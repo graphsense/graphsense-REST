@@ -1,0 +1,11 @@
+# Play
+target/
+/logs/
+
+# IDE
+/.classpath
+/.project
+/.settings/
+/.cache-main
+/.cache-tests
+/bin/
