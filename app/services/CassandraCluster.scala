@@ -20,9 +20,10 @@ import models.Category._
 class CassandraCluster @Inject() (lifecycle: ApplicationLifecycle, conf: Configuration) {
 
   val host = conf.getOptional[String]("cassandra.host") getOrElse "127.0.0.1"
+  val keyspace = conf.getOptional[String]("cassandra.keyspace") getOrElse "graphsense_transformed"
   val cluster = Cluster.builder().addContactPoint(host).build()
-  Logger.info(s"Using Cassandra Cluster at $host.")
-  private val s = cluster connect "graphsense_transformed"
+  Logger.info(s"Connecting to keyspace $keyspace on Cassandra cluster at $host.")
+  private val s = cluster connect keyspace
 
   implicit def getHexString(c: Context, i: Int) =
     HexString(Bytes.toHexString(c getBytes i) substring 2)

@@ -1,6 +1,6 @@
 name := """graphsense-REST"""
 
-version := "0.3.2dev"
+version := "0.3.2-SNAPSHOT"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
@@ -24,5 +24,5 @@ scalacOptions ++= Seq(
 libraryDependencies ++= Seq(
   guice,
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.0.0" % Test,
-  "com.datastax.cassandra" % "cassandra-driver-core" % "3.3.0"
+  "com.datastax.cassandra" % "cassandra-driver-core" % "3.3.2"
 )

@@ -9,8 +9,14 @@ Make sure Java 8 and [sbt][scala-sbt] are installed on your system.
 
 ## Setup and Installation
 
-If needed, adapt the setting of `cassandra.host` in `conf/application.conf`
-to point to a different Cassandra node.
+Create an application configuration file
+
+	cp conf/application.conf.template conf/application.conf
+
+...and configure `cassandra.host` and `cassandra.keyspace`. Example:
+
+	cassandra.host = localhost
+	cassandra.keyspace = graphsense_transformed_new 
 
 Start the server in development mode:
 

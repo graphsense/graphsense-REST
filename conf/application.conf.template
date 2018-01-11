@@ -1,4 +1,5 @@
-cassandra.host = localhost
+cassandra.host = ENTER_HOST_NAME
+cassandra.keyspace = ENTER_KEYSPACE_NAME
 play.filters.enabled = [
   play.filters.csrf.CSRFFilter,
   play.filters.headers.SecurityHeadersFilter,
