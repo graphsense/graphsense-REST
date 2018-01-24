@@ -5,7 +5,9 @@ import scala.collection.JavaConverters._
 import scala.language.implicitConversions
 
 object Parser {
+
   private type Q[A] = (Context, Int) => A
+  
   case class Context(parent: GettableData, entry: GettableData)
 
   implicit def contextToGettableData(c: Context) = c.entry

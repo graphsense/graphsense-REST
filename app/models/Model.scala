@@ -42,6 +42,11 @@ case class AddressSummary(
     totalReceived: Long,
     totalSpent: Long)
 
+case class ClusterSummary(
+    noAddresses: Int,
+    totalReceived: Long,
+    totalSpent: Long)
+
 case class RawTag(
     address: String,
     tag: String,
@@ -95,33 +100,24 @@ case class AddressTransactions(
     height: Int,
     timestamp: Int)
 
-class RelatedThing[+A](
-    val address: A,
-    val noTransactions: Int,
-    val estimatedValue: Bitcoin,
-    val category: Int,
-    val properties: AddressSummary)
-
 case class AddressIncomingRelations(
     dstAddress: String,
     srcAddress: String,
     srcCategory: Int,
     srcProperties: AddressSummary,
-    override val noTransactions: Int,
-    override val estimatedValue: Bitcoin) extends
-      RelatedThing[String](srcAddress, noTransactions, estimatedValue, srcCategory, srcProperties)
+    noTransactions: Int,
+    estimatedValue: Bitcoin)
 
 case class AddressOutgoingRelations(
     srcAddress: String,
     dstAddress: String,
     dstCategory: Int,
     dstProperties: AddressSummary,
-    override val noTransactions: Int,
-    override val estimatedValue: Bitcoin) extends
-      RelatedThing[String](dstAddress, noTransactions, estimatedValue, dstCategory, dstProperties)
+    noTransactions: Int,
+    estimatedValue: Bitcoin)
 
-case class Entity(
-    cluster: Long,
+case class Cluster(
+    cluster: Int,
     noAddresses: Int,
     noIncomingTxs: Int,
     noOutgoingTxs: Int,
@@ -131,7 +127,7 @@ case class Entity(
     totalSpent: Bitcoin) extends BitcoinFlow
 
 case class ClusterAddresses(
-    cluster: Long,
+    cluster: Int,
     address: String,
     noIncomingTxs: Int,
     noOutgoingTxs: Int,
@@ -141,20 +137,18 @@ case class ClusterAddresses(
     totalSpent: Bitcoin) extends BitcoinFlow
 
 case class ClusterIncomingRelations(
-    dstCluster: Long,
-    srcCluster: Long,
+    dstCluster: String,
+    srcCluster: String,
     srcCategory: Int,
-    srcProperties: AddressSummary,
-    override val noTransactions: Int,
-    value: Bitcoin) extends
-      RelatedThing[Long](srcCluster, noTransactions, value, srcCategory, srcProperties)
+    srcProperties: ClusterSummary,
+    noTransactions: Int,
+    value: Bitcoin)
 
 case class ClusterOutgoingRelations(
-    srcCluster: Long,
-    dstCluster: Long,
+    srcCluster: String,
+    dstCluster: String,
     dstCategory: Int,
-    dstProperties: AddressSummary,
-    override val noTransactions: Int,
-    value: Bitcoin) extends
-      RelatedThing[Long](dstCluster, noTransactions, value, dstCategory, dstProperties)
+    dstProperties: ClusterSummary,
+    noTransactions: Int,
+    value: Bitcoin)
 

@@ -16,7 +16,7 @@ object Category extends Enumeration {
     }
 }
 
-object AddressOutputType extends Enumeration {
-  type AddressOutputType = Value
+object DirectionType extends Enumeration {
+  type DirectionType = Value
   val Incoming, Outgoing, Both = Value
 }

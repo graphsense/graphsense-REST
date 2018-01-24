@@ -30,52 +30,64 @@ class BlockController @Inject()(comp: ControllerComponents, cc: CassandraCluster
   implicit val rawTagsWrites = Json.writes[RawTag]
   implicit val addressIncomingRelationsWrites = Json.writes[AddressIncomingRelations]
   implicit val addressOutgoingRelationsWrites = Json.writes[AddressOutgoingRelations]
-  implicit val entityWrites = Json.writes[Entity]
+  implicit val entityWrites = Json.writes[Cluster]
   implicit val clusterAddressesWrites = Json.writes[ClusterAddresses]
 
   def block(height: Int) = generalAction(cc.block(height))
+
   def transactions(height: Int) = generalAction(cc.transactions(height))
+  
   def transaction(hash: String) = generalAction(cc.transaction(hash))
+  
   def address(address: String) = generalAction(cc.address(address).map(bitcoinFlowToJson(_)))
+  
   def tags(address: String) = generalAction(cc.tags(address))
+  
   def implicitTags(address: String) = generalAction(cc.implicitTags(address))
-  def clusterTags(entity: Long) = generalAction(cc.clusterTags(entity))
+  
+  def clusterTags(cluster: Int) = generalAction(cc.clusterTags(cluster))
+  
   def addressTransactions(address: String, limit: Int) =
     generalAction(cc.addressTransactions(address, limit))
-  def inRelations(address: String, category: String, limit: Int) =
-    generalAction(cc.addressIncomingRelations(address, Category.fromString(category), limit))
-  def outRelations(address: String, category: String, limit: Int) =
-    generalAction(cc.addressOutgoingRelations(address, Category.fromString(category), limit))
-  def entityByAddress(address: String) = generalAction(cc.entity(address).map(bitcoinFlowToJson(_)))
-  def entity(entity: Long) = generalAction(bitcoinFlowToJson(cc.entity(entity)))
-  def addresses(entity: Long, limit: Int) =
+  
+//  def inRelations(address: String, category: String, limit: Int) =
+//    generalAction(cc.addressIncomingRelations(address, Category.fromString(category), limit))
+//
+//  def outRelations(address: String, category: String, limit: Int) =
+//    generalAction(cc.addressOutgoingRelations(address, Category.fromString(category), limit))
+
+  def clusterByAddress(address: String) = generalAction(cc.cluster(address).map(bitcoinFlowToJson(_)))
+
+  def cluster(cluster: Int) = generalAction(bitcoinFlowToJson(cc.cluster(cluster)))
+
+  def addresses(entity: Int, limit: Int) =
     generalAction(cc.addresses(entity, limit).map(bitcoinFlowToJson(_)))
-  def egoNet(
+
+  def addressEgoNet(
       address: String,
       direction: String,
-      minAvgValue: Long,
       limit: Int) = generalAction {
-    import models.Category._
-    val egoNet = new EgoNet[String](
-      cc.addressIncomingRelations,
-      cc.addressOutgoingRelations,
-      "address",
-      List(Explicit, Implicit, Unknown))
-    egoNet.egoNet(address, direction, limit)
+    val egoNet = new AddressEgoNet(
+      cc.addressIncomingRelations(address, limit),
+      cc.addressOutgoingRelations(address, limit),
+      )
+    egoNet.construct(address, direction)
   }
+
   def clusterEgoNet(
-      entity: Long,
+      cluster: String,
       direction: String,
-      minAvgValue: Long,
       limit: Int) = generalAction {
-    import models.Category._
-    val egoNet = new EgoNet[Long](
-      cc.clusterIncomingRelations,
-      cc.clusterOutgoingRelations,
-      "cluster",
-      List(Explicit, Implicit, Unknown))
-    egoNet.egoNet(entity, direction, limit)
+      "Under construction"
+    //    import models.Category._
+//    val egoNet = new ClusterEgoNet(
+//      cc.clusterIncomingRelations,
+//      cc.clusterOutgoingRelations,
+//      "cluster",
+//      List(Explicit, Implicit, Unknown))
+//    egoNet.egoNet(cluster, direction, limit)
   }
+
   def search(expression: String, limit: Int) = generalAction {
     def whenPatternMatches(pattern: String, f: (String) => Iterable[String]) = {
       for {
