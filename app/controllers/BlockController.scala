@@ -50,12 +50,6 @@ class BlockController @Inject()(comp: ControllerComponents, cc: CassandraCluster
   def addressTransactions(address: String, limit: Int) =
     generalAction(cc.addressTransactions(address, limit))
   
-//  def inRelations(address: String, category: String, limit: Int) =
-//    generalAction(cc.addressIncomingRelations(address, Category.fromString(category), limit))
-//
-//  def outRelations(address: String, category: String, limit: Int) =
-//    generalAction(cc.addressOutgoingRelations(address, Category.fromString(category), limit))
-
   def clusterByAddress(address: String) = generalAction(cc.cluster(address).map(bitcoinFlowToJson(_)))
 
   def cluster(cluster: Int) = generalAction(bitcoinFlowToJson(cc.cluster(cluster)))
@@ -78,14 +72,11 @@ class BlockController @Inject()(comp: ControllerComponents, cc: CassandraCluster
       cluster: String,
       direction: String,
       limit: Int) = generalAction {
-      "Under construction"
-    //    import models.Category._
-//    val egoNet = new ClusterEgoNet(
-//      cc.clusterIncomingRelations,
-//      cc.clusterOutgoingRelations,
-//      "cluster",
-//      List(Explicit, Implicit, Unknown))
-//    egoNet.egoNet(cluster, direction, limit)
+    val egoNet = new ClusterEgoNet(
+      cc.clusterIncomingRelations(cluster, limit),
+      cc.clusterOutgoingRelations(cluster, limit),
+      )
+    egoNet.construct(cluster, direction)
   }
 
   def search(expression: String, limit: Int) = generalAction {

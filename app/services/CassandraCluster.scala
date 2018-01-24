@@ -14,7 +14,6 @@ import scala.reflect.runtime.universe._
 
 import Parser.Context
 import models._
-import models.Category._
 
 @Singleton
 class CassandraCluster @Inject() (lifecycle: ApplicationLifecycle, conf: Configuration) {
@@ -117,12 +116,12 @@ class CassandraCluster @Inject() (lifecycle: ApplicationLifecycle, conf: Configu
   private val clusterIncomingRelationsQuery = ps(
     cols[ClusterIncomingRelations],
     "cluster_incoming_relations",
-    "dst_cluster=? and src_category=? limit ?")
+    "dst_cluster=? limit ?")
   
   private val clusterOutgoingRelationsQuery = ps(
     cols[ClusterOutgoingRelations],
     "cluster_outgoing_relations",
-    "src_cluster=? and dst_category=? limit ?")
+    "src_cluster=? limit ?")
 
   private def toBinary(s: String) = Bytes.fromHexString("0x" + s)
 
@@ -221,20 +220,20 @@ class CassandraCluster @Inject() (lifecycle: ApplicationLifecycle, conf: Configu
       Parser.parse(_, ClusterAddresses.curried, 0))
   
   /** Retrieve incoming relations for a given cluster **/
-  def clusterIncomingRelations(cluster: String, category: Option[Category], limit: Int) =
+  def clusterIncomingRelations(cluster: String, limit: Int) =
     list(
         clusterIncomingRelationsQuery
-          .bind(cluster, Int box Category.code(category.get), Int box limit),
+          .bind(cluster, Int box limit),
         Parser.parse(_, ClusterIncomingRelations.curried, 0))
-      .filter(_.srcCluster != cluster)
+      .filter(_.srcCluster != cluster) // omit cycles for the time being
   
   /** Retrieve outgoing relations for a given cluster **/
-  def clusterOutgoingRelations(cluster: String, category: Option[Category], limit: Int) =
+  def clusterOutgoingRelations(cluster: String, limit: Int) =
     list(
         clusterOutgoingRelationsQuery
-          .bind(cluster, Int box Category.code(category.get), Int box limit),
+          .bind(cluster, Int box limit),
         Parser.parse(_, ClusterOutgoingRelations.curried, 0))
-      .filter(_.dstCluster != cluster)
+      .filter(_.dstCluster != cluster) // omit cycles for the time being
 
   lifecycle.addStopHook { () =>
     Logger.info("Closing connections to Cassandra Cluster.")
