@@ -1,6 +1,6 @@
 package models
 
-import play.api.libs.json.{Json}
+import play.api.libs.json.{Json, JsObject}
 
 case class HexString(hex: String)
 
@@ -110,23 +110,31 @@ case class AddressTransactions(
     height: Int,
     timestamp: Int)
 
-class AddressRelation(
-    val address: String,
-    val noTransactions: Int,
-    val estimatedValue: Bitcoin,
-    val category: Int,
-    val properties: AddressSummary)
+trait AddressRelation{
+    def id(): String
+    def toJsonNode(): JsObject
+}
 
 case class AddressIncomingRelations(
     dstAddress: String,
     srcAddress: String,
     srcCategory: Int,
     srcProperties: AddressSummary,
-    override val noTransactions: Int,
-    override val estimatedValue: Bitcoin) extends
-      AddressRelation(srcAddress, noTransactions, estimatedValue, srcCategory, srcProperties) {
+    noTransactions: Int,
+    estimatedValue: Bitcoin) extends AddressRelation {
   
-    def toJson = {
+    override def id(): String = { srcAddress }
+  
+    override def toJsonNode: JsObject = {
+      Json.obj(
+        "id" -> id(),
+        "type" -> "address",
+        "received" -> srcProperties.totalReceived,
+        "balance" -> (srcProperties.totalReceived - srcProperties.totalSpent),
+        "category" -> Category(srcCategory))            
+    }
+  
+    def toJsonEdge = {
       Json.obj(
           "source" -> srcAddress,
           "target" -> dstAddress,
@@ -141,11 +149,21 @@ case class AddressOutgoingRelations(
     dstAddress: String,
     dstCategory: Int,
     dstProperties: AddressSummary,
-    override val noTransactions: Int,
-    override val estimatedValue: Bitcoin) extends
-      AddressRelation(dstAddress, noTransactions, estimatedValue, dstCategory, dstProperties) {
+    noTransactions: Int,
+    estimatedValue: Bitcoin) extends AddressRelation {
   
-    def toJson = {
+    override def id(): String = { dstAddress }
+
+    override def toJsonNode: JsObject = {
+      Json.obj(
+        "id" -> id(),
+        "type" -> "address",
+        "received" -> dstProperties.totalReceived,
+        "balance" -> (dstProperties.totalReceived - dstProperties.totalSpent),
+        "category" -> Category(dstCategory))            
+    }
+    
+    def toJsonEdge = {
       Json.obj(
           "source" -> srcAddress,
           "target" -> dstAddress,

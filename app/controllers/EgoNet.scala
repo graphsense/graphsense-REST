@@ -11,7 +11,6 @@ class AddressEgoNet(
     incomingRelations: List[AddressIncomingRelations],
     outgoingRelations: List[AddressOutgoingRelations]) {
 
-  val NodeType = "address"
   val focusNodeCategory = if (explicitTags.nonEmpty) {
     Category.Explicit
   } else if (implicitTags.nonEmpty) {
@@ -20,27 +19,18 @@ class AddressEgoNet(
     Category.Unknown
   }
   
-  implicit val estimatedValueWrites = Json.writes[models.Bitcoin]
-  implicit val addressSummaryWrites = Json.writes[AddressSummary]
-
   def focusNode = List(Json.obj(
     "id" -> focusAddress.get.address,
-    "type" -> NodeType,
+    "type" -> "address",
     "received" -> focusAddress.get.totalReceived.satoshi,
     "balance" -> (focusAddress.get.totalReceived.satoshi - focusAddress.get.totalSpent.satoshi),
     "category" -> focusNodeCategory))
   
   def addressNodes(addrRelations: List[AddressRelation]) = {
     val dedupNodes = {
-      for (a <- addrRelations) yield (a.address, a)
+      for (a <- addrRelations) yield (a.id, a)
     }.toMap
-    for (a <- dedupNodes)
-      yield Json.obj(
-        "id" -> a._1,
-        "type" -> NodeType,
-        "received" -> a._2.properties.totalReceived,
-        "balance" -> (a._2.properties.totalReceived - a._2.properties.totalSpent),
-        "category" -> Category(a._2.category))            
+    dedupNodes.values
   }
 
   def construct(
@@ -48,15 +38,15 @@ class AddressEgoNet(
       direction: String) = {
     
     val nodes = direction match {
-      case "in" => focusNode ++ addressNodes(incomingRelations)
-      case "out" => focusNode ++ addressNodes(outgoingRelations)
-      case _ => focusNode ++ addressNodes(incomingRelations ++ outgoingRelations)
+      case "in" => focusNode ++ addressNodes(incomingRelations).map(_.toJsonNode())
+      case "out" => focusNode ++ addressNodes(outgoingRelations).map(_.toJsonNode())
+      case _ => focusNode ++ addressNodes(incomingRelations ++ outgoingRelations).map(_.toJsonNode())
     }
     
     val edges = direction match {
-      case "in" => incomingRelations.map(_.toJson)
-      case "out" => outgoingRelations.map(_.toJson)
-      case _ => incomingRelations.map(_.toJson) ++ outgoingRelations.map(_.toJson)
+      case "in" => incomingRelations.map(_.toJsonEdge)
+      case "out" => outgoingRelations.map(_.toJsonEdge)
+      case _ => incomingRelations.map(_.toJsonEdge) ++ outgoingRelations.map(_.toJsonEdge)
     }
             
     Json.obj("focusNode" -> address, "nodes" -> nodes, "edges" -> edges)
