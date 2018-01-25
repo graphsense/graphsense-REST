@@ -177,7 +177,7 @@ class CassandraCluster @Inject() (lifecycle: ApplicationLifecycle, conf: Configu
     singleOption(addressQuery.bind(address take 5, address), Parser.parse(_, Address.curried, 0))
 
   /** Retrieve tags for a given address **/
-  def tags(address: String) =
+  def addressTags(address: String) =
     list(tagsQuery.bind(address), Parser.parse(_, RawTag.curried, 0))
 
   /** Retrieve incoming relations for a given address (filter by category) **/

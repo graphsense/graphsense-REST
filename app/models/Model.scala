@@ -100,21 +100,30 @@ case class AddressTransactions(
     height: Int,
     timestamp: Int)
 
+class AddressRelation(
+    val address: String,
+    val noTransactions: Int,
+    val estimatedValue: Bitcoin,
+    val category: Int,
+    val properties: AddressSummary)
+
 case class AddressIncomingRelations(
     dstAddress: String,
     srcAddress: String,
     srcCategory: Int,
     srcProperties: AddressSummary,
-    noTransactions: Int,
-    estimatedValue: Bitcoin)
+    override val noTransactions: Int,
+    override val estimatedValue: Bitcoin) extends
+      AddressRelation(srcAddress, noTransactions, estimatedValue, srcCategory, srcProperties)
 
 case class AddressOutgoingRelations(
     srcAddress: String,
     dstAddress: String,
     dstCategory: Int,
     dstProperties: AddressSummary,
-    noTransactions: Int,
-    estimatedValue: Bitcoin)
+    override val noTransactions: Int,
+    override val estimatedValue: Bitcoin) extends
+      AddressRelation(dstAddress, noTransactions, estimatedValue, dstCategory, dstProperties)
 
 case class Cluster(
     cluster: Int,

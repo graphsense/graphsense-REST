@@ -33,41 +33,57 @@ class BlockController @Inject()(comp: ControllerComponents, cc: CassandraCluster
   implicit val entityWrites = Json.writes[Cluster]
   implicit val clusterAddressesWrites = Json.writes[ClusterAddresses]
 
+  /** /block/:height **/
   def block(height: Int) = generalAction(cc.block(height))
 
+  /** /block/:height/transactions **/
   def transactions(height: Int) = generalAction(cc.transactions(height))
   
+  /** /tx/:hash **/
   def transaction(hash: String) = generalAction(cc.transaction(hash))
   
+  /** /address/:address **/
   def address(address: String) = generalAction(cc.address(address).map(bitcoinFlowToJson(_)))
   
-  def tags(address: String) = generalAction(cc.tags(address))
+  /** /address/:address/tags **/
+  def addressTags(address: String) = generalAction(cc.addressTags(address))
   
-  def implicitTags(address: String) = generalAction(cc.implicitTags(address))
+  /** /address/:address/implicitTags **/
+  def addressImplicitTags(address: String) = generalAction(cc.implicitTags(address))
   
+  /** /cluster/:id/tags **/
   def clusterTags(cluster: Int) = generalAction(cc.clusterTags(cluster))
   
+  /** /address/:address/transactions **/
   def addressTransactions(address: String, limit: Int) =
     generalAction(cc.addressTransactions(address, limit))
   
+  /** /cluster/:id/addresses **/
   def clusterByAddress(address: String) = generalAction(cc.cluster(address).map(bitcoinFlowToJson(_)))
 
+  /** /cluster/:id **/
   def cluster(cluster: Int) = generalAction(bitcoinFlowToJson(cc.cluster(cluster)))
 
+  /** /cluster/:id/addresses **/
   def addresses(entity: Int, limit: Int) =
     generalAction(cc.addresses(entity, limit).map(bitcoinFlowToJson(_)))
 
+  /** /address/:address/egonet **/
   def addressEgoNet(
       address: String,
       direction: String,
       limit: Int) = generalAction {
     val egoNet = new AddressEgoNet(
-      cc.addressIncomingRelations(address, limit),
-      cc.addressOutgoingRelations(address, limit),
+      cc.address(address),
+      cc.addressTags(address),
+      cc.implicitTags(address), // TODO: refactor handling of implicit and explicit tags
+      cc.addressIncomingRelations(address, limit).toList,
+      cc.addressOutgoingRelations(address, limit).toList,
       )
     egoNet.construct(address, direction)
   }
 
+  /** /cluster/:id/egonet **/
   def clusterEgoNet(
       cluster: String,
       direction: String,
@@ -79,6 +95,7 @@ class BlockController @Inject()(comp: ControllerComponents, cc: CassandraCluster
     egoNet.construct(cluster, direction)
   }
 
+  /** /search **/
   def search(expression: String, limit: Int) = generalAction {
     def whenPatternMatches(pattern: String, f: (String) => Iterable[String]) = {
       for {
