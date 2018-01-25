@@ -27,7 +27,7 @@ class AddressEgoNet(
     "id" -> focusAddress.get.address,
     "type" -> NodeType,
     "received" -> focusAddress.get.totalReceived.satoshi,
-    "balance" -> 0, // TODO: fix that (would require exchange rates)
+    "balance" -> (focusAddress.get.totalReceived.satoshi - focusAddress.get.totalSpent.satoshi),
     "category" -> focusNodeCategory))
   
   def addressNodes(addrRelations: List[AddressRelation]) = {
