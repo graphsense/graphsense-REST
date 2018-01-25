@@ -42,25 +42,7 @@ class AddressEgoNet(
         "balance" -> (a._2.properties.totalReceived - a._2.properties.totalSpent),
         "category" -> Category(a._2.category))            
   }
-      
-  def incomingRelationEdges = {
-    for(rel <- incomingRelations)
-      yield Json.obj(
-          "source" -> rel.srcAddress,
-          "target" -> rel.dstAddress,
-          "transactions" -> rel.noTransactions,
-          "estimatedValue" -> rel.estimatedValue)
-  }
-  
-  def outgoingRelationEdges = {
-    for(rel <- outgoingRelations)
-      yield Json.obj(
-          "source" -> rel.srcAddress,
-          "target" -> rel.dstAddress,
-          "transactions" -> rel.noTransactions,
-          "estimatedValue" -> rel.estimatedValue)
-  }
-    
+
   def construct(
       address: String,
       direction: String) = {
@@ -72,9 +54,9 @@ class AddressEgoNet(
     }
     
     val edges = direction match {
-      case "in" => incomingRelationEdges
-      case "out" => outgoingRelationEdges
-      case _ => incomingRelationEdges ++ outgoingRelationEdges
+      case "in" => incomingRelations.map(_.toJson)
+      case "out" => outgoingRelations.map(_.toJson)
+      case _ => incomingRelations.map(_.toJson) ++ outgoingRelations.map(_.toJson)
     }
             
     Json.obj("focusNode" -> address, "nodes" -> nodes, "edges" -> edges)

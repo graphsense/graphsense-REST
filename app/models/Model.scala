@@ -1,5 +1,7 @@
 package models
 
+import play.api.libs.json.{Json}
+
 case class HexString(hex: String)
 
 trait BitcoinFlow {
@@ -36,7 +38,15 @@ case class VolatileValue(
 case class Bitcoin(
     satoshi: Long,
     eur: Double,
-    usd: Double)
+    usd: Double) {
+  
+    def toJson = {
+      Json.obj(
+          "satoshi" -> satoshi,
+          "eur" -> eur,
+          "usd" -> usd)
+    }
+}
 
 case class AddressSummary(
     totalReceived: Long,
@@ -114,7 +124,17 @@ case class AddressIncomingRelations(
     srcProperties: AddressSummary,
     override val noTransactions: Int,
     override val estimatedValue: Bitcoin) extends
-      AddressRelation(srcAddress, noTransactions, estimatedValue, srcCategory, srcProperties)
+      AddressRelation(srcAddress, noTransactions, estimatedValue, srcCategory, srcProperties) {
+  
+    def toJson = {
+      Json.obj(
+          "source" -> srcAddress,
+          "target" -> dstAddress,
+          "transactions" -> noTransactions,
+          "estimatedValue" -> estimatedValue.toJson)
+    }
+  
+}
 
 case class AddressOutgoingRelations(
     srcAddress: String,
@@ -123,7 +143,18 @@ case class AddressOutgoingRelations(
     dstProperties: AddressSummary,
     override val noTransactions: Int,
     override val estimatedValue: Bitcoin) extends
-      AddressRelation(dstAddress, noTransactions, estimatedValue, dstCategory, dstProperties)
+      AddressRelation(dstAddress, noTransactions, estimatedValue, dstCategory, dstProperties) {
+  
+    def toJson = {
+      Json.obj(
+          "source" -> srcAddress,
+          "target" -> dstAddress,
+          "transactions" -> noTransactions,
+          "estimatedValue" -> estimatedValue.toJson)
+    }
+  
+  
+}
 
 case class Cluster(
     cluster: Int,
