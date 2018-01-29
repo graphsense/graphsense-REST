@@ -25,12 +25,14 @@ class BlockController @Inject()(comp: ControllerComponents, cc: CassandraCluster
   implicit val richTransactionWrites = Json.writes[BlockTransactions]
   implicit val addressTransactionsWrites = Json.writes[AddressTransactions]
   implicit val addressWrites = Json.writes[Address]
-  implicit val rawTagsWrites = Json.writes[RawTag]
+  implicit val addressTagWrites = Json.writes[AddressTag]
   implicit val clusterWrites = Json.writes[Cluster]
   implicit val addressIncomingRelationsWrites = Json.writes[AddressIncomingRelations]
   implicit val addressOutgoingRelationsWrites = Json.writes[AddressOutgoingRelations]
   implicit val clusterAddressesWrites = Json.writes[ClusterAddresses]
-
+  implicit val clusterTagsWrites = Json.writes[ClusterTag]
+ 
+  
   /** generic response action used by all controller methods **/
   def generalAction[T](responseObject: T)(implicit writes: Writes[T]) = Action {
     Ok(Json.toJson(responseObject))

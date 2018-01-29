@@ -57,16 +57,6 @@ case class ClusterSummary(
     totalReceived: Long,
     totalSpent: Long)
 
-case class RawTag(
-    address: String,
-    tag: String,
-    tagUri: String,
-    description: String,
-    actorCategory: String,
-    source: String,
-    sourceUri: String,
-    timestamp: Int)
-
 case class ExchangeRates(
     height: Int,
     eur: Double,
@@ -110,6 +100,16 @@ case class AddressTransactions(
     height: Int,
     timestamp: Int)
 
+case class AddressTag(
+    address: String,
+    tag: String,
+    tagUri: String,
+    description: String,
+    actorCategory: String,
+    source: String,
+    sourceUri: String,
+    timestamp: Int)
+    
 trait AddressRelation{
     def id(): String
     def toJsonNode(): JsObject
@@ -196,7 +196,17 @@ case class ClusterAddresses(
     totalReceived: Bitcoin,
     totalSpent: Bitcoin) extends BitcoinFlow
 
-
+case class ClusterTag (
+    cluster: Int,
+    address: String,
+    tag: String,
+    tagUri: String,
+    description: String,
+    actorCategory: String,
+    source: String,
+    sourceUri: String,
+    timestamp: Int)
+    
 trait ClusterRelation{
     def id(): String
     def toJsonNode(): JsObject

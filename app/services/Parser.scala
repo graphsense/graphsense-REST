@@ -54,4 +54,9 @@ object Parser {
       (con: Context, fun: A => B => C => D => E => F => G => H => Z, pos: Int)
       (implicit a: Q[A], b: Q[B], c: Q[C], d: Q[D], e: Q[E], f: Q[F], g: Q[G], h: Q[H]): Z =
     parse(con, fun(a(con, pos)), pos+1)
+  def parse[A, B, C, D, E, F, G, H, I, Z]
+      (con: Context, fun: A => B => C => D => E => F => G => H => I => Z, pos: Int)
+      (implicit a: Q[A], b: Q[B], c: Q[C], d: Q[D], e: Q[E], f: Q[F], g: Q[G], h: Q[H], i:Q[I]): Z =
+    parse(con, fun(a(con, pos)), pos+1)
+
 }

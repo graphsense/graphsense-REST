@@ -6,8 +6,8 @@ import models._
 
 class AddressEgoNet(
     focusAddress: Option[Address],
-    explicitTags: Iterable[RawTag],
-    implicitTags: Iterable[RawTag],
+    explicitTags: Iterable[AddressTag],
+    implicitTags: Iterable[ClusterTag],
     incomingRelations: List[AddressIncomingRelations],
     outgoingRelations: List[AddressOutgoingRelations]) {
 
@@ -56,7 +56,7 @@ class AddressEgoNet(
 
 class ClusterEgoNet(
     focusCluster: Cluster,
-    clusterTags: Iterable[RawTag],
+    clusterTags: Iterable[ClusterTag],
     incomingRelations: List[ClusterIncomingRelations],
     outgoingRelations: List[ClusterOutgoingRelations]) {
 
