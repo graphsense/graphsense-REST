@@ -158,7 +158,7 @@ class CassandraCluster @Inject() (lifecycle: ApplicationLifecycle, conf: Configu
     single(blockQuery.bind(Int box height), Parser.parse(_, models.Block.curried, 0))
 
   /** Retrieve transactions for a given block height **/
-  def transactions(height: Int) =
+  def blockTransactions(height: Int) =
     single(transactionsQuery.bind(Int box height), Parser.parse(_, BlockTransactions.curried, 0))
 
   /** Retrieve transaction with a given hash **/
@@ -180,6 +180,10 @@ class CassandraCluster @Inject() (lifecycle: ApplicationLifecycle, conf: Configu
   def addressTags(address: String) =
     list(tagsQuery.bind(address), Parser.parse(_, RawTag.curried, 0))
 
+  /** Retrieve implicit tags for a given address **/
+  def addressImplicitTags(address: String) =
+    addressClusterId(address).toIterable.flatMap(clusterTags).filter(_.address != address)
+    
   /** Retrieve incoming relations for a given address (filter by category) **/
   def addressIncomingRelations(address: String, limit: Int) =
     list(
@@ -195,43 +199,39 @@ class CassandraCluster @Inject() (lifecycle: ApplicationLifecycle, conf: Configu
       Parser.parse(_, AddressOutgoingRelations.curried, 0))
 
   /** Retrieve the cluster id for a given address **/
-  def addressCluster(address: String) =
+  def addressClusterId(address: String) =
     singleOption(addressClusterQuery.bind(address take 5, address), _ getInt 0)
 
+  /** Retrieve statistics for a given address cluster by address **/
+  def addressCluster(address: String): Option[models.Cluster] = addressClusterId(address) map cluster
+  
   /** Retrieve statistics for a given address cluster by cluster id **/
   def cluster(cluster: Int) =
     single(clusterQuery.bind(Int box cluster), Parser.parse(_, models.Cluster.curried, 0))
-  
-  /** Retrieve statistics for a given address cluster by address **/
-  def cluster(address: String): Option[models.Cluster] = addressCluster(address) map cluster
-  
+    
   /** Retrieve tags for a given address cluster id **/
   def clusterTags(cluster: Int) =
     list(clusterTagsQuery.bind(Int box cluster), Parser.parse(_, RawTag.curried, 0))
   
-  /** Retrieve implicit tags for a given address **/
-  def implicitTags(address: String) =
-    addressCluster(address).toIterable.flatMap(clusterTags).filter(_.address != address)
-  
   /** Retrieve addresses belonging to a certain cluster **/
-  def addresses(cluster: Int, limit: Int) =
+  def clusterAddresses(cluster: Int, limit: Int) =
     list(
       clusterAddressesQuery.bind(Int box cluster, Int box limit),
       Parser.parse(_, ClusterAddresses.curried, 0))
   
   /** Retrieve incoming relations for a given cluster **/
-  def clusterIncomingRelations(cluster: String, limit: Int) =
+  def clusterIncomingRelations(cluster: Int, limit: Int) =
     list(
         clusterIncomingRelationsQuery
-          .bind(cluster, Int box limit),
+          .bind(cluster.toString, Int box limit),
         Parser.parse(_, ClusterIncomingRelations.curried, 0))
       .filter(_.srcCluster != cluster) // omit cycles for the time being
   
   /** Retrieve outgoing relations for a given cluster **/
-  def clusterOutgoingRelations(cluster: String, limit: Int) =
+  def clusterOutgoingRelations(cluster: Int, limit: Int) =
     list(
         clusterOutgoingRelationsQuery
-          .bind(cluster, Int box limit),
+          .bind(cluster.toString(), Int box limit),
         Parser.parse(_, ClusterOutgoingRelations.curried, 0))
       .filter(_.dstCluster != cluster) // omit cycles for the time being
 

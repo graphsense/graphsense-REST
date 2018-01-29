@@ -6,18 +6,18 @@ GET     /                                  controllers.BlockController.index
 GET     /search                            controllers.BlockController.search(q, limit: Int ?= 50)
 
 GET     /block/:height                     controllers.BlockController.block(height: Int)
-GET     /block/:height/transactions        controllers.BlockController.transactions(height: Int)
+GET     /block/:height/transactions        controllers.BlockController.blockTransactions(height: Int)
 GET     /tx/:hash                          controllers.BlockController.transaction(hash)
 GET     /address/:address                  controllers.BlockController.address(address)
+GET     /address/:address/transactions     controllers.BlockController.addressTransactions(address, limit: Int ?= 100)
 GET     /address/:address/tags             controllers.BlockController.addressTags(address)
 GET     /address/:address/implicitTags     controllers.BlockController.addressImplicitTags(address)
-GET     /address/:address/cluster          controllers.BlockController.clusterByAddress(address)
-GET     /address/:address/transactions     controllers.BlockController.addressTransactions(address, limit: Int ?= 100)
+GET     /address/:address/cluster          controllers.BlockController.addressCluster(address)
 GET     /address/:address/egonet           controllers.BlockController.addressEgoNet(address, direction ?= "", limit: Int ?= 50)
 GET     /cluster/:id                       controllers.BlockController.cluster(id: Int)
-GET     /cluster/:id/addresses             controllers.BlockController.addresses(id: Int, limit: Int ?= 100)
+GET     /cluster/:id/addresses             controllers.BlockController.clusterAddresses(id: Int, limit: Int ?= 100)
 GET     /cluster/:id/tags                  controllers.BlockController.clusterTags(id: Int)
-GET     /cluster/:id/egonet                controllers.BlockController.clusterEgoNet(id: String, direction ?= "", limit: Int ?= 50)
+GET     /cluster/:id/egonet                controllers.BlockController.clusterEgoNet(id: Int, direction ?= "", limit: Int ?= 50)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file                      controllers.Assets.versioned(path="/public", file: Asset)

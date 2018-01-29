@@ -55,73 +55,45 @@ class AddressEgoNet(
 }
 
 class ClusterEgoNet(
-    incomingRelations: Iterable[ClusterIncomingRelations],
-    outgoingRelations: Iterable[ClusterOutgoingRelations]) {
-  
-  implicit val valueWrites = Json.writes[models.Bitcoin]
-  implicit val clusterSummaryWrites = Json.writes[ClusterSummary]
+    focusCluster: Cluster,
+    clusterTags: Iterable[RawTag],
+    incomingRelations: List[ClusterIncomingRelations],
+    outgoingRelations: List[ClusterOutgoingRelations]) {
 
-  def isNumeric(input: String): Boolean = input.forall(_.isDigit)
-  
-  def incomingClusterNodes = {
-    for (a <- incomingRelations)
-      yield Json.obj(
-        "id" -> a.srcCluster,
-        "type" -> (if (isNumeric(a.srcCluster)) "cluster" else "address"),
-        "received" -> a.srcProperties.totalReceived,
-        "balance" -> (a.srcProperties.totalReceived - a.srcProperties.totalSpent),
-        "noAddresses" -> a.srcProperties.noAddresses,
-        "category" -> Category(a.srcCategory))            
-  }
-
-  def outgoingClusterNodes = {
-    for (a <- outgoingRelations)
-      yield Json.obj(
-        "id" -> a.dstCluster,
-        "type" -> (if (isNumeric(a.dstCluster)) "cluster" else "address"),
-        "received" -> a.dstProperties.totalReceived,
-        "balance" -> (a.dstProperties.totalReceived - a.dstProperties.totalSpent),
-        "noAddresses" -> a.dstProperties.noAddresses,
-        "category" -> Category(a.dstCategory))            
-  }
-    
-  def incomingRelationEdges = {
-    for(rel <- incomingRelations)
-      yield Json.obj(
-          "source" -> rel.srcCluster,
-          "target" -> rel.dstCluster,
-          "transactions" -> rel.noTransactions,
-          "value" -> rel.value)
+  val focusNodeCategory = if (clusterTags.nonEmpty) {
+    Category.Implicit
+  } else {
+    Category.Unknown
   }
   
-  def outgoingRelationEdges = {
-    for(rel <- outgoingRelations)
-      yield Json.obj(
-          "source" -> rel.srcCluster,
-          "target" -> rel.dstCluster,
-          "transactions" -> rel.noTransactions,
-          "value" -> rel.value)
+  def focusNode = List(Json.obj(
+    "id" -> focusCluster.cluster,
+    "type" -> "cluster",
+    "received" -> focusCluster.totalReceived.satoshi,
+    "balance" -> (focusCluster.totalReceived.satoshi - focusCluster.totalSpent.satoshi),
+    "category" -> focusNodeCategory))
+  
+  def clusterNodes(clusterRelations: List[ClusterRelation]) = {
+    val dedupNodes = {
+      for (rel <- clusterRelations) yield (rel.id, rel)
+    }.toMap
+    dedupNodes.values
   }
 
-  
   def construct(
-      cluster: String,
+      cluster: Int,
       direction: String) = {
-
-    val focusNode = List(Json.obj(
-      "id" -> cluster,
-      "type" -> "cluster"))
     
     val nodes = direction match {
-      case "in" => focusNode ++ incomingClusterNodes
-      case "out" => focusNode ++ outgoingClusterNodes
-      case _ => focusNode ++ incomingClusterNodes ++ outgoingClusterNodes
+      case "in" => focusNode ++ clusterNodes(incomingRelations).map(_.toJsonNode())
+      case "out" => focusNode ++ clusterNodes(outgoingRelations).map(_.toJsonNode())
+      case _ => focusNode ++ clusterNodes(incomingRelations ++ outgoingRelations).map(_.toJsonNode())
     }
     
     val edges = direction match {
-      case "in" => incomingRelationEdges
-      case "out" => outgoingRelationEdges
-      case _ => incomingRelationEdges ++ outgoingRelationEdges
+      case "in" => incomingRelations.map(_.toJsonEdge)
+      case "out" => outgoingRelations.map(_.toJsonEdge)
+      case _ => incomingRelations.map(_.toJsonEdge) ++ outgoingRelations.map(_.toJsonEdge)
     }
             
     Json.obj("focusNode" -> cluster, "nodes" -> nodes, "edges" -> edges)

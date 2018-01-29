@@ -170,9 +170,9 @@ case class AddressOutgoingRelations(
           "transactions" -> noTransactions,
           "estimatedValue" -> estimatedValue.toJson)
     }
-  
-  
+    
 }
+
 
 case class Cluster(
     cluster: Int,
@@ -184,6 +184,8 @@ case class Cluster(
     totalReceived: Bitcoin,
     totalSpent: Bitcoin) extends BitcoinFlow
 
+    
+
 case class ClusterAddresses(
     cluster: Int,
     address: String,
@@ -194,13 +196,40 @@ case class ClusterAddresses(
     totalReceived: Bitcoin,
     totalSpent: Bitcoin) extends BitcoinFlow
 
+
+trait ClusterRelation{
+    def id(): String
+    def toJsonNode(): JsObject
+}
+
 case class ClusterIncomingRelations(
     dstCluster: String,
     srcCluster: String,
     srcCategory: Int,
     srcProperties: ClusterSummary,
     noTransactions: Int,
-    value: Bitcoin)
+    value: Bitcoin) extends ClusterRelation {
+  
+    override def id(): String = { srcCluster }
+
+    override def toJsonNode: JsObject = {
+      Json.obj(
+        "id" -> id(),
+        "type" -> { if(id().forall(Character.isDigit)) "cluster" else "address" },
+        "received" -> srcProperties.totalReceived,
+        "balance" -> (srcProperties.totalReceived - srcProperties.totalSpent),
+        "category" -> Category(srcCategory))            
+    }
+    
+    def toJsonEdge = {
+      Json.obj(
+          "source" -> srcCluster,
+          "target" -> dstCluster,
+          "transactions" -> noTransactions,
+          "estimatedValue" -> value.toJson)
+    }
+  
+}
 
 case class ClusterOutgoingRelations(
     srcCluster: String,
@@ -208,5 +237,26 @@ case class ClusterOutgoingRelations(
     dstCategory: Int,
     dstProperties: ClusterSummary,
     noTransactions: Int,
-    value: Bitcoin)
+    value: Bitcoin) extends ClusterRelation {
+  
+    override def id(): String = { dstCluster }
+
+    override def toJsonNode: JsObject = {
+      Json.obj(
+        "id" -> id(),
+        "type" -> { if(id().forall(Character.isDigit)) "cluster" else "address" },
+        "received" -> dstProperties.totalReceived,
+        "balance" -> (dstProperties.totalReceived - dstProperties.totalSpent),
+        "category" -> Category(dstCategory))            
+    }
+    
+    def toJsonEdge = {
+      Json.obj(
+          "source" -> srcCluster,
+          "target" -> dstCluster,
+          "transactions" -> noTransactions,
+          "estimatedValue" -> value.toJson)
+    }
+  
+}
 
