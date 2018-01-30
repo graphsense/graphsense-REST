@@ -15,8 +15,3 @@ object Category extends Enumeration {
       case Manual => 3
     }
 }
-
-object DirectionType extends Enumeration {
-  type DirectionType = Value
-  val Incoming, Outgoing, Both = Value
-}

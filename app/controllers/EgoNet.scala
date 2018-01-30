@@ -8,8 +8,8 @@ class AddressEgoNet(
     focusAddress: Option[Address],
     explicitTags: Iterable[AddressTag],
     implicitTags: Iterable[ClusterTag],
-    incomingRelations: List[AddressIncomingRelations],
-    outgoingRelations: List[AddressOutgoingRelations]) {
+    incomingRelations: List[EgonetRelation],
+    outgoingRelations: List[EgonetRelation]) {
 
   val focusNodeCategory = if (explicitTags.nonEmpty) {
     Category.Explicit
@@ -26,7 +26,7 @@ class AddressEgoNet(
     "balance" -> (focusAddress.get.totalReceived.satoshi - focusAddress.get.totalSpent.satoshi),
     "category" -> focusNodeCategory))
   
-  def addressNodes(addrRelations: List[AddressRelation]) = {
+  def egonetNodes(addrRelations: List[EgonetRelation]) = {
     val dedupNodes = {
       for (a <- addrRelations) yield (a.id, a)
     }.toMap
@@ -38,9 +38,9 @@ class AddressEgoNet(
       direction: String) = {
     
     val nodes = direction match {
-      case "in" => focusNode ++ addressNodes(incomingRelations).map(_.toJsonNode())
-      case "out" => focusNode ++ addressNodes(outgoingRelations).map(_.toJsonNode())
-      case _ => focusNode ++ addressNodes(incomingRelations ++ outgoingRelations).map(_.toJsonNode())
+      case "in" => focusNode ++ egonetNodes(incomingRelations).map(_.toJsonNode())
+      case "out" => focusNode ++ egonetNodes(outgoingRelations).map(_.toJsonNode())
+      case _ => focusNode ++ egonetNodes(incomingRelations ++ outgoingRelations).map(_.toJsonNode())
     }
     
     val edges = direction match {
@@ -57,8 +57,8 @@ class AddressEgoNet(
 class ClusterEgoNet(
     focusCluster: Cluster,
     clusterTags: Iterable[ClusterTag],
-    incomingRelations: List[ClusterIncomingRelations],
-    outgoingRelations: List[ClusterOutgoingRelations]) {
+    incomingRelations: List[EgonetRelation],
+    outgoingRelations: List[EgonetRelation]) {
 
   val focusNodeCategory = if (clusterTags.nonEmpty) {
     Category.Implicit
@@ -73,7 +73,7 @@ class ClusterEgoNet(
     "balance" -> (focusCluster.totalReceived.satoshi - focusCluster.totalSpent.satoshi),
     "category" -> focusNodeCategory))
   
-  def clusterNodes(clusterRelations: List[ClusterRelation]) = {
+  def clusterNodes(clusterRelations: List[EgonetRelation]) = {
     val dedupNodes = {
       for (rel <- clusterRelations) yield (rel.id, rel)
     }.toMap

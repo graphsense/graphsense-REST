@@ -110,9 +110,10 @@ case class AddressTag(
     sourceUri: String,
     timestamp: Int)
     
-trait AddressRelation{
+trait EgonetRelation{
     def id(): String
     def toJsonNode(): JsObject
+    def toJsonEdge(): JsObject
 }
 
 case class AddressIncomingRelations(
@@ -121,7 +122,7 @@ case class AddressIncomingRelations(
     srcCategory: Int,
     srcProperties: AddressSummary,
     noTransactions: Int,
-    estimatedValue: Bitcoin) extends AddressRelation {
+    estimatedValue: Bitcoin) extends EgonetRelation {
   
     override def id(): String = { srcAddress }
   
@@ -134,7 +135,7 @@ case class AddressIncomingRelations(
         "category" -> Category(srcCategory))            
     }
   
-    def toJsonEdge = {
+    override def toJsonEdge = {
       Json.obj(
           "source" -> srcAddress,
           "target" -> dstAddress,
@@ -150,7 +151,7 @@ case class AddressOutgoingRelations(
     dstCategory: Int,
     dstProperties: AddressSummary,
     noTransactions: Int,
-    estimatedValue: Bitcoin) extends AddressRelation {
+    estimatedValue: Bitcoin) extends EgonetRelation {
   
     override def id(): String = { dstAddress }
 
@@ -163,7 +164,7 @@ case class AddressOutgoingRelations(
         "category" -> Category(dstCategory))            
     }
     
-    def toJsonEdge = {
+    override def toJsonEdge = {
       Json.obj(
           "source" -> srcAddress,
           "target" -> dstAddress,
@@ -183,8 +184,6 @@ case class Cluster(
     lastTx: TxIdTime,
     totalReceived: Bitcoin,
     totalSpent: Bitcoin) extends BitcoinFlow
-
-    
 
 case class ClusterAddresses(
     cluster: Int,
@@ -207,18 +206,13 @@ case class ClusterTag (
     sourceUri: String,
     timestamp: Int)
     
-trait ClusterRelation{
-    def id(): String
-    def toJsonNode(): JsObject
-}
-
 case class ClusterIncomingRelations(
     dstCluster: String,
     srcCluster: String,
     srcCategory: Int,
     srcProperties: ClusterSummary,
     noTransactions: Int,
-    value: Bitcoin) extends ClusterRelation {
+    value: Bitcoin) extends EgonetRelation {
   
     override def id(): String = { srcCluster }
 
@@ -231,7 +225,7 @@ case class ClusterIncomingRelations(
         "category" -> Category(srcCategory))            
     }
     
-    def toJsonEdge = {
+    override def toJsonEdge = {
       Json.obj(
           "source" -> srcCluster,
           "target" -> dstCluster,
@@ -247,7 +241,7 @@ case class ClusterOutgoingRelations(
     dstCategory: Int,
     dstProperties: ClusterSummary,
     noTransactions: Int,
-    value: Bitcoin) extends ClusterRelation {
+    value: Bitcoin) extends EgonetRelation {
   
     override def id(): String = { dstCluster }
 
@@ -260,7 +254,7 @@ case class ClusterOutgoingRelations(
         "category" -> Category(dstCategory))            
     }
     
-    def toJsonEdge = {
+    override def toJsonEdge = {
       Json.obj(
           "source" -> srcCluster,
           "target" -> dstCluster,
