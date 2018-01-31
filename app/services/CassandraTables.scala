@@ -24,8 +24,7 @@ object CassandraTables {
 
   val addressCluster = "address_cluster"
 
-  /** TODO: rename after transformation refactoring */
-  val addressTags = "tag"
+  val addressTags = "address_tags"
   
   val cluster = "cluster"
 
