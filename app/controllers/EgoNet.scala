@@ -61,7 +61,7 @@ class ClusterEgoNet(
     outgoingRelations: List[EgonetRelation]) {
 
   val focusNodeCategory = if (clusterTags.nonEmpty) {
-    Category.Implicit
+    Category.Explicit
   } else {
     Category.Unknown
   }

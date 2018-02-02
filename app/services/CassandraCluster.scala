@@ -58,12 +58,10 @@ class CassandraCluster @Inject() (lifecycle: ApplicationLifecycle, conf: Configu
 
   /** Create a query string for given columns, a given table, and an optional where clause */
   private def queryString(columns: String, table: String, clause: Option[String] = None) = {
-    val query = s"select $columns from $table" + (clause match {
+    s"select $columns from $table" + (clause match {
       case Some(s) => " where " + s
       case None => ""
     })
-    println(query)
-    query
   }
     
   /** Converts (field) names from camel (e.g., blockHeight) to snake case (block_height) */
