@@ -1,5 +1,7 @@
 package models
 
+import play.api.libs.json.{Json, JsObject}
+
 case class HexString(hex: String)
 
 trait BitcoinFlow {
@@ -18,47 +20,60 @@ case class TxSummary(
     noOutputs: Int,
     totalInput: VolatileValue,
     totalOutput: VolatileValue)
+
 case class TxInputOutput(
     address: Option[String],
     value: Option[VolatileValue])
+
 case class TxIdTime(
     height: Int,
     txHash: HexString,
     timestamp: Int)
+
 case class VolatileValue(
     satoshi: Long,
     eur: Double,
     usd: Double)
+
 case class Bitcoin(
     satoshi: Long,
     eur: Double,
-    usd: Double)
+    usd: Double) {
+  
+    def toJson = {
+      Json.obj(
+          "satoshi" -> satoshi,
+          "eur" -> eur,
+          "usd" -> usd)
+    }
+}
+
 case class AddressSummary(
     totalReceived: Long,
     totalSpent: Long)
 
-case class RawTag(
-    address: String,
-    tag: String,
-    tagUri: String,
-    description: String,
-    actorCategory: String,
-    source: String,
-    sourceUri: String,
-    timestamp: Int)
+case class ClusterSummary(
+    noAddresses: Int,
+    totalReceived: Long,
+    totalSpent: Long)
+
 case class ExchangeRates(
     height: Int,
     eur: Double,
     usd: Double)
+
 case class Block(
     height: Int,
     blockHash: HexString,
     timestamp: Int,
     noTransactions: Int)
+
 case class BlockTransactions(
     height: Int,
     txs: Seq[TxSummary])
+
 case class TransactionHash(txHash: HexString)
+
 case class Transaction(
     txHash: HexString,
     height: Int,
@@ -68,6 +83,7 @@ case class Transaction(
     totalOutput: VolatileValue,
     inputs: Seq[TxInputOutput],
     outputs: Seq[TxInputOutput])
+
 case class Address(
     address: String,
     noIncomingTxs: Int,
@@ -76,36 +92,91 @@ case class Address(
     lastTx: TxIdTime,
     totalReceived: Bitcoin,
     totalSpent: Bitcoin) extends BitcoinFlow
+
 case class AddressTransactions(
     address: String,
     txHash: HexString,
     value: Option[VolatileValue],
     height: Int,
     timestamp: Int)
-class RelatedThing[+A](
-    val address: A,
-    val noTransactions: Int,
-    val estimatedValue: Bitcoin,
-    val category: Int,
-    val properties: AddressSummary)
+
+case class AddressTag(
+    address: String,
+    tag: String,
+    tagUri: String,
+    description: String,
+    actorCategory: String,
+    source: String,
+    sourceUri: String,
+    timestamp: Int)
+    
+trait EgonetRelation{
+    def id(): String
+    def toJsonNode(): JsObject
+    def toJsonEdge(): JsObject
+}
+
 case class AddressIncomingRelations(
     dstAddress: String,
     srcAddress: String,
     srcCategory: Int,
     srcProperties: AddressSummary,
-    override val noTransactions: Int,
-    override val estimatedValue: Bitcoin) extends
-      RelatedThing[String](srcAddress, noTransactions, estimatedValue, srcCategory, srcProperties)
+    noTransactions: Int,
+    estimatedValue: Bitcoin) extends EgonetRelation {
+  
+    override def id(): String = { srcAddress }
+  
+    override def toJsonNode: JsObject = {
+      Json.obj(
+        "id" -> id(),
+        "nodeType" -> "address",
+        "received" -> srcProperties.totalReceived,
+        "balance" -> (srcProperties.totalReceived - srcProperties.totalSpent),
+        "category" -> Category(srcCategory))            
+    }
+  
+    override def toJsonEdge = {
+      Json.obj(
+          "source" -> srcAddress,
+          "target" -> dstAddress,
+          "transactions" -> noTransactions,
+          "estimatedValue" -> estimatedValue.toJson)
+    }
+  
+}
+
 case class AddressOutgoingRelations(
     srcAddress: String,
     dstAddress: String,
     dstCategory: Int,
     dstProperties: AddressSummary,
-    override val noTransactions: Int,
-    override val estimatedValue: Bitcoin) extends
-      RelatedThing[String](dstAddress, noTransactions, estimatedValue, dstCategory, dstProperties)
-case class Entity(
-    cluster: Long,
+    noTransactions: Int,
+    estimatedValue: Bitcoin) extends EgonetRelation {
+  
+    override def id(): String = { dstAddress }
+
+    override def toJsonNode: JsObject = {
+      Json.obj(
+        "id" -> id(),
+        "nodeType" -> "address",
+        "received" -> dstProperties.totalReceived,
+        "balance" -> (dstProperties.totalReceived - dstProperties.totalSpent),
+        "category" -> Category(dstCategory))            
+    }
+    
+    override def toJsonEdge = {
+      Json.obj(
+          "source" -> srcAddress,
+          "target" -> dstAddress,
+          "transactions" -> noTransactions,
+          "estimatedValue" -> estimatedValue.toJson)
+    }
+    
+}
+
+
+case class Cluster(
+    cluster: Int,
     noAddresses: Int,
     noIncomingTxs: Int,
     noOutgoingTxs: Int,
@@ -113,8 +184,9 @@ case class Entity(
     lastTx: TxIdTime,
     totalReceived: Bitcoin,
     totalSpent: Bitcoin) extends BitcoinFlow
+
 case class ClusterAddresses(
-    cluster: Long,
+    cluster: Int,
     address: String,
     noIncomingTxs: Int,
     noOutgoingTxs: Int,
@@ -122,20 +194,73 @@ case class ClusterAddresses(
     lastTx: TxIdTime,
     totalReceived: Bitcoin,
     totalSpent: Bitcoin) extends BitcoinFlow
+
+case class ClusterTag (
+    cluster: Int,
+    address: String,
+    tag: String,
+    tagUri: String,
+    description: String,
+    actorCategory: String,
+    source: String,
+    sourceUri: String,
+    timestamp: Int)
+    
 case class ClusterIncomingRelations(
-    dstCluster: Long,
-    srcCluster: Long,
+    dstCluster: String,
+    srcCluster: String,
     srcCategory: Int,
-    srcProperties: AddressSummary,
-    override val noTransactions: Int,
-    override val estimatedValue: Bitcoin) extends
-      RelatedThing[Long](srcCluster, noTransactions, estimatedValue, srcCategory, srcProperties)
+    srcProperties: ClusterSummary,
+    noTransactions: Int,
+    value: Bitcoin) extends EgonetRelation {
+  
+    override def id(): String = { srcCluster }
+
+    override def toJsonNode: JsObject = {
+      Json.obj(
+        "id" -> id(),
+        "nodeType" -> { if(id().forall(Character.isDigit)) "cluster" else "address" },
+        "received" -> srcProperties.totalReceived,
+        "balance" -> (srcProperties.totalReceived - srcProperties.totalSpent),
+        "category" -> Category(srcCategory))            
+    }
+    
+    override def toJsonEdge = {
+      Json.obj(
+          "source" -> srcCluster,
+          "target" -> dstCluster,
+          "transactions" -> noTransactions,
+          "estimatedValue" -> value.toJson)
+    }
+  
+}
+
 case class ClusterOutgoingRelations(
-    srcCluster: Long,
-    dstCluster: Long,
+    srcCluster: String,
+    dstCluster: String,
     dstCategory: Int,
-    dstProperties: AddressSummary,
-    override val noTransactions: Int,
-    override val estimatedValue: Bitcoin) extends
-      RelatedThing[Long](dstCluster, noTransactions, estimatedValue, dstCategory, dstProperties)
+    dstProperties: ClusterSummary,
+    noTransactions: Int,
+    value: Bitcoin) extends EgonetRelation {
+  
+    override def id(): String = { dstCluster }
+
+    override def toJsonNode: JsObject = {
+      Json.obj(
+        "id" -> id(),
+        "nodeType" -> { if(id().forall(Character.isDigit)) "cluster" else "address" },
+        "received" -> dstProperties.totalReceived,
+        "balance" -> (dstProperties.totalReceived - dstProperties.totalSpent),
+        "category" -> Category(dstCategory))            
+    }
+    
+    override def toJsonEdge = {
+      Json.obj(
+          "source" -> srcCluster,
+          "target" -> dstCluster,
+          "transactions" -> noTransactions,
+          "estimatedValue" -> value.toJson)
+    }
+  
+}
 

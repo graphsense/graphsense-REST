@@ -1,92 +1,102 @@
 package controllers
 
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.{Json}
 
 import models._
-import models.AddressOutputType._
-import models.Category._
 
-class EgoNet[A](
-    incomingObjects: (A, Option[Category], Int) => Iterable[RelatedThing[A]],
-    outgoingObjects: (A, Option[Category], Int) => Iterable[RelatedThing[A]],
-    typeName: String,
-    categories: List[Category]) {
+class AddressEgoNet(
+    focusAddress: Option[Address],
+    explicitTags: Iterable[AddressTag],
+    implicitTags: Iterable[ClusterTag],
+    incomingRelations: List[EgonetRelation],
+    outgoingRelations: List[EgonetRelation]) {
 
-  implicit val valueWrites = Json.writes[models.Bitcoin]
-  implicit val addressSummaryWrites = Json.writes[AddressSummary]
-
-  def egoNet(
-      address: A,
-      direction: String,
-      limit: Int) = {
-    val dir =
-      direction match {
-        case "in" => Incoming
-        case "out" => Outgoing
-        case _ => Both
-      }
-    val (nodes, edges) = egoNetPart(dir, address, limit)
-    Json.obj("focusNode" -> address.toString(), "nodes" -> nodes, "edges" -> edges)
+  val focusNodeCategory = if (explicitTags.nonEmpty) {
+    Category.Explicit
+  } else if (implicitTags.nonEmpty) {
+    Category.Implicit
+  } else {
+    Category.Unknown
+  }
+  
+  def focusNode = List(Json.obj(
+    "id" -> focusAddress.get.address,
+    "nodeType" -> "address",
+    "received" -> focusAddress.get.totalReceived.satoshi,
+    "balance" -> (focusAddress.get.totalReceived.satoshi - focusAddress.get.totalSpent.satoshi),
+    "category" -> focusNodeCategory))
+  
+  def egonetNodes(addrRelations: List[EgonetRelation]) = {
+    val dedupNodes = {
+      for (a <- addrRelations) yield (a.id, a)
+    }.toMap
+    dedupNodes.values
   }
 
-  private def egoNetPart(
-      addressOutputType: AddressOutputType,
-      address: A,
-      limit: Int): (Iterable[JsObject], List[JsObject]) = {
-    def relAddr(t: AddressOutputType) =
-      if (addressOutputType == t || addressOutputType == Both)
-        relAddresses(t, address, limit)
-      else List.empty
-    val relatedAddressesIn = relAddr(Incoming)
-    val relatedAddressesOut = relAddr(Outgoing)
-    val relatedAddresses = {
-      for (relatedAddress <- (relatedAddressesIn ++ relatedAddressesOut).view)
-      yield (relatedAddress.address, relatedAddress)
-    }.toMap
-    val nodes = List(Json.obj(
-        "id" -> address.toString(),
-        "type" -> typeName)) ++ {
-      for (a <- relatedAddresses)
-      yield Json.obj(
-        "id" -> a._1.toString(),
-        "type" -> typeName,
-        "received" -> a._2.properties.totalReceived,
-        "balance" -> (a._2.properties.totalReceived - a._2.properties.totalSpent),
-        "category" -> Category(a._2.category))
+  def construct(
+      address: String,
+      direction: String) = {
+    
+    val nodes = direction match {
+      case "in" => focusNode ++ egonetNodes(incomingRelations).map(_.toJsonNode())
+      case "out" => focusNode ++ egonetNodes(outgoingRelations).map(_.toJsonNode())
+      case _ => focusNode ++ egonetNodes(incomingRelations ++ outgoingRelations).map(_.toJsonNode())
     }
-    def edges(relatedAddresses: List[RelatedThing[A]], addressOutputType: AddressOutputType) =
-      for (relatedAddress <- relatedAddresses)
-      yield {
-        val addrs = (relatedAddress.address, address)
-        val (source, target) = if (addressOutputType == Incoming) addrs else addrs.swap
-        Json.obj(
-          "source" -> source.toString(),
-          "target" -> target.toString(),
-          "transactions" -> relatedAddress.noTransactions,
-          "estimatedValue" -> relatedAddress.estimatedValue)
-      }
-    (nodes, edges(relatedAddressesIn, Incoming) ++ edges(relatedAddressesOut, Outgoing))
+    
+    val edges = direction match {
+      case "in" => incomingRelations.map(_.toJsonEdge)
+      case "out" => outgoingRelations.map(_.toJsonEdge)
+      case _ => incomingRelations.map(_.toJsonEdge) ++ outgoingRelations.map(_.toJsonEdge)
+    }
+            
+    Json.obj("focusNode" -> address, "nodes" -> nodes, "edges" -> edges)
   }
 
-  private def relAddresses(
-      addressOutputType: AddressOutputType,
-      address: A,
-      limit: Int): List[RelatedThing[A]] = {
-    val numberOfSpecialNodes = math.min(5, limit / 2)
-    val relAddrFunction =
-      if (addressOutputType == Incoming) incomingObjects
-      else outgoingObjects
-    val relsPerCategory = {
-      for (category <- categories)
-      yield category -> relAddrFunction(address, Some(category), limit).toList
-    }.toMap
-    val (reservedKnownNodes, otherKnownNodes) =
-      if (categories.contains(Explicit)) relsPerCategory(Explicit).splitAt(numberOfSpecialNodes)
-      else (List.empty, List.empty)
-    val (reservedIKnownNodes, otherIKnownNodes) =
-      relsPerCategory(Implicit).splitAt(numberOfSpecialNodes)
-    val specialNodes = reservedKnownNodes ++ reservedIKnownNodes
-    val allOtherNodes = relsPerCategory(Unknown) ++ otherKnownNodes ++ otherIKnownNodes
-    specialNodes ++ allOtherNodes.sortBy(-_.estimatedValue.satoshi).take(limit - specialNodes.size)
+}
+
+class ClusterEgoNet(
+    focusCluster: Cluster,
+    clusterTags: Iterable[ClusterTag],
+    incomingRelations: List[EgonetRelation],
+    outgoingRelations: List[EgonetRelation]) {
+
+  val focusNodeCategory = if (clusterTags.nonEmpty) {
+    Category.Explicit
+  } else {
+    Category.Unknown
   }
+  
+  def focusNode = List(Json.obj(
+    "id" -> focusCluster.cluster,
+    "nodeType" -> "cluster",
+    "received" -> focusCluster.totalReceived.satoshi,
+    "balance" -> (focusCluster.totalReceived.satoshi - focusCluster.totalSpent.satoshi),
+    "category" -> focusNodeCategory))
+  
+  def clusterNodes(clusterRelations: List[EgonetRelation]) = {
+    val dedupNodes = {
+      for (rel <- clusterRelations) yield (rel.id, rel)
+    }.toMap
+    dedupNodes.values
+  }
+
+  def construct(
+      cluster: Int,
+      direction: String) = {
+    
+    val nodes = direction match {
+      case "in" => focusNode ++ clusterNodes(incomingRelations).map(_.toJsonNode())
+      case "out" => focusNode ++ clusterNodes(outgoingRelations).map(_.toJsonNode())
+      case _ => focusNode ++ clusterNodes(incomingRelations ++ outgoingRelations).map(_.toJsonNode())
+    }
+    
+    val edges = direction match {
+      case "in" => incomingRelations.map(_.toJsonEdge)
+      case "out" => outgoingRelations.map(_.toJsonEdge)
+      case _ => incomingRelations.map(_.toJsonEdge) ++ outgoingRelations.map(_.toJsonEdge)
+    }
+            
+    Json.obj("focusNode" -> cluster, "nodes" -> nodes, "edges" -> edges)
+  }
+
 }

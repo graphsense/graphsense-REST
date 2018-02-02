@@ -15,8 +15,3 @@ object Category extends Enumeration {
       case Manual => 3
     }
 }
-
-object AddressOutputType extends Enumeration {
-  type AddressOutputType = Value
-  val Incoming, Outgoing, Both = Value
-}

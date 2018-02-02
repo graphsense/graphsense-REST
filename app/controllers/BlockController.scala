@@ -11,71 +11,46 @@ import services.CassandraCluster
 class BlockController @Inject()(comp: ControllerComponents, cc: CassandraCluster)
     extends AbstractController(comp) {
 
-  def index = Action(Ok("This is the GraphSense REST API."))
-
   implicit val hexStringWrites = new Writes[HexString] {
     def writes(hexString: HexString) = Json.toJson(hexString.hex)
   }
-  implicit val valueWrites = Json.writes[Bitcoin]
+  implicit val txIdTimeWrites = Json.writes[TxIdTime]  
+  implicit val valueWrites = Json.writes[Bitcoin]  
   implicit val volatileValueWrites = Json.writes[VolatileValue]
   implicit val txSummaryWrites = Json.writes[TxSummary]
   implicit val txInputOutputWrites = Json.writes[TxInputOutput]
-  implicit val txIdTimeWrites = Json.writes[TxIdTime]
   implicit val addressSummaryWrites = Json.writes[AddressSummary]
   implicit val blockWrites = Json.writes[Block]
   implicit val transactionWrites = Json.writes[Transaction]
   implicit val richTransactionWrites = Json.writes[BlockTransactions]
   implicit val addressTransactionsWrites = Json.writes[AddressTransactions]
   implicit val addressWrites = Json.writes[Address]
-  implicit val rawTagsWrites = Json.writes[RawTag]
+  implicit val addressTagWrites = Json.writes[AddressTag]
+  implicit val clusterWrites = Json.writes[Cluster]
   implicit val addressIncomingRelationsWrites = Json.writes[AddressIncomingRelations]
   implicit val addressOutgoingRelationsWrites = Json.writes[AddressOutgoingRelations]
-  implicit val entityWrites = Json.writes[Entity]
   implicit val clusterAddressesWrites = Json.writes[ClusterAddresses]
+  implicit val clusterTagsWrites = Json.writes[ClusterTag]
+ 
+  
+  /** generic response action used by all controller methods **/
+  def generalAction[T](responseObject: T)(implicit writes: Writes[T]) = Action {
+    Ok(Json.toJson(responseObject))
+  }
 
-  def block(height: Int) = generalAction(cc.block(height))
-  def transactions(height: Int) = generalAction(cc.transactions(height))
-  def transaction(hash: String) = generalAction(cc.transaction(hash))
-  def address(address: String) = generalAction(cc.address(address).map(bitcoinFlowToJson(_)))
-  def tags(address: String) = generalAction(cc.tags(address))
-  def implicitTags(address: String) = generalAction(cc.implicitTags(address))
-  def clusterTags(entity: Long) = generalAction(cc.clusterTags(entity))
-  def addressTransactions(address: String, limit: Int) =
-    generalAction(cc.addressTransactions(address, limit))
-  def inRelations(address: String, category: String, limit: Int) =
-    generalAction(cc.addressIncomingRelations(address, Category.fromString(category), limit))
-  def outRelations(address: String, category: String, limit: Int) =
-    generalAction(cc.addressOutgoingRelations(address, Category.fromString(category), limit))
-  def entityByAddress(address: String) = generalAction(cc.entity(address).map(bitcoinFlowToJson(_)))
-  def entity(entity: Long) = generalAction(bitcoinFlowToJson(cc.entity(entity)))
-  def addresses(entity: Long, limit: Int) =
-    generalAction(cc.addresses(entity, limit).map(bitcoinFlowToJson(_)))
-  def egoNet(
-      address: String,
-      direction: String,
-      minAvgValue: Long,
-      limit: Int) = generalAction {
-    import models.Category._
-    val egoNet = new EgoNet[String](
-      cc.addressIncomingRelations,
-      cc.addressOutgoingRelations,
-      "address",
-      List(Explicit, Implicit, Unknown))
-    egoNet.egoNet(address, direction, limit)
-  }
-  def clusterEgoNet(
-      entity: Long,
-      direction: String,
-      minAvgValue: Long,
-      limit: Int) = generalAction {
-    import models.Category._
-    val egoNet = new EgoNet[Long](
-      cc.clusterIncomingRelations,
-      cc.clusterOutgoingRelations,
-      "cluster",
-      List(Explicit, Implicit, Unknown))
-    egoNet.egoNet(entity, direction, limit)
-  }
+  /** method for serializing Bitcoin flow traits (balance) to Json **/
+  def bitcoinFlowToJson[T <: BitcoinFlow](bitcoinFlow: T)(implicit writes: Writes[T]): JsObject =
+    Json.toJson(bitcoinFlow).as[JsObject] ++
+      Json.obj("balance" -> bitcoinFlow.balance(cc.exchangeRates.last._2))
+  
+  /*
+    REST INTERFACE CONTROLLER METHODS (mapped in routes file)
+	*/
+      
+  /** / **/
+  def index = Action(Ok("This is the GraphSense REST API."))      
+
+  /** /search **/
   def search(expression: String, limit: Int) = generalAction {
     def whenPatternMatches(pattern: String, f: (String) => Iterable[String]) = {
       for {
@@ -88,13 +63,68 @@ class BlockController @Inject()(comp: ControllerComponents, cc: CassandraCluster
       "addresses" -> whenPatternMatches("^[13][1-9A-HJ-NP-Za-km-z]*$", cc.addressSearch),
       "transactions" -> whenPatternMatches("^[0-9a-f]+$", cc.transactionSearch))
   }
+      
+  /** /block/:height **/
+  def block(height: Int) = generalAction(cc.block(height))
 
-  def bitcoinFlowToJson[T <: BitcoinFlow](bitcoinFlow: T)(implicit writes: Writes[T]): JsObject =
-    Json.toJson(bitcoinFlow).as[JsObject] ++
-      Json.obj("balance" -> bitcoinFlow.balance(cc.exchangeRates.last._2))
-
-  def generalAction[T](responseObject: T)(implicit writes: Writes[T]) = Action {
-    Ok(Json.toJson(responseObject))
+  /** /block/:height/transactions **/
+  def blockTransactions(height: Int) = generalAction(cc.blockTransactions(height))
+  
+  /** /tx/:hash **/
+  def transaction(hash: String) = generalAction(cc.transaction(hash))
+  
+  /** /address/:address **/
+  def address(address: String) = generalAction(cc.address(address).map(bitcoinFlowToJson(_)))
+  
+  /** /address/:address/transactions **/
+  def addressTransactions(address: String, limit: Int) =
+    generalAction(cc.addressTransactions(address, limit))
+  
+  /** /address/:address/tags **/
+  def addressTags(address: String) = generalAction(cc.addressTags(address))
+  
+  /** /address/:address/implicitTags **/
+  def addressImplicitTags(address: String) = generalAction(cc.addressImplicitTags(address))
+  
+  /** /address/:address/cluster **/
+  def addressCluster(address: String) = generalAction(cc.addressCluster(address).map(bitcoinFlowToJson(_)))
+  
+  /** /address/:address/egonet **/
+  def addressEgoNet(
+      address: String,
+      direction: String,
+      limit: Int) = generalAction {
+    val egoNet = new AddressEgoNet(
+      cc.address(address),
+      cc.addressTags(address),
+      cc.addressImplicitTags(address), // TODO: refactor handling of implicit and explicit tags
+      cc.addressIncomingRelations(address, limit).toList,
+      cc.addressOutgoingRelations(address, limit).toList,
+      )
+    egoNet.construct(address, direction)
   }
+  
+  /** /cluster/:id **/
+  def cluster(cluster: Int) = generalAction(bitcoinFlowToJson(cc.cluster(cluster)))
+  
+  /** /cluster/:id/addresses **/
+  def clusterAddresses(cluster: Int, limit: Int) =
+    generalAction(cc.clusterAddresses(cluster, limit).map(bitcoinFlowToJson(_)))
+  
+  /** /cluster/:id/tags **/
+  def clusterTags(cluster: Int) = generalAction(cc.clusterTags(cluster))
 
+  /** /cluster/:id/egonet **/
+  def clusterEgoNet(
+      cluster: Int,
+      direction: String,
+      limit: Int) = generalAction {
+    val egoNet = new ClusterEgoNet(
+      cc.cluster(cluster),
+      cc.clusterTags(cluster),
+      cc.clusterIncomingRelations(cluster, limit).toList,
+      cc.clusterOutgoingRelations(cluster, limit).toList,
+      )
+    egoNet.construct(cluster, direction)
+  }
 }
