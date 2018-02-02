@@ -21,7 +21,7 @@ class AddressEgoNet(
   
   def focusNode = List(Json.obj(
     "id" -> focusAddress.get.address,
-    "type" -> "address",
+    "nodeType" -> "address",
     "received" -> focusAddress.get.totalReceived.satoshi,
     "balance" -> (focusAddress.get.totalReceived.satoshi - focusAddress.get.totalSpent.satoshi),
     "category" -> focusNodeCategory))
@@ -68,7 +68,7 @@ class ClusterEgoNet(
   
   def focusNode = List(Json.obj(
     "id" -> focusCluster.cluster,
-    "type" -> "cluster",
+    "nodeType" -> "cluster",
     "received" -> focusCluster.totalReceived.satoshi,
     "balance" -> (focusCluster.totalReceived.satoshi - focusCluster.totalSpent.satoshi),
     "category" -> focusNodeCategory))

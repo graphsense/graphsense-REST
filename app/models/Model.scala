@@ -129,7 +129,7 @@ case class AddressIncomingRelations(
     override def toJsonNode: JsObject = {
       Json.obj(
         "id" -> id(),
-        "type" -> "address",
+        "nodeType" -> "address",
         "received" -> srcProperties.totalReceived,
         "balance" -> (srcProperties.totalReceived - srcProperties.totalSpent),
         "category" -> Category(srcCategory))            
@@ -158,7 +158,7 @@ case class AddressOutgoingRelations(
     override def toJsonNode: JsObject = {
       Json.obj(
         "id" -> id(),
-        "type" -> "address",
+        "nodeType" -> "address",
         "received" -> dstProperties.totalReceived,
         "balance" -> (dstProperties.totalReceived - dstProperties.totalSpent),
         "category" -> Category(dstCategory))            
@@ -219,7 +219,7 @@ case class ClusterIncomingRelations(
     override def toJsonNode: JsObject = {
       Json.obj(
         "id" -> id(),
-        "type" -> { if(id().forall(Character.isDigit)) "cluster" else "address" },
+        "nodeType" -> { if(id().forall(Character.isDigit)) "cluster" else "address" },
         "received" -> srcProperties.totalReceived,
         "balance" -> (srcProperties.totalReceived - srcProperties.totalSpent),
         "category" -> Category(srcCategory))            
@@ -248,7 +248,7 @@ case class ClusterOutgoingRelations(
     override def toJsonNode: JsObject = {
       Json.obj(
         "id" -> id(),
-        "type" -> { if(id().forall(Character.isDigit)) "cluster" else "address" },
+        "nodeType" -> { if(id().forall(Character.isDigit)) "cluster" else "address" },
         "received" -> dstProperties.totalReceived,
         "balance" -> (dstProperties.totalReceived - dstProperties.totalSpent),
         "category" -> Category(dstCategory))            
