@@ -1,13 +1,24 @@
 # GraphSense REST Interface
 
-A REST service for accessing data stored in Apache Cassandra.
+The GraphSense REST Interface provides access to denormalized views computed by the [Graphsense
+Transformation Pipeline][graphsense-transformation]. It is used by the
+[graphsense-dashboard][graphsense-dashboard] component.
 
-## Prerequisites
+This component is implemented using the [Scala Play Framework][play-doc].
 
-This component connects to an existing Apache Cassandra installation.
-Make sure Java 8 and [sbt][scala-sbt] are installed on your system.
+## Local Development Environment Setup
 
-## Setup and Installation
+Follow the local development environment setup instructions described in the
+[graphsense-transformation][graphsense-transformation] component.
+
+Create an eclipse project file using `sbt`
+
+    sbt eclipse
+
+Import project into the Scala-IDE via
+`File > Import... > Existing Projects into Workspace`
+
+## Run REST interface locally
 
 Create an application configuration file
 
@@ -15,8 +26,8 @@ Create an application configuration file
 
 ...and configure `cassandra.host` and `cassandra.keyspace`. Example:
 
-	cassandra.host = localhost
-	cassandra.keyspace = graphsense_transformed_new 
+	cassandra.host = HOST (e.g., localhost)
+	cassandra.keyspace = TRANSFORMED_KEYSPACE (e.g., graphsense_transformed) 
 
 Start the server in development mode:
 
@@ -28,5 +39,6 @@ Test the service in your browser:
 
 In production mode `sbt stage` can be used (see the [Play documentation][play-doc]).
 
-[scala-sbt]: http://www.scala-sbt.org/
+[graphsense-transformation]: https://github.com/graphsense/graphsense-transformation
+[graphsense-dashboard]: https://github.com/graphsense/graphsense-dashboard
 [play-doc]: https://www.playframework.com/documentation/2.6.x/Deploying
