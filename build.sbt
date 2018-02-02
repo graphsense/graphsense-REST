@@ -1,6 +1,6 @@
 name := """graphsense-REST"""
 
-version := "0.3.2-SNAPSHOT"
+version := "0.3.2"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
