@@ -208,7 +208,7 @@ def query_all_exchange_rates(currency, h_max):
         return df
     except Exception as e:
         session.row_factory = named_tuple_factory
-        print("Failed to query exchange rates. Closing Flask instance")
+        print("Failed to query exchange rates. Cause: \n%s\n Commiting suicide. Bye Bye!" % str(e))
         exit(1)
 
 def query_last_block_height(currency):
