@@ -195,15 +195,21 @@ def pandas_factory(colnames, rows):
     return pd.DataFrame(rows, columns=colnames)
 
 def query_all_exchange_rates(currency, h_max):
-    set_keyspace(session, currency + '_raw')
-    session.row_factory = pandas_factory
-    session.default_fetch_size = None
-    t0 = time()
-    results = session.execute(exchange_rates_query[currency], [h_max], timeout=180)
-    print('time to query', h_max, 'exchange rates for', currency, time()-t0)
-    df = results._current_rows
-    session.row_factory = named_tuple_factory  # reset default
-    return df
+    df = None
+    try:
+        set_keyspace(session, currency + '_raw')
+        session.row_factory = pandas_factory
+        session.default_fetch_size = None
+        t0 = time()
+        results = session.execute(exchange_rates_query[currency], [h_max], timeout=180)
+        print('time to query', h_max, 'exchange rates for', currency, time()-t0)
+        df = results._current_rows
+        session.row_factory = named_tuple_factory  # reset default
+        return df
+    except Exception as e:
+        session.row_factory = named_tuple_factory
+        print("Failed to query exchange rates. Closing Flask instance")
+        exit(1)
 
 def query_last_block_height(currency):
     set_keyspace(session, currency + '_raw')
