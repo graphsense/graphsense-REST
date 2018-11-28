@@ -18,11 +18,11 @@ class TxInputOutput(object):
 class Value(object):
     def __init__(self, satoshi, eur, usd):
         self.satoshi = satoshi
-        self.eur = eur
-        self.usd = usd
+        self.eur = round(eur, 2)
+        self.usd = round(usd, 2)
 
     def __sub__(self, other):
-        return Value(self.satoshi-other.satoshi, self.eur-other.eur, self.usd-other.usd)
+        return Value(self.satoshi-other.satoshi, round(self.eur-other.eur, 2), round(self.usd-other.usd, 2))
 
 class TxIdTime(object):
     def __init__(self, height, tx_hash, timestamp):
@@ -77,23 +77,28 @@ class Transaction(object):
         self.coinbase = row.coinbase
         self.height = row.height
         if row.inputs:
-            self.inputs = [TxInputOutput(input.address, Value(input.value, input.value*rates.eur*10**(-8), input.value*rates.usd*10**(-8)).__dict__).__dict__
+            self.inputs = [TxInputOutput(input.address, Value(input.value, round(input.value*rates.eur*10**(-8), 2),
+                                                              round(input.value*rates.usd*10**(-8), 2)).__dict__).__dict__
                        for input in row.inputs]
         else:
             self.inputs = []
-        self.outputs = [TxInputOutput(output.address, Value(output.value, output.value*rates.eur*10**(-8), output.value*rates.usd*10**(-8)).__dict__).__dict__
+        self.outputs = [TxInputOutput(output.address, Value(output.value, round(output.value*rates.eur*10**(-8), 2),
+                                                            round(output.value*rates.usd*10**(-8), 2)).__dict__).__dict__
                         for output in row.outputs if output.address]
         self.timestamp = row.timestamp
-        self.totalInput = Value(row.total_input, row.total_input*rates.eur*10**(-8), row.total_input*rates.usd*10**(-8)).__dict__
-        self.totalOutput = Value(row.total_output, row.total_output*rates.eur*10**(-8), row.total_output*rates.usd*10**(-8)).__dict__
+        self.totalInput = Value(row.total_input, round(row.total_input*rates.eur*10**(-8), 2),
+                                round(row.total_input*rates.usd*10**(-8), 2)).__dict__
+        self.totalOutput = Value(row.total_output, round(row.total_output*rates.eur*10**(-8), 2),
+                                 round(row.total_output*rates.usd*10**(-8), 2)).__dict__
 
 class BlockTransaction(object):
     def __init__(self, row, rates):
         self.txHash = byte_to_hex(row.tx_hash)
         self.noInputs = row.no_inputs
         self.noOutputs = row.no_outputs
-        self.totalInput = Value(row.total_input, row.total_input*rates.eur*10**(-8), row.total_input*rates.usd*10**(-8)).__dict__
-        self.totalOutput = Value(row.total_output, row.total_output*rates.eur*10**(-8), row.total_output*rates.usd*10**(-8)).__dict__
+        self.totalInput = Value(row.total_input, round(row.total_input*rates.eur*10**(-8), 2), round(row.total_input*rates.usd*10**(-8), 2)).__dict__
+        self.totalOutput = Value(row.total_output, round(row.total_output*rates.eur*10**(-8), 2),
+                                 round(row.total_output*rates.usd*10**(-8), 2)).__dict__
 
 class Block(object):
     def __init__(self, row):
@@ -115,9 +120,9 @@ class Address(object):
         self.lastTx = TxIdTime(row.last_tx.height, byte_to_hex(row.last_tx.tx_hash), row.last_tx.timestamp).__dict__
         self.noIncomingTxs = row.no_incoming_txs
         self.noOutgoingTxs = row.no_outgoing_txs
-        received = Value(row.total_received.satoshi, row.total_received.eur, row.total_received.usd)
+        received = Value(row.total_received.satoshi, round(row.total_received.eur, 2), round(row.total_received.usd, 2))
         self.totalReceived = received.__dict__
-        spent = Value(row.total_spent.satoshi, row.total_spent.eur, row.total_spent.usd)
+        spent = Value(row.total_spent.satoshi, round(row.total_spent.eur, 2), round(row.total_spent.usd, 2))
         self.totalSpent = spent.__dict__
         balance = compute_balance(row.total_received.satoshi, row.total_spent.satoshi, exchange_rate)
         self.balance = balance.__dict__
@@ -127,7 +132,8 @@ class Address(object):
 
 def compute_balance(total_received_satoshi, total_spent_satoshi, exchange_rate):
     balance_satoshi = total_received_satoshi - total_spent_satoshi
-    balance = Value(balance_satoshi, balance_satoshi*exchange_rate.eur*10**(-8), balance_satoshi*exchange_rate.usd*10**(-8))
+    balance = Value(balance_satoshi, round(balance_satoshi*exchange_rate.eur*10**(-8), 2),
+                    round(balance_satoshi*exchange_rate.usd*10**(-8), 2))
     return balance
 
 class AddressTransactions(object):
@@ -135,7 +141,7 @@ class AddressTransactions(object):
         self.address = row.address
         self.address_prefix = row.address_prefix
         self.txHash = byte_to_hex(row.tx_hash)
-        self.value = Value(row.value, row.value*rates.eur*10**(-8), row.value*rates.usd*10**(-8)).__dict__
+        self.value = Value(row.value, round(row.value*rates.eur*10**(-8), 2), round(row.value*rates.usd*10**(-8), 2)).__dict__
         self.height = row.height
         self.timestamp = row.timestamp
         self.txIndex = row.tx_index
@@ -148,9 +154,9 @@ class Cluster(object):
         self.noAddresses = row.no_addresses
         self.noIncomingTxs = row.no_incoming_txs
         self.noOutgoingTxs = row.no_outgoing_txs
-        received = Value(row.total_received.satoshi, row.total_received.eur, row.total_received.usd)
+        received = Value(row.total_received.satoshi, round(row.total_received.eur, 2), round(row.total_received.usd, 2))
         self.totalReceived = received.__dict__
-        spent = Value(row.total_spent.satoshi, row.total_spent.eur, row.total_spent.usd)
+        spent = Value(row.total_spent.satoshi, round(row.total_spent.eur, 2), round(row.total_spent.usd, 2))
         self.totalSpent = spent.__dict__
         balance = compute_balance(row.total_received.satoshi, row.total_spent.satoshi, exchange_rate)
         self.balance = balance.__dict__
@@ -163,7 +169,7 @@ class AddressIncomingRelations(object):
         self.dstAddressPrefix = row.dst_address_prefix
         self.dstAddress = row.dst_address
         self.srcCategory = Category(row.src_category)
-        self.estimatedValue = Value(row.estimated_value.satoshi, row.estimated_value.eur, row.estimated_value.usd).__dict__
+        self.estimatedValue = Value(row.estimated_value.satoshi, round(row.estimated_value.eur, 2), round(row.estimated_value.usd, 2)).__dict__
         self.srcAddress = row.src_address
         self.noTransactions = row.no_transactions
         self.srcProperties = AddressSummary(row.src_properties.total_received, row.src_properties.total_spent)
@@ -192,7 +198,7 @@ class AddressOutgoingRelations(object):
         self.srcAddressPrefix = row.src_address_prefix
         self.srcAddress = row.src_address
         self.dstCategory = Category(row.dst_category)
-        self.estimatedValue = Value(row.estimated_value.satoshi, row.estimated_value.eur, row.estimated_value.usd).__dict__
+        self.estimatedValue = Value(row.estimated_value.satoshi, round(row.estimated_value.eur, 2), round(row.estimated_value.usd, 2)).__dict__
         self.dstAddress = row.dst_address
         self.noTransactions = row.no_transactions
         self.dstProperties = AddressSummary(row.dst_properties.total_received, row.dst_properties.total_spent)
@@ -227,7 +233,7 @@ class ClusterIncomingRelations(object):
         self.srcCluster = str(row.src_cluster)
         self.srcCategory = Category(row.src_category)
         self.srcProperties = ClusterSummary(row.src_properties.no_addresses, row.src_properties.total_received, row.src_properties.total_spent)
-        self.value = Value(row.value.satoshi, row.value.eur, row.value.usd).__dict__
+        self.value = Value(row.value.satoshi, round(row.value.eur, 2), round(row.value.usd, 2)).__dict__
         self.noTransactions = row.no_transactions
 
     def id(self):
@@ -254,7 +260,7 @@ class ClusterOutgoingRelations(object):
         self.dstCluster = str(row.dst_cluster)
         self.dstCategory = Category(row.dst_category)
         self.dstProperties = ClusterSummary(row.dst_properties.no_addresses, row.dst_properties.total_received, row.dst_properties.total_spent)
-        self.value = Value(row.value.satoshi, row.value.eur, row.value.usd).__dict__
+        self.value = Value(row.value.satoshi, round(row.value.eur, 2), round(row.value.usd, 2)).__dict__
         self.noTransactions = row.no_transactions
 
     def id(self):
@@ -410,9 +416,9 @@ class ClusterAddresses(object):
         self.noOutgoingTxs = row.no_outgoing_txs
         self.firstTx = TxIdTime(row.first_tx.height, byte_to_hex(row.first_tx.tx_hash), row.first_tx.timestamp).__dict__
         self.lastTx = TxIdTime(row.last_tx.height, byte_to_hex(row.last_tx.tx_hash), row.last_tx.timestamp).__dict__
-        totalReceived = Value(row.total_received.satoshi, row.total_received.eur, row.total_received.usd)
+        totalReceived = Value(row.total_received.satoshi, round(row.total_received.eur, 2), round(row.total_received.usd, 2))
         self.totalReceived = totalReceived.__dict__
-        totalSpent = Value(row.total_spent.satoshi, row.total_spent.eur, row.total_spent.usd)
+        totalSpent = Value(row.total_spent.satoshi, round(row.total_spent.eur, 2), round(row.total_spent.usd, 2))
         self.totalSpent = totalSpent.__dict__
         balance = compute_balance(row.total_received.satoshi, row.total_spent.satoshi, exchange_rate)
         self.balance = balance.__dict__
