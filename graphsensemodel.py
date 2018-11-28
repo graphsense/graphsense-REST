@@ -121,8 +121,8 @@ class Address(object):
         self.totalSpent = spent.__dict__
         balance = compute_balance(row.total_received.satoshi, row.total_spent.satoshi, exchange_rate)
         self.balance = balance.__dict__
-        self.in_degree = row.in_degree
-        self.out_degree = row.out_degree
+        self.inDegree = row.in_degree
+        self.outDegree = row.out_degree
 
 
 def compute_balance(total_received_satoshi, total_spent_satoshi, exchange_rate):
