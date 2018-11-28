@@ -1,1 +1,2 @@
-docker exec --user dockeruser -ti graphsenserest bash
+#docker exec --user dockeruser -ti graphsenserest-python bash
+docker exec -ti graphsenserest-python bash

@@ -9,13 +9,20 @@ from flask_cors import CORS
 from graphsensedao import *
 
 app = Flask(__name__)
+
 CORS(app)
 app.config.from_object(__name__)
 app.config.update(dict(
     SECRET_KEY='development key',
     CASSANDRA_NODES=['spark1', 'spark2'],
-    MAPPING={'btc': 'btc_transformed_20180831',
-             'ltc': 'ltc_transformed_20180430'}
+    MAPPING={\
+        'btc': 'btc_blocksci_transformed_20181123',
+        'btc_raw': 'btc_blocksci_raw',
+        'bch': 'bch_blocksci_transformed_20181115',
+        'bch_raw': 'bch_blocksci_raw',
+        'ltc': 'ltc_blocksci_transformed_20181126',
+        'ltc_raw': 'ltc_blocksci_raw',
+    }
 ))
 app.config.from_envvar('GRAPHSENSE_REST_SETTINGS', silent=True)
 currency_mapping = app.config['MAPPING']
@@ -23,14 +30,24 @@ currency_mapping = app.config['MAPPING']
 
 @app.route('/')
 def index():
-    return "Graphsense REST"
+    statistics = dict()
+    for currency in currency_mapping.keys():
+        if len(currency.split('_')) == 1:
+            statistics[currency] = query_statistics(currency)
+    return jsonify(statistics)
 
 @app.route('/<currency>/exchangerates')
 def exchange_rates(currency):
-    page_state = request.args.get('page')
-    (page_state, exchange_rates) = query_exchange_rates(currency, page_state)
+    manual_limit = 100000
+    limit = request.args.get('limit')
+    offset = request.args.get('offset')
+    if offset and not isinstance(offset, int):
+        abort(404, 'Invalid offset')
+    if limit and (not isinstance(offset, int) or limit > manual_limit):
+        abort(404, 'Invalid limit')
+
+    exchange_rates = query_exchange_rates(currency, offset, limit)
     return jsonify({
-        "nextPage": page_state.hex() if page_state is not None else None,
         "exchangeRates": exchange_rates
     })
 
@@ -78,7 +95,12 @@ def search(currency):
     expression = request.args.get('q')
     if not expression:
         abort(404, "Expression parameter not provided")
-
+    leading_zeros = 0
+    pos = 0
+    # leading zeros will be lost when casting to int
+    while expression[pos] == '0':
+        pos += 1
+        leading_zeros +=1
     limit = request.args.get('limit')
     if not limit:
         limit = 50
@@ -95,7 +117,7 @@ def search(currency):
     addresses = query_address_search(currency, prefix)  # no limit here, else we miss the specified address
     return jsonify({
         'addresses': [row.address for row in addresses.current_rows if row.address.startswith(expression)][:limit],
-        'transactions': [tx for tx in [str(hex(int.from_bytes(row.tx_hash, byteorder='big')))[2:]
+        'transactions': [tx for tx in ['0'*leading_zeros + str(hex(int.from_bytes(row.tx_hash, byteorder='big')))[2:]\
                                        for row in transactions.current_rows] if tx.startswith(expression)][:limit]
     })
 
@@ -174,21 +196,33 @@ def address_egonet(currency, address):
 @app.route('/<currency>/cluster/<cluster>')
 def cluster(currency, cluster):
     if not cluster:
-        abort(404, "Cluster id not provided")
+        abort(404, "Cluster not provided")
+    try:
+        cluster = int(cluster)
+    except:
+        abort(404, "Invalid cluster ID")
     cluster_obj = query_cluster(currency, cluster)
     return jsonify(cluster_obj.__dict__) if cluster_obj else jsonify({})
 
 @app.route('/<currency>/cluster/<cluster>/tags')
 def cluster_tags(currency, cluster):
     if not cluster:
-        abort(404, "Cluster id not provided")
+        abort(404, "Cluster not provided")
+    try:
+        cluster = int(cluster)
+    except:
+        abort(404, "Invalid cluster ID")
     tags = query_cluster_tags(currency, cluster)
     return jsonify(tags)
 
 @app.route('/<currency>/cluster/<cluster>/addresses')
 def cluster_addresses(currency, cluster):
     if not cluster:
-        abort(404, "Cluster id not provided")
+        abort(404, "Cluster not provided")
+    try:
+        cluster = int(cluster)
+    except:
+        abort(404, "Invalid cluster ID")
     limit = request.args.get('limit')
     if not limit:
         limit = 100
@@ -204,6 +238,13 @@ def cluster_addresses(currency, cluster):
 @app.route('/<currency>/cluster/<cluster>/egonet')
 def cluster_egonet(currency, cluster):
     direction = request.args.get('direction')
+    if not cluster:
+        abort(404, "Cluster not provided")
+    try:
+        cluster = int(cluster)
+        cluster = str(cluster)
+    except:
+        abort(404, "Invalid cluster ID")
     if not direction:
         direction = ""
     limit = request.args.get('limit')
@@ -233,7 +274,6 @@ def custom400(error):
 if __name__ == '__main__':
     connect(app)
     app.run(port=9000, debug=True, processes=1)
-
 # @app.teardown_appcontext
 # def cluster_shutdown(error):
 #     """Shutdown all connections to cassandra."""

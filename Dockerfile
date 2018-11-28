@@ -8,9 +8,10 @@ RUN apt-get update --fix-missing
 RUN apt-get -t testing -y upgrade
 RUN apt-get -t testing install -y python3.6 python3-pip nginx upstart telnet nano curl
 RUN pip3 install --upgrade pip
-RUN mkdir /srv/graphsenserest
-ADD ./requirements.txt /srv/graphsenserest
-#TODO: remove following line when done
+RUN mkdir -p /srv/graphsenserest
+ADD ./requirements.txt /srv/graphsenserest/
+
+
 RUN pip3 install cassandra-driver
 RUN cd /srv/graphsenserest; pip3 install -r requirements.txt
 ADD ./ /srv/graphsenserest/

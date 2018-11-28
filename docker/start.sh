@@ -1,6 +1,6 @@
 #!/bin/bash
-docker stop graphsenserest
-docker rm graphsenserest
+docker stop graphsenserest-python
+docker rm graphsenserest-python
 hosts=""
 for host in spark1 spark2
 do
@@ -9,6 +9,6 @@ do
    hosts+=${h:-`getent hosts $host | awk '{print $1}'`}
    #echo $hosts
 done
-docker run $hosts -d --name graphsenserest -p 9000:9000 -it graphsenserest
+docker run $hosts -d --name graphsenserest-python -p 9001:9000 -it graphsenserest-python
 #--restart=always
 docker ps

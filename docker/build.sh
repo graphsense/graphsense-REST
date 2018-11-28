@@ -1,1 +1,1 @@
-docker build -t graphsenserest .
+docker build -t graphsenserest-python .
