@@ -333,6 +333,8 @@ class AddressEgoNet(object):
                 nodes.extend(eNodes)
                 eNodes = [node.toJsonNode() for node in self.dedupNodes(self.outgoingRelations)]
                 nodes.extend(eNodes)
+        nodes = [dict(t) for t in {tuple(d.items()) for d in nodes}]  # remove duplicate nodes
+
         edges = []
         if 'in' in direction:
             new = [edge.toJsonEdge() for edge in self.incomingRelations]
@@ -376,21 +378,20 @@ class ClusterEgoNet(object):
 
     def construct(self, cluster, direction):
         nodes = []
+        nodes.extend(self.focusNode)
         if 'in' in direction:
-            nodes.extend(self.focusNode)
             new = [node.toJsonNode() for node in self.dedupNodes(self.incomingRelations)]
             nodes.extend(new)
         else:
             if 'out' in direction:
-                nodes.extend(self.focusNode)
                 new = [node.toJsonNode() for node in self.dedupNodes(self.outgoingRelations)]
                 nodes.extend(new)
             else:
-                nodes.extend(self.focusNode)
                 new = [node.toJsonNode() for node in self.dedupNodes(self.incomingRelations)]
                 nodes.extend(new)
                 new = [node.toJsonNode() for node in self.dedupNodes(self.outgoingRelations)]
                 nodes.extend(new)
+        nodes = [dict(t) for t in {tuple(d.items()) for d in nodes}]  # remove duplicate nodes
 
         edges = []
         if 'in' in direction:

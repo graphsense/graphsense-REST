@@ -34,7 +34,6 @@ all_exchange_rates = {}
 last_height = {}
 
 def query_exchange_rates(currency, offset, limit):
-    # TODO: use page_state
     if not offset:
         offset = 0
     if not limit:
@@ -208,7 +207,7 @@ def query_all_exchange_rates(currency, h_max):
         return df
     except Exception as e:
         session.row_factory = named_tuple_factory
-        print("Failed to query exchange rates. Cause: \n%s\n Commiting suicide. Bye Bye!" % str(e))
+        print("Failed to query exchange rates. Cause: \n%s\n Committing suicide. Bye Bye!" % str(e))
         exit(1)
 
 def query_last_block_height(currency):
@@ -249,7 +248,7 @@ def connect(app):
     # set the first keyspace in mapping to the default in order to be able to create the prepared statements
     # alternative strategy is to not use prepared statements and specify the keyspace in the query string
     currency_mapping = app.config['MAPPING']
-    currency = 'btc'  # just to get the session
+    currency = 'bch'  # just to get the session
     session = cluster.connect(currency_mapping[currency])
     session.default_fetch_size = 10
     app.logger.debug("Created new Cassandra session.")
