@@ -248,7 +248,7 @@ def connect(app):
     # set the first keyspace in mapping to the default in order to be able to create the prepared statements
     # alternative strategy is to not use prepared statements and specify the keyspace in the query string
     currency_mapping = app.config['MAPPING']
-    currency = 'bch'  # just to get the session
+    currency = 'btc'  # just to get the session
     session = cluster.connect(currency_mapping[currency])
     session.default_fetch_size = 10
     app.logger.debug("Created new Cassandra session.")

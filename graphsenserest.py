@@ -7,23 +7,15 @@
 from flask import Flask, jsonify, request, g, abort
 from flask_cors import CORS
 from graphsensedao import *
+import json
 
+with open('./config.json', 'r') as fp:
+    config = json.load(fp)
 app = Flask(__name__)
 
 CORS(app)
 app.config.from_object(__name__)
-app.config.update(dict(
-    SECRET_KEY='development key',
-    CASSANDRA_NODES=['spark1', 'spark2'],
-    MAPPING={\
-        'btc': 'btc_blocksci_transformed_20181123',
-        'btc_raw': 'btc_blocksci_raw',
-        'bch': 'bch_blocksci_transformed_20181115',
-        'bch_raw': 'bch_blocksci_raw',
-        'ltc': 'ltc_blocksci_transformed_20181126',
-        'ltc_raw': 'ltc_blocksci_raw',
-    }
-))
+app.config.update(config)
 app.config.from_envvar('GRAPHSENSE_REST_SETTINGS', silent=True)
 currency_mapping = app.config['MAPPING']
 

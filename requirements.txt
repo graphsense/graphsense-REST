@@ -2,5 +2,6 @@ Flask==0.12.2
 flask-cors
 cassandra-driver
 pandas
+json==2.0.9
 uwsgidecorators==1.1.0
 uwsgi==2.0.17
