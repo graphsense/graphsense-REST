@@ -1,1 +1,1 @@
-docker build -t graphsense_rest .
+docker build -t graphsense-rest .
