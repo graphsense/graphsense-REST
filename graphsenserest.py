@@ -11,8 +11,8 @@ import json
 
 with open('./config.json', 'r') as fp:
     config = json.load(fp)
-app = Flask(__name__)
 
+app = Flask(__name__)
 CORS(app)
 app.config.from_object(__name__)
 app.config.update(config)

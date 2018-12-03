@@ -1,8 +1,6 @@
 import cassandra.cluster
-from time import time
 import pandas as pd
-from cassandra.query import SimpleStatement
-from cassandra.query import named_tuple_factory, dict_factory
+from cassandra.query import named_tuple_factory
 from graphsensemodel import (Block, Tag, Transaction, ExchangeRate, Statistics, Address, Cluster, AddressIncomingRelations, AddressOutgoingRelations, AddressEgoNet, ClusterEgoNet, ClusterIncomingRelations, ClusterOutgoingRelations, ClusterAddresses, AddressTransactions, BlockWithTransactions)
 from flask import abort
 
@@ -194,14 +192,11 @@ def pandas_factory(colnames, rows):
     return pd.DataFrame(rows, columns=colnames)
 
 def query_all_exchange_rates(currency, h_max):
-    df = None
     try:
         set_keyspace(session, currency + '_raw')
         session.row_factory = pandas_factory
         session.default_fetch_size = None
-        t0 = time()
         results = session.execute(exchange_rates_query[currency], [h_max], timeout=180)
-        print('time to query', h_max, 'exchange rates for', currency, time()-t0)
         df = results._current_rows
         session.row_factory = named_tuple_factory  # reset default
         return df
@@ -253,7 +248,6 @@ def connect(app):
     session.default_fetch_size = 10
     app.logger.debug("Created new Cassandra session.")
     for currency in currency_mapping.keys():
-#    for currency in ['btc', 'btc_raw']:
         if len(currency.split('_')) == 1:  # exclude dict keys with '_raw'
             set_keyspace(session, currency)
             address_query[currency] = session.prepare('SELECT * FROM address WHERE address = ? AND address_prefix = ?')

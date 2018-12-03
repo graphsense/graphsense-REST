@@ -1,6 +1,4 @@
 from enum import Enum
-#from graphsensedao import query_exchange_rate_for_height
-from flask import jsonify
 
 def byte_to_hex(bytebuffer):
     return "".join(("%02x" % a) for a in bytebuffer)

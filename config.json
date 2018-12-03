@@ -1,0 +1,12 @@
+{
+	"SECRET_KEY": "your secret key",
+	"CASSANDRA_NODES": ["localhost"],
+	"MAPPING": {
+		"btc": "btc_transformed",
+		"btc_raw": "btc_raw",
+		"bch": "bch_transformed",
+		"bch_raw": "bch_raw",
+		"ltc": "ltc_transformed",
+		"ltc_raw": "ltc_raw"
+	}
+}
