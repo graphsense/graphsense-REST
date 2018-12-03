@@ -1,5 +1,5 @@
 #!/bin/bash
-docker stop graphsenserest
-docker rm graphsenserest
-docker run --restart=always -d --name graphsenserest -p 9000:9000 -it graphsenserest
+docker stop graphsense_rest
+docker rm graphsense_rest
+docker run --restart=always -d --name graphsense_rest -p 9000:9000 -it graphsense_rest
 docker ps -a
