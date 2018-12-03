@@ -1,11 +1,12 @@
 from graphsenserest import app as application
-from graphsenserest import connect
-
+from graphsensedao import connect
 from uwsgidecorators import postfork
+
 
 @postfork
 def postfork_connect():
     connect(application)
+
 
 if __name__ == "__main__":
     # deactivate debug and multiple processes in production
