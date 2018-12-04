@@ -1,9 +1,8 @@
 import cassandra.cluster
-import pandas as pd
-from cassandra.query import named_tuple_factory
+from cassandra.query import named_tuple_factory, dict_factory
 from graphsensemodel import (Block, Tag, Transaction, ExchangeRate, Statistics, Address, Cluster, AddressIncomingRelations, AddressOutgoingRelations, ClusterIncomingRelations, ClusterOutgoingRelations, ClusterAddresses, BlockWithTransactions)
 from flask import abort
-
+from time import time
 
 session = None
 tx_query = {}
@@ -40,7 +39,7 @@ def query_exchange_rates(currency, offset, limit):
         limit = 100
     start = last_height[currency] - limit*offset
     end = last_height[currency] - limit*(offset+1)
-    exchange_rates = [ExchangeRate(all_exchange_rates[currency].query("height==" + str(height))).__dict__
+    exchange_rates = [ExchangeRate(all_exchange_rates[currency][height]).__dict__
                       for height in range(start, end, -1)]
     return exchange_rates
 
@@ -117,8 +116,7 @@ def query_address_search(currency, expression):
 def query_address(currency, address):
     set_keyspace(session, currency)
     rows = session.execute(address_query[currency], [address, address[0:5]])
-    return Address(rows[0], ExchangeRate(all_exchange_rates[currency]
-                                         .query("height==" + str(last_height[currency])))) if rows else None
+    return Address(rows[0], ExchangeRate(all_exchange_rates[currency][last_height[currency]])) if rows else None
 
 
 def query_address_cluster(currency, address):
@@ -173,8 +171,7 @@ def query_cluster(currency, cluster):
     set_keyspace(session, currency)
     rows = session.execute(cluster_query[currency], [int(cluster)])
     return Cluster(rows.current_rows[0],
-                   ExchangeRate(all_exchange_rates[currency]
-                                .query("height==" + str(last_height[currency])))) if rows else None
+                   ExchangeRate(all_exchange_rates[currency][last_height[currency]])) if rows else None
 
 
 def query_cluster_tags(currency, cluster):
@@ -188,8 +185,7 @@ def query_cluster_addresses(currency, cluster, limit):
     set_keyspace(session, currency)
     rows = session.execute(cluster_addresses_query[currency], [int(cluster), limit])
     clusteraddresses = [ClusterAddresses(row,
-                        ExchangeRate(all_exchange_rates[currency]
-                                     .query("height==" + str(last_height[currency])))).__dict__ for (row) in rows]
+                        ExchangeRate(all_exchange_rates[currency][last_height[currency]])).__dict__ for (row) in rows]
     return clusteraddresses
 
 
@@ -214,19 +210,15 @@ def set_keyspace(session, currency):
         abort(404, "Currency %s does not exist" % currency)
 
 
-def pandas_factory(colnames, rows):
-    return pd.DataFrame(rows, columns=colnames)
-
-
 def query_all_exchange_rates(currency, h_max):
     try:
         set_keyspace(session, currency + "_raw")
-        session.row_factory = pandas_factory
+        session.row_factory = dict_factory
         session.default_fetch_size = None
         results = session.execute(exchange_rates_query[currency], [h_max], timeout=180)
-        df = results._current_rows
+        d = {row['height']: {'eur': row['eur'], 'usd': row['usd']} for row in results}
         session.row_factory = named_tuple_factory  # reset default
-        return df
+        return d
     except Exception as e:
         session.row_factory = named_tuple_factory
         print("Failed to query exchange rates. Cause: \n%s\nCommitting suicide. Bye Bye!" % str(e))
@@ -253,9 +245,9 @@ def query_last_block_height(currency):
 
 def query_exchange_rate_for_height(currency, height):
     if height <= last_height[currency]:
-        res = ExchangeRate(all_exchange_rates[currency].query("height==" + str(height)))
+        res = ExchangeRate(all_exchange_rates[currency][height])
     else:
-        res = ExchangeRate(all_exchange_rates[currency].query("height==" + str(last_height[currency])))
+        res = ExchangeRate(all_exchange_rates[currency][last_height[currency]])
     return res
 
 
