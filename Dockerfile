@@ -2,7 +2,7 @@ FROM alpine:3.7
 LABEL maintainer="rainer.stuetz@ait.ac.at"
 
 RUN mkdir -p /srv/graphsense-rest/
-COPY requirements.txt graphsense-rest.ini config.json *.py /srv/graphsense-rest/
+COPY requirements.txt /srv/graphsense-rest/
 
 RUN apk --no-cache --update add bash python3 uwsgi-python3 nginx supervisor && \
     apk --no-cache --update --virtual build-dependendencies add \
@@ -22,5 +22,6 @@ RUN apk --no-cache --update add bash python3 uwsgi-python3 nginx supervisor && \
 COPY nginx.conf /etc/nginx/                                                   
 COPY graphsense-rest.conf /etc/nginx/conf.d/graphsense-rest.conf
 COPY supervisor-app.conf /etc/supervisor/conf.d/
+COPY graphsense-rest.ini config.json *.py /srv/graphsense-rest/
 
 CMD ["supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisor-app.conf"]
