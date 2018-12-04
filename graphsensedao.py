@@ -2,7 +2,7 @@ import cassandra.cluster
 from cassandra.query import named_tuple_factory, dict_factory
 from graphsensemodel import (Block, Tag, Transaction, ExchangeRate, Statistics, Address, Cluster, AddressIncomingRelations, AddressOutgoingRelations, ClusterIncomingRelations, ClusterOutgoingRelations, ClusterAddresses, BlockWithTransactions)
 from flask import abort
-from time import time
+
 
 session = None
 tx_query = {}
