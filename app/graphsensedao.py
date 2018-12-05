@@ -1,6 +1,6 @@
 import cassandra.cluster
 from cassandra.query import named_tuple_factory, dict_factory
-from graphsensemodel import (Block, Tag, Transaction, ExchangeRate, Statistics, Address, Cluster, AddressIncomingRelations, AddressOutgoingRelations, ClusterIncomingRelations, ClusterOutgoingRelations, ClusterAddresses, BlockWithTransactions)
+import graphsensemodel as gm
 from flask import abort
 
 
@@ -39,7 +39,7 @@ def query_exchange_rates(currency, offset, limit):
         limit = 100
     start = last_height[currency] - limit*offset
     end = last_height[currency] - limit*(offset+1)
-    exchange_rates = [ExchangeRate(all_exchange_rates[currency][height]).__dict__
+    exchange_rates = [gm.ExchangeRate(all_exchange_rates[currency][height]).__dict__
                       for height in range(start, end, -1)]
     return exchange_rates
 
@@ -49,13 +49,13 @@ def query_block(currency, height):
     if height > last_height[currency]:
         abort(404, "Block not available yet")
     result = session.execute(block_query[currency], [height])
-    return Block(result[0]).__dict__ if result else None
+    return gm.Block(result[0]).__dict__ if result else None
 
 
 def query_statistics(currency):
     set_keyspace(session, currency)
     result = session.execute(statistics_query[currency])
-    return Statistics(result[0]).__dict__ if result else None
+    return gm.Statistics(result[0]).__dict__ if result else None
 
 
 def query_block_transactions(currency, height):
@@ -63,18 +63,19 @@ def query_block_transactions(currency, height):
     if height > last_height[currency]:
         abort(404, "Block not available yet")
     result = session.execute(block_transactions_query[currency], [height])
-    return BlockWithTransactions(result[0], query_exchange_rate_for_height(currency, height)).__dict__ if result else None
+    return gm.BlockWithTransactions(result[0], query_exchange_rate_for_height(currency, height)).__dict__ if result else None
 
 
 def query_blocks(currency, page_state):
     set_keyspace(session, currency + "_raw")
     if page_state is not None:
         page_state = bytes.fromhex(page_state)
-        results = session.execute(blocks_query[currency], paging_state=page_state)
+        results = session.execute(blocks_query[currency],
+                                  paging_state=page_state)
     else:
         results = session.execute(blocks_query[currency], [10])
     page_state = results.paging_state
-    blocks = [Block(row).__dict__ for row in results]
+    blocks = [gm.Block(row).__dict__ for row in results]
     return page_state, blocks
 
 
@@ -84,7 +85,7 @@ def query_transaction(currency, txHash):
         rows = session.execute(tx_query[currency], [txHash[0:5], bytearray.fromhex(txHash)])
     except Exception:
         abort(404, "Transaction hash is not hex")
-    return Transaction(rows[0], query_exchange_rate_for_height(currency, rows[0].height)).__dict__ if rows else None
+    return gm.Transaction(rows[0], query_exchange_rate_for_height(currency, rows[0].height)).__dict__ if rows else None
 
 
 def query_transactions(currency, page_state):
@@ -95,13 +96,15 @@ def query_transactions(currency, page_state):
     else:
         results = session.execute(txs_query[currency], [10])
     page_state = results.paging_state
-    transactions = [Transaction(row, query_exchange_rate_for_height(currency, row.height)).__dict__ for row in results]
+    transactions = [gm.Transaction(row, query_exchange_rate_for_height(currency, row.height)).__dict__
+                    for row in results]
     return page_state, transactions
 
 
 def query_transaction_search(currency, expression):
     set_keyspace(session, currency + "_raw")
-    transactions = session.execute(transaction_search_query[currency], [expression])
+    transactions = session.execute(transaction_search_query[currency],
+                                   [expression])
     transactions._fetch_all()
     return transactions
 
@@ -116,12 +119,13 @@ def query_address_search(currency, expression):
 def query_address(currency, address):
     set_keyspace(session, currency)
     rows = session.execute(address_query[currency], [address, address[0:5]])
-    return Address(rows[0], ExchangeRate(all_exchange_rates[currency][last_height[currency]])) if rows else None
+    return gm.Address(rows[0], gm.ExchangeRate(all_exchange_rates[currency][last_height[currency]])) if rows else None
 
 
 def query_address_cluster(currency, address):
     set_keyspace(session, currency)
-    clusterids = session.execute(address_cluster_query[currency], [address, address[0:5]])
+    clusterids = session.execute(address_cluster_query[currency],
+                                 [address, address[0:5]])
     ret = {}
     if clusterids:
         clusterid = clusterids[0].cluster
@@ -132,19 +136,21 @@ def query_address_cluster(currency, address):
 
 def query_address_transactions(currency, address, limit):
     set_keyspace(session, currency)
-    rows = session.execute(address_transactions_query[currency], [address, address[0:5], int(limit)])
+    rows = session.execute(address_transactions_query[currency],
+                           [address, address[0:5], int(limit)])
     return [row for (row) in rows]
 
 
 def query_address_tags(currency, address):
     set_keyspace(session, currency)
     tags = session.execute(address_tags_query[currency], [address])
-    return [Tag(row).__dict__ for (row) in tags]
+    return [gm.Tag(row).__dict__ for (row) in tags]
 
 
 def query_implicit_tags(currency, address):
     set_keyspace(session, currency)
-    clusters = session.execute(address_cluster_query[currency], [address, address[0:5]])
+    clusters = session.execute(address_cluster_query[currency],
+                               [address, address[0:5]])
     implicit_tags = []
     for (clusterrow) in clusters:
         clustertags = query_cluster_tags(currency, clusterrow.cluster)
@@ -155,51 +161,55 @@ def query_implicit_tags(currency, address):
 
 def query_address_incoming_relations(currency, address, limit):
     set_keyspace(session, currency)
-    rows = session.execute(address_incoming_relations_query[currency], [address[0:5], address, limit])
-    relations = [AddressIncomingRelations(row) for row in rows]
+    rows = session.execute(address_incoming_relations_query[currency],
+                           [address[0:5], address, limit])
+    relations = [gm.AddressIncomingRelations(row) for row in rows]
     return relations
 
 
 def query_address_outgoing_relations(currency, address, limit):
     set_keyspace(session, currency)
-    rows = session.execute(address_outgoing_relations_query[currency], [address[0:5], address, limit])
-    relations = [AddressOutgoingRelations(row) for row in rows]
+    rows = session.execute(address_outgoing_relations_query[currency],
+                           [address[0:5], address, limit])
+    relations = [gm.AddressOutgoingRelations(row) for row in rows]
     return relations
 
 
 def query_cluster(currency, cluster):
     set_keyspace(session, currency)
     rows = session.execute(cluster_query[currency], [int(cluster)])
-    return Cluster(rows.current_rows[0],
-                   ExchangeRate(all_exchange_rates[currency][last_height[currency]])) if rows else None
+    return gm.Cluster(rows.current_rows[0],
+                      gm.ExchangeRate(all_exchange_rates[currency][last_height[currency]])) if rows else None
 
 
 def query_cluster_tags(currency, cluster):
     set_keyspace(session, currency)
     tags = session.execute(cluster_tags_query[currency], [int(cluster)])
-    clustertags = [Tag(tagrow).__dict__ for (tagrow) in tags]
+    clustertags = [gm.Tag(tagrow).__dict__ for (tagrow) in tags]
     return clustertags
 
 
 def query_cluster_addresses(currency, cluster, limit):
     set_keyspace(session, currency)
     rows = session.execute(cluster_addresses_query[currency], [int(cluster), limit])
-    clusteraddresses = [ClusterAddresses(row,
-                        ExchangeRate(all_exchange_rates[currency][last_height[currency]])).__dict__ for (row) in rows]
+    clusteraddresses = [gm.ClusterAddresses(row, gm.ExchangeRate(all_exchange_rates[currency][last_height[currency]])).__dict__
+                        for (row) in rows]
     return clusteraddresses
 
 
 def query_cluster_incoming_relations(currency, cluster, limit):
     set_keyspace(session, currency)
-    rows = session.execute(cluster_incoming_relations_query[currency], [cluster, limit])
-    relations = [ClusterIncomingRelations(row) for row in rows]
+    rows = session.execute(cluster_incoming_relations_query[currency],
+                           [cluster, limit])
+    relations = [gm.ClusterIncomingRelations(row) for row in rows]
     return relations
 
 
 def query_cluster_outgoing_relations(currency, cluster, limit):
     set_keyspace(session, currency)
-    rows = session.execute(cluster_outgoing_relations_query[currency], [cluster, limit])
-    relations = [ClusterOutgoingRelations(row) for row in rows]
+    rows = session.execute(cluster_outgoing_relations_query[currency],
+                           [cluster, limit])
+    relations = [gm.ClusterOutgoingRelations(row) for row in rows]
     return relations
 
 
@@ -212,16 +222,19 @@ def set_keyspace(session, currency):
 
 def query_all_exchange_rates(currency, h_max):
     try:
+        print("Fetching exchange rates for %s" % currency)
         set_keyspace(session, currency + "_raw")
         session.row_factory = dict_factory
         session.default_fetch_size = None
-        results = session.execute(exchange_rates_query[currency], [h_max], timeout=180)
-        d = {row['height']: {'eur': row['eur'], 'usd': row['usd']} for row in results}
+        results = session.execute(exchange_rates_query[currency], [h_max],
+                                  timeout=180)
+        d = {row['height']: {'eur': row['eur'], 'usd': row['usd']}
+             for row in results}
         session.row_factory = named_tuple_factory  # reset default
         return d
     except Exception as e:
         session.row_factory = named_tuple_factory
-        print("Failed to query exchange rates. Cause: \n%s\nCommitting suicide. Bye Bye!" % str(e))
+        print("Failed to query exchange rates. Cause: \n%s" % str(e))
         raise SystemExit
 
 
@@ -245,19 +258,25 @@ def query_last_block_height(currency):
 
 def query_exchange_rate_for_height(currency, height):
     if height <= last_height[currency]:
-        res = ExchangeRate(all_exchange_rates[currency][height])
+        res = gm.ExchangeRate(all_exchange_rates[currency][height])
     else:
-        res = ExchangeRate(all_exchange_rates[currency][last_height[currency]])
+        res = gm.ExchangeRate(all_exchange_rates[currency][last_height[currency]])
     return res
 
 
 def connect(app):
-    global session, currency_mapping, tx_query, txs_query, block_query, blocks_query, exchange_rates_query, \
-        address_query, address_transactions_query, address_tags_query, address_search_query, transaction_search_query, \
-        address_cluster_query, address_incoming_relations_query, address_outgoing_relations_query, \
-        cluster_tags_query, cluster_query, cluster_incoming_relations_query, cluster_outgoing_relations_query, \
-        cluster_addresses_query, block_height_query, exchange_rate_for_height_query, block_transactions_query, \
-        last_height, all_exchange_rates, statistics_query
+    global address_cluster_query, address_incoming_relations_query, \
+           address_outgoing_relations_query, address_query, \
+           address_search_query, address_tags_query, \
+           address_transactions_query, all_exchange_rates, \
+           block_height_query, block_query, block_transactions_query, \
+           blocks_query, cluster_addresses_query, \
+           cluster_incoming_relations_query, \
+           cluster_outgoing_relations_query, \
+           cluster_query, cluster_tags_query, currency_mapping, \
+           exchange_rate_for_height_query, exchange_rates_query, \
+           last_height, session, statistics_query, transaction_search_query, \
+           tx_query, txs_query
 
     cluster = cassandra.cluster.Cluster(app.config["CASSANDRA_NODES"])
     app.logger.debug("Created new Cassandra cluster.")
