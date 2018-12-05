@@ -215,8 +215,10 @@ def query_all_exchange_rates(currency, h_max):
         set_keyspace(session, currency + "_raw")
         session.row_factory = dict_factory
         session.default_fetch_size = None
+        print('Loading exchange rates for ' + currency + '...')
         results = session.execute(exchange_rates_query[currency], [h_max], timeout=180)
         d = {row['height']: {'eur': row['eur'], 'usd': row['usd']} for row in results}
+        print('Rates loaded.')
         session.row_factory = named_tuple_factory  # reset default
         return d
     except Exception as e:
