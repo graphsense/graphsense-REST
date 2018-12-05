@@ -6,10 +6,13 @@ It is used by the [graphsense-dashboard][graphsense-dashboard] component.
 
 ## Configuration
 
-Update the application configuration file `config.json` by setting
-appropriate values for `SECRET_KEY`, `CASSANDRA_NODES` (default `localhost`)
-and `MAPPING`. For each currency two keyspaces are needed, which are
-created by the [GraphSense Blocksci][graphsense-blocksci] backend and the
+Create a configuration file
+
+    cp app/config.json.template app/config.json
+
+and update the values for `SECRET_KEY`, `CASSANDRA_NODES` (default
+`localhost`) and `MAPPING`. For each currency two keyspaces are needed, which
+are created by the [GraphSense Blocksci][graphsense-blocksci] backend and the
 [GraphSense transformation][graphsense-transformation] pipeline respectively.
 The keyspace names must follow this naming convention:
 
@@ -32,6 +35,7 @@ Run
 
 and then
 
+    cd app/
     python graphsenserest.py
 
 ##### Using `docker`
