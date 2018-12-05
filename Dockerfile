@@ -19,9 +19,9 @@ RUN apk --no-cache --update add bash python3 uwsgi-python3 nginx supervisor && \
     apk del build-dependendencies && \
     rm -rf /root/.cache
 
-COPY nginx.conf /etc/nginx/                                                   
-COPY graphsense-rest.conf /etc/nginx/conf.d/graphsense-rest.conf
-COPY supervisor-app.conf /etc/supervisor/conf.d/
-COPY graphsense-rest.ini config.json *.py /srv/graphsense-rest/
+COPY conf/nginx.conf /etc/nginx/
+COPY conf/graphsense-rest.conf /etc/nginx/conf.d/graphsense-rest.conf
+COPY conf/supervisor-app.conf /etc/supervisor/conf.d/
+COPY conf/graphsense-rest.ini app/config.json app/*.py /srv/graphsense-rest/
 
 CMD ["supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisor-app.conf"]
