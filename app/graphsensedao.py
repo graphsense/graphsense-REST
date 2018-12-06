@@ -216,9 +216,9 @@ def query_cluster_outgoing_relations(currency, cluster, limit):
 def set_keyspace(session, currency, raw=False):
     if currency in currency_mapping:
         if raw:
-            session.set_keyspace(currency_mapping[currency][1])
-        else:
             session.set_keyspace(currency_mapping[currency][0])
+        else:
+            session.set_keyspace(currency_mapping[currency][1])
     else:
         abort(404, "Currency %s does not exist" % currency)
 
@@ -290,7 +290,7 @@ def connect(app):
     # prepared statements and specify the keyspace in the query string
     currency_mapping = app.config["MAPPING"]
     currency = list(currency_mapping.keys())[0]  # just to get the session
-    session = cluster.connect(currency_mapping[currency][0])
+    session = cluster.connect(currency_mapping[currency][1])
     session.default_fetch_size = 10
     app.logger.debug("Created new Cassandra session.")
     for currency in currency_mapping.keys():

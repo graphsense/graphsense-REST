@@ -16,11 +16,12 @@ are created by the [GraphSense Blocksci][graphsense-blocksci] backend and the
 [GraphSense transformation][graphsense-transformation] pipeline respectively.
 The keyspace names must follow this naming convention:
 
-    {<CURRENCY>: <TRANSFORMED_KEYSPACE_NAME>,
-     <CURRENCY>_raw: <RAW_KEYSPACE_NAME>,
+    {<CURRENCY_1>: [<RAW_KEYSPACE_NAME_CURRENCY_1>, <TRANSFORMED_KEYSPACE_NAME_CURRENCY_1>],
+     <CURRENCY_2>: [<RAW_KEYSPACE_NAME_CURRENCY_2>, <TRANSFORMED_KEYSPACE_NAME_CURRENCY_2>],
      ...
     }
 
+    }
 ## Run REST interface locally
 
 The REST interface is implemented in Python, Python version 3 is recommended.
