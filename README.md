@@ -20,8 +20,6 @@ The keyspace names must follow this naming convention:
      <CURRENCY_2>: [<RAW_KEYSPACE_NAME_CURRENCY_2>, <TRANSFORMED_KEYSPACE_NAME_CURRENCY_2>],
      ...
     }
-
-    }
 ## Run REST interface locally
 
 The REST interface is implemented in Python, Python version 3 is recommended.
