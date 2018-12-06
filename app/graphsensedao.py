@@ -45,7 +45,7 @@ def query_exchange_rates(currency, offset, limit):
 
 
 def query_block(currency, height):
-    set_keyspace(session, currency + "_raw")
+    set_keyspace(session, currency, raw=True)
     if height > last_height[currency]:
         abort(404, "Block not available yet")
     result = session.execute(block_query[currency], [height])
@@ -59,7 +59,7 @@ def query_statistics(currency):
 
 
 def query_block_transactions(currency, height):
-    set_keyspace(session, currency + "_raw")
+    set_keyspace(session, currency, raw=True)
     if height > last_height[currency]:
         abort(404, "Block not available yet")
     result = session.execute(block_transactions_query[currency], [height])
@@ -67,7 +67,7 @@ def query_block_transactions(currency, height):
 
 
 def query_blocks(currency, page_state):
-    set_keyspace(session, currency + "_raw")
+    set_keyspace(session, currency, raw=True)
     if page_state is not None:
         page_state = bytes.fromhex(page_state)
         results = session.execute(blocks_query[currency],
@@ -80,7 +80,7 @@ def query_blocks(currency, page_state):
 
 
 def query_transaction(currency, txHash):
-    set_keyspace(session, currency + "_raw")
+    set_keyspace(session, currency, raw=True)
     try:
         rows = session.execute(tx_query[currency], [txHash[0:5], bytearray.fromhex(txHash)])
     except Exception:
@@ -89,7 +89,7 @@ def query_transaction(currency, txHash):
 
 
 def query_transactions(currency, page_state):
-    set_keyspace(session, currency + "_raw")
+    set_keyspace(session, currency, raw=True)
     if page_state is not None:
         page_state = bytes.fromhex(page_state)
         results = session.execute(txs_query[currency], paging_state=page_state)
@@ -102,7 +102,7 @@ def query_transactions(currency, page_state):
 
 
 def query_transaction_search(currency, expression):
-    set_keyspace(session, currency + "_raw")
+    set_keyspace(session, currency, raw=True)
     transactions = session.execute(transaction_search_query[currency],
                                    [expression])
     transactions._fetch_all()
@@ -213,17 +213,19 @@ def query_cluster_outgoing_relations(currency, cluster, limit):
     return relations
 
 
-def set_keyspace(session, currency):
+def set_keyspace(session, currency, raw=False):
     if currency in currency_mapping:
-        session.set_keyspace(currency_mapping[currency])
+        if raw:
+            session.set_keyspace(currency_mapping[currency][1])
+        else:
+            session.set_keyspace(currency_mapping[currency][0])
     else:
         abort(404, "Currency %s does not exist" % currency)
 
 
 def query_all_exchange_rates(currency, h_max):
     try:
-        print("Fetching exchange rates for %s" % currency)
-        set_keyspace(session, currency + "_raw")
+        set_keyspace(session, currency, raw=True)
         session.row_factory = dict_factory
         session.default_fetch_size = None
         print('Loading exchange rates for ' + currency + '...')
@@ -241,7 +243,7 @@ def query_all_exchange_rates(currency, h_max):
 
 
 def query_last_block_height(currency):
-    set_keyspace(session, currency + "_raw")
+    set_keyspace(session, currency, raw=True)
     block_max = 0
     block_inc = 100000
     while True:
@@ -287,39 +289,38 @@ def connect(app):
     # create the prepared statements; alternative strategy is to not use
     # prepared statements and specify the keyspace in the query string
     currency_mapping = app.config["MAPPING"]
-    currency = "btc"  # just to get the session
-    session = cluster.connect(currency_mapping[currency])
+    currency = list(currency_mapping.keys())[0]  # just to get the session
+    session = cluster.connect(currency_mapping[currency][0])
     session.default_fetch_size = 10
     app.logger.debug("Created new Cassandra session.")
     for currency in currency_mapping.keys():
-        if len(currency.split("_")) == 1:  # exclude dict keys with '_raw'
-            set_keyspace(session, currency)
-            address_query[currency] = session.prepare("SELECT * FROM address WHERE address = ? AND address_prefix = ?")
-            address_search_query[currency] = session.prepare("SELECT address FROM address WHERE address_prefix = ?")
-            address_transactions_query[currency] = session.prepare("SELECT * FROM address_transactions WHERE address = ? AND address_prefix = ? LIMIT ?")
-            address_tags_query[currency] = session.prepare("SELECT * FROM address_tags WHERE address = ?")
-            address_cluster_query[currency] = session.prepare("SELECT cluster FROM address_cluster WHERE address = ? AND address_prefix = ?")
-            address_incoming_relations_query[currency] = session.prepare("SELECT * FROM address_incoming_relations WHERE dst_address_prefix = ? AND dst_address = ? LIMIT ?")
-            address_outgoing_relations_query[currency] = session.prepare("SELECT * FROM address_outgoing_relations WHERE src_address_prefix = ? AND src_address = ? LIMIT ?")
-            cluster_incoming_relations_query[currency] = session.prepare("SELECT * FROM cluster_incoming_relations WHERE dst_cluster = ? LIMIT ?")
-            cluster_outgoing_relations_query[currency] = session.prepare("SELECT * FROM cluster_outgoing_relations WHERE src_cluster = ? LIMIT ?")
-            cluster_tags_query[currency] = session.prepare("SELECT * FROM cluster_tags WHERE cluster = ?")
-            cluster_query[currency] = session.prepare("SELECT * FROM cluster WHERE cluster = ?")
-            cluster_addresses_query[currency] = session.prepare("SELECT * FROM cluster_addresses WHERE cluster = ? LIMIT ?")
-            statistics_query[currency] = session.prepare("SELECT * FROM summary_statistics LIMIT 1")
+        set_keyspace(session, currency)
+        address_query[currency] = session.prepare("SELECT * FROM address WHERE address = ? AND address_prefix = ?")
+        address_search_query[currency] = session.prepare("SELECT address FROM address WHERE address_prefix = ?")
+        address_transactions_query[currency] = session.prepare("SELECT * FROM address_transactions WHERE address = ? AND address_prefix = ? LIMIT ?")
+        address_tags_query[currency] = session.prepare("SELECT * FROM address_tags WHERE address = ?")
+        address_cluster_query[currency] = session.prepare("SELECT cluster FROM address_cluster WHERE address = ? AND address_prefix = ?")
+        address_incoming_relations_query[currency] = session.prepare("SELECT * FROM address_incoming_relations WHERE dst_address_prefix = ? AND dst_address = ? LIMIT ?")
+        address_outgoing_relations_query[currency] = session.prepare("SELECT * FROM address_outgoing_relations WHERE src_address_prefix = ? AND src_address = ? LIMIT ?")
+        cluster_incoming_relations_query[currency] = session.prepare("SELECT * FROM cluster_incoming_relations WHERE dst_cluster = ? LIMIT ?")
+        cluster_outgoing_relations_query[currency] = session.prepare("SELECT * FROM cluster_outgoing_relations WHERE src_cluster = ? LIMIT ?")
+        cluster_tags_query[currency] = session.prepare("SELECT * FROM cluster_tags WHERE cluster = ?")
+        cluster_query[currency] = session.prepare("SELECT * FROM cluster WHERE cluster = ?")
+        cluster_addresses_query[currency] = session.prepare("SELECT * FROM cluster_addresses WHERE cluster = ? LIMIT ?")
+        statistics_query[currency] = session.prepare("SELECT * FROM summary_statistics LIMIT 1")
 
-            set_keyspace(session, currency + "_raw")
-            tx_query[currency] = session.prepare("SELECT * FROM transaction WHERE tx_prefix = ? AND tx_hash = ?")
-            txs_query[currency] = session.prepare("SELECT * FROM transaction LIMIT ?")
-            transaction_search_query[currency] = session.prepare("SELECT tx_hash from transaction where tx_prefix = ?")
-            block_transactions_query[currency] = session.prepare("SELECT * FROM block_transactions WHERE height = ?")
-            block_query[currency] = session.prepare("SELECT * FROM block WHERE height = ?")
-            blocks_query[currency] = session.prepare("SELECT * FROM block LIMIT ?")
-            exchange_rates_query[currency] = session.prepare("SELECT * FROM exchange_rates LIMIT ?")
-            exchange_rate_for_height_query[currency] = session.prepare("SELECT * FROM exchange_rates WHERE height = ?")
-            block_height_query[currency] = session.prepare("SELECT height FROM exchange_rates WHERE height = ?")
+        set_keyspace(session, currency, raw=True)
+        tx_query[currency] = session.prepare("SELECT * FROM transaction WHERE tx_prefix = ? AND tx_hash = ?")
+        txs_query[currency] = session.prepare("SELECT * FROM transaction LIMIT ?")
+        transaction_search_query[currency] = session.prepare("SELECT tx_hash from transaction where tx_prefix = ?")
+        block_transactions_query[currency] = session.prepare("SELECT * FROM block_transactions WHERE height = ?")
+        block_query[currency] = session.prepare("SELECT * FROM block WHERE height = ?")
+        blocks_query[currency] = session.prepare("SELECT * FROM block LIMIT ?")
+        exchange_rates_query[currency] = session.prepare("SELECT * FROM exchange_rates LIMIT ?")
+        exchange_rate_for_height_query[currency] = session.prepare("SELECT * FROM exchange_rates WHERE height = ?")
+        block_height_query[currency] = session.prepare("SELECT height FROM exchange_rates WHERE height = ?")
 
-            last_height[currency] = query_last_block_height(currency)
-            all_exchange_rates[currency] = query_all_exchange_rates(currency, last_height[currency])
+        last_height[currency] = query_last_block_height(currency)
+        all_exchange_rates[currency] = query_all_exchange_rates(currency, last_height[currency])
 
     app.logger.debug("Created prepared statements")
