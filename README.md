@@ -1,44 +1,57 @@
 # GraphSense REST Interface
 
-The GraphSense REST Interface provides access to denormalized views computed by the [Graphsense
-Transformation Pipeline][graphsense-transformation]. It is used by the
-[graphsense-dashboard][graphsense-dashboard] component.
+The GraphSense REST Interface provides access to denormalized views computed
+by the [Graphsense Transformation Pipeline][graphsense-transformation].
+It is used by the [graphsense-dashboard][graphsense-dashboard] component.
 
-This component is implemented using the [Scala Play Framework][play-doc].
+## Configuration
 
-## Local Development Environment Setup
+Create a configuration file
 
-Follow the local development environment setup instructions described in the
-[graphsense-transformation][graphsense-transformation] component.
+    cp app/config.json.template app/config.json
 
-Create an eclipse project file using `sbt`
+and update the values for `SECRET_KEY`, `CASSANDRA_NODES` (default
+`localhost`) and `MAPPING`. For each currency two keyspaces are needed, which
+are created by the [GraphSense Blocksci][graphsense-blocksci] backend and the
+[GraphSense transformation][graphsense-transformation] pipeline respectively.
+The keyspaces are configured according to the following structure
 
-    sbt eclipse
-
-Import project into the Scala-IDE via
-`File > Import... > Existing Projects into Workspace`
+    {<CURRENCY_1>: [<RAW_KEYSPACE_NAME_CURRENCY_1>, <TRANSFORMED_KEYSPACE_NAME_CURRENCY_1>],
+     <CURRENCY_2>: [<RAW_KEYSPACE_NAME_CURRENCY_2>, <TRANSFORMED_KEYSPACE_NAME_CURRENCY_2>],
+     ...
+    }
 
 ## Run REST interface locally
 
-Create an application configuration file
+The REST interface is implemented in Python, Python version 3 is recommended.
 
-	cp conf/application.conf.template conf/application.conf
+You can run the API either using `pip` or `docker`:
 
-...and configure `cassandra.host` and `cassandra.keyspace`. Example:
+##### Using `pip`
 
-	cassandra.host = HOST (e.g., localhost)
-	cassandra.keyspace = TRANSFORMED_KEYSPACE (e.g., graphsense_transformed) 
+Run 
 
-Start the server in development mode:
+    pip install -r requirements.txt
 
-    sbt run
+and then
+
+    cd app/
+    python graphsenserest.py
+
+##### Using `docker`
+
+After installing [docker][docker], run:
+
+    docker/build.sh
+    docker/start.sh
+
 
 Test the service in your browser:
 
-    http://localhost:9000/block/9000
+    http://localhost:9000/btc/block/10000
 
-In production mode `sbt stage` can be used (see the [Play documentation][play-doc]).
 
+[graphsense-blocksci]: https://github.com/graphsense/graphsense-blocksci
 [graphsense-transformation]: https://github.com/graphsense/graphsense-transformation
 [graphsense-dashboard]: https://github.com/graphsense/graphsense-dashboard
-[play-doc]: https://www.playframework.com/documentation/2.6.x/Deploying
+[docker]: https://docs.docker.com/install
