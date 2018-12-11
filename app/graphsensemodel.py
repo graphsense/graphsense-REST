@@ -164,6 +164,12 @@ def compute_balance(total_received_satoshi, total_spent_satoshi,
     return balance
 
 
+def compute_exchanged_value(value, exchange_rate):
+    return Value(value,
+                 round(value*exchange_rate.eur*1e-8, 2),
+                 round(value*exchange_rate.usd*1e-8, 2))
+
+
 class AddressTransactions(object):
     def __init__(self, row, rates):
         self.address = row.address
@@ -206,7 +212,7 @@ class Cluster(object):
 
 
 class AddressIncomingRelations(object):
-    def __init__(self, row):
+    def __init__(self, row, exchange_rate):
         self.dstAddressPrefix = row.dst_address_prefix
         self.dstAddress = row.dst_address
         self.srcCategory = Category(row.src_category)
@@ -215,6 +221,11 @@ class AddressIncomingRelations(object):
                                     round(row.estimated_value.usd, 2)).__dict__
         self.srcAddress = row.src_address
         self.noTransactions = row.no_transactions
+        self.srcBalance = compute_balance(row.src_properties.total_received,
+                                          row.src_properties.total_spent,
+                                          exchange_rate)
+        self.srcTotalReceived = compute_exchanged_value(row.src_properties.total_received,
+                                                        exchange_rate)
         self.srcProperties = AddressSummary(row.src_properties.total_received,
                                             row.src_properties.total_spent)
 
@@ -237,9 +248,20 @@ class AddressIncomingRelations(object):
                 "estimatedValue": self.estimatedValue}
         return edge
 
+    def toJson(self):
+        return {
+            "id": self.id(),
+            "nodeType": "address",
+            "category": self.srcCategory.name,
+            "received": self.srcTotalReceived.__dict__,
+            "balance": self.srcBalance.__dict__,
+            "noTransactions": self.noTransactions,
+            "estimatedValue": self.estimatedValue
+        }
+
 
 class AddressOutgoingRelations(object):
-    def __init__(self, row):
+    def __init__(self, row, exchange_rate):
         self.srcAddressPrefix = row.src_address_prefix
         self.srcAddress = row.src_address
         self.dstCategory = Category(row.dst_category)
@@ -248,6 +270,11 @@ class AddressOutgoingRelations(object):
                                     round(row.estimated_value.usd, 2)).__dict__
         self.dstAddress = row.dst_address
         self.noTransactions = row.no_transactions
+        self.dstBalance = compute_balance(row.dst_properties.total_received,
+                                          row.dst_properties.total_spent,
+                                          exchange_rate)
+        self.dstTotalReceived = compute_exchanged_value(row.dst_properties.total_received,
+                                                        exchange_rate)
         self.dstProperties = AddressSummary(row.dst_properties.total_received,
                                             row.dst_properties.total_spent)
 
@@ -270,6 +297,17 @@ class AddressOutgoingRelations(object):
                 "estimatedValue": self.estimatedValue}
         return edge
 
+    def toJson(self):
+        return {
+            "id": self.id(),
+            "nodeType": 'address',
+            "category": self.dstCategory.name,
+            "received": self.dstTotalReceived.__dict__,
+            "balance": self.dstBalance.__dict__,
+            "noTransactions": self.noTransactions,
+            "estimatedValue": self.estimatedValue
+        }
+
 
 class ClusterSummary(object):
     def __init__(self, no_addresses, total_received, total_spent):
@@ -279,7 +317,7 @@ class ClusterSummary(object):
 
 
 class ClusterIncomingRelations(object):
-    def __init__(self, row):
+    def __init__(self, row, exchange_rate):
         self.dstCluster = str(row.dst_cluster)
         self.srcCluster = str(row.src_cluster)
         self.srcCategory = Category(row.src_category)
@@ -290,6 +328,11 @@ class ClusterIncomingRelations(object):
                            round(row.value.eur, 2),
                            round(row.value.usd, 2)).__dict__
         self.noTransactions = row.no_transactions
+        self.srcBalance = compute_balance(row.src_properties.total_received,
+                                          row.src_properties.total_spent,
+                                          exchange_rate)
+        self.srcTotalReceived = compute_exchanged_value(row.src_properties.total_received,
+                                                        exchange_rate)
 
     def id(self):
         return self.srcCluster
@@ -310,9 +353,20 @@ class ClusterIncomingRelations(object):
                 "estimatedValue": self.value}
         return edge
 
+    def toJson(self):
+        return {
+            "id": self.id(),
+            "nodeType": "cluster" if self.id().isdigit() else 'address',
+            "category": self.srcCategory.name,
+            "received": self.srcTotalReceived.__dict__,
+            "balance": self.srcBalance.__dict__,
+            "noTransactions": self.noTransactions,
+            "estimatedValue": self.value
+        }
+
 
 class ClusterOutgoingRelations(object):
-    def __init__(self, row):
+    def __init__(self, row, exchange_rate):
         self.srcCluster = str(row.src_cluster)
         self.dstCluster = str(row.dst_cluster)
         self.dstCategory = Category(row.dst_category)
@@ -323,6 +377,11 @@ class ClusterOutgoingRelations(object):
                            round(row.value.eur, 2),
                            round(row.value.usd, 2)).__dict__
         self.noTransactions = row.no_transactions
+        self.dstBalance = compute_balance(row.dst_properties.total_received,
+                                          row.dst_properties.total_spent,
+                                          exchange_rate)
+        self.dstTotalReceived = compute_exchanged_value(row.dst_properties.total_received,
+                                                        exchange_rate)
 
     def id(self):
         return self.dstCluster
@@ -342,6 +401,17 @@ class ClusterOutgoingRelations(object):
                 "transactions": self.noTransactions,
                 "estimatedValue": self.value}
         return edge
+
+    def toJson(self):
+        return {
+            "id": self.id(),
+            "nodeType": "cluster" if self.id().isdigit() else 'address',
+            "category": self.dstCategory.name,
+            "received": self.dstTotalReceived.__dict__,
+            "balance": self.dstBalance.__dict__,
+            "noTransactions": self.noTransactions,
+            "estimatedValue": self.value
+        }
 
 
 class Category(Enum):
@@ -511,3 +581,5 @@ class ClusterAddresses(object):
                                   row.total_spent.satoshi,
                                   exchange_rate)
         self.balance = balance.__dict__
+        self.inDegree = row.in_degree
+        self.outDegree = row.out_degree

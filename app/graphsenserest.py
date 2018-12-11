@@ -116,8 +116,10 @@ def search(currency):
     return jsonify({
         "addresses": [row.address for row in addresses.current_rows
                       if row.address.startswith(expression)][:limit],
-        "transactions": [tx for tx in ["0"*leading_zeros + str(hex(int.from_bytes(row.tx_hash, byteorder="big")))[2:]
-                                       for row in transactions.current_rows] if tx.startswith(expression)][:limit]
+        "transactions": [tx for tx in ["0"*leading_zeros +
+                                       str(hex(int.from_bytes(row.tx_hash, byteorder="big")))[2:]
+                                       for row in transactions.current_rows]
+                         if tx.startswith(expression)][:limit]
     })
 
 
@@ -130,21 +132,45 @@ def address(currency, address):
     return jsonify(result.__dict__) if result else jsonify({})
 
 
+@app.route("/<currency>/address_with_tags/<address>")
+def address_with_tags(currency, address):
+    if not address:
+        abort(404, "Address not provided")
+
+    result = gd.query_address(currency, address)
+    result.tags = gd.query_address_tags(currency, address)
+    return jsonify(result.__dict__) if result else jsonify({})
+
+
 @app.route("/<currency>/address/<address>/transactions")
 def address_transactions(currency, address):
     if not address:
         abort(404, "Address not provided")
     limit = request.args.get("limit")
-    if not limit:
-        limit = 100
-    else:
+    if limit is not None:
         try:
             limit = int(limit)
         except Exception:
             abort(404, "Invalid limit value")
-    rows = gd.query_address_transactions(currency, address, limit)
-    txs = [gm.AddressTransactions(row, gd.query_exchange_rate_for_height(currency, row.height)).__dict__ for row in rows]
-    return jsonify(txs)
+
+    pagesize = request.args.get("pagesize")
+    if pagesize is not None:
+        try:
+            pagesize = int(pagesize)
+        except Exception:
+            abort(404, "Invalid pagesize value")
+
+    page_state = request.args.get("page")
+    (page_state, rows) = gd.query_address_transactions(
+        currency, page_state, address, pagesize, limit)
+    txs = [gm.AddressTransactions(
+               row, gd.query_exchange_rate_for_height(currency, row.height)
+           ).__dict__
+           for row in rows]
+    return jsonify({
+        "nextPage": page_state.hex() if page_state is not None else None,
+        "transactions": txs
+    })
 
 
 @app.route("/<currency>/address/<address>/tags")
@@ -174,6 +200,18 @@ def address_cluster(currency, address):
     return jsonify(address_cluster)
 
 
+@app.route("/<currency>/address/<address>/cluster_with_tags")
+def address_cluster_with_tags(currency, address):
+    if not address:
+        abort(404, "Address not provided")
+
+    address_cluster = gd.query_address_cluster(currency, address)
+    if "cluster" in address_cluster:
+        address_cluster["tags"] = gd.query_cluster_tags(
+            currency, address_cluster["cluster"])
+    return jsonify(address_cluster)
+
+
 @app.route("/<currency>/address/<address>/egonet")
 def address_egonet(currency, address):
     direction = request.args.get("direction")
@@ -186,17 +224,59 @@ def address_egonet(currency, address):
     else:
         limit = int(limit)
     try:
+        _, incoming = gd.query_address_incoming_relations(
+            currency, None, address, None, int(limit))
+        _, outgoing = gd.query_address_outgoing_relations(
+            currency, None, address, None, int(limit))
         egoNet = gm.AddressEgoNet(
             gd.query_address(currency, address),
             gd.query_address_tags(currency, address),
             gd.query_implicit_tags(currency, address),
-            gd.query_address_incoming_relations(currency, address, int(limit)),
-            gd.query_address_outgoing_relations(currency, address, int(limit))
+            incoming,
+            outgoing
         )
         ret = egoNet.construct(address, direction)
     except Exception:
         ret = {}
     return jsonify(ret)
+
+
+@app.route("/<currency>/address/<address>/neighbors")
+def address_neighbors(currency, address):
+    direction = request.args.get("direction")
+    if not direction:
+        abort(404, "direction value missing")
+    if "in" in direction:
+        isOutgoing = False
+    elif "out" in direction:
+        isOutgoing = True
+    else:
+        abort(404, "invalid direction value - has to be either in or out")
+
+    limit = request.args.get("limit")
+    if limit is not None:
+        try:
+            limit = int(limit)
+        except Exception:
+            abort(404, "Invalid limit value")
+
+    pagesize = request.args.get("pagesize")
+    if pagesize is not None:
+        try:
+            pagesize = int(pagesize)
+        except Exception:
+            abort(404, "Invalid pagesize value")
+    page_state = request.args.get("page")
+    if isOutgoing:
+        (page_state, rows) = gd.query_address_outgoing_relations(
+            currency, page_state, address, pagesize, limit)
+    else:
+        (page_state, rows) = gd.query_address_incoming_relations(
+            currency, page_state, address, pagesize, limit)
+    return jsonify({
+        "nextPage": page_state.hex() if page_state is not None else None,
+        "neighbors": [row.toJson() for row in rows]
+    })
 
 
 @app.route("/<currency>/cluster/<cluster>")
@@ -208,6 +288,15 @@ def cluster(currency, cluster):
     except Exception:
         abort(404, "Invalid cluster ID")
     cluster_obj = gd.query_cluster(currency, cluster)
+    return jsonify(cluster_obj.__dict__) if cluster_obj else jsonify({})
+
+
+@app.route("/<currency>/cluster_with_tags/<cluster>")
+def cluster_with_tags(currency, cluster):
+    if not cluster:
+        abort(404, "Cluster id not provided")
+    cluster_obj = gd.query_cluster(currency, cluster)
+    cluster_obj.tags = gd.query_cluster_tags(currency, cluster)
     return jsonify(cluster_obj.__dict__) if cluster_obj else jsonify({})
 
 
@@ -232,15 +321,24 @@ def cluster_addresses(currency, cluster):
     except Exception:
         abort(404, "Invalid cluster ID")
     limit = request.args.get("limit")
-    if not limit:
-        limit = 100
-    else:
+    if limit is not None:
         try:
             limit = int(limit)
         except Exception:
             abort(404, "Invalid limit value")
-    addresses = gd.query_cluster_addresses(currency, cluster, int(limit))
-    return jsonify(addresses)
+    pagesize = request.args.get("pagesize")
+    if pagesize is not None:
+        try:
+            pagesize = int(pagesize)
+        except Exception:
+            abort(404, "Invalid pagesize value")
+    page = request.args.get("page")
+    (page, addresses) = gd.query_cluster_addresses(
+        currency, cluster, page, pagesize, limit)
+    return jsonify({
+        "nextPage": page.hex() if page is not None else None,
+        "addresses": addresses
+        })
 
 
 @app.route("/<currency>/cluster/<cluster>/egonet")
@@ -274,6 +372,50 @@ def cluster_egonet(currency, cluster):
     except Exception:
         ret = {}
     return jsonify(ret)
+
+
+@app.route("/<currency>/cluster/<cluster>/neighbors")
+def cluster_neighbors(currency, cluster):
+    direction = request.args.get("direction")
+    if not direction:
+        abort(404, "direction value missing")
+    if "in" in direction:
+        isOutgoing = False
+    elif "out" in direction:
+        isOutgoing = True
+    else:
+        abort(404, "invalid direction value - has to be either in or out")
+
+    limit = request.args.get("limit")
+    if limit is not None:
+        try:
+            limit = int(limit)
+        except Exception:
+            abort(404, "Invalid limit value")
+
+    pagesize = request.args.get("pagesize")
+    if pagesize is not None:
+        try:
+            pagesize = int(pagesize)
+        except Exception:
+            abort(404, "Invalid pagesize value")
+    page_state = request.args.get("page")
+    if isOutgoing:
+        (page_state, rows) = gd.query_cluster_outgoing_relations(currency,
+                                                                 page_state,
+                                                                 cluster,
+                                                                 pagesize,
+                                                                 limit)
+    else:
+        (page_state, rows) = gd.query_cluster_incoming_relations(currency,
+                                                                 page_state,
+                                                                 cluster,
+                                                                 pagesize,
+                                                                 limit)
+    return jsonify({
+        "nextPage": page_state.hex() if page_state is not None else None,
+        "neighbors": [row.toJson() for row in rows]
+    })
 
 
 @app.errorhandler(400)
