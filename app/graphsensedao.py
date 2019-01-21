@@ -2,6 +2,7 @@ import cassandra.cluster
 from cassandra.query import named_tuple_factory, dict_factory
 import graphsensemodel as gm
 from flask import abort
+from joblib import Memory
 
 
 session = None
@@ -355,6 +356,9 @@ def query_exchange_rate_for_height(currency, height):
     return res
 
 
+location = './cachedir'
+memory = Memory(location, verbose=0)
+
 def connect(app):
     global address_cluster_query, address_incoming_relations_query, \
            address_outgoing_relations_query, address_query, \
@@ -414,6 +418,7 @@ def connect(app):
         block_height_query[currency] = session.prepare("SELECT height FROM exchange_rates WHERE height = ?")
 
         last_height[currency] = query_last_block_height(currency)
+        #query_all_exchange_rates_cached = memory.cache(query_all_exchange_rates)
         all_exchange_rates[currency] = query_all_exchange_rates(currency,
                                                                 last_height[currency])
 
