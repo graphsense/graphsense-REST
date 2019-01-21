@@ -215,7 +215,6 @@ class AddressIncomingRelations(object):
     def __init__(self, row, exchange_rate):
         self.dstAddressPrefix = row.dst_address_prefix
         self.dstAddress = row.dst_address
-        #self.srcCategory = Category(row.src_category)
         self.estimatedValue = Value(row.estimated_value.satoshi,
                                     round(row.estimated_value.eur, 2),
                                     round(row.estimated_value.usd, 2)).__dict__
@@ -237,8 +236,7 @@ class AddressIncomingRelations(object):
                 "nodeType": "address",
                 "received": self.srcProperties.totalReceived,
                 "balance": (self.srcProperties.totalReceived -
-                            self.srcProperties.totalSpent), # satoshi
-                #"category": self.srcCategory.name
+                            self.srcProperties.totalSpent) # satoshi
                 }
         return node
 
@@ -253,7 +251,6 @@ class AddressIncomingRelations(object):
         return {
             "id": self.id(),
             "nodeType": "address",
-            #"category": self.srcCategory.name,
             "received": self.srcTotalReceived.__dict__,
             "balance": self.srcBalance.__dict__,
             "noTransactions": self.noTransactions,
@@ -265,7 +262,6 @@ class AddressOutgoingRelations(object):
     def __init__(self, row, exchange_rate):
         self.srcAddressPrefix = row.src_address_prefix
         self.srcAddress = row.src_address
-        #self.dstCategory = Category(row.dst_category)
         self.estimatedValue = Value(row.estimated_value.satoshi,
                                     round(row.estimated_value.eur, 2),
                                     round(row.estimated_value.usd, 2)).__dict__
@@ -287,8 +283,7 @@ class AddressOutgoingRelations(object):
                 "nodeType": "address",
                 "received": self.dstProperties.totalReceived,
                 "balance": (self.dstProperties.totalReceived -
-                            self.dstProperties.totalSpent),  # satoshi
-                #"category": self.dstCategory.name
+                            self.dstProperties.totalSpent)  # satoshi
                 }
         return node
 
@@ -303,7 +298,6 @@ class AddressOutgoingRelations(object):
         return {
             "id": self.id(),
             "nodeType": 'address',
-            #"category": self.dstCategory.name,
             "received": self.dstTotalReceived.__dict__,
             "balance": self.dstBalance.__dict__,
             "noTransactions": self.noTransactions,
@@ -322,7 +316,6 @@ class ClusterIncomingRelations(object):
     def __init__(self, row, exchange_rate):
         self.dstCluster = str(row.dst_cluster)
         self.srcCluster = str(row.src_cluster)
-        #self.srcCategory = Category(row.src_category)
         self.srcProperties = ClusterSummary(row.src_properties.no_addresses,
                                             row.src_properties.total_received,
                                             row.src_properties.total_spent)
@@ -344,8 +337,7 @@ class ClusterIncomingRelations(object):
                 "nodeType": "cluster" if self.id().isdigit() else "address",
                 "received": self.srcProperties.totalReceived,
                 "balance": (self.srcProperties.totalReceived -
-                            self.srcProperties.totalSpent),  # satoshi
-                #"category": self.srcCategory.name
+                            self.srcProperties.totalSpent)  # satoshi
                 }
         return node
 
