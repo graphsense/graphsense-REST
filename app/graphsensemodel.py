@@ -47,8 +47,8 @@ class AddressSummary(object):
 # CASSSANDRA TABLES
 class ExchangeRate(object):
     def __init__(self, d):
-        self.usd = d['eur']
-        self.eur = d['usd']
+        self.eur = d['eur']
+        self.usd = d['usd']
 
 
 class Statistics(object):
