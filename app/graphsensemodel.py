@@ -1,4 +1,3 @@
-from enum import Enum
 
 
 def byte_to_hex(bytebuffer):
@@ -236,7 +235,7 @@ class AddressIncomingRelations(object):
                 "nodeType": "address",
                 "received": self.srcProperties.totalReceived,
                 "balance": (self.srcProperties.totalReceived -
-                            self.srcProperties.totalSpent) # satoshi
+                            self.srcProperties.totalSpent)  # satoshi
                 }
         return node
 
@@ -352,7 +351,6 @@ class ClusterIncomingRelations(object):
         return {
             "id": self.id(),
             "nodeType": "cluster" if self.id().isdigit() else 'address',
-            #"category": self.srcCategory.name,
             "received": self.srcTotalReceived.__dict__,
             "balance": self.srcBalance.__dict__,
             "noTransactions": self.noTransactions,
@@ -364,7 +362,6 @@ class ClusterOutgoingRelations(object):
     def __init__(self, row, exchange_rate):
         self.srcCluster = str(row.src_cluster)
         self.dstCluster = str(row.dst_cluster)
-        #self.dstCategory = Category(row.dst_category)
         self.dstProperties = ClusterSummary(row.dst_properties.no_addresses,
                                             row.dst_properties.total_received,
                                             row.dst_properties.total_spent)
@@ -387,7 +384,6 @@ class ClusterOutgoingRelations(object):
                 "received": self.dstProperties.totalReceived,
                 "balance": (self.dstProperties.totalReceived -
                             self.dstProperties.totalSpent),  # satoshi
-                #"category": self.dstCategory.name
                 }
         return node
 
@@ -402,19 +398,11 @@ class ClusterOutgoingRelations(object):
         return {
             "id": self.id(),
             "nodeType": "cluster" if self.id().isdigit() else 'address',
-            #"category": self.dstCategory.name,
             "received": self.dstTotalReceived.__dict__,
             "balance": self.dstBalance.__dict__,
             "noTransactions": self.noTransactions,
             "estimatedValue": self.value
         }
-
-
-#class Category(Enum):
-#    Unknown = 0
-#    Implicit = 1
-#    Explicit = 2
-#    Manual = 3
 
 
 class AddressEgoNet(object):
@@ -425,20 +413,11 @@ class AddressEgoNet(object):
         self.implicitTags = implicit_tags
         self.incomingRelations = incoming_relations
         self.outgoingRelations = outgoing_relations
-        #if self.explicitTags:
-        #    self.focusNodeCategory = Category.Explicit
-        #else:
-        #    if self.implicitTags:
-        #        self.focusNodeCategory = Category.Implicit
-        #    else:
-        #        self.focusNodeCategory = Category.Unknown
-
         self.focusNode = [{"id": self.focusAddress.address,
                            "nodeType": "address",
                            "received": self.focusAddress.totalReceived["satoshi"],
                            "balance": (self.focusAddress.totalReceived["satoshi"] -
                                        self.focusAddress.totalSpent["satoshi"]),
-                           #"category": self.focusNodeCategory.name
                            }]
 
     # receives a List[EgonetRelation]
@@ -496,18 +475,12 @@ class ClusterEgoNet(object):
         self.incomingRelations = incomingRelations
         self.outgoingRelations = outgoingRelations
 
-        #if clusterTags:
-        #    self.focusNodeCategory = Category.Explicit
-        #else:
-        #    self.focusNodeCategory = Category.Unknown
-
         self.focusNode = [{
             "id": self.focusCluster.cluster,
             "nodeType": "cluster",
             "received": self.focusCluster.totalReceived["satoshi"],
             "balance": (self.focusCluster.totalReceived["satoshi"] -
                         self.focusCluster.totalSpent["satoshi"]),
-            #"category":self.focusNodeCategory.name
         }]
 
     def dedupNodes(self, clusterRelations):

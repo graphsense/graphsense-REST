@@ -14,6 +14,7 @@ app.config.update(config)
 app.config.from_envvar("GRAPHSENSE_REST_SETTINGS", silent=True)
 currency_mapping = app.config["MAPPING"]
 
+
 @app.route("/")
 def index():
     statistics = dict()
