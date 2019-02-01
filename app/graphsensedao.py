@@ -3,7 +3,6 @@ from cassandra.query import named_tuple_factory, dict_factory
 import graphsensemodel as gm
 from flask import abort
 
-
 session = None
 tx_query = {}
 txs_query = {}
@@ -14,6 +13,7 @@ exchange_rates_query = {}
 exchange_rate_for_height_query = {}
 address_query = {}
 address_transactions_query = {}
+address_transactions_without_limit_query = {}
 address_tags_query = {}
 address_search_query = {}
 transaction_search_query = {}
@@ -21,10 +21,15 @@ address_cluster_query = {}
 cluster_tags_query = {}
 cluster_query = {}
 address_incoming_relations_query = {}
+address_incoming_relations_without_limit_query = {}
 address_outgoing_relations_query = {}
+address_outgoing_relations_without_limit_query = {}
 cluster_incoming_relations_query = {}
+cluster_incoming_relations_without_limit_query = {}
 cluster_outgoing_relations_query = {}
+cluster_outgoing_relations_without_limit_query = {}
 cluster_addresses_query = {}
+cluster_addresses_without_limit_query = {}
 block_height_query = {}
 statistics_query = {}
 currency_mapping = {}
@@ -134,23 +139,36 @@ def query_address_cluster(currency, address):
     return ret
 
 
-def query_address_transactions(currency, address, limit):
+def query_address_transactions(currency, page_state, address, pagesize, limit):
     set_keyspace(session, currency)
-    rows = session.execute(address_transactions_query[currency],
-                           [address, address[0:5], int(limit)])
-    return [row for (row) in rows]
+
+    if limit is None:
+        query = address_transactions_without_limit_query
+        params = [address, address[0:5]]
+    else:
+        query = address_transactions_query
+        params = [address, address[0:5], limit]
+
+    if pagesize is not None:
+        query[currency].fetch_size = pagesize
+    if page_state is not None:
+        page_state = bytes.fromhex(page_state)
+        rows = session.execute(query[currency], params, paging_state=page_state)
+    else:
+        rows = session.execute(query[currency], params)
+    page_state = rows.paging_state
+    return page_state, [row for row in rows.current_rows]
 
 
 def query_address_tags(currency, address):
     set_keyspace(session, currency)
     tags = session.execute(address_tags_query[currency], [address])
-    return [gm.Tag(row).__dict__ for (row) in tags]
+    return [gm.Tag(row).__dict__ for row in tags]
 
 
 def query_implicit_tags(currency, address):
     set_keyspace(session, currency)
-    clusters = session.execute(address_cluster_query[currency],
-                               [address, address[0:5]])
+    clusters = session.execute(address_cluster_query[currency], [address, address[0:5]])
     implicit_tags = []
     for (clusterrow) in clusters:
         clustertags = query_cluster_tags(currency, clusterrow.cluster)
@@ -159,20 +177,48 @@ def query_implicit_tags(currency, address):
     return implicit_tags
 
 
-def query_address_incoming_relations(currency, address, limit):
+def query_address_incoming_relations(currency, page_state, address, pagesize, limit):
     set_keyspace(session, currency)
-    rows = session.execute(address_incoming_relations_query[currency],
-                           [address[0:5], address, limit])
-    relations = [gm.AddressIncomingRelations(row) for row in rows]
-    return relations
+    if limit is None:
+        query = address_incoming_relations_without_limit_query
+        params = [address[0:5], address]
+    else:
+        query = address_incoming_relations_query
+        params = [address[0:5], address, limit]
+    if pagesize is not None:
+        query[currency].fetch_size = pagesize
+    if page_state is not None:
+        page_state = bytes.fromhex(page_state)
+        rows = session.execute(query[currency], params, paging_state=page_state)
+    else:
+        rows = session.execute(query[currency], params)
+    page_state = rows.paging_state
+    exchange_rate = gm.ExchangeRate(all_exchange_rates[currency][last_height[currency]])
+    relations = [gm.AddressIncomingRelations(row, exchange_rate)
+                 for row in rows.current_rows]
+    return page_state, relations
 
 
-def query_address_outgoing_relations(currency, address, limit):
+def query_address_outgoing_relations(currency, page_state, address, pagesize, limit):
     set_keyspace(session, currency)
-    rows = session.execute(address_outgoing_relations_query[currency],
-                           [address[0:5], address, limit])
-    relations = [gm.AddressOutgoingRelations(row) for row in rows]
-    return relations
+    if limit is None:
+        query = address_outgoing_relations_without_limit_query
+        params = [address[0:5], address]
+    else:
+        query = address_outgoing_relations_query
+        params = [address[0:5], address, limit]
+    if pagesize is not None:
+        query[currency].fetch_size = pagesize
+    if page_state is not None:
+        page_state = bytes.fromhex(page_state)
+        rows = session.execute(query[currency], params, paging_state=page_state)
+    else:
+        rows = session.execute(query[currency], params)
+    page_state = rows.paging_state
+    exchange_rate = gm.ExchangeRate(all_exchange_rates[currency][last_height[currency]])
+    relations = [gm.AddressOutgoingRelations(row, exchange_rate)
+                 for row in rows.current_rows]
+    return page_state, relations
 
 
 def query_cluster(currency, cluster):
@@ -189,28 +235,68 @@ def query_cluster_tags(currency, cluster):
     return clustertags
 
 
-def query_cluster_addresses(currency, cluster, limit):
+def query_cluster_addresses(currency, cluster, page, pagesize, limit):
     set_keyspace(session, currency)
-    rows = session.execute(cluster_addresses_query[currency], [int(cluster), limit])
+    if limit is None:
+        query = cluster_addresses_without_limit_query
+        params = [int(cluster)]
+    else:
+        query = cluster_addresses_query
+        params = [int(cluster), limit]
+
+    if pagesize is not None:
+        query[currency].fetch_size = pagesize
+    if page is not None:
+        page = bytes.fromhex(page)
+        rows = session.execute(query[currency], params, paging_state=page)
+    else:
+        rows = session.execute(query[currency], params)
     clusteraddresses = [gm.ClusterAddresses(row, gm.ExchangeRate(all_exchange_rates[currency][last_height[currency]])).__dict__
-                        for (row) in rows]
-    return clusteraddresses
+                        for row in rows.current_rows]
+    page = rows.paging_state
+    return page, clusteraddresses
 
 
-def query_cluster_incoming_relations(currency, cluster, limit):
+def query_cluster_incoming_relations(currency, page_state, cluster, pagesize, limit):
     set_keyspace(session, currency)
-    rows = session.execute(cluster_incoming_relations_query[currency],
-                           [cluster, limit])
-    relations = [gm.ClusterIncomingRelations(row) for row in rows]
-    return relations
+    if limit is None:
+        query = cluster_incoming_relations_without_limit_query
+        params = [cluster]
+    else:
+        query = cluster_incoming_relations_query
+        params = [cluster, limit]
+    if pagesize is not None:
+        query[currency].fetch_size = pagesize
+    if page_state is not None:
+        page_state = bytes.fromhex(page_state)
+        rows = session.execute(query[currency], params, paging_state=page_state)
+    else:
+        rows = session.execute(query[currency], params)
+    page_state = rows.paging_state
+    exchange_rate = gm.ExchangeRate(all_exchange_rates[currency][last_height[currency]])
+    relations = [gm.ClusterIncomingRelations(row, exchange_rate) for row in rows.current_rows]
+    return page_state, relations
 
 
-def query_cluster_outgoing_relations(currency, cluster, limit):
+def query_cluster_outgoing_relations(currency, page_state, cluster, pagesize, limit):
     set_keyspace(session, currency)
-    rows = session.execute(cluster_outgoing_relations_query[currency],
-                           [cluster, limit])
-    relations = [gm.ClusterOutgoingRelations(row) for row in rows]
-    return relations
+    if limit is None:
+        query = cluster_outgoing_relations_without_limit_query
+        params = [cluster]
+    else:
+        query = cluster_outgoing_relations_query
+        params = [cluster, limit]
+    if pagesize is not None:
+        query[currency].fetch_size = pagesize
+    if page_state is not None:
+        page_state = bytes.fromhex(page_state)
+        rows = session.execute(query[currency], params, paging_state=page_state)
+    else:
+        rows = session.execute(query[currency], params)
+    page_state = rows.paging_state
+    exchange_rate = gm.ExchangeRate(all_exchange_rates[currency][last_height[currency]])
+    relations = [gm.ClusterOutgoingRelations(row, exchange_rate) for row in rows.current_rows]
+    return page_state, relations
 
 
 def set_keyspace(session, currency, raw=False):
@@ -228,12 +314,12 @@ def query_all_exchange_rates(currency, h_max):
         set_keyspace(session, currency, raw=True)
         session.row_factory = dict_factory
         session.default_fetch_size = None
-        print('Loading exchange rates for ' + currency + '...')
+        print("Loading exchange rates for %s ..." % currency)
         results = session.execute(exchange_rates_query[currency], [h_max],
                                   timeout=180)
-        d = {row['height']: {'eur': row['eur'], 'usd': row['usd']}
+        d = {row["height"]: {"eur": row["eur"], "usd": row["usd"]}
              for row in results}
-        print('Rates loaded.')
+        print("Rates loaded.")
         session.row_factory = named_tuple_factory  # reset default
         return d
     except Exception as e:
@@ -298,15 +384,21 @@ def connect(app):
         address_query[currency] = session.prepare("SELECT * FROM address WHERE address = ? AND address_prefix = ?")
         address_search_query[currency] = session.prepare("SELECT address FROM address WHERE address_prefix = ?")
         address_transactions_query[currency] = session.prepare("SELECT * FROM address_transactions WHERE address = ? AND address_prefix = ? LIMIT ?")
+        address_transactions_without_limit_query[currency] = session.prepare("SELECT * FROM address_transactions WHERE address = ? AND address_prefix = ?")
         address_tags_query[currency] = session.prepare("SELECT * FROM address_tags WHERE address = ?")
         address_cluster_query[currency] = session.prepare("SELECT cluster FROM address_cluster WHERE address = ? AND address_prefix = ?")
         address_incoming_relations_query[currency] = session.prepare("SELECT * FROM address_incoming_relations WHERE dst_address_prefix = ? AND dst_address = ? LIMIT ?")
+        address_incoming_relations_without_limit_query[currency] = session.prepare("SELECT * FROM address_incoming_relations WHERE dst_address_prefix = ? AND dst_address = ?")
         address_outgoing_relations_query[currency] = session.prepare("SELECT * FROM address_outgoing_relations WHERE src_address_prefix = ? AND src_address = ? LIMIT ?")
+        address_outgoing_relations_without_limit_query[currency] = session.prepare("SELECT * FROM address_outgoing_relations WHERE src_address_prefix = ? AND src_address = ?")
         cluster_incoming_relations_query[currency] = session.prepare("SELECT * FROM cluster_incoming_relations WHERE dst_cluster = ? LIMIT ?")
+        cluster_incoming_relations_without_limit_query[currency] = session.prepare("SELECT * FROM cluster_incoming_relations WHERE dst_cluster = ?")
         cluster_outgoing_relations_query[currency] = session.prepare("SELECT * FROM cluster_outgoing_relations WHERE src_cluster = ? LIMIT ?")
+        cluster_outgoing_relations_without_limit_query[currency] = session.prepare("SELECT * FROM cluster_outgoing_relations WHERE src_cluster = ?")
         cluster_tags_query[currency] = session.prepare("SELECT * FROM cluster_tags WHERE cluster = ?")
         cluster_query[currency] = session.prepare("SELECT * FROM cluster WHERE cluster = ?")
         cluster_addresses_query[currency] = session.prepare("SELECT * FROM cluster_addresses WHERE cluster = ? LIMIT ?")
+        cluster_addresses_without_limit_query[currency] = session.prepare("SELECT * FROM cluster_addresses WHERE cluster = ?")
         statistics_query[currency] = session.prepare("SELECT * FROM summary_statistics LIMIT 1")
 
         set_keyspace(session, currency, raw=True)
@@ -321,6 +413,7 @@ def connect(app):
         block_height_query[currency] = session.prepare("SELECT height FROM exchange_rates WHERE height = ?")
 
         last_height[currency] = query_last_block_height(currency)
-        all_exchange_rates[currency] = query_all_exchange_rates(currency, last_height[currency])
+        all_exchange_rates[currency] = query_all_exchange_rates(currency,
+                                                                last_height[currency])
 
     app.logger.debug("Created prepared statements")
