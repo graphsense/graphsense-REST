@@ -50,10 +50,19 @@ class Statistics(Resource):
                 statistics[currency] = gd.query_statistics(currency)
         return statistics
 
+exchangerate = api.model('exchangerate', {
+    "eur": fields.Float(required=True, description='Euro'),
+    "usd": fields.Float(required=True, description='Usd')
+})
+
+exchangerates_response = api.model('exchangerates_response', {
+    "exchangeRates": fields.List(fields.Nested(exchangerate), required=True, description='List with exchange rates')
+})
 
 @api.route("/<currency>/exchangerates")
 class ExchangeRates(Resource):
     @api.doc(parser=limit_offset_parser)
+    @api.marshal_with(exchangerates_response)
     def get(self, currency):
         """
         Returns a JSON with exchange rates
@@ -421,7 +430,6 @@ class AddressCluster(Resource):
         return address_cluster
 
 
-
 cluster_with_tags_response = api.model('address_cluster_with_tags_response', {
     'balance': fields.Nested(value_response, required=True, description='Balance'),
     'cluster': fields.Integer(required=True, description='Cluster id'),
@@ -560,8 +568,7 @@ class AddressNeighbors(Resource):
             (page_state, rows) = gd.query_address_incoming_relations(
                 currency, page_state, address, pagesize, limit)
         return {"nextPage": page_state.hex() if page_state is not None else None,
-            "neighbors": [row.toJson() for row in rows]
-        }
+                "neighbors": [row.toJson() for row in rows]}
 
 
 @api.route("/<currency>/cluster/<cluster>")
@@ -578,7 +585,9 @@ class Cluster(Resource):
         except Exception:
             abort(404, "Invalid cluster ID")
         cluster_obj = gd.query_cluster(currency, cluster)
-        return cluster_obj.__dict__ if cluster_obj else {}
+        if not cluster_obj:
+            abort(404, "Cluster not found")
+        return cluster_obj
 
 
 @api.route("/<currency>/cluster_with_tags/<cluster>")
@@ -591,8 +600,10 @@ class ClusterWithTags(Resource):
         if not cluster:
             abort(404, "Cluster id not provided")
         cluster_obj = gd.query_cluster(currency, cluster)
+        if not cluster_obj:
+            abort(404, "Cluster not found")
         cluster_obj.tags = gd.query_cluster_tags(currency, cluster)
-        return cluster_obj.__dict__ if cluster_obj else {}
+        return cluster_obj
 
 
 @api.route("/<currency>/cluster/<cluster>/tags")
@@ -746,19 +757,14 @@ class ClusterNeighbors(Resource):
                 abort(404, "Invalid pagesize value")
         page_state = request.args.get("page")
         if isOutgoing:
-            (page_state, rows) = gd.query_cluster_outgoing_relations(currency,
-                                                                     page_state,
-                                                                     cluster,
-                                                                     pagesize,
-                                                                     limit)
+            (page_state, rows) = gd.query_cluster_outgoing_relations(
+                currency, page_state, cluster, pagesize, limit)
         else:
-            (page_state, rows) = gd.query_cluster_incoming_relations(currency,
-                                                                     page_state,
-                                                                     cluster,
-                                                                     pagesize,
-                                                                     limit)
+            (page_state, rows) = gd.query_cluster_incoming_relations(
+                currency, page_state, cluster, pagesize, limit)
+
         return {"nextPage": page_state.hex() if page_state is not None else None,
-            "neighbors": [row.toJson() for row in rows] }
+                "neighbors": [row.toJson() for row in rows]}
 
 
 @app.errorhandler(400)
