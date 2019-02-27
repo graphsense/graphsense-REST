@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, abort
+from flask import Flask, request, abort
 from flask_restplus import Api, Resource, fields
 from flask_cors import CORS
 import graphsensedao as gd
@@ -67,9 +67,7 @@ class ExchangeRates(Resource):
             abort(404, "Invalid limit")
 
         exchange_rates = gd.query_exchange_rates(currency, offset, limit)
-        return jsonify({
-            "exchangeRates": exchange_rates
-        })
+        return {"exchangeRates": exchange_rates}
 
 
 block_response = api.model('block_response', {
@@ -89,7 +87,7 @@ class Block(Resource):
         block = gd.query_block(currency, height)
         if not block:
             abort(404, "Block height %d not found" % height)
-        return jsonify(block)
+        return block
 
 
 blocks_response = api.model('blocks_response', {
@@ -133,7 +131,7 @@ class BlockTransactions(Resource):
         block_transactions = gd.query_block_transactions(currency, height)
         if not block_transactions:
             abort(404, "Block height %d not found" % height)
-        return jsonify(block_transactions)
+        return block_transactions
 
 
 input_output_response = api.model('input_output_response', {
@@ -268,11 +266,10 @@ class Address(Resource):
             abort(404, "Address not provided")
 
         result = gd.query_address(currency, address)
-        if result:
-            return result.__dict__
-        else:
+        if not result:
             abort(404, "Address not found")
-        #return jsonify(result.__dict__) if result else jsonify({})
+        return result
+
 
 tag_response = api.model('address_tag_response', {
     'actorCategory': fields.String(required=True, description='Actor category'),
@@ -325,7 +322,9 @@ class AddressWithTags(Resource):
 
         result = gd.query_address(currency, address)
         result.tags = gd.query_address_tags(currency, address)
-        return jsonify(result.__dict__) if result else jsonify({})
+        if not result:
+            abort(404, "Address not found")
+        return result
 
 
 address_transaction_response = api.model('address_transaction_response', {
@@ -450,9 +449,8 @@ class AddressClusterWithTags(Resource):
 
         address_cluster = gd.query_address_cluster(currency, address)
         if "cluster" in address_cluster:
-            address_cluster["tags"] = gd.query_cluster_tags(
-                currency, address_cluster["cluster"])
-        return jsonify(address_cluster)
+            address_cluster["tags"] = gd.query_cluster_tags(currency, address_cluster["cluster"])
+        return address_cluster
 
 
 edge_response = api.model('edge_response', {
@@ -518,7 +516,7 @@ neighbor_response = api.model('neighbor_response', {
     "estimatedValue": fields.Nested(value_response, required=True)
 })
 
-address_neighbors_response = api.model('address_neighbors_response', {
+neighbors_response = api.model('address_neighbors_response', {
     'nextPage': fields.String(required=True, description='The next page'),
     'neighbors': fields.List(fields.Nested(neighbor_response), required=True, description='The list of neighbors')
 })
@@ -526,7 +524,7 @@ address_neighbors_response = api.model('address_neighbors_response', {
 @api.route("/<currency>/address/<address>/neighbors")
 class AddressNeighbors(Resource):
     @api.doc(parser=limit_direction_parser)
-    @api.marshal_with(address_neighbors_response)
+    @api.marshal_with(neighbors_response)
     def get(self, currency, address):
         """
         Returns a JSON with edges and nodes of the address
@@ -717,6 +715,8 @@ class ClusterEgonet(Resource):
 
 @api.route("/<currency>/cluster/<cluster>/neighbors")
 class ClusterNeighbors(Resource):
+    @api.doc(parser=limit_direction_parser)
+    @api.marshal_with(neighbors_response)
     def get(self, currency, cluster):
         """
         Returns a JSON with edges and nodes of the cluster
@@ -763,7 +763,7 @@ class ClusterNeighbors(Resource):
 
 @app.errorhandler(400)
 def custom400(error):
-    return jsonify({"message": error.description})
+    return {"message": error.description}
 
 
 if __name__ == "__main__":
