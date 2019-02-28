@@ -674,56 +674,6 @@ class ClusterAddresses(Resource):
         return {"nextPage": page.hex() if page is not None else None, "addresses": addresses}
 
 
-#cluster_egonet_response = api.model('cluster_egonet_response', {
-#    'edges': fields.List(fields.Nested(edge_response), required=True, description='List of edges'),
-#    'nodes': fields.List(fields.Nested(node_response), required=True, description='List of nodes'),
-#    'focusNode': fields.String(required=True, description='Focus node'),
-#})
-
-@api.route("/<currency>/cluster/<cluster>/egonet")
-class ClusterEgonet(Resource):
-    @api.doc(parser=limit_direction_parser)
-    @api.marshal_with(egonet_response)
-    def get(self, currency, cluster):
-        """
-        Returns a JSON with edges and nodes of the cluster
-        """
-        if not cluster:
-            abort(404, "Cluster not provided")
-        try:
-            cluster = int(cluster)
-            cluster = str(cluster)
-        except Exception:
-            abort(404, "Invalid cluster ID")
-
-        direction = request.args.get("direction")
-        if not direction:
-            direction = ""
-        limit = request.args.get("limit")
-        if not limit:
-            limit = 50
-        else:
-            try:
-                limit = int(limit)
-            except Exception:
-                abort(404, "Invalid limit value")
-        try:
-            _, incoming = gd.query_cluster_incoming_relations(
-                currency, None, cluster, None, int(limit))
-            _, outgoing = gd.query_cluster_outgoing_relations(
-                currency, None, cluster, None, int(limit))
-            egoNet = gm.ClusterEgoNet(
-                gd.query_cluster(currency, cluster),
-                gd.query_cluster_tags(currency, cluster),
-                incoming,
-                outgoing
-            )
-            ret = egoNet.construct(cluster, direction)
-        except Exception as e:
-            abort(500, "%s" % e)
-        return ret
-
-
 @api.route("/<currency>/cluster/<cluster>/neighbors")
 class ClusterNeighbors(Resource):
     @api.doc(parser=limit_direction_parser)
