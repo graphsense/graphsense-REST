@@ -4,4 +4,8 @@ cassandra-driver==3.16.0
 uwsgidecorators==1.1.0
 uwsgi==2.0.17
 flask-restplus
+flask_jwt
+flask_jwt_extended
+flask_sqlalchemy
+passlib
 nose

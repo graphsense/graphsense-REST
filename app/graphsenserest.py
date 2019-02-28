@@ -4,12 +4,65 @@ from flask_cors import CORS
 import graphsensedao as gd
 import graphsensemodel as gm
 import json
+from flask_jwt_extended import (JWTManager, create_access_token, create_refresh_token, jwt_required, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt)
+from flask_jwt_extended import exceptions as jwt_extended_exceptions
+from flask_sqlalchemy import SQLAlchemy
+
+from functools import wraps
+
+security = ['basicAuth', 'apiKey']
+authorizations = {
+    'basicAuth': {
+        'type': 'basic',
+        'in': 'header',
+        'name': 'Authorization'
+    },
+
+    'apiKey': {
+        'type': 'apiKey',
+        'in': 'header',
+        'name': 'Authorization'
+    },
+}
+
+app = Flask(__name__)
+api = Api(app=app, authorizations=authorizations, security=security, version='0.4', description='REST Interface for Graphsense')
+
+
+'''
+    Flask app configuration 
+'''
+
+app.config.from_object(__name__)
 
 with open("./config.json", "r") as fp:
     config = json.load(fp)
+app.config.update(config)
 
-app = Flask(__name__)
-api = Api(app=app, version='0.4', description='REST Interface for Graphsense')
+app.config['SECRET_KEY'] = 'some-secret-string'
+app.config['SWAGGER_UI_JSONEDITOR'] = True
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['JWT_TOKEN_LOCATION'] = 'headers'
+app.config['JWT_SECRET_KEY'] = 'jwt-secret-string'
+app.config['JWT_BLACKLIST_ENABLED'] = True
+app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
+app.config['PROPAGATE_EXCEPTIONS'] = True
+
+app.config.from_envvar("GRAPHSENSE_REST_SETTINGS", silent=True)
+
+CORS(app)
+jwt = JWTManager(app)
+db = SQLAlchemy(app)
+
+currency_mapping = app.config["MAPPING"]
+
+import authmodel
+db.create_all()
+
+'''
+    Methods related to swagger argument parsing 
+'''
 
 limit_parser = api.parser()
 limit_parser.add_argument('limit', type=int, location='args')
@@ -26,11 +79,86 @@ limit_direction_parser .add_argument('direction', location='args')
 page_parser = api.parser()
 page_parser.add_argument('page', location='args')  # TODO: find right type
 
-CORS(app)
-app.config.from_object(__name__)
-app.config.update(config)
-app.config.from_envvar("GRAPHSENSE_REST_SETTINGS", silent=True)
-currency_mapping = app.config["MAPPING"]
+
+'''
+    Methods related to user authentication 
+'''
+@api.errorhandler(jwt_extended_exceptions.FreshTokenRequired)
+def handle_expired_error():
+    return {'message': 'Token has expired!'}, 401
+
+@api.errorhandler(jwt_extended_exceptions.RevokedTokenError)
+def revoked_token_callback():
+    return {'message': 'Token has been revoked!'}, 402
+
+@jwt.token_in_blacklist_loader
+def check_if_token_in_blacklist(decrypted_token):
+    jti = decrypted_token['jti']
+    return authmodel.RevokedJWTToken.is_jti_blacklisted(jti)
+
+def auth_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if auth:
+            current_user = authmodel.GraphsenseUser.find_by_username(auth.username)
+            if not current_user:
+                return {'message': 'Could not verify your login! User {} doesn\'t exist'.format(auth.username) }, 401
+            if not current_user.isAdmin:
+                return {'message': 'User not allowed! User {} not admin.'.format(auth.username)}, 401
+            if authmodel.GraphsenseUser.verify_hash(auth.password, current_user.password):
+                access_token = create_access_token(identity=auth.username)
+                refresh_token = create_refresh_token(identity=auth.password)
+                return { 'message': 'Logged in as {}'.format(current_user.userName), 'access_token': access_token, 'refresh_token': refresh_token }, 200
+            else:
+                return {'message': 'Could not verify your login! Wrong credentials'}, 401
+        return {'message': 'Could not verify your login!'}, 401, {'WWW-Authenticate': 'Basic realm="Login required"'}
+
+    return decorated
+
+
+@api.route('/login', methods=['GET'])
+class UserLogin(Resource):
+    @api.doc(security='basicAuth')
+    @auth_required
+    def get(self):
+        pass
+
+@api.route('/token_refresh', methods=['GET'])
+class UserTokenRefresh(Resource):
+    @jwt_refresh_token_required
+    def get(self):
+        current_user = get_jwt_identity()
+        access_token = create_access_token(identity=current_user)
+        return {'access_token': access_token}, 200
+
+@api.route('/logout_refresh', methods=['GET'])
+class UserLogoutRefresh(Resource):
+    @jwt_refresh_token_required
+    def get(self):
+        jti = get_raw_jwt()['jti']
+        try:
+            revoked_token = authmodel.RevokedJWTToken(jti=jti)
+            revoked_token.add()
+            return {'message': 'Refresh token has been revoked!'}, 200
+        except:
+            return {'message': 'Something went wrong'}, 500
+
+@api.route('/logout_access', methods=['GET'])
+class UserLogoutAccess(Resource):
+    @jwt_required
+    def get(self):
+        jti = get_raw_jwt()['jti']
+        try:
+            revoked_token = authmodel.RevokedJWTToken(jti=jti)
+            revoked_token.add()
+            return {'message': 'Access token has been revoked!'}, 200
+        except:
+            return {'message': 'Something went wrong'}, 500
+
+'''
+    Graphsense api methods 
+'''
 
 value_response = api.model('value_response  ', {
     'eur': fields.Integer(required=True, description='Euro value'),
@@ -40,6 +168,7 @@ value_response = api.model('value_response  ', {
 
 @api.route("/")
 class Statistics(Resource):
+    @jwt_required
     def get(self):
         """
         Returns a JSON with statistics of all the available currencies
@@ -61,6 +190,7 @@ exchangerates_response = api.model('exchangerates_response', {
 
 @api.route("/<currency>/exchangerates")
 class ExchangeRates(Resource):
+    @jwt_required
     @api.doc(parser=limit_offset_parser)
     @api.marshal_with(exchangerates_response)
     def get(self, currency):
@@ -88,6 +218,7 @@ block_response = api.model('block_response', {
 
 @api.route("/<currency>/block/<int:height>")
 class Block(Resource):
+    @jwt_required
     @api.marshal_with(block_response)
     def get(self, currency, height):
         """
@@ -106,6 +237,7 @@ blocks_response = api.model('blocks_response', {
 
 @api.route("/<currency>/blocks")
 class Blocks(Resource):
+    @jwt_required
     @api.doc(parser=page_parser)
     @api.marshal_with(blocks_response)
     def get(self, currency):
@@ -132,6 +264,7 @@ block_transactions_response = api.model('block_transactions_response', {
 
 @api.route("/<currency>/block/<int:height>/transactions")
 class BlockTransactions(Resource):
+    @jwt_required
     @api.marshal_with(block_transactions_response)
     def get(self, currency, height):
         """
@@ -161,6 +294,7 @@ transaction_response = api.model('transaction_response', {
 
 @api.route("/<currency>/tx/<txHash>")
 class Transaction(Resource):
+    @jwt_required
     @api.marshal_with(transaction_response)
     def get(self, currency, txHash):
         """
@@ -179,6 +313,7 @@ transactions_response = api.model('transactions_response', {
 
 @api.route("/<currency>/transactions")
 class Transactions(Resource):
+    @jwt_required
     @api.doc(parser=page_parser)
     @api.marshal_with(transactions_response)
     def get(self, currency):
@@ -200,6 +335,7 @@ search_response = api.model('search_response', {
 
 @api.route("/<currency>/search")
 class Search(Resource):
+    @jwt_required
     @api.doc(parser=limit_query_parser)
     @api.marshal_with(search_response)
     def get(self, currency):
@@ -266,6 +402,7 @@ address_response = api.model('address_response', {
 
 @api.route("/<currency>/address/<address>")
 class Address(Resource):
+    @jwt_required
     @api.marshal_with(address_response)
     def get(self, currency, address):
         """
@@ -293,6 +430,7 @@ tag_response = api.model('address_tag_response', {
 
 @api.route("/<currency>/address/<address>/tags")
 class AddressTags(Resource):
+    @jwt_required
     @api.marshal_list_with(tag_response)
     def get(self, currency, address):
         """
@@ -321,6 +459,7 @@ address_with_tags_response = api.model('address_with_tags_response', {
 
 @api.route("/<currency>/address_with_tags/<address>")
 class AddressWithTags(Resource):
+    @jwt_required
     @api.marshal_with(address_with_tags_response)
     def get(self, currency, address):
         """
@@ -353,6 +492,7 @@ address_transactions_response = api.model('address_transactions_response', {
 
 @api.route("/<currency>/address/<address>/transactions")
 class AddressTransactions(Resource):
+    @jwt_required
     @api.doc(parser=limit_parser)
     @api.marshal_with(address_transactions_response)
     def get(self, currency, address):
@@ -390,6 +530,7 @@ class AddressTransactions(Resource):
 
 @api.route("/<currency>/address/<address>/implicitTags")
 class AddressImplicitTags(Resource):
+    @jwt_required
     @api.marshal_list_with(tag_response)
     def get(self, currency, address):
         """
@@ -418,6 +559,7 @@ cluster_response = api.model('address_cluster_response', {
 
 @api.route("/<currency>/address/<address>/cluster")
 class AddressCluster(Resource):
+    @jwt_required
     @api.marshal_with(cluster_response)
     def get(self, currency, address):
         """
@@ -447,6 +589,7 @@ cluster_with_tags_response = api.model('address_cluster_with_tags_response', {
 
 @api.route("/<currency>/address/<address>/cluster_with_tags")
 class AddressClusterWithTags(Resource):
+    @jwt_required
     @api.marshal_with(cluster_with_tags_response)
     def get(self, currency, address):
         """
@@ -483,6 +626,7 @@ egonet_response = api.model('address_egonet_response', {
 
 @api.route("/<currency>/address/<address>/egonet")
 class AddressEgonet(Resource):
+    @jwt_required
     @api.doc(parser=limit_direction_parser)
     @api.marshal_with(egonet_response)
     def get(self, currency, address):
@@ -531,6 +675,7 @@ neighbors_response = api.model('address_neighbors_response', {
 
 @api.route("/<currency>/address/<address>/neighbors")
 class AddressNeighbors(Resource):
+    @jwt_required
     @api.doc(parser=limit_direction_parser)
     @api.marshal_with(neighbors_response)
     def get(self, currency, address):
@@ -573,6 +718,7 @@ class AddressNeighbors(Resource):
 
 @api.route("/<currency>/cluster/<cluster>")
 class Cluster(Resource):
+    @jwt_required
     @api.marshal_with(cluster_response)
     def get(self, currency, cluster):
         """
@@ -592,6 +738,7 @@ class Cluster(Resource):
 
 @api.route("/<currency>/cluster_with_tags/<cluster>")
 class ClusterWithTags(Resource):
+    @jwt_required
     @api.marshal_with(cluster_with_tags_response)
     def get(self, currency, cluster):
         """
@@ -608,6 +755,7 @@ class ClusterWithTags(Resource):
 
 @api.route("/<currency>/cluster/<cluster>/tags")
 class ClusterTags(Resource):
+    @jwt_required
     @api.marshal_list_with(tag_response)
     def get(self, currency, cluster):
         """
@@ -644,6 +792,7 @@ address_transactions_response = api.model('address_transactions_response', {
 
 @api.route("/<currency>/cluster/<cluster>/addresses")
 class ClusterAddresses(Resource):
+    @jwt_required
     @api.doc(parser=limit_parser)
     @api.marshal_with(address_transactions_response)
     def get(self,currency, cluster):
@@ -676,6 +825,7 @@ class ClusterAddresses(Resource):
 
 @api.route("/<currency>/cluster/<cluster>/neighbors")
 class ClusterNeighbors(Resource):
+    @jwt_required
     @api.doc(parser=limit_direction_parser)
     @api.marshal_with(neighbors_response)
     def get(self, currency, cluster):
