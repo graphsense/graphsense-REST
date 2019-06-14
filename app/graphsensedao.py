@@ -314,6 +314,48 @@ def query_cluster_outgoing_relations(currency, page_state, cluster, pagesize, li
     relations = [gm.ClusterOutgoingRelations(row, exchange_rate) for row in rows.current_rows]
     return page_state, relations
 
+def query_cluster_search_category(currency, cluster, isOutgoing, category, ids, breadth, depth):
+    set_keyspace(session, currency)
+    if depth <= 0:
+        return []
+
+
+    if isOutgoing:
+        (_, rows) = query_cluster_outgoing_relations(currency, None, cluster, breadth, breadth)
+    else:
+        (_, rows) = query_cluster_incoming_relations(currency, None, cluster, breadth, breadth)
+
+    paths = []
+
+    for row in rows:
+        subcluster = row.dstCluster if isOutgoing else row.srcCluster 
+        if not subcluster.isdigit(): 
+            continue
+        match = True
+        tags = query_cluster_tags(currency, subcluster)
+
+        if category != None:
+            # find first occurence of category in tags
+            match = next((True for t in tags if t['actorCategory'] == category), False)
+
+        if ids != None:
+            match = match and next((True for id in ids if id == subcluster), False)
+
+        if match: 
+            subpaths = True
+        else:
+            subpaths = query_cluster_search_category(currency, subcluster, isOutgoing, category, ids, breadth, depth - 1)
+
+        if not subpaths:
+            continue
+        props = query_cluster(currency, subcluster).__dict__
+        props['tags'] = tags
+        obj = {'node': props, 'relation': row}
+        if subpaths == True:
+            subpaths = None
+        obj['paths'] = subpaths
+        paths.append(obj)
+    return paths
 
 def set_keyspace(session, currency=None, space='transformed'):
     if space == 'tagpacks':

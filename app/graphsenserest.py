@@ -91,6 +91,12 @@ direction_parser.add_argument('direction', location='args')
 page_parser = api.parser()
 page_parser.add_argument('page', location='args')  # TODO: find right type
 
+search_category_parser = api.parser()
+search_category_parser.add_argument('direction', location='args')
+search_category_parser.add_argument('category', location='args')
+search_category_parser.add_argument('ids', location='args')
+search_category_parser.add_argument('depth', type=int, location='args')
+search_category_parser.add_argument('breadth', type=int, location='args')
 
 '''
     Methods related to user authentication 
@@ -1089,6 +1095,58 @@ class LabelAddresses(Resource):
             abort(404, "Label not found")
         return result
 
+
+def search_category_recursive(depth = 7):
+    mapping = {
+        'node': fields.Nested(cluster_with_tags_response, required=True, description="Node"),
+        'relation': fields.Nested(neighbor_response, required=True, description="Relation to parent node")
+    }
+
+    if depth:
+        mapping['paths'] = fields.List(fields.Nested(search_category_recursive(depth-1), required=True))
+
+    return mapping
+
+maxdepth = 7
+
+search_category_response = api.model('search_category_response_depth_' + str(maxdepth), {
+        'paths': fields.List(fields.Nested(search_category_recursive(maxdepth), required=True))
+    })
+
+@api.route("/<currency>/cluster/<cluster>/search")
+class ClusterSearchCategory(Resource):
+    @jwt_required
+    @api.doc(parser=search_category_parser)
+    @api.marshal_with(search_category_response)
+    def get(self, currency, cluster):
+        try:
+            # depth search
+            depth = int(request.args.get("depth") or 1)
+            # breadth search
+            breadth = int(request.args.get("breadth") or 16)
+        except:
+            abort(400, "Invalid depth or breadth")
+
+        if depth > maxdepth:
+            abort(400, "Depth must not exceed " + str(maxdepth))
+
+        direction = request.args.get("direction")
+        if not direction:
+            abort(400, "direction value missing")
+        if "in" in direction:
+            isOutgoing = False
+        elif "out" in direction:
+            isOutgoing = True
+        else:
+            abort(400, "invalid direction value - has to be either in or out")
+
+        category = request.args.get('category')
+        ids = request.args.get('ids')
+        if ids:
+            ids = ids.split(',')
+
+        result = gd.query_cluster_search_category(currency, cluster, isOutgoing, category, ids, breadth, depth)
+        return {'paths': result}
 
 @app.errorhandler(400)
 def custom400(error):
