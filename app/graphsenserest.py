@@ -46,12 +46,12 @@ with open("./config.json", "r") as fp:
     config = json.load(fp)
 app.config.update(config)
 
-app.config['SECRET_KEY'] = 'some-secret-string'
+app.config['SECRET_KEY'] = app.config.get('SECRET_KEY') or 'some-secret-string'
 app.config['SWAGGER_UI_JSONEDITOR'] = True
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = app.config.get('SQLALCHEMY_DATABASE_URI') or 'sqlite:////var/lib/graphsense-rest/users.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_TOKEN_LOCATION'] = 'headers'
-app.config['JWT_SECRET_KEY'] = 'jwt-secret-string'
+app.config['JWT_SECRET_KEY'] = app.config.get('JWT_SECRET_KEY') or 'jwt-secret-string'
 app.config['JWT_BLACKLIST_ENABLED'] = True
 app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
 app.config['PROPAGATE_EXCEPTIONS'] = True
