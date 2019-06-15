@@ -58,7 +58,7 @@ app.config['PROPAGATE_EXCEPTIONS'] = True
 
 app.config.from_envvar("GRAPHSENSE_REST_SETTINGS", silent=True)
 
-CORS(app)
+CORS(app, supports_credentials=True)
 jwt = JWTManager(app)
 db = SQLAlchemy(app)
 
