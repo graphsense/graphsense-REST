@@ -9,3 +9,4 @@ flask_jwt_extended
 flask_sqlalchemy
 passlib
 nose
+requests
