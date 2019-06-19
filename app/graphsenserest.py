@@ -7,8 +7,13 @@ import json
 from flask_jwt_extended import (JWTManager, create_access_token, create_refresh_token, jwt_required, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt)
 from flask_jwt_extended import exceptions as jwt_extended_exceptions
 from flask_sqlalchemy import SQLAlchemy
-
 from functools import wraps
+import authmodel
+import re
+
+label_prefix_len = 3
+address_prefix_len = transaction_prefix_len = 5
+pattern = re.compile('[\W_]+', re.UNICODE)  # only alphanumeric chars for label
 
 security = ['basicAuth', 'apiKey']
 authorizations = {
@@ -57,7 +62,6 @@ db = SQLAlchemy(app)
 
 currency_mapping = app.config["MAPPING"]
 
-import authmodel
 db.create_all()
 
 '''
@@ -392,24 +396,44 @@ class Search(Resource):
                 limit = int(limit)
             except Exception:
                 abort(404, "Invalid limit value")
-        if len(expression) >= 5:
-            prefix = expression[:5]
+
+        # Normalize label
+        if len(expression) > label_prefix_len:  # must be label_prefix_len <= address_prefix_len
+            label_norm = pattern.sub('', expression).lower()
+            label_norm_prefix = label_norm[:label_prefix_len]
+            labels = gd.query_label_search(currency, label_norm_prefix)
+
+        # Look for labels, addresses and transactions
+        if len(expression) > address_prefix_len:
+            transactions = gd.query_transaction_search(currency, expression[:transaction_prefix_len])
+            addresses = gd.query_address_search(currency, expression[:address_prefix_len])
+            return {
+                "labels": [row.label for row in labels.current_rows
+                              if row.label.startswith(expression)][:limit],
+                "addresses": [row.address for row in addresses.current_rows
+                              if row.address.startswith(expression)][:limit],
+                "transactions": [tx for tx in ["0"*leading_zeros +
+                                               str(hex(int.from_bytes(row.tx_hash, byteorder="big")))[2:]
+                                               for row in transactions.current_rows]
+                                 if tx.startswith(expression)][:limit]
+            }
+
+        # Look for labels
+        elif len(expression) > label_prefix_len:
+            return {
+                "labels": [row.label for row in labels.current_rows
+                              if row.label.startswith(expression)][:limit],
+                "addresses": [],
+                "transactions": []
+            }
+
         else:
             # returns an empty list because the user did not input enough chars
-            prefix = expression
-        # no limit here, else we miss the specified transaction
-        transactions = gd.query_transaction_search(currency, prefix)
-        # no limit here, else we miss the specified address
-        addresses = gd.query_address_search(currency, prefix)
-
-        return {
-            "addresses": [row.address for row in addresses.current_rows
-                          if row.address.startswith(expression)][:limit],
-            "transactions": [tx for tx in ["0"*leading_zeros +
-                                           str(hex(int.from_bytes(row.tx_hash, byteorder="big")))[2:]
-                                           for row in transactions.current_rows]
-                             if tx.startswith(expression)][:limit]
-        }
+            return {
+                "labels": [],
+                "addresses": [],
+                "transactions": []
+            }
 
 
 tx_response = api.model('tx_response', {
