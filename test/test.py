@@ -144,7 +144,6 @@ class FlaskBookshelfTests(unittest.TestCase):
         result = self.app.get('/btc/tx/%s' % self.txhash, headers=self.headers)
         # assert the status code of the response
         self.assertEqual(result.status_code, 200)
-        print(result.json)
 
     def test_10_search(self):
         #"/<currency>/search"
@@ -237,3 +236,12 @@ class FlaskBookshelfTests(unittest.TestCase):
         # assert the status code of the response
         self.assertEqual(result.status_code, 200)
         print(str(result.data, result.charset))
+
+    def test_26_address_tags_csv(self):
+        #"/<currency>/address/<address>/tags"
+        result = self.app.get('/btc/address/%s/tags.csv' % self.address, headers=self.headers)
+        # assert the status code of the response
+        self.assertEqual(result.status_code, 200)
+        print(str(result.data, result.charset))
+
+

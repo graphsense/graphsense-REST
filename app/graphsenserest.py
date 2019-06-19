@@ -1,4 +1,4 @@
-from flask import Flask, request, abort
+from flask import Flask, request, abort, Response
 from flask_restplus import Api, Resource, fields
 from flask_cors import CORS
 import graphsensedao as gd
@@ -297,8 +297,6 @@ def transactionsToCSV(jsonData):
         yield ','.join([str(item) for item in flatDict.values()]) + '\n'
         flatDict = {}
 
-from flask import Response
-
 @api.route("/<currency>/block/<int:height>/transactions.csv")
 class BlockTransactionsCSV(Resource):
     @jwt_required
@@ -476,6 +474,38 @@ class AddressTags(Resource):
 
         tags = gd.query_address_tags(currency, address)
         return tags
+
+def tagsToCSV(jsonData):
+    flatDict = {}
+    def flatten(x, name=''):
+        if type(x) is dict:
+            for a in x:
+                flatten(x[a], name + a + '_')
+        else:
+            flatDict[name[:-1]] = x
+
+    fieldnames = []
+    for tx in jsonData:
+        flatten(tx)
+        if not fieldnames:
+            fieldnames = ','.join(flatDict.keys())
+            yield fieldnames + '\n'
+        yield ','.join([str(item) for item in flatDict.values()]) + '\n'
+        flatDict = {}
+
+@api.route("/<currency>/address/<address>/tags.csv")
+class AddressTagsCSV(Resource):
+    @jwt_required
+    def get(self, currency, address):
+        """
+        Returns a JSON with the explicit tags of the address
+        """
+        if not address:
+            abort(404, "Address not provided")
+
+        tags = gd.query_address_tags(currency, address)
+        return Response(tagsToCSV(tags), mimetype='text/csv')
+
 
 address_with_tags_response = api.model('address_with_tags_response', {
     'address': fields.String(required=True, description='Address'),
