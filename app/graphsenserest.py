@@ -8,7 +8,6 @@ from flask_jwt_extended import (JWTManager, create_access_token, create_refresh_
 from flask_jwt_extended import exceptions as jwt_extended_exceptions
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
-import authmodel
 import re
 
 label_prefix_len = 3
@@ -62,6 +61,8 @@ db = SQLAlchemy(app)
 
 currency_mapping = app.config["MAPPING"]
 
+import authmodel
+
 db.create_all()
 
 '''
@@ -72,13 +73,17 @@ limit_parser = api.parser()
 limit_parser.add_argument('limit', type=int, location='args')
 
 limit_offset_parser = limit_parser.copy()
-limit_offset_parser .add_argument('offset', type=int, location='args')
+limit_offset_parser.add_argument('offset', type=int, location='args')
 
 limit_query_parser = limit_parser.copy()
 limit_query_parser.add_argument('q', location='args')
 
 limit_direction_parser = limit_parser.copy()
-limit_direction_parser .add_argument('direction', location='args')
+limit_direction_parser.add_argument('direction', location='args')
+
+direction_parser = api.parser()
+direction_parser.add_argument('direction', location='args')
+
 
 page_parser = api.parser()
 page_parser.add_argument('page', location='args')  # TODO: find right type
@@ -297,8 +302,8 @@ def transactionsToCSV(jsonData):
         flatten(tx)
         if not fieldnames:
             fieldnames = ','.join(flatDict.keys())
-            yield fieldnames + '\n'
-        yield ','.join([str(item) for item in flatDict.values()]) + '\n'
+            yield (fieldnames + '\n')
+        yield (','.join([str(item) for item in flatDict.values()]) + '\n')
         flatDict = {}
 
 @api.route("/<currency>/block/<int:height>/transactions.csv")
@@ -366,6 +371,7 @@ class Transactions(Resource):
 
 
 search_response = api.model('search_response', {
+    'labels': fields.List(fields.String, required=True, description='The list of found labels'),
     'addresses': fields.List(fields.String, required=True, description='The list of found addresses'),
     'transactions': fields.List(fields.String, required=True, description='The list of found transactions')
 })
@@ -397,43 +403,30 @@ class Search(Resource):
             except Exception:
                 abort(404, "Invalid limit value")
 
+        result = {"labels": [], "addresses": [], "transactions": []}
+
         # Normalize label
-        if len(expression) > label_prefix_len:  # must be label_prefix_len <= address_prefix_len
-            label_norm = pattern.sub('', expression).lower()
-            label_norm_prefix = label_norm[:label_prefix_len]
-            labels = gd.query_label_search(currency, label_norm_prefix)
+        if len(expression) >= label_prefix_len:  # must be label_prefix_len <= address_prefix_len
+            expression_norm = pattern.sub('', expression).lower()
+            expression_norm_prefix = expression_norm[:label_prefix_len]
+            labels = gd.query_label_search(currency, expression_norm_prefix)
+
+            # Look for labels
+            result["labels"] = list(dict.fromkeys(
+                [row.label for row in labels.current_rows if row.label_norm.startswith(expression_norm)][:limit]))
 
         # Look for labels, addresses and transactions
-        if len(expression) > address_prefix_len:
+        if len(expression) >= address_prefix_len:
             transactions = gd.query_transaction_search(currency, expression[:transaction_prefix_len])
             addresses = gd.query_address_search(currency, expression[:address_prefix_len])
-            return {
-                "labels": [row.label for row in labels.current_rows
-                              if row.label.startswith(expression)][:limit],
-                "addresses": [row.address for row in addresses.current_rows
-                              if row.address.startswith(expression)][:limit],
-                "transactions": [tx for tx in ["0"*leading_zeros +
-                                               str(hex(int.from_bytes(row.tx_hash, byteorder="big")))[2:]
-                                               for row in transactions.current_rows]
-                                 if tx.startswith(expression)][:limit]
-            }
 
-        # Look for labels
-        elif len(expression) > label_prefix_len:
-            return {
-                "labels": [row.label for row in labels.current_rows
-                              if row.label.startswith(expression)][:limit],
-                "addresses": [],
-                "transactions": []
-            }
+            result["addresses"] = \
+                [row.address for row in addresses.current_rows if row.address.startswith(expression)][:limit],
+            result["transactions"] = \
+                [tx for tx in ["0"*leading_zeros + str(hex(int.from_bytes(row.tx_hash, byteorder="big")))[2:]
+                               for row in transactions.current_rows] if tx.startswith(expression)][:limit]
 
-        else:
-            # returns an empty list because the user did not input enough chars
-            return {
-                "labels": [],
-                "addresses": [],
-                "transactions": []
-            }
+        return result
 
 
 tx_response = api.model('tx_response', {
@@ -513,8 +506,8 @@ def tagsToCSV(jsonData):
         flatten(tx)
         if not fieldnames:
             fieldnames = ','.join(flatDict.keys())
-            yield fieldnames + '\n'
-        yield ','.join([str(item) for item in flatDict.values()]) + '\n'
+            yield (fieldnames + '\n')
+        yield (','.join([str(item) for item in flatDict.values()]) + '\n')
         flatDict = {}
 
 @api.route("/<currency>/address/<address>/tags.csv")
@@ -749,6 +742,46 @@ class AddressNeighbors(Resource):
         return {"nextPage": page_state.hex() if page_state is not None else None,
                 "neighbors": [row.toJson() for row in rows]}
 
+@api.route("/<currency>/address/<address>/neighbors.csv")
+class AddressNeighborsCSV(Resource):
+    @jwt_required
+    @api.doc(parser=limit_direction_parser)
+    def get(self, currency, address):
+        """
+        Returns a JSON with edges and nodes of the address
+        """
+        direction = request.args.get("direction")
+        if not direction:
+            abort(404, "direction value missing")
+        if "in" in direction:
+            isOutgoing = False
+        elif "out" in direction:
+            isOutgoing = True
+        else:
+            abort(404, "invalid direction value - has to be either in or out")
+
+        limit = request.args.get("limit")
+        if limit is not None:
+            try:
+                limit = int(limit)
+            except Exception:
+                abort(404, "Invalid limit value")
+
+        pagesize = request.args.get("pagesize")
+        if pagesize is not None:
+            try:
+                pagesize = int(pagesize)
+            except Exception:
+                abort(404, "Invalid pagesize value")
+        page_state = request.args.get("page")
+        if isOutgoing:
+            (page_state, rows) = gd.query_address_outgoing_relations(
+                currency, page_state, address, pagesize, limit)
+        else:
+            (page_state, rows) = gd.query_address_incoming_relations(
+                currency, page_state, address, pagesize, limit)
+        jsonData = [row.toJson() for row in rows]
+        return Response(tagsToCSV(jsonData), mimetype='text/csv')
 
 @api.route("/<currency>/cluster/<cluster>")
 class Cluster(Resource):
@@ -803,6 +836,27 @@ class ClusterTags(Resource):
             abort(404, "Invalid cluster ID")
         tags = gd.query_cluster_tags(currency, cluster)
         return tags
+
+
+@api.route("/<currency>/cluster/<cluster>/tags.csv")
+class ClusterTagsCSV(Resource):
+    @jwt_required
+    def get(self, currency, cluster):
+        """
+        Returns a JSON with the tags of the cluster
+        """
+        if not cluster:
+            abort(404, "Cluster not provided")
+        try:
+            cluster = int(cluster)
+        except Exception:
+            abort(404, "Invalid cluster ID")
+
+        tags = gd.query_cluster_tags(currency, cluster)
+
+        return Response(tagsToCSV(tags), mimetype='text/csv')
+
+
 
 cluster_address_response = api.model('cluster_address_response', {
     'cluster': fields.Integer(required=True, description='Cluster id'),
@@ -900,6 +954,47 @@ class ClusterNeighbors(Resource):
         return {"nextPage": page_state.hex() if page_state is not None else None,
                 "neighbors": [row.toJson() for row in rows]}
 
+@api.route("/<currency>/cluster/<cluster>/neighbors.csv")
+class ClusterNeighborsCSV(Resource):
+    @jwt_required
+    @api.doc(parser=limit_direction_parser)
+    def get(self, currency, cluster):
+        """
+        Returns a JSON with edges and nodes of the cluster
+        """
+        direction = request.args.get("direction")
+        if not direction:
+            abort(404, "direction value missing")
+        if "in" in direction:
+            isOutgoing = False
+        elif "out" in direction:
+            isOutgoing = True
+        else:
+            abort(404, "invalid direction value - has to be either in or out")
+
+        limit = request.args.get("limit")
+        if limit is not None:
+            try:
+                limit = int(limit)
+            except Exception:
+                abort(404, "Invalid limit value")
+
+        pagesize = request.args.get("pagesize")
+        if pagesize is not None:
+            try:
+                pagesize = int(pagesize)
+            except Exception:
+                abort(404, "Invalid pagesize value")
+        page_state = request.args.get("page")
+        if isOutgoing:
+            (page_state, rows) = gd.query_cluster_outgoing_relations(
+                currency, page_state, cluster, pagesize, limit)
+        else:
+            (page_state, rows) = gd.query_cluster_incoming_relations(
+                currency, page_state, cluster, pagesize, limit)
+
+        jsonData = [row.toJson() for row in rows]
+        return Response(tagsToCSV(jsonData), mimetype='text/csv')
 
 @app.errorhandler(400)
 def custom400(error):

@@ -391,7 +391,7 @@ def connect(app):
     session = cluster.connect(currency_mapping[currency][2])
     session.default_fetch_size = 10
     app.logger.debug("Created new Cassandra session.")
-    label_search_query = session.prepare("SELECT label FROM tag_by_label WHERE label_norm_prefix = ?")
+    label_search_query = session.prepare("SELECT label,label_norm FROM tag_by_label WHERE label_norm_prefix = ?")
     for currency in currency_mapping.keys():
         set_keyspace(session, currency)
         address_query[currency] = session.prepare("SELECT * FROM address WHERE address = ? AND address_prefix = ?")
