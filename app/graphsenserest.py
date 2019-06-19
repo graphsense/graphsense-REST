@@ -276,6 +276,41 @@ class BlockTransactions(Resource):
         return block_transactions
 
 
+def transactionsToCSV(jsonData):
+    flatDict = {}
+    def flatten(x, name=''):
+        if type(x) is dict:
+            for a in x:
+                flatten(x[a], name + a + '_')
+        else:
+            flatDict[name[:-1]] = x
+
+    txs = jsonData['txs']
+    blockHeight = jsonData['height']
+    fieldnames = []
+    for tx in txs:
+        flatDict['blockHeight'] = blockHeight
+        flatten(tx)
+        if not fieldnames:
+            fieldnames = ','.join(flatDict.keys())
+            yield fieldnames + '\n'
+        yield ','.join([str(item) for item in flatDict.values()]) + '\n'
+        flatDict = {}
+
+from flask import Response
+
+@api.route("/<currency>/block/<int:height>/transactions.csv")
+class BlockTransactionsCSV(Resource):
+    @jwt_required
+    def get(self, currency, height):
+        """
+        Returns a JSON with all the transactions of the block
+        """
+        block_transactions = gd.query_block_transactions(currency, height)
+        if not block_transactions:
+            abort(404, "Block height %d not found" % height)
+        return Response(transactionsToCSV(block_transactions), mimetype='text/csv')
+
 input_output_response = api.model('input_output_response', {
     'address': fields.String(required=True, description='Address'),
     'value': fields.Nested(value_response, required=True, description='Ionput/Output value')
@@ -603,61 +638,6 @@ class AddressClusterWithTags(Resource):
             address_cluster["tags"] = gd.query_cluster_tags(currency, address_cluster["cluster"])
         return address_cluster
 
-
-edge_response = api.model('edge_response', {
-    "estimatedValue": fields.Nested(value_response, required=True),
-    'source': fields.String(required=True, description='Source'),
-    'target': fields.String(required=True, description='Target'),
-    'transactions': fields.Integer(required=True, description='number of transactions')
-})
-
-node_response = api.model('node_response', {
-    "balance": fields.Integer(required=True, description='Node balance'),
-    "id": fields.String(required=True, description='Node Id'),
-    "nodeType": fields.String(required=True, description='Node type'),
-    "received": fields.Integer(required=True, description='Received amount')
-})
-
-egonet_response = api.model('address_egonet_response', {
-    'edges': fields.List(fields.Nested(edge_response), required=True, description='List of edges'),
-    'nodes': fields.List(fields.Nested(node_response), required=True, description='List of nodes'),
-    'focusNode': fields.String(required=True, description='Focus node'),
-})
-
-@api.route("/<currency>/address/<address>/egonet")
-class AddressEgonet(Resource):
-    @jwt_required
-    @api.doc(parser=limit_direction_parser)
-    @api.marshal_with(egonet_response)
-    def get(self, currency, address):
-        """
-        Returns a JSON with edges and nodes of the address
-        """
-        direction = request.args.get("direction")
-        if not direction:
-            direction = ""
-
-        limit = request.args.get("limit")
-        if not limit:
-            limit = 50
-        else:
-            limit = int(limit)
-        try:
-            _, incoming = gd.query_address_incoming_relations(
-                currency, None, address, None, int(limit))
-            _, outgoing = gd.query_address_outgoing_relations(
-                currency, None, address, None, int(limit))
-            egoNet = gm.AddressEgoNet(
-                gd.query_address(currency, address),
-                gd.query_address_tags(currency, address),
-                gd.query_implicit_tags(currency, address),
-                incoming,
-                outgoing
-            )
-            ret = egoNet.construct(address, direction)
-        except Exception:
-            ret = {}
-        return ret
 
 neighbor_response = api.model('neighbor_response', {
     "id": fields.String(required=True, description='Node Id'),
