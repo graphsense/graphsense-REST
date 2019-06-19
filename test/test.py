@@ -117,6 +117,7 @@ class FlaskBookshelfTests(unittest.TestCase):
         self.assertEqual(result.status_code, 200)
         # assert the response data
         response = result.json
+        print(response)
         self.assertEqual(response['height'], 10)
         self.assertEqual(len(response['txs']), 1)
 
@@ -143,6 +144,7 @@ class FlaskBookshelfTests(unittest.TestCase):
         result = self.app.get('/btc/tx/%s' % self.txhash, headers=self.headers)
         # assert the status code of the response
         self.assertEqual(result.status_code, 200)
+        print(result.json)
 
     def test_10_search(self):
         #"/<currency>/search"
@@ -192,12 +194,6 @@ class FlaskBookshelfTests(unittest.TestCase):
         # assert the status code of the response
         self.assertEqual(result.status_code, 200)
 
-    def test_18_address_egonet(self):
-        # "/<currency>/address/<address>/egonet"
-        result = self.app.get('/btc/address/%s/egonet' % self.address, headers=self.headers)
-        # assert the status code of the response
-        self.assertEqual(result.status_code, 200)
-
     def test_19_address_neighbours(self):
         #"/<currency>/address/<address>/neighbors"
         result = self.app.get('/btc/address/%s/neighbors?direction=in&pagesize=10&limit=10' % self.address, headers=self.headers)
@@ -234,3 +230,10 @@ class FlaskBookshelfTests(unittest.TestCase):
         # assert the status code of the response
         self.assertEqual(result.status_code, 200)
 
+    def test_25_block_transactions_csv(self):
+        # sends HTTP GET request to the application
+        # "/<currency>/block/<int:height>/transactions"
+        result = self.app.get('/btc/block/10/transactions.csv', headers=self.headers)
+        # assert the status code of the response
+        self.assertEqual(result.status_code, 200)
+        print(str(result.data, result.charset))
