@@ -17,6 +17,7 @@ address_transactions_without_limit_query = {}
 address_tags_query = {}
 address_search_query = {}
 label_search_query = None
+label_query = None
 transaction_search_query = {}
 address_cluster_query = {}
 cluster_tags_query = {}
@@ -122,9 +123,16 @@ def query_address_search(currency, expression):
     return addresses
 
 
-def query_label_search(currency, expression):
+def query_label_search(currency, expression_norm_prefix, expression_norm):
     set_keyspace(session, currency, space='tagpack')
-    labels = session.execute(label_search_query, [expression])
+    labels = session.execute(label_search_query, [expression_norm_prefix, expression_norm])
+    labels._fetch_all()
+    return labels
+
+
+def query_label(currency, label_norm_prefix, label_norm):
+    set_keyspace(session, currency, space='tagpack')
+    labels = session.execute(label_query, [label_norm_prefix, label_norm])
     labels._fetch_all()
     return labels
 
@@ -313,8 +321,6 @@ def set_keyspace(session, currency, space='transformed'):
             session.set_keyspace(currency_mapping[currency][0])
         elif space == 'transformed':
             session.set_keyspace(currency_mapping[currency][1])
-        elif space == 'tagpack':
-            session.set_keyspace(currency_mapping[currency][2])
         else:
             abort(404, "Keyspace %s not allowed" % space)
     else:
@@ -378,7 +384,7 @@ def connect(app):
            cluster_query, cluster_tags_query, currency_mapping, \
            exchange_rate_for_height_query, exchange_rates_query, \
            last_height, session, statistics_query, transaction_search_query, \
-           tx_query, txs_query, label_search_query
+           tx_query, txs_query, label_search_query, label_query
 
     cluster = cassandra.cluster.Cluster(app.config["CASSANDRA_NODES"])
     app.logger.debug("Created new Cassandra cluster.")
@@ -391,7 +397,8 @@ def connect(app):
     session = cluster.connect(currency_mapping[currency][2])
     session.default_fetch_size = 10
     app.logger.debug("Created new Cassandra session.")
-    label_search_query = session.prepare("SELECT label,label_norm FROM tag_by_label WHERE label_norm_prefix = ?")
+    label_search_query = session.prepare("SELECT label,label_norm FROM tag_by_label WHERE label_norm_prefix = ? and label_norm = ?")
+    label_query = session.prepare("SELECT * FROM tag_by_label WHERE label_norm_prefix = ? and label_norm = ?")
     for currency in currency_mapping.keys():
         set_keyspace(session, currency)
         address_query[currency] = session.prepare("SELECT * FROM address WHERE address = ? AND address_prefix = ?")

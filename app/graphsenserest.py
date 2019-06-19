@@ -14,6 +14,9 @@ label_prefix_len = 3
 address_prefix_len = transaction_prefix_len = 5
 pattern = re.compile('[\W_]+', re.UNICODE)  # only alphanumeric chars for label
 
+def alphanumeric_lower(expression):
+    return pattern.sub('', expression).lower()
+
 security = ['basicAuth', 'apiKey']
 authorizations = {
     'basicAuth': {
@@ -407,9 +410,9 @@ class Search(Resource):
 
         # Normalize label
         if len(expression) >= label_prefix_len:  # must be label_prefix_len <= address_prefix_len
-            expression_norm = pattern.sub('', expression).lower()
+            expression_norm = alphanumeric_lower(expression)
             expression_norm_prefix = expression_norm[:label_prefix_len]
-            labels = gd.query_label_search(currency, expression_norm_prefix)
+            labels = gd.query_label_search(currency, expression_norm_prefix, expression_norm)
 
             # Look for labels
             result["labels"] = list(dict.fromkeys(
@@ -995,6 +998,38 @@ class ClusterNeighborsCSV(Resource):
 
         jsonData = [row.toJson() for row in rows]
         return Response(tagsToCSV(jsonData), mimetype='text/csv')
+
+
+label_response = api.model('label_response', {
+    'label': fields.String(required=True, description='Label'),
+    'label_norm': fields.String(required=True, description='Label prefix'),
+    'label_norm_prefix': fields.String(required=True, description='Label prefix normalized'),
+    'address': fields.String(required=True, description='Address'),
+    'source': fields.String(required=True, description='Source'),
+    'tagpack_uri': fields.String(required=True, description='Tagpack URI'),
+    'currency': fields.String(required=True, description='Currency'),
+    'lastmod': fields.String(required=True, description='Last modified'),
+    'category': fields.String(required=False, description='Category')
+})
+
+
+@api.route("/<currency>/label/<label>")
+class Label(Resource):
+    @jwt_required
+    @api.marshal_list_with(label_response)
+    def get(self, currency, label):
+        """
+        Returns a JSON with the details of the label
+        """
+        if not label:
+            abort(404, "Label not provided")
+        label_norm = alphanumeric_lower(label)
+        label_norm_prefix = label_norm[:label_prefix_len]
+        result = gd.query_label(currency, label_norm_prefix, label_norm)
+        if not result:
+            abort(404, "Label not found")
+        return result
+
 
 @app.errorhandler(400)
 def custom400(error):

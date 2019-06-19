@@ -229,7 +229,7 @@ class FlaskBookshelfTests(unittest.TestCase):
         result = self.app.get('/btc/cluster/%s/neighbors?direction=in&pagesize=10&limit=10' % self.clusterId, headers=self.headers)
         # assert the status code of the response
         self.assertEqual(result.status_code, 200)
-        print(result.json)
+#        print(result.json)
 
     def test_25_block_transactions_csv(self):
         # sends HTTP GET request to the application
@@ -237,37 +237,42 @@ class FlaskBookshelfTests(unittest.TestCase):
         result = self.app.get('/btc/block/10/transactions.csv', headers=self.headers)
         # assert the status code of the response
         self.assertEqual(result.status_code, 200)
-        print(str(result.data, result.charset))
+#        print(str(result.data, result.charset))
 
     def test_26_address_tags_csv(self):
         #"/<currency>/address/<address>/tags.csv"
         result = self.app.get('/btc/address/%s/tags.csv' % '1PF9jQserjdws3qWuDpYcTkCcafFgMHhD6', headers=self.headers)
         # assert the status code of the response
         self.assertEqual(result.status_code, 200)
-        print(str(result.data, result.charset))
+#        print(str(result.data, result.charset))
 
     def test_27_cluster_tags_csv(self):
         #"/<currency>/cluster/<address>/tags.csv"
         result = self.app.get('/btc/cluster/%s/tags.csv' % '111857125', headers=self.headers)
         # assert the status code of the response
         self.assertEqual(result.status_code, 200)
-        print(str(result.data, result.charset))
+#        print(str(result.data, result.charset))
 
     def test_28_address_neighbours(self):
         #"/<currency>/address/<address>/neighbors"
         result = self.app.get('/btc/address/%s/neighbors.csv?direction=in&pagesize=100&limit=100' % self.address, headers=self.headers)
         # assert the status code of the response
         self.assertEqual(result.status_code, 200)
-        print(str(result.data, result.charset))
+#        print(str(result.data, result.charset))
 
     def test_29_cluster_neighbours(self):
         # "/<currency>/cluster/<cluster>/neighbors"
         result = self.app.get('/btc/cluster/%s/neighbors.csv?direction=in&pagesize=100&limit=100' % self.clusterId, headers=self.headers)
         # assert the status code of the response
         self.assertEqual(result.status_code, 200)
-        print(str(result.data, result.charset))
+#        print(str(result.data, result.charset))
 
-
+    def test_99_label(self):
+        #"/<currency>/label/<label>"
+        result = self.app.get('/btc/label/%s' % self.label, headers=self.headers)
+        # assert the status code of the response
+        self.assertEqual(result.status_code, 200)
+        print(result.json)
 
 
 
