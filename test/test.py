@@ -9,7 +9,7 @@ class FlaskBookshelfTests(unittest.TestCase):
     clusterId = 59468308
     address = '1Arch17xM2rBqDSLhPKc9WF9hnsuHbUiwB'
     txhash = 'd3ad39fa52a89997ac7381c95eeffeaf40b66af7a57e9eba144be0a175a12b11'
-
+    label = 'clevercoincom'
     headers = {'X-API-KEY': 'mytoken',
                # 'content-type': 'application/json'
                }

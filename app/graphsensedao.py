@@ -124,17 +124,17 @@ def query_address_search(currency, expression):
 
 
 def query_label_search(currency, expression_norm_prefix, expression_norm):
-    set_keyspace(session, currency, space='tagpack')
+    set_keyspace(session, currency, space='tagpacks')
     labels = session.execute(label_search_query, [expression_norm_prefix, expression_norm])
     labels._fetch_all()
     return labels
 
 
 def query_label(currency, label_norm_prefix, label_norm):
-    set_keyspace(session, currency, space='tagpack')
+    set_keyspace(session, currency, space='tagpacks')
     labels = session.execute(label_query, [label_norm_prefix, label_norm])
     labels._fetch_all()
-    return labels
+    return [gm.Label(row).__dict__ for row in labels]
 
 
 def query_address(currency, address):
@@ -321,6 +321,8 @@ def set_keyspace(session, currency, space='transformed'):
             session.set_keyspace(currency_mapping[currency][0])
         elif space == 'transformed':
             session.set_keyspace(currency_mapping[currency][1])
+        elif space == 'tagpacks':
+            session.set_keyspace(currency_mapping[currency][2])
         else:
             abort(404, "Keyspace %s not allowed" % space)
     else:

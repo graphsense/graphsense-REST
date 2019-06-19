@@ -71,6 +71,18 @@ class Tag(object):
         self.sourceUri = row.source_uri
         self.timestamp = row.timestamp
 
+class Label(object):
+    def __init__(self, row):
+        self.label_norm_prefix = row.label_norm_prefix
+        self.label_norm = row.label_norm
+        self.label = row.label
+        self.address = row.address
+        self.source = row.source
+        self.tagpack_uri = row.tagpack_uri
+        self.category = row.category
+        self.currency = row.currency
+        self.lastmod = row.lastmod
+
 
 class Transaction(object):
     def __init__(self, row, rates):
