@@ -16,6 +16,7 @@ address_transactions_query = {}
 address_transactions_without_limit_query = {}
 address_tags_query = {}
 address_search_query = {}
+label_search_query = None
 transaction_search_query = {}
 address_cluster_query = {}
 cluster_tags_query = {}
@@ -50,7 +51,7 @@ def query_exchange_rates(currency, offset, limit):
 
 
 def query_block(currency, height):
-    set_keyspace(session, currency, raw=True)
+    set_keyspace(session, currency, space='raw')
     if height > last_height[currency]:
         abort(404, "Block not available yet")
     result = session.execute(block_query[currency], [height])
@@ -64,7 +65,7 @@ def query_statistics(currency):
 
 
 def query_block_transactions(currency, height):
-    set_keyspace(session, currency, raw=True)
+    set_keyspace(session, currency, space='raw')
     if height > last_height[currency]:
         abort(404, "Block not available yet")
     result = session.execute(block_transactions_query[currency], [height])
@@ -72,7 +73,7 @@ def query_block_transactions(currency, height):
 
 
 def query_blocks(currency, page_state):
-    set_keyspace(session, currency, raw=True)
+    set_keyspace(session, currency, space='raw')
     if page_state is not None:
         page_state = bytes.fromhex(page_state)
         results = session.execute(blocks_query[currency],
@@ -85,7 +86,7 @@ def query_blocks(currency, page_state):
 
 
 def query_transaction(currency, txHash):
-    set_keyspace(session, currency, raw=True)
+    set_keyspace(session, currency, space='raw')
     try:
         rows = session.execute(tx_query[currency], [txHash[0:5], bytearray.fromhex(txHash)])
     except Exception:
@@ -94,7 +95,7 @@ def query_transaction(currency, txHash):
 
 
 def query_transactions(currency, page_state):
-    set_keyspace(session, currency, raw=True)
+    set_keyspace(session, currency, space='raw')
     if page_state is not None:
         page_state = bytes.fromhex(page_state)
         results = session.execute(txs_query[currency], paging_state=page_state)
@@ -107,7 +108,7 @@ def query_transactions(currency, page_state):
 
 
 def query_transaction_search(currency, expression):
-    set_keyspace(session, currency, raw=True)
+    set_keyspace(session, currency, space='raw')
     transactions = session.execute(transaction_search_query[currency],
                                    [expression])
     transactions._fetch_all()
@@ -119,6 +120,13 @@ def query_address_search(currency, expression):
     addresses = session.execute(address_search_query[currency], [expression])
     addresses._fetch_all()
     return addresses
+
+
+def query_label_search(currency, expression):
+    set_keyspace(session, currency, space='tagpack')
+    labels = session.execute(label_search_query, [expression])
+    labels._fetch_all()
+    return labels
 
 
 def query_address(currency, address):
@@ -299,19 +307,23 @@ def query_cluster_outgoing_relations(currency, page_state, cluster, pagesize, li
     return page_state, relations
 
 
-def set_keyspace(session, currency, raw=False):
+def set_keyspace(session, currency, space='transformed'):
     if currency in currency_mapping:
-        if raw:
+        if space == 'raw':
             session.set_keyspace(currency_mapping[currency][0])
-        else:
+        elif space == 'transformed':
             session.set_keyspace(currency_mapping[currency][1])
+        elif space == 'tagpack':
+            session.set_keyspace(currency_mapping[currency][2])
+        else:
+            abort(404, "Keyspace %s not allowed" % space)
     else:
         abort(404, "Currency %s does not exist" % currency)
 
 
 def query_all_exchange_rates(currency, h_max):
     try:
-        set_keyspace(session, currency, raw=True)
+        set_keyspace(session, currency, space='raw')
         session.row_factory = dict_factory
         session.default_fetch_size = None
         print("Loading exchange rates for %s ..." % currency)
@@ -329,7 +341,7 @@ def query_all_exchange_rates(currency, h_max):
 
 
 def query_last_block_height(currency):
-    set_keyspace(session, currency, raw=True)
+    set_keyspace(session, currency, space='raw')
     block_max = 0
     block_inc = 100000
     while True:
@@ -366,7 +378,7 @@ def connect(app):
            cluster_query, cluster_tags_query, currency_mapping, \
            exchange_rate_for_height_query, exchange_rates_query, \
            last_height, session, statistics_query, transaction_search_query, \
-           tx_query, txs_query
+           tx_query, txs_query, label_search_query
 
     cluster = cassandra.cluster.Cluster(app.config["CASSANDRA_NODES"])
     app.logger.debug("Created new Cassandra cluster.")
@@ -376,9 +388,10 @@ def connect(app):
     # prepared statements and specify the keyspace in the query string
     currency_mapping = app.config["MAPPING"]
     currency = list(currency_mapping.keys())[0]  # just to get the session
-    session = cluster.connect(currency_mapping[currency][1])
+    session = cluster.connect(currency_mapping[currency][2])
     session.default_fetch_size = 10
     app.logger.debug("Created new Cassandra session.")
+    label_search_query = session.prepare("SELECT label FROM tag_by_label WHERE label_norm_prefix = ?")
     for currency in currency_mapping.keys():
         set_keyspace(session, currency)
         address_query[currency] = session.prepare("SELECT * FROM address WHERE address = ? AND address_prefix = ?")
@@ -401,7 +414,7 @@ def connect(app):
         cluster_addresses_without_limit_query[currency] = session.prepare("SELECT * FROM cluster_addresses WHERE cluster = ?")
         statistics_query[currency] = session.prepare("SELECT * FROM summary_statistics LIMIT 1")
 
-        set_keyspace(session, currency, raw=True)
+        set_keyspace(session, currency, space='raw')
         tx_query[currency] = session.prepare("SELECT * FROM transaction WHERE tx_prefix = ? AND tx_hash = ?")
         txs_query[currency] = session.prepare("SELECT * FROM transaction LIMIT ?")
         transaction_search_query[currency] = session.prepare("SELECT tx_hash from transaction where tx_prefix = ?")
