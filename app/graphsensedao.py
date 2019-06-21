@@ -314,7 +314,7 @@ def query_cluster_outgoing_relations(currency, page_state, cluster, pagesize, li
     relations = [gm.ClusterOutgoingRelations(row, exchange_rate) for row in rows.current_rows]
     return page_state, relations
 
-def query_cluster_search_category(currency, cluster, isOutgoing, category, ids, breadth, depth):
+def query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids, breadth, depth):
     set_keyspace(session, currency)
     if depth <= 0:
         return []
@@ -344,7 +344,7 @@ def query_cluster_search_category(currency, cluster, isOutgoing, category, ids, 
         if match: 
             subpaths = True
         else:
-            subpaths = query_cluster_search_category(currency, subcluster, isOutgoing, category, ids, breadth, depth - 1)
+            subpaths = query_cluster_search_neighbors(currency, subcluster, isOutgoing, category, ids, breadth, depth - 1)
 
         if not subpaths:
             continue

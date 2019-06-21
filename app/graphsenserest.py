@@ -91,12 +91,12 @@ direction_parser.add_argument('direction', location='args')
 page_parser = api.parser()
 page_parser.add_argument('page', location='args')  # TODO: find right type
 
-search_category_parser = api.parser()
-search_category_parser.add_argument('direction', location='args')
-search_category_parser.add_argument('category', location='args')
-search_category_parser.add_argument('ids', location='args')
-search_category_parser.add_argument('depth', type=int, location='args')
-search_category_parser.add_argument('breadth', type=int, location='args')
+search_neighbors_parser = api.parser()
+search_neighbors_parser.add_argument('direction', location='args')
+search_neighbors_parser.add_argument('category', location='args')
+search_neighbors_parser.add_argument('ids', location='args')
+search_neighbors_parser.add_argument('depth', type=int, location='args')
+search_neighbors_parser.add_argument('breadth', type=int, location='args')
 
 '''
     Methods related to user authentication 
@@ -1096,28 +1096,28 @@ class LabelAddresses(Resource):
         return result
 
 
-def search_category_recursive(depth = 7):
+def search_neighbors_recursive(depth = 7):
     mapping = {
         'node': fields.Nested(cluster_with_tags_response, required=True, description="Node"),
         'relation': fields.Nested(neighbor_response, required=True, description="Relation to parent node")
     }
 
     if depth:
-        mapping['paths'] = fields.List(fields.Nested(search_category_recursive(depth-1), required=True))
+        mapping['paths'] = fields.List(fields.Nested(search_neighbors_recursive(depth-1), required=True))
 
     return mapping
 
 maxdepth = 7
 
-search_category_response = api.model('search_category_response_depth_' + str(maxdepth), {
-        'paths': fields.List(fields.Nested(search_category_recursive(maxdepth), required=True))
+search_neighbors_response = api.model('search_neighbors_response_depth_' + str(maxdepth), {
+        'paths': fields.List(fields.Nested(search_neighbors_recursive(maxdepth), required=True))
     })
 
 @api.route("/<currency>/cluster/<cluster>/search")
-class ClusterSearchCategory(Resource):
+class ClusterSearchNeighbors(Resource):
     @jwt_required
-    @api.doc(parser=search_category_parser)
-    @api.marshal_with(search_category_response)
+    @api.doc(parser=search_neighbors_parser)
+    @api.marshal_with(search_neighbors_response)
     def get(self, currency, cluster):
         try:
             # depth search
@@ -1145,7 +1145,7 @@ class ClusterSearchCategory(Resource):
         if ids:
             ids = ids.split(',')
 
-        result = gd.query_cluster_search_category(currency, cluster, isOutgoing, category, ids, breadth, depth)
+        result = gd.query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids, breadth, depth)
         return {'paths': result}
 
 @app.errorhandler(400)
