@@ -184,7 +184,7 @@ value_response = api.model('value_response  ', {
     'usd': fields.Integer(required=True, description='USD value')
 })
 
-@api.route("/")
+@api.route("/stats")
 class Statistics(Resource):
     @jwt_required
     def get(self):
