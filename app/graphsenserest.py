@@ -413,7 +413,7 @@ class Search(Resource):
             addresses = gd.query_address_search(currency, expression[:address_prefix_len])
 
             result["addresses"] = \
-                [row.address for row in addresses.current_rows if row.address.startswith(expression)][:limit],
+                [row.address for row in addresses.current_rows if row.address.startswith(expression)][:limit]
             result["transactions"] = \
                 [tx for tx in ["0"*leading_zeros + str(hex(int.from_bytes(row.tx_hash, byteorder="big")))[2:]
                                for row in transactions.current_rows] if tx.startswith(expression)][:limit]

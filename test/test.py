@@ -147,10 +147,16 @@ class FlaskBookshelfTests(unittest.TestCase):
 
     def test_10_search(self):
         #"/<currency>/search"
-        result = self.app.get('/btc/search?q=coi', headers=self.headers)
+        response = self.app.get('/btc/search?q=%s' % self.address, headers=self.headers)
         # assert the status code of the response
-        self.assertEqual(result.status_code, 200)
-        print(result.json)
+        self.assertEqual(response.status_code, 200)
+
+        result = response.json
+        self.assertTrue("addresses" in result.keys())
+        self.assertTrue(type(result["addresses"]) is list)
+        self.assertTrue("transactions" in result.keys())
+        self.assertTrue(type(result["transactions"]) is list)
+        print(result)
 
     def test_11_address(self):
         #"/<currency>/address/<address>"
