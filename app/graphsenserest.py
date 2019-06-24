@@ -594,8 +594,7 @@ class AddressWithTags(Resource):
         if not address:
             abort(404, "Address not provided")
 
-        result = gd.query_address(currency, address)
-        result.tags = gd.query_address_tags(currency, address)
+        result = gd.query_address_with_tags(currency, address)
         if not result:
             abort(404, "Address not found")
         return result
@@ -1099,6 +1098,7 @@ class LabelAddresses(Resource):
 def search_neighbors_recursive(depth = 7):
     mapping = {
         'node': fields.Nested(cluster_with_tags_response, required=True, description="Node"),
+        'matchingAddresses': fields.List(fields.Nested(address_with_tags_response, required=True, description="Addresses contained in cluster node that matched the search query (if any)")),
         'relation': fields.Nested(neighbor_response, required=True, description="Relation to parent node")
     }
 
@@ -1141,10 +1141,11 @@ class ClusterSearchNeighbors(Resource):
             abort(400, "invalid direction value - has to be either in or out")
 
         category = request.args.get('category')
-        ids = request.args.get('ids')
+        ids = request.args.get('addresses')
         if ids:
-            ids = ids.split(',')
+            ids = [ {'address' : address, 'cluster' : gd.query_address_cluster_id(currency, address)} for address in ids.split(',')]
 
+        print("ids " + str(ids))
         result = gd.query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids, breadth, depth)
         return {'paths': result}
 
