@@ -193,7 +193,7 @@ class Statistics(Resource):
         """
         statistics = dict()
         for currency in keyspace_mapping.keys():
-            if len(currency.split("_")) == 1:
+            if currency != 'tagpacks':
                 statistics[currency] = gd.query_statistics(currency)
         return statistics
 
