@@ -9,7 +9,7 @@ class FlaskBookshelfTests(unittest.TestCase):
     clusterId = 59468308
     address = '1Arch17xM2rBqDSLhPKc9WF9hnsuHbUiwB'
     txhash = 'd3ad39fa52a89997ac7381c95eeffeaf40b66af7a57e9eba144be0a175a12b11'
-    label = 'clevercoincom'
+    label = 'coinapultcom'
     headers = {'X-API-KEY': 'mytoken',
                # 'content-type': 'application/json'
                }
@@ -22,7 +22,7 @@ class FlaskBookshelfTests(unittest.TestCase):
         app.config.from_object(__name__)
         app.config.update(config)
         app.config.from_envvar("GRAPHSENSE_REST_SETTINGS", silent=True)
-        currency_mapping = app.config["MAPPING"]
+        keyspace_mapping = app.config["MAPPING"]
         gd.connect(app)
         #app.run(port=9000, debug=True, processes=1)
         pass
@@ -147,7 +147,7 @@ class FlaskBookshelfTests(unittest.TestCase):
 
     def test_10_search(self):
         #"/<currency>/search"
-        result = self.app.get('/btc/search?q=btc', headers=self.headers)
+        result = self.app.get('/btc/search?q=coi', headers=self.headers)
         # assert the status code of the response
         self.assertEqual(result.status_code, 200)
         print(result.json)
@@ -267,9 +267,23 @@ class FlaskBookshelfTests(unittest.TestCase):
         self.assertEqual(result.status_code, 200)
 #        print(str(result.data, result.charset))
 
-    def test_99_label(self):
-        #"/<currency>/label/<label>"
-        result = self.app.get('/btc/label/%s' % self.label, headers=self.headers)
+    def test_30_labelsearch(self):
+        #"/labelsearch"
+        result = self.app.get('/labelsearch?q=coi', headers=self.headers)
+        # assert the status code of the response
+        self.assertEqual(result.status_code, 200)
+        print(result.json)
+
+    def test_31_label_addresses(self):
+        #"/label/<label>/addresses"
+        result = self.app.get('/label/%s/addresses' % self.label, headers=self.headers)
+        # assert the status code of the response
+        self.assertEqual(result.status_code, 200)
+        print(result.json)
+
+    def test_32_label(self):
+        #"/label/<label>"
+        result = self.app.get('/label/%s' % self.label, headers=self.headers)
         # assert the status code of the response
         self.assertEqual(result.status_code, 200)
         print(result.json)

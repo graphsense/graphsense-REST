@@ -62,7 +62,7 @@ CORS(app)
 jwt = JWTManager(app)
 db = SQLAlchemy(app)
 
-currency_mapping = app.config["MAPPING"]
+keyspace_mapping = app.config["MAPPING"]
 
 import authmodel
 
@@ -186,7 +186,7 @@ class Statistics(Resource):
         Returns a JSON with statistics of all the available currencies
         """
         statistics = dict()
-        for currency in currency_mapping.keys():
+        for currency in keyspace_mapping.keys():
             if len(currency.split("_")) == 1:
                 statistics[currency] = gd.query_statistics(currency)
         return statistics
@@ -374,7 +374,6 @@ class Transactions(Resource):
 
 
 search_response = api.model('search_response', {
-    'labels': fields.List(fields.String, required=True, description='The list of found labels'),
     'addresses': fields.List(fields.String, required=True, description='The list of found addresses'),
     'transactions': fields.List(fields.String, required=True, description='The list of found transactions')
 })
@@ -406,19 +405,9 @@ class Search(Resource):
             except Exception:
                 abort(404, "Invalid limit value")
 
-        result = {"labels": [], "addresses": [], "transactions": []}
+        result = {"addresses": [], "transactions": []}
 
-        # Normalize label
-        if len(expression) >= label_prefix_len:  # must be label_prefix_len <= address_prefix_len
-            expression_norm = alphanumeric_lower(expression)
-            expression_norm_prefix = expression_norm[:label_prefix_len]
-            labels = gd.query_label_search(currency, expression_norm_prefix, expression_norm)
-
-            # Look for labels
-            result["labels"] = list(dict.fromkeys(
-                [row.label for row in labels.current_rows if row.label_norm.startswith(expression_norm)][:limit]))
-
-        # Look for labels, addresses and transactions
+        # Look addresses and transactions
         if len(expression) >= address_prefix_len:
             transactions = gd.query_transaction_search(currency, expression[:transaction_prefix_len])
             addresses = gd.query_address_search(currency, expression[:address_prefix_len])
@@ -431,6 +420,52 @@ class Search(Resource):
 
         return result
 
+
+label_search_response = api.model('label_search_response', {
+    'labels': fields.List(fields.String, required=True, description='The list of found labels'),
+})
+
+
+@api.route("/labelsearch")
+class LabelSearch(Resource):
+    @jwt_required
+    @api.doc(parser=limit_query_parser)
+    @api.marshal_with(label_search_response)
+    def get(self):
+        """
+        Returns a JSON with a list of matching addresses and a list of matching transactions
+        """
+        expression = request.args.get("q")
+        if not expression:
+            abort(404, "Expression parameter not provided")
+        leading_zeros = 0
+        pos = 0
+        # leading zeros will be lost when casting to int
+        while expression[pos] == "0":
+            pos += 1
+            leading_zeros += 1
+        limit = request.args.get("limit")
+        if not limit:
+            limit = 50
+        else:
+            try:
+                limit = int(limit)
+            except Exception:
+                abort(404, "Invalid limit value")
+
+        result = {"labels": []}
+
+        # Normalize label
+        if len(expression) >= label_prefix_len:  # must be label_prefix_len <= address_prefix_len
+            expression_norm = alphanumeric_lower(expression)
+            expression_norm_prefix = expression_norm[:label_prefix_len]
+            labels = gd.query_label_search(expression_norm_prefix)
+
+            # Look for labels
+            result["labels"] = list(dict.fromkeys(
+                [row.label for row in labels.current_rows if row.label_norm.startswith(expression_norm)][:limit]))
+
+        return result
 
 tx_response = api.model('tx_response', {
     'height': fields.Integer(required=True, description='Transaction height'),
@@ -1000,7 +1035,32 @@ class ClusterNeighborsCSV(Resource):
         return Response(tagsToCSV(jsonData), mimetype='text/csv')
 
 
+
 label_response = api.model('label_response', {
+    'label': fields.String(required=True, description='Label'),
+    'address_count': fields.Integer(required=True, description='Number of addresses for the label'),
+})
+
+@api.route("/label/<label>")
+class Label(Resource):
+    @jwt_required
+    @api.marshal_with(label_response)
+    def get(self, label):
+        """
+        Returns a JSON with the details of the label
+        """
+        if not label:
+            abort(404, "Label not provided")
+        label_norm = alphanumeric_lower(label)
+        label_norm_prefix = label_norm[:label_prefix_len]
+        result = gd.query_label(label_norm_prefix, label_norm)
+        if not result:
+            abort(404, "Label not found")
+
+        return {'label': label, 'address_count': len(result)}
+
+
+label_addresses_response = api.model('label_response', {
     'label': fields.String(required=True, description='Label'),
     'label_norm': fields.String(required=True, description='Label prefix'),
     'label_norm_prefix': fields.String(required=True, description='Label prefix normalized'),
@@ -1012,12 +1072,11 @@ label_response = api.model('label_response', {
     'category': fields.String(required=False, description='Category')
 })
 
-
-@api.route("/<currency>/label/<label>")
-class Label(Resource):
+@api.route("/label/<label>/addresses")
+class LabelAddresses(Resource):
     @jwt_required
-    @api.marshal_list_with(label_response)
-    def get(self, currency, label):
+    @api.marshal_list_with(label_addresses_response)
+    def get(self, label):
         """
         Returns a JSON with the details of the label
         """
@@ -1025,7 +1084,7 @@ class Label(Resource):
             abort(404, "Label not provided")
         label_norm = alphanumeric_lower(label)
         label_norm_prefix = label_norm[:label_prefix_len]
-        result = gd.query_label(currency, label_norm_prefix, label_norm)
+        result = gd.query_label(label_norm_prefix, label_norm)
         if not result:
             abort(404, "Label not found")
         return result

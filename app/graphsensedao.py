@@ -34,7 +34,7 @@ cluster_addresses_query = {}
 cluster_addresses_without_limit_query = {}
 block_height_query = {}
 statistics_query = {}
-currency_mapping = {}
+keyspace_mapping = {}
 all_exchange_rates = {}
 last_height = {}
 
@@ -123,15 +123,15 @@ def query_address_search(currency, expression):
     return addresses
 
 
-def query_label_search(currency, expression_norm_prefix, expression_norm):
-    set_keyspace(session, currency, space='tagpacks')
-    labels = session.execute(label_search_query, [expression_norm_prefix, expression_norm])
+def query_label_search(expression_norm_prefix):
+    set_keyspace(session, "", space='tagpacks')
+    labels = session.execute(label_search_query, [expression_norm_prefix])
     labels._fetch_all()
     return labels
 
 
-def query_label(currency, label_norm_prefix, label_norm):
-    set_keyspace(session, currency, space='tagpacks')
+def query_label(label_norm_prefix, label_norm):
+    set_keyspace(session, "", space='tagpacks')
     labels = session.execute(label_query, [label_norm_prefix, label_norm])
     labels._fetch_all()
     return [gm.Label(row).__dict__ for row in labels]
@@ -315,14 +315,16 @@ def query_cluster_outgoing_relations(currency, page_state, cluster, pagesize, li
     return page_state, relations
 
 
-def set_keyspace(session, currency, space='transformed'):
-    if currency in currency_mapping:
+def set_keyspace(session, currency=None, space='transformed'):
+    if space == 'tagpacks':
+        session.set_keyspace(keyspace_mapping['tagpacks'])
+        return
+
+    if currency in keyspace_mapping:
         if space == 'raw':
-            session.set_keyspace(currency_mapping[currency][0])
+            session.set_keyspace(keyspace_mapping[currency][0])
         elif space == 'transformed':
-            session.set_keyspace(currency_mapping[currency][1])
-        elif space == 'tagpacks':
-            session.set_keyspace(currency_mapping[currency][2])
+            session.set_keyspace(keyspace_mapping[currency][1])
         else:
             abort(404, "Keyspace %s not allowed" % space)
     else:
@@ -383,7 +385,7 @@ def connect(app):
            blocks_query, cluster_addresses_query, \
            cluster_incoming_relations_query, \
            cluster_outgoing_relations_query, \
-           cluster_query, cluster_tags_query, currency_mapping, \
+           cluster_query, cluster_tags_query, keyspace_mapping, \
            exchange_rate_for_height_query, exchange_rates_query, \
            last_height, session, statistics_query, transaction_search_query, \
            tx_query, txs_query, label_search_query, label_query
@@ -394,48 +396,50 @@ def connect(app):
     # set the first keyspace in mapping to the default in order to be able to
     # create the prepared statements; alternative strategy is to not use
     # prepared statements and specify the keyspace in the query string
-    currency_mapping = app.config["MAPPING"]
-    currency = list(currency_mapping.keys())[0]  # just to get the session
-    session = cluster.connect(currency_mapping[currency][2])
+    keyspace_mapping = app.config["MAPPING"]
+    keyspace_name = list(keyspace_mapping.keys())[0]  # just to get the session
+    session = cluster.connect(keyspace_mapping[keyspace_name])
     session.default_fetch_size = 10
     app.logger.debug("Created new Cassandra session.")
-    label_search_query = session.prepare("SELECT label,label_norm FROM tag_by_label WHERE label_norm_prefix = ? and label_norm = ?")
+    label_search_query = session.prepare("SELECT label,label_norm FROM tag_by_label WHERE label_norm_prefix = ?")
     label_query = session.prepare("SELECT * FROM tag_by_label WHERE label_norm_prefix = ? and label_norm = ?")
-    for currency in currency_mapping.keys():
-        set_keyspace(session, currency)
-        address_query[currency] = session.prepare("SELECT * FROM address WHERE address = ? AND address_prefix = ?")
-        address_search_query[currency] = session.prepare("SELECT address FROM address WHERE address_prefix = ?")
-        address_transactions_query[currency] = session.prepare("SELECT * FROM address_transactions WHERE address = ? AND address_prefix = ? LIMIT ?")
-        address_transactions_without_limit_query[currency] = session.prepare("SELECT * FROM address_transactions WHERE address = ? AND address_prefix = ?")
-        address_tags_query[currency] = session.prepare("SELECT * FROM address_tags WHERE address = ?")
-        address_cluster_query[currency] = session.prepare("SELECT cluster FROM address_cluster WHERE address = ? AND address_prefix = ?")
-        address_incoming_relations_query[currency] = session.prepare("SELECT * FROM address_incoming_relations WHERE dst_address_prefix = ? AND dst_address = ? LIMIT ?")
-        address_incoming_relations_without_limit_query[currency] = session.prepare("SELECT * FROM address_incoming_relations WHERE dst_address_prefix = ? AND dst_address = ?")
-        address_outgoing_relations_query[currency] = session.prepare("SELECT * FROM address_outgoing_relations WHERE src_address_prefix = ? AND src_address = ? LIMIT ?")
-        address_outgoing_relations_without_limit_query[currency] = session.prepare("SELECT * FROM address_outgoing_relations WHERE src_address_prefix = ? AND src_address = ?")
-        cluster_incoming_relations_query[currency] = session.prepare("SELECT * FROM cluster_incoming_relations WHERE dst_cluster = ? LIMIT ?")
-        cluster_incoming_relations_without_limit_query[currency] = session.prepare("SELECT * FROM cluster_incoming_relations WHERE dst_cluster = ?")
-        cluster_outgoing_relations_query[currency] = session.prepare("SELECT * FROM cluster_outgoing_relations WHERE src_cluster = ? LIMIT ?")
-        cluster_outgoing_relations_without_limit_query[currency] = session.prepare("SELECT * FROM cluster_outgoing_relations WHERE src_cluster = ?")
-        cluster_tags_query[currency] = session.prepare("SELECT * FROM cluster_tags WHERE cluster = ?")
-        cluster_query[currency] = session.prepare("SELECT * FROM cluster WHERE cluster = ?")
-        cluster_addresses_query[currency] = session.prepare("SELECT * FROM cluster_addresses WHERE cluster = ? LIMIT ?")
-        cluster_addresses_without_limit_query[currency] = session.prepare("SELECT * FROM cluster_addresses WHERE cluster = ?")
-        statistics_query[currency] = session.prepare("SELECT * FROM summary_statistics LIMIT 1")
+    for keyspace_name in keyspace_mapping.keys():
+        if keyspace_name == 'tagpacks':
+            continue
+        set_keyspace(session, keyspace_name)
+        address_query[keyspace_name] = session.prepare("SELECT * FROM address WHERE address = ? AND address_prefix = ?")
+        address_search_query[keyspace_name] = session.prepare("SELECT address FROM address WHERE address_prefix = ?")
+        address_transactions_query[keyspace_name] = session.prepare("SELECT * FROM address_transactions WHERE address = ? AND address_prefix = ? LIMIT ?")
+        address_transactions_without_limit_query[keyspace_name] = session.prepare("SELECT * FROM address_transactions WHERE address = ? AND address_prefix = ?")
+        address_tags_query[keyspace_name] = session.prepare("SELECT * FROM address_tags WHERE address = ?")
+        address_cluster_query[keyspace_name] = session.prepare("SELECT cluster FROM address_cluster WHERE address = ? AND address_prefix = ?")
+        address_incoming_relations_query[keyspace_name] = session.prepare("SELECT * FROM address_incoming_relations WHERE dst_address_prefix = ? AND dst_address = ? LIMIT ?")
+        address_incoming_relations_without_limit_query[keyspace_name] = session.prepare("SELECT * FROM address_incoming_relations WHERE dst_address_prefix = ? AND dst_address = ?")
+        address_outgoing_relations_query[keyspace_name] = session.prepare("SELECT * FROM address_outgoing_relations WHERE src_address_prefix = ? AND src_address = ? LIMIT ?")
+        address_outgoing_relations_without_limit_query[keyspace_name] = session.prepare("SELECT * FROM address_outgoing_relations WHERE src_address_prefix = ? AND src_address = ?")
+        cluster_incoming_relations_query[keyspace_name] = session.prepare("SELECT * FROM cluster_incoming_relations WHERE dst_cluster = ? LIMIT ?")
+        cluster_incoming_relations_without_limit_query[keyspace_name] = session.prepare("SELECT * FROM cluster_incoming_relations WHERE dst_cluster = ?")
+        cluster_outgoing_relations_query[keyspace_name] = session.prepare("SELECT * FROM cluster_outgoing_relations WHERE src_cluster = ? LIMIT ?")
+        cluster_outgoing_relations_without_limit_query[keyspace_name] = session.prepare("SELECT * FROM cluster_outgoing_relations WHERE src_cluster = ?")
+        cluster_tags_query[keyspace_name] = session.prepare("SELECT * FROM cluster_tags WHERE cluster = ?")
+        cluster_query[keyspace_name] = session.prepare("SELECT * FROM cluster WHERE cluster = ?")
+        cluster_addresses_query[keyspace_name] = session.prepare("SELECT * FROM cluster_addresses WHERE cluster = ? LIMIT ?")
+        cluster_addresses_without_limit_query[keyspace_name] = session.prepare("SELECT * FROM cluster_addresses WHERE cluster = ?")
+        statistics_query[keyspace_name] = session.prepare("SELECT * FROM summary_statistics LIMIT 1")
 
-        set_keyspace(session, currency, space='raw')
-        tx_query[currency] = session.prepare("SELECT * FROM transaction WHERE tx_prefix = ? AND tx_hash = ?")
-        txs_query[currency] = session.prepare("SELECT * FROM transaction LIMIT ?")
-        transaction_search_query[currency] = session.prepare("SELECT tx_hash from transaction where tx_prefix = ?")
-        block_transactions_query[currency] = session.prepare("SELECT * FROM block_transactions WHERE height = ?")
-        block_query[currency] = session.prepare("SELECT * FROM block WHERE height = ?")
-        blocks_query[currency] = session.prepare("SELECT * FROM block LIMIT ?")
-        exchange_rates_query[currency] = session.prepare("SELECT * FROM exchange_rates LIMIT ?")
-        exchange_rate_for_height_query[currency] = session.prepare("SELECT * FROM exchange_rates WHERE height = ?")
-        block_height_query[currency] = session.prepare("SELECT height FROM exchange_rates WHERE height = ?")
+        set_keyspace(session, keyspace_name, space='raw')
+        tx_query[keyspace_name] = session.prepare("SELECT * FROM transaction WHERE tx_prefix = ? AND tx_hash = ?")
+        txs_query[keyspace_name] = session.prepare("SELECT * FROM transaction LIMIT ?")
+        transaction_search_query[keyspace_name] = session.prepare("SELECT tx_hash from transaction where tx_prefix = ?")
+        block_transactions_query[keyspace_name] = session.prepare("SELECT * FROM block_transactions WHERE height = ?")
+        block_query[keyspace_name] = session.prepare("SELECT * FROM block WHERE height = ?")
+        blocks_query[keyspace_name] = session.prepare("SELECT * FROM block LIMIT ?")
+        exchange_rates_query[keyspace_name] = session.prepare("SELECT * FROM exchange_rates LIMIT ?")
+        exchange_rate_for_height_query[keyspace_name] = session.prepare("SELECT * FROM exchange_rates WHERE height = ?")
+        block_height_query[keyspace_name] = session.prepare("SELECT height FROM exchange_rates WHERE height = ?")
 
-        last_height[currency] = query_last_block_height(currency)
-        all_exchange_rates[currency] = query_all_exchange_rates(currency,
-                                                                last_height[currency])
+        last_height[keyspace_name] = query_last_block_height(keyspace_name)
+        all_exchange_rates[keyspace_name] = query_all_exchange_rates(keyspace_name,
+                                                                last_height[keyspace_name])
 
     app.logger.debug("Created prepared statements")
