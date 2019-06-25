@@ -63,13 +63,10 @@ class Statistics(object):
 class Tag(object):
     def __init__(self, row):
         self.address = row.address
-        self.tag = row.tag
-        self.tagUri = row.tag_uri
-        self.description = row.description
-        self.actorCategory = row.actor_category
+        self.tag = row.label
+        self.actorCategory = row.category
         self.source = row.source
-        self.sourceUri = row.source_uri
-        self.timestamp = row.timestamp
+        self.timestamp = row.lastmod
 
 class Label(object):
     def __init__(self, row):

@@ -46,19 +46,19 @@ with open("./config.json", "r") as fp:
     config = json.load(fp)
 app.config.update(config)
 
-app.config['SECRET_KEY'] = 'some-secret-string'
+app.config['SECRET_KEY'] = app.config.get('SECRET_KEY') or 'some-secret-string'
 app.config['SWAGGER_UI_JSONEDITOR'] = True
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = app.config.get('SQLALCHEMY_DATABASE_URI') or 'sqlite:////var/lib/graphsense-rest/users.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_TOKEN_LOCATION'] = 'headers'
-app.config['JWT_SECRET_KEY'] = 'jwt-secret-string'
+app.config['JWT_SECRET_KEY'] = app.config.get('JWT_SECRET_KEY') or 'jwt-secret-string'
 app.config['JWT_BLACKLIST_ENABLED'] = True
 app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
 app.config['PROPAGATE_EXCEPTIONS'] = True
 
 app.config.from_envvar("GRAPHSENSE_REST_SETTINGS", silent=True)
 
-CORS(app)
+CORS(app, supports_credentials=True)
 jwt = JWTManager(app)
 db = SQLAlchemy(app)
 
@@ -91,6 +91,12 @@ direction_parser.add_argument('direction', location='args')
 page_parser = api.parser()
 page_parser.add_argument('page', location='args')  # TODO: find right type
 
+search_neighbors_parser = api.parser()
+search_neighbors_parser.add_argument('direction', location='args')
+search_neighbors_parser.add_argument('category', location='args')
+search_neighbors_parser.add_argument('ids', location='args')
+search_neighbors_parser.add_argument('depth', type=int, location='args')
+search_neighbors_parser.add_argument('breadth', type=int, location='args')
 
 '''
     Methods related to user authentication 
@@ -178,7 +184,7 @@ value_response = api.model('value_response  ', {
     'usd': fields.Integer(required=True, description='USD value')
 })
 
-@api.route("/")
+@api.route("/stats")
 class Statistics(Resource):
     @jwt_required
     def get(self):
@@ -187,7 +193,7 @@ class Statistics(Resource):
         """
         statistics = dict()
         for currency in keyspace_mapping.keys():
-            if len(currency.split("_")) == 1:
+            if currency != 'tagpacks':
                 statistics[currency] = gd.query_statistics(currency)
         return statistics
 
@@ -591,8 +597,7 @@ class AddressWithTags(Resource):
         if not address:
             abort(404, "Address not provided")
 
-        result = gd.query_address(currency, address)
-        result.tags = gd.query_address_tags(currency, address)
+        result = gd.query_address_with_tags(currency, address)
         if not result:
             abort(404, "Address not found")
         return result
@@ -1116,6 +1121,60 @@ class LabelAddresses(Resource):
             abort(404, "Label not found")
         return result
 
+
+def search_neighbors_recursive(depth = 7):
+    mapping = {
+        'node': fields.Nested(cluster_with_tags_response, required=True, description="Node"),
+        'matchingAddresses': fields.List(fields.Nested(address_with_tags_response, required=True, description="Addresses contained in cluster node that matched the search query (if any)")),
+        'relation': fields.Nested(neighbor_response, required=True, description="Relation to parent node")
+    }
+
+    if depth:
+        mapping['paths'] = fields.List(fields.Nested(search_neighbors_recursive(depth-1), required=True))
+
+    return mapping
+
+maxdepth = 7
+
+search_neighbors_response = api.model('search_neighbors_response_depth_' + str(maxdepth), {
+        'paths': fields.List(fields.Nested(search_neighbors_recursive(maxdepth), required=True))
+    })
+
+@api.route("/<currency>/cluster/<cluster>/search")
+class ClusterSearchNeighbors(Resource):
+    @jwt_required
+    @api.doc(parser=search_neighbors_parser)
+    @api.marshal_with(search_neighbors_response)
+    def get(self, currency, cluster):
+        try:
+            # depth search
+            depth = int(request.args.get("depth") or 1)
+            # breadth search
+            breadth = int(request.args.get("breadth") or 16)
+        except:
+            abort(400, "Invalid depth or breadth")
+
+        if depth > maxdepth:
+            abort(400, "Depth must not exceed " + str(maxdepth))
+
+        direction = request.args.get("direction")
+        if not direction:
+            abort(400, "direction value missing")
+        if "in" in direction:
+            isOutgoing = False
+        elif "out" in direction:
+            isOutgoing = True
+        else:
+            abort(400, "invalid direction value - has to be either in or out")
+
+        category = request.args.get('category')
+        ids = request.args.get('addresses')
+        if ids:
+            ids = [ {'address' : address, 'cluster' : gd.query_address_cluster_id(currency, address)} for address in ids.split(',')]
+
+        print("ids " + str(ids))
+        result = gd.query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids, breadth, depth)
+        return {'paths': result}
 
 @app.errorhandler(400)
 def custom400(error):

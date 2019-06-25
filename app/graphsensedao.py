@@ -143,15 +143,20 @@ def query_address(currency, address):
 
 def query_address_cluster(currency, address):
     set_keyspace(session, currency)
-    clusterids = session.execute(address_cluster_query[currency],
-                                 [address, address[0:5]])
+    clusterid = query_address_cluster_id(currency, address)
     ret = {}
-    if clusterids:
-        clusterid = clusterids[0].cluster
+    if clusterid:
         cluster_obj = query_cluster(currency, clusterid)
         ret = cluster_obj.__dict__
     return ret
 
+def query_address_cluster_id(currency, address):
+    set_keyspace(session, currency)
+    clusterids = session.execute(address_cluster_query[currency],
+                                 [address, address[0:5]])
+    if clusterids:
+        return clusterids[0].cluster
+    return None
 
 def query_address_transactions(currency, page_state, address, pagesize, limit):
     set_keyspace(session, currency)
@@ -180,6 +185,10 @@ def query_address_tags(currency, address):
     tags = session.execute(address_tags_query[currency], [address])
     return [gm.Tag(row).__dict__ for row in tags]
 
+def query_address_with_tags(currency, address):
+    result = query_address(currency, address)
+    result.tags = query_address_tags(currency, address)
+    return result
 
 def query_implicit_tags(currency, address):
     set_keyspace(session, currency)
@@ -321,6 +330,52 @@ def query_cluster_outgoing_relations(currency, page_state, cluster, pagesize, li
     relations = [gm.ClusterOutgoingRelations(row, exchange_rate) for row in rows.current_rows]
     return page_state, relations
 
+def query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids, breadth, depth):
+    set_keyspace(session, currency)
+    if depth <= 0:
+        return []
+
+
+    if isOutgoing:
+        (_, rows) = query_cluster_outgoing_relations(currency, None, cluster, breadth, breadth)
+    else:
+        (_, rows) = query_cluster_incoming_relations(currency, None, cluster, breadth, breadth)
+
+    paths = []
+
+    for row in rows:
+        subcluster = row.dstCluster if isOutgoing else row.srcCluster 
+        if not subcluster.isdigit(): 
+            continue
+        match = True
+        tags = query_cluster_tags(currency, subcluster)
+
+        if category != None:
+            # find first occurence of category in tags
+            match = next((True for t in tags if t['actorCategory'] == category), False)
+
+        matchingAddresses = []
+        if match and ids != None:
+            matchingAddresses = [id['address'] for id in ids if str(id['cluster']) == str(subcluster)]
+            match = len(matchingAddresses) > 0
+
+        if match: 
+            subpaths = True
+        else:
+            subpaths = query_cluster_search_neighbors(currency, subcluster, isOutgoing, category, ids, breadth, depth - 1)
+
+        if not subpaths:
+            continue
+        props = query_cluster(currency, subcluster).__dict__
+        props['tags'] = tags
+        obj = {'node': props, 'relation': row.toJson(), 'matchingAddresses': []}
+        if subpaths == True:
+            addresses_with_tags = [ query_address_with_tags(currency, address) for address in matchingAddresses ]
+            obj['matchingAddresses'] = [ address for address in addresses_with_tags if address is not None ]
+            subpaths = None
+        obj['paths'] = subpaths
+        paths.append(obj)
+    return paths
 
 def set_keyspace(session, currency=None, space='transformed'):
     if space == 'tagpacks':
