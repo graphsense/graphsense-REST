@@ -75,10 +75,8 @@ def query_block_transactions(currency, height):
 
 def query_blocks(currency, page_state):
     set_keyspace(session, currency, space='raw')
-    if page_state is not None:
-        page_state = bytes.fromhex(page_state)
-        results = session.execute(blocks_query[currency],
-                                  paging_state=page_state)
+    if page_state:
+        results = session.execute(blocks_query[currency], paging_state=page_state)
     else:
         results = session.execute(blocks_query[currency], [10])
     page_state = results.paging_state
@@ -97,11 +95,11 @@ def query_transaction(currency, txHash):
 
 def query_transactions(currency, page_state):
     set_keyspace(session, currency, space='raw')
-    if page_state is not None:
-        page_state = bytes.fromhex(page_state)
+    if page_state:
         results = session.execute(txs_query[currency], paging_state=page_state)
     else:
         results = session.execute(txs_query[currency], [10])
+
     page_state = results.paging_state
     transactions = [gm.Transaction(row, query_exchange_rate_for_height(currency, row.height)).__dict__
                     for row in results]
@@ -165,13 +163,14 @@ def query_address_transactions(currency, page_state, address, pagesize, limit):
         query = address_transactions_query
         params = [address, address[0:5], limit]
 
-    if pagesize is not None:
+    if pagesize:
         query[currency].fetch_size = pagesize
-    if page_state is not None:
-        page_state = bytes.fromhex(page_state)
+
+    if page_state:
         rows = session.execute(query[currency], params, paging_state=page_state)
     else:
         rows = session.execute(query[currency], params)
+
     page_state = rows.paging_state
     return page_state, [row for row in rows.current_rows]
 
@@ -201,13 +200,15 @@ def query_address_incoming_relations(currency, page_state, address, pagesize, li
     else:
         query = address_incoming_relations_query
         params = [address[0:5], address, limit]
-    if pagesize is not None:
+
+    if pagesize:
         query[currency].fetch_size = pagesize
-    if page_state is not None:
-        page_state = bytes.fromhex(page_state)
+
+    if page_state:
         rows = session.execute(query[currency], params, paging_state=page_state)
     else:
         rows = session.execute(query[currency], params)
+
     page_state = rows.paging_state
     exchange_rate = gm.ExchangeRate(all_exchange_rates[currency][last_height[currency]])
     relations = [gm.AddressIncomingRelations(row, exchange_rate)
@@ -223,13 +224,15 @@ def query_address_outgoing_relations(currency, page_state, address, pagesize, li
     else:
         query = address_outgoing_relations_query
         params = [address[0:5], address, limit]
+
     if pagesize is not None:
         query[currency].fetch_size = pagesize
+
     if page_state is not None:
-        page_state = bytes.fromhex(page_state)
         rows = session.execute(query[currency], params, paging_state=page_state)
     else:
         rows = session.execute(query[currency], params)
+
     page_state = rows.paging_state
     exchange_rate = gm.ExchangeRate(all_exchange_rates[currency][last_height[currency]])
     relations = [gm.AddressOutgoingRelations(row, exchange_rate)
@@ -262,11 +265,12 @@ def query_cluster_addresses(currency, cluster, page, pagesize, limit):
 
     if pagesize is not None:
         query[currency].fetch_size = pagesize
-    if page is not None:
-        page = bytes.fromhex(page)
+
+    if page:
         rows = session.execute(query[currency], params, paging_state=page)
     else:
         rows = session.execute(query[currency], params)
+
     clusteraddresses = [gm.ClusterAddresses(row, gm.ExchangeRate(all_exchange_rates[currency][last_height[currency]])).__dict__
                         for row in rows.current_rows]
     page = rows.paging_state
@@ -281,13 +285,15 @@ def query_cluster_incoming_relations(currency, page_state, cluster, pagesize, li
     else:
         query = cluster_incoming_relations_query
         params = [cluster, limit]
-    if pagesize is not None:
+
+    if pagesize:
         query[currency].fetch_size = pagesize
-    if page_state is not None:
-        page_state = bytes.fromhex(page_state)
+
+    if page_state:
         rows = session.execute(query[currency], params, paging_state=page_state)
     else:
         rows = session.execute(query[currency], params)
+
     page_state = rows.paging_state
     exchange_rate = gm.ExchangeRate(all_exchange_rates[currency][last_height[currency]])
     relations = [gm.ClusterIncomingRelations(row, exchange_rate) for row in rows.current_rows]
@@ -302,10 +308,11 @@ def query_cluster_outgoing_relations(currency, page_state, cluster, pagesize, li
     else:
         query = cluster_outgoing_relations_query
         params = [cluster, limit]
-    if pagesize is not None:
+
+    if pagesize:
         query[currency].fetch_size = pagesize
-    if page_state is not None:
-        page_state = bytes.fromhex(page_state)
+
+    if page_state:
         rows = session.execute(query[currency], params, paging_state=page_state)
     else:
         rows = session.execute(query[currency], params)

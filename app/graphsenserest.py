@@ -256,9 +256,10 @@ class Blocks(Resource):
         """
         Returns a JSON with 10 blocks per page
         """
-        page_state = request.args.get("page")
+        page = request.args.get("page")
+        page_state = bytes.fromhex(page) if page else None
         (page_state, blocks) = gd.query_blocks(currency, page_state)
-        return {"nextPage": page_state.hex() if page_state is not None else None, "blocks": blocks}
+        return {"nextPage": page_state.hex() if page_state else None, "blocks": blocks}
 
 
 block_transaction_response = api.model('block_transaction_response', {
@@ -365,10 +366,12 @@ class Transactions(Resource):
         """
         Returns a JSON with the details of 10 transactions per page
         """
-        page_state = request.args.get("page")
+        page = request.args.get("page")
+        page_state = bytes.fromhex(page) if page else None
+
         (page_state, transactions) = gd.query_transactions(currency, page_state)
         return {
-            "nextPage": page_state.hex() if page_state is not None else None,
+            "nextPage": page_state.hex() if page_state else None,
             "transactions": transactions
         }
 
@@ -635,15 +638,16 @@ class AddressTransactions(Resource):
             except Exception:
                 abort(404, "Invalid pagesize value")
 
-        page_state = request.args.get("page")
-        (page_state, rows) = gd.query_address_transactions(
-            currency, page_state, address, pagesize, limit)
+        page = request.args.get("page")
+        page_state = bytes.fromhex(page) if page else None
+
+        (page_state, rows) = gd.query_address_transactions(currency, page_state, address, pagesize, limit)
         txs = [gm.AddressTransactions(
                    row, gd.query_exchange_rate_for_height(currency, row.height)
                ).__dict__
                for row in rows]
         return {
-            "nextPage": page_state.hex() if page_state is not None else None,
+            "nextPage": page_state.hex() if page_state else None,
             "transactions": txs
         }
 
@@ -770,15 +774,42 @@ class AddressNeighbors(Resource):
                 pagesize = int(pagesize)
             except Exception:
                 abort(404, "Invalid pagesize value")
-        page_state = request.args.get("page")
+
+        page = request.args.get("page")
+        page_state = bytes.fromhex(page) if page else None
+
         if isOutgoing:
-            (page_state, rows) = gd.query_address_outgoing_relations(
-                currency, page_state, address, pagesize, limit)
+            (page_state, rows) = gd.query_address_outgoing_relations(currency, page_state, address, pagesize, limit)
         else:
-            (page_state, rows) = gd.query_address_incoming_relations(
-                currency, page_state, address, pagesize, limit)
-        return {"nextPage": page_state.hex() if page_state is not None else None,
+            (page_state, rows) = gd.query_address_incoming_relations(currency, page_state, address, pagesize, limit)
+        return {"nextPage": page_state.hex() if page_state else None,
                 "neighbors": [row.toJson() for row in rows]}
+
+
+def neighboursToCSV(query_function, currency, cluster, pagesize, limit, page_state = None):
+    fieldnames = []
+    flatDict = {}
+    while True:
+        (page_state, rows) = query_function(currency, page_state, cluster, pagesize, limit)
+
+        def flatten(item, name=''):
+            if type(item) is dict:
+                for sub_item in item:
+                    flatten(item[sub_item], name + sub_item + '_')
+            else:
+                flatDict[name[:-1]] = item
+
+        for row in rows:
+            #for item in row.toJson():
+            flatten(row.toJson())
+            if not fieldnames:
+                fieldnames = ','.join(flatDict.keys())
+                yield (fieldnames + '\n')
+            yield (','.join([str(item) for item in flatDict.values()]) + '\n')
+            flatDict = {}
+
+        if not page_state:
+            break
 
 @api.route("/<currency>/address/<address>/neighbors.csv")
 class AddressNeighborsCSV(Resource):
@@ -811,15 +842,13 @@ class AddressNeighborsCSV(Resource):
                 pagesize = int(pagesize)
             except Exception:
                 abort(404, "Invalid pagesize value")
-        page_state = request.args.get("page")
+
         if isOutgoing:
-            (page_state, rows) = gd.query_address_outgoing_relations(
-                currency, page_state, address, pagesize, limit)
+            query_function = gd.query_address_outgoing_relations
         else:
-            (page_state, rows) = gd.query_address_incoming_relations(
-                currency, page_state, address, pagesize, limit)
-        jsonData = [row.toJson() for row in rows]
-        return Response(tagsToCSV(jsonData), mimetype='text/csv')
+            query_function = gd.query_address_incoming_relations
+
+        return Response(neighboursToCSV(query_function, currency, address, pagesize, limit), mimetype='text/csv')
 
 @api.route("/<currency>/cluster/<cluster>")
 class Cluster(Resource):
@@ -981,16 +1010,18 @@ class ClusterNeighbors(Resource):
                 pagesize = int(pagesize)
             except Exception:
                 abort(404, "Invalid pagesize value")
-        page_state = request.args.get("page")
-        if isOutgoing:
-            (page_state, rows) = gd.query_cluster_outgoing_relations(
-                currency, page_state, cluster, pagesize, limit)
-        else:
-            (page_state, rows) = gd.query_cluster_incoming_relations(
-                currency, page_state, cluster, pagesize, limit)
 
-        return {"nextPage": page_state.hex() if page_state is not None else None,
+        page = request.args.get("page")
+        page_state = bytes.fromhex(page) if page else None
+
+        if isOutgoing:
+            (page_state, rows) = gd.query_cluster_outgoing_relations(currency, page_state, cluster, pagesize, limit)
+        else:
+            (page_state, rows) = gd.query_cluster_incoming_relations(currency, page_state, cluster, pagesize, limit)
+
+        return {"nextPage": page_state.hex() if page_state else None,
                 "neighbors": [row.toJson() for row in rows]}
+
 
 @api.route("/<currency>/cluster/<cluster>/neighbors.csv")
 class ClusterNeighborsCSV(Resource):
@@ -1023,17 +1054,13 @@ class ClusterNeighborsCSV(Resource):
                 pagesize = int(pagesize)
             except Exception:
                 abort(404, "Invalid pagesize value")
-        page_state = request.args.get("page")
+
         if isOutgoing:
-            (page_state, rows) = gd.query_cluster_outgoing_relations(
-                currency, page_state, cluster, pagesize, limit)
+            query_function = gd.query_cluster_outgoing_relations
         else:
-            (page_state, rows) = gd.query_cluster_incoming_relations(
-                currency, page_state, cluster, pagesize, limit)
+            query_function = gd.query_cluster_incoming_relations
 
-        jsonData = [row.toJson() for row in rows]
-        return Response(tagsToCSV(jsonData), mimetype='text/csv')
-
+        return Response(neighboursToCSV(query_function, currency, cluster, pagesize, limit), mimetype='text/csv')
 
 
 label_response = api.model('label_response', {
