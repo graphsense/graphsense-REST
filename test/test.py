@@ -21,6 +21,7 @@ class FlaskBookshelfTests(unittest.TestCase):
         CORS(app)
         app.config.from_object(__name__)
         app.config.update(config)
+
         app.config.from_envvar("GRAPHSENSE_REST_SETTINGS", silent=True)
         keyspace_mapping = app.config["MAPPING"]
         gd.connect(app)
@@ -60,7 +61,7 @@ class FlaskBookshelfTests(unittest.TestCase):
         self.headers['refresh_token'] = response['refresh_token']
         self.headers['Authorization'] = 'Bearer ' + self.headers['access_token']
         # self.headers['X-API-KEY'] = response['token']
-        
+
 
     def test_01_refresh_token(self):
         # sends HTTP GET request to the application
@@ -271,15 +272,15 @@ class FlaskBookshelfTests(unittest.TestCase):
         result = self.app.get('/btc/block/10/transactions.csv', headers=self.headers)
         # assert the status code of the response
         self.assertEqual(result.status_code, 200)
-#        print(str(result.data, result.charset))
+        print(str(result.data, result.charset))
 
 
     def test_26_address_tags_csv(self):
         #"/<currency>/address/<address>/tags.csv"
-        result = self.app.get('/btc/address/%s/tags.csv' % '1PF9jQserjdws3qWuDpYcTkCcafFgMHhD6', headers=self.headers)
+        result = self.app.get('/btc/address/%s/tags.csv' % '1PUoHc5ncRsRpFavzQwPnDhqAkQ1SYFicR', headers=self.headers)
         # assert the status code of the response
         self.assertEqual(result.status_code, 200)
-#        print(str(result.data, result.charset))
+        print(str(result.data, result.charset))
 
 
     def test_27_cluster_tags_csv(self):
@@ -287,7 +288,7 @@ class FlaskBookshelfTests(unittest.TestCase):
         result = self.app.get('/btc/cluster/%s/tags.csv' % '111857125', headers=self.headers)
         # assert the status code of the response
         self.assertEqual(result.status_code, 200)
-#        print(str(result.data, result.charset))
+        print(str(result.data, result.charset))
 
 
     def test_28_address_neighbours(self):

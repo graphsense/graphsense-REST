@@ -68,6 +68,7 @@ class Tag(object):
         self.source = row.source
         self.timestamp = row.lastmod
 
+
 class Label(object):
     def __init__(self, row):
         self.label_norm_prefix = row.label_norm_prefix
