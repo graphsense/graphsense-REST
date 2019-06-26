@@ -128,12 +128,16 @@ def query_label_search(expression_norm_prefix):
     return labels
 
 
+def query_tags(label_norm_prefix, label_norm):
+    set_keyspace(session, "", space='tagpacks')
+    labels = session.execute(tags_query, [label_norm_prefix, label_norm])
+    labels._fetch_all()
+    return [gm.Tag(row).__dict__ for row in labels]
+
 def query_label(label_norm_prefix, label_norm):
     set_keyspace(session, "", space='tagpacks')
-    labels = session.execute(label_query, [label_norm_prefix, label_norm])
-    labels._fetch_all()
-    return [gm.Label(row).__dict__ for row in labels]
-
+    label = session.execute(label_query, [label_norm_prefix, label_norm])
+    return gm.Label(label[0]).__dict__ if label else None
 
 def query_address(currency, address):
     set_keyspace(session, currency)
@@ -450,7 +454,7 @@ def connect(app):
            cluster_query, cluster_tags_query, keyspace_mapping, \
            exchange_rate_for_height_query, exchange_rates_query, \
            last_height, session, statistics_query, transaction_search_query, \
-           tx_query, txs_query, label_search_query, label_query
+           tx_query, txs_query, label_search_query, label_query, tags_query
 
     cluster = cassandra.cluster.Cluster(app.config["CASSANDRA_NODES"])
     app.logger.debug("Created new Cassandra cluster.")
@@ -463,8 +467,9 @@ def connect(app):
     session = cluster.connect(keyspace_mapping[keyspace_name])
     session.default_fetch_size = 10
     app.logger.debug("Created new Cassandra session.")
-    label_search_query = session.prepare("SELECT label,label_norm FROM tag_by_label WHERE label_norm_prefix = ?")
-    label_query = session.prepare("SELECT * FROM tag_by_label WHERE label_norm_prefix = ? and label_norm = ?")
+    label_search_query = session.prepare("SELECT label,label_norm FROM tag_by_label WHERE label_norm_prefix = ? GROUP BY label_norm_prefix, label_norm")
+    label_query = session.prepare("SELECT label_norm, label_norm_prefix, label, COUNT(address) as address_count FROM tag_by_label WHERE label_norm_prefix = ? and label_norm = ? GROUP BY label_norm_prefix, label_norm")
+    tags_query = session.prepare("SELECT * FROM tag_by_label WHERE label_norm_prefix = ? and label_norm = ?")
     for keyspace_name in keyspace_mapping.keys():
         if keyspace_name == 'tagpacks':
             continue

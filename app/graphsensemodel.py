@@ -63,10 +63,12 @@ class Statistics(object):
 class Tag(object):
     def __init__(self, row):
         self.address = row.address
-        self.tag = row.label
-        self.actorCategory = row.category
+        self.label = row.label
+        self.category = row.category
+        self.tagpack_uri = row.tagpack_uri
         self.source = row.source
-        self.timestamp = row.lastmod
+        self.currency = row.currency
+        self.lastmod = row.lastmod
 
 
 class Label(object):
@@ -74,13 +76,7 @@ class Label(object):
         self.label_norm_prefix = row.label_norm_prefix
         self.label_norm = row.label_norm
         self.label = row.label
-        self.address = row.address
-        self.source = row.source
-        self.tagpack_uri = row.tagpack_uri
-        self.category = row.category
-        self.currency = row.currency
-        self.lastmod = row.lastmod
-
+        self.address_count = row.address_count
 
 class Transaction(object):
     def __init__(self, row, rates):

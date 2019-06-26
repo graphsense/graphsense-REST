@@ -514,15 +514,14 @@ class Address(Resource):
         return result
 
 
-tag_response = api.model('address_tag_response', {
-    'actorCategory': fields.String(required=True, description='Actor category'),
+tag_response = api.model('tag_response', {
+    'label': fields.String(required=True, description='Label'),
     'address': fields.String(required=True, description='Address'),
-    'description': fields.String(required=True, description='Description'),
     'source': fields.String(required=True, description='Source'),
-    'sourceUri': fields.String(required=True, description='Source URI'),
-    'tag': fields.String(required=True, description='Tag'),
-    'tagUri': fields.String(required=True, description='Tag URI'),
-    'timestamp': fields.Integer(required=True, description='Transaction timestamp')
+    'tagpack_uri': fields.String(required=True, description='Tagpack URI'),
+    'currency': fields.String(required=True, description='Currency'),
+    'lastmod': fields.String(required=True, description='Last modified'),
+    'category': fields.String(required=False, description='Category')
 })
 
 @api.route("/<currency>/address/<address>/tags")
@@ -1070,6 +1069,7 @@ class ClusterNeighborsCSV(Resource):
 
 label_response = api.model('label_response', {
     'label': fields.String(required=True, description='Label'),
+    'label_norm': fields.String(required=True, description='Normalized label'),
     'address_count': fields.Integer(required=True, description='Number of addresses for the label'),
 })
 
@@ -1089,34 +1089,22 @@ class Label(Resource):
         if not result:
             abort(404, "Label not found")
 
-        return {'label': label, 'address_count': len(result)}
+        return result
 
 
-label_addresses_response = api.model('label_response', {
-    'label': fields.String(required=True, description='Label'),
-    'label_norm': fields.String(required=True, description='Label prefix'),
-    'label_norm_prefix': fields.String(required=True, description='Label prefix normalized'),
-    'address': fields.String(required=True, description='Address'),
-    'source': fields.String(required=True, description='Source'),
-    'tagpack_uri': fields.String(required=True, description='Tagpack URI'),
-    'currency': fields.String(required=True, description='Currency'),
-    'lastmod': fields.String(required=True, description='Last modified'),
-    'category': fields.String(required=False, description='Category')
-})
-
-@api.route("/label/<label>/addresses")
-class LabelAddresses(Resource):
+@api.route("/label/<label>/tags")
+class LabelTags(Resource):
     @jwt_required
-    @api.marshal_list_with(label_addresses_response)
+    @api.marshal_list_with(tag_response)
     def get(self, label):
         """
-        Returns a JSON with the details of the label
+        Returns a JSON with the tags with the label
         """
         if not label:
             abort(404, "Label not provided")
         label_norm = alphanumeric_lower(label)
         label_norm_prefix = label_norm[:label_prefix_len]
-        result = gd.query_label(label_norm_prefix, label_norm)
+        result = gd.query_tags(label_norm_prefix, label_norm)
         if not result:
             abort(404, "Label not found")
         return result
