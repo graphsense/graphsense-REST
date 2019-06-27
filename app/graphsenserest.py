@@ -977,8 +977,9 @@ class ClusterAddresses(Resource):
             except Exception:
                 abort(404, "Invalid pagesize value")
         page = request.args.get("page")
+        page_state = bytes.fromhex(page) if page else None
         (page, addresses) = gd.query_cluster_addresses(
-            currency, cluster, page, pagesize, limit)
+            currency, cluster, page_state, pagesize, limit)
         return {"nextPage": page.hex() if page is not None else None, "addresses": addresses}
 
 
