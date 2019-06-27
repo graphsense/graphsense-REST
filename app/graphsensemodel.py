@@ -57,6 +57,7 @@ class Statistics(object):
         self.no_addresses = row.no_addresses
         self.no_clusters = row.no_clusters
         self.no_transactions = row.no_transactions
+        self.no_labels = row.no_tags
         self.timestamp = row.timestamp
 
 
