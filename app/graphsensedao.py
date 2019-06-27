@@ -132,7 +132,13 @@ def query_tags(label_norm_prefix, label_norm):
     set_keyspace(session, "", space='tagpacks')
     labels = session.execute(tags_query, [label_norm_prefix, label_norm])
     labels._fetch_all()
-    return [gm.Tag(row).__dict__ for row in labels]
+    def makeTagWithCurrency(row):
+        d = gm.Tag(row).__dict__
+        d['currency'] = row.currency
+        return d
+
+    tags = [makeTagWithCurrency(row) for row in labels]
+    return tags
 
 def query_label(label_norm_prefix, label_norm):
     set_keyspace(session, "", space='tagpacks')
@@ -356,7 +362,7 @@ def query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids,
 
         if category != None:
             # find first occurence of category in tags
-            match = next((True for t in tags if t['actorCategory'] == category), False)
+            match = next((True for t in tags if t['category'] == category), False)
 
         matchingAddresses = []
         if match and ids != None:
