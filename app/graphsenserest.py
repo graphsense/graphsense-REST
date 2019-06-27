@@ -1120,10 +1120,9 @@ def search_neighbors_recursive(depth = 7):
     if depth:
         mapping['paths'] = fields.List(fields.Nested(search_neighbors_recursive(depth-1), required=True))
 
-    return mapping
+    return api.model('mapping%s' % depth, mapping)
 
 maxdepth = 7
-
 search_neighbors_response = api.model('search_neighbors_response_depth_' + str(maxdepth), {
         'paths': fields.List(fields.Nested(search_neighbors_recursive(maxdepth), required=True))
     })

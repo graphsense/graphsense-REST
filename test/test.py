@@ -323,17 +323,24 @@ class FlaskBookshelfTests(unittest.TestCase):
         print(result.json)
 
 
-    def test_31_label_addresses(self):
-        #"/label/<label>/addresses"
-        result = self.app.get('/label/%s/addresses' % self.label, headers=self.headers)
-        # assert the status code of the response
-        self.assertEqual(result.status_code, 200)
-        print(result.json)
+    # def test_31_label_addresses(self):
+    #     #"/label/<label>/addresses"
+    #     result = self.app.get('/label/%s/addresses' % self.label, headers=self.headers)
+    #     # assert the status code of the response
+    #     self.assertEqual(result.status_code, 200)
+    #     print(result.json)
 
 
     def test_32_label(self):
         #"/label/<label>"
         result = self.app.get('/label/%s' % self.label, headers=self.headers)
+        # assert the status code of the response
+        self.assertEqual(result.status_code, 200)
+        print(result.json)
+
+    def test_33_swagger(self):
+        #"/label/<label>"
+        result = self.app.get('/swagger.json', headers=self.headers)
         # assert the status code of the response
         self.assertEqual(result.status_code, 200)
         print(result.json)

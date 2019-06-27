@@ -67,7 +67,6 @@ class Tag(object):
         self.category = row.category
         self.tagpack_uri = row.tagpack_uri
         self.source = row.source
-        self.currency = row.currency
         self.lastmod = row.lastmod
 
 
