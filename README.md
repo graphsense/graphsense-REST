@@ -19,6 +19,7 @@ The keyspaces are configured according to the following structure
     {<CURRENCY_1>: [<RAW_KEYSPACE_NAME_CURRENCY_1>, <TRANSFORMED_KEYSPACE_NAME_CURRENCY_1>],
      <CURRENCY_2>: [<RAW_KEYSPACE_NAME_CURRENCY_2>, <TRANSFORMED_KEYSPACE_NAME_CURRENCY_2>],
      ...
+     "tagoacks": "tagpacks"
     }
 
 ## Run REST interface locally
@@ -33,10 +34,10 @@ Run
 
     pip install -r requirements.txt
 
-and then
+then create a new user and password of your choice and start the interface with
 
     cd app/
-    python graphsenserest.py
+    ./adduser_and_start_rest.sh <user> <password>
 
 ##### Using `docker`
 

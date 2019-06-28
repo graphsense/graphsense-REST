@@ -470,7 +470,7 @@ def connect(app):
     # create the prepared statements; alternative strategy is to not use
     # prepared statements and specify the keyspace in the query string
     keyspace_mapping = app.config["MAPPING"]
-    keyspace_name = list(keyspace_mapping.keys())[0]  # just to get the session
+    keyspace_name = list(keyspace_mapping.keys())[-1]  # it must be "tagpacks"
     session = cluster.connect(keyspace_mapping[keyspace_name])
     session.default_fetch_size = 10
     app.logger.debug("Created new Cassandra session.")
