@@ -19,7 +19,7 @@ The keyspaces are configured according to the following structure
     {<CURRENCY_1>: [<RAW_KEYSPACE_NAME_CURRENCY_1>, <TRANSFORMED_KEYSPACE_NAME_CURRENCY_1>],
      <CURRENCY_2>: [<RAW_KEYSPACE_NAME_CURRENCY_2>, <TRANSFORMED_KEYSPACE_NAME_CURRENCY_2>],
      ...
-     "tagoacks": "tagpacks"
+     "tagpacks": "tagpacks"
     }
 
 ## Run REST interface locally
@@ -37,7 +37,7 @@ Run
 then create a new user and password of your choice and start the interface with
 
     cd app/
-    ./adduser_and_start_rest.sh <user> <password>
+    sudo ./adduser_and_start_rest.sh <user> <password>
 
 ##### Using `docker`
 
