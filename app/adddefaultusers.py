@@ -9,14 +9,13 @@ if __name__ == '__main__':
 
     user = sys.argv[1]
     password = sys.argv[2]
-    print(user, password)
-    # admin = {'id': 0, 'userName': user, 'password': str(sha256.hash(password)),
-    #          'creationDate': datetime.datetime.now(), 'isAdmin': True}
-    # admin = GraphsenseUser(**admin)
-    # try:
-    #     db.session.add(admin)
-    #     db.session.commit()
-    #     db.session.close()
-    # except sqlalchemy.exc.IntegrityError as ex:
-    #     print("Admin user already exists")
-    #     print(ex)
+    admin = {'id': 0, 'userName': user, 'password': str(sha256.hash(password)),
+             'creationDate': datetime.datetime.now(), 'isAdmin': True}
+    admin = GraphsenseUser(**admin)
+    try:
+        db.session.add(admin)
+        db.session.commit()
+        db.session.close()
+    except sqlalchemy.exc.IntegrityError as ex:
+        print("Admin user already exists")
+        print(ex)
