@@ -1,14 +1,15 @@
+import json
+import re
+from functools import wraps
 from flask import Flask, request, abort, Response
 from flask_restplus import Api, Resource, fields
 from flask_cors import CORS
-import graphsensedao as gd
-import graphsensemodel as gm
-import json
 from flask_jwt_extended import (JWTManager, create_access_token, create_refresh_token, jwt_required, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt)
 from flask_jwt_extended import exceptions as jwt_extended_exceptions
 from flask_sqlalchemy import SQLAlchemy
-from functools import wraps
-import re
+import graphsensedao as gd
+import graphsensemodel as gm
+
 
 label_prefix_len = 3
 address_prefix_len = transaction_prefix_len = 5
@@ -37,7 +38,7 @@ api = Api(app=app, authorizations=authorizations, security=security, version='0.
 
 
 '''
-    Flask app configuration 
+    Flask app configuration
 '''
 
 app.config.from_object(__name__)
@@ -69,7 +70,7 @@ import authmodel
 db.create_all()
 
 '''
-    Methods related to swagger argument parsing 
+    Methods related to swagger argument parsing
 '''
 
 limit_parser = api.parser()
@@ -99,7 +100,7 @@ search_neighbors_parser.add_argument('depth', type=int, location='args')
 search_neighbors_parser.add_argument('breadth', type=int, location='args')
 
 '''
-    Methods related to user authentication 
+    Methods related to user authentication
 '''
 @api.errorhandler(jwt_extended_exceptions.FreshTokenRequired)
 def handle_expired_error():
@@ -175,7 +176,7 @@ class UserLogoutAccess(Resource):
             return {'message': 'Something went wrong'}, 500
 
 '''
-    Graphsense api methods 
+    Graphsense api methods
 '''
 
 value_response = api.model('value_response  ', {

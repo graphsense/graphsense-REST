@@ -1,7 +1,8 @@
 import cassandra.cluster
 from cassandra.query import named_tuple_factory, dict_factory
-import graphsensemodel as gm
 from flask import abort
+import graphsensemodel as gm
+
 
 session = None
 tx_query = {}
@@ -354,8 +355,8 @@ def query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids,
     paths = []
 
     for row in rows:
-        subcluster = row.dstCluster if isOutgoing else row.srcCluster 
-        if not subcluster.isdigit(): 
+        subcluster = row.dstCluster if isOutgoing else row.srcCluster
+        if not subcluster.isdigit():
             continue
         match = True
         tags = query_cluster_tags(currency, subcluster)
@@ -369,7 +370,7 @@ def query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids,
             matchingAddresses = [id['address'] for id in ids if str(id['cluster']) == str(subcluster)]
             match = len(matchingAddresses) > 0
 
-        if match: 
+        if match:
             subpaths = True
         else:
             subpaths = query_cluster_search_neighbors(currency, subcluster, isOutgoing, category, ids, breadth, depth - 1)
