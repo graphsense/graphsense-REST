@@ -1,6 +1,9 @@
 FROM alpine:3.7.3
 LABEL maintainer="rainer.stuetz@ait.ac.at"
 
+ARG rest_user=admin
+ARG rest_passwd
+
 RUN mkdir -p /srv/graphsense-rest/
 COPY requirements.txt /srv/graphsense-rest/
 
@@ -31,8 +34,8 @@ COPY conf/graphsense-rest.ini app/config.json app/*.py /srv/graphsense-rest/
 RUN mkdir /var/lib/graphsense-rest && \
     chown dockeruser /var/lib/graphsense-rest && \
     cd /srv/graphsense-rest/ && \
-    python3 /srv/graphsense-rest/adddefaultusers.py && \
-    /bin/rm -f /srv/graphsense-rest/adddefaultusers.py
+    python3 /srv/graphsense-rest/add_default_users.py $rest_user $rest_passwd && \
+    /bin/rm -f /srv/graphsense-rest/add_default_users.py
 
 USER dockeruser
 CMD ["supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisor-app.conf"]
