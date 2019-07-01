@@ -46,8 +46,8 @@ class AddressSummary(object):
 # CASSSANDRA TABLES
 class ExchangeRate(object):
     def __init__(self, d):
-        self.eur = d['eur']
-        self.usd = d['usd']
+        self.eur = d["eur"]
+        self.usd = d["usd"]
 
 
 class Statistics(object):
@@ -302,7 +302,7 @@ class AddressOutgoingRelations(object):
     def toJson(self):
         return {
             "id": self.id(),
-            "nodeType": 'address',
+            "nodeType": "address",
             "received": self.dstTotalReceived.__dict__,
             "balance": self.dstBalance.__dict__,
             "noTransactions": self.noTransactions,
@@ -356,7 +356,7 @@ class ClusterIncomingRelations(object):
     def toJson(self):
         return {
             "id": self.id(),
-            "nodeType": "cluster" if self.id().isdigit() else 'address',
+            "nodeType": "cluster" if self.id().isdigit() else "address",
             "received": self.srcTotalReceived.__dict__,
             "balance": self.srcBalance.__dict__,
             "noTransactions": self.noTransactions,
@@ -403,7 +403,7 @@ class ClusterOutgoingRelations(object):
     def toJson(self):
         return {
             "id": self.id(),
-            "nodeType": "cluster" if self.id().isdigit() else 'address',
+            "nodeType": "cluster" if self.id().isdigit() else "address",
             "received": self.dstTotalReceived.__dict__,
             "balance": self.dstBalance.__dict__,
             "noTransactions": self.noTransactions,

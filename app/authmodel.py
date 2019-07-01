@@ -3,7 +3,7 @@ from passlib.hash import pbkdf2_sha256 as sha256
 
 
 class GraphsenseUser(db.Model):
-    __tablename__ = 'GraphsenseUser'
+    __tablename__ = "GraphsenseUser"
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
     userName = db.Column(db.String(120), nullable=False)
     isAdmin = db.Column(db.Boolean, nullable=False)
@@ -19,7 +19,7 @@ class GraphsenseUser(db.Model):
             query = db.session.query(GraphsenseUser).filter(GraphsenseUser.id == int(idOrNameStr))
         except:
             query = db.session.query(GraphsenseUser).filter(GraphsenseUser.sysName.like(
-                '%%%s%%' % idOrNameStr)).limit(limit)
+                "%%%s%%" % idOrNameStr)).limit(limit)
         return query
 
     @classmethod
@@ -36,7 +36,7 @@ class GraphsenseUser(db.Model):
 
 
 class RevokedJWTToken(db.Model):
-    __tablename__ = 'revoked_tokens'
+    __tablename__ = "revoked_tokens"
     id = db.Column(db.Integer, primary_key=True)
     jti = db.Column(db.String(120))
 
