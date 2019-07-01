@@ -7,7 +7,6 @@ from flask_cors import CORS
 from flask_jwt_extended import (JWTManager, create_access_token, create_refresh_token, jwt_required, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt)
 from flask_jwt_extended import exceptions as jwt_extended_exceptions
 from flask_sqlalchemy import SQLAlchemy
-import authmodel
 import graphsensedao as gd
 import graphsensemodel as gm
 
@@ -67,6 +66,8 @@ jwt = JWTManager(app)
 db = SQLAlchemy(app)
 
 keyspace_mapping = app.config["MAPPING"]
+
+import authmodel
 
 db.create_all()
 
@@ -135,7 +136,7 @@ def auth_required(f):
                 return { "message": "Logged in as {}".format(current_user.userName), "access_token": access_token, "refresh_token": refresh_token }, 200
             else:
                 return {"message": "Could not verify your login! Wrong credentials"}, 401
-        return {"message": "Could not verify your login!"}, 401, {"WWW-Authenticate": "Basic realm="Login required""}
+        return {"message": "Could not verify your login!"}, 401, {"WWW-Authenticate": "Basic realm=\"Login required\""}
 
     return decorated
 
