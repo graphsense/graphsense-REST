@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Changed
+- `config.json` contains not only currencies, but also `tagpacks` keyspace
+- currency statistics are now available at `<api_root>/stats` (previously at `<api_root>/`)
+
+### Added
+- Query label and label search (for suggestions)
+- Unit tests
+- Swagger documentation
+- JWT Authentication
+- Number of labels in statistics
+- `start_develop.sh`
+- CSV export of txs, tags and neighbors
+
+### Removed
+- Egonet calls 
 
 ## [0.4.0] - 2019-02-01
 ### Changed

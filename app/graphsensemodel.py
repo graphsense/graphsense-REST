@@ -46,8 +46,8 @@ class AddressSummary(object):
 # CASSSANDRA TABLES
 class ExchangeRate(object):
     def __init__(self, d):
-        self.eur = d['eur']
-        self.usd = d['usd']
+        self.eur = d["eur"]
+        self.usd = d["usd"]
 
 
 class Statistics(object):
@@ -57,20 +57,26 @@ class Statistics(object):
         self.no_addresses = row.no_addresses
         self.no_clusters = row.no_clusters
         self.no_transactions = row.no_transactions
+        self.no_labels = row.no_tags
         self.timestamp = row.timestamp
 
 
 class Tag(object):
     def __init__(self, row):
         self.address = row.address
-        self.tag = row.tag
-        self.tagUri = row.tag_uri
-        self.description = row.description
-        self.actorCategory = row.actor_category
+        self.label = row.label
+        self.category = row.category
+        self.tagpack_uri = row.tagpack_uri
         self.source = row.source
-        self.sourceUri = row.source_uri
-        self.timestamp = row.timestamp
+        self.lastmod = row.lastmod
 
+
+class Label(object):
+    def __init__(self, row):
+        self.label_norm_prefix = row.label_norm_prefix
+        self.label_norm = row.label_norm
+        self.label = row.label
+        self.address_count = row.address_count
 
 class Transaction(object):
     def __init__(self, row, rates):
@@ -296,7 +302,7 @@ class AddressOutgoingRelations(object):
     def toJson(self):
         return {
             "id": self.id(),
-            "nodeType": 'address',
+            "nodeType": "address",
             "received": self.dstTotalReceived.__dict__,
             "balance": self.dstBalance.__dict__,
             "noTransactions": self.noTransactions,
@@ -350,7 +356,7 @@ class ClusterIncomingRelations(object):
     def toJson(self):
         return {
             "id": self.id(),
-            "nodeType": "cluster" if self.id().isdigit() else 'address',
+            "nodeType": "cluster" if self.id().isdigit() else "address",
             "received": self.srcTotalReceived.__dict__,
             "balance": self.srcBalance.__dict__,
             "noTransactions": self.noTransactions,
@@ -397,7 +403,7 @@ class ClusterOutgoingRelations(object):
     def toJson(self):
         return {
             "id": self.id(),
-            "nodeType": "cluster" if self.id().isdigit() else 'address',
+            "nodeType": "cluster" if self.id().isdigit() else "address",
             "received": self.dstTotalReceived.__dict__,
             "balance": self.dstBalance.__dict__,
             "noTransactions": self.noTransactions,

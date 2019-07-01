@@ -1,9 +1,12 @@
 {
-    "SECRET_KEY": "your secret key",
+    "SECRET_KEY": "FLASK_SECRET_KEY",
     "CASSANDRA_NODES": ["localhost"],
-     "MAPPING": {
-          "btc": ["btc_raw", "btc_transformed"],
-          "bch": ["bch_raw", "bch_transformed"],
-          "ltc": ["ltc_raw", "ltc_transformed"]
-     }
+    "JWT_ACCESS_TOKEN_EXPIRES": false,
+    "MAPPING": {
+        "tagpacks": "tagpacks",
+        "btc": ["btc_raw", "btc_transformed"],
+        "bch": ["bch_raw", "bch_transformed"],
+        "ltc": ["ltc_raw", "ltc_transformed"],
+        "zec": ["zec_raw", "zec_transformed"]
+    }
 }
