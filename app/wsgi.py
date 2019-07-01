@@ -1,6 +1,6 @@
+from uwsgidecorators import postfork
 from graphsenserest import app as application
 from graphsensedao import connect
-from uwsgidecorators import postfork
 
 
 @postfork
