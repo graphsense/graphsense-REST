@@ -39,18 +39,6 @@ then create a new user and password of your choice and start the interface with
     cd app/
     sudo ./adduser_and_start_rest.sh <user> <password>
 
-##### Using `docker`
-
-After installing [docker][docker], run:
-
-    docker/build.sh
-    docker/start.sh
-
-
-Test the service in your browser:
-
-    http://localhost:9000/btc/block/10000
-
 ## Generate never expiring JWT
 
 For development purposes you may generate a never expiring JSON Web Token. 
@@ -59,6 +47,18 @@ For development purposes you may generate a never expiring JSON Web Token.
 2. Restart the REST service.
 3. Visit `/login` and enter credentials.
 4. On success, the response contains your token in the field `access_token`.
+
+##### Using `docker`
+
+After installing [docker][docker], set the REST password (and username)
+in `docker/build.sh` and run:
+
+    docker/build.sh
+    docker/start.sh
+
+Test the service in your browser:
+
+    http://localhost:9000
 
 [graphsense-blocksci]: https://github.com/graphsense/graphsense-blocksci
 [graphsense-transformation]: https://github.com/graphsense/graphsense-transformation
