@@ -53,7 +53,7 @@ def query_exchange_rates(currency, offset, limit):
 
 
 def query_block(currency, height):
-    set_keyspace(session, currency, space='raw')
+    set_keyspace(session, currency, space="raw")
     if height > last_height[currency]:
         abort(404, "Block not available yet")
     result = session.execute(block_query[currency], [height])
@@ -67,7 +67,7 @@ def query_statistics(currency):
 
 
 def query_block_transactions(currency, height):
-    set_keyspace(session, currency, space='raw')
+    set_keyspace(session, currency, space="raw")
     if height > last_height[currency]:
         abort(404, "Block not available yet")
     result = session.execute(block_transactions_query[currency], [height])
@@ -75,7 +75,7 @@ def query_block_transactions(currency, height):
 
 
 def query_blocks(currency, page_state):
-    set_keyspace(session, currency, space='raw')
+    set_keyspace(session, currency, space="raw")
     if page_state:
         results = session.execute(blocks_query[currency], paging_state=page_state)
     else:
@@ -86,7 +86,7 @@ def query_blocks(currency, page_state):
 
 
 def query_transaction(currency, txHash):
-    set_keyspace(session, currency, space='raw')
+    set_keyspace(session, currency, space="raw")
     try:
         rows = session.execute(tx_query[currency], [txHash[0:5], bytearray.fromhex(txHash)])
     except Exception:
@@ -95,7 +95,7 @@ def query_transaction(currency, txHash):
 
 
 def query_transactions(currency, page_state):
-    set_keyspace(session, currency, space='raw')
+    set_keyspace(session, currency, space="raw")
     if page_state:
         results = session.execute(txs_query[currency], paging_state=page_state)
     else:
@@ -108,7 +108,7 @@ def query_transactions(currency, page_state):
 
 
 def query_transaction_search(currency, expression):
-    set_keyspace(session, currency, space='raw')
+    set_keyspace(session, currency, space="raw")
     transactions = session.execute(transaction_search_query[currency],
                                    [expression])
     transactions._fetch_all()
@@ -123,26 +123,26 @@ def query_address_search(currency, expression):
 
 
 def query_label_search(expression_norm_prefix):
-    set_keyspace(session, "", space='tagpacks')
+    set_keyspace(session, "", space="tagpacks")
     labels = session.execute(label_search_query, [expression_norm_prefix])
     labels._fetch_all()
     return labels
 
 
 def query_tags(label_norm_prefix, label_norm):
-    set_keyspace(session, "", space='tagpacks')
+    set_keyspace(session, "", space="tagpacks")
     labels = session.execute(tags_query, [label_norm_prefix, label_norm])
     labels._fetch_all()
     def makeTagWithCurrency(row):
         d = gm.Tag(row).__dict__
-        d['currency'] = row.currency
+        d["currency"] = row.currency
         return d
 
     tags = [makeTagWithCurrency(row) for row in labels]
     return tags
 
 def query_label(label_norm_prefix, label_norm):
-    set_keyspace(session, "", space='tagpacks')
+    set_keyspace(session, "", space="tagpacks")
     label = session.execute(label_query, [label_norm_prefix, label_norm])
     return gm.Label(label[0]).__dict__ if label else None
 
@@ -363,11 +363,11 @@ def query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids,
 
         if category != None:
             # find first occurence of category in tags
-            match = next((True for t in tags if t['category'] == category), False)
+            match = next((True for t in tags if t["category"] == category), False)
 
         matchingAddresses = []
         if match and ids != None:
-            matchingAddresses = [id['address'] for id in ids if str(id['cluster']) == str(subcluster)]
+            matchingAddresses = [id["address"] for id in ids if str(id["cluster"]) == str(subcluster)]
             match = len(matchingAddresses) > 0
 
         if match:
@@ -378,25 +378,25 @@ def query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids,
         if not subpaths:
             continue
         props = query_cluster(currency, subcluster).__dict__
-        props['tags'] = tags
-        obj = {'node': props, 'relation': row.toJson(), 'matchingAddresses': []}
+        props["tags"] = tags
+        obj = {"node": props, "relation": row.toJson(), "matchingAddresses": []}
         if subpaths == True:
             addresses_with_tags = [ query_address_with_tags(currency, address) for address in matchingAddresses ]
-            obj['matchingAddresses'] = [ address for address in addresses_with_tags if address is not None ]
+            obj["matchingAddresses"] = [ address for address in addresses_with_tags if address is not None ]
             subpaths = None
-        obj['paths'] = subpaths
+        obj["paths"] = subpaths
         paths.append(obj)
     return paths
 
-def set_keyspace(session, currency=None, space='transformed'):
-    if space == 'tagpacks':
-        session.set_keyspace(keyspace_mapping['tagpacks'])
+def set_keyspace(session, currency=None, space="transformed"):
+    if space == "tagpacks":
+        session.set_keyspace(keyspace_mapping["tagpacks"])
         return
 
     if currency in keyspace_mapping:
-        if space == 'raw':
+        if space == "raw":
             session.set_keyspace(keyspace_mapping[currency][0])
-        elif space == 'transformed':
+        elif space == "transformed":
             session.set_keyspace(keyspace_mapping[currency][1])
         else:
             abort(404, "Keyspace %s not allowed" % space)
@@ -406,7 +406,7 @@ def set_keyspace(session, currency=None, space='transformed'):
 
 def query_all_exchange_rates(currency, h_max):
     try:
-        set_keyspace(session, currency, space='raw')
+        set_keyspace(session, currency, space="raw")
         session.row_factory = dict_factory
         session.default_fetch_size = None
         print("Loading exchange rates for %s ..." % currency)
@@ -424,7 +424,7 @@ def query_all_exchange_rates(currency, h_max):
 
 
 def query_last_block_height(currency):
-    set_keyspace(session, currency, space='raw')
+    set_keyspace(session, currency, space="raw")
     block_max = 0
     block_inc = 100000
     while True:
@@ -470,7 +470,11 @@ def connect(app):
     # create the prepared statements; alternative strategy is to not use
     # prepared statements and specify the keyspace in the query string
     keyspace_mapping = app.config["MAPPING"]
-    keyspace_name = list(keyspace_mapping.keys())[-1]  # it must be "tagpacks"
+    if "tagpacks" in keyspace_mapping.keys() and keyspace_mapping["tagpacks"] == "tagpacks":
+        keyspace_name = "tagpacks"  # it must be "tagpacks"
+    else:
+        abort(404, "Tagpacks keyspace missing")
+
     session = cluster.connect(keyspace_mapping[keyspace_name])
     session.default_fetch_size = 10
     app.logger.debug("Created new Cassandra session.")
@@ -478,7 +482,7 @@ def connect(app):
     label_query = session.prepare("SELECT label_norm, label_norm_prefix, label, COUNT(address) as address_count FROM tag_by_label WHERE label_norm_prefix = ? and label_norm = ? GROUP BY label_norm_prefix, label_norm")
     tags_query = session.prepare("SELECT * FROM tag_by_label WHERE label_norm_prefix = ? and label_norm = ?")
     for keyspace_name in keyspace_mapping.keys():
-        if keyspace_name == 'tagpacks':
+        if keyspace_name == "tagpacks":
             continue
         set_keyspace(session, keyspace_name)
         address_query[keyspace_name] = session.prepare("SELECT * FROM address WHERE address = ? AND address_prefix = ?")
@@ -501,7 +505,7 @@ def connect(app):
         cluster_addresses_without_limit_query[keyspace_name] = session.prepare("SELECT * FROM cluster_addresses WHERE cluster = ?")
         statistics_query[keyspace_name] = session.prepare("SELECT * FROM summary_statistics LIMIT 1")
 
-        set_keyspace(session, keyspace_name, space='raw')
+        set_keyspace(session, keyspace_name, space="raw")
         tx_query[keyspace_name] = session.prepare("SELECT * FROM transaction WHERE tx_prefix = ? AND tx_hash = ?")
         txs_query[keyspace_name] = session.prepare("SELECT * FROM transaction LIMIT ?")
         transaction_search_query[keyspace_name] = session.prepare("SELECT tx_hash from transaction where tx_prefix = ?")
