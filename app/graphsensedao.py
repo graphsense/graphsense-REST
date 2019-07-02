@@ -359,6 +359,12 @@ def query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids,
         if not subcluster.isdigit():
             continue
         match = True
+        props = query_cluster(currency, subcluster)
+        if props is None:
+            print("empty cluster result for " + str(subcluster))
+            continue
+
+        props = props.__dict__
         tags = query_cluster_tags(currency, subcluster)
 
         if category != None:
@@ -377,7 +383,6 @@ def query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids,
 
         if not subpaths:
             continue
-        props = query_cluster(currency, subcluster).__dict__
         props["tags"] = tags
         obj = {"node": props, "relation": row.toJson(), "matchingAddresses": []}
         if subpaths == True:
