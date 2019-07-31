@@ -301,10 +301,10 @@ def query_cluster_incoming_relations(currency, page_state, cluster, pagesize, li
     set_keyspace(session, currency)
     if limit is None:
         query = cluster_incoming_relations_without_limit_query
-        params = [cluster]
+        params = [int(cluster)]
     else:
         query = cluster_incoming_relations_query
-        params = [cluster, limit]
+        params = [int(cluster), limit]
 
     if pagesize:
         query[currency].fetch_size = pagesize
@@ -324,10 +324,10 @@ def query_cluster_outgoing_relations(currency, page_state, cluster, pagesize, li
     set_keyspace(session, currency)
     if limit is None:
         query = cluster_outgoing_relations_without_limit_query
-        params = [cluster]
+        params = [int(cluster)]
     else:
         query = cluster_outgoing_relations_query
-        params = [cluster, limit]
+        params = [int(cluster), limit]
 
     if pagesize:
         query[currency].fetch_size = pagesize

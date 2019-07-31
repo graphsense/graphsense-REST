@@ -319,8 +319,8 @@ class ClusterSummary(object):
 
 class ClusterIncomingRelations(object):
     def __init__(self, row, exchange_rate):
-        self.dstCluster = str(row.dst_cluster)
-        self.srcCluster = str(row.src_cluster)
+        self.dstCluster = row.dst_cluster
+        self.srcCluster = row.src_cluster
         self.srcProperties = ClusterSummary(row.src_properties.no_addresses,
                                             row.src_properties.total_received,
                                             row.src_properties.total_spent)
@@ -339,7 +339,7 @@ class ClusterIncomingRelations(object):
 
     def toJsonNode(self):
         node = {"id": self.id(),
-                "nodeType": "cluster" if self.id().isdigit() else "address",
+                "nodeType": "cluster" if isinstance(self.id(), int) else "address",
                 "received": self.srcProperties.totalReceived,
                 "balance": (self.srcProperties.totalReceived -
                             self.srcProperties.totalSpent)  # satoshi
@@ -356,7 +356,7 @@ class ClusterIncomingRelations(object):
     def toJson(self):
         return {
             "id": self.id(),
-            "nodeType": "cluster" if self.id().isdigit() else "address",
+            "nodeType": "cluster" if isinstance(self.id(), int) else "address",
             "received": self.srcTotalReceived.__dict__,
             "balance": self.srcBalance.__dict__,
             "noTransactions": self.noTransactions,
@@ -366,8 +366,8 @@ class ClusterIncomingRelations(object):
 
 class ClusterOutgoingRelations(object):
     def __init__(self, row, exchange_rate):
-        self.srcCluster = str(row.src_cluster)
-        self.dstCluster = str(row.dst_cluster)
+        self.srcCluster = row.src_cluster
+        self.dstCluster = row.dst_cluster
         self.dstProperties = ClusterSummary(row.dst_properties.no_addresses,
                                             row.dst_properties.total_received,
                                             row.dst_properties.total_spent)
@@ -386,7 +386,7 @@ class ClusterOutgoingRelations(object):
 
     def toJsonNode(self):
         node = {"id": self.id(),
-                "nodeType": "cluster" if self.id().isdigit() else "address",
+                "nodeType": "cluster" if isinstance(self.id(), int) else "address",
                 "received": self.dstProperties.totalReceived,
                 "balance": (self.dstProperties.totalReceived -
                             self.dstProperties.totalSpent),  # satoshi
@@ -403,7 +403,7 @@ class ClusterOutgoingRelations(object):
     def toJson(self):
         return {
             "id": self.id(),
-            "nodeType": "cluster" if self.id().isdigit() else "address",
+            "nodeType": "cluster" if isinstance(self.id(), int) else "address",
             "received": self.dstTotalReceived.__dict__,
             "balance": self.dstBalance.__dict__,
             "noTransactions": self.noTransactions,
@@ -534,7 +534,7 @@ class ClusterEgoNet(object):
 
 class ClusterAddresses(object):
     def __init__(self, row, exchange_rate):
-        self.cluster = str(row.cluster)
+        self.cluster = row.cluster
         self.address = row.address
         self.noIncomingTxs = row.no_incoming_txs
         self.noOutgoingTxs = row.no_outgoing_txs
