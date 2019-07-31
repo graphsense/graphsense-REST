@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 ### Changed
 - Use integer values for cluster IDs
+### Fixed
+- Handle empty results in `query_address_with_tags`
 
 ## [0.4.1] - 2019-07-01
 ### Changed

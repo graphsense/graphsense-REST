@@ -198,7 +198,8 @@ def query_address_tags(currency, address):
 
 def query_address_with_tags(currency, address):
     result = query_address(currency, address)
-    result.tags = query_address_tags(currency, address)
+    if result:
+        result.tags = query_address_tags(currency, address)
     return result
 
 def query_implicit_tags(currency, address):
