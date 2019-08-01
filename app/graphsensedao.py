@@ -141,10 +141,12 @@ def query_tags(label_norm_prefix, label_norm):
     tags = [makeTagWithCurrency(row) for row in labels]
     return tags
 
+
 def query_label(label_norm_prefix, label_norm):
     set_keyspace(session, "", space="tagpacks")
     label = session.execute(label_query, [label_norm_prefix, label_norm])
     return gm.Label(label[0]).__dict__ if label else None
+
 
 def query_address(currency, address):
     set_keyspace(session, currency)
@@ -161,6 +163,7 @@ def query_address_cluster(currency, address):
         ret = cluster_obj.__dict__
     return ret
 
+
 def query_address_cluster_id(currency, address):
     set_keyspace(session, currency)
     clusterids = session.execute(address_cluster_query[currency],
@@ -168,6 +171,7 @@ def query_address_cluster_id(currency, address):
     if clusterids:
         return clusterids[0].cluster
     return None
+
 
 def query_address_transactions(currency, page_state, address, pagesize, limit):
     set_keyspace(session, currency)
@@ -196,11 +200,13 @@ def query_address_tags(currency, address):
     tags = session.execute(address_tags_query[currency], [address])
     return [gm.Tag(row).__dict__ for row in tags]
 
+
 def query_address_with_tags(currency, address):
     result = query_address(currency, address)
     if result:
         result.tags = query_address_tags(currency, address)
     return result
+
 
 def query_implicit_tags(currency, address):
     set_keyspace(session, currency)
@@ -342,6 +348,7 @@ def query_cluster_outgoing_relations(currency, page_state, cluster, pagesize, li
     relations = [gm.ClusterOutgoingRelations(row, exchange_rate) for row in rows.current_rows]
     return page_state, relations
 
+
 def query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids, breadth, depth):
     set_keyspace(session, currency)
     if depth <= 0:
@@ -393,6 +400,7 @@ def query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids,
         obj["paths"] = subpaths
         paths.append(obj)
     return paths
+
 
 def set_keyspace(session, currency=None, space="transformed"):
     if space == "tagpacks":
@@ -524,6 +532,6 @@ def connect(app):
 
         last_height[keyspace_name] = query_last_block_height(keyspace_name)
         all_exchange_rates[keyspace_name] = query_all_exchange_rates(keyspace_name,
-                                                                last_height[keyspace_name])
+                                                                     last_height[keyspace_name])
 
     app.logger.debug("Created prepared statements")
