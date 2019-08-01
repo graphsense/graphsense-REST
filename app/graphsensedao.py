@@ -357,7 +357,7 @@ def query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids,
 
     for row in rows:
         subcluster = row.dstCluster if isOutgoing else row.srcCluster
-        if not subcluster.isdigit():
+        if not isinstance(subcluster, int):
             continue
         match = True
         props = query_cluster(currency, subcluster)
