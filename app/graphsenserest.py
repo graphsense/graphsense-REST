@@ -188,9 +188,9 @@ class UserLogoutAccess(Resource):
 '''
 
 value_response = api.model("value_response", {
-    "eur": fields.Integer(required=True, description="EUR value"),
+    "eur": fields.Float(required=True, description="EUR value"),
     "satoshi": fields.Integer(required=True, description="Satoshi value"),
-    "usd": fields.Integer(required=True, description="USD value")
+    "usd": fields.Float(required=True, description="USD value")
 })
 
 

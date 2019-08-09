@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 - Handle empty results in `query_address_with_tags`
 - Type error in `query_cluster_search_neighbors`
+- Type error in `value_response`
 
 ## [0.4.1] - 2019-07-01
 ### Changed
