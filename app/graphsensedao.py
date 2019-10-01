@@ -157,7 +157,6 @@ def query_address(currency, address):
 def query_address_cluster(currency, address):
     set_keyspace(session, currency)
     clusterid = query_address_cluster_id(currency, address)
-    print('+++++++', clusterid, '+++++++')
     ret = {}
     if clusterid:
         cluster_obj = query_cluster(currency, clusterid)
