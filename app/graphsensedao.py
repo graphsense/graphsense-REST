@@ -420,7 +420,7 @@ def set_keyspace(session, currency=None, space="transformed"):
 
 def query_all_exchange_rates(currency, h_max):
     try:
-        set_keyspace(session, currency, space="raw")
+        set_keyspace(session, currency)
         session.row_factory = dict_factory
         session.default_fetch_size = None
         print("Loading exchange rates for %s ..." % currency)
@@ -517,6 +517,12 @@ def connect(app):
         cluster_query[keyspace_name] = session.prepare("SELECT * FROM cluster WHERE cluster = ?")
         cluster_addresses_query[keyspace_name] = session.prepare("SELECT * FROM cluster_addresses WHERE cluster = ? LIMIT ?")
         cluster_addresses_without_limit_query[keyspace_name] = session.prepare("SELECT * FROM cluster_addresses WHERE cluster = ?")
+        exchange_rates_query[keyspace_name] = session.prepare("SELECT * FROM exchange_rates LIMIT ?")
+        exchange_rate_for_height_query[keyspace_name] = session.prepare("SELECT * FROM exchange_rates WHERE height = ?")
+        block_height_query[keyspace_name] = session.prepare("SELECT height FROM exchange_rates WHERE height = ?")
+        last_height[keyspace_name] = query_last_block_height(keyspace_name)
+        all_exchange_rates[keyspace_name] = query_all_exchange_rates(keyspace_name,
+                                                                     last_height[keyspace_name])
         statistics_query[keyspace_name] = session.prepare("SELECT * FROM summary_statistics LIMIT 1")
 
         set_keyspace(session, keyspace_name, space="raw")
@@ -526,12 +532,5 @@ def connect(app):
         block_transactions_query[keyspace_name] = session.prepare("SELECT * FROM block_transactions WHERE height = ?")
         block_query[keyspace_name] = session.prepare("SELECT * FROM block WHERE height = ?")
         blocks_query[keyspace_name] = session.prepare("SELECT * FROM block LIMIT ?")
-        exchange_rates_query[keyspace_name] = session.prepare("SELECT * FROM exchange_rates LIMIT ?")
-        exchange_rate_for_height_query[keyspace_name] = session.prepare("SELECT * FROM exchange_rates WHERE height = ?")
-        block_height_query[keyspace_name] = session.prepare("SELECT height FROM exchange_rates WHERE height = ?")
-
-        last_height[keyspace_name] = query_last_block_height(keyspace_name)
-        all_exchange_rates[keyspace_name] = query_all_exchange_rates(keyspace_name,
-                                                                     last_height[keyspace_name])
 
     app.logger.debug("Created prepared statements")
