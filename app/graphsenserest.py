@@ -6,6 +6,7 @@ from flask_restplus import Api, Resource, fields
 from flask_cors import CORS
 from flask_jwt_extended import (JWTManager, create_access_token, create_refresh_token, jwt_required, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt)
 from flask_jwt_extended import exceptions as jwt_extended_exceptions
+from flask_jwt import jwt as jwt_base
 from flask_sqlalchemy import SQLAlchemy
 import graphsensedao as gd
 import graphsensemodel as gm
@@ -55,6 +56,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = app.config.get("SQLALCHEMY_DATABASE_URI"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["JWT_TOKEN_LOCATION"] = "headers"
 app.config["JWT_SECRET_KEY"] = app.config.get("JWT_SECRET_KEY") or "jwt-secret-string"
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = app.config.get("JWT_ACCESS_TOKEN_EXPIRES") or 1200
 app.config["JWT_BLACKLIST_ENABLED"] = True
 app.config["JWT_BLACKLIST_TOKEN_CHECKS"] = ["access", "refresh"]
 app.config["PROPAGATE_EXCEPTIONS"] = True
@@ -105,6 +107,7 @@ search_neighbors_parser.add_argument("breadth", type=int, location="args")
     Methods related to user authentication
 '''
 @api.errorhandler(jwt_extended_exceptions.FreshTokenRequired)
+@api.errorhandler(jwt_base.ExpiredSignatureError)
 def handle_expired_error():
     return {"message": "Token has expired!"}, 401
 
@@ -196,7 +199,6 @@ value_response = api.model("value_response", {
 
 @api.route("/stats")
 class Statistics(Resource):
-    @jwt_required
     def get(self):
         """
         Returns a JSON with statistics of all the available currencies
@@ -1169,6 +1171,8 @@ class ClusterSearchNeighbors(Resource):
             depth = int(request.args.get("depth") or 1)
             # breadth search
             breadth = int(request.args.get("breadth") or 16)
+            # breadth search
+            skipNumNeighbors = int(request.args.get("skipNumNeighbors") or breadth)
         except:
             abort(400, "Invalid depth or breadth")
 
@@ -1190,7 +1194,7 @@ class ClusterSearchNeighbors(Resource):
         if ids:
             ids = [ {"address" : address, "cluster" : gd.query_address_cluster_id(currency, address)} for address in ids.split(",")]
 
-        result = gd.query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids, breadth, depth)
+        result = gd.query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids, breadth, depth, skipNumNeighbors)
         return {"paths": result}
 
 
