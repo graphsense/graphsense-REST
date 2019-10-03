@@ -1194,7 +1194,7 @@ class ClusterSearchNeighbors(Resource):
         if ids:
             ids = [ {"address" : address, "cluster" : gd.query_address_cluster_id(currency, address)} for address in ids.split(",")]
 
-        result = gd.query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids, breadth, depth, skipNumAddresses)
+        result = gd.query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids, breadth, depth, skipNumAddresses, dict())
         return {"paths": result}
 
 

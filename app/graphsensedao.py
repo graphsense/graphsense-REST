@@ -349,16 +349,27 @@ def query_cluster_outgoing_relations(currency, page_state, cluster, pagesize, li
     return page_state, relations
 
 
-def query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids, breadth, depth, skipNumAddresses):
+def query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids, breadth, depth, skipNumAddresses, cache):
     set_keyspace(session, currency)
     if depth <= 0:
         return []
 
+    def getCached(cl, key):
+        return (cache.get(cl) or {}).get(key)
+
+    def setCached(cl, key, value):
+        if cl not in cache:
+            cache[cl] = {}
+        cache[cl][key] = value
+        return value
+
+    def cached(cl, key, get):
+        return getCached(cl, key) or setCached(cl, key, get())
 
     if isOutgoing:
-        (_, rows) = query_cluster_outgoing_relations(currency, None, cluster, breadth, breadth)
+        (_, rows) = cached(cluster, 'rows', lambda : query_cluster_outgoing_relations(currency, None, cluster, breadth, breadth))
     else:
-        (_, rows) = query_cluster_incoming_relations(currency, None, cluster, breadth, breadth)
+        (_, rows) = cached(cluster, 'rows', lambda : query_cluster_incoming_relations(currency, None, cluster, breadth, breadth))
 
     paths = []
 
@@ -367,13 +378,13 @@ def query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids,
         if not isinstance(subcluster, int):
             continue
         match = True
-        props = query_cluster(currency, subcluster)
+        props = cached(subcluster, 'props', lambda : query_cluster(currency, subcluster))
         if props is None:
             print("empty cluster result for " + str(subcluster))
             continue
 
         props = props.__dict__
-        tags = query_cluster_tags(currency, subcluster)
+        tags = cached(subcluster, 'tags', lambda : query_cluster_tags(currency, subcluster))
 
         if category != None:
             # find first occurence of category in tags
@@ -388,7 +399,7 @@ def query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids,
         if match:
             subpaths = True
         elif 'noAddresses' in props and props['noAddresses'] <= skipNumAddresses:
-            subpaths = query_cluster_search_neighbors(currency, subcluster, isOutgoing, category, ids, breadth, depth - 1, skipNumAddresses)
+            subpaths = query_cluster_search_neighbors(currency, subcluster, isOutgoing, category, ids, breadth, depth - 1, skipNumAddresses, cache)
 
         if not subpaths:
             continue
