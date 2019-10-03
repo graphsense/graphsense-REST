@@ -349,7 +349,7 @@ def query_cluster_outgoing_relations(currency, page_state, cluster, pagesize, li
     return page_state, relations
 
 
-def query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids, breadth, depth, skipNumNeighbors):
+def query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids, breadth, depth, skipNumAddresses):
     set_keyspace(session, currency)
     if depth <= 0:
         return []
@@ -384,10 +384,11 @@ def query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids,
             matchingAddresses = [id["address"] for id in ids if str(id["cluster"]) == str(subcluster)]
             match = len(matchingAddresses) > 0
 
+        subpaths = False
         if match:
             subpaths = True
-        else:
-            subpaths = query_cluster_search_neighbors(currency, subcluster, isOutgoing, category, ids, breadth, depth - 1, skipNumNeighbors)
+        elif 'noAddresses' in props and props['noAddresses'] <= skipNumAddresses:
+            subpaths = query_cluster_search_neighbors(currency, subcluster, isOutgoing, category, ids, breadth, depth - 1, skipNumAddresses)
 
         if not subpaths:
             continue

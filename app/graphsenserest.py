@@ -1172,7 +1172,7 @@ class ClusterSearchNeighbors(Resource):
             # breadth search
             breadth = int(request.args.get("breadth") or 16)
             # breadth search
-            skipNumNeighbors = int(request.args.get("skipNumNeighbors") or breadth)
+            skipNumAddresses = int(request.args.get("skipNumAddresses") or breadth)
         except:
             abort(400, "Invalid depth or breadth")
 
@@ -1194,7 +1194,7 @@ class ClusterSearchNeighbors(Resource):
         if ids:
             ids = [ {"address" : address, "cluster" : gd.query_address_cluster_id(currency, address)} for address in ids.split(",")]
 
-        result = gd.query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids, breadth, depth, skipNumNeighbors)
+        result = gd.query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids, breadth, depth, skipNumAddresses)
         return {"paths": result}
 
 
