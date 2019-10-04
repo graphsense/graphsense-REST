@@ -33,11 +33,12 @@ cluster_outgoing_relations_query = {}
 cluster_outgoing_relations_without_limit_query = {}
 cluster_addresses_query = {}
 cluster_addresses_without_limit_query = {}
-block_height_query = {}
+last_block_height_query = {}
 statistics_query = {}
 keyspace_mapping = {}
 all_exchange_rates = {}
 last_height = {}
+tags_query = {}
 
 
 def query_exchange_rates(currency, offset, limit):
@@ -386,12 +387,12 @@ def query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids,
         props = props.__dict__
         tags = cached(subcluster, 'tags', lambda : query_cluster_tags(currency, subcluster))
 
-        if category != None:
+        if category is not None:
             # find first occurence of category in tags
             match = next((True for t in tags if t["category"] == category), False)
 
         matchingAddresses = []
-        if match and ids != None:
+        if match and ids is not None:
             matchingAddresses = [id["address"] for id in ids if str(id["cluster"]) == str(subcluster)]
             match = len(matchingAddresses) > 0
 
@@ -436,7 +437,7 @@ def query_all_exchange_rates(currency, h_max):
         session.row_factory = dict_factory
         session.default_fetch_size = None
         print("Loading exchange rates for %s ..." % currency)
-        results = session.execute(exchange_rates_query[currency], [h_max],
+        results = session.execute(exchange_rates_query[currency], [h_max + 1],
                                   timeout=180)
         d = {row["height"]: {"eur": row["eur"], "usd": row["usd"]}
              for row in results}
@@ -451,20 +452,9 @@ def query_all_exchange_rates(currency, h_max):
 
 def query_last_block_height(currency):
     set_keyspace(session, currency, space="raw")
-    block_max = 0
-    block_inc = 100000
-    while True:
-        rs = session.execute(block_height_query[currency], [block_max])
-        if not rs:
-            if block_max == 0:
-                return 0
-            if block_inc == 1:
-                return block_max - 1
-            else:
-                block_max -= block_inc
-                block_inc //= 10
-        else:
-            block_max += block_inc
+    res = session.execute(last_block_height_query[currency])
+    h = int(res.current_rows[0].no_blocks) - 1
+    return h
 
 
 def query_exchange_rate_for_height(currency, height):
@@ -480,7 +470,7 @@ def connect(app):
            address_outgoing_relations_query, address_query, \
            address_search_query, address_tags_query, \
            address_transactions_query, all_exchange_rates, \
-           block_height_query, block_query, block_transactions_query, \
+           last_block_height_query, block_query, block_transactions_query, \
            blocks_query, cluster_addresses_query, \
            cluster_incoming_relations_query, \
            cluster_outgoing_relations_query, \
@@ -531,7 +521,7 @@ def connect(app):
         cluster_addresses_without_limit_query[keyspace_name] = session.prepare("SELECT * FROM cluster_addresses WHERE cluster = ?")
         exchange_rates_query[keyspace_name] = session.prepare("SELECT * FROM exchange_rates LIMIT ?")
         exchange_rate_for_height_query[keyspace_name] = session.prepare("SELECT * FROM exchange_rates WHERE height = ?")
-        block_height_query[keyspace_name] = session.prepare("SELECT height FROM exchange_rates WHERE height = ?")
+        last_block_height_query[keyspace_name] = session.prepare("SELECT no_blocks FROM summary_statistics")
         last_height[keyspace_name] = query_last_block_height(keyspace_name)
         all_exchange_rates[keyspace_name] = query_all_exchange_rates(keyspace_name,
                                                                      last_height[keyspace_name])
