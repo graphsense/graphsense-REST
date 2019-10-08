@@ -209,17 +209,6 @@ def query_address_with_tags(currency, address):
     return result
 
 
-def query_implicit_tags(currency, address):
-    set_keyspace(session, currency)
-    clusters = session.execute(address_cluster_query[currency], [address, address[0:5]])
-    implicit_tags = []
-    for (clusterrow) in clusters:
-        clustertags = query_cluster_tags(currency, clusterrow.cluster)
-        if clustertags:
-            implicit_tags.extend(clustertags)
-    return implicit_tags
-
-
 def query_address_incoming_relations(currency, page_state, address, pagesize, limit):
     set_keyspace(session, currency)
     if limit is None:

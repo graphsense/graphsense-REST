@@ -708,21 +708,6 @@ class AddressTransactions(Resource):
         }
 
 
-@api.route("/<currency>/address/<address>/implicitTags")
-class AddressImplicitTags(Resource):
-    @jwt_required
-    @api.marshal_list_with(tag_response)
-    def get(self, currency, address):
-        """
-        Returns a JSON with the implicit tags of the address
-        """
-        if not address:
-            abort(404, "Address not provided")
-
-        implicit_tags = gd.query_implicit_tags(currency, address)
-        return implicit_tags
-
-
 cluster_response = api.model("address_cluster_response", {
     "balance": fields.Nested(value_response, required=True, description="Balance"),
     "cluster": fields.Integer(required=True, description="Cluster id"),
