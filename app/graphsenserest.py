@@ -708,9 +708,9 @@ class AddressTransactions(Resource):
         }
 
 
-cluster_response = api.model("address_cluster_response", {
+entity_response = api.model("address_entity_response", {
     "balance": fields.Nested(value_response, required=True, description="Balance"),
-    "cluster": fields.Integer(required=True, description="Cluster id"),
+    "entity": fields.Integer(required=True, description="Entity id"),
     "firstTx": fields.Nested(tx_response, required=True),
     "lastTx": fields.Nested(tx_response, required=True),
     "noAddresses": fields.Integer(required=True, description="Number of adDresses"),
@@ -723,24 +723,24 @@ cluster_response = api.model("address_cluster_response", {
 })
 
 
-@api.route("/<currency>/address/<address>/cluster")
-class AddressCluster(Resource):
+@api.route("/<currency>/address/<address>/entity")
+class AddressEntity(Resource):
     @jwt_required
-    @api.marshal_with(cluster_response)
+    @api.marshal_with(entity_response)
     def get(self, currency, address):
         """
-        Returns a JSON with the details of the address cluster
+        Returns a JSON with the details of the entity
         """
         if not address:
             abort(404, "Address not provided")
 
-        address_cluster = gd.query_address_cluster(currency, address)
-        return address_cluster
+        address_entity = gd.query_address_entity(currency, address)
+        return address_entity
 
 
-cluster_with_tags_response = api.model("address_cluster_with_tags_response", {
+entity_with_tags_response = api.model("address_entity_with_tags_response", {
     "balance": fields.Nested(value_response, required=True, description="Balance"),
-    "cluster": fields.Integer(required=True, description="Cluster id"),
+    "entity": fields.Integer(required=True, description="Entity id"),
     "firstTx": fields.Nested(tx_response, required=True),
     "lastTx": fields.Nested(tx_response, required=True),
     "noAddresses": fields.Integer(required=True, description="Number of adDresses"),
@@ -754,10 +754,10 @@ cluster_with_tags_response = api.model("address_cluster_with_tags_response", {
 })
 
 
-@api.route("/<currency>/address/<address>/cluster_with_tags")
-class AddressClusterWithTags(Resource):
+@api.route("/<currency>/address/<address>/entity_with_tags")
+class AddressEntityWithTags(Resource):
     @jwt_required
-    @api.marshal_with(cluster_with_tags_response)
+    @api.marshal_with(entity_with_tags_response)
     def get(self, currency, address):
         """
         Returns a JSON with edges and nodes of the address
@@ -765,10 +765,10 @@ class AddressClusterWithTags(Resource):
         if not address:
             abort(404, "Address not provided")
 
-        address_cluster = gd.query_address_cluster(currency, address)
-        if "cluster" in address_cluster:
-            address_cluster["tags"] = gd.query_cluster_tags(currency, address_cluster["cluster"])
-        return address_cluster
+        address_entity = gd.query_address_entity(currency, address)
+        if "entity" in address_entity:
+            address_entity["tags"] = gd.query_entity_tags(currency, address_entity["entity"])
+        return address_entity
 
 
 neighbor_response = api.model("neighbor_response", {
@@ -830,11 +830,11 @@ class AddressNeighbors(Resource):
                 "neighbors": [row.toJson() for row in rows]}
 
 
-def neighboursToCSV(query_function, currency, cluster, pagesize, limit, page_state = None):
+def neighboursToCSV(query_function, currency, entity, pagesize, limit, page_state = None):
     fieldnames = []
     flatDict = {}
     while True:
-        (page_state, rows) = query_function(currency, page_state, cluster, pagesize, limit)
+        (page_state, rows) = query_function(currency, page_state, entity, pagesize, limit)
 
         def flatten(item, name=""):
             if type(item) is dict:
@@ -895,83 +895,83 @@ class AddressNeighborsCSV(Resource):
         return Response(neighboursToCSV(query_function, currency, address, pagesize, limit), mimetype="text/csv")
 
 
-@api.route("/<currency>/cluster/<cluster>")
-class Cluster(Resource):
+@api.route("/<currency>/entity/<entity>")
+class Entity(Resource):
     @jwt_required
-    @api.marshal_with(cluster_response)
-    def get(self, currency, cluster):
+    @api.marshal_with(entity_response)
+    def get(self, currency, entity):
         """
-        Returns a JSON with the details of the cluster
+        Returns a JSON with the details of the entity
         """
-        if not cluster:
-            abort(404, "Cluster not provided")
+        if not entity:
+            abort(404, "Entity not provided")
         try:
-            cluster = int(cluster)
+            entity = int(entity)
         except Exception:
-            abort(404, "Invalid cluster ID")
-        cluster_obj = gd.query_cluster(currency, cluster)
-        if not cluster_obj:
-            abort(404, "Cluster not found")
-        return cluster_obj
+            abort(404, "Invalid entity ID")
+        entity_obj = gd.query_entity(currency, entity)
+        if not entity_obj:
+            abort(404, "Entity not found")
+        return entity_obj
 
 
-@api.route("/<currency>/cluster_with_tags/<cluster>")
-class ClusterWithTags(Resource):
+@api.route("/<currency>/entity_with_tags/<entity>")
+class EntityWithTags(Resource):
     @jwt_required
-    @api.marshal_with(cluster_with_tags_response)
-    def get(self, currency, cluster):
+    @api.marshal_with(entity_with_tags_response)
+    def get(self, currency, entity):
         """
-        Returns a JSON with the tags of the cluster
+        Returns a JSON with the tags of the entity
         """
-        if not cluster:
-            abort(404, "Cluster id not provided")
-        cluster_obj = gd.query_cluster(currency, cluster)
-        if not cluster_obj:
-            abort(404, "Cluster not found")
-        cluster_obj.tags = gd.query_cluster_tags(currency, cluster)
-        return cluster_obj
+        if not entity:
+            abort(404, "Entity id not provided")
+        entity_obj = gd.query_entity(currency, entity)
+        if not entity_obj:
+            abort(404, "Entity not found")
+        entity_obj.tags = gd.query_entity_tags(currency, entity)
+        return entity_obj
 
 
-@api.route("/<currency>/cluster/<cluster>/tags")
-class ClusterTags(Resource):
+@api.route("/<currency>/entity/<entity>/tags")
+class EntityTags(Resource):
     @jwt_required
     @api.marshal_list_with(tag_response)
-    def get(self, currency, cluster):
+    def get(self, currency, entity):
         """
-        Returns a JSON with the tags of the cluster
+        Returns a JSON with the tags of the entity
         """
-        if not cluster:
-            abort(404, "Cluster not provided")
+        if not entity:
+            abort(404, "Entity not provided")
         try:
-            cluster = int(cluster)
+            entity = int(entity)
         except Exception:
-            abort(404, "Invalid cluster ID")
-        tags = gd.query_cluster_tags(currency, cluster)
+            abort(404, "Invalid entity ID")
+        tags = gd.query_entity_tags(currency, entity)
         return tags
 
 
-@api.route("/<currency>/cluster/<cluster>/tags.csv")
-class ClusterTagsCSV(Resource):
+@api.route("/<currency>/entity/<entity>/tags.csv")
+class EntityTagsCSV(Resource):
     @jwt_required
-    def get(self, currency, cluster):
+    def get(self, currency, entity):
         """
-        Returns a JSON with the tags of the cluster
+        Returns a JSON with the tags of the entity
         """
-        if not cluster:
-            abort(404, "Cluster not provided")
+        if not entity:
+            abort(404, "Entity not provided")
         try:
-            cluster = int(cluster)
+            entity = int(entity)
         except Exception:
-            abort(404, "Invalid cluster ID")
+            abort(404, "Invalid entity ID")
 
-        tags = gd.query_cluster_tags(currency, cluster)
+        tags = gd.query_entity_tags(currency, entity)
 
         return Response(tagsToCSV(tags), mimetype="text/csv")
 
 
 
-cluster_address_response = api.model("cluster_address_response", {
-    "cluster": fields.Integer(required=True, description="Cluster id"),
+entity_address_response = api.model("entity_address_response", {
+    "entity": fields.Integer(required=True, description="Entity id"),
     "address": fields.String(required=True, description="Address"),
     "address_prefix": fields.String(required=True, description="Address prefix"),
     "balance": fields.Nested(value_response, required=True),
@@ -987,24 +987,24 @@ cluster_address_response = api.model("cluster_address_response", {
 
 address_transactions_response = api.model("address_transactions_response", {
     "nextPage": fields.String(required=True, description="The next page"),
-    "addresses": fields.List(fields.Nested(cluster_address_response), required=True, description="The list of cluster adresses")
+    "addresses": fields.List(fields.Nested(entity_address_response), required=True, description="The list of entity adresses")
 })
 
-@api.route("/<currency>/cluster/<cluster>/addresses")
-class ClusterAddresses(Resource):
+@api.route("/<currency>/entity/<entity>/addresses")
+class EntityAddresses(Resource):
     @jwt_required
     @api.doc(parser=limit_parser)
     @api.marshal_with(address_transactions_response)
-    def get(self,currency, cluster):
+    def get(self,currency, entity):
         """
-        Returns a JSON with the details of the addresses in the cluster
+        Returns a JSON with the details of the addresses in the entity
         """
-        if not cluster:
-            abort(404, "Cluster not provided")
+        if not entity:
+            abort(404, "Entity not provided")
         try:
-            cluster = int(cluster)
+            entity = int(entity)
         except Exception:
-            abort(404, "Invalid cluster ID")
+            abort(404, "Invalid entity ID")
         limit = request.args.get("limit")
         if limit is not None:
             try:
@@ -1019,19 +1019,19 @@ class ClusterAddresses(Resource):
                 abort(404, "Invalid pagesize value")
         page = request.args.get("page")
         page_state = bytes.fromhex(page) if page else None
-        (page, addresses) = gd.query_cluster_addresses(
-            currency, cluster, page_state, pagesize, limit)
+        (page, addresses) = gd.query_entity_addresses(
+            currency, entity, page_state, pagesize, limit)
         return {"nextPage": page.hex() if page is not None else None, "addresses": addresses}
 
 
-@api.route("/<currency>/cluster/<cluster>/neighbors")
-class ClusterNeighbors(Resource):
+@api.route("/<currency>/entity/<entity>/neighbors")
+class EntityNeighbors(Resource):
     @jwt_required
     @api.doc(parser=limit_direction_parser)
     @api.marshal_with(neighbors_response)
-    def get(self, currency, cluster):
+    def get(self, currency, entity):
         """
-        Returns a JSON with edges and nodes of the cluster
+        Returns a JSON with edges and nodes of the entity
         """
         direction = request.args.get("direction")
         if not direction:
@@ -1061,21 +1061,21 @@ class ClusterNeighbors(Resource):
         page_state = bytes.fromhex(page) if page else None
 
         if isOutgoing:
-            (page_state, rows) = gd.query_cluster_outgoing_relations(currency, page_state, cluster, pagesize, limit)
+            (page_state, rows) = gd.query_entity_outgoing_relations(currency, page_state, entity, pagesize, limit)
         else:
-            (page_state, rows) = gd.query_cluster_incoming_relations(currency, page_state, cluster, pagesize, limit)
+            (page_state, rows) = gd.query_entity_incoming_relations(currency, page_state, entity, pagesize, limit)
 
         return {"nextPage": page_state.hex() if page_state else None,
                 "neighbors": [row.toJson() for row in rows]}
 
 
-@api.route("/<currency>/cluster/<cluster>/neighbors.csv")
-class ClusterNeighborsCSV(Resource):
+@api.route("/<currency>/entity/<entity>/neighbors.csv")
+class EntityNeighborsCSV(Resource):
     @jwt_required
     @api.doc(parser=limit_direction_parser)
-    def get(self, currency, cluster):
+    def get(self, currency, entity):
         """
-        Returns a JSON with edges and nodes of the cluster
+        Returns a JSON with edges and nodes of the entity
         """
         direction = request.args.get("direction")
         if not direction:
@@ -1102,11 +1102,11 @@ class ClusterNeighborsCSV(Resource):
                 abort(404, "Invalid pagesize value")
 
         if isOutgoing:
-            query_function = gd.query_cluster_outgoing_relations
+            query_function = gd.query_entity_outgoing_relations
         else:
-            query_function = gd.query_cluster_incoming_relations
+            query_function = gd.query_entity_incoming_relations
 
-        return Response(neighboursToCSV(query_function, currency, cluster, pagesize, limit), mimetype="text/csv")
+        return Response(neighboursToCSV(query_function, currency, entity, pagesize, limit), mimetype="text/csv")
 
 
 label_response = api.model("label_response", {
@@ -1155,8 +1155,8 @@ class LabelTags(Resource):
 
 def search_neighbors_recursive(depth = 7):
     mapping = {
-        "node": fields.Nested(cluster_with_tags_response, required=True, description="Node"),
-        "matchingAddresses": fields.List(fields.Nested(address_with_tags_response, required=True, description="Addresses contained in cluster node that matched the search query (if any)")),
+        "node": fields.Nested(entity_with_tags_response, required=True, description="Node"),
+        "matchingAddresses": fields.List(fields.Nested(address_with_tags_response, required=True, description="Addresses contained in entity node that matched the search query (if any)")),
         "relation": fields.Nested(neighbor_response, required=True, description="Relation to parent node")
     }
 
@@ -1171,12 +1171,12 @@ search_neighbors_response = api.model("search_neighbors_response_depth_" + str(m
     })
 
 
-@api.route("/<currency>/cluster/<cluster>/search")
-class ClusterSearchNeighbors(Resource):
+@api.route("/<currency>/entity/<entity>/search")
+class EntitySearchNeighbors(Resource):
     @jwt_required
     @api.doc(parser=search_neighbors_parser)
     @api.marshal_with(search_neighbors_response)
-    def get(self, currency, cluster):
+    def get(self, currency, entity):
         try:
             # depth search
             depth = int(request.args.get("depth") or 1)
@@ -1203,9 +1203,9 @@ class ClusterSearchNeighbors(Resource):
         category = request.args.get("category")
         ids = request.args.get("addresses")
         if ids:
-            ids = [ {"address" : address, "cluster" : gd.query_address_cluster_id(currency, address)} for address in ids.split(",")]
+            ids = [ {"address" : address, "entity" : gd.query_address_entity_id(currency, address)} for address in ids.split(",")]
 
-        result = gd.query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids, breadth, depth, skipNumAddresses, dict())
+        result = gd.query_entity_search_neighbors(currency, entity, isOutgoing, category, ids, breadth, depth, skipNumAddresses, dict())
         return {"paths": result}
 
 

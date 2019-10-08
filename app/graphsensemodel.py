@@ -55,7 +55,7 @@ class Statistics(object):
         self.no_blocks = row.no_blocks
         self.no_address_relations = row.no_address_relations
         self.no_addresses = row.no_addresses
-        self.no_clusters = row.no_clusters
+        self.no_entitys = row.no_clusters
         self.no_transactions = row.no_transactions
         self.no_labels = row.no_tags
         self.timestamp = row.timestamp
@@ -188,9 +188,9 @@ class AddressTransactions(object):
         self.txIndex = row.tx_index
 
 
-class Cluster(object):
+class Entity(object):
     def __init__(self, row, exchange_rate):
-        self.cluster = int(row.cluster)
+        self.entity = int(row.cluster)
         self.firstTx = TxIdTime(row.first_tx.height,
                                 byte_to_hex(row.first_tx.tx_hash),
                                 row.first_tx.timestamp).__dict__
@@ -310,18 +310,18 @@ class AddressOutgoingRelations(object):
         }
 
 
-class ClusterSummary(object):
+class EntitySummary(object):
     def __init__(self, no_addresses, total_received, total_spent):
         self.noAddresses = no_addresses
         self.totalReceived = total_received
         self.totalSpent = total_spent
 
 
-class ClusterIncomingRelations(object):
+class EntityIncomingRelations(object):
     def __init__(self, row, exchange_rate):
-        self.dstCluster = row.dst_cluster
-        self.srcCluster = row.src_cluster
-        self.srcProperties = ClusterSummary(row.src_properties.no_addresses,
+        self.dstEntity = row.dst_cluster
+        self.srcEntity = row.src_cluster
+        self.srcProperties = EntitySummary(row.src_properties.no_addresses,
                                             row.src_properties.total_received,
                                             row.src_properties.total_spent)
         self.value = Value(row.value.satoshi,
@@ -335,11 +335,11 @@ class ClusterIncomingRelations(object):
                                                         exchange_rate)
 
     def id(self):
-        return self.srcCluster
+        return self.srcEntity
 
     def toJsonNode(self):
         node = {"id": self.id(),
-                "nodeType": "cluster" if isinstance(self.id(), int) else "address",
+                "nodeType": "entity" if isinstance(self.id(), int) else "address",
                 "received": self.srcProperties.totalReceived,
                 "balance": (self.srcProperties.totalReceived -
                             self.srcProperties.totalSpent)  # satoshi
@@ -347,8 +347,8 @@ class ClusterIncomingRelations(object):
         return node
 
     def toJsonEdge(self):
-        edge = {"source": self.srcCluster,
-                "target": self.dstCluster,
+        edge = {"source": self.srcEntity,
+                "target": self.dstEntity,
                 "transactions": self.noTransactions,
                 "estimatedValue": self.value}
         return edge
@@ -356,7 +356,7 @@ class ClusterIncomingRelations(object):
     def toJson(self):
         return {
             "id": self.id(),
-            "nodeType": "cluster" if isinstance(self.id(), int) else "address",
+            "nodeType": "entity" if isinstance(self.id(), int) else "address",
             "received": self.srcTotalReceived.__dict__,
             "balance": self.srcBalance.__dict__,
             "noTransactions": self.noTransactions,
@@ -364,11 +364,11 @@ class ClusterIncomingRelations(object):
         }
 
 
-class ClusterOutgoingRelations(object):
+class EntityOutgoingRelations(object):
     def __init__(self, row, exchange_rate):
-        self.srcCluster = row.src_cluster
-        self.dstCluster = row.dst_cluster
-        self.dstProperties = ClusterSummary(row.dst_properties.no_addresses,
+        self.srcEntity = row.src_cluster
+        self.dstEntity = row.dst_cluster
+        self.dstProperties = EntitySummary(row.dst_properties.no_addresses,
                                             row.dst_properties.total_received,
                                             row.dst_properties.total_spent)
         self.value = Value(row.value.satoshi,
@@ -382,11 +382,11 @@ class ClusterOutgoingRelations(object):
                                                         exchange_rate)
 
     def id(self):
-        return self.dstCluster
+        return self.dstEntity
 
     def toJsonNode(self):
         node = {"id": self.id(),
-                "nodeType": "cluster" if isinstance(self.id(), int) else "address",
+                "nodeType": "entity" if isinstance(self.id(), int) else "address",
                 "received": self.dstProperties.totalReceived,
                 "balance": (self.dstProperties.totalReceived -
                             self.dstProperties.totalSpent),  # satoshi
@@ -394,8 +394,8 @@ class ClusterOutgoingRelations(object):
         return node
 
     def toJsonEdge(self):
-        edge = {"source": self.srcCluster,
-                "target": self.dstCluster,
+        edge = {"source": self.srcEntity,
+                "target": self.dstEntity,
                 "transactions": self.noTransactions,
                 "estimatedValue": self.value}
         return edge
@@ -403,7 +403,7 @@ class ClusterOutgoingRelations(object):
     def toJson(self):
         return {
             "id": self.id(),
-            "nodeType": "cluster" if isinstance(self.id(), int) else "address",
+            "nodeType": "entity" if isinstance(self.id(), int) else "address",
             "received": self.dstTotalReceived.__dict__,
             "balance": self.dstBalance.__dict__,
             "noTransactions": self.noTransactions,
@@ -411,9 +411,9 @@ class ClusterOutgoingRelations(object):
         }
 
 
-class ClusterAddresses(object):
+class EntityAddresses(object):
     def __init__(self, row, exchange_rate):
-        self.cluster = row.cluster
+        self.entity = row.cluster
         self.address = row.address
         self.noIncomingTxs = row.no_incoming_txs
         self.noOutgoingTxs = row.no_outgoing_txs

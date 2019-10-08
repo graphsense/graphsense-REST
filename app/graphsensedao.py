@@ -20,19 +20,19 @@ address_search_query = {}
 label_search_query = None
 label_query = None
 transaction_search_query = {}
-address_cluster_query = {}
-cluster_tags_query = {}
-cluster_query = {}
+address_entity_query = {}
+entity_tags_query = {}
+entity_query = {}
 address_incoming_relations_query = {}
 address_incoming_relations_without_limit_query = {}
 address_outgoing_relations_query = {}
 address_outgoing_relations_without_limit_query = {}
-cluster_incoming_relations_query = {}
-cluster_incoming_relations_without_limit_query = {}
-cluster_outgoing_relations_query = {}
-cluster_outgoing_relations_without_limit_query = {}
-cluster_addresses_query = {}
-cluster_addresses_without_limit_query = {}
+entity_incoming_relations_query = {}
+entity_incoming_relations_without_limit_query = {}
+entity_outgoing_relations_query = {}
+entity_outgoing_relations_without_limit_query = {}
+entity_addresses_query = {}
+entity_addresses_without_limit_query = {}
 last_block_height_query = {}
 statistics_query = {}
 keyspace_mapping = {}
@@ -155,22 +155,22 @@ def query_address(currency, address):
     return gm.Address(rows[0], gm.ExchangeRate(all_exchange_rates[currency][last_height[currency]])) if rows else None
 
 
-def query_address_cluster(currency, address):
+def query_address_entity(currency, address):
     set_keyspace(session, currency)
-    clusterid = query_address_cluster_id(currency, address)
+    entityid = query_address_entity_id(currency, address)
     ret = {}
-    if clusterid:
-        cluster_obj = query_cluster(currency, clusterid)
-        ret = cluster_obj.__dict__
+    if entityid:
+        entity_obj = query_entity(currency, entityid)
+        ret = entity_obj.__dict__
     return ret
 
 
-def query_address_cluster_id(currency, address):
+def query_address_entity_id(currency, address):
     set_keyspace(session, currency)
-    clusterids = session.execute(address_cluster_query[currency],
+    entityids = session.execute(address_entity_query[currency],
                                  [address, address[0:5]])
-    if clusterids:
-        return clusterids[0].cluster
+    if entityids:
+        return entityids[0].cluster
     return None
 
 
@@ -257,28 +257,28 @@ def query_address_outgoing_relations(currency, page_state, address, pagesize, li
     return page_state, relations
 
 
-def query_cluster(currency, cluster):
+def query_entity(currency, entity):
     set_keyspace(session, currency)
-    rows = session.execute(cluster_query[currency], [int(cluster)])
-    return gm.Cluster(rows.current_rows[0],
+    rows = session.execute(entity_query[currency], [int(entity)])
+    return gm.Entity(rows.current_rows[0],
                       gm.ExchangeRate(all_exchange_rates[currency][last_height[currency]])) if rows else None
 
 
-def query_cluster_tags(currency, cluster):
+def query_entity_tags(currency, entity):
     set_keyspace(session, currency)
-    tags = session.execute(cluster_tags_query[currency], [int(cluster)])
-    clustertags = [gm.Tag(tagrow).__dict__ for (tagrow) in tags]
-    return clustertags
+    tags = session.execute(entity_tags_query[currency], [int(entity)])
+    entitytags = [gm.Tag(tagrow).__dict__ for (tagrow) in tags]
+    return entitytags
 
 
-def query_cluster_addresses(currency, cluster, page, pagesize, limit):
+def query_entity_addresses(currency, entity, page, pagesize, limit):
     set_keyspace(session, currency)
     if limit is None:
-        query = cluster_addresses_without_limit_query
-        params = [int(cluster)]
+        query = entity_addresses_without_limit_query
+        params = [int(entity)]
     else:
-        query = cluster_addresses_query
-        params = [int(cluster), limit]
+        query = entity_addresses_query
+        params = [int(entity), limit]
 
     if pagesize is not None:
         query[currency].fetch_size = pagesize
@@ -288,20 +288,20 @@ def query_cluster_addresses(currency, cluster, page, pagesize, limit):
     else:
         rows = session.execute(query[currency], params)
 
-    clusteraddresses = [gm.ClusterAddresses(row, gm.ExchangeRate(all_exchange_rates[currency][last_height[currency]])).__dict__
+    entityaddresses = [gm.EntityAddresses(row, gm.ExchangeRate(all_exchange_rates[currency][last_height[currency]])).__dict__
                         for row in rows.current_rows]
     page = rows.paging_state
-    return page, clusteraddresses
+    return page, entityaddresses
 
 
-def query_cluster_incoming_relations(currency, page_state, cluster, pagesize, limit):
+def query_entity_incoming_relations(currency, page_state, entity, pagesize, limit):
     set_keyspace(session, currency)
     if limit is None:
-        query = cluster_incoming_relations_without_limit_query
-        params = [int(cluster)]
+        query = entity_incoming_relations_without_limit_query
+        params = [int(entity)]
     else:
-        query = cluster_incoming_relations_query
-        params = [int(cluster), limit]
+        query = entity_incoming_relations_query
+        params = [int(entity), limit]
 
     if pagesize:
         query[currency].fetch_size = pagesize
@@ -313,18 +313,18 @@ def query_cluster_incoming_relations(currency, page_state, cluster, pagesize, li
 
     page_state = rows.paging_state
     exchange_rate = gm.ExchangeRate(all_exchange_rates[currency][last_height[currency]])
-    relations = [gm.ClusterIncomingRelations(row, exchange_rate) for row in rows.current_rows]
+    relations = [gm.EntityIncomingRelations(row, exchange_rate) for row in rows.current_rows]
     return page_state, relations
 
 
-def query_cluster_outgoing_relations(currency, page_state, cluster, pagesize, limit):
+def query_entity_outgoing_relations(currency, page_state, entity, pagesize, limit):
     set_keyspace(session, currency)
     if limit is None:
-        query = cluster_outgoing_relations_without_limit_query
-        params = [int(cluster)]
+        query = entity_outgoing_relations_without_limit_query
+        params = [int(entity)]
     else:
-        query = cluster_outgoing_relations_query
-        params = [int(cluster), limit]
+        query = entity_outgoing_relations_query
+        params = [int(entity), limit]
 
     if pagesize:
         query[currency].fetch_size = pagesize
@@ -335,11 +335,11 @@ def query_cluster_outgoing_relations(currency, page_state, cluster, pagesize, li
         rows = session.execute(query[currency], params)
     page_state = rows.paging_state
     exchange_rate = gm.ExchangeRate(all_exchange_rates[currency][last_height[currency]])
-    relations = [gm.ClusterOutgoingRelations(row, exchange_rate) for row in rows.current_rows]
+    relations = [gm.EntityOutgoingRelations(row, exchange_rate) for row in rows.current_rows]
     return page_state, relations
 
 
-def query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids, breadth, depth, skipNumAddresses, cache):
+def query_entity_search_neighbors(currency, entity, isOutgoing, category, ids, breadth, depth, skipNumAddresses, cache):
     set_keyspace(session, currency)
     if depth <= 0:
         return []
@@ -357,24 +357,24 @@ def query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids,
         return getCached(cl, key) or setCached(cl, key, get())
 
     if isOutgoing:
-        (_, rows) = cached(cluster, 'rows', lambda : query_cluster_outgoing_relations(currency, None, cluster, breadth, breadth))
+        (_, rows) = cached(entity, 'rows', lambda : query_entity_outgoing_relations(currency, None, entity, breadth, breadth))
     else:
-        (_, rows) = cached(cluster, 'rows', lambda : query_cluster_incoming_relations(currency, None, cluster, breadth, breadth))
+        (_, rows) = cached(entity, 'rows', lambda : query_entity_incoming_relations(currency, None, entity, breadth, breadth))
 
     paths = []
 
     for row in rows:
-        subcluster = row.dstCluster if isOutgoing else row.srcCluster
-        if not isinstance(subcluster, int):
+        subentity = row.dstEntity if isOutgoing else row.srcEntity
+        if not isinstance(subentity, int):
             continue
         match = True
-        props = cached(subcluster, 'props', lambda : query_cluster(currency, subcluster))
+        props = cached(subentity, 'props', lambda : query_entity(currency, subentity))
         if props is None:
-            print("empty cluster result for " + str(subcluster))
+            print("empty entity result for " + str(subentity))
             continue
 
         props = props.__dict__
-        tags = cached(subcluster, 'tags', lambda : query_cluster_tags(currency, subcluster))
+        tags = cached(subentity, 'tags', lambda : query_entity_tags(currency, subentity))
 
         if category is not None:
             # find first occurence of category in tags
@@ -382,14 +382,14 @@ def query_cluster_search_neighbors(currency, cluster, isOutgoing, category, ids,
 
         matchingAddresses = []
         if match and ids is not None:
-            matchingAddresses = [id["address"] for id in ids if str(id["cluster"]) == str(subcluster)]
+            matchingAddresses = [id["address"] for id in ids if str(id["entity"]) == str(subentity)]
             match = len(matchingAddresses) > 0
 
         subpaths = False
         if match:
             subpaths = True
         elif 'noAddresses' in props and props['noAddresses'] <= skipNumAddresses:
-            subpaths = query_cluster_search_neighbors(currency, subcluster, isOutgoing, category, ids, breadth, depth - 1, skipNumAddresses, cache)
+            subpaths = query_entity_search_neighbors(currency, subentity, isOutgoing, category, ids, breadth, depth - 1, skipNumAddresses, cache)
 
         if not subpaths:
             continue
@@ -455,15 +455,15 @@ def query_exchange_rate_for_height(currency, height):
 
 
 def connect(app):
-    global address_cluster_query, address_incoming_relations_query, \
+    global address_entity_query, address_incoming_relations_query, \
            address_outgoing_relations_query, address_query, \
            address_search_query, address_tags_query, \
            address_transactions_query, all_exchange_rates, \
            last_block_height_query, block_query, block_transactions_query, \
-           blocks_query, cluster_addresses_query, \
-           cluster_incoming_relations_query, \
-           cluster_outgoing_relations_query, \
-           cluster_query, cluster_tags_query, keyspace_mapping, \
+           blocks_query, entity_addresses_query, \
+           entity_incoming_relations_query, \
+           entity_outgoing_relations_query, \
+           entity_query, entity_tags_query, keyspace_mapping, \
            exchange_rate_for_height_query, exchange_rates_query, \
            last_height, session, statistics_query, transaction_search_query, \
            tx_query, txs_query, label_search_query, label_query, tags_query
@@ -495,19 +495,19 @@ def connect(app):
         address_transactions_query[keyspace_name] = session.prepare("SELECT * FROM address_transactions WHERE address = ? AND address_prefix = ? LIMIT ?")
         address_transactions_without_limit_query[keyspace_name] = session.prepare("SELECT * FROM address_transactions WHERE address = ? AND address_prefix = ?")
         address_tags_query[keyspace_name] = session.prepare("SELECT * FROM address_tags WHERE address = ?")
-        address_cluster_query[keyspace_name] = session.prepare("SELECT cluster FROM address_cluster WHERE address = ? AND address_prefix = ?")
+        address_entity_query[keyspace_name] = session.prepare("SELECT cluster FROM address_cluster WHERE address = ? AND address_prefix = ?")
         address_incoming_relations_query[keyspace_name] = session.prepare("SELECT * FROM address_incoming_relations WHERE dst_address_prefix = ? AND dst_address = ? LIMIT ?")
         address_incoming_relations_without_limit_query[keyspace_name] = session.prepare("SELECT * FROM address_incoming_relations WHERE dst_address_prefix = ? AND dst_address = ?")
         address_outgoing_relations_query[keyspace_name] = session.prepare("SELECT * FROM address_outgoing_relations WHERE src_address_prefix = ? AND src_address = ? LIMIT ?")
         address_outgoing_relations_without_limit_query[keyspace_name] = session.prepare("SELECT * FROM address_outgoing_relations WHERE src_address_prefix = ? AND src_address = ?")
-        cluster_incoming_relations_query[keyspace_name] = session.prepare("SELECT * FROM cluster_incoming_relations WHERE dst_cluster = ? LIMIT ?")
-        cluster_incoming_relations_without_limit_query[keyspace_name] = session.prepare("SELECT * FROM cluster_incoming_relations WHERE dst_cluster = ?")
-        cluster_outgoing_relations_query[keyspace_name] = session.prepare("SELECT * FROM cluster_outgoing_relations WHERE src_cluster = ? LIMIT ?")
-        cluster_outgoing_relations_without_limit_query[keyspace_name] = session.prepare("SELECT * FROM cluster_outgoing_relations WHERE src_cluster = ?")
-        cluster_tags_query[keyspace_name] = session.prepare("SELECT * FROM cluster_tags WHERE cluster = ?")
-        cluster_query[keyspace_name] = session.prepare("SELECT * FROM cluster WHERE cluster = ?")
-        cluster_addresses_query[keyspace_name] = session.prepare("SELECT * FROM cluster_addresses WHERE cluster = ? LIMIT ?")
-        cluster_addresses_without_limit_query[keyspace_name] = session.prepare("SELECT * FROM cluster_addresses WHERE cluster = ?")
+        entity_incoming_relations_query[keyspace_name] = session.prepare("SELECT * FROM cluster_incoming_relations WHERE dst_cluster = ? LIMIT ?")
+        entity_incoming_relations_without_limit_query[keyspace_name] = session.prepare("SELECT * FROM cluster_incoming_relations WHERE dst_cluster = ?")
+        entity_outgoing_relations_query[keyspace_name] = session.prepare("SELECT * FROM cluster_outgoing_relations WHERE src_cluster = ? LIMIT ?")
+        entity_outgoing_relations_without_limit_query[keyspace_name] = session.prepare("SELECT * FROM cluster_outgoing_relations WHERE src_cluster = ?")
+        entity_tags_query[keyspace_name] = session.prepare("SELECT * FROM cluster_tags WHERE cluster = ?")
+        entity_query[keyspace_name] = session.prepare("SELECT * FROM cluster WHERE cluster = ?")
+        entity_addresses_query[keyspace_name] = session.prepare("SELECT * FROM cluster_addresses WHERE cluster = ? LIMIT ?")
+        entity_addresses_without_limit_query[keyspace_name] = session.prepare("SELECT * FROM cluster_addresses WHERE cluster = ?")
         exchange_rates_query[keyspace_name] = session.prepare("SELECT * FROM exchange_rates LIMIT ?")
         exchange_rate_for_height_query[keyspace_name] = session.prepare("SELECT * FROM exchange_rates WHERE height = ?")
         last_block_height_query[keyspace_name] = session.prepare("SELECT no_blocks FROM summary_statistics")
