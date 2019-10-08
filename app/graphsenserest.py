@@ -1,6 +1,7 @@
 import json
 import re
 from functools import wraps
+from werkzeug.datastructures import Headers
 from flask import Flask, request, abort, Response, jsonify
 from flask_restplus import Api, Resource, fields
 from flask_cors import CORS
@@ -216,6 +217,11 @@ class UserLogoutAccess(Resource):
     Graphsense api methods
 '''
 
+def create_download_header(filename):
+    headers = Headers()
+    headers.add('Content-Disposition', 'attachment', filename=filename)
+    return headers
+
 value_response = api.model("value_response", {
     "eur": fields.Float(required=True, description="EUR value"),
     "satoshi": fields.Integer(required=True, description="Satoshi value"),
@@ -369,7 +375,7 @@ class BlockTransactionsCSV(Resource):
         block_transactions = gd.query_block_transactions(currency, height)
         if not block_transactions:
             abort(404, "Block height %d not found" % height)
-        return Response(transactionsToCSV(block_transactions), mimetype="text/csv")
+        return Response(transactionsToCSV(block_transactions), mimetype="text/csv", headers=create_download_header('transactions of block {} ({}).csv'.format(height, currency.upper())))
 
 input_output_response = api.model("input_output_response", {
     "address": fields.String(required=True, description="Address"),
@@ -617,7 +623,7 @@ class AddressTagsCSV(Resource):
             abort(404, "Address not provided")
 
         tags = gd.query_address_tags(currency, address)
-        return Response(tagsToCSV(tags), mimetype="text/csv")
+        return Response(tagsToCSV(tags), mimetype="text/csv", headers=create_download_header('tags of address {} ({}).csv'.format(address,currency.upper())))
 
 
 address_with_tags_response = api.model("address_with_tags_response", {
@@ -892,7 +898,7 @@ class AddressNeighborsCSV(Resource):
         else:
             query_function = gd.query_address_incoming_relations
 
-        return Response(neighboursToCSV(query_function, currency, address, pagesize, limit), mimetype="text/csv")
+        return Response(neighboursToCSV(query_function, currency, address, pagesize, limit), mimetype="text/csv", headers=create_download_header('neighbors of address {} ({}).csv'.format(address, currency.upper())))
 
 
 @api.route("/<currency>/entity/<entity>")
@@ -966,7 +972,7 @@ class EntityTagsCSV(Resource):
 
         tags = gd.query_entity_tags(currency, entity)
 
-        return Response(tagsToCSV(tags), mimetype="text/csv")
+        return Response(tagsToCSV(tags), mimetype="text/csv", headers=create_download_header('tags of entity {} ({}).csv'.format(entity, currency.upper())))
 
 
 
@@ -1106,7 +1112,7 @@ class EntityNeighborsCSV(Resource):
         else:
             query_function = gd.query_entity_incoming_relations
 
-        return Response(neighboursToCSV(query_function, currency, entity, pagesize, limit), mimetype="text/csv")
+        return Response(neighboursToCSV(query_function, currency, entity, pagesize, limit), mimetype="text/csv", headers=create_download_header('neighbors of entity {} ({}).csv'.format(entity, currency.upper())))
 
 
 label_response = api.model("label_response", {
