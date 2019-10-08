@@ -1,10 +1,10 @@
 import json
 import re
 from functools import wraps
-from flask import Flask, request, abort, Response
+from flask import Flask, request, abort, Response, jsonify
 from flask_restplus import Api, Resource, fields
 from flask_cors import CORS
-from flask_jwt_extended import (JWTManager, create_access_token, create_refresh_token, jwt_required, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt)
+from flask_jwt_extended import (JWTManager, create_access_token, create_refresh_token, jwt_required, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt, set_access_cookies, set_refresh_cookies, unset_jwt_cookies)
 from flask_jwt_extended import exceptions as jwt_extended_exceptions
 from flask_jwt import jwt as jwt_base
 from flask_sqlalchemy import SQLAlchemy
@@ -54,12 +54,30 @@ app.config["SECRET_KEY"] = app.config.get("SECRET_KEY") or "some-secret-string"
 app.config["SWAGGER_UI_JSONEDITOR"] = True
 app.config["SQLALCHEMY_DATABASE_URI"] = app.config.get("SQLALCHEMY_DATABASE_URI") or "sqlite:////var/lib/graphsense-rest/users.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["JWT_TOKEN_LOCATION"] = "headers"
+# Configure application to store JWTs in cookies
+app.config["JWT_TOKEN_LOCATION"] = ["cookies"]
 app.config["JWT_SECRET_KEY"] = app.config.get("JWT_SECRET_KEY") or "jwt-secret-string"
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = app.config.get("JWT_ACCESS_TOKEN_EXPIRES") or 1200
+app.config["JWT_REFRESH_TOKEN_EXPIRES"] = app.config.get("JWT_REFRESH_TOKEN_EXPIRES") or 3600 * 6
 app.config["JWT_BLACKLIST_ENABLED"] = True
 app.config["JWT_BLACKLIST_TOKEN_CHECKS"] = ["access", "refresh"]
 app.config["PROPAGATE_EXCEPTIONS"] = True
+
+# Only allow JWT cookies to be sent over https. In production, this
+# should likely be True
+app.config['JWT_COOKIE_SECURE'] = app.config.get("JWT_COOKIE_SECURE") if "JWT_COOKIE_SECURE" in app.config else True
+
+# Set the cookie paths, so that you are only sending your access token
+# cookie to the access endpoints, and only sending your refresh token
+# to the refresh endpoint. Technically this is optional, but it is in
+# your best interest to not send additional cookies in the request if
+# they aren't needed.
+app.config['JWT_ACCESS_COOKIE_PATH'] = '/'
+app.config['JWT_REFRESH_COOKIE_PATH'] = '/token_refresh'
+
+# Enable csrf double submit protection. See this for a thorough
+# explanation: http://www.redotheweb.com/2015/11/09/api-security.html
+app.config['JWT_COOKIE_CSRF_PROTECT'] = True
 
 app.config.from_envvar("GRAPHSENSE_REST_SETTINGS", silent=True)
 
@@ -136,7 +154,13 @@ def auth_required(f):
             if authmodel.GraphsenseUser.verify_hash(auth.password, current_user.password):
                 access_token = create_access_token(identity=auth.username)
                 refresh_token = create_refresh_token(identity=auth.password)
-                return { "message": "Logged in as {}".format(current_user.userName), "access_token": access_token, "refresh_token": refresh_token }, 200
+
+                # Set the JWTs and the CSRF double submit protection cookies
+                # in this response
+                resp = jsonify({ "loggedin": True})
+                set_access_cookies(resp, access_token)
+                set_refresh_cookies(resp, refresh_token)
+                return resp
             else:
                 return {"message": "Could not verify your login! Wrong credentials"}, 401
         return {"message": "Could not verify your login!"}, 401, {"WWW-Authenticate": "Basic realm=\"Login required\""}
@@ -158,7 +182,9 @@ class UserTokenRefresh(Resource):
     def get(self):
         current_user = get_jwt_identity()
         access_token = create_access_token(identity=current_user)
-        return {"access_token": access_token}, 200
+        resp = jsonify({"refreshed": True})
+        set_access_cookies(resp, access_token)
+        return resp
 
 
 @api.route("/logout_refresh", methods=["GET"])
