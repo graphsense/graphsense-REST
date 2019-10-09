@@ -1158,6 +1158,20 @@ class LabelTags(Resource):
             abort(404, "Label not found")
         return result
 
+category_response = api.model("category_response", {
+    "category": fields.String(required=True, description="Category")
+})
+
+
+@api.route("/categories")
+class Categories(Resource):
+    @jwt_required
+    @api.marshal_list_with(category_response)
+    def get(self):
+        """
+        Returns a JSON with the categories
+        """
+        return gd.query_categories()
 
 def search_neighbors_recursive(depth = 7):
     mapping = {

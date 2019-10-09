@@ -78,6 +78,10 @@ class Label(object):
         self.label = row.label
         self.address_count = row.address_count
 
+class Category(object):
+    def __init__(self, row):
+        self.category = row.category
+
 class Transaction(object):
     def __init__(self, row, rates):
         self.txHash = byte_to_hex(row.tx_hash)

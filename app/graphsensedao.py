@@ -148,6 +148,11 @@ def query_label(label_norm_prefix, label_norm):
     label = session.execute(label_query, [label_norm_prefix, label_norm])
     return gm.Label(label[0]).__dict__ if label else None
 
+def query_categories():
+    set_keyspace(session, "", space="tagpacks")
+    rows = session.execute(categories_query)
+    rows._fetch_all()
+    return [gm.Category(row).__dict__ for row in rows]
 
 def query_address(currency, address):
     set_keyspace(session, currency)
@@ -466,7 +471,7 @@ def connect(app):
            entity_query, entity_tags_query, keyspace_mapping, \
            exchange_rate_for_height_query, exchange_rates_query, \
            last_height, session, statistics_query, transaction_search_query, \
-           tx_query, txs_query, label_search_query, label_query, tags_query
+           tx_query, txs_query, label_search_query, label_query, tags_query, categories_query
 
     cluster = cassandra.cluster.Cluster(app.config["CASSANDRA_NODES"])
     app.logger.debug("Created new Cassandra cluster.")
@@ -475,16 +480,15 @@ def connect(app):
     # create the prepared statements; alternative strategy is to not use
     # prepared statements and specify the keyspace in the query string
     keyspace_mapping = app.config["MAPPING"]
-    if "tagpacks" in keyspace_mapping.keys() and keyspace_mapping["tagpacks"] == "tagpacks":
-        keyspace_name = "tagpacks"  # it must be "tagpacks"
-    else:
+    if "tagpacks" not in keyspace_mapping.keys():
         abort(404, "Tagpacks keyspace missing")
 
-    session = cluster.connect(keyspace_mapping[keyspace_name])
+    session = cluster.connect(keyspace_mapping["tagpacks"])
     session.default_fetch_size = 10
     app.logger.debug("Created new Cassandra session.")
     label_search_query = session.prepare("SELECT label,label_norm FROM tag_by_label WHERE label_norm_prefix = ? GROUP BY label_norm_prefix, label_norm")
     label_query = session.prepare("SELECT label_norm, label_norm_prefix, label, COUNT(address) as address_count FROM tag_by_label WHERE label_norm_prefix = ? and label_norm = ? GROUP BY label_norm_prefix, label_norm")
+    categories_query = session.prepare("SELECT category FROM categories")
     tags_query = session.prepare("SELECT * FROM tag_by_label WHERE label_norm_prefix = ? and label_norm = ?")
     for keyspace_name in keyspace_mapping.keys():
         if keyspace_name == "tagpacks":
