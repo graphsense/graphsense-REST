@@ -39,15 +39,6 @@ then create a new user and password of your choice and start the interface with
     cd app/
     sudo ./adduser_and_start_rest.sh <user> <password>
 
-## Generate never expiring JWT
-
-For development purposes you may generate a never expiring JSON Web Token. 
-
-1. Set `"JWT_ACCESS_TOKEN_EXPIRES": false` in `app/config.json`
-2. Restart the REST service.
-3. Visit `/login` and enter credentials.
-4. On success, the response contains your token in the field `access_token`.
-
 ##### Using `docker`
 
 After installing [docker][docker], set the REST password (and username)
