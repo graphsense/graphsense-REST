@@ -44,6 +44,10 @@ Install the requirements
 
     pip3 install -r requirements.txt
 
+Init the user database
+
+    flask init-db
+
 Run the REST interface
 
     export FLASK_APP=app
@@ -51,17 +55,9 @@ Run the REST interface
 
     flask run
 
+## Add a user
 
-##### Using `pip`
-
-Run 
-
-    pip install -r requirements.txt
-
-then create a new user and password of your choice and start the interface with
-
-    cd app/
-    sudo ./adduser_and_start_rest.sh <user> <password>
+TODO
 
 ##### Using `docker`
 

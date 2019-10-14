@@ -26,13 +26,18 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    # a simple page that says hello
+    # register user database
+    from . import user_db
+    user_db.init_app(app)
+
+    # for testing purposes: a simple page that says hello
     @app.route('/hello')
     def hello():
         return 'Hello, World!'
 
     api = Api(app)
 
+    # for testing purposes: a REST endpoint
     @api.route('/helloworld')
     class HelloWorld(Resource):
         def get(self):

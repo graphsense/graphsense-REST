@@ -1,3 +1,4 @@
+instance
 *.sublime-project
 *.sublime-workspace
 venv
