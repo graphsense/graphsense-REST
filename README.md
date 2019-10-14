@@ -4,7 +4,16 @@ The GraphSense REST Interface provides access to denormalized views computed
 by the [Graphsense Transformation Pipeline][graphsense-transformation].
 It is used by the [graphsense-dashboard][graphsense-dashboard] component.
 
-## Configuration
+## Prerequisites
+
+Make sure you are running Python version >= 3.6
+
+    python --version
+
+You need access to GraphSense raw and transformed keyspaces. See [Graphsense Transformation Pipeline][graphsense-transformation] for further details.
+
+
+## REST Interface Configuration
 
 Create a configuration file
 
@@ -22,11 +31,27 @@ The keyspaces are configured according to the following structure
      "tagpacks": "tagpacks"
     }
 
-## Run REST interface locally
+## Run REST interface locally without Docker
 
-The REST interface is implemented in Python, Python version 3 is recommended.
+Create a python environment for required dependencies
 
-You can run the API either using `pip` or `docker`:
+    python -m venv venv
+
+Activate the environment
+
+    . venv/bin/activate
+
+Install the requirements
+
+    pip install -r requirements.txt
+
+Run the REST interface
+
+    export FLASK_APP=app
+    export FLASK_ENV=development
+
+    flask run
+
 
 ##### Using `pip`
 
