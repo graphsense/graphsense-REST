@@ -6,12 +6,11 @@ It is used by the [graphsense-dashboard][graphsense-dashboard] component.
 
 ## Prerequisites
 
-Make sure you are running Python version >= 3.6
+Make sure you are running Python version >= 3.7
 
-    python --version
+    python3 --version
 
 You need access to GraphSense raw and transformed keyspaces. See [Graphsense Transformation Pipeline][graphsense-transformation] for further details.
-
 
 ## REST Interface Configuration
 
@@ -35,7 +34,7 @@ The keyspaces are configured according to the following structure
 
 Create a python environment for required dependencies
 
-    python -m venv venv
+    python3 -m venv venv
 
 Activate the environment
 
@@ -43,7 +42,7 @@ Activate the environment
 
 Install the requirements
 
-    pip install -r requirements.txt
+    pip3 install -r requirements.txt
 
 Run the REST interface
 

@@ -1,6 +1,7 @@
 import os
 
 from flask import Flask
+from flask_restplus import Resource, Api
 
 
 def create_app(test_config=None):
@@ -29,5 +30,12 @@ def create_app(test_config=None):
     @app.route('/hello')
     def hello():
         return 'Hello, World!'
+
+    api = Api(app)
+
+    @api.route('/helloworld')
+    class HelloWorld(Resource):
+        def get(self):
+            return {'hello': 'world'}
 
     return app
