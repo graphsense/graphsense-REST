@@ -1,8 +1,7 @@
-from werkzeug.security import generate_password_hash
-
 import click
 from flask.cli import with_appcontext
 
+from app.model.user import User
 from app.db.user_db import get_db
 
 
@@ -13,13 +12,10 @@ def init_app(app):
 def create_user(username, password):
     db = get_db()
 
-    if not username:
-        raise Exception("Username is required")
-    if not password:
-        raise Exception("Password is required")
+    user = User(username, password)
 
     db.execute('INSERT INTO user (username, password) VALUES (?, ?)',
-               (username, generate_password_hash(password))
+               (user.username, user.password_hash)
                )
     db.commit()
 
