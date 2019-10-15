@@ -1,6 +1,6 @@
+__pycache__
 instance
 *.sublime-project
 *.sublime-workspace
 venv
 app/config.json
-app/__pycache__/
