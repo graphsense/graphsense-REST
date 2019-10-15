@@ -1,5 +1,7 @@
 from flask_restplus import Namespace, Resource
 
+# from app.service.user_service import create_user
+
 api = Namespace('auth',
                 path='/',
                 description='Operations related to authentication')

@@ -26,9 +26,14 @@ def create_app(test_config=None):
         pass
 
     # register user database
-    from . import user_db
+    from .db import user_db
     user_db.init_app(app)
 
+    # register user service
+    from .service import user_service
+    user_service.init_app(app)
+
+    # register api namespaces
     from .apis import api
     api.init_app(app)
 
