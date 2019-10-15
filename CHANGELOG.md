@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 ### Changed
 - Use integer values for cluster IDs
+- Increase size of uWSGI listen queue from 100 to 1024, fix #18
 ### Fixed
 - Handle empty results in `query_address_with_tags`
 - Type error in `query_cluster_search_neighbors`
