@@ -574,7 +574,8 @@ tag_response = api.model("tag_response", {
     "tagpack_uri": fields.String(required=True, description="Tagpack URI"),
     "currency": fields.String(required=True, description="Currency"),
     "lastmod": fields.String(required=True, description="Last modified"),
-    "category": fields.String(required=False, description="Category")
+    "category": fields.String(required=False, description="Category"),
+    "abuse": fields.String(required=False, description="Abuse")
 })
 
 

@@ -66,6 +66,7 @@ class Tag(object):
         self.address = row.address
         self.label = row.label
         self.category = row.category
+        self.abuse = row.abuse
         self.tagpack_uri = row.tagpack_uri
         self.source = row.source
         self.lastmod = row.lastmod
