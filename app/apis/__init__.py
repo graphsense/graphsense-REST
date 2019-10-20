@@ -1,7 +1,7 @@
 from flask_restplus import Api
 
-from .auth import api as auth_api
-from .blocks import api as blocks_api
+from app.apis.auth import api as auth_api
+from app.apis.blocks import api as blocks_api
 
 api = Api(
     title='GraphSense REST API',

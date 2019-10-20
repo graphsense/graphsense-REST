@@ -1,4 +1,4 @@
-from .user_service import find_user
+from app.service.user_service import find_user
 
 
 class Auth:
