@@ -1,16 +1,19 @@
+import datetime
+import jwt
 from werkzeug.security import generate_password_hash, check_password_hash
+
+SECRET_KEY = 'some secret'
 
 
 class User(object):
     """ User Model for storing user related details """
 
-    def __init__(self, username, password):
+    def __init__(self, username, password=None):
         if not username:
             raise Exception("Username is required")
-        if not password:
-            raise Exception("Password is required")
         self.username = username
-        self.password = password
+        if password:
+            self.password = password
 
     @property
     def password(self):
@@ -22,6 +25,26 @@ class User(object):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+    def encode_auth_token(self, username):
+            """
+            Generates the Auth Token
+            :return: string
+            """
+            try:
+                payload = {
+                    'exp': datetime.datetime.utcnow() +
+                    datetime.timedelta(days=1, seconds=5),
+                    'iat': datetime.datetime.utcnow(),
+                    'sub': username
+                }
+                return jwt.encode(
+                    payload,
+                    SECRET_KEY,
+                    algorithm='HS256'
+                )
+            except Exception as e:
+                return e
 
     def __repr__(self):
         return "<User '{}'>".format(self.username)
