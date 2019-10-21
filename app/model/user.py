@@ -2,6 +2,8 @@ import datetime
 import jwt
 from werkzeug.security import generate_password_hash, check_password_hash
 
+from app.service.blacklist_service import check_blacklist
+
 SECRET_KEY = 'some secret'
 
 
@@ -48,3 +50,22 @@ class User(object):
 
     def __repr__(self):
         return "<User '{}'>".format(self.username)
+
+    @staticmethod
+    def decode_auth_token(auth_token):
+        """
+        Decodes the auth token
+        :param auth_token:
+        :return: integer|string
+        """
+        try:
+            payload = jwt.decode(auth_token, SECRET_KEY)
+            is_blacklisted_token = check_blacklist(auth_token)
+            if is_blacklisted_token:
+                return 'Token blacklisted. Please log in again.'
+            else:
+                return payload['sub']
+        except jwt.ExpiredSignatureError:
+            return 'Signature expired. Please log in again.'
+        except jwt.InvalidTokenError:
+            return 'Invalid token. Please log in again.'
