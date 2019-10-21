@@ -21,6 +21,7 @@ class UserLogin(Resource):
     """
     @api.doc('user login')
     @api.expect(user_auth, validate=True)
+    @api.doc(security=[])
     def post(self):
         # get the post data
         post_data = request.json
