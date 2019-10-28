@@ -2,22 +2,25 @@ import os
 
 from flask import Flask
 
+from app.config import Config
+
 
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
     # read the configuration
-    app.config.from_mapping(
-        SECRET_KEY='dev',
-        DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
-    )
 
     if test_config is None:
-        # load the instance config, if it exists, when not testing
-        app.config.from_pyfile('config.py', silent=True)
+        # load default config, when not testing
+        config = Config(instance_path=app.instance_path)
+        app.config.from_object(config)
+        # override with instance config, if available
+        app.config.from_pyfile('config.py', silent=False)
     else:
         # load the test config if passed in
         app.config.from_mapping(test_config)
+
+    print(app.config)
 
     # ensure the instance folder exists
     try:
@@ -26,15 +29,15 @@ def create_app(test_config=None):
         pass
 
     # register user database
-    from .db import user_db
+    from app.db import user_db
     user_db.init_app(app)
 
     # register user service
-    from .service import user_service
+    from app.service import user_service
     user_service.init_app(app)
 
     # register api namespaces
-    from .apis import api
+    from app.apis import api
     api.init_app(app)
 
     return app

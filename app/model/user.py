@@ -4,7 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from app.service.blacklist_service import check_blacklist
 
-SECRET_KEY = 'some secret'
+from flask import current_app
 
 
 class User(object):
@@ -36,13 +36,14 @@ class User(object):
             try:
                 payload = {
                     'exp': datetime.datetime.utcnow() +
-                    datetime.timedelta(days=1, seconds=5),
+                    datetime.timedelta(
+                        current_app.config['JWT_ACCESS_TOKEN_EXPIRES_DAYS']),
                     'iat': datetime.datetime.utcnow(),
                     'sub': username
                 }
                 return jwt.encode(
                     payload,
-                    SECRET_KEY,
+                    current_app.config['SECRET_KEY'],
                     algorithm='HS256'
                 )
             except Exception as e:
@@ -59,7 +60,7 @@ class User(object):
         :return: integer|string
         """
         try:
-            payload = jwt.decode(auth_token, SECRET_KEY)
+            payload = jwt.decode(auth_token, current_app.config['SECRET_KEY'])
             is_blacklisted_token = check_blacklist(auth_token)
             if is_blacklisted_token:
                 return 'Token blacklisted. Please log in again.'
