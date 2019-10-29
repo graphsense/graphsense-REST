@@ -1,3 +1,4 @@
+import json
 import os
 import tempfile
 
@@ -14,10 +15,17 @@ class AuthActions(object):
         self._client = client
 
     def login(self, username='john', password='doe'):
-        return self._client.post(
+        response = self._client.post(
             '/login',
-            data={'username': username, 'password': password}
+            data=json.dumps(dict(
+                username=username,
+                password=password
+            )),
+            content_type='application/json'
         )
+        data = json.loads(response.data.decode())
+        self._client.environ_base['HTTP_AUTHORIZATION'] = data['Authorization']
+        return response
 
     def logout(self):
         return self._client.get('/logout')
