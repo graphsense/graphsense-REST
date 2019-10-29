@@ -10,10 +10,6 @@ Make sure you are running Python version >= 3.7
 
     python3 --version
 
-You need access to GraphSense raw and transformed keyspaces. See [Graphsense Transformation Pipeline][graphsense-transformation] for further details.
-
-## Run REST interface locally without Docker
-
 Create a python environment for required dependencies
 
     python3 -m venv venv
@@ -26,6 +22,15 @@ Install the requirements
 
     pip3 install -r requirements.txt
 
+Export REST interface env variables
+
+    export FLASK_APP=gsrest
+    export FLASK_ENV=development
+
+You need access to GraphSense raw and transformed keyspaces. See [Graphsense Transformation Pipeline][graphsense-transformation] for further details.
+
+## Development (without Docker)
+
 Init the user database
 
     flask init-db
@@ -36,14 +41,28 @@ Create a username and password
 
 Run the REST interface
 
-    export FLASK_APP=app
-    export FLASK_ENV=development
-
     flask run
 
 Test the service in your browser:
 
     http://localhost:5000
+
+
+## Testing
+
+Install project in local environment
+
+    pip install -e .
+
+Run tests
+
+    pytest
+
+Check test coverage
+
+    coverage run -m pytest
+    coverage report
+
 
 ## Authenticate your client app
 

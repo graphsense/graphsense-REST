@@ -1,8 +1,8 @@
 import click
 from flask.cli import with_appcontext
 
-from app.model.user import User
-from app.db.user_db import get_db
+from gsrest.model.user import User
+from gsrest.db.user_db import get_db
 
 
 def init_app(app):

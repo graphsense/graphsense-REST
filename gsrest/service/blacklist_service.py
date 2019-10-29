@@ -1,5 +1,5 @@
-from app.model.blacklist import BlacklistToken
-from app.db.user_db import get_db
+from gsrest.model.blacklist import BlacklistToken
+from gsrest.db.user_db import get_db
 
 
 def save_token(token):

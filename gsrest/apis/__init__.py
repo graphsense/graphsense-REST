@@ -1,7 +1,7 @@
 from flask_restplus import Api
 
-from app.apis.auth import api as auth_api
-from app.apis.blocks import api as blocks_api
+from gsrest.apis.auth import api as auth_api
+from gsrest.apis.blocks import api as blocks_api
 
 authorizations = {
     'apikey': {

@@ -2,7 +2,7 @@ import os
 
 from flask import Flask
 
-from app.config import Config
+from gsrest.config import Config
 
 
 def create_app(test_config=None):
@@ -20,8 +20,6 @@ def create_app(test_config=None):
         # load the test config if passed in
         app.config.from_mapping(test_config)
 
-    print(app.config)
-
     # ensure the instance folder exists
     try:
         os.makedirs(app.instance_path)
@@ -29,15 +27,15 @@ def create_app(test_config=None):
         pass
 
     # register user database
-    from app.db import user_db
+    from gsrest.db import user_db
     user_db.init_app(app)
 
     # register user service
-    from app.service import user_service
+    from gsrest.service import user_service
     user_service.init_app(app)
 
     # register api namespaces
-    from app.apis import api
+    from gsrest.apis import api
     api.init_app(app)
 
     return app

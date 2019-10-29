@@ -2,7 +2,7 @@ import datetime
 import jwt
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from app.service.blacklist_service import check_blacklist
+from gsrest.service.blacklist_service import check_blacklist
 
 from flask import current_app
 

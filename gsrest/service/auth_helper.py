@@ -1,6 +1,6 @@
-from app.model.user import User
-from app.service.user_service import find_user
-from app.service.blacklist_service import save_token
+from gsrest.model.user import User
+from gsrest.service.user_service import find_user
+from gsrest.service.blacklist_service import save_token
 
 
 class Auth:

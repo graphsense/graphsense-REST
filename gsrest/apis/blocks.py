@@ -1,6 +1,6 @@
 from flask_restplus import Namespace, Resource
 
-from app.util.decorator import token_required
+from gsrest.util.decorator import token_required
 
 api = Namespace('blocks',
                 path='/<currency>/blocks',

@@ -1,7 +1,7 @@
 from flask import request
 from flask_restplus import Namespace, Resource, fields
 
-from app.service.auth_helper import Auth
+from gsrest.service.auth_helper import Auth
 
 api = Namespace('auth',
                 path='/',
