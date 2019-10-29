@@ -28,12 +28,12 @@ def find_user(username):
     ).fetchone()
 
     if db_user is None:
-        print('User {} not found'.format(username))
+        # print('User {} not found'.format(username))
         return None
     else:
         user = User(username=db_user['username'])
         user.password_hash = db_user['password']
-        print('User {} found'.format(username))
+        # print('User {} found'.format(username))
         return user
 
 

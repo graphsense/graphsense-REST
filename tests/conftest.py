@@ -9,13 +9,29 @@ from gsrest.db.user_db import init_db
 from gsrest.service.user_service import create_user
 
 
+class AuthActions(object):
+    def __init__(self, client):
+        self._client = client
+
+    def login(self, username='john', password='doe'):
+        return self._client.post(
+            '/login',
+            data={'username': username, 'password': password}
+        )
+
+    def logout(self):
+        return self._client.get('/logout')
+
+
 @pytest.fixture
-def application():
+def app():
     db_fd, db_path = tempfile.mkstemp()
 
     app = create_app({
         'TESTING': True,
-        'DATABASE': db_path
+        'DATABASE': db_path,
+        'JWT_ACCESS_TOKEN_EXPIRES_DAYS': 5,
+        'SECRET_KEY': 'testing_secret'
     })
 
     with app.app_context():
@@ -29,10 +45,15 @@ def application():
 
 
 @pytest.fixture
-def client(application):
-    return application.test_client()
+def client(app):
+    return app.test_client()
 
 
 @pytest.fixture
-def runner(application):
-    return application.test_cli_runner()
+def runner(app):
+    return app.test_cli_runner()
+
+
+@pytest.fixture
+def auth(client):
+    return AuthActions(client)

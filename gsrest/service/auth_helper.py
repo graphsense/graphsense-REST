@@ -22,7 +22,7 @@ class Auth:
             else:
                 response_object = {
                     'status': 'fail',
-                    'message': 'email or password does not match.'
+                    'message': 'Error: email or password does not match.'
                 }
                 return response_object, 401
 
@@ -38,7 +38,6 @@ class Auth:
     def logout_user(data):
         if data:
             resp = User.decode_auth_token(data)
-            print(resp)
             if isinstance(resp, str):
                 # mark the token as blacklisted
                 save_token(token=data)
