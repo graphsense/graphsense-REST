@@ -28,7 +28,7 @@ class User(object):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    def encode_auth_token(self, username):
+    def encode_auth_token(self):
             """
             Generates the Auth Token
             :return: string
@@ -39,7 +39,7 @@ class User(object):
                     datetime.timedelta(
                         current_app.config['JWT_ACCESS_TOKEN_EXPIRES_DAYS']),
                     'iat': datetime.datetime.utcnow(),
-                    'sub': username
+                    'sub': self.username
                 }
                 return jwt.encode(
                     payload,
@@ -57,7 +57,7 @@ class User(object):
         """
         Decodes the auth token
         :param auth_token:
-        :return: integer|string
+        :return: string
         """
         try:
             payload = jwt.decode(auth_token, current_app.config['SECRET_KEY'])

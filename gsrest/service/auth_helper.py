@@ -11,7 +11,7 @@ class Auth:
             # fetch the user data
             user = find_user(data['username'])
             if user and user.check_password(data.get('password')):
-                auth_token = user.encode_auth_token(user.username)
+                auth_token = user.encode_auth_token()
                 if auth_token:
                     response_object = {
                         'status': 'success',
