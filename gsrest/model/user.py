@@ -3,6 +3,7 @@ import jwt
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from gsrest.service.blacklist_service import check_blacklist
+from gsrest.util.exceptions import MissingConfigError
 
 from flask import current_app
 
@@ -29,25 +30,27 @@ class User(object):
         return check_password_hash(self.password_hash, password)
 
     def encode_auth_token(self):
-            """
-            Generates the Auth Token
-            :return: string
-            """
-            try:
-                payload = {
-                    'exp': datetime.datetime.utcnow() +
-                    datetime.timedelta(
-                        current_app.config['JWT_ACCESS_TOKEN_EXPIRES_DAYS']),
-                    'iat': datetime.datetime.utcnow(),
-                    'sub': self.username
-                }
-                return jwt.encode(
-                    payload,
-                    current_app.config['SECRET_KEY'],
-                    algorithm='HS256'
-                )
-            except Exception as e:
-                return e
+        """
+        Generates the Auth Token
+        :return: string
+        """
+        if current_app.config.get('JWT_ACCESS_TOKEN_EXPIRES_DAYS') is None:
+            raise MissingConfigError(
+                'JWT_ACCESS_TOKEN_EXPIRES_DAYS is not set in config')
+
+        payload = {
+            'exp': datetime.datetime.utcnow() +
+            datetime.timedelta(days=current_app.config[
+                'JWT_ACCESS_TOKEN_EXPIRES_DAYS']),
+            'iat': datetime.datetime.utcnow(),
+            'sub': self.username
+        }
+
+        return jwt.encode(
+            payload,
+            current_app.config['SECRET_KEY'],
+            algorithm='HS256'
+        )
 
     def __repr__(self):
         return "<User '{}'>".format(self.username)
