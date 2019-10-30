@@ -47,7 +47,6 @@ Test the service in your browser:
 
     http://localhost:5000
 
-
 ## Testing
 
 Install project in local environment
@@ -64,7 +63,21 @@ Check test coverage
     coverage report
 
 
-## Authenticate your client app
+## Deployment
+
+When used in production, GraphSense-REST must be deployed to a WSGI server because Flask's built-in server is not suitable for production - it doesn't scale. From [several deployment options](https://flask.palletsprojects.com/en/1.1.x/deploying/#self-hosted-options), we have chosen [Gunicorn][gunicorn].
+
+Install gunicorn
+
+    pip install gunicorn
+
+Run production server
+
+    gunicorn "gsrest:create_app()"
+
+## Usage
+
+### Authenticate your client app
 
 All REST interface methods require authentication via [JSON Web Tokens (JWT][https://jwt.io/].
 
@@ -112,3 +125,4 @@ should be set before starting the app
 [graphsense-transformation]: https://github.com/graphsense/graphsense-transformation
 [graphsense-dashboard]: https://github.com/graphsense/graphsense-dashboard
 [docker]: https://docs.docker.com/install
+[gunicorn]: https://gunicorn.org/#docs
