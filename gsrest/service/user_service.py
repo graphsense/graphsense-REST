@@ -1,4 +1,5 @@
 import click
+from flask import current_app
 from flask.cli import with_appcontext
 
 from gsrest.model.user import User
@@ -18,6 +19,7 @@ def create_user(username, password):
                (user.username, user.password_hash)
                )
     db.commit()
+    current_app.logger.info('Created user %s', username)
 
 
 def find_user(username):
@@ -28,12 +30,12 @@ def find_user(username):
     ).fetchone()
 
     if db_user is None:
-        # print('User {} not found'.format(username))
+        current_app.logger.info('User %s not found', username)
         return None
     else:
         user = User(username=db_user['username'])
         user.password_hash = db_user['password']
-        # print('User {} found'.format(username))
+        current_app.logger.info('User %s found', username)
         return user
 
 

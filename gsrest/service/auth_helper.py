@@ -1,3 +1,5 @@
+from flask import current_app
+
 from gsrest.model.user import User
 from gsrest.service.user_service import find_user
 from gsrest.service.blacklist_service import save_token
@@ -27,7 +29,7 @@ class Auth:
                 return response_object, 401
 
         except Exception as e:
-            print(e)
+            current_app.logger.error('User login error: %s', e)
             response_object = {
                 'status': 'fail',
                 'message': 'Try again'
