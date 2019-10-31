@@ -13,7 +13,7 @@ def get_block(currency, height):
     query = "SELECT * FROM block WHERE height = %s"
     result = session.execute(query, [height])
 
-    return Block(result[0]).__dict__ if result else None
+    return Block.from_row(result[0]).__dict__ if result else None
 
 
 def list_blocks(currency, paging_state=None):
@@ -24,6 +24,6 @@ def list_blocks(currency, paging_state=None):
     results = session.execute(statement, paging_state=paging_state)
 
     paging_state = results.paging_state
-    block_list = [Block(row).__dict__ for row in results.current_rows]
+    block_list = [Block.from_row(row).__dict__ for row in results.current_rows]
 
     return paging_state, block_list

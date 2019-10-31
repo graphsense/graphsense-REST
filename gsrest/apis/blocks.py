@@ -30,7 +30,8 @@ class Block(Resource):
         """
         block = blocksDAO.get_block(currency, height)
         if not block:
-            abort(404, "Block height %d not found" % height)
+            abort(404, "Block height %d not found in currency %s"
+                  % (height, currency))
         return block
 
 
