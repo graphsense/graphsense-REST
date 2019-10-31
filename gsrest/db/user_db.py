@@ -12,6 +12,7 @@ def init_app(app):
 
 def get_db():
     if 'db' not in g:
+        current_app.logger.info("Connecting to user db.")
         g.db = sqlite3.connect(
             current_app.config['DATABASE'],
             detect_types=sqlite3.PARSE_DECLTYPES

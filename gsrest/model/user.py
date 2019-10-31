@@ -13,7 +13,7 @@ class User(object):
 
     def __init__(self, username, password=None):
         if not username:
-            raise Exception("Username is required")
+            raise ValueError("Username is required")
         self.username = username
         if password:
             self.password = password
