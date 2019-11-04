@@ -17,7 +17,38 @@ def get_cluster():
     return g.ccluster
 
 
-def get_session(currency, keyspace):
+def get_keyspace_mapping_definition():
+    if 'MAPPING' not in current_app.config:
+        raise MissingConfigError('Missing config property: MAPPING')
+    return current_app.config['MAPPING']
+
+
+def get_supported_currencies():
+    ks_mapping = get_keyspace_mapping_definition()
+    return dict(filter(lambda elem: elem[0] != 'tagpacks',
+                       ks_mapping.items())).keys()
+
+
+def get_keyspace_mapping(currency, keyspace_type):
+    ks_mapping = get_keyspace_mapping_definition()
+    if currency is None and keyspace_type == 'tagpacks':
+        if 'tagpacks' not in ks_mapping:
+            raise MissingConfigError('Missing config property: tagpacks')
+        return ks_mapping['tagpacks']
+    elif currency is not None and keyspace_type in ('raw', 'transformed'):
+        if currency not in ks_mapping:
+            raise MissingConfigError(
+                'Unknown currency in config: {}'.format(currency))
+        if keyspace_type == 'raw':
+            return ks_mapping[currency][0]
+        elif keyspace_type == 'transformed':
+            return ks_mapping[currency][0]
+    else:
+        raise ValueError("Invalid keyspace request: {} {}".format(
+            currency, keyspace_type))
+
+
+def get_session(currency, keyspace_type):
     if 'csession' not in g:
         current_app.logger.info("Creating new Cassandra session.")
         cluster = get_cluster()
@@ -25,24 +56,8 @@ def get_session(currency, keyspace):
 
     session = g.csession
 
-    if 'MAPPING' not in current_app.config:
-        raise MissingConfigError('Missing config property: MAPPING')
-    ks_mapping = current_app.config['MAPPING']
-    if currency is None and keyspace == 'tagpacks':
-        if 'tagpacks' not in ks_mapping:
-            raise MissingConfigError('Missing config property: tagpacks')
-        session.set_keyspace(ks_mapping['tagpacks'])
-    elif currency is not None and keyspace in ('raw', 'transformed'):
-        if currency not in ks_mapping:
-            raise MissingConfigError(
-                'Unknown currency in config: {}'.format(currency))
-        if keyspace == 'raw':
-            session.set_keyspace(ks_mapping[currency][0])
-        elif keyspace == 'transformed':
-            session.set_keyspace(ks_mapping[currency][0])
-    else:
-        raise ValueError("Invalid keyspace request: {} {}".format(
-            currency, keyspace))
+    keyspace = get_keyspace_mapping(currency, keyspace_type)
+    session.set_keyspace(keyspace)
 
     return session
 

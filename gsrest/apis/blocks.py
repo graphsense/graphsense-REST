@@ -65,8 +65,44 @@ class BlockList(Resource):
         return page
 
 
+value_response = api.model("value_response", {
+    "eur": fields.Float(required=True, description="EUR value"),
+    "crypto": fields.Integer(required=True, description="Satoshi value"),
+    "usd": fields.Float(required=True, description="USD value")
+})
+
+
+block_transaction_response = api.model("block_transaction_response", {
+    "txHash": fields.String(required=True, description="Transaction hash"),
+    "noInputs": fields.Integer(
+        required=True, description="Number of inputs"),
+    "noOutputs": fields.Integer(
+        required=True, description="Number of outputs"),
+    "totalInput": fields.Nested(
+        value_response, required=True, description="Total input value"),
+    "totalOutput": fields.Nested(
+        value_response, required=True, description="Total output value")
+})
+
+
+block_transactions_response = api.model("block_transactions_response", {
+    "height": fields.Integer(required=True, description="Block height"),
+    "txs": fields.List(fields.Nested(
+        block_transaction_response), required=True, description="Block list")
+})
+
+
 @api.route("/<int:height>/transactions")
 class BlockTransactions(Resource):
     @token_required
+    @api.marshal_with(block_transactions_response)
     def get(self, currency, height):
-        return "NOT YET IMPLEMENTED"
+        """
+        Returns a list of all transactions within a given block.
+        """
+        block_transactions = blocksDAO.list_block_transactions(currency,
+                                                               height)
+
+        if not block_transactions:
+            abort(404, "Block height %d not found" % height)
+        return block_transactions

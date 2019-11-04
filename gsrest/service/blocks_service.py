@@ -1,8 +1,7 @@
 from cassandra.query import SimpleStatement
 
 from gsrest.db.cassandra import get_session
-from gsrest.model.blocks import Block
-
+from gsrest.model.blocks import Block, BlockTransactions
 
 BLOCKS_PAGE_SIZE = 100
 
@@ -13,7 +12,7 @@ def get_block(currency, height):
     query = "SELECT * FROM block WHERE height = %s"
     result = session.execute(query, [height])
 
-    return Block.from_row(result[0]).__dict__ if result else None
+    return Block.from_row(result[0]).to_dict() if result else None
 
 
 def list_blocks(currency, paging_state=None):
@@ -24,6 +23,22 @@ def list_blocks(currency, paging_state=None):
     results = session.execute(statement, paging_state=paging_state)
 
     paging_state = results.paging_state
-    block_list = [Block.from_row(row).__dict__ for row in results.current_rows]
+    block_list = [Block.from_row(row).to_dict()
+                  for row in results.current_rows]
 
     return paging_state, block_list
+
+
+def list_block_transactions(currency, height):
+    session = get_session(currency, 'raw')
+
+    query = "SELECT * FROM block_transactions WHERE height = %s"
+    results = session.execute(query, [height])
+
+    if results:
+        block_transactions = BlockTransactions.from_row(
+            results[0]).to_dict()
+    else:
+        None
+
+    return block_transactions

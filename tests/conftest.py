@@ -32,8 +32,17 @@ class AuthActions(object):
 
 
 @pytest.fixture
-def app():
+def app(monkeypatch):
+
+    # temp user db location
     db_fd, db_path = tempfile.mkstemp()
+
+    # we don't want to load exchange rates during testing
+    def fake_load_all_exchange_rates():
+        pass
+
+    monkeypatch.setattr('gsrest.service.rates_service.load_all_exchange_rates',
+                        fake_load_all_exchange_rates)
 
     app = create_app({
         'TESTING': True,
