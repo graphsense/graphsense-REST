@@ -55,7 +55,7 @@ class Statistics(object):
         self.no_blocks = row.no_blocks
         self.no_address_relations = row.no_address_relations
         self.no_addresses = row.no_addresses
-        self.no_entitys = row.no_clusters
+        self.no_entities = row.no_clusters
         self.no_transactions = row.no_transactions
         self.no_labels = row.no_tags
         self.timestamp = row.timestamp
