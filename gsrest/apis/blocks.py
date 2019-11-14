@@ -13,7 +13,7 @@ api = Namespace('blocks',
 block_response = api.model("block_response", {
     "blockHash": fields.String(required=True, description="Block hash"),
     "height": fields.Integer(required=True, description="Block height"),
-    "noTransactions": fields.Integer(
+    "noTxs": fields.Integer(
         required=True, description="Number of transactions"),
     "timestamp": fields.Integer(
         required=True, description="Transaction timestamp"),
@@ -30,7 +30,7 @@ class Block(Resource):
         """
         block = blocksDAO.get_block(currency, height)
         if not block:
-            abort(404, "Block height %d not found in currency %s"
+            abort(404, "Block %d not found in currency %s"
                   % (height, currency))
         return block
 
@@ -62,7 +62,6 @@ class BlockList(Resource):
         (paging_state, blocks) = blocksDAO.list_blocks(currency, paging_state)
         return {"nextPage": paging_state.hex() if paging_state else None,
                 "blocks": blocks}
-        return page
 
 
 value_response = api.model("value_response", {
@@ -72,7 +71,7 @@ value_response = api.model("value_response", {
 })
 
 
-block_transaction_response = api.model("block_transaction_response", {
+block_tx_response = api.model("block_tx_response", {
     "txHash": fields.String(required=True, description="Transaction hash"),
     "noInputs": fields.Integer(
         required=True, description="Number of inputs"),
@@ -85,24 +84,23 @@ block_transaction_response = api.model("block_transaction_response", {
 })
 
 
-block_transactions_response = api.model("block_transactions_response", {
+block_txs_response = api.model("block_txs_response", {
     "height": fields.Integer(required=True, description="Block height"),
     "txs": fields.List(fields.Nested(
-        block_transaction_response), required=True, description="Block list")
+        block_tx_response), required=True, description="Block list")
 })
 
 
-@api.route("/<int:height>/transactions")
-class BlockTransactions(Resource):
+@api.route("/<int:height>/txs")
+class BlockTxs(Resource):
     @token_required
-    @api.marshal_with(block_transactions_response)
+    @api.marshal_with(block_txs_response)
     def get(self, currency, height):
         """
-        Returns a list of all transactions within a given block.
+        Returns a list of all txs within a given block.
         """
-        block_transactions = blocksDAO.list_block_transactions(currency,
-                                                               height)
+        block_txs = blocksDAO.list_block_txs(currency, height)
 
-        if not block_transactions:
-            abort(404, "Block height %d not found" % height)
-        return block_transactions
+        if not block_txs:
+            abort(404, "Block %d not found" % height)
+        return block_txs

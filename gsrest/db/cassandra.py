@@ -1,6 +1,6 @@
 from cassandra.cluster import Cluster
 
-from flask import current_app, g
+from flask import current_app, g, abort
 
 from gsrest.util.exceptions import MissingConfigError
 
@@ -37,8 +37,7 @@ def get_keyspace_mapping(currency, keyspace_type):
         return ks_mapping['tagpacks']
     elif currency is not None and keyspace_type in ('raw', 'transformed'):
         if currency not in ks_mapping:
-            raise MissingConfigError(
-                'Unknown currency in config: {}'.format(currency))
+            abort(404, 'Unknown currency in config: {}'.format(currency))
         if keyspace_type == 'raw':
             return ks_mapping[currency][0]
         elif keyspace_type == 'transformed':

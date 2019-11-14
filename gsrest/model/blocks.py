@@ -1,10 +1,13 @@
+# TODO: add exchange rates
+
+
 class Block(object):
     """ Model representing block header fields and summary statistics """
 
-    def __init__(self, height, blockHash, noTransactions, timestamp):
+    def __init__(self, height, blockHash, noTxs, timestamp):
         self.height = height
         self.blockHash = blockHash
-        self.noTransactions = noTransactions
+        self.noTxs = noTxs
         self.timestamp = timestamp
 
     @staticmethod
@@ -51,7 +54,7 @@ class BlockTxSummary(object):
         return self.__dict__
 
 
-class BlockTransactions(object):
+class BlockTxs(object):
     """ Model representing all transactions of a given block """
 
     def __init__(self, height, txs):
@@ -60,7 +63,7 @@ class BlockTransactions(object):
 
     @staticmethod
     def from_row(row):
-        return BlockTransactions(row.height,
+        return BlockTxs(row.height,
                                  [BlockTxSummary.from_row(tx).to_dict()
                                   for tx in row.txs])
 
