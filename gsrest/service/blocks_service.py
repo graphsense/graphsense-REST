@@ -34,7 +34,7 @@ def list_blocks(currency, paging_state=None):
 def list_block_txs(currency, height):
     session = get_session(currency, 'raw')
 
-    query = "SELECT * FROM block_txs WHERE height = %s"
+    query = "SELECT * FROM block_transactions WHERE height = %s"
     results = session.execute(query, [height])
 
     block_txs = None

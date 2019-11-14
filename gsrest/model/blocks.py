@@ -63,9 +63,8 @@ class BlockTxs(object):
 
     @staticmethod
     def from_row(row):
-        return BlockTxs(row.height,
-                                 [BlockTxSummary.from_row(tx).to_dict()
-                                  for tx in row.txs])
+        return BlockTxs(row.height, [BlockTxSummary.from_row(tx).to_dict()
+                                     for tx in row.txs])
 
     def to_dict(self):
         return self.__dict__
