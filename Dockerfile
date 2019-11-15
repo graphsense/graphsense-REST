@@ -6,9 +6,9 @@ ARG rest_passwd
 ENV FLASK_APP=gsrest
 
 RUN mkdir -p /srv/graphsense-rest/
-COPY requirements.txt /srv/graphsense-rest/
+COPY requirements.txt requirements-docker.txt /srv/graphsense-rest/
 
-RUN apk --no-cache --update add bash python3 py3-gunicorn nginx supervisor shadow && \
+RUN apk --no-cache --update add bash python3 py3-gunicorn nginx shadow && \
     useradd -r -m -u 10000 dockeruser && \
     apk --no-cache --update --virtual build-dependendencies add \
         gcc \
@@ -21,6 +21,7 @@ RUN apk --no-cache --update add bash python3 py3-gunicorn nginx supervisor shado
     rm /etc/nginx/conf.d/default.conf && \
     pip3 install --upgrade pip setuptools && \
     pip3 install -r /srv/graphsense-rest/requirements.txt && \
+    pip3 install -r /srv/graphsense-rest/requirements-docker.txt && \
     apk del build-dependendencies && \
     rm -rf /root/.cache && \
     chmod -R o+rwx /var/log/nginx && \
