@@ -41,7 +41,7 @@ def get_keyspace_mapping(currency, keyspace_type):
         if keyspace_type == 'raw':
             return ks_mapping[currency][0]
         elif keyspace_type == 'transformed':
-            return ks_mapping[currency][0]
+            return ks_mapping[currency][1]
     else:
         raise ValueError("Invalid keyspace request: {} {}".format(
             currency, keyspace_type))
