@@ -57,8 +57,8 @@ def test_tx(client, auth, monkeypatch):
     response = client.get('/btc/txs/{}'.format(non_existing_tx))
     assert response.status_code == 404
     json_data = response.get_json()
-    assert 'Tx {} not found in currency btc'.format(non_existing_tx) in \
-           json_data['message']
+    assert 'Transaction {} not found in currency btc'.format(non_existing_tx) \
+           in json_data['message']
 
     # request tx of non-existing currency
     response = client.get('/{}/txs/{}'.format(non_existing_currency,
@@ -86,8 +86,6 @@ def test_tx_list(client, auth, monkeypatch):
     response = client.get('/btc/txs/')
     assert response.status_code == 200
     json_data = response.get_json()
-    # assert len(json_data['txs']) == 100
-    # assert json_data['nextPage'] is not None
     assert len(json_data['txs']) == 1
     assert json_data['nextPage'] is None
 
@@ -114,5 +112,4 @@ def test_tx_list(client, auth, monkeypatch):
     assert response.status_code == 200
     json_data = response.get_json()
 
-    # assert json_data['nextPage'] is not None
     assert json_data['nextPage'] == bytes('example token', 'utf-8').hex()

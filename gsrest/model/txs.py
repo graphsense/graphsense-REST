@@ -12,7 +12,7 @@ class Tx(object):
 
     def __init__(self, txHash, coinbase, height, inputs, outputs, timestamp,
                  totalInput, totalOutput):
-        self.txHash = byte_to_hex(txHash)
+        self.txHash = txHash.hex()
         self.coinbase = coinbase
         self.height = height
         if inputs:

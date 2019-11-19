@@ -43,8 +43,8 @@ class Tx(Resource):
         """
         tx = txsDAO.get_tx(currency, txHash)
         if not tx:
-            abort(404, "Tx %s not found in currency %s"
-                  % (txHash, currency))
+            abort(404, "Transaction {} not found in currency {}"
+                  .format(txHash, currency))
         return tx
 
 

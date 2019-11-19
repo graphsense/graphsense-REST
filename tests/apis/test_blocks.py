@@ -75,8 +75,6 @@ def test_block_list(client, auth, monkeypatch):
     response = client.get('/btc/blocks/')
     assert response.status_code == 200
     json_data = response.get_json()
-    # assert len(json_data['blocks']) == 100
-    # assert json_data['nextPage'] is not None
     assert len(json_data['blocks']) == 2
     assert json_data['nextPage'] is None
 
@@ -103,7 +101,6 @@ def test_block_list(client, auth, monkeypatch):
     assert response.status_code == 200
     json_data = response.get_json()
 
-    # assert json_data['nextPage'] is not None
     assert json_data['nextPage'] == bytes('example token', 'utf-8').hex()
 
 
@@ -111,11 +108,11 @@ def test_block_txs_list(client, auth, monkeypatch):
     # define a monkeypatch method without paging
     def mock_list_blocks_txs(*args, **kwargs):
         if crypto_in_config(args[0]):
-            return None, [block.__dict__ for block in TEST_BLOCKS.values()]
+            return [tx.__dict__ for tx in TEST_BLOCK_TXS.values()]
         # else 404 from crypto_in_config()
 
     # apply the monkeypatch method for blocks_service.get_block_txs
-    monkeypatch.setattr(gsrest.service.blocks_service, "list_blocks",
+    monkeypatch.setattr(gsrest.service.blocks_service, "list_block_txs",
                         mock_list_blocks_txs)
 
     auth.login()
@@ -125,5 +122,6 @@ def test_block_txs_list(client, auth, monkeypatch):
     response = client.get('/btc/blocks/{}/txs'.format(block_height_test))
     assert response.status_code == 200
     json_data = response.get_json()
-    assert json_data['height'] == TEST_BLOCK_TXS.get(block_height_test).height
-    assert json_data['txs'] == TEST_BLOCK_TXS.get(block_height_test).txs
+    assert json_data[0]['height'] == TEST_BLOCK_TXS.get(block_height_test)\
+        .height
+    assert json_data[0]['txs'] == TEST_BLOCK_TXS.get(block_height_test).txs

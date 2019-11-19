@@ -8,7 +8,6 @@ from gsrest import create_app
 
 from gsrest.db.user_db import init_db
 from gsrest.service.user_service import create_user
-from instance import config
 
 
 class AuthActions(object):
@@ -50,8 +49,6 @@ def app(monkeypatch):
         'DATABASE': db_path,
         'JWT_ACCESS_TOKEN_EXPIRES_DAYS': 5,
         'SECRET_KEY': 'testing_secret',
-        # 'MAPPING': config.MAPPING,
-        # 'CASSANDRA_NODES': config.CASSANDRA_NODES
     }
 
     app = create_app(db_test_conf)
