@@ -40,7 +40,7 @@ def test_tx(client, auth, monkeypatch):
     auth.login()
 
     # request existing tx
-    response = client.get('btc/txs/' + tx1)
+    response = client.get('btc/txs/{}'.format(tx1))
     assert response.status_code == 200
     json_data = response.get_json()
 
