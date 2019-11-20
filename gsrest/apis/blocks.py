@@ -67,7 +67,7 @@ class BlockList(Resource):
 
 value_response = api.model("value_response", {
     "eur": fields.Float(required=True, description="EUR value"),
-    "crypto": fields.Integer(required=True, description="Satoshi value"),
+    "value": fields.Integer(required=True, description="Satoshi value"),
     "usd": fields.Float(required=True, description="USD value")
 })
 

@@ -1,6 +1,7 @@
 from cassandra.query import SimpleStatement
 
 from gsrest.db.cassandra import get_session
+from gsrest.service.rates_service import get_exchange_rate
 from gsrest.model.blocks import Block, BlockTransactions
 
 BLOCKS_PAGE_SIZE = 100
@@ -36,8 +37,11 @@ def list_block_transactions(currency, height):
     results = session.execute(query, [height])
 
     if results:
+        exchange_rates = get_exchange_rate(currency, height)
+
         block_transactions = BlockTransactions.from_row(
-            results[0]).to_dict()
+            row=results[0],
+            exchange_rates=exchange_rates['rates']).to_dict()
     else:
         None
 

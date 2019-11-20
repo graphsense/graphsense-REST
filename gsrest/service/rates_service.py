@@ -11,7 +11,9 @@ CACHED_EXCHANGE_RATES = {}
 
 
 def init_app(app):
-    app.before_first_request(load_all_exchange_rates)
+    # do not load in development mode
+    if not app.config.get('DUMMY_EXCHANGE_RATES'):
+        app.before_first_request(load_all_exchange_rates)
 
 
 def load_all_exchange_rates():
@@ -54,6 +56,7 @@ def load_exchange_rates(currency):
     supported_fiat_currencies = load_supported_fiat_currencies(currency)
 
     session = get_session(currency, 'transformed')
+    session.row_factory = dict_factory
 
     query = "SELECT * FROM exchange_rates"
     statement = SimpleStatement(query, fetch_size=10000)
@@ -73,6 +76,10 @@ def load_exchange_rates(currency):
 
 def get_exchange_rate(currency, height):
     """ Returns the exchange rate for a given block height """
+
+    # used in development mode only
+    if current_app.config.get('DUMMY_EXCHANGE_RATES'):
+        return ExchangeRate(height, {'eur': 0.3, 'usd': 0.5}).to_dict()
 
     currency_rates = CACHED_EXCHANGE_RATES.get(currency)
     if not currency_rates:
