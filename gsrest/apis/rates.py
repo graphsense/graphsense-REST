@@ -19,6 +19,6 @@ class ExchangeRate(Resource):
         """
         rate = ratesDAO.get_exchange_rate(currency, height)
         if not rate:
-            abort(404, "Exchange rate for height %d not found in currency %s"
-                  % (height, currency))
+            abort(404, "Exchange rate for height {} not found in currency {}"
+                  .format(height, currency))
         return rate

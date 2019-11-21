@@ -1,6 +1,7 @@
 from cassandra.query import SimpleStatement
 
 from gsrest.db.cassandra import get_session
+from gsrest.service.rates_service import get_exchange_rate
 from gsrest.model.blocks import Block, BlockTxs
 
 # TODO: handle failing queries
@@ -39,7 +40,10 @@ def list_block_txs(currency, height):
 
     block_txs = None
     if results:
+        exchange_rates = get_exchange_rate(currency, height)
+
         block_txs = BlockTxs.from_row(
-            results[0]).to_dict()
+            row=results[0],
+            exchange_rates=exchange_rates['rates']).to_dict()
 
     return block_txs

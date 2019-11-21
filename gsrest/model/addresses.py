@@ -1,13 +1,11 @@
 # TODO: put compute_balance() in a general module
-from gsrest.model.blocks import Value
+from gsrest.model.blocks import ConvertedValue
 
 
-def compute_balance(total_received_satoshi, total_spent_satoshi,
-                    exchange_rate):
-    balance_satoshi = total_received_satoshi - total_spent_satoshi
-    balance = Value(balance_satoshi,
-                    round(balance_satoshi*0, 2),
-                    round(balance_satoshi*0, 2))
+def compute_balance(total_received_value, total_spent_value,
+                    rates):
+    balance_value = total_received_value - total_spent_value
+    balance = ConvertedValue(balance_value, rates)
     return balance
 
 

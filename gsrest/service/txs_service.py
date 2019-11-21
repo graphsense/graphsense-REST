@@ -2,6 +2,7 @@ from cassandra.query import SimpleStatement
 
 from gsrest.db.cassandra import get_session
 from gsrest.model.txs import Tx
+from gsrest.service.rates_service import get_exchange_rate
 
 # TODO: handle failing queries
 
@@ -14,7 +15,9 @@ def get_tx(currency, txHash):
     query = "SELECT * FROM transaction WHERE tx_prefix = %s AND tx_hash = %s"
     result = session.execute(query, [txHash[:5], bytearray.fromhex(txHash)])
 
-    return Tx.from_row(result[0]).to_dict() if result else None
+    return Tx.from_row(result[0],
+                       get_exchange_rate(currency, result[0].height)['rates'])\
+        .to_dict() if result else None
 
 
 def list_txs(currency, paging_state=None):
@@ -25,7 +28,8 @@ def list_txs(currency, paging_state=None):
     results = session.execute(statement, paging_state=paging_state)
 
     paging_state = results.paging_state
-    tx_list = [Tx.from_row(row).to_dict()
-               for row in results.current_rows]
+    tx_list = [Tx.from_row(row,
+                           get_exchange_rate(currency, row.height)['rates'])
+               .to_dict() for row in results.current_rows]
 
     return paging_state, tx_list

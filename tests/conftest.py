@@ -51,7 +51,8 @@ def app(monkeypatch):
         'JWT_ACCESS_TOKEN_EXPIRES_DAYS': 5,
         'SECRET_KEY': 'testing_secret',
         'MAPPING': config.MAPPING,
-        'CASSANDRA_NODES': config.CASSANDRA_NODES
+        'CASSANDRA_NODES': config.CASSANDRA_NODES,
+        'DUMMY_EXCHANGE_RATES': config.DUMMY_EXCHANGE_RATES
     }
 
     app = create_app(db_test_conf)

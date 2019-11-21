@@ -1,40 +1,34 @@
-from gsrest.model.blocks import Value
-
-# TODO: add exchange rates
+from gsrest.model.common import ConvertedValue
 
 
 class Tx(object):
     """ Model representing a transaction """
 
     def __init__(self, txHash, coinbase, height, inputs, outputs, timestamp,
-                 totalInput, totalOutput):
+                 totalInput, totalOutput, rates):
         self.txHash = txHash.hex()
         self.coinbase = coinbase
         self.height = height
         if inputs:
             self.inputs = [TxInputOutput(i.address,
-                                         Value(i.value, 0, 0)
+                                         ConvertedValue(i.value, rates)
                                          .to_dict()).to_dict()
                            for i in inputs]
         else:
             self.inputs = []
         self.outputs = [TxInputOutput(output.address,
-                                      Value(output.value, 0, 0)
+                                      ConvertedValue(output.value, rates)
                                       .to_dict()).to_dict()
                         for output in outputs if output.address]
         self.timestamp = timestamp
-        self.totalInput = Value(totalInput,
-                                0,
-                                0).to_dict()
-        self.totalOutput = Value(totalOutput,
-                                 0,
-                                 0).to_dict()
+        self.totalInput = ConvertedValue(totalInput, rates).to_dict()
+        self.totalOutput = ConvertedValue(totalOutput, rates).to_dict()
 
     @staticmethod
-    def from_row(row):
+    def from_row(row, rates):
         return Tx(row.tx_hash, row.coinbase, row.height, row.inputs,
                   row.outputs, row.timestamp, row.total_input,
-                  row.total_output)
+                  row.total_output, rates)
 
     def to_dict(self):
         return self.__dict__

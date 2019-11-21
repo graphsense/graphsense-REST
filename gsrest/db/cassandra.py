@@ -1,4 +1,5 @@
 from cassandra.cluster import Cluster
+from cassandra.query import named_tuple_factory
 
 from flask import current_app, g, abort
 
@@ -54,6 +55,8 @@ def get_session(currency, keyspace_type):
         g.csession = cluster.connect()
 
     session = g.csession
+    # enforce standard row factory (can be overridden on service-level)
+    session.row_factory = named_tuple_factory
 
     keyspace = get_keyspace_mapping(currency, keyspace_type)
     session.set_keyspace(keyspace)

@@ -1,5 +1,4 @@
-# TODO: add exchange rates
-# TODO: move Value in a general module?
+from gsrest.model.common import ConvertedValue
 
 
 class Block(object):
@@ -20,18 +19,6 @@ class Block(object):
         return self.__dict__
 
 
-class Value(object):
-    """ Model representing crypto- and fiat-currency values """
-
-    def __init__(self, crypto, eur, usd):
-        self.crypto = crypto
-        self.eur = eur
-        self.usd = usd
-
-    def to_dict(self):
-        return self.__dict__
-
-
 class BlockTxSummary(object):
     """ Model representing block transaction summary statistics  """
 
@@ -43,12 +30,14 @@ class BlockTxSummary(object):
         self.totalOutput = totalOutput
 
     @staticmethod
-    def from_row(row):
+    def from_row(row, exchange_rates):
         return BlockTxSummary(row.tx_hash.hex(),
                               row.no_inputs,
                               row.no_outputs,
-                              Value(row.total_input, 0.5, 0.5).to_dict(),
-                              Value(row.total_output, 0.5, 0.5).to_dict()
+                              ConvertedValue(row.total_input,
+                                             exchange_rates).to_dict(),
+                              ConvertedValue(row.total_output,
+                                             exchange_rates).to_dict()
                               )
 
     def to_dict(self):
@@ -63,9 +52,11 @@ class BlockTxs(object):
         self.txs = txs
 
     @staticmethod
-    def from_row(row):
-        return BlockTxs(row.height, [BlockTxSummary.from_row(tx).to_dict()
-                                     for tx in row.txs])
+    def from_row(row, exchange_rates):
+        tx_summaries = [BlockTxSummary.from_row(tx, exchange_rates).to_dict()
+                        for tx in row.txs]
+
+        return BlockTxs(row.height, tx_summaries)
 
     def to_dict(self):
         return self.__dict__

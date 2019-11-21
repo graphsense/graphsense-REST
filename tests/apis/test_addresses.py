@@ -1,7 +1,7 @@
 import gsrest.service.addresses_service
 from gsrest.model.addresses import Address
 from gsrest.model.txs import TxSummary
-from gsrest.model.blocks import Value
+from gsrest.model.common import ConvertedValue
 from gsrest.util.checks import crypto_in_config
 
 non_existing_address = 'zzzzz'
@@ -12,7 +12,7 @@ lastTx = TxSummary(585637, 1563268350, bytearray.fromhex('39435696ea53d580f15f85
 tx1 = 'ab188013f626405ddebf1a7b2e0af34253d09e80f9ef7f981ec1ec59d6200c1f'
 
 TEST_ADDRESSES = {
-    address1: Address(address1, 514179526, firstTx, lastTx, 1, 1, Value(649456, 44.39, 49.51), Value(649456, 54.59, 61.19), 1, 2)
+    address1: Address(address1, 514179526, firstTx, lastTx, 1, 1, ConvertedValue(649456, {'eur': 0.5, 'usd': 0.5}), ConvertedValue(649456, {'eur': 0.5, 'usd': 0.5}), 1, 2)
 }
 
 
@@ -24,7 +24,7 @@ def test_address(client, auth, monkeypatch):
             return TEST_ADDRESSES.get(args[1])
         # else 404 from crypto_in_config()
 
-    # apply the monkeypatch method for txs_service.addresses_service
+    # apply the monkeypatch method for addresses_service
     monkeypatch.setattr(gsrest.service.addresses_service, "get_address",
                         mock_get_address)
 

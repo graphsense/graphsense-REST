@@ -14,7 +14,7 @@ TEST_BLOCKS = {
 
 
 TEST_BLOCK_TXS = {
-    0: BlockTxs(0, [BlockTxSummary('4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b', 0, 1, {'crypto': 0, 'eur': 0.5, 'usd': 0.5}, {'crypto': 5000000000, 'eur': 0.5, 'usd': 0.5}).to_dict()])
+    0: BlockTxs(0, [BlockTxSummary('4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b', 0, 1, {'value': 0, 'eur': 0, 'usd': 0}, {'value': 5000000000, 'eur': 25, 'usd': 25}).to_dict()])
 }
 
 

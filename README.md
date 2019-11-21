@@ -22,12 +22,14 @@ Install the requirements
 
     pip3 install -r requirements.txt
 
-Export REST interface env variables
+Export REST interface environment variables
 
     export FLASK_APP=gsrest
     export FLASK_ENV=development
 
-You need access to GraphSense raw and transformed keyspaces. See [Graphsense Transformation Pipeline][graphsense-transformation] for further details.
+You need access to GraphSense raw and transformed keyspaces.
+See [Graphsense Transformation Pipeline][graphsense-transformation]
+for further details.
 
 ## Development (without Docker)
 
@@ -65,7 +67,10 @@ Check test coverage
 
 ## Deployment
 
-When used in production, GraphSense-REST must be deployed to a WSGI server because Flask's built-in server is not suitable for production - it doesn't scale. From [several deployment options](https://flask.palletsprojects.com/en/1.1.x/deploying/#self-hosted-options), we have chosen [Gunicorn][gunicorn].
+When used in production, GraphSense-REST must be deployed to a WSGI server
+because Flask's built-in server is not suitable for production - 
+it doesn't scale. From several [deployment options][flask-deployment],
+we have chosen [Gunicorn][gunicorn].
 
 Install gunicorn
 
@@ -75,17 +80,30 @@ Run production server
 
     gunicorn "gsrest:create_app()"
 
+### Deployment with `docker`
+
+After installing docker, set the REST password and username
+in `docker/build.sh` (`rest_user` and `rest_passwd`) and run:
+
+    docker/build.sh
+    docker/start.sh
+
+Test the service in your browser:
+
+    http://localhost:9000
+
 ## Usage
 
 ### Authenticate your client app
 
 All REST interface methods require authentication via [JSON Web Tokens (JWT][https://jwt.io/].
 
-Request a JWT by calling the login interface using a given username / password commbination:
+Request a JWT by calling the login interface using a given username/password combination:
 
     curl -X POST "http://localhost:5000/login" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"username\": \"john\", \"password\": \"doe\"}"
 
-This will return a JWT, which you must use in subsequent requests. This is an example response:
+This will return a JWT, which you must use in subsequent requests.
+This is an example response:
 
     {
         "status": "success",
@@ -105,7 +123,8 @@ Logging out will blacklist the JWT
 
 Default configuration parameters are read from `app/config.py` during startup.
 
-Parameters can be customized by placing a custom configuration file into the Flask app instance folder, e.g., `instance/config.py`. Example
+Parameters can be customized by placing a custom configuration file into the
+Flask app instance folder, e.g., `instance/config.py`. Example
 
     MAPPING = {
     "tagpacks": "tagpacks",
@@ -115,8 +134,8 @@ Parameters can be customized by placing a custom configuration file into the Fla
     "zec": ["zec_raw", "zec_transformed_20190930"]
 }
 
-The secret key that will be used for signing authentication tokens is read from the environment and
-should be set before starting the app
+The secret key that will be used for signing authentication tokens is read
+from the environment and should be set before starting the app
 
     export SECRET_KEY=$(python -c 'import os; print(os.urandom(16))')
 
@@ -125,4 +144,5 @@ should be set before starting the app
 [graphsense-transformation]: https://github.com/graphsense/graphsense-transformation
 [graphsense-dashboard]: https://github.com/graphsense/graphsense-dashboard
 [docker]: https://docs.docker.com/install
+[flask-deployment]: https://flask.palletsprojects.com/en/1.1.x/deploying/#self-hosted-options
 [gunicorn]: https://gunicorn.org/#docs
