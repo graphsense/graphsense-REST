@@ -4,6 +4,7 @@ from gsrest.apis.auth import api as auth_api
 from gsrest.apis.blocks import api as blocks_api
 from gsrest.apis.rates import api as rates_api
 from gsrest.apis.txs import api as txs_api
+from gsrest.apis.addresses import api as addresses_api
 
 
 authorizations = {
@@ -26,3 +27,4 @@ api.add_namespace(auth_api)
 api.add_namespace(blocks_api)
 api.add_namespace(rates_api)
 api.add_namespace(txs_api)
+api.add_namespace(addresses_api)

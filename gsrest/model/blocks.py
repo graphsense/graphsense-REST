@@ -1,4 +1,5 @@
 # TODO: add exchange rates
+# TODO: move Value in a general module?
 
 
 class Block(object):

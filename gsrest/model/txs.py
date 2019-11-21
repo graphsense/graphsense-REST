@@ -3,10 +3,6 @@ from gsrest.model.blocks import Value
 # TODO: add exchange rates
 
 
-def byte_to_hex(buffer):
-    return "".join(("%02x" % a) for a in buffer)
-
-
 class Tx(object):
     """ Model representing a transaction """
 
@@ -51,3 +47,10 @@ class TxInputOutput(object):
 
     def to_dict(self):
         return self.__dict__
+
+
+class TxSummary(object):
+    def __init__(self, height, timestamp, txHash):
+        self.height = height
+        self.timestamp = timestamp
+        self.txHash = txHash
