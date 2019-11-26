@@ -36,9 +36,9 @@ def test_block_by_height(client, auth, monkeypatch):
     response = client.get('/btc/blocks/{}'.format(existing_block1))
     assert response.status_code == 200
     json_data = response.get_json()
-    assert json_data['blockHash'] == TEST_BLOCKS.get(existing_block1).blockHash
+    assert json_data['block_hash'] == TEST_BLOCKS.get(existing_block1).block_hash
     assert json_data['height'] == TEST_BLOCKS.get(existing_block1).height
-    assert json_data['noTxs'] == TEST_BLOCKS.get(existing_block1).noTxs
+    assert json_data['no_txs'] == TEST_BLOCKS.get(existing_block1).no_txs
     assert json_data['timestamp'] == TEST_BLOCKS.get(existing_block1).timestamp
 
     # request non-existing block
@@ -76,7 +76,7 @@ def test_block_list(client, auth, monkeypatch):
     assert response.status_code == 200
     json_data = response.get_json()
     assert len(json_data['blocks']) == 2
-    assert json_data['nextPage'] is None
+    assert json_data['next_page'] is None
 
     # request list of non-existing-currency blocks
     response = client.get('/{}/blocks/'.format(non_existing_currency))
@@ -101,7 +101,7 @@ def test_block_list(client, auth, monkeypatch):
     assert response.status_code == 200
     json_data = response.get_json()
 
-    assert json_data['nextPage'] == bytes('example token', 'utf-8').hex()
+    assert json_data['next_page'] == bytes('example token', 'utf-8').hex()
 
 
 def test_block_txs_list(client, auth, monkeypatch):

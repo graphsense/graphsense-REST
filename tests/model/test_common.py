@@ -1,8 +1,8 @@
-from gsrest.model.common import Value, ConvertedValue
+from gsrest.model.common import Values, ConvertedValues
 
 
 def test_normal_value():
-    value = Value(value=0.1, usd=2, eur=4)
+    value = Values(value=0.1, usd=2, eur=4)
 
     value_dict = value.to_dict()
 
@@ -16,7 +16,7 @@ def test_normal_value():
 def test_converted_value():
     exchange_rates = {'eur': 0.4, 'usd': 0.7}
 
-    value = ConvertedValue(175000000000, exchange_rates)
+    value = ConvertedValues(175000000000, exchange_rates)
 
     value_dict = value.to_dict()
 

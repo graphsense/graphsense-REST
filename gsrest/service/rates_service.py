@@ -74,8 +74,9 @@ def load_exchange_rates(currency):
                             .format(counter, currency))
 
 
-def get_exchange_rate(currency, height):
+def get_exchange_rate(currency, height=-1):
     """ Returns the exchange rate for a given block height """
+    # TODO: handle default value (-1) as last height
 
     # used in development mode only
     if current_app.config.get('DUMMY_EXCHANGE_RATES'):

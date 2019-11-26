@@ -1,28 +1,32 @@
-from gsrest.model.common import ConvertedValue
+from gsrest.model.common import ConvertedValues
 
 
 class Tx(object):
     """ Model representing a transaction """
 
-    def __init__(self, txHash, coinbase, height, inputs, outputs, timestamp,
-                 totalInput, totalOutput, rates):
-        self.txHash = txHash.hex()
+    def __init__(self, tx_hash, coinbase, height, inputs, outputs, timestamp,
+                 total_input, total_output, exchange_rates):
+        self.tx_hash = tx_hash.hex()
         self.coinbase = coinbase
         self.height = height
         if inputs:
             self.inputs = [TxInputOutput(i.address,
-                                         ConvertedValue(i.value, rates)
+                                         ConvertedValues(i.value,
+                                                         exchange_rates)
                                          .to_dict()).to_dict()
                            for i in inputs]
         else:
             self.inputs = []
         self.outputs = [TxInputOutput(output.address,
-                                      ConvertedValue(output.value, rates)
+                                      ConvertedValues(output.value,
+                                                      exchange_rates)
                                       .to_dict()).to_dict()
                         for output in outputs if output.address]
         self.timestamp = timestamp
-        self.totalInput = ConvertedValue(totalInput, rates).to_dict()
-        self.totalOutput = ConvertedValue(totalOutput, rates).to_dict()
+        self.total_input = ConvertedValues(total_input,
+                                           exchange_rates).to_dict()
+        self.total_output = ConvertedValues(total_output,
+                                            exchange_rates).to_dict()
 
     @staticmethod
     def from_row(row, rates):
@@ -44,7 +48,10 @@ class TxInputOutput(object):
 
 
 class TxSummary(object):
-    def __init__(self, height, timestamp, txHash):
+    def __init__(self, height, timestamp, tx_hash):
         self.height = height
         self.timestamp = timestamp
-        self.txHash = txHash
+        self.tx_hash = tx_hash
+
+    def to_dict(self):
+        return self.__dict__

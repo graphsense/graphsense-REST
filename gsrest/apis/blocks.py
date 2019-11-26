@@ -11,9 +11,9 @@ api = Namespace('blocks',
 
 
 block_response = api.model("block_response", {
-    "blockHash": fields.String(required=True, description="Block hash"),
+    "block_hash": fields.String(required=True, description="Block hash"),
     "height": fields.Integer(required=True, description="Block height"),
-    "noTxs": fields.Integer(
+    "no_txs": fields.Integer(
         required=True, description="Number of transactions"),
     "timestamp": fields.Integer(
         required=True, description="Transaction timestamp"),
@@ -38,7 +38,7 @@ class Block(Resource):
 block_list_response = api.model("block_list_response", {
     "blocks": fields.List(fields.Nested(block_response),
                           required=True, description="Block list"),
-    "nextPage": fields.String(required=True, description="The next page")
+    "next_page": fields.String(required=True, description="The next page")
 })
 
 
@@ -60,26 +60,26 @@ class BlockList(Resource):
         paging_state = bytes.fromhex(page) if page else None
 
         (paging_state, blocks) = blocksDAO.list_blocks(currency, paging_state)
-        return {"nextPage": paging_state.hex() if paging_state else None,
+        return {"next_page": paging_state.hex() if paging_state else None,
                 "blocks": blocks}
 
 
 value_response = api.model("value_response", {
     "eur": fields.Float(required=True, description="EUR value"),
-    "value": fields.Integer(required=True, description="Satoshi value"),
+    "value": fields.Integer(required=True, description="Value"),
     "usd": fields.Float(required=True, description="USD value")
 })
 
 
 block_tx_response = api.model("block_tx_response", {
-    "txHash": fields.String(required=True, description="Transaction hash"),
-    "noInputs": fields.Integer(
+    "tx_hash": fields.String(required=True, description="Transaction hash"),
+    "no_inputs": fields.Integer(
         required=True, description="Number of inputs"),
-    "noOutputs": fields.Integer(
+    "no_outputs": fields.Integer(
         required=True, description="Number of outputs"),
-    "totalInput": fields.Nested(
+    "total_input": fields.Nested(
         value_response, required=True, description="Total input value"),
-    "totalOutput": fields.Nested(
+    "total_output": fields.Nested(
         value_response, required=True, description="Total output value")
 })
 

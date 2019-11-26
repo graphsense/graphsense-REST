@@ -45,14 +45,14 @@ def test_tx(client, auth, monkeypatch):
     assert response.status_code == 200
     json_data = response.get_json()
 
-    assert json_data['txHash'] == TEST_TXS.get(tx1).txHash
+    assert json_data['tx_hash'] == TEST_TXS.get(tx1).tx_hash
     assert json_data['coinbase'] == TEST_TXS.get(tx1).coinbase
     assert json_data['height'] == TEST_TXS.get(tx1).height
     assert json_data['inputs'] == TEST_TXS.get(tx1).inputs
     assert json_data['outputs'] == TEST_TXS.get(tx1).outputs
     assert json_data['timestamp'] == TEST_TXS.get(tx1).timestamp
-    assert json_data['totalInput'] == TEST_TXS.get(tx1).totalInput
-    assert json_data['totalOutput'] == TEST_TXS.get(tx1).totalOutput
+    assert json_data['total_input'] == TEST_TXS.get(tx1).total_input
+    assert json_data['total_output'] == TEST_TXS.get(tx1).total_output
 
     # request non-existing tx
     response = client.get('/btc/txs/{}'.format(non_existing_tx))
@@ -63,7 +63,7 @@ def test_tx(client, auth, monkeypatch):
 
     # request tx of non-existing currency
     response = client.get('/{}/txs/{}'.format(non_existing_currency,
-                                              TEST_TXS.get(tx1).txHash))
+                                              TEST_TXS.get(tx1).tx_hash))
     assert response.status_code == 404
     json_data = response.get_json()
     assert 'Unknown currency in config: {}'.format(non_existing_currency) in \
@@ -88,7 +88,7 @@ def test_tx_list(client, auth, monkeypatch):
     assert response.status_code == 200
     json_data = response.get_json()
     assert len(json_data['txs']) == 1
-    assert json_data['nextPage'] is None
+    assert json_data['next_page'] is None
 
     # request list of non-existing-currency txs
     response = client.get('/{}/txs/'.format(non_existing_currency))
@@ -113,4 +113,4 @@ def test_tx_list(client, auth, monkeypatch):
     assert response.status_code == 200
     json_data = response.get_json()
 
-    assert json_data['nextPage'] == bytes('example token', 'utf-8').hex()
+    assert json_data['next_page'] == bytes('example token', 'utf-8').hex()

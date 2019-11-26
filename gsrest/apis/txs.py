@@ -18,7 +18,7 @@ input_output_response = api.model("input_output_response", {
 
 
 tx_response = api.model("tx_response", {
-    "txHash": fields.String(required=True, description="Transaction hash"),
+    "tx_hash": fields.String(required=True, description="Transaction hash"),
     "coinbase": fields.Boolean(required=True,
                                description="Coinbase transaction flag"),
     "height": fields.Integer(required=True, description="Transaction height"),
@@ -28,30 +28,30 @@ tx_response = api.model("tx_response", {
                            description="Transaction inputs"),
     "timestamp": fields.Integer(required=True,
                                 description="Transaction timestamp"),
-    "totalInput": fields.Nested(value_response, required=True),
-    "totalOutput": fields.Nested(value_response, required=True),
+    "total_input": fields.Nested(value_response, required=True),
+    "total_output": fields.Nested(value_response, required=True),
 })
 
 
-@api.route("/<txHash>")
+@api.route("/<tx_hash>")
 class Tx(Resource):
     @token_required
     @api.marshal_with(tx_response)
-    def get(self, currency, txHash):
+    def get(self, currency, tx_hash):
         """
         Returns details of a specific transaction identified by its hash.
         """
-        tx = txsDAO.get_tx(currency, txHash)
+        tx = txsDAO.get_tx(currency, tx_hash)
         if not tx:
             abort(404, "Transaction {} not found in currency {}"
-                  .format(txHash, currency))
+                  .format(tx_hash, currency))
         return tx
 
 
 tx_list_response = api.model("tx_list_response", {
     "txs": fields.List(fields.Nested(tx_response),
                        required=True, description="Transaction list"),
-    "nextPage": fields.String(required=True, description="The next page")
+    "next_page": fields.String(required=True, description="The next page")
 })
 
 
@@ -73,6 +73,6 @@ class TxList(Resource):
         paging_state = bytes.fromhex(page) if page else None
 
         (paging_state, txs) = txsDAO.list_txs(currency, paging_state)
-        return {"nextPage": paging_state.hex() if paging_state else None,
+        return {"next_page": paging_state.hex() if paging_state else None,
                 "txs": txs}
 

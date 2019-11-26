@@ -7,13 +7,15 @@ from gsrest.service.rates_service import get_exchange_rate
 # TODO: handle failing queries
 
 TXS_PAGE_SIZE = 100
+TX_PREFIX_LENGTH = 5
 
 
-def get_tx(currency, txHash):
+def get_tx(currency, tx_hash):
     session = get_session(currency, 'raw')
 
     query = "SELECT * FROM transaction WHERE tx_prefix = %s AND tx_hash = %s"
-    result = session.execute(query, [txHash[:5], bytearray.fromhex(txHash)])
+    result = session.execute(query, [tx_hash[:TX_PREFIX_LENGTH],
+                                     bytearray.fromhex(tx_hash)])
 
     return Tx.from_row(result[0],
                        get_exchange_rate(currency, result[0].height)['rates'])\
