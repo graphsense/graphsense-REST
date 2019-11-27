@@ -2,6 +2,7 @@ from cassandra.query import SimpleStatement
 
 from gsrest.db.cassandra import get_session
 from gsrest.model.addresses import Address, AddressTx
+from gsrest.model.tags import Tag
 from gsrest.service.rates_service import get_exchange_rate
 from math import floor
 # TODO: handle failing queries
@@ -50,4 +51,15 @@ def list_address_txs(currency, address, paging_state=None):
                    .to_dict() for row in results.current_rows]
 
     return paging_state, address_txs
+
+
+def list_address_tags(currency, address):
+    session = get_session(currency, 'transformed')
+
+    query = "SELECT * FROM address_tags WHERE address = %s"
+    results = session.execute(query, [address])
+    address_tags = [Tag.from_row(row, currency).to_dict()
+                    for row in results.current_rows]
+
+    return address_tags
 

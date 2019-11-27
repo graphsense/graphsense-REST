@@ -42,11 +42,11 @@ class AddressTx(object):
         self.height = height
         self.timestamp = timestamp
         self.tx_hash = tx_hash
-        self.value = ConvertedValues(value, exchange_rates)
+        self.value = ConvertedValues(value, exchange_rates).to_dict()
 
     @staticmethod
     def from_row(row, address, exchange_rates):
-        return AddressTx(address, row.height, row.timestamp, row.tx_hash,
+        return AddressTx(address, row.height, row.timestamp, row.tx_hash.hex(),
                          row.value, exchange_rates)
 
     def to_dict(self):

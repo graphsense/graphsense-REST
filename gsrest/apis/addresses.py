@@ -90,4 +90,33 @@ class AddressTxs(Resource):
                 "address_txs": address_txs}
 
 
-# TODO: AddressTransactions, AddressIncomingRelations, AddressOutgoingRelations, AddressSummary
+tag_response = api.model("tag_response", {
+    "label": fields.String(required=True, description="Label"),
+    "address": fields.String(required=True, description="Address"),
+    "source": fields.String(required=True, description="Source"),
+    "tagpack_uri": fields.String(required=True, description="Tagpack URI"),
+    "currency": fields.String(required=True, description="Currency"),
+    "lastmod": fields.Integer(required=True, description="Last modified"),
+    "category": fields.String(required=False, description="Category"),
+    "abuse": fields.String(required=False, description="Abuse")
+})
+
+
+@api.route("/<address>/tags")
+class AddressTags(Resource):
+    @token_required
+    @api.marshal_list_with(tag_response)
+    def get(self, currency, address):
+        """
+        Returns tags of a specific address.
+        """
+        address_tags = addressesDAO.list_address_tags(currency, address)
+        if not address_tags:
+            abort(404, "Address {} not found in currency {}"
+                  .format(address, currency))
+
+        return address_tags
+
+
+
+# TODO: AddressIncomingRelations, AddressOutgoingRelations, AddressSummary
