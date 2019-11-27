@@ -1,11 +1,11 @@
-from flask import request, abort
+from flask import request, abort, Response
 from flask_restplus import Namespace, Resource, fields
 from functools import wraps
 
 from gsrest.util.decorator import token_required
 from gsrest.apis.blocks import value_response
 from gsrest.apis.txs import tx_summary_response
-
+from gsrest.util.csvify import tags_to_csv, create_download_header
 import gsrest.service.addresses_service as addressesDAO
 
 api = Namespace('addresses',
@@ -65,12 +65,13 @@ tag_model = {
 tag_response = api.model("tag_response", tag_model)
 
 address_tags_model = address_model
-address_tags_model["tags"] = fields.List(fields.Nested(tag_response, required=True))
+address_tags_model["tags"] = fields.List(fields.Nested(tag_response,
+                                                       required=True))
 address_tags_response = api.model("address_tags_response",
                                   address_tags_model)
 
 
-def selective_marshal_with(address_response, address_tags_response, tags_parser):
+def selective_marshal_with(address_response, address_tags_response):
     """ Selective response marshalling """
     def decorator(func):
         @wraps(func)
@@ -93,7 +94,7 @@ tags_parser.add_argument("tags", location="args")
 class Address(Resource):
     @token_required
     @api.doc(parser=tags_parser)
-    @selective_marshal_with(address_response, address_tags_response, tags_parser)
+    @selective_marshal_with(address_response, address_tags_response)
     def get(self, currency, address):
         """ Returns details of a specific address """
         addr = addressesDAO.get_address(currency, address)
@@ -147,6 +148,20 @@ class AddressTags(Resource):
                   .format(address, currency))
 
         return address_tags
+
+
+@api.route("/<address>/tags.csv")
+class AddressTagsCSV(Resource):
+    @token_required
+    def get(self, currency, address):
+        """ Returns a JSON with the tags of the address """
+        tags = addressesDAO.list_address_tags(currency, address)
+        return Response(tags_to_csv(tags), mimetype="text/csv",
+                        headers=create_download_header('tags of address {} '
+                                                       '({}).csv'
+                                                       .format(address,
+                                                               currency
+                                                               .upper())))
 
 
 # TODO: AddressIncomingRelations, AddressOutgoingRelations, AddressSummary

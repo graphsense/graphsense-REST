@@ -107,7 +107,8 @@ def test_address_txs(client, auth, monkeypatch):
     assert len(json_data['address_txs']) == len(TEST_ADDRESSES_TXS[address1])
     for i, tx in enumerate(json_data['address_txs']):
         for k in TEST_ADDRESSES_TXS[address1][i]:
-            assert json_data['address_txs'][i][k] == TEST_ADDRESSES_TXS[address1][i][k]
+            assert json_data['address_txs'][i][k] == \
+                   TEST_ADDRESSES_TXS[address1][i][k]
 
 
 def test_address_tags(client, auth, monkeypatch):
