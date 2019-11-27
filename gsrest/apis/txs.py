@@ -10,14 +10,23 @@ api = Namespace('txs',
                 description='Operations related to transactions')
 
 
-input_output_response = api.model("input_output_response", {
+tx_summary_model = {
+    "height": fields.Integer(required=True, description="Transaction height"),
+    "timestamp": fields.Integer(required=True,
+                                description="Transaction timestamp"),
+    "tx_hash": fields.String(required=True, description="Transaction hash")
+}
+tx_summary_response = api.model("tx_summary_response", tx_summary_model)
+
+
+input_output_model = {
     "address": fields.String(required=True, description="Address"),
     "value": fields.Nested(value_response, required=True,
                            description="Input/Output value")
-})
+}
+input_output_response = api.model("input_output_response", input_output_model)
 
-
-tx_response = api.model("tx_response", {
+tx_model = {
     "tx_hash": fields.String(required=True, description="Transaction hash"),
     "coinbase": fields.Boolean(required=True,
                                description="Coinbase transaction flag"),
@@ -30,7 +39,15 @@ tx_response = api.model("tx_response", {
                                 description="Transaction timestamp"),
     "total_input": fields.Nested(value_response, required=True),
     "total_output": fields.Nested(value_response, required=True),
-})
+}
+tx_response = api.model("tx_response", tx_model)
+
+tx_list_model = {
+    "txs": fields.List(fields.Nested(tx_response),
+                       required=True, description="Transaction list"),
+    "next_page": fields.String(required=True, description="The next page")
+}
+tx_list_response = api.model("tx_list_response", tx_list_model)
 
 
 @api.route("/<tx_hash>")
@@ -46,13 +63,6 @@ class Tx(Resource):
             abort(404, "Transaction {} not found in currency {}"
                   .format(tx_hash, currency))
         return tx
-
-
-tx_list_response = api.model("tx_list_response", {
-    "txs": fields.List(fields.Nested(tx_response),
-                       required=True, description="Transaction list"),
-    "next_page": fields.String(required=True, description="The next page")
-})
 
 
 page_parser = api.parser()

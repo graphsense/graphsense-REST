@@ -44,6 +44,7 @@ def test_address(client, auth, monkeypatch):
 
     # define a monkeypatch method
     def mock_get_address(*args, **kwargs):
+        # TODO: add case of tags
         if crypto_in_config(args[0]):
             return TEST_ADDRESSES.get(args[1])
         # else 404 from crypto_in_config()
@@ -54,7 +55,6 @@ def test_address(client, auth, monkeypatch):
 
     auth.login()
 
-    # request existing address
     response = client.get('btc/addresses/{}'.format(address1))
     assert response.status_code == 200
     json_data = response.get_json()
@@ -62,20 +62,27 @@ def test_address(client, auth, monkeypatch):
     for k, v in json_data.items():
         assert v == TEST_ADDRESSES[address1][k]
 
-    # request non-existing address
     response = client.get('/btc/addresses/{}'.format(non_existing_address))
     assert response.status_code == 404
     json_data = response.get_json()
     assert 'Address {} not found in currency btc'.format(non_existing_address)\
            in json_data['message']
-#
-    # request tx of non-existing currency
+
     response = client.get('/{}/addresses/{}'.format(non_existing_currency,
                                                     address1))
     assert response.status_code == 404
     json_data = response.get_json()
     assert 'Unknown currency in config: {}'.format(non_existing_currency) in \
            json_data['message']
+
+    # TODO: finish monkeypatch
+    # response = client.get('btc/addresses/{}?tags=1'.format(address2))
+    # assert response.status_code == 200
+    # json_data = response.get_json()
+    # assert json_data['tags'] == TEST_ADDRESSES_TAGS[address2]
+    # # test presence of keys, not content (already tested above)
+    # for k in TEST_ADDRESSES[address1]:  # address2 is not in TEST_ADDRESSES
+    #     assert json_data[k]
 
 
 def test_address_txs(client, auth, monkeypatch):

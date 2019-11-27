@@ -9,15 +9,50 @@ api = Namespace('blocks',
                 path='/<currency>/blocks',
                 description='Operations related to blocks')
 
-
-block_response = api.model("block_response", {
+block_model = {
     "block_hash": fields.String(required=True, description="Block hash"),
     "height": fields.Integer(required=True, description="Block height"),
     "no_txs": fields.Integer(
         required=True, description="Number of transactions"),
     "timestamp": fields.Integer(
         required=True, description="Transaction timestamp"),
-})
+}
+block_response = api.model("block_response", block_model)
+
+block_list_model = {
+    "blocks": fields.List(fields.Nested(block_response),
+                          required=True, description="Block list"),
+    "next_page": fields.String(required=True, description="The next page")
+}
+
+block_list_response = api.model("block_list_response", block_list_model)
+
+value_model = {
+    "eur": fields.Float(required=True, description="EUR value"),
+    "value": fields.Integer(required=True, description="Value"),
+    "usd": fields.Float(required=True, description="USD value")
+}
+value_response = api.model("value_response", value_model)
+
+block_tx_model = {
+    "tx_hash": fields.String(required=True, description="Transaction hash"),
+    "no_inputs": fields.Integer(
+        required=True, description="Number of inputs"),
+    "no_outputs": fields.Integer(
+        required=True, description="Number of outputs"),
+    "total_input": fields.Nested(
+        value_response, required=True, description="Total input value"),
+    "total_output": fields.Nested(
+        value_response, required=True, description="Total output value")
+}
+block_tx_response = api.model("block_tx_response", block_tx_model)
+
+block_txs_model = {
+    "height": fields.Integer(required=True, description="Block height"),
+    "txs": fields.List(fields.Nested(
+        block_tx_response), required=True, description="Block list")
+}
+block_txs_response = api.model("block_txs_response", block_txs_model)
 
 
 @api.route("/<int:height>")
@@ -33,13 +68,6 @@ class Block(Resource):
             abort(404, "Block %d not found in currency %s"
                   % (height, currency))
         return block
-
-
-block_list_response = api.model("block_list_response", {
-    "blocks": fields.List(fields.Nested(block_response),
-                          required=True, description="Block list"),
-    "next_page": fields.String(required=True, description="The next page")
-})
 
 
 page_parser = api.parser()
@@ -62,33 +90,6 @@ class BlockList(Resource):
         (paging_state, blocks) = blocksDAO.list_blocks(currency, paging_state)
         return {"next_page": paging_state.hex() if paging_state else None,
                 "blocks": blocks}
-
-
-value_response = api.model("value_response", {
-    "eur": fields.Float(required=True, description="EUR value"),
-    "value": fields.Integer(required=True, description="Value"),
-    "usd": fields.Float(required=True, description="USD value")
-})
-
-
-block_tx_response = api.model("block_tx_response", {
-    "tx_hash": fields.String(required=True, description="Transaction hash"),
-    "no_inputs": fields.Integer(
-        required=True, description="Number of inputs"),
-    "no_outputs": fields.Integer(
-        required=True, description="Number of outputs"),
-    "total_input": fields.Nested(
-        value_response, required=True, description="Total input value"),
-    "total_output": fields.Nested(
-        value_response, required=True, description="Total output value")
-})
-
-
-block_txs_response = api.model("block_txs_response", {
-    "height": fields.Integer(required=True, description="Block height"),
-    "txs": fields.List(fields.Nested(
-        block_tx_response), required=True, description="Block list")
-})
 
 
 @api.route("/<int:height>/txs")

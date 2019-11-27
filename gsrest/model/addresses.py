@@ -8,7 +8,7 @@ class Address(object):
 
     def __init__(self, address, first_tx, last_tx, no_incoming_txs,
                  no_outgoing_txs, total_received, total_spent, in_degree,
-                 outDegree, exchange_rates):
+                 out_degree, exchange_rates):
         self.address = address
         self.first_tx = TxSummary(first_tx.height, first_tx.timestamp,
                                   first_tx.tx_hash.hex()).to_dict()
@@ -19,7 +19,7 @@ class Address(object):
         self.total_received = Values(**total_received).to_dict()
         self.total_spent = Values(**total_spent).to_dict()
         self.in_degree = in_degree
-        self.out_degree = outDegree
+        self.out_degree = out_degree
         self.balance = compute_balance(total_received['value'],
                                        total_spent['value'],
                                        exchange_rates)
