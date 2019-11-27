@@ -20,7 +20,7 @@ TEST_TXS = {
             1373266967,
             10000000,
             9950000,
-            {'eur': 0.5, 'usd': 0.5})
+            {'eur': 0.5, 'usd': 0.5}).to_dict()
 }
 
 non_existing_tx = '999999'
@@ -44,15 +44,8 @@ def test_tx(client, auth, monkeypatch):
     response = client.get('btc/txs/{}'.format(tx1))
     assert response.status_code == 200
     json_data = response.get_json()
-
-    assert json_data['tx_hash'] == TEST_TXS.get(tx1).tx_hash
-    assert json_data['coinbase'] == TEST_TXS.get(tx1).coinbase
-    assert json_data['height'] == TEST_TXS.get(tx1).height
-    assert json_data['inputs'] == TEST_TXS.get(tx1).inputs
-    assert json_data['outputs'] == TEST_TXS.get(tx1).outputs
-    assert json_data['timestamp'] == TEST_TXS.get(tx1).timestamp
-    assert json_data['total_input'] == TEST_TXS.get(tx1).total_input
-    assert json_data['total_output'] == TEST_TXS.get(tx1).total_output
+    for k in TEST_TXS[tx1]:
+        assert json_data[k] == TEST_TXS[tx1][k]
 
     # request non-existing tx
     response = client.get('/btc/txs/{}'.format(non_existing_tx))
@@ -63,7 +56,7 @@ def test_tx(client, auth, monkeypatch):
 
     # request tx of non-existing currency
     response = client.get('/{}/txs/{}'.format(non_existing_currency,
-                                              TEST_TXS.get(tx1).tx_hash))
+                                              TEST_TXS[tx1]['tx_hash']))
     assert response.status_code == 404
     json_data = response.get_json()
     assert 'Unknown currency in config: {}'.format(non_existing_currency) in \
@@ -75,7 +68,7 @@ def test_tx_list(client, auth, monkeypatch):
     # define a monkeypatch method without paging
     def mock_list_txs(*args, **kwargs):
         if crypto_in_config(args[0]):
-            return None, [tx.__dict__ for tx in TEST_TXS.values()]
+            return None, [tx for tx in TEST_TXS.values()]
         # else 404 from crypto_in_config()
 
     # apply the monkeypatch method for txs_service.get_tx
@@ -101,7 +94,7 @@ def test_tx_list(client, auth, monkeypatch):
     def mock_list_txs_paging(*args, **kwargs):
         if crypto_in_config(args[0]):
             return (bytes('example token', 'utf-8'),
-                    [tx.__dict__ for tx in TEST_TXS.values()])
+                    [tx for tx in TEST_TXS.values()])
         # else 404 from crypto_in_config()
 
     # apply the monkeypatch method for txs_service.list_txs

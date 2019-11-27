@@ -16,7 +16,7 @@ TEST_ADDRESSES = {
     address1: Address(address1, first_tx, last_tx, 1, 1,
                       {'value': 649456, 'eur': 44.39, 'usd': 49.51},
                       {'value': 649456, 'eur': 54.59, 'usd': 61.19},
-                      1, 2, {'eur': 0.5, 'usd': 0.5})
+                      1, 2, {'eur': 0.5, 'usd': 0.5}).to_dict()
 }
 
 TEST_ADDRESSES_TXS = {
@@ -58,17 +58,9 @@ def test_address(client, auth, monkeypatch):
     response = client.get('btc/addresses/{}'.format(address1))
     assert response.status_code == 200
     json_data = response.get_json()
-    assert 'address' in json_data
-    assert json_data['out_degree'] == TEST_ADDRESSES[address1].out_degree
-    assert json_data['in_degree'] == TEST_ADDRESSES[address1].in_degree
-    assert json_data['no_incoming_txs'] == TEST_ADDRESSES[address1].no_incoming_txs
-    assert json_data['no_outgoing_txs'] == TEST_ADDRESSES[address1].no_outgoing_txs
-    # TODO: test values once exchange rates are available
-    assert json_data['balance'] == TEST_ADDRESSES[address1].balance
-    assert json_data['first_tx'] == TEST_ADDRESSES[address1].first_tx
-    assert json_data['last_tx'] == TEST_ADDRESSES[address1].last_tx
-    assert json_data['total_received'] == TEST_ADDRESSES[address1].total_received
-    assert json_data['total_spent'] == TEST_ADDRESSES[address1].total_spent
+    assert TEST_ADDRESSES[address1].keys() == json_data.keys()
+    for k, v in json_data.items():
+        assert v == TEST_ADDRESSES[address1][k]
 
     # request non-existing address
     response = client.get('/btc/addresses/{}'.format(non_existing_address))
@@ -105,9 +97,10 @@ def test_address_txs(client, auth, monkeypatch):
     assert response.status_code == 200
     json_data = response.get_json()
     assert 'address_txs' in json_data
+    assert len(json_data['address_txs']) == len(TEST_ADDRESSES_TXS[address1])
     for i, tx in enumerate(json_data['address_txs']):
-        for key in tx:
-            assert tx[key] == TEST_ADDRESSES_TXS[address1][i][key]
+        for k in TEST_ADDRESSES_TXS[address1][i]:
+            assert json_data['address_txs'][i][k] == TEST_ADDRESSES_TXS[address1][i][k]
 
 
 def test_address_tags(client, auth, monkeypatch):
@@ -129,5 +122,6 @@ def test_address_tags(client, auth, monkeypatch):
     assert response.status_code == 200
     json_data = response.get_json()
     assert len(json_data) == len(TEST_ADDRESSES_TAGS[address2])
-    for k, v in json_data[0].items():
-        assert v == TEST_ADDRESSES_TAGS[address2][0][k]
+    for i in range(len(json_data)):
+        for k in TEST_ADDRESSES_TAGS[address2][i]:
+            assert json_data[i][k] == TEST_ADDRESSES_TAGS[address2][i][k]

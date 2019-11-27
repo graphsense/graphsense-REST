@@ -8,13 +8,13 @@ existing_block1 = 302602
 existing_block2 = 531141
 
 TEST_BLOCKS = {
-    existing_block1: Block(existing_block1, "00000000000000000a4d72c6f0c714e8b0f4e847a9599110acc133cec97900d4", 101, 1401047125),
-    existing_block2: Block(existing_block2, "0000000000000000000fc3ab40914d4e72ff42d7f9730647cee43d2178607a31", 1342, 1531116874),
+    existing_block1: Block(existing_block1, "00000000000000000a4d72c6f0c714e8b0f4e847a9599110acc133cec97900d4", 101, 1401047125).to_dict(),
+    existing_block2: Block(existing_block2, "0000000000000000000fc3ab40914d4e72ff42d7f9730647cee43d2178607a31", 1342, 1531116874).to_dict(),
 }
 
 
 TEST_BLOCK_TXS = {
-    0: BlockTxs(0, [BlockTxSummary('4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b', 0, 1, {'value': 0, 'eur': 0, 'usd': 0}, {'value': 5000000000, 'eur': 25, 'usd': 25}).to_dict()])
+    0: BlockTxs(0, [BlockTxSummary('4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b', 0, 1, {'value': 0, 'eur': 0, 'usd': 0}, {'value': 5000000000, 'eur': 25, 'usd': 25}).to_dict()]).to_dict()
 }
 
 
@@ -36,10 +36,9 @@ def test_block_by_height(client, auth, monkeypatch):
     response = client.get('/btc/blocks/{}'.format(existing_block1))
     assert response.status_code == 200
     json_data = response.get_json()
-    assert json_data['block_hash'] == TEST_BLOCKS.get(existing_block1).block_hash
-    assert json_data['height'] == TEST_BLOCKS.get(existing_block1).height
-    assert json_data['no_txs'] == TEST_BLOCKS.get(existing_block1).no_txs
-    assert json_data['timestamp'] == TEST_BLOCKS.get(existing_block1).timestamp
+    assert len(json_data) == len(TEST_BLOCKS[existing_block1])
+    for k in TEST_BLOCKS[existing_block1]:
+        assert json_data[k] == TEST_BLOCKS[existing_block1][k]
 
     # request non-existing block
     response = client.get('/btc/blocks/{}'.format(non_existing_block))
@@ -50,7 +49,7 @@ def test_block_by_height(client, auth, monkeypatch):
 
     # request block of non-existing currency
     response = client.get('/{}/blocks/{}'.format(
-        non_existing_currency, TEST_BLOCKS.get(existing_block1).height))
+        non_existing_currency, TEST_BLOCKS[existing_block1]['height']))
     assert response.status_code == 404
     json_data = response.get_json()
     assert 'Unknown currency in config: {}'.format(non_existing_currency) in \
@@ -62,7 +61,7 @@ def test_block_list(client, auth, monkeypatch):
     # define a monkeypatch method without paging
     def mock_list_blocks(*args, **kwargs):
         if crypto_in_config(args[0]):
-            return None, [block.__dict__ for block in TEST_BLOCKS.values()]
+            return None, [block for block in TEST_BLOCKS.values()]
         # else 404 from crypto_in_config()
 
     # apply the monkeypatch method for blocks_service.get_block
@@ -89,7 +88,7 @@ def test_block_list(client, auth, monkeypatch):
     def mock_list_blocks_paging(*args, **kwargs):
         if crypto_in_config(args[0]):
             return (bytes('example token', 'utf-8'),
-                    [block.__dict__ for block in TEST_BLOCKS.values()])
+                    [block for block in TEST_BLOCKS.values()])
         # else 404 from crypto_in_config()
 
     # apply the monkeypatch method for blocks_service.list_blocks
@@ -122,6 +121,5 @@ def test_block_txs_list(client, auth, monkeypatch):
     response = client.get('/btc/blocks/{}/txs'.format(block_height_test))
     assert response.status_code == 200
     json_data = response.get_json()
-    assert json_data['height'] == TEST_BLOCK_TXS.get(block_height_test)\
-        .height
-    assert json_data['txs'] == TEST_BLOCK_TXS.get(block_height_test).txs
+    assert json_data['height'] == TEST_BLOCK_TXS[block_height_test]['height']
+    assert json_data['txs'] == TEST_BLOCK_TXS[block_height_test]['txs']
