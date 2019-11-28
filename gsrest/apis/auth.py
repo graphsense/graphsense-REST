@@ -5,7 +5,7 @@ from gsrest.service.auth_helper import Auth
 
 api = Namespace('auth',
                 path='/',
-                description='Operations related to authentication')
+                description='Operations related to client authentication')
 
 
 auth_model = {
@@ -17,25 +17,21 @@ user_auth = api.model('auth_details', auth_model)
 
 @api.route('/login')
 class UserLogin(Resource):
-    """
-        User Login Resource
-    """
-    @api.doc('user login')
     @api.expect(user_auth, validate=True)
     @api.doc(security=[])
     def post(self):
-        # get the post data
+        """
+        Returns a JWT token for a given username and password
+        """
         post_data = request.json
         return Auth.login_user(data=post_data)
 
 
 @api.route('/logout')
 class LogoutAPI(Resource):
-    """
-        User Logout Resource
-    """
-    @api.doc('logout a user')
     def post(self):
-        # get auth token
+        """
+        Blacklists a given JWT token
+        """
         auth_header = request.headers.get('Authorization')
         return Auth.logout_user(data=auth_header)

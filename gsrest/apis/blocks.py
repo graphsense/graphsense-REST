@@ -58,12 +58,14 @@ block_txs_response = api.model("block_txs_response", block_txs_model)
 
 
 @api.route("/<int:height>")
+@api.param('currency', 'The cryptocurrency (e.g., btc)')
+@api.param('height', 'The block height')
 class Block(Resource):
     @token_required
     @api.marshal_with(block_response)
     def get(self, currency, height):
         """
-        Returns details of a specific block identified by its height.
+        Returns details of a specific block identified by its height
         """
         block = blocksDAO.get_block(currency, height)
         if not block:
@@ -72,15 +74,21 @@ class Block(Resource):
         return block
 
 
+page_parser = api.parser()
+page_parser.add_argument("page", type="str",
+                         location="args",
+                         help="Resumption token for retrieving the next page")
+
+
 @api.route("/")
+@api.param('currency', 'The cryptocurrency (e.g., btc)')
 class BlockList(Resource):
     @token_required
     @api.doc(parser=page_parser)
     @api.marshal_with(block_list_response)
     def get(self, currency):
         """
-        Returns a list of blocks (100 per page) and a resumption token for
-        fetching the next page.
+        Returns a list of blocks (100 per page)
         """
         page = request.args.get("page")
         paging_state = bytes.fromhex(page) if page else None
@@ -91,12 +99,14 @@ class BlockList(Resource):
 
 
 @api.route("/<int:height>/txs")
+@api.param('currency', 'The cryptocurrency (e.g., btc)')
+@api.param('height', 'The block height')
 class BlockTxs(Resource):
     @token_required
     @api.marshal_with(block_txs_response)
     def get(self, currency, height):
         """
-        Returns a list of all txs within a given block.
+        Returns a list of all transactions within a given block.
         """
         block_txs = blocksDAO.list_block_txs(currency, height)
 
