@@ -11,6 +11,8 @@ api = Namespace('exchange_rates',
 
 
 @api.route("/<int:height>")
+@api.param('currency', 'The cryptocurrency (e.g., btc)')
+@api.param('height', 'The block height')
 class ExchangeRate(Resource):
     @token_required
     def get(self, currency, height):

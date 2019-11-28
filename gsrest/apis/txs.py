@@ -51,6 +51,8 @@ tx_list_response = api.model("tx_list_response", tx_list_model)
 
 
 @api.route("/<tx_hash>")
+@api.param('currency', 'The cryptocurrency (e.g., btc)')
+@api.param('tx_hash', 'The transaction hash')
 class Tx(Resource):
     @token_required
     @api.marshal_with(tx_response)
@@ -70,14 +72,14 @@ page_parser.add_argument("page", location="args")
 
 
 @api.route("/")
+@api.param('currency', 'The cryptocurrency (e.g., btc)')
 class TxList(Resource):
     @token_required
     @api.doc(parser=page_parser)
     @api.marshal_with(tx_list_response)
     def get(self, currency):
         """
-        Returns a list of transactions (100 per page) and a resumption token
-        for fetching the next page.
+        Returns a list of transactions (100 per page)
         """
         page = request.args.get("page")
         paging_state = bytes.fromhex(page) if page else None
@@ -85,4 +87,3 @@ class TxList(Resource):
         (paging_state, txs) = txsDAO.list_txs(currency, paging_state)
         return {"next_page": paging_state.hex() if paging_state else None,
                 "txs": txs}
-
