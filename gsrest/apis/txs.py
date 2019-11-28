@@ -9,6 +9,8 @@ api = Namespace('txs',
                 path='/<currency>/txs',
                 description='Operations related to transactions')
 
+page_parser = api.parser()
+page_parser.add_argument("page", location="args")
 
 tx_summary_model = {
     "height": fields.Integer(required=True, description="Transaction height"),
@@ -63,10 +65,6 @@ class Tx(Resource):
             abort(404, "Transaction {} not found in currency {}"
                   .format(tx_hash, currency))
         return tx
-
-
-page_parser = api.parser()
-page_parser.add_argument("page", location="args")
 
 
 @api.route("/")

@@ -1,7 +1,7 @@
 from cassandra.query import SimpleStatement
 
 from gsrest.db.cassandra import get_session
-from gsrest.model.addresses import Address, AddressTx
+from gsrest.model.addresses import Address, AddressTx, AddressOutgoingRelations
 from gsrest.model.tags import Tag
 from gsrest.service.rates_service import get_exchange_rate
 from math import floor
@@ -14,6 +14,14 @@ bucket_size = 25000  # TODO: get bucket_size from cassandra
 
 def get_address_id_group(address_id):
     return floor(address_id / bucket_size)
+
+
+def get_address_by_id_group(currency, address_id_group, address_id):
+    session = get_session(currency, 'transformed')
+    query ="SELECT address FROM address_by_id_group WHERE " \
+           "address_id_group = %s and address_id = %s"
+    result = session.execute(query, [address_id_group, address_id])
+    return result[0].address if result else None
 
 
 def get_address_id(currency, address):
@@ -40,10 +48,10 @@ def list_address_txs(currency, address, paging_state=None):
     address_id_group = get_address_id_group(address_id)
     query = "SELECT * FROM address_transactions WHERE address_id = %s " \
             "AND address_id_group = %s"
-    # TODO: add paging_state
-    # statement = SimpleStatement(query, fetch_size=ADDRESS_PAGE_SIZE)
-    # results = session.execute(statement, paging_state=paging_state)
-    results = session.execute(query, [address_id, address_id_group])
+    statement = SimpleStatement(query, fetch_size=ADDRESS_PAGE_SIZE)
+    results = session.execute(statement, [address_id, address_id_group],
+                              paging_state=paging_state)
+    paging_state = results.paging_state
     address_txs = [AddressTx.from_row(row,
                                       address,
                                       get_exchange_rate(currency,
@@ -63,3 +71,30 @@ def list_address_tags(currency, address):
 
     return address_tags
 
+
+def list_address_outgoing_relations(currency, address, paging_state=None,
+                                    page_size=None):
+    session = get_session(currency, 'transformed')
+
+    address_id = get_address_id(currency, address)
+    address_id_group = get_address_id_group(address_id)
+    query = "SELECT * FROM address_outgoing_relations WHERE " \
+            "src_address_id_group = %s AND src_address_id = %s"
+    fetch_size = ADDRESS_PAGE_SIZE
+    if page_size:
+        fetch_size = page_size
+    statement = SimpleStatement(query, fetch_size=fetch_size)
+    results = session.execute(statement, [address_id_group, address_id],
+                              paging_state=paging_state)
+    paging_state = results.paging_state
+    exchange_rate = get_exchange_rate(currency)['rates']  # TODO: implement default (-1)
+    relations = []
+    for row in results.current_rows:
+        dst_address_id_group = get_address_id_group(row.dst_address_id)
+        dst_address = get_address_by_id_group(currency, dst_address_id_group,
+                                              row.dst_address_id)
+
+        relations.append(AddressOutgoingRelations.from_row(row, dst_address,
+                                                           exchange_rate)
+                         .to_dict())
+    return paging_state, relations
