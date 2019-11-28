@@ -3,6 +3,7 @@ from flask_restplus import Namespace, Resource, fields
 from functools import wraps
 
 from gsrest.util.decorator import token_required
+from gsrest.apis.common import page_parser
 from gsrest.apis.blocks import value_response
 from gsrest.apis.txs import tx_summary_response
 from gsrest.util.csvify import tags_to_csv, create_download_header
@@ -11,6 +12,17 @@ import gsrest.service.addresses_service as addressesDAO
 api = Namespace('addresses',
                 path='/<currency>/addresses',
                 description='Operations related to addresses')
+
+tags_parser = api.parser()
+tags_parser.add_argument("tags", location="args")
+
+direction_parser = api.parser()
+direction_parser.add_argument("direction", location="args")
+
+neighbors_parser = page_parser(api).copy()
+neighbors_parser.add_argument("direction", location="args")
+neighbors_parser.add_argument("pagesize", location="args")
+
 
 address_model = {
     "address": fields.String(required=True, description="Address"),
@@ -70,6 +82,23 @@ address_tags_model["tags"] = fields.List(fields.Nested(tag_response,
 address_tags_response = api.model("address_tags_response",
                                   address_tags_model)
 
+neighbor_model = {
+    "id": fields.String(required=True, description="Node Id"),
+    "node_type": fields.String(required=True, description="Node type"),
+    "balance": fields.Nested(value_response, required=True, description="Balance"),
+    "received": fields.Nested(value_response, required=True, description="Received amount"),
+    "no_txs": fields.Integer(required=True, description="Number of transactions"),
+    "estimated_value": fields.Nested(value_response, required=True)
+}
+neighbor_response = api.model("neighbor_response", neighbor_model)
+
+neighbors_model = {
+    "next_page": fields.String(required=True, description="The next page"),
+    "neighbors": fields.List(fields.Nested(neighbor_response), required=True,
+                             description="The list of neighbors")
+}
+neighbors_response = api.model("neighbors_response", neighbors_model)
+
 
 def selective_marshal_with(address_response, address_tags_response):
     """ Selective response marshalling """
@@ -86,10 +115,6 @@ def selective_marshal_with(address_response, address_tags_response):
     return decorator
 
 
-tags_parser = api.parser()
-tags_parser.add_argument("tags", location="args")
-
-
 @api.route("/<address>")
 @api.param('currency', 'The cryptocurrency (e.g., btc)')
 @api.param('address', 'The cryptocurrency address')
@@ -98,7 +123,7 @@ class Address(Resource):
     @api.doc(parser=tags_parser)
     @selective_marshal_with(address_response, address_tags_response)
     def get(self, currency, address):
-        """ 
+        """
         Returns details of a specific address
         """
         addr = addressesDAO.get_address(currency, address)
@@ -110,24 +135,20 @@ class Address(Resource):
         return addr
 
 
-page_parser = api.parser()
-page_parser.add_argument("page", default=0, location="args")
-
-
 @api.param('currency', 'The cryptocurrency (e.g., btc)')
 @api.param('address', 'The cryptocurrency address')
 @api.route("/<address>/txs")
 class AddressTxs(Resource):
     @token_required
-    @api.doc(parser=page_parser)
+    @api.doc(parser=page_parser(api))
     @api.marshal_with(address_txs_response)
     def get(self, currency, address):
         """
         Returns all transactions an address has been involved in
         """
+        # TODO: should we allow the user to specify the page size?
         page = request.args.get("page")
         paging_state = bytes.fromhex(page) if page else None
-        # TODO: check paging_state
         paging_state, address_txs = addressesDAO.list_address_txs(currency,
                                                                   address,
                                                                   paging_state)
@@ -169,5 +190,44 @@ class AddressTagsCSV(Resource):
                                                                currency
                                                                .upper())))
 
+
+@api.route("/<address>/neighbors")
+class AddressNeighbors(Resource):
+    @token_required
+    @api.doc(parser=neighbors_parser)
+    @api.marshal_with(neighbors_response)
+    def get(self, currency, address):
+        """
+        Returns a JSON with edges and nodes of the address
+        """
+        direction = request.args.get("direction")
+        if not direction:
+            abort(404, "Direction value missing")
+        if "in" in direction:
+            is_outgoing = False
+        elif "out" in direction:
+            is_outgoing = True
+        else:
+            abort(404, "Invalid direction value - has to be either in or out")
+
+        page = request.args.get("page")
+        pagesize = request.args.get("pagesize")
+        paging_state = bytes.fromhex(page) if page else None
+
+        if pagesize is not None:
+            try:
+                pagesize = int(pagesize)
+            except Exception:
+                abort(404, "Invalid pagesize value")
+
+        if is_outgoing:
+            paging_state, relations = addressesDAO.\
+                list_address_outgoing_relations(currency, address,
+                                                paging_state, pagesize)
+        # else:
+        #     paging_state, relations = addressesDAO.list_address_incoming_relations(
+        #         currency, paging_state, address, pagesize)
+        return {"next_page": paging_state.hex() if paging_state else None,
+                "neighbors": relations}
 
 # TODO: AddressIncomingRelations, AddressOutgoingRelations, AddressSummary

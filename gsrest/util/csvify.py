@@ -60,7 +60,7 @@ def neighbours_to_csv(query_function, currency, entity, pagesize, limit,
                 flat_dict[name[:-1]] = item
 
         for row in rows:
-            flatten(row.toJson())
+            flatten(row.to_json())
             if not field_names:
                 field_names = ",".join(flat_dict.keys())
                 yield (field_names + "\n")

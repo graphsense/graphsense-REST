@@ -3,12 +3,12 @@ from flask_restplus import Namespace, Resource, fields
 
 from gsrest.apis.common import page_parser
 from gsrest.util.decorator import token_required
-
 import gsrest.service.blocks_service as blocksDAO
 
 api = Namespace('blocks',
                 path='/<currency>/blocks',
                 description='Operations related to blocks')
+
 
 block_model = {
     "block_hash": fields.String(required=True, description="Block hash"),
@@ -25,7 +25,6 @@ block_list_model = {
                           required=True, description="Block list"),
     "next_page": fields.String(required=True, description="The next page")
 }
-
 block_list_response = api.model("block_list_response", block_list_model)
 
 value_model = {
