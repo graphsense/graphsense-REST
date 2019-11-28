@@ -91,12 +91,16 @@ tags_parser.add_argument("tags", location="args")
 
 
 @api.route("/<address>")
+@api.param('currency', 'The cryptocurrency (e.g., btc)')
+@api.param('address', 'The cryptocurrency address')
 class Address(Resource):
     @token_required
     @api.doc(parser=tags_parser)
     @selective_marshal_with(address_response, address_tags_response)
     def get(self, currency, address):
-        """ Returns details of a specific address """
+        """ 
+        Returns details of a specific address
+        """
         addr = addressesDAO.get_address(currency, address)
         if not addr:
             abort(404, "Address {} not found in currency {}"
@@ -110,6 +114,8 @@ page_parser = api.parser()
 page_parser.add_argument("page", default=0, location="args")
 
 
+@api.param('currency', 'The cryptocurrency (e.g., btc)')
+@api.param('address', 'The cryptocurrency address')
 @api.route("/<address>/txs")
 class AddressTxs(Resource):
     @token_required
@@ -117,7 +123,7 @@ class AddressTxs(Resource):
     @api.marshal_with(address_txs_response)
     def get(self, currency, address):
         """
-        Returns transactions of a specific address.
+        Returns all transactions an address has been involved in
         """
         page = request.args.get("page")
         paging_state = bytes.fromhex(page) if page else None

@@ -1,6 +1,7 @@
 from flask import request, abort
 from flask_restplus import Namespace, Resource, fields
 
+from gsrest.apis.common import page_parser
 from gsrest.util.decorator import token_required
 
 import gsrest.service.blocks_service as blocksDAO
@@ -72,17 +73,11 @@ class Block(Resource):
         return block
 
 
-page_parser = api.parser()
-page_parser.add_argument("page", type="str",
-                         location="args",
-                         help="Resumption token for retrieving the next page")
-
-
 @api.route("/")
 @api.param('currency', 'The cryptocurrency (e.g., btc)')
 class BlockList(Resource):
     @token_required
-    @api.doc(parser=page_parser)
+    @api.doc(parser=page_parser(api))
     @api.marshal_with(block_list_response)
     def get(self, currency):
         """
