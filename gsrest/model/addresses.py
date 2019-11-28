@@ -83,3 +83,26 @@ class AddressOutgoingRelations(object):
 
     def to_dict(self):
         return self.__dict__
+
+
+class AddressIncomingRelations(object):
+    def __init__(self, estimated_value, src_address,
+                 no_txs, src_properties, exchange_rate):
+        self.id = src_address
+        self.node_type = 'address'
+        self.received = Values(**src_properties.total_received._asdict())\
+            .to_dict()
+        self.balance = compute_balance(src_properties.total_received.value,
+                                       src_properties.total_received.value,
+                                       exchange_rate)
+        self.no_txs = no_txs
+        self.estimated_value = Values(**estimated_value._asdict()).to_dict()
+
+    @staticmethod
+    def from_row(row, src_address, exchange_rate):
+        return AddressIncomingRelations(row.estimated_value,
+                                        src_address, row.no_transactions,
+                                        row.src_properties, exchange_rate)
+
+    def to_dict(self):
+        return self.__dict__

@@ -85,9 +85,12 @@ address_tags_response = api.model("address_tags_response",
 neighbor_model = {
     "id": fields.String(required=True, description="Node Id"),
     "node_type": fields.String(required=True, description="Node type"),
-    "balance": fields.Nested(value_response, required=True, description="Balance"),
-    "received": fields.Nested(value_response, required=True, description="Received amount"),
-    "no_txs": fields.Integer(required=True, description="Number of transactions"),
+    "balance": fields.Nested(value_response, required=True,
+                             description="Balance"),
+    "received": fields.Nested(value_response, required=True,
+                              description="Received amount"),
+    "no_txs": fields.Integer(required=True,
+                             description="Number of transactions"),
     "estimated_value": fields.Nested(value_response, required=True)
 }
 neighbor_response = api.model("neighbor_response", neighbor_model)
@@ -221,12 +224,13 @@ class AddressNeighbors(Resource):
                 abort(404, "Invalid pagesize value")
 
         if is_outgoing:
-            paging_state, relations = addressesDAO.\
-                list_address_outgoing_relations(currency, address,
-                                                paging_state, pagesize)
-        # else:
-        #     paging_state, relations = addressesDAO.list_address_incoming_relations(
-        #         currency, paging_state, address, pagesize)
+            paging_state, relations = addressesDAO\
+                .list_address_outgoing_relations(currency, address,
+                                                 paging_state, pagesize)
+        else:
+            paging_state, relations = addressesDAO\
+                .list_address_incoming_relations(currency, address,
+                                                 paging_state, pagesize)
         return {"next_page": paging_state.hex() if paging_state else None,
                 "neighbors": relations}
 
