@@ -2,10 +2,8 @@ from flask import request, abort, Response
 from flask_restplus import Namespace, Resource, fields
 from functools import wraps
 
+from gsrest.apis.common import page_parser, value_response, tx_summary_response
 from gsrest.util.decorator import token_required
-from gsrest.apis.common import page_parser
-from gsrest.apis.blocks import value_response
-from gsrest.apis.txs import tx_summary_response
 from gsrest.util.csvify import tags_to_csv, create_download_header
 import gsrest.service.addresses_service as addressesDAO
 
@@ -19,7 +17,7 @@ tags_parser.add_argument("tags", location="args")
 direction_parser = api.parser()
 direction_parser.add_argument("direction", location="args")
 
-neighbors_parser = page_parser(api).copy()
+neighbors_parser = page_parser.copy()
 neighbors_parser.add_argument("direction", location="args")
 neighbors_parser.add_argument("pagesize", location="args")
 
@@ -143,7 +141,7 @@ class Address(Resource):
 @api.route("/<address>/txs")
 class AddressTxs(Resource):
     @token_required
-    @api.doc(parser=page_parser(api))
+    @api.doc(parser=page_parser)
     @api.marshal_with(address_txs_response)
     def get(self, currency, address):
         """

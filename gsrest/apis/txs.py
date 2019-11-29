@@ -1,25 +1,13 @@
 from flask import request, abort
 from flask_restplus import Namespace, Resource, fields
 
+from gsrest.apis.common import page_parser, value_response
 from gsrest.util.decorator import token_required
-from gsrest.apis.blocks import value_response
 import gsrest.service.txs_service as txsDAO
 
 api = Namespace('txs',
                 path='/<currency>/txs',
                 description='Operations related to transactions')
-
-page_parser = api.parser()
-page_parser.add_argument("page", location="args")
-
-tx_summary_model = {
-    "height": fields.Integer(required=True, description="Transaction height"),
-    "timestamp": fields.Integer(required=True,
-                                description="Transaction timestamp"),
-    "tx_hash": fields.String(required=True, description="Transaction hash")
-}
-tx_summary_response = api.model("tx_summary_response", tx_summary_model)
-
 
 input_output_model = {
     "address": fields.String(required=True, description="Address"),
