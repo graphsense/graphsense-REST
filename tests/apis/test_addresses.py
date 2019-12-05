@@ -8,10 +8,11 @@ from collections import namedtuple
 
 non_existing_address = 'zzzzz'
 non_existing_currency = 'abc'
-address1 = 'bc1q2jhyw77crz3xqjml30jpw8zf66dr366kec68a9'
-address2 = '3Aa7BnDG7XeuSZwL7Hzo3p87eiqoaAG3s3'
-address3 = '1NDyJtNTjmwk5xPNhjgAMu4HDHigtobu1s'
-address4 = '1A8pUXyXzqWQzqR6q2djwrXuG4nfici4KY'
+address1 = 'bc1q2jhyw77crz3xqjml30jpw8zf66dr366kec68a9'  # no more txs
+address2 = '3Aa7BnDG7XeuSZwL7Hzo3p87eiqoaAG3s3'  # txs were easy to fetch
+address3 = '1NDyJtNTjmwk5xPNhjgAMu4HDHigtobu1s'  # binance
+address4 = '1A8pUXyXzqWQzqR6q2djwrXuG4nfici4KY'  # random
+address5 = '1N4RJ9fRGzk1HCWfqZs3jYdSJZprC4D76Y'  # tags error
 first_tx = TxSummary(577281, 1558549477, bytearray.fromhex('39435696ea53d580f15f85fcae5f084ff9c3ba6b5f1b84d4e1e41d8fceb5d0ba'))
 last_tx = TxSummary(585637, 1563268350, bytearray.fromhex('e11c9764f94f5bc8ea2b59ebe6d1e49a69a820d5b46eb9861e0f581be911071a'))
 tx1 = 'ab188013f626405ddebf1a7b2e0af34253d09e80f9ef7f981ec1ec59d6200c1f'
@@ -47,6 +48,11 @@ TEST_ADDRESSES_TAGS = {
         'btc',
     ).to_dict()]
 }
+
+# TODO: test neighbors
+# TEST_NEIGHBORS = {
+#     address1: [AddressIncomingRelations()]
+# }
 
 
 def test_address(client, auth, monkeypatch):
@@ -142,3 +148,4 @@ def test_address_tags(client, auth, monkeypatch):
     for i in range(len(json_data)):
         for k in TEST_ADDRESSES_TAGS[address2][i]:
             assert json_data[i][k] == TEST_ADDRESSES_TAGS[address2][i][k]
+

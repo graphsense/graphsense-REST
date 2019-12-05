@@ -16,12 +16,12 @@ def tags_to_csv(json_data):
         flatten(tx)
         if not field_names:
             field_names = ",".join(flat_dict.keys())
-            yield (field_names + "\n")
-        yield (",".join([str(item) for item in flat_dict.values()]) + "\n")
+            yield field_names + "\n"
+        yield ",".join([str(item) for item in flat_dict.values()]) + "\n"
         flat_dict = {}
 
 
-def transactions_to_csv(json_data):
+def txs_to_csv(json_data):
     flat_dict = {}
 
     def flatten(x, name=""):
@@ -39,36 +39,28 @@ def transactions_to_csv(json_data):
         flatten(tx)
         if not field_names:
             field_names = ",".join(flat_dict.keys())
-            yield (field_names + "\n")
-        yield (",".join([str(item) for item in flat_dict.values()]) + "\n")
+            yield field_names + "\n"
+        yield ",".join([str(item) for item in flat_dict.values()]) + "\n"
         flat_dict = {}
 
 
-def neighbours_to_csv(query_function, currency, entity, pagesize, limit,
-                      page_state=None):
-    field_names = []
-    flat_dict = {}
-    while True:
-        (page_state, rows) = query_function(currency, page_state, entity,
-                                            pagesize, limit)
+def flatten_rows(rows, field_names):
+    flat_dict = dict()
 
-        def flatten(item, name=""):
-            if type(item) is dict:
-                for sub_item in item:
-                    flatten(item[sub_item], name + sub_item + "_")
-            else:
-                flat_dict[name[:-1]] = item
+    def flatten(item, name=""):
+        if type(item) is dict:
+            for sub_item in item:
+                flatten(item[sub_item], name + sub_item + "_")
+        else:
+            flat_dict[name[:-1]] = item
 
-        for row in rows:
-            flatten(row.to_json())
-            if not field_names:
-                field_names = ",".join(flat_dict.keys())
-                yield (field_names + "\n")
-            yield (",".join([str(item) for item in flat_dict.values()]) + "\n")
-            flat_dict = {}
-
-        if not page_state:
-            break
+    for row in rows:
+        flatten(row)
+        if not field_names:
+            field_names = ",".join(flat_dict.keys())
+            yield field_names + "\n"
+        yield ",".join([str(item) for item in flat_dict.values()]) + "\n"
+        flat_dict = dict()
 
 
 def create_download_header(filename):

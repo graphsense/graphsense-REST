@@ -12,13 +12,15 @@ class Tag(object):
         self.lastmod = lastmod
         self.currency = currency
 
+    @staticmethod
+    def from_address_row(row, currency):
+        return Tag(row.address, row.label, row.category, row.abuse,
+                   row.tagpack_uri, row.source, row.lastmod, currency)
 
     @staticmethod
-    def from_row(row, currency):
-        return Tag(row.address, row.label, row.category, row.abuse,
+    def from_entity_row(row, address, currency):
+        return Tag(address, row.label, row.category, row.abuse,
                    row.tagpack_uri, row.source, row.lastmod, currency)
 
     def to_dict(self):
         return self.__dict__
-
-
