@@ -2,12 +2,11 @@ from flask import request, abort, Response
 from flask_restplus import Namespace, Resource, fields
 from functools import wraps
 
-from gsrest.apis.common import get_page_parser, get_value_response
+from gsrest.apis.common import get_page_parser
 from gsrest.apis.entities import entity_response, entity_tags_response, \
-    tag_response, neighbors_response, neighbors_parser
+    tag_response, neighbors_response
 import gsrest.service.addresses_service as addressesDAO
 import gsrest.service.entities_service as entitiesDAO
-from gsrest.service.common_service import address_model
 from gsrest.util.decorator import token_required
 from gsrest.util.csvify import tags_to_csv, create_download_header, \
     flatten_rows
@@ -25,6 +24,30 @@ tags_parser.add_argument("tags", location="args")
 direction_parser = api.parser()
 direction_parser.add_argument("direction", location="args")
 
+neighbors_parser = page_parser.copy()
+neighbors_parser.add_argument("direction", location="args")
+neighbors_parser.add_argument("pagesize", location="args")
+
+address_model = {
+    "address": fields.String(required=True, description="Address"),
+    "balance": fields.Nested(value_response, required=True,
+                             description="Balance"),
+    "first_tx": fields.Nested(tx_summary_response, required=True,
+                              description="First transaction"),
+    "last_tx": fields.Nested(tx_summary_response, required=True,
+                             description="Last transaction"),
+    "in_degree": fields.Integer(required=True, description="In-degree value"),
+    "out_degree": fields.Integer(required=True,
+                                 description="Out-degree value"),
+    "no_incoming_txs": fields.Integer(required=True,
+                                      description="Incoming transactions"),
+    "no_outgoing_txs": fields.Integer(required=True,
+                                      description="Outgoing transactions"),
+    "total_received": fields.Nested(value_response, required=True,
+                                    description="Total received"),
+    "total_spent": fields.Nested(value_response, required=True,
+                                 description="Total spent"),
+}
 address_response = api.model("address_response", address_model)
 
 address_tx_model = {
@@ -93,7 +116,7 @@ class Address(Resource):
 @api.route("/<address>/txs")
 class AddressTxs(Resource):
     @token_required
-    @api.doc(parser=get_page_parser(api))
+    @api.doc(parser=page_parser)
     @api.marshal_with(address_txs_response)
     def get(self, currency, address):
         """

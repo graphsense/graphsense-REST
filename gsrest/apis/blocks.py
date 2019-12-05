@@ -1,7 +1,7 @@
 from flask import request, abort
 from flask_restplus import Namespace, Resource, fields
 
-from gsrest.apis.common import get_page_parser
+from gsrest.apis.common import page_parser, value_response
 from gsrest.util.decorator import token_required
 import gsrest.service.blocks_service as blocksDAO
 
@@ -26,13 +26,6 @@ block_list_model = {
     "next_page": fields.String(required=True, description="The next page")
 }
 block_list_response = api.model("block_list_response", block_list_model)
-
-value_model = {
-    "eur": fields.Float(required=True, description="EUR value"),
-    "value": fields.Integer(required=True, description="Value"),
-    "usd": fields.Float(required=True, description="USD value")
-}
-value_response = api.model("value_response", value_model)
 
 block_tx_model = {
     "tx_hash": fields.String(required=True, description="Transaction hash"),
@@ -76,7 +69,7 @@ class Block(Resource):
 @api.param('currency', 'The cryptocurrency (e.g., btc)')
 class BlockList(Resource):
     @token_required
-    @api.doc(parser=get_page_parser(api))
+    @api.doc(parser=page_parser)
     @api.marshal_with(block_list_response)
     def get(self, currency):
         """

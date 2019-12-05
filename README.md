@@ -82,13 +82,16 @@ Run production server
 
 ### Deployment with `docker`
 
-After installing docker, set the REST password and username
-in `docker/build.sh` (`rest_user` and `rest_passwd`) and run:
+After installing docker, build the image and start a container using:
 
     docker/build.sh
     docker/start.sh
 
-Test the service in your browser:
+Afterwards add users to the running container instance using
+
+    docker/add_user.sh USERNAME PASSWORD
+
+and test the service in a web browser:
 
     http://localhost:9000
 

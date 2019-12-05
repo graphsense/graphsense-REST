@@ -1,8 +1,6 @@
-FROM alpine:3.7.3
+FROM alpine:3.10.3
 LABEL maintainer="rainer.stuetz@ait.ac.at"
 
-ARG rest_user=graphsense
-ARG rest_passwd
 ENV FLASK_APP=gsrest
 
 RUN mkdir -p /srv/graphsense-rest/
@@ -20,8 +18,8 @@ RUN apk --no-cache --update add bash python3 py3-gunicorn nginx shadow && \
     rm -r /usr/lib/python*/ensurepip && \
     rm /etc/nginx/conf.d/default.conf && \
     pip3 install --upgrade pip setuptools && \
-    pip3 install -r /srv/graphsense-rest/requirements.txt && \
     pip3 install -r /srv/graphsense-rest/requirements-docker.txt && \
+    pip3 install -r /srv/graphsense-rest/requirements.txt && \
     apk del build-dependendencies && \
     rm -rf /root/.cache && \
     chmod -R o+rwx /var/log/nginx && \
@@ -38,8 +36,9 @@ COPY instance /usr/var/gsrest-instance
 RUN mkdir /var/lib/graphsense-rest && \
     chown dockeruser /var/lib/graphsense-rest && \
     pip3 install /srv/graphsense-rest/ && \
-    flask init-db && \
-    flask create-user $rest_user $rest_passwd
+    chown -R dockeruser /usr/var/gsrest-instance
 
 USER dockeruser
+RUN flask init-db
+
 CMD ["supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisor-app.conf"]
