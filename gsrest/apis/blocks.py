@@ -1,51 +1,14 @@
 from flask import request, abort
 from flask_restplus import Namespace, Resource, fields
 
-from gsrest.apis.common import page_parser, value_response
+from gsrest.apis.common import page_parser, block_response, \
+    block_list_response, block_txs_response
 from gsrest.util.decorator import token_required
 import gsrest.service.blocks_service as blocksDAO
 
 api = Namespace('blocks',
                 path='/<currency>/blocks',
                 description='Operations related to blocks')
-
-
-block_model = {
-    "block_hash": fields.String(required=True, description="Block hash"),
-    "height": fields.Integer(required=True, description="Block height"),
-    "no_txs": fields.Integer(
-        required=True, description="Number of transactions"),
-    "timestamp": fields.Integer(
-        required=True, description="Transaction timestamp"),
-}
-block_response = api.model("block_response", block_model)
-
-block_list_model = {
-    "blocks": fields.List(fields.Nested(block_response),
-                          required=True, description="Block list"),
-    "next_page": fields.String(required=True, description="The next page")
-}
-block_list_response = api.model("block_list_response", block_list_model)
-
-block_tx_model = {
-    "tx_hash": fields.String(required=True, description="Transaction hash"),
-    "no_inputs": fields.Integer(
-        required=True, description="Number of inputs"),
-    "no_outputs": fields.Integer(
-        required=True, description="Number of outputs"),
-    "total_input": fields.Nested(
-        value_response, required=True, description="Total input value"),
-    "total_output": fields.Nested(
-        value_response, required=True, description="Total output value")
-}
-block_tx_response = api.model("block_tx_response", block_tx_model)
-
-block_txs_model = {
-    "height": fields.Integer(required=True, description="Block height"),
-    "txs": fields.List(fields.Nested(
-        block_tx_response), required=True, description="Block list")
-}
-block_txs_response = api.model("block_txs_response", block_txs_model)
 
 
 @api.route("/<int:height>")

@@ -1,7 +1,7 @@
 from flask import request, abort
-from flask_restplus import Namespace, Resource, fields
+from flask_restplus import Namespace, Resource
 
-from gsrest.apis.common import page_parser, value_response
+from gsrest.apis.common import page_parser, tx_response, tx_list_response
 from gsrest.util.decorator import token_required
 import gsrest.service.txs_service as txsDAO
 
@@ -9,35 +9,6 @@ api = Namespace('txs',
                 path='/<currency>/txs',
                 description='Operations related to transactions')
 
-input_output_model = {
-    "address": fields.String(required=True, description="Address"),
-    "value": fields.Nested(value_response, required=True,
-                           description="Input/Output value")
-}
-input_output_response = api.model("input_output_response", input_output_model)
-
-tx_model = {
-    "tx_hash": fields.String(required=True, description="Transaction hash"),
-    "coinbase": fields.Boolean(required=True,
-                               description="Coinbase transaction flag"),
-    "height": fields.Integer(required=True, description="Transaction height"),
-    "inputs": fields.List(fields.Nested(input_output_response), required=True,
-                          description="Transaction inputs"),
-    "outputs": fields.List(fields.Nested(input_output_response), required=True,
-                           description="Transaction inputs"),
-    "timestamp": fields.Integer(required=True,
-                                description="Transaction timestamp"),
-    "total_input": fields.Nested(value_response, required=True),
-    "total_output": fields.Nested(value_response, required=True),
-}
-tx_response = api.model("tx_response", tx_model)
-
-tx_list_model = {
-    "txs": fields.List(fields.Nested(tx_response),
-                       required=True, description="Transaction list"),
-    "next_page": fields.String(required=True, description="The next page")
-}
-tx_list_response = api.model("tx_list_response", tx_list_model)
 
 
 @api.route("/<tx_hash>")

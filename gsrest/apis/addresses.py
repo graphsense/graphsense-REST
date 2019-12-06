@@ -2,9 +2,10 @@ from flask import request, abort, Response
 from flask_restplus import Namespace, Resource, fields
 from functools import wraps
 
-from gsrest.apis.common import get_page_parser
-from gsrest.apis.entities import entity_response, entity_tags_response, \
-    tag_response, neighbors_response
+from gsrest.apis.common import page_parser, tags_parser, neighbors_parser, \
+    entity_response, address_txs_response, address_response, \
+    address_tags_response, entity_tags_response, tag_response, \
+    neighbors_response
 import gsrest.service.addresses_service as addressesDAO
 import gsrest.service.entities_service as entitiesDAO
 from gsrest.util.decorator import token_required
@@ -15,64 +16,6 @@ from gsrest.util.csvify import tags_to_csv, create_download_header, \
 api = Namespace('addresses',
                 path='/<currency>/addresses',
                 description='Operations related to addresses')
-
-# value_response = get_value_response(api)
-
-tags_parser = api.parser()
-tags_parser.add_argument("tags", location="args")
-
-direction_parser = api.parser()
-direction_parser.add_argument("direction", location="args")
-
-neighbors_parser = page_parser.copy()
-neighbors_parser.add_argument("direction", location="args")
-neighbors_parser.add_argument("pagesize", location="args")
-
-address_model = {
-    "address": fields.String(required=True, description="Address"),
-    "balance": fields.Nested(value_response, required=True,
-                             description="Balance"),
-    "first_tx": fields.Nested(tx_summary_response, required=True,
-                              description="First transaction"),
-    "last_tx": fields.Nested(tx_summary_response, required=True,
-                             description="Last transaction"),
-    "in_degree": fields.Integer(required=True, description="In-degree value"),
-    "out_degree": fields.Integer(required=True,
-                                 description="Out-degree value"),
-    "no_incoming_txs": fields.Integer(required=True,
-                                      description="Incoming transactions"),
-    "no_outgoing_txs": fields.Integer(required=True,
-                                      description="Outgoing transactions"),
-    "total_received": fields.Nested(value_response, required=True,
-                                    description="Total received"),
-    "total_spent": fields.Nested(value_response, required=True,
-                                 description="Total spent"),
-}
-address_response = api.model("address_response", address_model)
-
-address_tx_model = {
-    "address": fields.String(required=True, description="Address"),
-    "height": fields.Integer(required=True, description="Transaction height"),
-    "timestamp": fields.Integer(required=True,
-                                description="Transaction timestamp"),
-    "tx_hash": fields.String(required=True, description="Transaction hash"),
-    "value": fields.Nested(value_response, required=True)
-}
-address_tx_response = api.model("address_tx_response", address_tx_model)
-
-address_txs_model = {
-    "next_page": fields.String(required=True, description="The next page"),
-    "address_txs": fields.List(fields.Nested(address_tx_response),
-                               required=True,
-                               description="The list of transactions")
-}
-address_txs_response = api.model("address_txs_response", address_txs_model)
-
-address_tags_model = address_model.copy()
-address_tags_model["tags"] = fields.List(fields.Nested(tag_response,
-                                                       required=True))
-address_tags_response = api.model("address_tags_response",
-                                  address_tags_model)
 
 
 def selective_marshal_with(default_response, args_response, arg):
