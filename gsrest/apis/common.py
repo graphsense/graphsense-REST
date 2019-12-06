@@ -16,14 +16,11 @@ page_parser.add_argument(
 tags_parser = api.parser()
 tags_parser.add_argument("tags", location="args")
 
-direction_parser = api.parser()
-direction_parser.add_argument("direction", location="args")
-
 page_size_parser = page_parser.copy()
 page_size_parser.add_argument("pagesize", location="args")
 
 neighbors_parser = page_size_parser.copy()
-neighbors_parser.add_argument("direction", location="args")
+neighbors_parser.add_argument("direction", required=True, location="args")
 
 
 """
