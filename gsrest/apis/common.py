@@ -228,3 +228,18 @@ tx_list_model = {
     "next_page": fields.String(required=True, description="The next page")
 }
 tx_list_response = api.model("tx_list_response", tx_list_model)
+
+label_model = {
+    "label": fields.String(required=True, description="Label"),
+    "label_norm": fields.String(required=True, description="Normalized label"),
+    "address_count": fields.Integer(required=True,
+                                    description="Number of addresses "
+                                                "for the label"),
+}
+label_response = api.model("label_response", label_model)
+
+category_model = {
+    "category": fields.String(required=True, description="Category"),
+    "id": fields.Integer(required=True, description="Id")
+}
+category_response = api.model("category_response", category_model)

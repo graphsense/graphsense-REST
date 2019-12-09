@@ -1,5 +1,5 @@
 from flask import request, abort, Response
-from flask_restplus import Namespace, Resource, fields
+from flask_restplus import Namespace, Resource
 from functools import wraps
 
 from gsrest.apis.common import page_parser, tags_parser, neighbors_parser, \
