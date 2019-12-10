@@ -1,13 +1,19 @@
-from flask_restplus import Namespace, Resource
+from flask_restplus import Namespace, Resource, abort
 
-import gsrest.service.general_services as generalDAO
+import gsrest.service.general_service as generalDAO
 from gsrest.util.checks import config
 from gsrest.util.decorator import token_required
-
+from gsrest.apis.common import search_response
+from gsrest.apis.common import label_search_response
+import gsrest.service.addresses_service as addressesDAO
+import gsrest.service.labels_service as labelsDAO
+import gsrest.service.txs_service as txsDAO
+from gsrest.service.addresses_service import ADDRESS_PREFIX_LENGTH
+from gsrest.service.txs_service import TX_PREFIX_LENGTH
 
 api = Namespace('general',
-                path='/general',
-                description='General operations')
+                path='/',
+                description='General operations like stats and search')
 
 
 # TODO: is a response model needed here?
@@ -23,3 +29,53 @@ class Statistics(Resource):
             if currency != "tagpacks":
                 statistics[currency] = generalDAO.get_statistics(currency)
         return statistics
+
+
+@api.route("/<currency>/search/<expression>")
+class Search(Resource):
+    @token_required
+    @api.marshal_with(search_response)
+    def get(self, currency, expression):
+        """
+        Returns a JSON with a list of matching addresses and a list of
+        matching transactions
+        """
+        leading_zeros = 0
+        pos = 0
+        # leading zeros will be lost when casting to int
+        while expression[pos] == "0":
+            pos += 1
+            leading_zeros += 1
+
+        result = {"addresses": [], "txs": []}
+
+        # Look for addresses and transactions
+        if len(expression) >= TX_PREFIX_LENGTH:
+            txs = txsDAO.list_matching_txs(currency, expression, leading_zeros)
+            result["txs"] = txs
+
+        if len(expression) >= ADDRESS_PREFIX_LENGTH:
+            addresses = addressesDAO.list_matching_addresses(currency,
+                                                             expression)
+            result["addresses"] = addresses
+
+        return result
+
+
+@api.route("/search/labels/<label>")
+class LabelSearch(Resource):
+    @token_required
+    @api.marshal_with(label_search_response)
+    def get(self, label):
+        """
+        Returns a JSON with a list of matching labels
+        """
+        if not label:
+            # TODO: capitalize all first letters of first word in error message
+            abort(400, "Label parameter not provided")
+
+        if len(label) < labelsDAO.LABEL_PREFIX_LENGTH:
+            abort(400, "Label parameter too short: at least {} characters"
+                  .format(labelsDAO.LABEL_PREFIX_LENGTH))
+
+        return {'labels': labelsDAO.list_labels(label)}

@@ -1,5 +1,5 @@
-from flask import request, abort
-from flask_restplus import Namespace, Resource, fields
+from flask import abort
+from flask_restplus import Namespace, Resource
 
 from gsrest.apis.common import page_parser, block_response, \
     block_list_response, block_txs_response
@@ -38,7 +38,8 @@ class BlockList(Resource):
         """
         Returns a list of blocks (100 per page)
         """
-        page = request.args.get("page")
+        args = page_parser.parse_args()
+        page = args.get("page")
         paging_state = bytes.fromhex(page) if page else None
 
         (paging_state, blocks) = blocksDAO.list_blocks(currency, paging_state)

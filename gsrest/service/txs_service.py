@@ -35,3 +35,13 @@ def list_txs(currency, paging_state=None):
                .to_dict() for row in results.current_rows]
 
     return paging_state, tx_list
+
+
+def list_matching_txs(currency, expression, leading_zeros):
+    session = get_session(currency, 'raw')
+    query = 'SELECT tx_hash from transaction where tx_prefix = %s'
+    results = session.execute(query, [expression[:TX_PREFIX_LENGTH]])
+    txs = ["0" * leading_zeros + str(hex(int.from_bytes(row.tx_hash,
+                                                        byteorder="big")))[2:]
+           for row in results]
+    return [tx for tx in txs if tx.startswith(expression)]

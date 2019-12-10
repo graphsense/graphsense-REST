@@ -1,12 +1,13 @@
-from flask import request, abort, Response
-from flask_restplus import Namespace, Resource, fields
+from flask import abort, Response
+from flask_restplus import Namespace, Resource
 from gsrest.util.decorator import token_required
 from gsrest.service import entities_service as entitiesDAO
+from gsrest.service import addresses_service as addressesDAO
 from gsrest.util.csvify import tags_to_csv, create_download_header, \
     flatten_rows
 from gsrest.apis.common import neighbors_parser, page_size_parser, \
-    entity_addresses_response, neighbors_response, entity_tags_response, \
-    tag_response
+    search_neighbors_parser, entity_addresses_response, neighbors_response, \
+    entity_tags_response, tag_response, search_neighbors_response, MAX_DEPTH
 
 api = Namespace('entities',
                 path='/<currency>/entities',
@@ -68,26 +69,26 @@ class EntityNeighbors(Resource):
         """
         Returns a JSON with edges and nodes of the address
         """
-
-        direction = request.args.get("direction")
+        args = neighbors_parser.parse_args()
+        direction = args.get("direction")
         if not direction:
-            abort(404, "Direction value missing")
+            abort(400, "Direction value missing")
         if "in" in direction:
             is_outgoing = False
         elif "out" in direction:
             is_outgoing = True
         else:
-            abort(404, "Invalid direction value - has to be either in or out")
+            abort(400, "Invalid direction value - has to be either in or out")
 
-        page = request.args.get("page")
-        pagesize = request.args.get("pagesize")
+        page = args.get("page")
+        pagesize = args.get("pagesize")
         paging_state = bytes.fromhex(page) if page else None
 
         if pagesize is not None:
             try:
                 pagesize = int(pagesize)
             except Exception:
-                abort(404, "Invalid pagesize value")
+                abort(400, "Invalid pagesize value")
 
         if is_outgoing:
             paging_state, relations = entitiesDAO\
@@ -109,24 +110,25 @@ class EntityNeighborsCSV(Resource):
         """
         Returns a JSON with edges and nodes of the entity
         """
-        direction = request.args.get("direction")
-        page = request.args.get("page")
-        pagesize = request.args.get("pagesize")
+        args = neighbors_parser.parse_args()
+        direction = args.get("direction")
+        page = args.get("page")
+        pagesize = args.get("pagesize")
         paging_state = bytes.fromhex(page) if page else None
         if not direction:
-            abort(404, "Direction value missing")
+            abort(400, "Direction value missing")
         if "in" in direction:
             query_function = entitiesDAO.list_entity_incoming_relations
         elif "out" in direction:
             query_function = entitiesDAO.list_entity_outgoing_relations
         else:
-            abort(404, "Invalid direction value - has to be either in or out")
+            abort(400, "Invalid direction value - has to be either in or out")
 
         if pagesize is not None:
             try:
                 pagesize = int(pagesize)
             except Exception:
-                abort(404, "Invalid pagesize value")
+                abort(400, "Invalid pagesize value")
 
         columns = []
         data = ''
@@ -154,14 +156,15 @@ class EntityAddresses(Resource):
         Returns a JSON with the details of the addresses in the entity
         """
         if not entity:
-            abort(404, "Entity not provided")
-        page = request.args.get("page")
-        pagesize = request.args.get("pagesize")
+            abort(400, "Entity not provided")
+        args = page_size_parser.parse_args()
+        page = args.get("page")
+        pagesize = args.get("pagesize")
         if pagesize is not None:
             try:
                 pagesize = int(pagesize)
             except Exception:
-                abort(404, "Invalid pagesize value")
+                abort(400, "Invalid pagesize value")
 
         paging_state = bytes.fromhex(page) if page else None
 
@@ -169,3 +172,52 @@ class EntityAddresses(Resource):
             .list_entity_addresses(currency, entity, paging_state, pagesize)
         return {"next_page": paging_state.hex() if paging_state else None,
                 "addresses": addresses}
+
+
+@api.route("/<int:entity>/search")
+class EntitySearchNeighbors(Resource):
+    @token_required
+    @api.doc(search_neighbors_parser)
+    @api.marshal_with(search_neighbors_response)
+    def get(self, currency, entity):
+        args = search_neighbors_parser.parse_args()
+        # depth search
+        depth = args['depth']
+        # breadth search
+        breadth = args['breadth']
+        # breadth search
+        skipNumAddresses = args['skipNumAddresses']
+
+        if depth > MAX_DEPTH:
+            abort(400, "Depth must not exceed %d".format(MAX_DEPTH))
+
+        direction = args.get("direction")
+        if not direction:
+            abort(400, "Direction value missing")
+
+        if 'category' in args:
+            category = args['category']
+        else:
+            abort(400, 'Missing category, please specify one.')
+        ids = []
+        if 'addresses' in args:
+            ids = args['addresses']
+        if ids:
+            ids = [{"address": address,
+                    "entity": addressesDAO.get_address_entity_id(currency,
+                                                                 address)}
+                   for address in ids.split(",")]
+
+        if "in" in direction:
+            outgoing = False
+        elif "out" in direction:
+            outgoing = True
+        else:
+            abort(400, "Invalid direction value - has to be either in or out")
+
+        result = entitiesDAO.\
+            list_entity_search_neighbors(currency, entity, category, ids,
+                                         breadth, depth, skipNumAddresses,
+                                         dict(), outgoing)
+
+        return {"paths": result}

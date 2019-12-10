@@ -5,7 +5,8 @@ from gsrest.service.rates_service import get_exchange_rate
 from gsrest.model.tags import Tag
 from gsrest.model.entities import Entity, EntityIncomingRelations, \
     EntityOutgoingRelations, EntityAddress
-from gsrest.service.common_service import get_address_by_id_group
+from gsrest.service.common_service import get_address_by_id_group, \
+    get_address_with_tags
 
 from math import floor
 
@@ -48,7 +49,7 @@ def get_entity(currency, entity_id):
 
 
 def list_entity_outgoing_relations(currency, entity_id, paging_state=None,
-                                   page_size=None):
+                                   page_size=None, from_search=False):
     session = get_session(currency, 'transformed')
     entity_id_group = get_id_group(entity_id)
     query = "SELECT * FROM cluster_outgoing_relations WHERE " \
@@ -65,13 +66,14 @@ def list_entity_outgoing_relations(currency, entity_id, paging_state=None,
     for row in results.current_rows:
         dst_entity = get_entity(currency, row.dst_cluster)
         relations.append(EntityOutgoingRelations.from_row(row, dst_entity,
-                                                           exchange_rate)
+                                                          exchange_rate,
+                                                          from_search)
                          .to_dict())
     return paging_state, relations
 
 
 def list_entity_incoming_relations(currency, entity_id, paging_state=None,
-                                   page_size=None):
+                                   page_size=None, from_search=False):
     session = get_session(currency, 'transformed')
     entity_id_group = get_id_group(entity_id)
     query = "SELECT * FROM cluster_incoming_relations WHERE " \
@@ -83,12 +85,14 @@ def list_entity_incoming_relations(currency, entity_id, paging_state=None,
     results = session.execute(statement, [entity_id_group, entity_id],
                               paging_state=paging_state)
     paging_state = results.paging_state
-    exchange_rate = get_exchange_rate(currency)['rates']  # TODO: implement default (-1)
+    exchange_rate = get_exchange_rate(currency)[
+        'rates']  # TODO: implement default (-1)
     relations = []
     for row in results.current_rows:
         src_entity = get_entity(currency, row.src_cluster)
         relations.append(EntityIncomingRelations.from_row(row, src_entity,
-                                                           exchange_rate)
+                                                          exchange_rate,
+                                                          from_search)
                          .to_dict())
     return paging_state, relations
 
@@ -115,3 +119,91 @@ def list_entity_addresses(currency, entity_id, paging_state, page_size):
                                                        exchange_rate)
                          .to_dict())
     return paging_state, addresses
+
+
+def list_entity_search_neighbors(currency, entity, category, ids, breadth,
+                                 depth, skipNumAddresses, cache, outgoing):
+    if depth <= 0:
+        return []
+
+    def get_cached(cl, key):
+        return (cache.get(cl) or {}).get(key)
+
+    def set_cached(cl, key, value):
+        if cl not in cache:
+            cache[cl] = {}
+        cache[cl][key] = value
+        return value
+
+    def cached(cl, key, get):
+        return get_cached(cl, key) or set_cached(cl, key, get())
+
+    if outgoing:
+        (_, rows) = cached(entity, 'rows',
+                           lambda: list_entity_outgoing_relations(
+                               currency, entity, paging_state=None,
+                               page_size=breadth, from_search=True))
+    else:
+        (_, rows) = cached(entity, 'rows',
+                           lambda: list_entity_incoming_relations(
+                               currency, entity, paging_state=None,
+                               page_size=breadth, from_search=True))
+
+    paths = []
+
+    for row in rows:
+        subentity = row['dst_entity'] if outgoing else row['src_entity']
+        if not isinstance(subentity, int):
+            continue
+        match = True
+        props = cached(subentity, 'props', lambda: get_entity(currency,
+                                                              subentity))
+        if props is None:
+            print("empty entity result for " + str(subentity))
+            continue
+
+        tags = cached(subentity, 'tags', lambda: list_entity_tags(currency,
+                                                                  subentity))
+
+        if category:
+            # find first occurrence of category in tags
+            match = next((True for t in tags
+                          if t["category"].lower() == category.lower()), False)
+
+        matching_addresses = []
+        if match and ids:
+            matching_addresses = [id["address"] for id in ids
+                                  if str(id["entity"]) == str(subentity)]
+            match = len(matching_addresses) > 0
+
+        subpaths = False
+        if match:
+            subpaths = True
+        elif 'no_addresses' in props \
+                and props['no_addresses'] <= skipNumAddresses:
+            subpaths = list_entity_search_neighbors(currency, subentity,
+                                                    category, ids, breadth,
+                                                    depth - 1,
+                                                    skipNumAddresses,
+                                                    cache, outgoing)
+
+        if not subpaths:
+            continue
+        # re-create the right neighbor to respect the model
+        row_neighbor = row.copy()
+        row_neighbor.pop('src_entity', None)
+        row_neighbor.pop('dst_entity', None)
+
+        props["tags"] = tags
+        obj = {"node": props, "relation": row_neighbor,
+               "matching_addresses": []}
+        if subpaths:
+            addresses_with_tags = [get_address_with_tags(currency, address)
+                                   for address in matching_addresses]
+            obj["matching_addresses"] = [address for address in
+                                         addresses_with_tags
+                                         if address is not None]
+            subpaths = None
+        obj["paths"] = subpaths
+        paths.append(obj)
+    return paths

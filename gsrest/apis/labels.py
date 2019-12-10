@@ -2,7 +2,7 @@ from flask import abort
 from flask_restplus import Namespace, Resource
 
 import gsrest.service.labels_service as labelsDAO
-import gsrest.service.general_services as generalDAO
+import gsrest.service.general_service as generalDAO
 from gsrest.apis.common import label_response, tag_response
 from gsrest.util.decorator import token_required
 from gsrest.apis.common import category_response

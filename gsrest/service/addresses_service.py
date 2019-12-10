@@ -1,15 +1,15 @@
 from cassandra.query import SimpleStatement
 
 from gsrest.db.cassandra import get_session
-from gsrest.model.addresses import Address, AddressTx, \
+from gsrest.model.addresses import AddressTx, \
     AddressOutgoingRelations, AddressIncomingRelations
-from gsrest.model.tags import Tag
 from gsrest.service.rates_service import get_exchange_rate
 from gsrest.service.entities_service import get_entity, get_id_group
-from gsrest.service.common_service import get_address_by_id_group
+from gsrest.service.common_service import get_address_by_id_group, \
+    ADDRESS_PREFIX_LENGTH
+
 # TODO: handle failing queries
 
-ADDRESS_PREFIX_LENGTH = 5
 ADDRESS_PAGE_SIZE = 100
 
 
@@ -19,15 +19,6 @@ def get_address_id(currency, address):
             "AND address = %s"
     result = session.execute(query, [address[:ADDRESS_PREFIX_LENGTH], address])
     return result[0].address_id if result else None
-
-
-def get_address(currency, address):
-    session = get_session(currency, 'transformed')
-
-    query = "SELECT * FROM address WHERE address_prefix = %s AND address = %s"
-    result = session.execute(query, [address[:ADDRESS_PREFIX_LENGTH], address])
-    return Address.from_row(result[0], get_exchange_rate(currency)['rates'])\
-        .to_dict() if result else None
 
 
 def list_address_txs(currency, address, paging_state=None):
@@ -48,17 +39,6 @@ def list_address_txs(currency, address, paging_state=None):
                    .to_dict() for row in results.current_rows]
 
     return paging_state, address_txs
-
-
-def list_address_tags(currency, address):
-    session = get_session(currency, 'transformed')
-
-    query = "SELECT * FROM address_tags WHERE address = %s"
-    results = session.execute(query, [address])
-    address_tags = [Tag.from_address_row(row, currency).to_dict()
-                    for row in results.current_rows]
-
-    return address_tags
 
 
 def list_address_outgoing_relations(currency, address, paging_state=None,
@@ -132,3 +112,13 @@ def get_address_entity_id(currency, address):
             " AND address_id = %s "
     result = session.execute(query, [address_id_group, address_id])
     return result[0].cluster if result else None
+
+
+def list_matching_addresses(currency, expression):
+    # TODO: rather slow with bech32 address (loop through pages instead)
+    session = get_session(currency, 'transformed')
+    query = "SELECT address FROM address WHERE address_prefix = %s"
+    statement = SimpleStatement(query, fetch_size=ADDRESS_PAGE_SIZE)
+    result = session.execute(statement, [expression[:ADDRESS_PREFIX_LENGTH]])
+    return [row.address for row in result
+            if row.address.startswith(expression)]

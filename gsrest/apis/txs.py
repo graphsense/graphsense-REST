@@ -1,4 +1,4 @@
-from flask import request, abort
+from flask import abort
 from flask_restplus import Namespace, Resource
 
 from gsrest.apis.common import page_parser, tx_response, tx_list_response
@@ -8,7 +8,6 @@ import gsrest.service.txs_service as txsDAO
 api = Namespace('txs',
                 path='/<currency>/txs',
                 description='Operations related to transactions')
-
 
 
 @api.route("/<tx_hash>")
@@ -38,7 +37,8 @@ class TxList(Resource):
         """
         Returns a list of transactions (100 per page)
         """
-        page = request.args.get("page")
+        args = page_parser.parse_args()
+        page = args.get("page")
         paging_state = bytes.fromhex(page) if page else None
 
         (paging_state, txs) = txsDAO.list_txs(currency, paging_state)

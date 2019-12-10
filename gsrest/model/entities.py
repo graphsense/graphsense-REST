@@ -38,7 +38,8 @@ class Entity(object):
 
 class EntityIncomingRelations(object):
     def __init__(self, estimated_value, src_entity,
-                 no_txs, src_properties, exchange_rate):
+                 no_txs, src_properties, exchange_rate, src_cluster,
+                 dst_cluster, from_search=False):
         self.id = src_entity
         self.node_type = 'entity'
         self.received = Values(**src_properties.total_received._asdict())\
@@ -48,12 +49,16 @@ class EntityIncomingRelations(object):
                                        exchange_rate)
         self.no_txs = no_txs
         self.estimated_value = Values(**estimated_value._asdict()).to_dict()
+        if from_search:
+            self.src_entity = src_cluster
+            self.dst_entity = dst_cluster
 
     @staticmethod
-    def from_row(row, src_entity, exchange_rate):
+    def from_row(row, src_entity, exchange_rate, from_search=False):
         return EntityIncomingRelations(row.value, src_entity,
                                        row.no_transactions, row.src_properties,
-                                       exchange_rate)
+                                       exchange_rate, row.src_cluster,
+                                       row.dst_cluster, from_search)
 
     def to_dict(self):
         return self.__dict__
@@ -61,7 +66,8 @@ class EntityIncomingRelations(object):
 
 class EntityOutgoingRelations(object):
     def __init__(self, estimated_value, dst_entity,
-                 no_txs, dst_properties, exchange_rate):
+                 no_txs, dst_properties, exchange_rate, dst_cluster,
+                 src_cluster, from_search=False):
         self.id = dst_entity
         self.node_type = 'entity'
         self.received = Values(**dst_properties.total_received._asdict())\
@@ -71,12 +77,16 @@ class EntityOutgoingRelations(object):
                                        exchange_rate)
         self.no_txs = no_txs
         self.estimated_value = Values(**estimated_value._asdict()).to_dict()
+        if from_search:
+            self.dst_entity = dst_cluster
+            self.src_entity = src_cluster
 
     @staticmethod
-    def from_row(row, dst_entity, exchange_rate):
-        return EntityOutgoingRelations(row.value,
-                                        dst_entity, row.no_transactions,
-                                        row.dst_properties, exchange_rate)
+    def from_row(row, dst_entity, exchange_rate, from_search=False):
+        return EntityOutgoingRelations(row.value, dst_entity,
+                                       row.no_transactions, row.dst_properties,
+                                       exchange_rate, row.dst_cluster,
+                                       row.src_cluster, from_search)
 
     def to_dict(self):
         return self.__dict__

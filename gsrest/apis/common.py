@@ -1,7 +1,11 @@
 from flask_restplus import Namespace, fields
 
+MAX_DEPTH = 7
+DEFAULT_DEPTH = 1
+DEFAULT_BREADTH = 16
+
 api = Namespace('common',
-                path='/',
+                path='/common',
                 description='Common models and definitions')
 
 """
@@ -16,11 +20,26 @@ page_parser.add_argument(
 tags_parser = api.parser()
 tags_parser.add_argument("tags", location="args")
 
+query_parser = api.parser()
+query_parser.add_argument("q", location="args")
+
+
 page_size_parser = page_parser.copy()
 page_size_parser.add_argument("pagesize", location="args")
 
 neighbors_parser = page_size_parser.copy()
 neighbors_parser.add_argument("direction", required=True, location="args")
+
+
+search_neighbors_parser = api.parser()
+search_neighbors_parser.add_argument("direction", location="args")
+search_neighbors_parser.add_argument("category", location="args")
+search_neighbors_parser.add_argument("ids", location="args")
+search_neighbors_parser.add_argument("depth", type=int, default=DEFAULT_DEPTH)
+search_neighbors_parser.add_argument("breadth", type=int,
+                                     default=DEFAULT_BREADTH, location="args")
+search_neighbors_parser.add_argument("skipNumAddresses", type=int,
+                                     default=DEFAULT_BREADTH, location="args")
 
 
 """
@@ -243,3 +262,44 @@ category_model = {
     "id": fields.Integer(required=True, description="Id")
 }
 category_response = api.model("category_response", category_model)
+
+
+def search_neighbors_recursive(depth=7):
+    mapping = {
+        "node": fields.Nested(entity_tags_response, required=True,
+                              description="Node"),
+        "matching_addresses":
+            fields.List(fields.Nested(address_tags_response,
+                                      required=True,
+                                      description="Addresses contained in "
+                                                  "entity node that matched "
+                                                  "the search query")),
+        "relation": fields.Nested(neighbor_response,
+                                  required=True,
+                                  description="Relation to parent node")
+    }
+    if depth:
+        mapping["paths"] = fields.List(fields.Nested(
+            search_neighbors_recursive(depth - 1), required=True))
+    return api.model("mapping{}".format(depth), mapping)
+
+
+search_neighbors_model = {
+        "paths": fields.List(fields.Nested(
+            search_neighbors_recursive(MAX_DEPTH), required=True))
+    }
+search_neighbors_response = api.model("search_neighbors_response_depth_" +
+                                      str(MAX_DEPTH), search_neighbors_model)
+
+
+label_search_response = api.model("label_search_response", {
+    "labels": fields.List(fields.String, required=True,
+                          description="The list of matching labels"),
+})
+
+search_response = api.model("search_response", {
+    "addresses": fields.List(fields.String, required=True,
+                             description="The list of found addresses"),
+    "txs": fields.List(fields.String, required=True,
+                       description="The list of found transactions")
+})

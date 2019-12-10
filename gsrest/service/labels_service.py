@@ -29,3 +29,18 @@ def list_tags(label):
     rows = session.execute(query, [label_norm_prefix, label_norm])
     return [Tag.from_address_row(row, row.currency).to_dict() for row in rows]\
         if rows else None
+
+
+def list_labels(expression):
+    # Normalize label
+    expression_norm = alphanumeric_lower(expression)
+    expression_norm_prefix = expression_norm[:LABEL_PREFIX_LENGTH]
+
+    session = get_session(currency=None, keyspace_type='tagpacks')
+    query = "SELECT label, label_norm FROM tag_by_label WHERE " \
+            "label_norm_prefix = %s GROUP BY label_norm_prefix, label_norm"
+    result = session.execute(query, [expression_norm_prefix])
+
+    # Second filter using all available chars from expression
+    return list(dict.fromkeys([row.label for row in result
+                               if row.label_norm.startswith(expression_norm)]))
