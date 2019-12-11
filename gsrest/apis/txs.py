@@ -1,6 +1,5 @@
 from flask import abort
 from flask_restplus import Namespace, Resource
-
 from gsrest.apis.common import page_parser, tx_response, tx_list_response
 from gsrest.util.decorator import token_required
 import gsrest.service.txs_service as txsDAO

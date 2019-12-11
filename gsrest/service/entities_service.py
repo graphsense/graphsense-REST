@@ -61,7 +61,7 @@ def list_entity_outgoing_relations(currency, entity_id, paging_state=None,
     results = session.execute(statement, [entity_id_group, entity_id],
                               paging_state=paging_state)
     paging_state = results.paging_state
-    exchange_rate = get_exchange_rate(currency)['rates']  # TODO: implement default (-1)
+    exchange_rate = get_exchange_rate(currency)['rates']
     relations = []
     for row in results.current_rows:
         dst_entity = get_entity(currency, row.dst_cluster)
@@ -85,8 +85,7 @@ def list_entity_incoming_relations(currency, entity_id, paging_state=None,
     results = session.execute(statement, [entity_id_group, entity_id],
                               paging_state=paging_state)
     paging_state = results.paging_state
-    exchange_rate = get_exchange_rate(currency)[
-        'rates']  # TODO: implement default (-1)
+    exchange_rate = get_exchange_rate(currency)['rates']
     relations = []
     for row in results.current_rows:
         src_entity = get_entity(currency, row.src_cluster)
@@ -109,7 +108,7 @@ def list_entity_addresses(currency, entity_id, paging_state, page_size):
     results = session.execute(statement, [entity_id_group, entity_id],
                               paging_state=paging_state)
     paging_state = results.paging_state
-    exchange_rate = get_exchange_rate(currency)['rates']  # TODO: implement default (-1)
+    exchange_rate = get_exchange_rate(currency)['rates']
     addresses = []
     for row in results.current_rows:
         address_id_group = get_id_group(row.address_id)

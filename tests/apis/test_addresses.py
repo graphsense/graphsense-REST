@@ -1,4 +1,5 @@
 import gsrest.service.addresses_service
+import gsrest.service.common_service
 from gsrest.model.addresses import Address, AddressTx
 from gsrest.model.txs import TxSummary
 from gsrest.model.tags import Tag
@@ -13,14 +14,17 @@ address2 = '3Aa7BnDG7XeuSZwL7Hzo3p87eiqoaAG3s3'  # txs were easy to fetch
 address3 = '1NDyJtNTjmwk5xPNhjgAMu4HDHigtobu1s'  # binance
 address4 = '1A8pUXyXzqWQzqR6q2djwrXuG4nfici4KY'  # random
 address5 = '1N4RJ9fRGzk1HCWfqZs3jYdSJZprC4D76Y'  # tags error
-first_tx = TxSummary(577281, 1558549477, bytearray.fromhex('39435696ea53d580f15f85fcae5f084ff9c3ba6b5f1b84d4e1e41d8fceb5d0ba'))
-last_tx = TxSummary(585637, 1563268350, bytearray.fromhex('e11c9764f94f5bc8ea2b59ebe6d1e49a69a820d5b46eb9861e0f581be911071a'))
+first_tx = TxSummary(577281, 1558549477, bytearray.fromhex(
+    '39435696ea53d580f15f85fcae5f084ff9c3ba6b5f1b84d4e1e41d8fceb5d0ba'))
+last_tx = TxSummary(585637, 1563268350, bytearray.fromhex(
+    'e11c9764f94f5bc8ea2b59ebe6d1e49a69a820d5b46eb9861e0f581be911071a'))
 tx1 = 'ab188013f626405ddebf1a7b2e0af34253d09e80f9ef7f981ec1ec59d6200c1f'
 
 total_received1 = {'value': 649456, 'eur': 44.39, 'usd': 49.51}
 total_spent1 = {'value': 649456, 'eur': 54.59, 'usd': 61.19}
 
-received1 = namedtuple('input1', total_received1.keys())(*total_received1.values())
+received1 = namedtuple('input1',
+                       total_received1.keys())(*total_received1.values())
 spent1 = namedtuple('input1', total_spent1.keys())(*total_spent1.values())
 
 TEST_ADDRESSES = {
@@ -31,8 +35,12 @@ TEST_ADDRESSES = {
 
 TEST_ADDRESSES_TXS = {
     address1: [
-        AddressTx(address1, first_tx.height, first_tx.timestamp, first_tx.tx_hash.hex(), 649456, {'eur': 0.5, 'usd': 0.5}).to_dict(),
-        AddressTx(address1, last_tx.height, last_tx.timestamp, last_tx.tx_hash.hex(), -649456, {'eur': 0.5, 'usd': 0.5}).to_dict()
+        AddressTx(address1, first_tx.height, first_tx.timestamp,
+                  first_tx.tx_hash.hex(), 649456, {'eur': 0.5, 'usd': 0.5})
+            .to_dict(),
+        AddressTx(address1, last_tx.height, last_tx.timestamp,
+                  last_tx.tx_hash.hex(), -649456, {'eur': 0.5, 'usd': 0.5})
+            .to_dict()
     ]
 }
 
@@ -42,7 +50,8 @@ TEST_ADDRESSES_TAGS = {
         "Shapeshift",
         "Other",
         None,
-        "https://git-service.ait.ac.at/dil-graphsense/graphsense-tagpacks-private/tree/master/shapeshift.yaml",
+        "https://git-service.ait.ac.at/dil-graphsense/"
+        "graphsense-tagpacks-private/tree/master/shapeshift.yaml",
         "https://arxiv.org/abs/1810.12786",
         1565128800,
         'btc',
@@ -65,7 +74,7 @@ def test_address(client, auth, monkeypatch):
         # else 404 from crypto_in_config()
 
     # apply the monkeypatch method for addresses_service
-    monkeypatch.setattr(gsrest.service.addresses_service, "get_address",
+    monkeypatch.setattr(gsrest.service.common_service, "get_address",
                         mock_get_address)
 
     auth.login()
@@ -73,7 +82,9 @@ def test_address(client, auth, monkeypatch):
     response = client.get('btc/addresses/{}'.format(address1))
     assert response.status_code == 200
     json_data = response.get_json()
-    assert TEST_ADDRESSES[address1].keys() == json_data.keys()
+
+    assert set(TEST_ADDRESSES[address1].keys()) == set(json_data.keys())\
+        .union({'tags'})
     for k, v in json_data.items():
         assert v == TEST_ADDRESSES[address1][k]
 
@@ -135,7 +146,7 @@ def test_address_tags(client, auth, monkeypatch):
         # else 404 from crypto_in_config()
 
     # apply the monkeypatch method for addresses_service
-    monkeypatch.setattr(gsrest.service.addresses_service, "list_address_tags",
+    monkeypatch.setattr(gsrest.service.common_service, "list_address_tags",
                         mock_list_address_tags)
 
     auth.login()

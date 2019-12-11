@@ -1,7 +1,7 @@
 from flask_restplus import Namespace, Resource, abort
+from flask import current_app
 
 import gsrest.service.general_service as generalDAO
-from gsrest.util.checks import config
 from gsrest.util.decorator import token_required
 from gsrest.apis.common import search_response
 from gsrest.apis.common import label_search_response
@@ -25,7 +25,8 @@ class Statistics(Resource):
         Returns a JSON with statistics of all the available currencies
         """
         statistics = dict()
-        for currency in config.MAPPING:
+
+        for currency in current_app.config['MAPPING']:
             if currency != "tagpacks":
                 statistics[currency] = generalDAO.get_statistics(currency)
         return statistics

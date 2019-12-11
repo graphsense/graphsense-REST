@@ -8,13 +8,31 @@ existing_block1 = 302602
 existing_block2 = 531141
 
 TEST_BLOCKS = {
-    existing_block1: Block(existing_block1, "00000000000000000a4d72c6f0c714e8b0f4e847a9599110acc133cec97900d4", 101, 1401047125).to_dict(),
-    existing_block2: Block(existing_block2, "0000000000000000000fc3ab40914d4e72ff42d7f9730647cee43d2178607a31", 1342, 1531116874).to_dict(),
+    existing_block1:
+        Block(
+            existing_block1,
+            "00000000000000000a4d72c6f0c714e8b0f4e847a9599110acc133cec97900d4",
+            101,
+            1401047125).to_dict(),
+    existing_block2:
+        Block(
+            existing_block2,
+            "0000000000000000000fc3ab40914d4e72ff42d7f9730647cee43d2178607a31",
+            1342,
+            1531116874).to_dict(),
 }
 
 
 TEST_BLOCK_TXS = {
-    0: BlockTxs(0, [BlockTxSummary('4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b', 0, 1, {'value': 0, 'eur': 0, 'usd': 0}, {'value': 5000000000, 'eur': 25, 'usd': 25}).to_dict()]).to_dict()
+    0: BlockTxs(
+        0,
+        [BlockTxSummary(
+            '4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b',
+            0,
+            1,
+            {'value': 0, 'eur': 0, 'usd': 0},
+            {'value': 5000000000, 'eur': 25, 'usd': 25}
+        ).to_dict()]).to_dict()
 }
 
 
