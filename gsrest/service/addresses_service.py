@@ -21,11 +21,15 @@ def get_address_id(currency, address):
     return result[0].address_id if result else None
 
 
+def get_address_id_id_group(currency, address):
+    address_id = get_address_id(currency, address)
+    return address_id, get_id_group(address_id)
+
+
 def list_address_txs(currency, address, paging_state=None):
     session = get_session(currency, 'transformed')
 
-    address_id = get_address_id(currency, address)
-    address_id_group = get_id_group(address_id)
+    address_id, address_id_group = get_address_id_id_group(currency, address)
     query = "SELECT * FROM address_transactions WHERE address_id = %s " \
             "AND address_id_group = %s"
     statement = SimpleStatement(query, fetch_size=ADDRESS_PAGE_SIZE)
@@ -45,8 +49,7 @@ def list_address_outgoing_relations(currency, address, paging_state=None,
                                     page_size=None):
     session = get_session(currency, 'transformed')
 
-    address_id = get_address_id(currency, address)
-    address_id_group = get_id_group(address_id)
+    address_id, address_id_group = get_address_id_id_group(currency, address)
     query = "SELECT * FROM address_outgoing_relations WHERE " \
             "src_address_id_group = %s AND src_address_id = %s"
     fetch_size = ADDRESS_PAGE_SIZE
@@ -73,8 +76,7 @@ def list_address_incoming_relations(currency, address, paging_state=None,
                                     page_size=None):
     session = get_session(currency, 'transformed')
 
-    address_id = get_address_id(currency, address)
-    address_id_group = get_id_group(address_id)
+    address_id, address_id_group = get_address_id_id_group(currency, address)
     query = "SELECT * FROM address_incoming_relations WHERE " \
             "dst_address_id_group = %s AND dst_address_id = %s"
     fetch_size = ADDRESS_PAGE_SIZE
@@ -106,8 +108,7 @@ def get_address_entity(currency, address):
 def get_address_entity_id(currency, address):
     # from address to entity id only
     session = get_session(currency, 'transformed')
-    address_id = get_address_id(currency, address)
-    address_id_group = get_id_group(address_id)
+    address_id, address_id_group = get_address_id_id_group(currency, address)
     query = "SELECT cluster FROM address_cluster WHERE address_id_group = %s" \
             " AND address_id = %s "
     result = session.execute(query, [address_id_group, address_id])

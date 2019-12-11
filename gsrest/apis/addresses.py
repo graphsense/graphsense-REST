@@ -8,7 +8,7 @@ from gsrest.apis.common import page_parser, tags_parser, neighbors_parser, \
     neighbors_response
 import gsrest.service.addresses_service as addressesDAO
 import gsrest.service.entities_service as entitiesDAO
-import gsrest.service.common_service as commondDAO
+import gsrest.service.common_service as commonDAO
 from gsrest.util.decorator import token_required
 from gsrest.util.csvify import tags_to_csv, create_download_header, \
     flatten_rows
@@ -47,12 +47,12 @@ class Address(Resource):
         Returns details of a specific address
         """
         args = tags_parser.parse_args()
-        addr = commondDAO.get_address(currency, address)
+        addr = commonDAO.get_address(currency, address)
         if not addr:
             abort(404, "Address {} not found in currency {}"
                   .format(address, currency))
         if 'tags' in args:  # TODO: wait for dashboard's API specifications
-            addr['tags'] = commondDAO.list_address_tags(currency, address)
+            addr['tags'] = commonDAO.list_address_tags(currency, address)
         return addr
 
 
@@ -90,7 +90,7 @@ class AddressTags(Resource):
         Returns tags of a specific address.
         """
 
-        address_tags = commondDAO.list_address_tags(currency, address)
+        address_tags = commonDAO.list_address_tags(currency, address)
         return address_tags
 
 
@@ -99,7 +99,7 @@ class AddressTagsCSV(Resource):
     @token_required
     def get(self, currency, address):
         """ Returns a JSON with the tags of the address """
-        tags = commondDAO.list_address_tags(currency, address)
+        tags = commonDAO.list_address_tags(currency, address)
         return Response(tags_to_csv(tags), mimetype="text/csv",
                         headers=create_download_header('tags of address {} '
                                                        '({}).csv'
@@ -208,7 +208,7 @@ class AddressEntity(Resource):
         entity = addressesDAO.get_address_entity(currency, address)
 
         if not entity:
-            abort(404, "Address not found")
+            abort(404, "Entity not found")
 
         if 'tags' in request.args:
             entity['tags'] = entitiesDAO.list_entity_tags(currency,

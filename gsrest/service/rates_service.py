@@ -89,7 +89,7 @@ def get_exchange_rate(currency, height=-1):
 
     height_rates = currency_rates.get(height)
     if not height_rates:
-        raise ValueError("Cannot load exchange rates. Height {} not found \
-                         in currency {}".format(height, currency))
+        raise ValueError("Cannot find height {} in currency {}"
+                         .format(height, currency))
 
     return height_rates.to_dict()
