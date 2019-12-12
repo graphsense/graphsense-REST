@@ -5,9 +5,10 @@ from gsrest.db.cassandra import (get_session, get_keyspace_mapping,
                                  get_supported_currencies)
 
 from gsrest.model.rates import ExchangeRate
+from gsrest.service.general_service import get_statistics
 
-
-CACHED_EXCHANGE_RATES = {}
+CACHED_EXCHANGE_RATES = dict()
+LAST_BLOCK_HEIGHT = dict()
 
 
 def init_app(app):
@@ -21,7 +22,8 @@ def load_all_exchange_rates():
 
     currencies = get_supported_currencies()
     for currency in currencies:
-        CACHED_EXCHANGE_RATES[currency] = {}
+        CACHED_EXCHANGE_RATES[currency] = dict()
+        LAST_BLOCK_HEIGHT[currency] = 0
         load_exchange_rates(currency)
 
 
@@ -31,7 +33,6 @@ def load_supported_fiat_currencies(currency):
     current_app.logger.info("Querying supported fiat currencies")
 
     keyspace = get_keyspace_mapping(currency, 'transformed')
-
     session = get_session(currency, 'transformed')
     session.row_factory = dict_factory
 
@@ -54,7 +55,7 @@ def load_exchange_rates(currency):
                             .format(currency))
 
     supported_fiat_currencies = load_supported_fiat_currencies(currency)
-
+    LAST_BLOCK_HEIGHT[currency] = get_statistics(currency)['no_blocks'] - 1
     session = get_session(currency, 'transformed')
     session.row_factory = dict_factory
 
@@ -86,7 +87,8 @@ def get_exchange_rate(currency, height=-1):
     if not currency_rates:
         raise ValueError("Cannot load exchange rates. Unknown currency: {}"
                          .format(currency))
-
+    if height == -1:
+        height = LAST_BLOCK_HEIGHT[currency]
     height_rates = currency_rates.get(height)
     if not height_rates:
         raise ValueError("Cannot find height {} in currency {}"
