@@ -19,7 +19,6 @@ api = Namespace('general',
 # TODO: is a response model needed here?
 @api.route("/stats")
 class Statistics(Resource):
-    @token_required
     def get(self):
         """
         Returns a JSON with statistics of all the available currencies
