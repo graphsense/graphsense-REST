@@ -113,12 +113,15 @@ class Auth:
                 'status': 'fail',
                 'message': 'Invalid user'
             }, 401
+        old_auth_token = auth_token
         auth_token = user.encode_auth_token()
         if not auth_token:
             return {
                 'status': 'fail',
                 'message': 'Could not generate auth token'
             }, 500
+        # mark the old token as blacklisted
+        save_token(token=old_auth_token)
         response = jsonify({
             'status': 'success',
             'message': 'Successfully refreshed auth token.',
