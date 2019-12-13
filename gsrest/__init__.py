@@ -1,6 +1,7 @@
 import os
 
 from flask import Flask
+from flask_cors import CORS
 
 from gsrest.config import Config
 
@@ -8,6 +9,7 @@ from gsrest.config import Config
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
+    CORS(app, supports_credentials=True)
     # read the configuration
 
     if test_config is None:

@@ -23,8 +23,7 @@ class UserLogin(Resource):
         """
         Returns a JWT token for a given username and password
         """
-        post_data = request.json
-        return Auth.login_user(data=post_data)
+        return Auth.login_user(request)
 
 
 @api.route('/logout')
@@ -33,5 +32,15 @@ class LogoutAPI(Resource):
         """
         Blacklists a given JWT token
         """
-        auth_header = request.headers.get('Authorization')
-        return Auth.logout_user(data=auth_header)
+        return Auth.logout_user(request)
+
+
+@api.route('/refresh')
+class RefreshToken(Resource):
+    def get(self):
+        """
+        Get a fresh JWT token
+        """
+        return Auth.refresh_token(request)
+
+
