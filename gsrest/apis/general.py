@@ -1,10 +1,11 @@
-from flask_restplus import Namespace, Resource, abort
+from flask_restplus import Namespace, Resource
 from flask import current_app
 
 import gsrest.service.general_service as generalDAO
 from gsrest.util.decorator import token_required
 from gsrest.apis.common import search_response
 from gsrest.apis.common import label_search_response
+from gsrest.util.checks import check_inputs
 import gsrest.service.addresses_service as addressesDAO
 import gsrest.service.labels_service as labelsDAO
 import gsrest.service.txs_service as txsDAO
@@ -24,7 +25,6 @@ class Statistics(Resource):
         Returns a JSON with statistics of all the available currencies
         """
         statistics = dict()
-
         for currency in current_app.config['MAPPING']:
             if currency != "tagpacks":
                 statistics[currency] = generalDAO.get_statistics(currency)
@@ -40,6 +40,7 @@ class Search(Resource):
         Returns a JSON with a list of matching addresses and a list of
         matching transactions
         """
+        check_inputs(currency=currency, address=expression, tx=expression)
         leading_zeros = 0
         pos = 0
         # leading zeros will be lost when casting to int
@@ -70,12 +71,6 @@ class LabelSearch(Resource):
         """
         Returns a JSON with a list of matching labels
         """
-        if not label:
-            # TODO: capitalize all first letters of first word in error message
-            abort(400, "Label parameter not provided")
-
-        if len(label) < labelsDAO.LABEL_PREFIX_LENGTH:
-            abort(400, "Label parameter too short: at least {} characters"
-                  .format(labelsDAO.LABEL_PREFIX_LENGTH))
-
+        check_inputs(label=label)
+        # TODO: capitalize all first letters of first word in error message
         return {'labels': labelsDAO.list_labels(label)}

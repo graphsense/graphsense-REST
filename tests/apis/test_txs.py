@@ -1,6 +1,6 @@
 import gsrest.service.txs_service
 from gsrest.model.txs import Tx
-from gsrest.util.checks import crypto_in_config
+from gsrest.util.checks import check_inputs
 
 from collections import namedtuple
 
@@ -32,9 +32,8 @@ def test_tx(client, auth, monkeypatch):
 
     # define a monkeypatch method
     def mock_get_tx(*args, **kwargs):
-        if crypto_in_config(args[0]):
-            return TEST_TXS.get(args[1])
-        # else 404 from crypto_in_config()
+        check_inputs(currency=args[0])  # abort if fails
+        return TEST_TXS.get(args[1])
 
     # apply the monkeypatch method for txs_service.get_tx
     monkeypatch.setattr(gsrest.service.txs_service, "get_tx", mock_get_tx)
@@ -68,9 +67,9 @@ def test_tx_list(client, auth, monkeypatch):
 
     # define a monkeypatch method without paging
     def mock_list_txs(*args, **kwargs):
-        if crypto_in_config(args[0]):
-            return None, [tx for tx in TEST_TXS.values()]
-        # else 404 from crypto_in_config()
+        check_inputs(currency=args[0])  # abort if fails
+        return None, [tx for tx in TEST_TXS.values()]
+
 
     # apply the monkeypatch method for txs_service.get_tx
     monkeypatch.setattr(gsrest.service.txs_service, "list_txs", mock_list_txs)
@@ -93,10 +92,9 @@ def test_tx_list(client, auth, monkeypatch):
 
     # define a monkeypatch method with paging
     def mock_list_txs_paging(*args, **kwargs):
-        if crypto_in_config(args[0]):
-            return (bytes('example token', 'utf-8'),
-                    [tx for tx in TEST_TXS.values()])
-        # else 404 from crypto_in_config()
+        check_inputs(currency=args[0])  # abort if fails
+        return bytes('example token', 'utf-8'), \
+            [tx for tx in TEST_TXS.values()]
 
     # apply the monkeypatch method for txs_service.list_txs
     monkeypatch.setattr(gsrest.service.txs_service, "list_txs",

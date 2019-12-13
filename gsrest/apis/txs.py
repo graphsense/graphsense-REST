@@ -2,7 +2,9 @@ from flask import abort
 from flask_restplus import Namespace, Resource
 from gsrest.apis.common import page_parser, tx_response, tx_list_response
 from gsrest.util.decorator import token_required
+from gsrest.util.checks import check_inputs
 import gsrest.service.txs_service as txsDAO
+
 
 api = Namespace('txs',
                 path='/<currency>/txs',
@@ -19,6 +21,7 @@ class Tx(Resource):
         """
         Returns details of a specific transaction identified by its hash.
         """
+        check_inputs(tx=tx_hash, currency=currency)
         tx = txsDAO.get_tx(currency, tx_hash)
         if not tx:
             abort(404, "Transaction {} not found in currency {}"
@@ -38,6 +41,7 @@ class TxList(Resource):
         """
         args = page_parser.parse_args()
         page = args.get("page")
+        check_inputs(currency=currency, page=page)
         paging_state = bytes.fromhex(page) if page else None
 
         (paging_state, txs) = txsDAO.list_txs(currency, paging_state)

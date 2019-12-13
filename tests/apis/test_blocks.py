@@ -1,6 +1,6 @@
 import gsrest.service.blocks_service
 from gsrest.model.blocks import Block, BlockTxs, BlockTxSummary
-from gsrest.util.checks import crypto_in_config
+from gsrest.util.checks import check_inputs
 
 non_existing_block = 999999
 non_existing_currency = 'abc'
@@ -40,9 +40,8 @@ def test_block_by_height(client, auth, monkeypatch):
 
     # define a monkeypatch method
     def mock_get_block(*args, **kwargs):
-        if crypto_in_config(args[0]):
-            return TEST_BLOCKS.get(args[1])
-        # else 404 from crypto_in_config()
+        check_inputs(currency=args[0])  # abort if fails
+        return TEST_BLOCKS.get(args[1])
 
     # apply the monkeypatch method for blocks_service.get_block
     monkeypatch.setattr(gsrest.service.blocks_service, "get_block",
@@ -78,9 +77,8 @@ def test_block_list(client, auth, monkeypatch):
 
     # define a monkeypatch method without paging
     def mock_list_blocks(*args, **kwargs):
-        if crypto_in_config(args[0]):
-            return None, [block for block in TEST_BLOCKS.values()]
-        # else 404 from crypto_in_config()
+        check_inputs(currency=args[0])  # abort if fails
+        return None, [block for block in TEST_BLOCKS.values()]
 
     # apply the monkeypatch method for blocks_service.get_block
     monkeypatch.setattr(gsrest.service.blocks_service, "list_blocks",
@@ -104,10 +102,9 @@ def test_block_list(client, auth, monkeypatch):
 
     # define a monkeypatch method with paging
     def mock_list_blocks_paging(*args, **kwargs):
-        if crypto_in_config(args[0]):
-            return (bytes('example token', 'utf-8'),
+        check_inputs(currency=args[0])  # abort if fails
+        return (bytes('example token', 'utf-8'),
                     [block for block in TEST_BLOCKS.values()])
-        # else 404 from crypto_in_config()
 
     # apply the monkeypatch method for blocks_service.list_blocks
     monkeypatch.setattr(gsrest.service.blocks_service, "list_blocks",
@@ -124,9 +121,8 @@ def test_block_list(client, auth, monkeypatch):
 def test_block_txs_list(client, auth, monkeypatch):
     # define a monkeypatch method without paging
     def mock_list_block_txs(*args, **kwargs):
-        if crypto_in_config(args[0]):
-            return TEST_BLOCK_TXS[args[1]]
-        # else 404 from crypto_in_config()
+        check_inputs(currency=args[0])  # abort if fails
+        return TEST_BLOCK_TXS[args[1]]
 
     # apply the monkeypatch method for blocks_service.list_block_txs
     monkeypatch.setattr(gsrest.service.blocks_service, "list_block_txs",

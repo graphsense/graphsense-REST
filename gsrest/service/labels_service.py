@@ -1,9 +1,7 @@
 from gsrest.db.cassandra import get_session
 from gsrest.model.tags import Label, Tag
 from gsrest.util.string_edit import alphanumeric_lower
-
-LABEL_PREFIX_LENGTH = 3
-
+from gsrest.util.checks import LABEL_PREFIX_LENGTH
 
 def get_label(label):
     # TODO: allow user to filter by currency

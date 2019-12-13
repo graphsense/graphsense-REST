@@ -3,7 +3,7 @@ import gsrest.service.common_service
 from gsrest.model.addresses import Address, AddressTx
 from gsrest.model.txs import TxSummary
 from gsrest.model.tags import Tag
-from gsrest.util.checks import crypto_in_config
+from gsrest.util.checks import check_inputs
 
 from collections import namedtuple
 
@@ -69,9 +69,8 @@ def test_address(client, auth, monkeypatch):
     # define a monkeypatch method
     def mock_get_address(*args, **kwargs):
         # TODO: add case of tags
-        crypto_in_config(args[0])  # this aborts if fails
+        check_inputs(currency=args[0])  # abort if fails
         return TEST_ADDRESSES.get(args[1])
-        # else 404 from crypto_in_config()
 
     # apply the monkeypatch method for addresses_service
     monkeypatch.setattr(gsrest.service.common_service, "get_address",
@@ -115,9 +114,8 @@ def test_address_txs(client, auth, monkeypatch):
 
     # define a monkeypatch method
     def mock_get_address_txs(*args, **kwargs):
-        crypto_in_config(args[0])
+        check_inputs(currency=args[0])  # abort if fails
         return None, TEST_ADDRESSES_TXS.get(args[1])
-        # else 404 from crypto_in_config()
 
     # apply the monkeypatch method for addresses_service
     monkeypatch.setattr(gsrest.service.addresses_service, "list_address_txs",
@@ -141,9 +139,8 @@ def test_address_tags(client, auth, monkeypatch):
 
     # define a monkeypatch method
     def mock_list_address_tags(*args, **kwargs):
-        if crypto_in_config(args[0]):
-            return TEST_ADDRESSES_TAGS.get(args[1])
-        # else 404 from crypto_in_config()
+        check_inputs(currency=args[0])  # abort if fails
+        return TEST_ADDRESSES_TAGS.get(args[1])
 
     # apply the monkeypatch method for addresses_service
     monkeypatch.setattr(gsrest.service.common_service, "list_address_tags",

@@ -4,6 +4,7 @@ from flask_restplus import Namespace, Resource
 from gsrest.apis.common import page_parser, block_response, \
     block_list_response, block_txs_response
 from gsrest.util.decorator import token_required
+from gsrest.util.checks import check_inputs
 import gsrest.service.blocks_service as blocksDAO
 
 api = Namespace('blocks',
@@ -21,6 +22,7 @@ class Block(Resource):
         """
         Returns details of a specific block identified by its height
         """
+        check_inputs(currency=currency, height=height)
         block = blocksDAO.get_block(currency, height)
         if not block:
             abort(404, "Block %d not found in currency %s"
@@ -40,9 +42,9 @@ class BlockList(Resource):
         """
         args = page_parser.parse_args()
         page = args.get("page")
+        check_inputs(currency=currency, page=page)
         paging_state = bytes.fromhex(page) if page else None
-
-        (paging_state, blocks) = blocksDAO.list_blocks(currency, paging_state)
+        paging_state, blocks = blocksDAO.list_blocks(currency, paging_state)
         return {"next_page": paging_state.hex() if paging_state else None,
                 "blocks": blocks}
 
@@ -57,8 +59,8 @@ class BlockTxs(Resource):
         """
         Returns a list of all transactions within a given block.
         """
+        check_inputs(currency=currency, height=height)
         block_txs = blocksDAO.list_block_txs(currency, height)
-
         if not block_txs:
             abort(404, "Block %d not found" % height)
         return block_txs

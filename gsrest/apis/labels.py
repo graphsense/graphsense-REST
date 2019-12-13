@@ -6,6 +6,7 @@ import gsrest.service.general_service as generalDAO
 from gsrest.apis.common import label_response, tag_response
 from gsrest.util.decorator import token_required
 from gsrest.apis.common import category_response
+from gsrest.util.checks import check_inputs
 
 api = Namespace('labels',
                 path='/labels',
@@ -20,12 +21,10 @@ class Label(Resource):
         """
         Returns a JSON with the details of the label
         """
-        if not label:
-            abort(404, "Label not provided")
+        check_inputs(label=label)
         result = labelsDAO.get_label(label)
         if not result:
             abort(404, "Label not found")
-
         return result
 
 
@@ -37,8 +36,7 @@ class LabelTags(Resource):
         """
         Returns a JSON with the tags of a label
         """
-        if not label:
-            abort(404, "Label not provided")
+        check_inputs(label=label)
         result = labelsDAO.list_tags(label)
         if not result:
             abort(404, "Label not found")

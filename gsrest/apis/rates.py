@@ -1,9 +1,8 @@
 from flask import abort
 from flask_restplus import Namespace, Resource
-
 from gsrest.util.decorator import token_required
-
 import gsrest.service.rates_service as ratesDAO
+from gsrest.util.checks import check_inputs
 
 api = Namespace('exchange_rates',
                 path='/<currency>/exchange_rates',
@@ -19,6 +18,7 @@ class ExchangeRate(Resource):
         """
         Returns exchange rate for a given height
         """
+        check_inputs(currency=currency, height=height)
         exchange_rate = ratesDAO.get_exchange_rate(currency, height)
         if not exchange_rate:
             abort(404, "Exchange rate for height {} not found in currency {}"

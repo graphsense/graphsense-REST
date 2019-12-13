@@ -12,7 +12,7 @@ import gsrest.service.common_service as commonDAO
 from gsrest.util.decorator import token_required
 from gsrest.util.csvify import tags_to_csv, create_download_header, \
     flatten_rows
-from gsrest.util.checks import check_input, crypto_in_config
+from gsrest.util.checks import check_inputs
 
 api = Namespace('addresses',
                 path='/<currency>/addresses',
@@ -46,13 +46,12 @@ class Address(Resource):
         """
         Returns details of a specific address
         """
-        check_input(address, type='address')  # this aborts if fails
-        crypto_in_config(currency)
-        args = tags_parser.parse_args()
+        check_inputs(address=address, currency=currency)  # abort if fails
         addr = commonDAO.get_address(currency, address)
         if not addr:
             abort(404, "Address {} not found in currency {}"
                   .format(address, currency))
+        args = tags_parser.parse_args()
         if 'tags' in args:  # TODO: wait for dashboard's API specifications
             addr['tags'] = commonDAO.list_address_tags(currency, address)
         return addr
@@ -70,10 +69,9 @@ class AddressTxs(Resource):
         Returns all transactions an address has been involved in
         """
         # TODO: should we allow the user to specify the page size?
-        check_input(address, type='address')  # this aborts if fails
-        if not address.isalnum():
-            abort(400, 'Invalid address')
-        page = request.args.get("page")
+        args = page_parser.parse_args()
+        page = args['page']
+        check_inputs(address=address, currency=currency, page=page)
         paging_state = bytes.fromhex(page) if page else None
         paging_state, address_txs = addressesDAO.list_address_txs(currency,
                                                                   address,
@@ -81,7 +79,6 @@ class AddressTxs(Resource):
         if not address_txs:
             abort(404, "Address {} not found in currency {}"
                   .format(address, currency))
-
         return {"next_page": paging_state.hex() if paging_state else None,
                 "address_txs": address_txs}
 
@@ -94,7 +91,7 @@ class AddressTags(Resource):
         """
         Returns tags of a specific address.
         """
-        check_input(address, type='address')  # this aborts if fails
+        check_inputs(address=address, currency=currency)  # abort if fails
         address_tags = commonDAO.list_address_tags(currency, address)
         return address_tags
 
@@ -104,7 +101,7 @@ class AddressTagsCSV(Resource):
     @token_required
     def get(self, currency, address):
         """ Returns a JSON with the tags of the address """
-        check_input(address, type='address')  # this aborts if fails
+        check_inputs(address=address, currency=currency)  # abort if fails
         tags = commonDAO.list_address_tags(currency, address)
         return Response(tags_to_csv(tags), mimetype="text/csv",
                         headers=create_download_header('tags of address {} '
@@ -123,35 +120,20 @@ class AddressNeighbors(Resource):
         """
         Returns a JSON with edges and nodes of the address
         """
-        check_input(address, type='address')  # this aborts if fails
         args = neighbors_parser.parse_args()
         direction = args.get("direction")
-        if not direction:
-            abort(400, "Direction value missing")
-        if "in" in direction:
-            is_outgoing = False
-        elif "out" in direction:
-            is_outgoing = True
-        else:
-            abort(400, "Invalid direction value - has to be either in or out")
-
         page = args.get("page")
         pagesize = args.get("pagesize")
+        check_inputs(address=address, currency=currency, direction=direction,
+                     page=page, pagesize=pagesize)
         paging_state = bytes.fromhex(page) if page else None
-
-        if pagesize is not None:
-            try:
-                pagesize = int(pagesize)
-            except Exception:
-                abort(400, "Invalid pagesize value")
-
-        if is_outgoing:
+        if "in" in direction:
             paging_state, relations = addressesDAO\
-                .list_address_outgoing_relations(currency, address,
+                .list_address_incoming_relations(currency, address,
                                                  paging_state, pagesize)
         else:
             paging_state, relations = addressesDAO\
-                .list_address_incoming_relations(currency, address,
+                .list_address_outgoing_relations(currency, address,
                                                  paging_state, pagesize)
         return {"next_page": paging_state.hex() if paging_state else None,
                 "neighbors": relations}
@@ -165,27 +147,17 @@ class AddressNeighborsCSV(Resource):
         """
         Returns a JSON with edges and nodes of the address
         """
-        check_input(address, type='address')  # this aborts if fails
         args = neighbors_parser.parse_args()
         direction = args.get("direction")
         page = args.get("page")
         pagesize = args.get("pagesize")
         paging_state = bytes.fromhex(page) if page else None
-        if not direction:
-            abort(400, "Direction value missing")
+        check_inputs(address=address, currency=currency, direction=direction,
+                     page=page, pagesize=pagesize)
         if "in" in direction:
             query_function = addressesDAO.list_address_incoming_relations
-        elif "out" in direction:
-            query_function = addressesDAO.list_address_outgoing_relations
         else:
-            abort(400, "Invalid direction value - has to be either in or out")
-
-        if pagesize is not None:
-            try:
-                pagesize = int(pagesize)
-            except Exception:
-                abort(400, "Invalid pagesize value")
-
+            query_function = addressesDAO.list_address_outgoing_relations
         columns = []
         data = ''
         while True:
@@ -205,19 +177,17 @@ class AddressNeighborsCSV(Resource):
 @api.route("/<address>/entity")
 class AddressEntity(Resource):
     @token_required
+    @api.doc(parser=tags_parser)
     @selective_marshal_with(entity_response, entity_tags_response, 'tags')
     def get(self, currency, address):
         """
         Returns a JSON with the details of the entity
         """
-        check_input(address, type='address')  # this aborts if fails
+        check_inputs(address=address, currency=currency)  # abort if fails
         entity = addressesDAO.get_address_entity(currency, address)
-
         if not entity:
             abort(404, "Entity not found")
-
-        if 'tags' in request.args:
+        if 'tags' in tags_parser.args:
             entity['tags'] = entitiesDAO.list_entity_tags(currency,
                                                           entity['entity'])
-
         return entity

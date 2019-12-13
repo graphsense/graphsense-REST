@@ -1,6 +1,7 @@
 from flask_restplus import Namespace, fields
 
-MAX_DEPTH = 7
+from gsrest.util.checks import MAX_DEPTH
+
 DEFAULT_DEPTH = 1
 DEFAULT_BREADTH = 16
 
