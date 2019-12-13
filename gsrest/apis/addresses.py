@@ -12,7 +12,7 @@ import gsrest.service.common_service as commonDAO
 from gsrest.util.decorator import token_required
 from gsrest.util.csvify import tags_to_csv, create_download_header, \
     flatten_rows
-from gsrest.util.checks import check_input
+from gsrest.util.checks import check_input, crypto_in_config
 
 api = Namespace('addresses',
                 path='/<currency>/addresses',
@@ -46,8 +46,9 @@ class Address(Resource):
         """
         Returns details of a specific address
         """
-        args = tags_parser.parse_args()
         check_input(address, type='address')  # this aborts if fails
+        crypto_in_config(currency)
+        args = tags_parser.parse_args()
         addr = commonDAO.get_address(currency, address)
         if not addr:
             abort(404, "Address {} not found in currency {}"

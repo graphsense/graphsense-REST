@@ -69,8 +69,8 @@ def test_address(client, auth, monkeypatch):
     # define a monkeypatch method
     def mock_get_address(*args, **kwargs):
         # TODO: add case of tags
-        if crypto_in_config(args[0]):
-            return TEST_ADDRESSES.get(args[1])
+        crypto_in_config(args[0])  # this aborts if fails
+        return TEST_ADDRESSES.get(args[1])
         # else 404 from crypto_in_config()
 
     # apply the monkeypatch method for addresses_service
@@ -115,8 +115,8 @@ def test_address_txs(client, auth, monkeypatch):
 
     # define a monkeypatch method
     def mock_get_address_txs(*args, **kwargs):
-        if crypto_in_config(args[0]):
-            return None, TEST_ADDRESSES_TXS.get(args[1])
+        crypto_in_config(args[0])
+        return None, TEST_ADDRESSES_TXS.get(args[1])
         # else 404 from crypto_in_config()
 
     # apply the monkeypatch method for addresses_service

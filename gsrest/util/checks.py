@@ -1,11 +1,11 @@
-from instance import config
-from flask import abort
+from flask import abort, current_app
 
 
 def crypto_in_config(crypto):
-    if crypto not in config.MAPPING:
+
+    if crypto not in current_app.config['MAPPING']:
         abort(404, 'Unknown currency in config: {}' .format(crypto))
-    return True
+    # return True
 
 
 def check_input(expression, type):
