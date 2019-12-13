@@ -5,4 +5,4 @@ if [ $# -lt 2 ]; then
   exit 1
 fi
 
-docker exec -ti graphsense-rest flask create-user "$1" "$2"
+docker exec graphsense-rest flask create-user "$1" "$2"
