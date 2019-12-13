@@ -12,7 +12,7 @@ import gsrest.service.common_service as commonDAO
 from gsrest.util.decorator import token_required
 from gsrest.util.csvify import tags_to_csv, create_download_header, \
     flatten_rows
-
+from gsrest.util.checks import check_input
 
 api = Namespace('addresses',
                 path='/<currency>/addresses',
@@ -47,6 +47,7 @@ class Address(Resource):
         Returns details of a specific address
         """
         args = tags_parser.parse_args()
+        check_input(address, type='address')  # this aborts if fails
         addr = commonDAO.get_address(currency, address)
         if not addr:
             abort(404, "Address {} not found in currency {}"
@@ -68,6 +69,9 @@ class AddressTxs(Resource):
         Returns all transactions an address has been involved in
         """
         # TODO: should we allow the user to specify the page size?
+        check_input(address, type='address')  # this aborts if fails
+        if not address.isalnum():
+            abort(400, 'Invalid address')
         page = request.args.get("page")
         paging_state = bytes.fromhex(page) if page else None
         paging_state, address_txs = addressesDAO.list_address_txs(currency,
@@ -89,7 +93,7 @@ class AddressTags(Resource):
         """
         Returns tags of a specific address.
         """
-
+        check_input(address, type='address')  # this aborts if fails
         address_tags = commonDAO.list_address_tags(currency, address)
         return address_tags
 
@@ -99,6 +103,7 @@ class AddressTagsCSV(Resource):
     @token_required
     def get(self, currency, address):
         """ Returns a JSON with the tags of the address """
+        check_input(address, type='address')  # this aborts if fails
         tags = commonDAO.list_address_tags(currency, address)
         return Response(tags_to_csv(tags), mimetype="text/csv",
                         headers=create_download_header('tags of address {} '
@@ -117,6 +122,7 @@ class AddressNeighbors(Resource):
         """
         Returns a JSON with edges and nodes of the address
         """
+        check_input(address, type='address')  # this aborts if fails
         args = neighbors_parser.parse_args()
         direction = args.get("direction")
         if not direction:
@@ -158,6 +164,7 @@ class AddressNeighborsCSV(Resource):
         """
         Returns a JSON with edges and nodes of the address
         """
+        check_input(address, type='address')  # this aborts if fails
         args = neighbors_parser.parse_args()
         direction = args.get("direction")
         page = args.get("page")
@@ -202,9 +209,7 @@ class AddressEntity(Resource):
         """
         Returns a JSON with the details of the entity
         """
-        if not address:
-            abort(400, "Address not provided")
-
+        check_input(address, type='address')  # this aborts if fails
         entity = addressesDAO.get_address_entity(currency, address)
 
         if not entity:

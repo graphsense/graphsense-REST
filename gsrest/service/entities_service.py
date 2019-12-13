@@ -64,8 +64,7 @@ def list_entity_outgoing_relations(currency, entity_id, paging_state=None,
     exchange_rate = get_exchange_rate(currency)['rates']
     relations = []
     for row in results.current_rows:
-        dst_entity = get_entity(currency, row.dst_cluster)
-        relations.append(EntityOutgoingRelations.from_row(row, dst_entity,
+        relations.append(EntityOutgoingRelations.from_row(row,
                                                           exchange_rate,
                                                           from_search)
                          .to_dict())
@@ -88,8 +87,7 @@ def list_entity_incoming_relations(currency, entity_id, paging_state=None,
     exchange_rate = get_exchange_rate(currency)['rates']
     relations = []
     for row in results.current_rows:
-        src_entity = get_entity(currency, row.src_cluster)
-        relations.append(EntityIncomingRelations.from_row(row, src_entity,
+        relations.append(EntityIncomingRelations.from_row(row,
                                                           exchange_rate,
                                                           from_search)
                          .to_dict())
