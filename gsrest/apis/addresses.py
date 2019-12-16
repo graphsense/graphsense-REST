@@ -2,10 +2,10 @@ from flask import request, abort, Response
 from flask_restplus import Namespace, Resource
 from functools import wraps
 
-from gsrest.apis.common import page_parser, tags_parser, neighbors_parser, \
-    entity_response, address_txs_response, address_response, \
-    address_tags_response, entity_tags_response, tag_response, \
-    neighbors_response
+from gsrest.apis.common import page_size_parser, tags_parser, \
+    neighbors_parser, entity_response, address_txs_response, \
+    address_response, address_tags_response, entity_tags_response, \
+    tag_response, neighbors_response
 import gsrest.service.addresses_service as addressesDAO
 import gsrest.service.entities_service as entitiesDAO
 import gsrest.service.common_service as commonDAO
@@ -62,20 +62,22 @@ class Address(Resource):
 @api.route("/<address>/txs")
 class AddressTxs(Resource):
     @token_required
-    @api.doc(parser=page_parser)
+    @api.doc(parser=page_size_parser)
     @api.marshal_with(address_txs_response)
     def get(self, currency, address):
         """
         Returns all transactions an address has been involved in
         """
-        # TODO: should we allow the user to specify the page size?
-        args = page_parser.parse_args()
+        args = page_size_parser.parse_args()
         page = args['page']
-        check_inputs(address=address, currency=currency, page=page)
+        pagesize = args['pagesize']
+        check_inputs(address=address, currency=currency, page=page,
+                     pagesize=pagesize)
         paging_state = bytes.fromhex(page) if page else None
         paging_state, address_txs = addressesDAO.list_address_txs(currency,
                                                                   address,
-                                                                  paging_state)
+                                                                  paging_state,
+                                                                  pagesize)
         if not address_txs:
             abort(404, "Address {} not found in currency {}"
                   .format(address, currency))

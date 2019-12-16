@@ -3,6 +3,7 @@ from gsrest.model.tags import Label, Tag
 from gsrest.util.string_edit import alphanumeric_lower
 from gsrest.util.checks import LABEL_PREFIX_LENGTH
 
+
 def get_label(label):
     # TODO: allow user to filter by currency
     label_norm = alphanumeric_lower(label)

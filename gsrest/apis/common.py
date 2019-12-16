@@ -14,9 +14,8 @@ REST interface argument parsers
 """
 
 page_parser = api.parser()
-page_parser.add_argument(
-    "page", type="str", location="args",
-    help="Resumption token for retrieving the next page")
+page_parser.add_argument("page", type="str", location="args",
+                         help="Resumption token for retrieving the next page")
 
 tags_parser = api.parser()
 tags_parser.add_argument("tags", location="args")

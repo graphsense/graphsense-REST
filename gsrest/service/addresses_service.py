@@ -26,13 +26,16 @@ def get_address_id_id_group(currency, address):
     return address_id, get_id_group(address_id)
 
 
-def list_address_txs(currency, address, paging_state=None):
+def list_address_txs(currency, address, paging_state=None, pagesize=None):
     session = get_session(currency, 'transformed')
 
     address_id, address_id_group = get_address_id_id_group(currency, address)
     query = "SELECT * FROM address_transactions WHERE address_id = %s " \
             "AND address_id_group = %s"
-    statement = SimpleStatement(query, fetch_size=ADDRESS_PAGE_SIZE)
+    fetch_size = ADDRESS_PAGE_SIZE
+    if pagesize:
+        fetch_size = pagesize
+    statement = SimpleStatement(query, fetch_size=fetch_size)
     results = session.execute(statement, [address_id, address_id_group],
                               paging_state=paging_state)
     paging_state = results.paging_state
@@ -59,7 +62,7 @@ def list_address_outgoing_relations(currency, address, paging_state=None,
     results = session.execute(statement, [address_id_group, address_id],
                               paging_state=paging_state)
     paging_state = results.paging_state
-    exchange_rate = get_exchange_rate(currency)['rates']  # TODO: default -1
+    exchange_rate = get_exchange_rate(currency)['rates']
     relations = []
     for row in results.current_rows:
         dst_address_id_group = get_id_group(row.dst_address_id)
