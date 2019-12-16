@@ -9,7 +9,7 @@ def check_inputs(**kwargs):
             if not isinstance(value, str) or not value.isalnum():
                 abort(400, 'Invalid {}'.format(key))
         if key in ['page']:
-            if key and not key.isalnum():
+            if value and not value.isalnum():
                 abort(400, 'Invalid {}'.format(key))
         if key in ['pagesize'] and value:
             try:

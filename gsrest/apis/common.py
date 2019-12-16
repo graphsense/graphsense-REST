@@ -26,7 +26,7 @@ query_parser.add_argument("q", location="args")
 
 
 page_size_parser = page_parser.copy()
-page_size_parser.add_argument("pagesize", location="args")
+page_size_parser.add_argument("pagesize", type=int, location="args")
 
 neighbors_parser = page_size_parser.copy()
 neighbors_parser.add_argument("direction", required=True, location="args")
