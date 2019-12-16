@@ -1,4 +1,3 @@
-from flask import abort
 from flask_restplus import Namespace, Resource
 
 import gsrest.service.labels_service as labelsDAO
@@ -23,8 +22,6 @@ class Label(Resource):
         """
         check_inputs(label=label)
         result = labelsDAO.get_label(label)
-        if not result:
-            abort(404, "Label not found")
         return result
 
 
@@ -38,8 +35,6 @@ class LabelTags(Resource):
         """
         check_inputs(label=label)
         result = labelsDAO.list_tags(label)
-        if not result:
-            abort(404, "Label not found")
         return result
 
 

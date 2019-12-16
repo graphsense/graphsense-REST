@@ -1,4 +1,3 @@
-from flask import abort
 from flask_restplus import Namespace, Resource
 
 from gsrest.apis.common import page_parser, block_response, \
@@ -24,9 +23,6 @@ class Block(Resource):
         """
         check_inputs(currency=currency, height=height)
         block = blocksDAO.get_block(currency, height)
-        if not block:
-            abort(404, "Block %d not found in currency %s"
-                  % (height, currency))
         return block
 
 
@@ -61,6 +57,4 @@ class BlockTxs(Resource):
         """
         check_inputs(currency=currency, height=height)
         block_txs = blocksDAO.list_block_txs(currency, height)
-        if not block_txs:
-            abort(404, "Block %d not found" % height)
         return block_txs

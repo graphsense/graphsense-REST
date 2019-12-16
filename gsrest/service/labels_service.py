@@ -1,3 +1,5 @@
+from flask import abort
+
 from gsrest.db.cassandra import get_session
 from gsrest.model.tags import Label, Tag
 from gsrest.util.string_edit import alphanumeric_lower
@@ -14,7 +16,10 @@ def get_label(label):
             "address_count FROM tag_by_label WHERE label_norm_prefix = %s " \
             "and label_norm = %s GROUP BY label_norm_prefix, label_norm"
     result = session.execute(query, [label_norm_prefix, label_norm])
-    return Label.from_row(result[0]).to_dict() if result else None
+    if result:
+        return Label.from_row(result[0]).to_dict()
+    else:
+        abort(404, "Label not found")
 
 
 def list_tags(label):
@@ -26,8 +31,11 @@ def list_tags(label):
     query = "SELECT * FROM tag_by_label WHERE label_norm_prefix = %s and " \
             "label_norm = %s"
     rows = session.execute(query, [label_norm_prefix, label_norm])
-    return [Tag.from_address_row(row, row.currency).to_dict() for row in rows]\
-        if rows else None
+    if rows:
+        return [Tag.from_address_row(row, row.currency).to_dict()
+                for row in rows]
+    else:
+        abort(404, "Label not found")
 
 
 def list_labels(expression):

@@ -1,4 +1,3 @@
-from flask import abort
 from flask_restplus import Namespace, Resource
 from gsrest.apis.common import page_parser, tx_response, tx_list_response
 from gsrest.util.decorator import token_required
@@ -23,9 +22,6 @@ class Tx(Resource):
         """
         check_inputs(tx=tx_hash, currency=currency)
         tx = txsDAO.get_tx(currency, tx_hash)
-        if not tx:
-            abort(404, "Transaction {} not found in currency {}"
-                  .format(tx_hash, currency))
         return tx
 
 

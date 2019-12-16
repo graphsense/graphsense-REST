@@ -1,4 +1,4 @@
-from flask import request, abort, Response
+from flask import request, Response
 from flask_restplus import Namespace, Resource
 from functools import wraps
 
@@ -47,10 +47,7 @@ class Address(Resource):
         Returns details of a specific address
         """
         check_inputs(address=address, currency=currency)  # abort if fails
-        addr = commonDAO.get_address(currency, address)
-        if not addr:
-            abort(404, "Address {} not found in currency {}"
-                  .format(address, currency))
+        addr = commonDAO.get_address(currency, address)  # abort if not found
         args = tags_parser.parse_args()
         if 'tags' in args:  # TODO: wait for dashboard's API specifications
             addr['tags'] = commonDAO.list_address_tags(currency, address)
@@ -72,15 +69,13 @@ class AddressTxs(Resource):
         page = args['page']
         pagesize = args['pagesize']
         check_inputs(address=address, currency=currency, page=page,
-                     pagesize=pagesize)
+                     pagesize=pagesize)  # abort if fails
         paging_state = bytes.fromhex(page) if page else None
+        # abort if not found
         paging_state, address_txs = addressesDAO.list_address_txs(currency,
                                                                   address,
                                                                   paging_state,
                                                                   pagesize)
-        if not address_txs:
-            abort(404, "Address {} not found in currency {}"
-                  .format(address, currency))
         return {"next_page": paging_state.hex() if paging_state else None,
                 "address_txs": address_txs}
 
@@ -95,7 +90,7 @@ class AddressTags(Resource):
         """
         check_inputs(address=address, currency=currency)  # abort if fails
         address_tags = commonDAO.list_address_tags(currency, address)
-        return address_tags
+        return address_tags  # can be empty list
 
 
 @api.route("/<address>/tags.csv")
@@ -186,10 +181,9 @@ class AddressEntity(Resource):
         Returns a JSON with the details of the entity
         """
         check_inputs(address=address, currency=currency)  # abort if fails
+        # abort if not found
         entity = addressesDAO.get_address_entity(currency, address)
-        if not entity:
-            abort(404, "Entity not found")
-        if 'tags' in tags_parser.args:
+        if 'tags' in tags_parser.parse_args():
             entity['tags'] = entitiesDAO.list_entity_tags(currency,
                                                           entity['entity'])
         return entity

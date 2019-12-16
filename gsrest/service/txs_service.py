@@ -1,4 +1,5 @@
 from cassandra.query import SimpleStatement
+from flask import abort
 
 from gsrest.db.cassandra import get_session
 from gsrest.model.txs import Tx
@@ -16,10 +17,13 @@ def get_tx(currency, tx_hash):
     query = "SELECT * FROM transaction WHERE tx_prefix = %s AND tx_hash = %s"
     result = session.execute(query, [tx_hash[:TX_PREFIX_LENGTH],
                                      bytearray.fromhex(tx_hash)])
-
-    return Tx.from_row(result[0],
-                       get_exchange_rate(currency, result[0].height)['rates'])\
-        .to_dict() if result else None
+    if result:
+        return Tx.from_row(result[0],
+                           get_exchange_rate(
+                               currency,
+                               result[0].height)['rates']).to_dict()
+    abort(404,
+          "Transaction {} not found in currency {}".format(tx_hash, currency))
 
 
 def list_txs(currency, paging_state=None):

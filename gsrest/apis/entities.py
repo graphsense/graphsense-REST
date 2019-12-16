@@ -1,4 +1,4 @@
-from flask import abort, Response
+from flask import Response
 from flask_restplus import Namespace, Resource
 
 from gsrest.util.decorator import token_required
@@ -27,10 +27,7 @@ class Entity(Resource):
         Returns details and tags of a specific entity
         """
         check_inputs(currency=currency, entity=entity)
-        entity_stats = entitiesDAO.get_entity(currency, int(entity))
-        if not entity_stats:
-            abort(404, "Entity {} not found in currency {}"
-                  .format(entity_stats, currency))
+        entity_stats = entitiesDAO.get_entity(currency, entity)
         entity_stats['tags'] = entitiesDAO.\
             list_entity_tags(currency, entity_stats['entity'])
         return entity_stats
@@ -100,6 +97,7 @@ class EntityNeighborsCSV(Resource):
         """
         Returns a JSON with edges and nodes of the entity
         """
+        # TODO: rather slow with 1NDyJtNTjmwk5xPNhjgAMu4HDHigtobu1s
         args = neighbors_parser.parse_args()
         direction = args.get("direction")
         page = args.get("page")

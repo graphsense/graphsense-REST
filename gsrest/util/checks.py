@@ -1,4 +1,5 @@
 from flask import abort, current_app
+
 MAX_DEPTH = 7
 LABEL_PREFIX_LENGTH = 3
 

@@ -1,3 +1,4 @@
+from flask import abort
 from cassandra.query import SimpleStatement
 
 from gsrest.db.cassandra import get_session
@@ -18,7 +19,9 @@ def get_address_id(currency, address):
     query = "SELECT address_id FROM address WHERE address_prefix = %s " \
             "AND address = %s"
     result = session.execute(query, [address[:ADDRESS_PREFIX_LENGTH], address])
-    return result[0].address_id if result else None
+    if result:
+        return result[0].address_id
+    abort(404, "Address {} not found".format(address))
 
 
 def get_address_id_id_group(currency, address):
@@ -39,13 +42,15 @@ def list_address_txs(currency, address, paging_state=None, pagesize=None):
     results = session.execute(statement, [address_id, address_id_group],
                               paging_state=paging_state)
     paging_state = results.paging_state
-    address_txs = [AddressTx.from_row(row,
-                                      address,
-                                      get_exchange_rate(currency,
-                                                        row.height)['rates'])
-                   .to_dict() for row in results.current_rows]
-
-    return paging_state, address_txs
+    if results:
+        address_txs = [AddressTx.from_row(row,
+                                          address,
+                                          get_exchange_rate(currency,
+                                                            row.height)
+                                          ['rates'])
+                       .to_dict() for row in results.current_rows]
+        return paging_state, address_txs
+    abort(404, "Address {} not found in currency {}".format(address, currency))
 
 
 def list_address_outgoing_relations(currency, address, paging_state=None,
@@ -104,8 +109,8 @@ def list_address_incoming_relations(currency, address, paging_state=None,
 
 def get_address_entity(currency, address):
     # from address to complete entity stats
-    entity_id = get_address_entity_id(currency, address)
-    return get_entity(currency, entity_id)
+    entity_id = get_address_entity_id(currency, address)  # abort if fails
+    return get_entity(currency, entity_id)  # abort if fails
 
 
 def get_address_entity_id(currency, address):
@@ -115,7 +120,9 @@ def get_address_entity_id(currency, address):
     query = "SELECT cluster FROM address_cluster WHERE address_id_group = %s" \
             " AND address_id = %s "
     result = session.execute(query, [address_id_group, address_id])
-    return result[0].cluster if result else None
+    if result:
+        return result[0].cluster
+    abort(404, 'Entity not found')
 
 
 def list_matching_addresses(currency, expression):

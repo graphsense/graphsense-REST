@@ -1,4 +1,5 @@
 from cassandra.query import SimpleStatement
+from flask import abort
 
 from gsrest.db.cassandra import get_session
 from gsrest.service.rates_service import get_exchange_rate
@@ -15,8 +16,9 @@ def get_block(currency, height):
 
     query = "SELECT * FROM block WHERE height = %s"
     result = session.execute(query, [height])
-
-    return Block.from_row(result[0]).to_dict() if result else None
+    if result:
+        return Block.from_row(result[0]).to_dict()
+    abort(404, "Block {} not found in currency {}".format(height, currency))
 
 
 def list_blocks(currency, paging_state=None):
@@ -39,12 +41,11 @@ def list_block_txs(currency, height):
     query = "SELECT * FROM block_transactions WHERE height = %s"
     results = session.execute(query, [height])
 
-    block_txs = None
     if results:
         exchange_rates = get_exchange_rate(currency, height)
 
-        block_txs = BlockTxs.from_row(
-            row=results[0],
-            exchange_rates=exchange_rates['rates']).to_dict()
+        block_txs = BlockTxs.from_row(results[0],
+                                      exchange_rates['rates']).to_dict()
 
-    return block_txs
+        return block_txs
+    abort(404, "Block {} not found in currency {}".format(height, currency))
