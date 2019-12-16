@@ -40,6 +40,7 @@ class Search(Resource):
         Returns a JSON with a list of matching addresses and a list of
         matching transactions
         """
+        # TODO: too slow with bech32 address search
         check_inputs(currency=currency, address=expression, tx=expression)
         leading_zeros = 0
         pos = 0

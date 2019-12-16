@@ -18,8 +18,7 @@ def get_label(label):
     result = session.execute(query, [label_norm_prefix, label_norm])
     if result:
         return Label.from_row(result[0]).to_dict()
-    else:
-        abort(404, "Label not found")
+    abort(404, "Label not found")
 
 
 def list_tags(label):
@@ -34,8 +33,7 @@ def list_tags(label):
     if rows:
         return [Tag.from_address_row(row, row.currency).to_dict()
                 for row in rows]
-    else:
-        abort(404, "Label not found")
+    abort(404, "Label not found")
 
 
 def list_labels(expression):
