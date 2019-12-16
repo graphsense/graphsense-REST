@@ -156,24 +156,27 @@ class EntitySearchNeighbors(Resource):
         depth = args['depth']  # default and int
         breadth = args['breadth']  # default and int
         skipNumAddresses = args['skipNumAddresses']  # default and int
-        check_inputs(currency=currency, entity=entity, direction=direction,
-                     category=args['category'], depth=depth)
         category = args['category']
-        ids = []
+        addresses = []
         if 'addresses' in args:
-            ids = args['addresses']
-        if ids:
-            ids = [{"address": address,
-                    "entity": addressesDAO.get_address_entity_id(currency,
+            addresses = args['addresses']
+
+        check_inputs(currency=currency, entity=entity, direction=direction,
+                     category=category, depth=depth, addresses=addresses)
+        if addresses:
+            # here addresses is a str
+            addresses = [{"address": address,
+                          "entity":
+                              addressesDAO.get_address_entity_id(currency,
                                                                  address)}
-                   for address in ids.split(",")]
+                         for address in addresses.split(",")]
 
         outgoing = True
         if "in" in direction:
             outgoing = False
 
         result = entitiesDAO.\
-            list_entity_search_neighbors(currency, entity, category, ids,
+            list_entity_search_neighbors(currency, entity, category, addresses,
                                          breadth, depth, skipNumAddresses,
                                          dict(), outgoing)
 

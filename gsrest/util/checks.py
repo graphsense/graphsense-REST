@@ -25,17 +25,19 @@ def check_inputs(**kwargs):
         if key in ['depth']:
             if value > MAX_DEPTH:
                 abort(400, "Depth must not exceed %d".format(MAX_DEPTH))
-        if key in ['category']:
-            if not value:
-                abort(400, "Missing {}, please specify one.".format(key))
-            elif not isinstance(value, str) or not value.isalpha():
-                abort(400, 'Invalid {}'.format(key))
+        if key in ['category'] and not value.isalpha():
+            abort(400, 'Invalid {}'.format(key))
         if key in ['label']:
             if not value:
                 abort(400, "Missing {}, please specify one.".format(key))
             if len(value) < LABEL_PREFIX_LENGTH:
                 abort(400, "Label parameter too short: at least {} characters"
                       .format(LABEL_PREFIX_LENGTH))
+        if key in ['addresses']:
+            if isinstance(value, str):
+                for a in value.split(','):
+                    if not a.isalnum():
+                        abort(400, 'Invalid address')
         elif key in ['height', 'entity']:
             if value is None:
                 abort(400, 'Invalid {}'.format(key))
