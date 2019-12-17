@@ -33,9 +33,9 @@ neighbors_parser.add_argument("direction", required=True, location="args")
 
 search_neighbors_parser = api.parser()
 search_neighbors_parser.add_argument("direction", location="args")
-search_neighbors_parser.add_argument("category", required=True, location="args")
+search_neighbors_parser.add_argument("category", location="args")
 search_neighbors_parser.add_argument("addresses", location="args")
-search_neighbors_parser.add_argument("depth", type=int, default=DEFAULT_DEPTH)
+search_neighbors_parser.add_argument("depth", type=int, default=DEFAULT_DEPTH, location="args")
 search_neighbors_parser.add_argument("breadth", type=int,
                                      default=DEFAULT_BREADTH, location="args")
 search_neighbors_parser.add_argument("skipNumAddresses", type=int,
