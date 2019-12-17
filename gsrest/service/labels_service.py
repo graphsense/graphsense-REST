@@ -46,6 +46,11 @@ def list_labels(currency, expression):
             "label_norm_prefix = %s GROUP BY label_norm_prefix, label_norm"
     result = session.execute(query, [expression_norm_prefix])
 
-    return list(dict.fromkeys([row.label for row in result
-                               if row.label_norm.startswith(expression_norm)
-                               and row.currency.lower() == currency]))
+    if currency:
+        return list(dict.fromkeys([
+            row.label for row in result
+            if row.label_norm.startswith(expression_norm)
+            and row.currency.lower() == currency]))
+    return list(dict.fromkeys([
+        row.label for row in result
+        if row.label_norm.startswith(expression_norm)]))

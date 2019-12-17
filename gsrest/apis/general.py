@@ -66,12 +66,15 @@ class Search(Resource):
                 element['currency'] = currency
                 # Look for addresses and transactions
                 if len(expression) >= TX_PREFIX_LENGTH:
-                    txs = txsDAO.list_matching_txs(currency, expression, leading_zeros)
+                    txs = txsDAO.list_matching_txs(currency,
+                                                   expression,
+                                                   leading_zeros)
                     element["txs"] = txs
 
                 if len(expression) >= ADDRESS_PREFIX_LENGTH:
-                    addresses = addressesDAO.list_matching_addresses(currency,
-                                                                     expression)
+                    addresses = \
+                        addressesDAO.list_matching_addresses(currency,
+                                                             expression)
                     element["addresses"] = addresses
                 result.append(element)
         element = dict()
