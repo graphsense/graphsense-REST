@@ -36,16 +36,16 @@ def list_tags(label):
     abort(404, "Label not found")
 
 
-def list_labels(expression):
+def list_labels(currency, expression):
     # Normalize label
     expression_norm = alphanumeric_lower(expression)
     expression_norm_prefix = expression_norm[:LABEL_PREFIX_LENGTH]
 
     session = get_session(currency=None, keyspace_type='tagpacks')
-    query = "SELECT label, label_norm FROM tag_by_label WHERE " \
+    query = "SELECT label, label_norm, currency FROM tag_by_label WHERE " \
             "label_norm_prefix = %s GROUP BY label_norm_prefix, label_norm"
     result = session.execute(query, [expression_norm_prefix])
 
-    # Second filter using all available chars from expression
     return list(dict.fromkeys([row.label for row in result
-                               if row.label_norm.startswith(expression_norm)]))
+                               if row.label_norm.startswith(expression_norm)
+                               and row.currency.lower() == currency]))
