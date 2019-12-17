@@ -3,7 +3,7 @@ from flask import current_app
 
 import gsrest.service.general_service as generalDAO
 from gsrest.util.decorator import token_required
-from gsrest.apis.common import currency_parser
+from gsrest.apis.common import currency_parser, search_response
 from gsrest.util.checks import check_inputs
 import gsrest.service.addresses_service as addressesDAO
 import gsrest.service.labels_service as labelsDAO
@@ -34,7 +34,7 @@ class Statistics(Resource):
 class Search(Resource):
     @token_required
     @api.doc(parser=currency_parser)
-    # @api.marshal_with(search_response)
+    @api.marshal_with(search_response)
     def get(self, expression):
         """
         Returns a JSON with a list of matching addresses, transactions and
@@ -56,7 +56,8 @@ class Search(Resource):
             pos += 1
             leading_zeros += 1
 
-        result = []
+        result = dict()
+        result['currencies'] = []
 
         if can_be_tx_address:
             for currency in currencies:
@@ -64,6 +65,7 @@ class Search(Resource):
                 element['addresses'] = []
                 element['txs'] = []
                 element['currency'] = currency
+
                 # Look for addresses and transactions
                 if len(expression) >= TX_PREFIX_LENGTH:
                     txs = txsDAO.list_matching_txs(currency,
@@ -76,17 +78,12 @@ class Search(Resource):
                         addressesDAO.list_matching_addresses(currency,
                                                              expression)
                     element["addresses"] = addresses
-                result.append(element)
-        element = dict()
-        element['labels'] = []
+
+                result['currencies'].append(element)
+
+        result['labels'] = []
         if can_be_label:
-            element['labels'] = labelsDAO.list_labels(currency, expression)
-        result.append(element)
-        # [{'currency': 'btc', 'addresses': [], 'txs': []},
-        # {'currency': 'ltc', 'addresses': [], 'txs': []},
-        # {'currency': 'zec', 'addresses': [], 'txs': []},
-        # {'currency': 'bch', 'addresses': [], 'txs': []},
-        # {'labels': []}]
+            result['labels'] = labelsDAO.list_labels(currency, expression)
 
         return result
 
