@@ -23,9 +23,11 @@ tags_parser.add_argument("tags", location="args")
 query_parser = api.parser()
 query_parser.add_argument("q", location="args")
 
-currency_parser = api.parser()
-currency_parser.add_argument("currency", type="str", location="args",
-                             help="Cryptocurrency")
+search_parser = api.parser()
+search_parser.add_argument("currency", type="str", location="args",
+                           help="Cryptocurrency")
+search_parser.add_argument("limit", type=int, location="args",
+                           help="Cryptocurrency")
 
 page_size_parser = page_parser.copy()
 page_size_parser.add_argument("pagesize", type=int, location="args")
@@ -38,7 +40,8 @@ search_neighbors_parser = api.parser()
 search_neighbors_parser.add_argument("direction", location="args")
 search_neighbors_parser.add_argument("category", location="args")
 search_neighbors_parser.add_argument("addresses", location="args")
-search_neighbors_parser.add_argument("depth", type=int, default=DEFAULT_DEPTH, location="args")
+search_neighbors_parser.add_argument("depth", type=int, default=DEFAULT_DEPTH,
+                                     location="args")
 search_neighbors_parser.add_argument("breadth", type=int,
                                      default=DEFAULT_BREADTH, location="args")
 search_neighbors_parser.add_argument("skipNumAddresses", type=int,

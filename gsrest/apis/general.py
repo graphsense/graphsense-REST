@@ -3,7 +3,7 @@ from flask import current_app
 
 import gsrest.service.general_service as generalDAO
 from gsrest.util.decorator import token_required
-from gsrest.apis.common import currency_parser, search_response
+from gsrest.apis.common import search_parser, search_response
 from gsrest.util.checks import check_inputs
 import gsrest.service.addresses_service as addressesDAO
 import gsrest.service.labels_service as labelsDAO
@@ -33,7 +33,7 @@ class Statistics(Resource):
 @api.route("/search/<expression>")
 class Search(Resource):
     @token_required
-    @api.doc(parser=currency_parser)
+    @api.doc(parser=search_parser)
     @api.marshal_with(search_response)
     def get(self, expression):
         """
@@ -41,8 +41,9 @@ class Search(Resource):
         labels
         """
         # TODO: too slow with bech32 address search
-        args = currency_parser.parse_args()
+        args = search_parser.parse_args()
         currency = args['currency']
+        limit = check_inputs(limit=args['limit'])
         currencies = [c for c in current_app.config['MAPPING']
                       if c != 'tagpacks']
         if currency:
@@ -71,19 +72,20 @@ class Search(Resource):
                     txs = txsDAO.list_matching_txs(currency,
                                                    expression,
                                                    leading_zeros)
-                    element["txs"] = txs
+                    element["txs"] = txs[:limit]
 
                 if len(expression) >= ADDRESS_PREFIX_LENGTH:
                     addresses = \
                         addressesDAO.list_matching_addresses(currency,
                                                              expression)
-                    element["addresses"] = addresses
+                    element["addresses"] = addresses[:limit]
 
                 result['currencies'].append(element)
 
         result['labels'] = []
         if can_be_label:
-            result['labels'] = labelsDAO.list_labels(currency, expression)
+            result['labels'] = labelsDAO.list_labels(currency,
+                                                     expression)[:limit]
 
         return result
 
