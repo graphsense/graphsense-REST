@@ -165,7 +165,6 @@ class EntitySearchNeighbors(Resource):
         check_inputs(currency=currency, entity=entity, direction=direction,
                      category=category, depth=depth, addresses=addresses)
         if addresses:
-            # here addresses is a str
             addresses = [{"address": address,
                           "entity":
                               addressesDAO.get_address_entity_id(currency,

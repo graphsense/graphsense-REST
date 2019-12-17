@@ -125,6 +125,10 @@ def list_entity_addresses(currency, entity_id, paging_state, page_size):
 
 def list_entity_search_neighbors(currency, entity, category, ids, breadth,
                                  depth, skipNumAddresses, cache, outgoing):
+    if not [category, ids].count(None) == 1:
+        abort(400, 'Invalid search arguments: one among category and '
+                   'addresses must be provided')
+    # TODO: why do we get non-empty result when category is missing?
     if depth <= 0:
         return []
 
