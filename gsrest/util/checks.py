@@ -39,6 +39,19 @@ def check_inputs(**kwargs):
                 for a in value.split(','):
                     if not a.isalnum():
                         abort(400, 'Invalid address')
+        if key in ['expression']:
+            if not value:
+                abort(400, 'Empty search expression')
+            # if invalid label and invalid tx and invalid address
+            can_be_label = False
+            can_be_tx_address = False
+            if len(value) >= LABEL_PREFIX_LENGTH:
+                can_be_label = True
+            if value.isalnum():
+                can_be_tx_address = True
+            if not can_be_label and not can_be_tx_address:
+                abort(400, 'Invalid search expression')
+            return can_be_label, can_be_tx_address
         elif key in ['height', 'entity']:
             if value is None:
                 abort(400, 'Invalid {}'.format(key))

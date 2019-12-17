@@ -129,6 +129,7 @@ def list_entity_search_neighbors(currency, entity, category, ids, breadth,
         abort(400, 'Invalid search arguments: one among category and '
                    'addresses must be provided')
     # TODO: why do we get non-empty result when category is missing?
+    # (removing the if above and with addresses=None)
     if depth <= 0:
         return []
 

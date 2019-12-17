@@ -1,3 +1,4 @@
+from flask import current_app
 from flask_restplus import Namespace, fields
 
 from gsrest.util.checks import MAX_DEPTH
@@ -23,6 +24,9 @@ tags_parser.add_argument("tags", location="args")
 query_parser = api.parser()
 query_parser.add_argument("q", location="args")
 
+currency_parser = api.parser()
+currency_parser.add_argument("currency", type="str", location="args",
+                             help="Cryptocurrency")
 
 page_size_parser = page_parser.copy()
 page_size_parser.add_argument("pagesize", type=int, location="args")
@@ -292,14 +296,38 @@ search_neighbors_response = api.model("search_neighbors_response_depth_" +
                                       str(MAX_DEPTH), search_neighbors_model)
 
 
-label_search_response = api.model("label_search_response", {
-    "labels": fields.List(fields.String, required=True,
-                          description="The list of matching labels"),
-})
+# address_tx_currency_model = {
+#     "addresses": fields.List(fields.String, required=True,
+#                              description="The list of found addresses"),
+#     "txs": fields.List(fields.String, required=True,
+#                        description="The list of found transactions"),
+#     "currency": fields.List(fields.String, required=True,
+#                             description="The cryptocurrency")
+# }
+# label_list_model = {
+#     "labels": fields.List(fields.String, required=True,
+#                           description="The list of matching labels"),
+# }
+# search_model = []
+# for currency in ['btc']:
+#     if currency != 'tagpacks':
+#         search_model.append(address_tx_currency_model)
+# search_model.append(label_list_model)
+#
+# search_model_dict = {'result', fields.List()}
+# search_response = api.model("search_response", search_model_dict)
+#
 
-search_response = api.model("search_response", {
-    "addresses": fields.List(fields.String, required=True,
-                             description="The list of found addresses"),
-    "txs": fields.List(fields.String, required=True,
-                       description="The list of found transactions")
-})
+# def get_search_response(mapping):
+#     search_model = []
+#     for currency in mapping:
+#         if currency != 'tagpacks':
+#             search_model.append(address_tx_currency_model)
+#     search_model.append(label_list_model)
+#     return api.model("search_response", search_model)
+
+# [{'currency': 'btc', 'addresses': [], 'txs': []},
+# {'currency': 'ltc', 'addresses': [], 'txs': []},
+# {'currency': 'zec', 'addresses': [], 'txs': []},
+# {'currency': 'bch', 'addresses': [], 'txs': []},
+# {'labels': []}]

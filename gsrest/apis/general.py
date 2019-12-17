@@ -3,8 +3,7 @@ from flask import current_app
 
 import gsrest.service.general_service as generalDAO
 from gsrest.util.decorator import token_required
-from gsrest.apis.common import search_response
-from gsrest.apis.common import label_search_response
+from gsrest.apis.common import currency_parser
 from gsrest.util.checks import check_inputs
 import gsrest.service.addresses_service as addressesDAO
 import gsrest.service.labels_service as labelsDAO
@@ -31,17 +30,25 @@ class Statistics(Resource):
         return statistics
 
 
-@api.route("/<currency>/search/<expression>")
+@api.route("/search/<expression>")
 class Search(Resource):
     @token_required
-    @api.marshal_with(search_response)
-    def get(self, currency, expression):
+    @api.doc(parser=currency_parser)
+    # @api.marshal_with(search_response)
+    def get(self, expression):
         """
-        Returns a JSON with a list of matching addresses and a list of
-        matching transactions
+        Returns a JSON with a list of matching addresses, transactions and
+        labels
         """
         # TODO: too slow with bech32 address search
-        check_inputs(currency=currency, address=expression, tx=expression)
+        args = currency_parser.parse_args()
+        currency = args['currency']
+        currencies = [c for c in current_app.config['MAPPING']
+                      if c != 'tagpacks']
+        if currency:
+            check_inputs(currency=currency)
+            currencies = [currency]
+        can_be_label, can_be_tx_address = check_inputs(expression=expression)
         leading_zeros = 0
         pos = 0
         # leading zeros will be lost when casting to int
@@ -49,29 +56,34 @@ class Search(Resource):
             pos += 1
             leading_zeros += 1
 
-        result = {"addresses": [], "txs": []}
+        result = []
 
-        # Look for addresses and transactions
-        if len(expression) >= TX_PREFIX_LENGTH:
-            txs = txsDAO.list_matching_txs(currency, expression, leading_zeros)
-            result["txs"] = txs
+        if can_be_tx_address:
+            for currency in currencies:
+                element = dict()
+                element['addresses'] = []
+                element['txs'] = []
+                element['currency'] = currency
+                # Look for addresses and transactions
+                if len(expression) >= TX_PREFIX_LENGTH:
+                    txs = txsDAO.list_matching_txs(currency, expression, leading_zeros)
+                    element["txs"] = txs
 
-        if len(expression) >= ADDRESS_PREFIX_LENGTH:
-            addresses = addressesDAO.list_matching_addresses(currency,
-                                                             expression)
-            result["addresses"] = addresses
+                if len(expression) >= ADDRESS_PREFIX_LENGTH:
+                    addresses = addressesDAO.list_matching_addresses(currency,
+                                                                     expression)
+                    element["addresses"] = addresses
+                result.append(element)
+        element = dict()
+        element['labels'] = []
+        if can_be_label:
+            element['labels'] = labelsDAO.list_labels(currency, expression)
+        result.append(element)
+        # [{'currency': 'btc', 'addresses': [], 'txs': []},
+        # {'currency': 'ltc', 'addresses': [], 'txs': []},
+        # {'currency': 'zec', 'addresses': [], 'txs': []},
+        # {'currency': 'bch', 'addresses': [], 'txs': []},
+        # {'labels': []}]
 
         return result
 
-
-@api.route("/search/labels/<label>")
-class LabelSearch(Resource):
-    @token_required
-    @api.marshal_with(label_search_response)
-    def get(self, label):
-        """
-        Returns a JSON with a list of matching labels
-        """
-        check_inputs(label=label)
-        # TODO: capitalize all first letters of first word in error message
-        return {'labels': labelsDAO.list_labels(label)}
