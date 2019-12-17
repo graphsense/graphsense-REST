@@ -1,4 +1,4 @@
-from flask import Response
+from flask import Response, abort
 from flask_restplus import Namespace, Resource
 
 from gsrest.util.decorator import token_required
@@ -157,10 +157,11 @@ class EntitySearchNeighbors(Resource):
         breadth = args['breadth']  # default and int
         skipNumAddresses = args['skipNumAddresses']  # default and int
         category = args['category']
-        addresses = []
-        if 'addresses' in args:
-            addresses = args['addresses']
+        addresses = args['addresses']
 
+        if not [category, addresses].count(None) == 1:
+            abort(400, 'Invalid search arguments: one among category and '
+                       'addresses must be provided')
         check_inputs(currency=currency, entity=entity, direction=direction,
                      category=category, depth=depth, addresses=addresses)
         if addresses:
