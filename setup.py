@@ -17,5 +17,3 @@ setup(
         'pyjwt'
     ],
 )
-
-
