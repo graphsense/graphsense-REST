@@ -9,8 +9,6 @@ from gsrest.service.entities_service import get_entity, get_id_group
 from gsrest.service.common_service import get_address_by_id_group, \
     ADDRESS_PREFIX_LENGTH
 
-# TODO: handle failing queries
-
 ADDRESS_PAGE_SIZE = 100
 
 
@@ -21,7 +19,7 @@ def get_address_id(currency, address):
     result = session.execute(query, [address[:ADDRESS_PREFIX_LENGTH], address])
     if result:
         return result[0].address_id
-    abort(404, "Address {} not found".format(address))
+    abort(404, "Address {} not found in currency {}".format(address, currency))
 
 
 def get_address_id_id_group(currency, address):
@@ -122,7 +120,8 @@ def get_address_entity_id(currency, address):
     result = session.execute(query, [address_id_group, address_id])
     if result:
         return result[0].cluster
-    abort(404, 'Entity not found')
+    abort(404, "Entity of address {} not found in currency {}"
+          .format(address, currency))
 
 
 def list_matching_addresses(currency, expression):

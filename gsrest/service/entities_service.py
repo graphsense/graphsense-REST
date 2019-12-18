@@ -47,7 +47,8 @@ def get_entity(currency, entity_id):
     exchange_rate = get_exchange_rate(currency)['rates']
     if result:
         return Entity.from_row(result[0], exchange_rate).to_dict()
-    abort(404, "Entity not found")
+    abort(404, "Entity {} not found in currency {}"
+          .format(entity_id, currency))
 
 
 def list_entity_outgoing_relations(currency, entity_id, paging_state=None,

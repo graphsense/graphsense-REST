@@ -5,9 +5,6 @@ from gsrest.db.cassandra import get_session
 from gsrest.service.rates_service import get_exchange_rate
 from gsrest.model.blocks import Block, BlockTxs
 
-
-# TODO: handle failing queries
-
 BLOCKS_PAGE_SIZE = 100
 
 

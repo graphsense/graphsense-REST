@@ -5,8 +5,6 @@ from gsrest.db.cassandra import get_session
 from gsrest.model.txs import Tx
 from gsrest.service.rates_service import get_exchange_rate
 
-# TODO: handle failing queries
-
 TXS_PAGE_SIZE = 100
 TX_PREFIX_LENGTH = 5
 

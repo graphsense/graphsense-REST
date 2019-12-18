@@ -24,7 +24,7 @@ def get_address(currency, address):
     if result:
         return Address.from_row(result[0],
                                 get_exchange_rate(currency)['rates']).to_dict()
-    abort(404, "Address {} not found".format(address))
+    abort(404, "Address {} not found in currency {}".format(address, currency))
 
 
 def list_address_tags(currency, address):

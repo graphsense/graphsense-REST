@@ -7,7 +7,6 @@ from gsrest.util.checks import LABEL_PREFIX_LENGTH
 
 
 def get_label(label):
-    # TODO: allow user to filter by currency
     label_norm = alphanumeric_lower(label)
     label_norm_prefix = label_norm[:LABEL_PREFIX_LENGTH]
 
@@ -21,8 +20,7 @@ def get_label(label):
     abort(404, "Label not found")
 
 
-def list_tags(label):
-    # TODO: allow user to filter by currency
+def list_tags(label, currency=None):
     label_norm = alphanumeric_lower(label)
     label_norm_prefix = label_norm[:LABEL_PREFIX_LENGTH]
 
@@ -31,6 +29,9 @@ def list_tags(label):
             "label_norm = %s"
     rows = session.execute(query, [label_norm_prefix, label_norm])
     if rows:
+        if currency:
+            return [Tag.from_address_row(row, row.currency).to_dict()
+                    for row in rows if row.currency.lower() == currency]
         return [Tag.from_address_row(row, row.currency).to_dict()
                 for row in rows]
     abort(404, "Label not found")
