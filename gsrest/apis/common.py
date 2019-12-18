@@ -17,6 +17,9 @@ page_parser = api.parser()
 page_parser.add_argument("page", location="args",
                          help="Resumption token for retrieving the next page")
 
+currency_parser = api.parser()
+currency_parser.add_argument("currency", location="args")
+
 tags_parser = api.parser()
 tags_parser.add_argument("tags", location="args")
 

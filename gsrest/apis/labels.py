@@ -2,7 +2,7 @@ from flask_restplus import Namespace, Resource
 
 import gsrest.service.labels_service as labelsDAO
 import gsrest.service.general_service as generalDAO
-from gsrest.apis.common import label_response, tag_response
+from gsrest.apis.common import label_response, tag_response, currency_parser
 from gsrest.util.decorator import token_required
 from gsrest.apis.common import category_response
 from gsrest.util.checks import check_inputs
@@ -28,13 +28,15 @@ class Label(Resource):
 @api.route("/<label>/tags")
 class LabelTags(Resource):
     @token_required
+    @api.doc(parser=currency_parser)
     @api.marshal_list_with(tag_response)
     def get(self, label):
         """
         Returns a JSON with the tags of a label
         """
-        check_inputs(label=label)
-        result = labelsDAO.list_tags(label)
+        currency = currency_parser.parse_args()['currency']
+        check_inputs(label=label, currency_optional=currency)
+        result = labelsDAO.list_tags(label, currency)
         return result
 
 
