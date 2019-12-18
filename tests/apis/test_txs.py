@@ -47,13 +47,6 @@ def test_tx(client, auth, monkeypatch):
     for k in TEST_TXS[tx1]:
         assert json_data[k] == TEST_TXS[tx1][k]
 
-    # request non-existing tx
-    response = client.get('/btc/txs/{}'.format(non_existing_tx))
-    assert response.status_code == 404
-    json_data = response.get_json()
-    assert 'Transaction {} not found in currency btc'.format(non_existing_tx) \
-           in json_data['message']
-
     # request tx of non-existing currency
     response = client.get('/{}/txs/{}'.format(non_existing_currency,
                                               TEST_TXS[tx1]['tx_hash']))

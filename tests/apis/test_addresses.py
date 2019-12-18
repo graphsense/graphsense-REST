@@ -58,11 +58,6 @@ TEST_ADDRESSES_TAGS = {
     ).to_dict()]
 }
 
-# TODO: test neighbors
-# TEST_NEIGHBORS = {
-#     address1: [AddressIncomingRelations()]
-# }
-
 
 def test_address(client, auth, monkeypatch):
 
@@ -86,12 +81,6 @@ def test_address(client, auth, monkeypatch):
         .union({'tags'})
     for k, v in json_data.items():
         assert v == TEST_ADDRESSES[address1][k]
-
-    response = client.get('/btc/addresses/{}'.format(non_existing_address))
-    assert response.status_code == 404
-    json_data = response.get_json()
-    assert 'Address {} not found in currency btc'.format(non_existing_address)\
-           in json_data['message']
 
     response = client.get('/{}/addresses/{}'.format(non_existing_currency,
                                                     address1))

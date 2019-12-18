@@ -57,13 +57,6 @@ def test_block_by_height(client, auth, monkeypatch):
     for k in TEST_BLOCKS[existing_block1]:
         assert json_data[k] == TEST_BLOCKS[existing_block1][k]
 
-    # request non-existing block
-    response = client.get('/btc/blocks/{}'.format(non_existing_block))
-    assert response.status_code == 404
-    json_data = response.get_json()
-    assert 'Block {} not found in currency btc.'.format(non_existing_block) \
-           in json_data['message']
-
     # request block of non-existing currency
     response = client.get('/{}/blocks/{}'.format(
         non_existing_currency, TEST_BLOCKS[existing_block1]['height']))
