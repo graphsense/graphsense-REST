@@ -14,7 +14,7 @@ REST interface argument parsers
 """
 
 page_parser = api.parser()
-page_parser.add_argument("page", type=str, location="args",
+page_parser.add_argument("page", location="args",
                          help="Resumption token for retrieving the next page")
 
 tags_parser = api.parser()
@@ -24,7 +24,7 @@ query_parser = api.parser()
 query_parser.add_argument("q", location="args")
 
 search_parser = api.parser()
-search_parser.add_argument("currency", type=str, location="args",
+search_parser.add_argument("currency", location="args",
                            help="Cryptocurrency")
 search_parser.add_argument("limit", type=int, location="args",
                            help="Cryptocurrency")
