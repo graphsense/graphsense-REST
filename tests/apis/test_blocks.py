@@ -39,7 +39,7 @@ TEST_BLOCK_TXS = {
 def test_block_by_height(client, auth, monkeypatch):
 
     # define a monkeypatch method
-    def mock_get_block(*args, **kwargs):
+    def mock_get_block(*args):
         check_inputs(currency=args[0])  # abort if fails
         return TEST_BLOCKS.get(args[1])
 
@@ -69,7 +69,7 @@ def test_block_by_height(client, auth, monkeypatch):
 def test_block_list(client, auth, monkeypatch):
 
     # define a monkeypatch method without paging
-    def mock_list_blocks(*args, **kwargs):
+    def mock_list_blocks(*args):
         check_inputs(currency=args[0])  # abort if fails
         return None, [block for block in TEST_BLOCKS.values()]
 
@@ -94,10 +94,10 @@ def test_block_list(client, auth, monkeypatch):
            json_data['message']
 
     # define a monkeypatch method with paging
-    def mock_list_blocks_paging(*args, **kwargs):
+    def mock_list_blocks_paging(*args):
         check_inputs(currency=args[0])  # abort if fails
         return (bytes('example token', 'utf-8'),
-                    [block for block in TEST_BLOCKS.values()])
+                [block for block in TEST_BLOCKS.values()])
 
     # apply the monkeypatch method for blocks_service.list_blocks
     monkeypatch.setattr(gsrest.service.blocks_service, "list_blocks",
@@ -113,7 +113,7 @@ def test_block_list(client, auth, monkeypatch):
 
 def test_block_txs_list(client, auth, monkeypatch):
     # define a monkeypatch method without paging
-    def mock_list_block_txs(*args, **kwargs):
+    def mock_list_block_txs(*args):
         check_inputs(currency=args[0])  # abort if fails
         return TEST_BLOCK_TXS[args[1]]
 

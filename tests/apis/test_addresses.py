@@ -37,10 +37,10 @@ TEST_ADDRESSES_TXS = {
     address1: [
         AddressTx(address1, first_tx.height, first_tx.timestamp,
                   first_tx.tx_hash.hex(), 649456, {'eur': 0.5, 'usd': 0.5})
-            .to_dict(),
+        .to_dict(),
         AddressTx(address1, last_tx.height, last_tx.timestamp,
                   last_tx.tx_hash.hex(), -649456, {'eur': 0.5, 'usd': 0.5})
-            .to_dict()
+        .to_dict()
     ]
 }
 
@@ -62,7 +62,7 @@ TEST_ADDRESSES_TAGS = {
 def test_address(client, auth, monkeypatch):
 
     # define a monkeypatch method
-    def mock_get_address(*args, **kwargs):
+    def mock_get_address(*args):
         # TODO: add case of tags
         check_inputs(currency=args[0])  # abort if fails
         return TEST_ADDRESSES.get(args[1])
@@ -102,7 +102,7 @@ def test_address(client, auth, monkeypatch):
 def test_address_txs(client, auth, monkeypatch):
 
     # define a monkeypatch method
-    def mock_get_address_txs(*args, **kwargs):
+    def mock_get_address_txs(*args):
         check_inputs(currency=args[0])  # abort if fails
         return None, TEST_ADDRESSES_TXS.get(args[1])
 
@@ -127,7 +127,7 @@ def test_address_txs(client, auth, monkeypatch):
 def test_address_tags(client, auth, monkeypatch):
 
     # define a monkeypatch method
-    def mock_list_address_tags(*args, **kwargs):
+    def mock_list_address_tags(*args):
         check_inputs(currency=args[0])  # abort if fails
         return TEST_ADDRESSES_TAGS.get(args[1])
 
@@ -145,4 +145,3 @@ def test_address_tags(client, auth, monkeypatch):
     for i in range(len(json_data)):
         for k in TEST_ADDRESSES_TAGS[address2][i]:
             assert json_data[i][k] == TEST_ADDRESSES_TAGS[address2][i][k]
-
