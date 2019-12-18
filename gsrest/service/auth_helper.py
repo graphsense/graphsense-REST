@@ -55,7 +55,7 @@ class Auth:
                     'message': 'Successfully logged out.'
                 })
                 response.set_cookie(header_name, '', httponly=True)
-                return response_object
+                return response
             else:
                 response_object = {
                     'status': 'fail',
