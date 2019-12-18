@@ -205,7 +205,7 @@ def list_entity_search_neighbors(currency, entity, category, ids, breadth,
         props["tags"] = tags
         obj = {"node": props, "relation": row_neighbor,
                "matching_addresses": []}
-        if subpaths == True:
+        if subpaths is True:
             addresses_with_tags = [get_address_with_tags(currency, address)
                                    for address in matching_addresses]
             obj["matching_addresses"] = [address for address in

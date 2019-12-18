@@ -80,6 +80,8 @@ class AddressTxs(Resource):
                 "address_txs": address_txs}
 
 
+@api.param('currency', 'The cryptocurrency (e.g., btc)')
+@api.param('address', 'The cryptocurrency address')
 @api.route("/<address>/tags")
 class AddressTags(Resource):
     @token_required
@@ -93,6 +95,8 @@ class AddressTags(Resource):
         return address_tags  # can be empty list
 
 
+@api.param('currency', 'The cryptocurrency (e.g., btc)')
+@api.param('address', 'The cryptocurrency address')
 @api.route("/<address>/tags.csv")
 class AddressTagsCSV(Resource):
     @token_required
@@ -108,6 +112,8 @@ class AddressTagsCSV(Resource):
                                                                .upper())))
 
 
+@api.param('currency', 'The cryptocurrency (e.g., btc)')
+@api.param('address', 'The cryptocurrency address')
 @api.route("/<address>/neighbors")
 class AddressNeighbors(Resource):
     @token_required
@@ -136,6 +142,8 @@ class AddressNeighbors(Resource):
                 "neighbors": relations}
 
 
+@api.param('currency', 'The cryptocurrency (e.g., btc)')
+@api.param('address', 'The cryptocurrency address')
 @api.route("/<address>/neighbors.csv")
 class AddressNeighborsCSV(Resource):
     @token_required
@@ -171,6 +179,8 @@ class AddressNeighborsCSV(Resource):
                             .format(address, currency.upper())))
 
 
+@api.param('currency', 'The cryptocurrency (e.g., btc)')
+@api.param('address', 'The cryptocurrency address')
 @api.route("/<address>/entity")
 class AddressEntity(Resource):
     @token_required

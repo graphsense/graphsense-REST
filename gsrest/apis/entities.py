@@ -33,6 +33,8 @@ class Entity(Resource):
         return entity_stats
 
 
+@api.param('currency', 'The cryptocurrency (e.g., btc)')
+@api.param('entity', 'The cryptocurrency entity')
 @api.route("/<int:entity>/tags")
 class EntityTags(Resource):
     @token_required
@@ -46,6 +48,8 @@ class EntityTags(Resource):
         return tags
 
 
+@api.param('currency', 'The cryptocurrency (e.g., btc)')
+@api.param('entity', 'The cryptocurrency entity')
 @api.route("/<int:entity>/tags.csv")
 class EntityTagsCSV(Resource):
     @token_required
@@ -61,6 +65,8 @@ class EntityTagsCSV(Resource):
                                                                .upper())))
 
 
+@api.param('currency', 'The cryptocurrency (e.g., btc)')
+@api.param('entity', 'The cryptocurrency entity')
 @api.route("/<int:entity>/neighbors")
 class EntityNeighbors(Resource):
     @token_required
@@ -89,6 +95,8 @@ class EntityNeighbors(Resource):
                 "neighbors": relations}
 
 
+@api.param('currency', 'The cryptocurrency (e.g., btc)')
+@api.param('entity', 'The cryptocurrency entity')
 @api.route("/<int:entity>/neighbors.csv")
 class EntityNeighborsCSV(Resource):
     @token_required
@@ -124,6 +132,8 @@ class EntityNeighborsCSV(Resource):
                             .format(entity, currency.upper())))
 
 
+@api.param('currency', 'The cryptocurrency (e.g., btc)')
+@api.param('entity', 'The cryptocurrency entity')
 @api.route("/<int:entity>/addresses")
 class EntityAddresses(Resource):
     @token_required
@@ -145,6 +155,8 @@ class EntityAddresses(Resource):
                 "addresses": addresses}
 
 
+@api.param('currency', 'The cryptocurrency (e.g., btc)')
+@api.param('entity', 'The cryptocurrency entity')
 @api.route("/<int:entity>/search")
 class EntitySearchNeighbors(Resource):
     @token_required

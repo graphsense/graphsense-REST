@@ -64,4 +64,3 @@ def check_inputs(**kwargs):
         elif key in ['height', 'entity']:
             if value is None:
                 abort(400, 'Invalid {}'.format(key))
-

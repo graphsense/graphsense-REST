@@ -30,6 +30,8 @@ class Statistics(Resource):
         return statistics
 
 
+@api.param('expression', 'It can be (the beginning of) an address, '
+                         'a transaction or a label')
 @api.route("/search/<expression>")
 class Search(Resource):
     @token_required
@@ -88,4 +90,3 @@ class Search(Resource):
                                                      expression)[:limit]
 
         return result
-

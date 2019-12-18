@@ -12,6 +12,7 @@ api = Namespace('labels',
                 description='Operations related to labels')
 
 
+@api.param('label', 'The label of an entity (e.g., Internet Archive)')
 @api.route("/<label>")
 class Label(Resource):
     @token_required
@@ -25,6 +26,7 @@ class Label(Resource):
         return result
 
 
+@api.param('label', 'The label of an entity (e.g., Internet Archive)')
 @api.route("/<label>/tags")
 class LabelTags(Resource):
     @token_required
@@ -49,6 +51,5 @@ class Categories(Resource):
         Returns a JSON with the categories
         """
         return generalDAO.list_categories()
-
 
 # TODO: add call: from category to list of labels and #addresses
