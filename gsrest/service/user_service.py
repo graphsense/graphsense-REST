@@ -1,6 +1,7 @@
 import click
 from flask import current_app
 from flask.cli import with_appcontext
+from sqlite3 import IntegrityError
 
 from gsrest.model.user import User
 from gsrest.db.user_db import get_db
@@ -15,11 +16,13 @@ def create_user(username, password):
 
     user = User(username, password)
 
-    db.execute('INSERT INTO user (username, password) VALUES (?, ?)',
-               (user.username, user.password_hash)
-               )
-    db.commit()
-    current_app.logger.info('Created user %s', username)
+    try:
+        db.execute('INSERT INTO user (username, password) VALUES (?, ?)',
+                   (user.username, user.password_hash))
+        db.commit()
+        current_app.logger.info('Created user %s', username)
+    except IntegrityError:
+        print('Error: Username already exists')
 
 
 def find_user(username):
