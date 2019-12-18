@@ -24,7 +24,7 @@ query_parser = api.parser()
 query_parser.add_argument("q", location="args")
 
 search_parser = api.parser()
-search_parser.add_argument("currency", type="str", location="args",
+search_parser.add_argument("currency", type=str, location="args",
                            help="Cryptocurrency")
 search_parser.add_argument("limit", type=int, location="args",
                            help="Cryptocurrency")
