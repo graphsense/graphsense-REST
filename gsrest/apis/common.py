@@ -62,6 +62,17 @@ value_model = {
 }
 value_response = api.model("value_response", value_model)
 
+rates_model = {
+    "eur": fields.Float(required=True, description="EUR/crypto rate"),
+    "usd": fields.Float(required=True, description="USD/crypto rate")
+}
+rates_response = api.model("rates_response", rates_model)
+
+height_rates_model = {
+    "height": fields.Integer(required=True, description="Block height"),
+    "rates": fields.Nested(rates_response, required=True, description="Rates")
+}
+
 tag_model = {
     "label": fields.String(required=True, description="Label"),
     "address": fields.String(required=True, description="Address"),

@@ -11,6 +11,8 @@ api = Namespace('labels',
                 path='/labels',
                 description='Operations related to labels')
 
+# TODO: add /labels/ to get al list of all labels
+
 
 @api.param('label', 'The label of an entity (e.g., Internet Archive)')
 @api.route("/<label>")

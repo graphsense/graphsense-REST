@@ -3,7 +3,7 @@ from flask import abort
 from gsrest.db.cassandra import get_session
 from gsrest.model.addresses import Address
 from gsrest.model.tags import Tag
-from gsrest.service.rates_service import get_exchange_rate
+from gsrest.service.rates_service import get_rates
 
 ADDRESS_PREFIX_LENGTH = 5
 
@@ -23,7 +23,7 @@ def get_address(currency, address):
     result = session.execute(query, [address[:ADDRESS_PREFIX_LENGTH], address])
     if result:
         return Address.from_row(result[0],
-                                get_exchange_rate(currency)['rates']).to_dict()
+                                get_rates(currency)['rates']).to_dict()
     abort(404, "Address {} not found in currency {}".format(address, currency))
 
 

@@ -4,7 +4,7 @@ from cassandra.query import SimpleStatement
 from gsrest.db.cassandra import get_session
 from gsrest.model.addresses import AddressTx, \
     AddressOutgoingRelations, AddressIncomingRelations
-from gsrest.service.rates_service import get_exchange_rate
+from gsrest.service.rates_service import get_rates
 from gsrest.service.entities_service import get_entity, get_id_group
 from gsrest.service.common_service import get_address_by_id_group, \
     ADDRESS_PREFIX_LENGTH
@@ -43,8 +43,8 @@ def list_address_txs(currency, address, paging_state=None, pagesize=None):
     if results:
         address_txs = [AddressTx.from_row(row,
                                           address,
-                                          get_exchange_rate(currency,
-                                                            row.height)
+                                          get_rates(currency,
+                                                    row.height)
                                           ['rates'])
                        .to_dict() for row in results.current_rows]
         return paging_state, address_txs
@@ -65,7 +65,7 @@ def list_address_outgoing_relations(currency, address, paging_state=None,
     results = session.execute(statement, [address_id_group, address_id],
                               paging_state=paging_state)
     paging_state = results.paging_state
-    exchange_rate = get_exchange_rate(currency)['rates']
+    rates = get_rates(currency)['rates']
     relations = []
     for row in results.current_rows:
         dst_address_id_group = get_id_group(row.dst_address_id)
@@ -73,7 +73,7 @@ def list_address_outgoing_relations(currency, address, paging_state=None,
                                               row.dst_address_id)
 
         relations.append(AddressOutgoingRelations.from_row(row, dst_address,
-                                                           exchange_rate)
+                                                           rates)
                          .to_dict())
     return paging_state, relations
 
@@ -92,7 +92,7 @@ def list_address_incoming_relations(currency, address, paging_state=None,
     results = session.execute(statement, [address_id_group, address_id],
                               paging_state=paging_state)
     paging_state = results.paging_state
-    exchange_rate = get_exchange_rate(currency)['rates']
+    rates = get_rates(currency)['rates']
     relations = []
     for row in results.current_rows:
         src_address_id_group = get_id_group(row.src_address_id)
@@ -100,7 +100,7 @@ def list_address_incoming_relations(currency, address, paging_state=None,
                                               row.src_address_id)
 
         relations.append(AddressIncomingRelations.from_row(row, src_address,
-                                                           exchange_rate)
+                                                           rates)
                          .to_dict())
     return paging_state, relations
 

@@ -8,7 +8,7 @@ class Address(object):
 
     def __init__(self, address, first_tx, last_tx, no_incoming_txs,
                  no_outgoing_txs, total_received, total_spent, in_degree,
-                 out_degree, exchange_rates):
+                 out_degree, rates):
         self.address = address
         self.first_tx = TxSummary(first_tx.height, first_tx.timestamp,
                                   first_tx.tx_hash.hex()).to_dict()
@@ -22,14 +22,14 @@ class Address(object):
         self.out_degree = out_degree
         self.balance = compute_balance(total_received.value,
                                        total_spent.value,
-                                       exchange_rates)
+                                       rates)
 
     @staticmethod
-    def from_row(row, exchange_rates):
+    def from_row(row, rates):
         return Address(row.address, row.first_tx, row.last_tx,
                        row.no_incoming_txs, row.no_outgoing_txs,
                        row.total_received, row.total_spent,
-                       row.in_degree, row.out_degree, exchange_rates)
+                       row.in_degree, row.out_degree, rates)
 
     def to_dict(self):
         return self.__dict__
@@ -37,17 +37,17 @@ class Address(object):
 
 class AddressTx(object):
     def __init__(self, address, height, timestamp, tx_hash, value,
-                 exchange_rates):
+                 rates):
         self.address = address
         self.height = height
         self.timestamp = timestamp
         self.tx_hash = tx_hash
-        self.value = ConvertedValues(value, exchange_rates).to_dict()
+        self.value = ConvertedValues(value, rates).to_dict()
 
     @staticmethod
-    def from_row(row, address, exchange_rates):
+    def from_row(row, address, rates):
         return AddressTx(address, row.height, row.timestamp, row.tx_hash.hex(),
-                         row.value, exchange_rates)
+                         row.value, rates)
 
     def to_dict(self):
         return self.__dict__
@@ -64,22 +64,22 @@ class ReceivedSpent(object):
 
 class AddressOutgoingRelations(object):
     def __init__(self, estimated_value, dst_address,
-                 no_txs, dst_properties, exchange_rate):
+                 no_txs, dst_properties, rates):
         self.id = dst_address
         self.node_type = 'address'
         self.received = Values(**dst_properties.total_received._asdict())\
             .to_dict()
         self.balance = compute_balance(dst_properties.total_received.value,
                                        dst_properties.total_received.value,
-                                       exchange_rate)
+                                       rates)
         self.no_txs = no_txs
         self.estimated_value = Values(**estimated_value._asdict()).to_dict()
 
     @staticmethod
-    def from_row(row, dst_address, exchange_rate):
+    def from_row(row, dst_address, rates):
         return AddressOutgoingRelations(row.estimated_value,
                                         dst_address, row.no_transactions,
-                                        row.dst_properties, exchange_rate)
+                                        row.dst_properties, rates)
 
     def to_dict(self):
         return self.__dict__
@@ -87,22 +87,22 @@ class AddressOutgoingRelations(object):
 
 class AddressIncomingRelations(object):
     def __init__(self, estimated_value, src_address,
-                 no_txs, src_properties, exchange_rate):
+                 no_txs, src_properties, rates):
         self.id = src_address
         self.node_type = 'address'
         self.received = Values(**src_properties.total_received._asdict())\
             .to_dict()
         self.balance = compute_balance(src_properties.total_received.value,
                                        src_properties.total_received.value,
-                                       exchange_rate)
+                                       rates)
         self.no_txs = no_txs
         self.estimated_value = Values(**estimated_value._asdict()).to_dict()
 
     @staticmethod
-    def from_row(row, src_address, exchange_rate):
+    def from_row(row, src_address, rates):
         return AddressIncomingRelations(row.estimated_value,
                                         src_address, row.no_transactions,
-                                        row.src_properties, exchange_rate)
+                                        row.src_properties, rates)
 
     def to_dict(self):
         return self.__dict__

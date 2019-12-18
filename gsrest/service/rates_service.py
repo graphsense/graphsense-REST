@@ -14,21 +14,21 @@ LAST_BLOCK_HEIGHT = dict()
 def init_app(app):
     # do not load in development mode
     if not app.config.get('DUMMY_EXCHANGE_RATES'):
-        app.before_first_request(load_all_exchange_rates)
+        app.before_first_request(load_all_rates)
 
 
-def load_all_exchange_rates():
+def load_all_rates():
     """ Load and cache exchange rates for all known currencies """
 
     currencies = get_supported_currencies()
     for currency in currencies:
         CACHED_EXCHANGE_RATES[currency] = dict()
         LAST_BLOCK_HEIGHT[currency] = 0
-        load_exchange_rates(currency)
+        load_rates(currency)
 
 
 def load_supported_fiat_currencies(currency):
-    """ Load supported fiat currencies from exchange_rates table schema """
+    """ Load supported fiat currencies from rates table schema """
 
     current_app.logger.info("Querying supported fiat currencies")
 
@@ -38,7 +38,7 @@ def load_supported_fiat_currencies(currency):
 
     query = "SELECT column_name FROM system_schema.columns \
              WHERE keyspace_name = '{}' \
-             AND table_name = 'exchange_rates'".format(keyspace)
+             AND table_name = 'rates'".format(keyspace)
 
     results = session.execute(query)
     currencies = []
@@ -48,7 +48,7 @@ def load_supported_fiat_currencies(currency):
     return currencies
 
 
-def load_exchange_rates(currency):
+def load_rates(currency):
     """ Load and cache exchange rates for a given currency """
 
     current_app.logger.info("Loading all exchange rates for {}..."
@@ -59,23 +59,23 @@ def load_exchange_rates(currency):
     session = get_session(currency, 'transformed')
     session.row_factory = dict_factory
 
-    query = "SELECT * FROM exchange_rates"
+    query = "SELECT * FROM rates"
     statement = SimpleStatement(query, fetch_size=10000)
     counter = 0
     for row in session.execute(statement):
-        exchange_rates = {}
+        rates = {}
         for fiat_currency in supported_fiat_currencies:
-            exchange_rates[fiat_currency] = row[fiat_currency]
+            rates[fiat_currency] = row[fiat_currency]
         height = row['height']
         CACHED_EXCHANGE_RATES[currency][height] = ExchangeRate(height,
-                                                               exchange_rates)
+                                                               rates)
         counter = counter + 1
 
     current_app.logger.info("Finished loading {} exchange rates for {}."
                             .format(counter, currency))
 
 
-def get_exchange_rate(currency, height=-1):
+def get_rates(currency, height=-1):
     """ Returns the exchange rate for a given block height """
 
     # used in development mode only

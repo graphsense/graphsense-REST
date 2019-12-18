@@ -5,28 +5,28 @@ class Tx(object):
     """ Model representing a transaction """
 
     def __init__(self, tx_hash, coinbase, height, inputs, outputs, timestamp,
-                 total_input, total_output, exchange_rates):
+                 total_input, total_output, rates):
         self.tx_hash = tx_hash.hex()
         self.coinbase = coinbase
         self.height = height
         if inputs:
             self.inputs = [TxInputOutput(i.address,
                                          ConvertedValues(i.value,
-                                                         exchange_rates)
+                                                         rates)
                                          .to_dict()).to_dict()
                            for i in inputs]
         else:
             self.inputs = []
         self.outputs = [TxInputOutput(output.address,
                                       ConvertedValues(output.value,
-                                                      exchange_rates)
+                                                      rates)
                                       .to_dict()).to_dict()
                         for output in outputs if output.address]
         self.timestamp = timestamp
         self.total_input = ConvertedValues(total_input,
-                                           exchange_rates).to_dict()
+                                           rates).to_dict()
         self.total_output = ConvertedValues(total_output,
-                                            exchange_rates).to_dict()
+                                            rates).to_dict()
 
     @staticmethod
     def from_row(row, rates):

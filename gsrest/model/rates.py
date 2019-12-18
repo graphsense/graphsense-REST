@@ -1,9 +1,9 @@
 class ExchangeRate(object):
     """ Model representing exchange rate for a given height """
 
-    def __init__(self, height, exchange_rates):
+    def __init__(self, height, rates):
         self.height = height
-        self.exchange_rates = exchange_rates
+        self.rates = rates
 
     def to_dict(self):
-        return {'height': self.height, 'rates': self.exchange_rates}
+        return {'height': self.height, 'rates': self.rates}

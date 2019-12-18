@@ -7,7 +7,6 @@ api = Namespace('auth',
                 path='/',
                 description='Operations related to client authentication')
 
-
 auth_model = {
     'username': fields.String(required=True, description='The username'),
     'password': fields.String(required=True, description='The user password'),
@@ -42,5 +41,3 @@ class RefreshToken(Resource):
         Get a fresh JWT token
         """
         return Auth.refresh_token(request)
-
-

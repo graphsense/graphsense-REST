@@ -31,14 +31,14 @@ class BlockTxSummary(object):
         self.total_output = total_output
 
     @staticmethod
-    def from_row(row, exchange_rates):
+    def from_row(row, rates):
         return BlockTxSummary(row.tx_hash.hex(),
                               row.no_inputs,
                               row.no_outputs,
                               ConvertedValues(row.total_input,
-                                              exchange_rates).to_dict(),
+                                              rates).to_dict(),
                               ConvertedValues(row.total_output,
-                                              exchange_rates).to_dict()
+                                              rates).to_dict()
                               )
 
     def to_dict(self):
@@ -53,8 +53,8 @@ class BlockTxs(object):
         self.txs = txs
 
     @staticmethod
-    def from_row(row, exchange_rates):
-        tx_summaries = [BlockTxSummary.from_row(tx, exchange_rates).to_dict()
+    def from_row(row, rates):
+        tx_summaries = [BlockTxSummary.from_row(tx, rates).to_dict()
                         for tx in row.txs]
 
         return BlockTxs(row.height, tx_summaries)

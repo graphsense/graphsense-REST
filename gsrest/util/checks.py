@@ -15,13 +15,13 @@ def check_inputs(**kwargs):
         if key in ['pagesize'] and value:
             try:
                 value = int(value)
-            except:
+            except ValueError:
                 abort(400, 'Invalid {}'.format(key))
         if key in ['limit'] and value:
             try:
                 value = int(value)
                 return value
-            except:
+            except ValueError:
                 abort(400, 'Invalid {}'.format(key))
         if key in ['direction'] and value not in ['in', 'out']:
             abort(400, 'Invalid {}, it has to be either in or out'.format(key))

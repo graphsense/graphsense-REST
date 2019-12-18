@@ -2,7 +2,7 @@ from cassandra.query import SimpleStatement
 from flask import abort
 
 from gsrest.db.cassandra import get_session
-from gsrest.service.rates_service import get_exchange_rate
+from gsrest.service.rates_service import get_rates
 from gsrest.model.tags import Tag
 from gsrest.model.entities import Entity, EntityIncomingRelations, \
     EntityOutgoingRelations, EntityAddress
@@ -44,9 +44,9 @@ def get_entity(currency, entity_id):
     entity_id_group = get_id_group(entity_id)
     query = "SELECT * FROM cluster WHERE cluster_group = %s AND cluster = %s "
     result = session.execute(query, [entity_id_group, entity_id])
-    exchange_rate = get_exchange_rate(currency)['rates']
+    rates = get_rates(currency)['rates']
     if result:
-        return Entity.from_row(result[0], exchange_rate).to_dict()
+        return Entity.from_row(result[0], rates).to_dict()
     abort(404, "Entity {} not found in currency {}"
           .format(entity_id, currency))
 
@@ -64,11 +64,11 @@ def list_entity_outgoing_relations(currency, entity_id, paging_state=None,
     results = session.execute(statement, [entity_id_group, entity_id],
                               paging_state=paging_state)
     paging_state = results.paging_state
-    exchange_rate = get_exchange_rate(currency)['rates']
+    rates = get_rates(currency)['rates']
     relations = []
     for row in results.current_rows:
         relations.append(EntityOutgoingRelations.from_row(row,
-                                                          exchange_rate,
+                                                          rates,
                                                           from_search)
                          .to_dict())
     return paging_state, relations
@@ -87,11 +87,11 @@ def list_entity_incoming_relations(currency, entity_id, paging_state=None,
     results = session.execute(statement, [entity_id_group, entity_id],
                               paging_state=paging_state)
     paging_state = results.paging_state
-    exchange_rate = get_exchange_rate(currency)['rates']
+    rates = get_rates(currency)['rates']
     relations = []
     for row in results.current_rows:
         relations.append(EntityIncomingRelations.from_row(row,
-                                                          exchange_rate,
+                                                          rates,
                                                           from_search)
                          .to_dict())
     return paging_state, relations
@@ -110,14 +110,14 @@ def list_entity_addresses(currency, entity_id, paging_state, page_size):
                               paging_state=paging_state)
     if results:
         paging_state = results.paging_state
-        exchange_rate = get_exchange_rate(currency)['rates']
+        rates = get_rates(currency)['rates']
         addresses = []
         for row in results.current_rows:
             address_id_group = get_id_group(row.address_id)
             address = get_address_by_id_group(currency, address_id_group,
                                               row.address_id)
             addresses.append(EntityAddress.from_entity_row(row, address,
-                                                           exchange_rate)
+                                                           rates)
                              .to_dict())
         return paging_state, addresses
     abort(404, "Entity {} not found in currency {}"

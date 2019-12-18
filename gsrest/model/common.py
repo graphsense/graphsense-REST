@@ -11,19 +11,19 @@ class Values(object):
 class ConvertedValues(Values):
     """ Model representing a crypto value and converted fiat values """
 
-    def __init__(self, value, exchange_rates):
+    def __init__(self, value, rates):
         super(Values, self).__init__()
-        self.values = self._convert_values(value, exchange_rates)
+        self.values = self._convert_values(value, rates)
 
-    def _convert_values(self, value, exchange_rates):
+    def _convert_values(self, value, rates):
         values = dict()
         values['value'] = value
-        for currency, rate in exchange_rates.items():
+        for currency, rate in rates.items():
             values[currency] = round(value * rate * 1e-8, 2)
         return values
 
 
-def compute_balance(total_received_value, total_spent_value, exchange_rates):
+def compute_balance(total_received_value, total_spent_value, rates):
     balance_value = total_received_value - total_spent_value
-    balance = ConvertedValues(balance_value, exchange_rates).to_dict()
+    balance = ConvertedValues(balance_value, rates).to_dict()
     return balance

@@ -39,11 +39,11 @@ def app(monkeypatch):
     db_fd, db_path = tempfile.mkstemp()
 
     # we don't want to load exchange rates during testing
-    def fake_load_all_exchange_rates():
+    def fake_load_all_rates():
         pass
 
-    monkeypatch.setattr('gsrest.service.rates_service.load_all_exchange_rates',
-                        fake_load_all_exchange_rates)
+    monkeypatch.setattr('gsrest.service.rates_service.load_all_rates',
+                        fake_load_all_rates)
 
     db_test_conf = {
         'TESTING': True,

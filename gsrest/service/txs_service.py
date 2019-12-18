@@ -3,7 +3,7 @@ from flask import abort
 
 from gsrest.db.cassandra import get_session
 from gsrest.model.txs import Tx
-from gsrest.service.rates_service import get_exchange_rate
+from gsrest.service.rates_service import get_rates
 
 TXS_PAGE_SIZE = 100
 TX_PREFIX_LENGTH = 5
@@ -17,7 +17,7 @@ def get_tx(currency, tx_hash):
                                      bytearray.fromhex(tx_hash)])
     if result:
         return Tx.from_row(result[0],
-                           get_exchange_rate(
+                           get_rates(
                                currency,
                                result[0].height)['rates']).to_dict()
     abort(404,
@@ -33,7 +33,7 @@ def list_txs(currency, paging_state=None):
 
     paging_state = results.paging_state
     tx_list = [Tx.from_row(row,
-                           get_exchange_rate(currency, row.height)['rates'])
+                           get_rates(currency, row.height)['rates'])
                .to_dict() for row in results.current_rows]
 
     return paging_state, tx_list

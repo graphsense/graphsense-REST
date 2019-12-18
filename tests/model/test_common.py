@@ -14,9 +14,9 @@ def test_normal_value():
 
 
 def test_converted_value():
-    exchange_rates = {'eur': 0.4, 'usd': 0.7}
+    rates = {'eur': 0.4, 'usd': 0.7}
 
-    value = ConvertedValues(175000000000, exchange_rates)
+    value = ConvertedValues(175000000000, rates)
 
     value_dict = value.to_dict()
 

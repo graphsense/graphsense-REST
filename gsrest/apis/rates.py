@@ -1,11 +1,12 @@
 from flask import abort
 from flask_restplus import Namespace, Resource
 from gsrest.util.decorator import token_required
+from gsrest.apis.common import height_rates_model
 import gsrest.service.rates_service as ratesDAO
 from gsrest.util.checks import check_inputs
 
-api = Namespace('exchange_rates',
-                path='/<currency>/exchange_rates',
+api = Namespace('rates',
+                path='/<currency>/rates',
                 description='Operations related to exchange rates')
 
 
@@ -14,13 +15,15 @@ api = Namespace('exchange_rates',
 @api.param('height', 'The block height')
 class ExchangeRate(Resource):
     @token_required
+    @api.marshal_with(height_rates_model)
+    # TODO: add response model
     def get(self, currency, height):
         """
         Returns exchange rate for a given height
         """
         check_inputs(currency=currency, height=height)
-        exchange_rate = ratesDAO.get_exchange_rate(currency, height)
-        if not exchange_rate:
+        rates = ratesDAO.get_rates(currency, height)
+        if not rates:
             abort(404, "Exchange rate for height {} not found in currency {}"
                   .format(height, currency))
-        return exchange_rate
+        return rates
