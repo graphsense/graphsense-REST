@@ -2,6 +2,8 @@ FROM alpine:3.10.3
 LABEL maintainer="rainer.stuetz@ait.ac.at"
 
 ENV FLASK_APP=gsrest
+ARG NUM_WORKERS=3
+ENV NUM_WORKERS=${NUM_WORKERS}
 
 RUN mkdir -p /srv/graphsense-rest/
 COPY requirements.txt requirements-docker.txt /srv/graphsense-rest/
