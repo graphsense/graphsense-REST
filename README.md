@@ -4,54 +4,148 @@ The GraphSense REST Interface provides access to denormalized views computed
 by the [Graphsense Transformation Pipeline][graphsense-transformation].
 It is used by the [graphsense-dashboard][graphsense-dashboard] component.
 
-## Configuration
+## Prerequisites
 
-Create a configuration file
+Make sure you are running Python version >= 3.7
 
-    cp app/config.json.template app/config.json
+    python3 --version
 
-and update the values for `SECRET_KEY`, `CASSANDRA_NODES` (default
-`localhost`) and `MAPPING`. For each currency two keyspaces are needed, which
-are created by the [GraphSense Blocksci][graphsense-blocksci] backend and the
-[GraphSense transformation][graphsense-transformation] pipeline respectively.
-The keyspaces are configured according to the following structure
+Create a python environment for required dependencies
 
-    {<CURRENCY_1>: [<RAW_KEYSPACE_NAME_CURRENCY_1>, <TRANSFORMED_KEYSPACE_NAME_CURRENCY_1>],
-     <CURRENCY_2>: [<RAW_KEYSPACE_NAME_CURRENCY_2>, <TRANSFORMED_KEYSPACE_NAME_CURRENCY_2>],
-     ...
-     "tagpacks": "tagpacks"
-    }
+    python3 -m venv venv
 
-## Run REST interface locally
+Activate the environment
 
-The REST interface is implemented in Python, Python version 3 is recommended.
+    . venv/bin/activate
 
-You can run the API either using `pip` or `docker`:
+Install the requirements
 
-##### Using `pip`
+    pip3 install -r requirements.txt
 
-Run 
+Export REST interface environment variables
 
-    pip install -r requirements.txt
+    export FLASK_APP=gsrest
+    export FLASK_ENV=development
 
-then create a new user and password of your choice and start the interface with
+You need access to GraphSense raw and transformed keyspaces.
+See [Graphsense Transformation Pipeline][graphsense-transformation]
+for further details.
 
-    cd app/
-    sudo ./adduser_and_start_rest.sh <user> <password>
+## Development (without Docker)
 
-##### Using `docker`
+Init the user database
 
-After installing [docker][docker], set the REST password (and username)
-in `docker/build.sh` and run:
+    flask init-db
+
+Create a username and password
+
+    flask create-user john doe
+
+Run the REST interface
+
+    flask run
+
+Test the service in your browser:
+
+    http://localhost:5000
+
+## Testing
+
+Install project in local environment
+
+    pip install -e .
+
+Run tests
+
+    pytest
+
+Check test coverage
+
+    coverage run -m pytest
+    coverage report
+
+
+## Deployment
+
+When used in production, GraphSense-REST must be deployed to a WSGI server
+because Flask's built-in server is not suitable for production - 
+it doesn't scale. From several [deployment options][flask-deployment],
+we have chosen [Gunicorn][gunicorn].
+
+Install gunicorn
+
+    pip install gunicorn
+
+Run production server
+
+    gunicorn "gsrest:create_app()"
+
+### Deployment with `docker`
+
+After installing docker, build the image and start a container using:
 
     docker/build.sh
     docker/start.sh
 
-Test the service in your browser:
+Afterwards add users to the running container instance using
+
+    docker/add_user.sh USERNAME PASSWORD
+
+and test the service in a web browser:
 
     http://localhost:9000
+
+## Usage
+
+### Authenticate your client app
+
+All REST interface methods require authentication via [JSON Web Tokens (JWT][https://jwt.io/].
+
+Request a JWT by calling the login interface using a given username/password combination:
+
+    curl -X POST "http://localhost:5000/login" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"username\": \"john\", \"password\": \"doe\"}"
+
+This will return a JWT, which you must use in subsequent requests.
+This is an example response:
+
+    {
+        "status": "success",
+        "message": "Successfully logged in.",
+        "Authorization": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NzE4MzQxNTMsImlhdCI6MTU3MTc0Nzc0OCwic3ViIjoiam9obiJ9.TxYnzE09A0BYfowvK4K5Zds6uyDJ_UrXkwF3NKqqvvA"
+    }
+
+Now use the JWT as part of the `Authorization` header field in subsequent requests:
+
+    curl -X GET "http://localhost:5000/100/blocks/" -H "accept: application/json" -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NzE4MzQxNTMsImlhdCI6MTU3MTc0Nzc0OCwic3ViIjoiam9obiJ9.TxYnzE09A0BYfowvK4K5Zds6uyDJ_UrXkwF3NKqqvvA"    
+
+Logging out will blacklist the JWT
+
+    curl -X POST "http://localhost:5000/logout" -H "accept: application/json" -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NzE3NzcyNTIsImlhdCI6MTU3MTY5MDg0Nywic3ViIjoic3RyaW5nIn0.muFr5f6vJEjh9NGwkXyxWgH3B0GuVkzxcu8fBgsKwdM"
+
+## Customize REST interface configuration
+
+Default configuration parameters are read from `app/config.py` during startup.
+
+Parameters can be customized by placing a custom configuration file into the
+Flask app instance folder, e.g., `instance/config.py`. Example
+
+    MAPPING = {
+    "tagpacks": "tagpacks",
+    "btc": ["btc_raw", "btc_transformed_20190914"],
+    "bch": ["bch_raw", "bch_transformed_20190930"],
+    "ltc": ["ltc_raw", "ltc_transformed_20190930"],
+    "zec": ["zec_raw", "zec_transformed_20190930"]
+}
+
+The secret key that will be used for signing authentication tokens is read
+from the environment and should be set before starting the app
+
+    export SECRET_KEY=$(python -c 'import os; print(os.urandom(16))')
+
 
 [graphsense-blocksci]: https://github.com/graphsense/graphsense-blocksci
 [graphsense-transformation]: https://github.com/graphsense/graphsense-transformation
 [graphsense-dashboard]: https://github.com/graphsense/graphsense-dashboard
 [docker]: https://docs.docker.com/install
+[flask-deployment]: https://flask.palletsprojects.com/en/1.1.x/deploying/#self-hosted-options
+[gunicorn]: https://gunicorn.org/#docs

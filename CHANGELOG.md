@@ -4,18 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Added
+- Checks on input values
 ### Changed
-- Use integer values for cluster IDs
-- Increase size of uWSGI listen queue from 100 to 1024, fix #18
-### Fixed
-- Handle empty results in `query_address_with_tags`
-- Type error in `query_cluster_search_neighbors`
-- Type error in `value_response`
+- Major restructuring and refactoring of API
+- Use Gunicorn instead of uWSGI
 
 ## [0.4.1] - 2019-07-01
 ### Changed
 - `config.json` contains not only currencies, but also `tagpacks` keyspace
-- currency statistics are now available at `<api_root>/stats` (previously at `<api_root>/`)
+- Currency statistics are now available at `<api_root>/stats` (previously at `<api_root>/`)
 ### Added
 - Query label and label search (for suggestions)
 - Unit tests

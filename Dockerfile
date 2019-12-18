@@ -1,24 +1,24 @@
-FROM alpine:3.7.3
+FROM alpine:3.10.3
 LABEL maintainer="rainer.stuetz@ait.ac.at"
 
-ARG rest_user=admin
-ARG rest_passwd
+ENV FLASK_APP=gsrest
 
 RUN mkdir -p /srv/graphsense-rest/
-COPY requirements.txt /srv/graphsense-rest/
+COPY requirements.txt requirements-docker.txt /srv/graphsense-rest/
 
-RUN apk --no-cache --update add bash python3 uwsgi-python3 nginx supervisor shadow && \
+RUN apk --no-cache --update add bash python3 py3-gunicorn nginx shadow && \
     useradd -r -m -u 10000 dockeruser && \
     apk --no-cache --update --virtual build-dependendencies add \
-    gcc \
-    linux-headers \
-    musl-dev \
-    pcre-dev \
-    python3-dev && \
+        gcc \
+        linux-headers \
+        musl-dev \
+        pcre-dev \
+        python3-dev && \
     python3 -m ensurepip && \
     rm -r /usr/lib/python*/ensurepip && \
     rm /etc/nginx/conf.d/default.conf && \
     pip3 install --upgrade pip setuptools && \
+    pip3 install -r /srv/graphsense-rest/requirements-docker.txt && \
     pip3 install -r /srv/graphsense-rest/requirements.txt && \
     apk del build-dependendencies && \
     rm -rf /root/.cache && \
@@ -29,12 +29,16 @@ RUN apk --no-cache --update add bash python3 uwsgi-python3 nginx supervisor shad
 COPY conf/nginx.conf /etc/nginx/
 COPY conf/graphsense-rest.conf /etc/nginx/conf.d/graphsense-rest.conf
 COPY conf/supervisor-app.conf /etc/supervisor/conf.d/
-COPY conf/graphsense-rest.ini app/config.json app/*.py /srv/graphsense-rest/
+COPY MANIFEST.in setup.* /srv/graphsense-rest/
+COPY gsrest /srv/graphsense-rest/gsrest
+COPY instance /usr/var/gsrest-instance
 
 RUN mkdir /var/lib/graphsense-rest && \
     chown dockeruser /var/lib/graphsense-rest && \
-    cd /srv/graphsense-rest/ && \
-    python3 /srv/graphsense-rest/add_user.py -u $rest_user -p $rest_passwd --uid 0
+    pip3 install /srv/graphsense-rest/ && \
+    chown -R dockeruser /usr/var/gsrest-instance
 
 USER dockeruser
+RUN flask init-db
+
 CMD ["supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisor-app.conf"]
