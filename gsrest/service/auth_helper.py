@@ -6,6 +6,7 @@ from gsrest.service.blacklist_service import save_token
 
 header_name = 'Authorization'
 
+
 class Auth:
 
     @staticmethod
@@ -22,7 +23,8 @@ class Auth:
                         'message': 'Successfully logged in.',
                         header_name: auth_token.decode()
                     })
-                    response.set_cookie(header_name, auth_token.decode(), httponly=True)
+                    response.set_cookie(header_name, auth_token.decode(),
+                                        httponly=True)
                     return response
             else:
                 response_object = {
@@ -41,7 +43,8 @@ class Auth:
 
     @staticmethod
     def logout_user(request):
-        data = request.cookies.get(header_name) or request.headers.get(header_name)
+        data = request.cookies.get(header_name) or \
+            request.headers.get(header_name)
         if data:
             resp = User.decode_auth_token(data)
             if isinstance(resp, str):
@@ -69,7 +72,8 @@ class Auth:
     @staticmethod
     def get_logged_in_user(new_request):
         # get the auth token
-        auth_token = new_request.cookies.get(header_name) or new_request.headers.get(header_name)
+        auth_token = new_request.cookies.get(header_name) or \
+            new_request.headers.get(header_name)
         if auth_token:
             resp = User.decode_auth_token(auth_token)
             user = find_user(resp)
@@ -95,7 +99,8 @@ class Auth:
 
     @staticmethod
     def refresh_token(request):
-        auth_token = request.cookies.get(header_name) or request.headers.get(header_name)
+        auth_token = request.cookies.get(header_name) or \
+            request.headers.get(header_name)
         if not auth_token:
             return {
                 'status': 'fail',
@@ -129,6 +134,3 @@ class Auth:
         })
         response.set_cookie(header_name, auth_token.decode(), httponly=True)
         return response
-        
-
-
