@@ -43,7 +43,7 @@ class Search(Resource):
         # TODO: too slow with bech32 address search
         args = search_parser.parse_args()
         currency = args['currency']
-        limit = check_inputs(limit=args['limit'])
+        limit = args['limit']
         currencies = [c for c in current_app.config['MAPPING']
                       if c != 'tagpacks']
         if currency:

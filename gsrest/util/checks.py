@@ -2,7 +2,6 @@ from flask import abort, current_app
 
 MAX_DEPTH = 7
 LABEL_PREFIX_LENGTH = 3
-SEARCH_RESULT_LIMIT = 50
 
 
 def check_inputs(**kwargs):
@@ -21,8 +20,6 @@ def check_inputs(**kwargs):
         if key in ['limit'] and value:
             try:
                 value = int(value)
-                if value > SEARCH_RESULT_LIMIT:
-                    return SEARCH_RESULT_LIMIT
                 return value
             except:
                 abort(400, 'Invalid {}'.format(key))
