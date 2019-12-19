@@ -72,6 +72,7 @@ height_rates_model = {
     "height": fields.Integer(required=True, description="Block height"),
     "rates": fields.Nested(rates_response, required=True, description="Rates")
 }
+height_rates_response = api.model("height_rates_response", height_rates_model)
 
 tag_model = {
     "label": fields.String(required=True, description="Label"),

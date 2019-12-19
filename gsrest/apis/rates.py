@@ -1,7 +1,8 @@
 from flask import abort
 from flask_restplus import Namespace, Resource
+
 from gsrest.util.decorator import token_required
-from gsrest.apis.common import height_rates_model
+from gsrest.apis.common import height_rates_response
 import gsrest.service.rates_service as ratesDAO
 from gsrest.util.checks import check_inputs
 
@@ -15,8 +16,7 @@ api = Namespace('rates',
 @api.param('height', 'The block height')
 class ExchangeRate(Resource):
     @token_required
-    @api.marshal_with(height_rates_model)
-    # TODO: add response model
+    @api.marshal_with(height_rates_response)
     def get(self, currency, height):
         """
         Returns exchange rate for a given height

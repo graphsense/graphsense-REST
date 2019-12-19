@@ -1,4 +1,5 @@
 from flask_restplus import Namespace, Resource
+
 from gsrest.apis.common import page_parser, tx_response, tx_list_response
 from gsrest.util.decorator import token_required
 from gsrest.util.checks import check_inputs

@@ -1,5 +1,4 @@
 from flask_restplus import Api
-#from setup import version
 
 from gsrest.apis.common import api as common_api
 from gsrest.apis.auth import api as auth_api
@@ -38,5 +37,3 @@ api.add_namespace(addresses_api)
 api.add_namespace(entities_api)
 api.add_namespace(labels_api)
 api.add_namespace(general_api)
-
-
