@@ -2,8 +2,8 @@ from flask import abort
 
 from gsrest.db.cassandra import get_session
 from gsrest.model.tags import Label, Tag
-from gsrest.util.string_edit import alphanumeric_lower
 from gsrest.util.checks import LABEL_PREFIX_LENGTH
+from gsrest.util.string_edit import alphanumeric_lower
 
 
 def get_label(label):

@@ -1,11 +1,11 @@
 from flask_restplus import Namespace, Resource
 
-import gsrest.service.labels_service as labelsDAO
+from gsrest.apis.common import label_response, tag_response, currency_parser, \
+    category_response
 import gsrest.service.general_service as generalDAO
-from gsrest.apis.common import label_response, tag_response, currency_parser
-from gsrest.util.decorator import token_required
-from gsrest.apis.common import category_response
+import gsrest.service.labels_service as labelsDAO
 from gsrest.util.checks import check_inputs
+from gsrest.util.decorator import token_required
 
 api = Namespace('labels',
                 path='/labels',

@@ -1,15 +1,13 @@
 from flask_restplus import Namespace, Resource
 from flask import current_app
 
-import gsrest.service.general_service as generalDAO
-from gsrest.util.decorator import token_required
 from gsrest.apis.common import search_parser, search_response
-from gsrest.util.checks import check_inputs
 import gsrest.service.addresses_service as addressesDAO
+import gsrest.service.general_service as generalDAO
 import gsrest.service.labels_service as labelsDAO
 import gsrest.service.txs_service as txsDAO
-from gsrest.service.addresses_service import ADDRESS_PREFIX_LENGTH
-from gsrest.service.txs_service import TX_PREFIX_LENGTH
+from gsrest.util.checks import check_inputs
+from gsrest.util.decorator import token_required
 
 api = Namespace('general',
                 path='/',
@@ -69,13 +67,13 @@ class Search(Resource):
                 element['currency'] = currency
 
                 # Look for addresses and transactions
-                if len(expression) >= TX_PREFIX_LENGTH:
+                if len(expression) >= txsDAO.TX_PREFIX_LENGTH:
                     txs = txsDAO.list_matching_txs(currency,
                                                    expression,
                                                    leading_zeros)
                     element["txs"] = txs[:limit]
 
-                if len(expression) >= ADDRESS_PREFIX_LENGTH:
+                if len(expression) >= addressesDAO.ADDRESS_PREFIX_LENGTH:
                     addresses = \
                         addressesDAO.list_matching_addresses(currency,
                                                              expression)

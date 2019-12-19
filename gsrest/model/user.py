@@ -1,11 +1,10 @@
 import datetime
+from flask import current_app
 import jwt
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from gsrest.service.blacklist_service import check_blacklist
 from gsrest.util.exceptions import MissingConfigError
-
-from flask import current_app
 
 
 class User(object):

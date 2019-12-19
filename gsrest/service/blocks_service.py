@@ -2,8 +2,8 @@ from cassandra.query import SimpleStatement
 from flask import abort
 
 from gsrest.db.cassandra import get_session
-from gsrest.service.rates_service import get_rates
 from gsrest.model.blocks import Block, BlockTxs
+from gsrest.service.rates_service import get_rates
 
 BLOCKS_PAGE_SIZE = 100
 

@@ -1,15 +1,13 @@
-from flask import current_app
 from cassandra.query import SimpleStatement, dict_factory
+from flask import current_app
 
 from gsrest.db.cassandra import (get_session, get_keyspace_mapping,
                                  get_supported_currencies)
-
 from gsrest.model.rates import ExchangeRate
 from gsrest.service.general_service import get_statistics
 
 
 RATES_TABLE = 'exchange_rates'
-
 CACHED_EXCHANGE_RATES = dict()
 LAST_BLOCK_HEIGHT = dict()
 

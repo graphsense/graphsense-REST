@@ -1,8 +1,8 @@
 from flask import current_app, jsonify
 
 from gsrest.model.user import User
-from gsrest.service.user_service import find_user
 from gsrest.service.blacklist_service import save_token
+from gsrest.service.user_service import find_user
 
 header_name = 'Authorization'
 

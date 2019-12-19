@@ -5,7 +5,6 @@ import click
 from flask import current_app, g
 from flask.cli import with_appcontext
 
-
 USER_DB_PATH = 'db/user_db_schema.sql'
 
 
@@ -44,7 +43,7 @@ def init_db():
         with current_app.open_resource(USER_DB_PATH) as f:
             db.executescript(f.read().decode('utf8'))
     except Exception:
-        current_app.logger.error("Excution of user DB SQL script failed")
+        current_app.logger.error("Execution of user DB SQL script failed")
         sys.exit()
 
 

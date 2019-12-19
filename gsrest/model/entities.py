@@ -1,6 +1,6 @@
-from gsrest.model.txs import TxSummary
-from gsrest.model.common import Values, compute_balance
 from gsrest.model.addresses import Address
+from gsrest.model.common import Values, compute_balance
+from gsrest.model.txs import TxSummary
 
 
 class Entity(object):

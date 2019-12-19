@@ -1,6 +1,6 @@
 from gsrest.model.blocks import ConvertedValues
-from gsrest.model.txs import TxSummary
 from gsrest.model.common import Values, compute_balance
+from gsrest.model.txs import TxSummary
 
 
 class Address(object):

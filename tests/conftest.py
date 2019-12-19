@@ -5,7 +5,6 @@ import tempfile
 import pytest
 
 from gsrest import create_app
-
 from gsrest.db.user_db import init_db
 from gsrest.service.user_service import create_user
 from instance import config

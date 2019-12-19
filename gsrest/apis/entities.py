@@ -1,15 +1,15 @@
 from flask import Response, abort
 from flask_restplus import Namespace, Resource
 
-from gsrest.util.decorator import token_required
-from gsrest.service import entities_service as entitiesDAO
-from gsrest.service import addresses_service as addressesDAO
-from gsrest.util.checks import check_inputs
-from gsrest.util.csvify import tags_to_csv, create_download_header, \
-    flatten_rows
 from gsrest.apis.common import neighbors_parser, page_size_parser, \
     search_neighbors_parser, entity_addresses_response, neighbors_response, \
     entity_tags_response, tag_response, search_neighbors_response
+from gsrest.service import addresses_service as addressesDAO
+from gsrest.service import entities_service as entitiesDAO
+from gsrest.util.checks import check_inputs
+from gsrest.util.csvify import tags_to_csv, create_download_header, \
+    flatten_rows
+from gsrest.util.decorator import token_required
 
 api = Namespace('entities',
                 path='/<currency>/entities',

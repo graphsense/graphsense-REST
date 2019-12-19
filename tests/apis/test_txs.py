@@ -1,8 +1,8 @@
-import gsrest.service.txs_service
-from gsrest.model.txs import Tx
-from gsrest.util.checks import check_inputs
-
 from collections import namedtuple
+
+from gsrest.model.txs import Tx
+import gsrest.service.txs_service
+from gsrest.util.checks import check_inputs
 
 tx1 = 'ab188013f626405ddebf1a7b2e0af34253d09e80f9ef7f981ec1ec59d6200c1f'
 in1_d = {"address": ["1H8omroLCN2578Mj6sDrWa8YueqWEckNKY"], "value": 10000000}

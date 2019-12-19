@@ -5,12 +5,12 @@ from gsrest.apis.common import page_size_parser, neighbors_parser, \
     address_txs_response, address_tags_response, entity_tags_response, \
     tag_response, neighbors_response
 import gsrest.service.addresses_service as addressesDAO
-import gsrest.service.entities_service as entitiesDAO
 import gsrest.service.common_service as commonDAO
-from gsrest.util.decorator import token_required
+import gsrest.service.entities_service as entitiesDAO
 from gsrest.util.csvify import tags_to_csv, create_download_header, \
     flatten_rows
 from gsrest.util.checks import check_inputs
+from gsrest.util.decorator import token_required
 
 api = Namespace('addresses',
                 path='/<currency>/addresses',

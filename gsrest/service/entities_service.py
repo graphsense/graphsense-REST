@@ -1,15 +1,14 @@
 from cassandra.query import SimpleStatement
 from flask import abort
+from math import floor
 
 from gsrest.db.cassandra import get_session
-from gsrest.service.rates_service import get_rates
-from gsrest.model.tags import Tag
 from gsrest.model.entities import Entity, EntityIncomingRelations, \
     EntityOutgoingRelations, EntityAddress
+from gsrest.model.tags import Tag
 from gsrest.service.common_service import get_address_by_id_group, \
     get_address_with_tags
-
-from math import floor
+from gsrest.service.rates_service import get_rates
 
 BUCKET_SIZE = 25000  # TODO: get BUCKET_SIZE from cassandra
 ENTITY_PAGE_SIZE = 100

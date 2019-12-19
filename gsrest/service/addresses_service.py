@@ -1,13 +1,13 @@
-from flask import abort
 from cassandra.query import SimpleStatement
+from flask import abort
 
 from gsrest.db.cassandra import get_session
 from gsrest.model.addresses import AddressTx, \
     AddressOutgoingRelations, AddressIncomingRelations
-from gsrest.service.rates_service import get_rates
 from gsrest.service.entities_service import get_entity, get_id_group
 from gsrest.service.common_service import get_address_by_id_group, \
     ADDRESS_PREFIX_LENGTH
+from gsrest.service.rates_service import get_rates
 
 ADDRESS_PAGE_SIZE = 100
 
