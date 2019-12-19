@@ -1,5 +1,5 @@
 FROM alpine:3.10.3
-LABEL maintainer="rainer.stuetz@ait.ac.at"
+LABEL maintainer="contact@graphsense.info"
 
 ENV FLASK_APP=gsrest
 ARG NUM_WORKERS=3
