@@ -44,7 +44,7 @@ class Address(Resource):
     @selective_marshal_with(address_response, address_tags_response, 'tags')
     def get(self, currency, address):
         """
-        Returns details of a specific address
+        Returns details and optionally tags of a specific address
         """
         check_inputs(address=address, currency=currency)  # abort if fails
         addr = commonDAO.get_address(currency, address)  # abort if not found

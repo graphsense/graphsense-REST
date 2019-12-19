@@ -24,7 +24,7 @@ class Entity(Resource):
     @api.marshal_with(entity_tags_response)
     def get(self, currency, entity):
         """
-        Returns details and tags of a specific entity
+        Returns details and optionally tags of a specific entity
         """
         check_inputs(currency=currency, entity=entity)
         entity_stats = entitiesDAO.get_entity(currency, entity)
@@ -41,7 +41,7 @@ class EntityTags(Resource):
     @api.marshal_list_with(tag_response)
     def get(self, currency, entity):
         """
-        Returns tags of a specific entity.
+        Returns attribution tags for a given entity
         """
         check_inputs(currency=currency, entity=entity)
         tags = entitiesDAO.list_entity_tags(currency, entity)
@@ -54,7 +54,9 @@ class EntityTags(Resource):
 class EntityTagsCSV(Resource):
     @token_required
     def get(self, currency, entity):
-        """ Returns a CSV with the tags of the entity """
+        """ 
+        Returns attribution tags for a given entity as CSV
+        """
         check_inputs(currency=currency, entity=entity)
         tags = entitiesDAO.list_entity_tags(currency, int(entity))
         return Response(tags_to_csv(tags), mimetype="text/csv",
@@ -74,7 +76,7 @@ class EntityNeighbors(Resource):
     @api.marshal_with(neighbors_response)
     def get(self, currency, entity):
         """
-        Returns a JSON with edges and nodes of the address
+        Returns an entities' neighbors in the entity graph
         """
         args = neighbors_parser.parse_args()
         direction = args.get("direction")
@@ -103,7 +105,7 @@ class EntityNeighborsCSV(Resource):
     @api.doc(parser=neighbors_parser)
     def get(self, currency, entity):
         """
-        Returns a CSV with neighbors of the entity
+        Returns an entities' neighbors in the entity graph as CSV
         """
         # TODO: rather slow with 1NDyJtNTjmwk5xPNhjgAMu4HDHigtobu1s
         args = neighbors_parser.parse_args()
@@ -141,7 +143,7 @@ class EntityAddresses(Resource):
     @api.marshal_with(entity_addresses_response)
     def get(self, currency, entity):
         """
-        Returns a JSON with the details of the addresses in the entity
+        Returns all addresses associated with an entity
         """
         args = page_size_parser.parse_args()
         page = args.get("page")
@@ -163,6 +165,9 @@ class EntitySearchNeighbors(Resource):
     @api.doc(search_neighbors_parser)
     @api.marshal_with(search_neighbors_response)
     def get(self, currency, entity):
+        """
+        Searches for specific types of nodes in an entities' neighborhood
+        """
         args = search_neighbors_parser.parse_args()
         direction = args['direction']
         depth = args['depth']  # default and int
