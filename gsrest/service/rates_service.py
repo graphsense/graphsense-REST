@@ -7,6 +7,9 @@ from gsrest.db.cassandra import (get_session, get_keyspace_mapping,
 from gsrest.model.rates import ExchangeRate
 from gsrest.service.general_service import get_statistics
 
+
+RATES_TABLE = 'exchange_rates'
+
 CACHED_EXCHANGE_RATES = dict()
 LAST_BLOCK_HEIGHT = dict()
 
@@ -38,7 +41,7 @@ def load_supported_fiat_currencies(currency):
 
     query = "SELECT column_name FROM system_schema.columns \
              WHERE keyspace_name = '{}' \
-             AND table_name = 'rates'".format(keyspace)
+             AND table_name = '{}'".format(keyspace, RATES_TABLE)
 
     results = session.execute(query)
     currencies = []
@@ -59,7 +62,7 @@ def load_rates(currency):
     session = get_session(currency, 'transformed')
     session.row_factory = dict_factory
 
-    query = "SELECT * FROM rates"
+    query = "SELECT * FROM {}".format(RATES_TABLE)
     statement = SimpleStatement(query, fetch_size=10000)
     counter = 0
     for row in session.execute(statement):
