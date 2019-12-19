@@ -49,7 +49,8 @@ class Address(Resource):
         check_inputs(address=address, currency=currency)  # abort if fails
         addr = commonDAO.get_address(currency, address)  # abort if not found
         args = tags_parser.parse_args()
-        if 'tags' in args:  # TODO: wait for dashboard's API specifications
+        print(args)
+        if args['tags']:  # TODO: wait for dashboard's API specifications
             addr['tags'] = commonDAO.list_address_tags(currency, address)
         return addr
 
@@ -88,7 +89,7 @@ class AddressTags(Resource):
     @api.marshal_list_with(tag_response)
     def get(self, currency, address):
         """
-        Returns tags of a specific address.
+        Returns attribution tags for a given address
         """
         check_inputs(address=address, currency=currency)  # abort if fails
         address_tags = commonDAO.list_address_tags(currency, address)
@@ -101,7 +102,9 @@ class AddressTags(Resource):
 class AddressTagsCSV(Resource):
     @token_required
     def get(self, currency, address):
-        """ Returns a JSON with the tags of the address """
+        """
+        Returns attribution tags for a given address as CSV
+        """
         check_inputs(address=address, currency=currency)  # abort if fails
         tags = commonDAO.list_address_tags(currency, address)
         return Response(tags_to_csv(tags), mimetype="text/csv",
@@ -121,7 +124,7 @@ class AddressNeighbors(Resource):
     @api.marshal_with(neighbors_response)
     def get(self, currency, address):
         """
-        Returns a JSON with edges and nodes of the address
+        Returns an addresses' neighbors in the address graph
         """
         args = neighbors_parser.parse_args()
         direction = args.get("direction")
@@ -150,7 +153,7 @@ class AddressNeighborsCSV(Resource):
     @api.doc(parser=neighbors_parser)
     def get(self, currency, address):
         """
-        Returns a JSON with edges and nodes of the address
+        Returns an addresses' neighbors in the address graph as CSV
         """
         args = neighbors_parser.parse_args()
         direction = args.get("direction")
@@ -188,7 +191,7 @@ class AddressEntity(Resource):
     @selective_marshal_with(entity_response, entity_tags_response, 'tags')
     def get(self, currency, address):
         """
-        Returns a JSON with the details of the entity
+        Returns the associated entity for a given address
         """
         check_inputs(address=address, currency=currency)  # abort if fails
         # abort if not found

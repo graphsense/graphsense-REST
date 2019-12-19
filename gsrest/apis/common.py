@@ -21,7 +21,8 @@ currency_parser = api.parser()
 currency_parser.add_argument("currency", location="args")
 
 tags_parser = api.parser()
-tags_parser.add_argument("tags", location="args")
+tags_parser.add_argument("tags", type=bool, location="args",
+                         help="Include tags in repsonse (tags=true if needed)")
 
 query_parser = api.parser()
 query_parser.add_argument("q", location="args")
@@ -33,10 +34,13 @@ search_parser.add_argument("limit", type=int, location="args",
                            help="Cryptocurrency")
 
 page_size_parser = page_parser.copy()
-page_size_parser.add_argument("pagesize", type=int, location="args")
+page_size_parser.add_argument("pagesize", type=int, location="args",
+                              help="Number of items returned in a single page")
 
 neighbors_parser = page_size_parser.copy()
-neighbors_parser.add_argument("direction", required=True, location="args")
+neighbors_parser.add_argument("direction", required=True, location="args",
+                              choices=('in', 'out'),
+                              help="Incoming or outgoing neighbors")
 
 
 search_neighbors_parser = api.parser()
