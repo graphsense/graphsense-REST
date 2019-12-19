@@ -6,6 +6,14 @@ from flask_cors import CORS
 from gsrest.config import Config
 
 
+def load_config_from_file(app):
+    # load default config, when not testing
+    config = Config(instance_path=app.instance_path)
+    app.config.from_object(config)
+    # override with instance config, if available
+    app.config.from_pyfile('config.py', silent=False)
+
+
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
@@ -13,11 +21,8 @@ def create_app(test_config=None):
     # read the configuration
 
     if test_config is None:
-        # load default config, when not testing
-        config = Config(instance_path=app.instance_path)
-        app.config.from_object(config)
-        # override with instance config, if available
-        app.config.from_pyfile('config.py', silent=False)
+        # load default config from file
+        load_config_from_file(app)
     else:
         # load the test config if passed in
         app.config.from_mapping(test_config)
