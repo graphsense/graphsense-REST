@@ -101,7 +101,7 @@ class AddressTags(Resource):
 class AddressTagsCSV(Resource):
     @token_required
     def get(self, currency, address):
-        """ Returns a JSON with the tags of the address """
+        """ Returns a CSV with the tags of the address """
         check_inputs(address=address, currency=currency)  # abort if fails
         tags = commonDAO.list_address_tags(currency, address)
         return Response(tags_to_csv(tags), mimetype="text/csv",
@@ -150,7 +150,7 @@ class AddressNeighborsCSV(Resource):
     @api.doc(parser=neighbors_parser)
     def get(self, currency, address):
         """
-        Returns a JSON with edges and nodes of the address
+        Returns a CSV with edges and nodes of the address
         """
         args = neighbors_parser.parse_args()
         direction = args.get("direction")
