@@ -200,7 +200,6 @@ entity_model = {
     "total_received": fields.Nested(value_response, required=True),
     "total_spent": fields.Nested(value_response, required=True),
 }
-entity_response = api.model("entity_response", entity_model)
 
 entity_tags_model = entity_model.copy()
 entity_tags_model["tags"] = fields.List(fields.Nested(tag_response,
