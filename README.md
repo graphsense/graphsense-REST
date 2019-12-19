@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/graphsense/graphsense-REST.svg?branch=develop)](https://travis-ci.org/graphsense/graphsense-REST)
+
 # GraphSense REST Interface
 
 The GraphSense REST Interface provides access to denormalized views computed
