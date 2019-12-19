@@ -1,10 +1,8 @@
-from flask import request, Response
+from flask import Response
 from flask_restplus import Namespace, Resource
-from functools import wraps
 
-from gsrest.apis.common import page_size_parser, tags_parser, \
-    neighbors_parser, entity_response, address_txs_response, \
-    address_response, address_tags_response, entity_tags_response, \
+from gsrest.apis.common import page_size_parser,neighbors_parser, \
+    address_txs_response, address_tags_response, entity_tags_response, \
     tag_response, neighbors_response
 import gsrest.service.addresses_service as addressesDAO
 import gsrest.service.entities_service as entitiesDAO
@@ -19,39 +17,19 @@ api = Namespace('addresses',
                 description='Operations related to addresses')
 
 
-def selective_marshal_with(default_response, args_response, arg):
-    """ Selective response marshalling """
-    # args_response is selected if arg is in request.args
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            if arg in request.args:
-                model = args_response
-            else:
-                model = default_response
-            func2 = api.marshal_with(model)(func)
-            return func2(*args, **kwargs)
-        return wrapper
-    return decorator
-
-
 @api.route("/<address>")
 @api.param('currency', 'The cryptocurrency (e.g., btc)')
 @api.param('address', 'The cryptocurrency address')
 class Address(Resource):
     @token_required
-    @api.doc(parser=tags_parser)
-    @selective_marshal_with(address_response, address_tags_response, 'tags')
+    @api.marshal_with(address_tags_response)
     def get(self, currency, address):
         """
         Returns details of a specific address
         """
         check_inputs(address=address, currency=currency)  # abort if fails
         addr = commonDAO.get_address(currency, address)  # abort if not found
-        args = tags_parser.parse_args()
-        print(args)
-        if args['tags']:  # TODO: wait for dashboard's API specifications
-            addr['tags'] = commonDAO.list_address_tags(currency, address)
+        addr['tags'] = commonDAO.list_address_tags(currency, address)
         return addr
 
 
@@ -187,8 +165,7 @@ class AddressNeighborsCSV(Resource):
 @api.route("/<address>/entity")
 class AddressEntity(Resource):
     @token_required
-    @api.doc(parser=tags_parser)
-    @selective_marshal_with(entity_response, entity_tags_response, 'tags')
+    @api.marshal_with(entity_tags_response)
     def get(self, currency, address):
         """
         Returns the associated entity for a given address
@@ -196,7 +173,6 @@ class AddressEntity(Resource):
         check_inputs(address=address, currency=currency)  # abort if fails
         # abort if not found
         entity = addressesDAO.get_address_entity(currency, address)
-        if 'tags' in tags_parser.parse_args():
-            entity['tags'] = entitiesDAO.list_entity_tags(currency,
-                                                          entity['entity'])
+        entity['tags'] = entitiesDAO.list_entity_tags(currency,
+                                                      entity['entity'])
         return entity
