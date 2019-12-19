@@ -54,7 +54,7 @@ class EntityTags(Resource):
 class EntityTagsCSV(Resource):
     @token_required
     def get(self, currency, entity):
-        """ Returns a JSON with the tags of the entity """
+        """ Returns a CSV with the tags of the entity """
         check_inputs(currency=currency, entity=entity)
         tags = entitiesDAO.list_entity_tags(currency, int(entity))
         return Response(tags_to_csv(tags), mimetype="text/csv",
@@ -103,7 +103,7 @@ class EntityNeighborsCSV(Resource):
     @api.doc(parser=neighbors_parser)
     def get(self, currency, entity):
         """
-        Returns a JSON with edges and nodes of the entity
+        Returns a CSV with neighbors of the entity
         """
         # TODO: rather slow with 1NDyJtNTjmwk5xPNhjgAMu4HDHigtobu1s
         args = neighbors_parser.parse_args()

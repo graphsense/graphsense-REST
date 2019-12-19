@@ -1,10 +1,12 @@
 from flask_restplus import Namespace, Resource
+from flask import Response
 
 from gsrest.apis.common import page_parser, block_response, \
     block_list_response, block_txs_response
 from gsrest.util.decorator import token_required
 from gsrest.util.checks import check_inputs
 import gsrest.service.blocks_service as blocksDAO
+from gsrest.util.csvify import txs_to_csv, create_download_header
 
 api = Namespace('blocks',
                 path='/<currency>/blocks',
@@ -58,3 +60,20 @@ class BlockTxs(Resource):
         check_inputs(currency=currency, height=height)
         block_txs = blocksDAO.list_block_txs(currency, height)
         return block_txs
+
+
+@api.route("/<int:height>/txs.csv")
+@api.param('currency', 'The cryptocurrency (e.g., btc)')
+@api.param('height', 'The block height')
+class BlockTxsCSV(Resource):
+    @token_required
+    def get(self, currency, height):
+        """
+        Returns a CSV with all the transactions of the block
+        """
+        check_inputs(currency=currency, height=height)
+        block_txs = blocksDAO.list_block_txs(currency, height)
+        return Response(txs_to_csv(block_txs), mimetype="text/csv",
+                        headers=create_download_header(
+                            'transactions of block {} ({}).csv'
+                            .format(height, currency.upper())))
