@@ -61,15 +61,17 @@ TEST_ADDRESSES_TAGS = {
 
 def test_address(client, auth, monkeypatch):
 
-    # define a monkeypatch method
     def mock_get_address(*args):
-        # TODO: add case of tags
-        check_inputs(currency=args[0])  # abort if fails
+        check_inputs(currency=args[0])
         return TEST_ADDRESSES.get(args[1])
-
-    # apply the monkeypatch method for addresses_service
     monkeypatch.setattr(gsrest.service.common_service, "get_address",
                         mock_get_address)
+
+    def mock_list_address_tags(*args):
+        check_inputs(currency=args[0])
+        return []
+    monkeypatch.setattr(gsrest.service.common_service, "list_address_tags",
+                        mock_list_address_tags)
 
     auth.login()
 
@@ -77,10 +79,12 @@ def test_address(client, auth, monkeypatch):
     assert response.status_code == 200
     json_data = response.get_json()
 
-    assert set(TEST_ADDRESSES[address1].keys()) == set(json_data.keys())\
-        .union({'tags'})
+    assert set(TEST_ADDRESSES[address1].keys()) == set(json_data.keys())
     for k, v in json_data.items():
-        assert v == TEST_ADDRESSES[address1][k]
+        if k == 'tags':
+            assert isinstance(type(v), type(list))
+        else:
+            assert v == TEST_ADDRESSES[address1][k]
 
     response = client.get('/{}/addresses/{}'.format(non_existing_currency,
                                                     address1))
