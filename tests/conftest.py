@@ -7,7 +7,6 @@ import pytest
 from gsrest import create_app
 from gsrest.db.user_db import init_db
 from gsrest.service.user_service import create_user
-from instance import config
 
 
 class AuthActions(object):
@@ -44,14 +43,22 @@ def app(monkeypatch):
     monkeypatch.setattr('gsrest.service.rates_service.load_all_rates',
                         fake_load_all_rates)
 
+    DUMMY_MAPPING = {
+        "tagpacks": "tagpacks",
+        "btc": ["btc_raw", "btc_transformed_X"],
+        "ltc": ["ltc_raw_", "ltc_transformed_Y"],
+        "bch": ["bch_raw_", "bch_transformed_Z"],
+        "zec": ["zec_raw_", "zec_transformed_A"]
+    }
+
     db_test_conf = {
         'TESTING': True,
         'DATABASE': db_path,
         'JWT_ACCESS_TOKEN_EXPIRES_DAYS': 5,
         'SECRET_KEY': 'testing_secret',
-        'MAPPING': config.MAPPING,
-        'CASSANDRA_NODES': config.CASSANDRA_NODES,
-        'DUMMY_EXCHANGE_RATES': config.DUMMY_EXCHANGE_RATES
+        'MAPPING': DUMMY_MAPPING,
+        'CASSANDRA_NODES': None,
+        'DUMMY_EXCHANGE_RATES': True
     }
 
     app = create_app(db_test_conf)

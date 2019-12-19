@@ -1,7 +1,7 @@
 # GraphSense REST Interface
 
 The GraphSense REST Interface provides access to denormalized views computed
-by the [Graphsense Transformation Pipeline][graphsense-transformation].
+by the [graphsense-transformation][graphsense-transformation] pipeline.
 It is used by the [graphsense-dashboard][graphsense-dashboard] component.
 
 ## Prerequisites
@@ -80,7 +80,7 @@ Run production server
 
     gunicorn "gsrest:create_app()"
 
-### Deployment with `docker`
+### Deployment with docker
 
 After installing docker, build the image and start a container using:
 
