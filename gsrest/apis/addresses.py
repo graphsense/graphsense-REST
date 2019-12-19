@@ -131,7 +131,7 @@ class AddressNeighborsCSV(Resource):
     @api.doc(parser=neighbors_parser)
     def get(self, currency, address):
         """
-        Returns an addresses' neighbors in the address graph as CSV
+        Returns addresses' neighbors in the address graph as CSV
         """
         args = neighbors_parser.parse_args()
         direction = args.get("direction")
