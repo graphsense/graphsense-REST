@@ -54,7 +54,7 @@ class EntityTags(Resource):
 class EntityTagsCSV(Resource):
     @token_required
     def get(self, currency, entity):
-        """ 
+        """
         Returns attribution tags for a given entity as CSV
         """
         check_inputs(currency=currency, entity=entity)

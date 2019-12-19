@@ -31,7 +31,7 @@ search_parser = api.parser()
 search_parser.add_argument("currency", location="args",
                            help="Cryptocurrency")
 search_parser.add_argument("limit", type=int, location="args",
-                           help="Cryptocurrency")
+                           help="Maximum number of search results")
 
 page_size_parser = page_parser.copy()
 page_size_parser.add_argument("pagesize", type=int, location="args",
@@ -309,9 +309,8 @@ def search_neighbors_recursive(depth=7):
 
 
 search_neighbors_model = {
-        "paths": fields.List(fields.Nested(
-            search_neighbors_recursive(MAX_DEPTH), required=True))
-    }
+    "paths": fields.List(fields.Nested(
+        search_neighbors_recursive(MAX_DEPTH), required=True))}
 search_neighbors_response = api.model("search_neighbors_response_depth_" +
                                       str(MAX_DEPTH), search_neighbors_model)
 

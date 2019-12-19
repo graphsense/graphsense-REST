@@ -21,7 +21,7 @@ api = Namespace('general',
 class Statistics(Resource):
     def get(self):
         """
-        Returns a JSON with statistics of all the available currencies
+        Returns summary statistics on all available currencies
         """
         statistics = dict()
         for currency in current_app.config['MAPPING']:
@@ -39,8 +39,7 @@ class Search(Resource):
     @api.marshal_with(search_response)
     def get(self, expression):
         """
-        Returns a JSON with a list of matching addresses, transactions and
-        labels
+        Returns matching addresses, transactions and labels
         """
         # TODO: too slow with bech32 address search
         args = search_parser.parse_args()

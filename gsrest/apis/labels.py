@@ -21,7 +21,7 @@ class Label(Resource):
     @api.marshal_with(label_response)
     def get(self, label):
         """
-        Returns a JSON with the details of the label
+        Returns details (address count) for a specific label
         """
         check_inputs(label=label)
         result = labelsDAO.get_label(label)
@@ -36,7 +36,7 @@ class LabelTags(Resource):
     @api.marshal_list_with(tag_response)
     def get(self, label):
         """
-        Returns a JSON with the tags of a label
+        Returns the tags associated with a given label
         """
         currency = currency_parser.parse_args()['currency']
         check_inputs(label=label, currency_optional=currency)
@@ -50,7 +50,7 @@ class Categories(Resource):
     @api.marshal_list_with(category_response)
     def get(self):
         """
-        Returns a JSON with the categories
+        Returns the supported entity categories
         """
         return generalDAO.list_categories()
 

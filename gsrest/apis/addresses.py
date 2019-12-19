@@ -1,7 +1,7 @@
 from flask import Response
 from flask_restplus import Namespace, Resource
 
-from gsrest.apis.common import page_size_parser,neighbors_parser, \
+from gsrest.apis.common import page_size_parser, neighbors_parser, \
     address_txs_response, address_tags_response, entity_tags_response, \
     tag_response, neighbors_response
 import gsrest.service.addresses_service as addressesDAO
