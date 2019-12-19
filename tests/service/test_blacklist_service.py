@@ -1,6 +1,5 @@
-from gsrest.service.blacklist_service import save_token, check_blacklist
-
 from gsrest.db.user_db import get_db
+from gsrest.service.blacklist_service import save_token, check_blacklist
 
 
 def test_save_token(app):

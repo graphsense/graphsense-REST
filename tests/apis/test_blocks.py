@@ -1,5 +1,5 @@
-import gsrest.service.blocks_service
 from gsrest.model.blocks import Block, BlockTxs, BlockTxSummary
+import gsrest.service.blocks_service
 from gsrest.util.checks import check_inputs
 
 non_existing_block = 999999

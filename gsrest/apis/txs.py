@@ -1,10 +1,9 @@
 from flask_restplus import Namespace, Resource
 
 from gsrest.apis.common import page_parser, tx_response, tx_list_response
-from gsrest.util.decorator import token_required
-from gsrest.util.checks import check_inputs
 import gsrest.service.txs_service as txsDAO
-
+from gsrest.util.checks import check_inputs
+from gsrest.util.decorator import token_required
 
 api = Namespace('txs',
                 path='/<currency>/txs',

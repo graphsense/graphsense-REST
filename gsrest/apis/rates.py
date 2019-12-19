@@ -1,10 +1,10 @@
 from flask import abort
 from flask_restplus import Namespace, Resource
 
-from gsrest.util.decorator import token_required
 from gsrest.apis.common import height_rates_response
 import gsrest.service.rates_service as ratesDAO
 from gsrest.util.checks import check_inputs
+from gsrest.util.decorator import token_required
 
 api = Namespace('rates',
                 path='/<currency>/rates',

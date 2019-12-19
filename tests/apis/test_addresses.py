@@ -1,11 +1,11 @@
-import gsrest.service.addresses_service
-import gsrest.service.common_service
+from collections import namedtuple
+
 from gsrest.model.addresses import Address, AddressTx
 from gsrest.model.txs import TxSummary
 from gsrest.model.tags import Tag
+import gsrest.service.addresses_service
+import gsrest.service.common_service
 from gsrest.util.checks import check_inputs
-
-from collections import namedtuple
 
 non_existing_address = 'zzzzz'
 non_existing_currency = 'abc'

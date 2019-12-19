@@ -1,7 +1,6 @@
-from gsrest.service.user_service import (create_user, find_user,
-                                         create_user_command)
-
 from gsrest.db.user_db import get_db
+from gsrest.service.user_service import create_user, find_user, \
+    create_user_command
 
 
 def test_create_user(app):

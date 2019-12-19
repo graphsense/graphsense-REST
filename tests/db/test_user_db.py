@@ -1,6 +1,6 @@
 import sqlite3
-
 import pytest
+
 from gsrest.db.user_db import get_db
 
 

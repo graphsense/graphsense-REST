@@ -3,10 +3,10 @@ from flask import Response
 
 from gsrest.apis.common import page_parser, block_response, \
     block_list_response, block_txs_response
-from gsrest.util.decorator import token_required
-from gsrest.util.checks import check_inputs
 import gsrest.service.blocks_service as blocksDAO
+from gsrest.util.checks import check_inputs
 from gsrest.util.csvify import txs_to_csv, create_download_header
+from gsrest.util.decorator import token_required
 
 api = Namespace('blocks',
                 path='/<currency>/blocks',
