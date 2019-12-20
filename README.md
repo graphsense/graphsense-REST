@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.org/graphsense/graphsense-REST.svg?branch=develop)](https://travis-ci.org/graphsense/graphsense-REST)
-[![Coverage Status](https://coveralls.io/repos/github/graphsense/graphsense-REST/badge.svg?branch=develop)](https://coveralls.io/github/graphsense/graphsense-REST?branch=develop)
+[![Build Status](https://travis-ci.org/graphsense/graphsense-REST.svg?branch=master)](https://travis-ci.org/graphsense/graphsense-REST)
+[![Coverage Status](https://coveralls.io/repos/github/graphsense/graphsense-REST/badge.svg?branch=master)](https://coveralls.io/github/graphsense/graphsense-REST?branch=master)
 
 # GraphSense REST Interface
 
@@ -134,10 +134,10 @@ Flask app instance folder, e.g., `instance/config.py`. Example
 
     MAPPING = {
     "tagpacks": "tagpacks",
-    "btc": ["btc_raw", "btc_transformed_20190914"],
-    "bch": ["bch_raw", "bch_transformed_20190930"],
-    "ltc": ["ltc_raw", "ltc_transformed_20190930"],
-    "zec": ["zec_raw", "zec_transformed_20190930"]
+    "btc": ["btc_raw", "btc_transformed"],
+    "bch": ["bch_raw", "bch_transformed"],
+    "ltc": ["ltc_raw", "ltc_transformed"],
+    "zec": ["zec_raw", "zec_transformed"]
 }
 
 The secret key that will be used for signing authentication tokens is read
