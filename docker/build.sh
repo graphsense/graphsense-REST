@@ -1,1 +1,2 @@
-docker build --build-arg rest_user=admin --build-arg rest_passwd=graphsense -t graphsense-rest .
+#!/bin/bash
+docker build -t graphsense-rest --build-arg NUM_WORKERS=3 .
