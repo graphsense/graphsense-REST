@@ -21,7 +21,7 @@ authorizations = {
 
 api = Api(
     title='GraphSense REST API',
-    version='0.4.2-dev',
+    version='0.4.2',
     description='GraphSense REST API',
     authorizations=authorizations,
     security='apikey'
