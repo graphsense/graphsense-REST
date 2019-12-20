@@ -133,12 +133,12 @@ Parameters can be customized by placing a custom configuration file into the
 Flask app instance folder, e.g., `instance/config.py`. Example
 
     MAPPING = {
-    "tagpacks": "tagpacks",
-    "btc": ["btc_raw", "btc_transformed"],
-    "bch": ["bch_raw", "bch_transformed"],
-    "ltc": ["ltc_raw", "ltc_transformed"],
-    "zec": ["zec_raw", "zec_transformed"]
-}
+        "tagpacks": "tagpacks",
+        "btc": ["btc_raw", "btc_transformed"],
+        "bch": ["bch_raw", "bch_transformed"],
+        "ltc": ["ltc_raw", "ltc_transformed"],
+        "zec": ["zec_raw", "zec_transformed"]
+    }
 
 The secret key that will be used for signing authentication tokens is read
 from the environment and should be set before starting the app
