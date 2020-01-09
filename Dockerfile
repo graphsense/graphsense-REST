@@ -1,7 +1,8 @@
 FROM alpine:3.10.3
-LABEL maintainer="rainer.stuetz@ait.ac.at"
+LABEL maintainer="contact@graphsense.info"
 
 ENV FLASK_APP=gsrest
+ENV FLASK_ENV=production
 ARG NUM_WORKERS=3
 ENV NUM_WORKERS=${NUM_WORKERS}
 
