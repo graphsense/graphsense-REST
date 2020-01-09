@@ -86,37 +86,25 @@ def test_address(client, auth, monkeypatch):
         else:
             assert v == TEST_ADDRESSES[address1][k]
 
-    response = client.get('/{}/addresses/{}'.format(non_existing_currency,
-                                                    address1))
+    response = client.get('{}/addresses/{}'.format(non_existing_currency,
+                                                   address1))
     assert response.status_code == 404
     json_data = response.get_json()
     assert 'Unknown currency in config: {}'.format(non_existing_currency) in \
            json_data['message']
 
-    # TODO: finish monkeypatch
-    # response = client.get('btc/addresses/{}?tags=1'.format(address2))
-    # assert response.status_code == 200
-    # json_data = response.get_json()
-    # assert json_data['tags'] == TEST_ADDRESSES_TAGS[address2]
-    # # test presence of keys, not content (already tested above)
-    # for k in TEST_ADDRESSES[address1]:  # address2 is not in TEST_ADDRESSES
-    #     assert json_data[k]
-
 
 def test_address_txs(client, auth, monkeypatch):
 
-    # define a monkeypatch method
-    def mock_get_address_txs(*args):
-        check_inputs(currency=args[0])  # abort if fails
+    def mock_list_address_txs(*args):
+        check_inputs(currency=args[0])
         return None, TEST_ADDRESSES_TXS.get(args[1])
 
-    # apply the monkeypatch method for addresses_service
     monkeypatch.setattr(gsrest.service.addresses_service, "list_address_txs",
-                        mock_get_address_txs)
+                        mock_list_address_txs)
 
     auth.login()
 
-    # request existing address
     response = client.get('btc/addresses/{}/txs'.format(address1))
     assert response.status_code == 200
     json_data = response.get_json()
@@ -130,18 +118,15 @@ def test_address_txs(client, auth, monkeypatch):
 
 def test_address_tags(client, auth, monkeypatch):
 
-    # define a monkeypatch method
     def mock_list_address_tags(*args):
-        check_inputs(currency=args[0])  # abort if fails
+        check_inputs(currency=args[0])
         return TEST_ADDRESSES_TAGS.get(args[1])
 
-    # apply the monkeypatch method for addresses_service
     monkeypatch.setattr(gsrest.service.common_service, "list_address_tags",
                         mock_list_address_tags)
 
     auth.login()
 
-    # request existing address
     response = client.get('btc/addresses/{}/tags'.format(address2))
     assert response.status_code == 200
     json_data = response.get_json()
@@ -149,3 +134,47 @@ def test_address_tags(client, auth, monkeypatch):
     for i in range(len(json_data)):
         for k in TEST_ADDRESSES_TAGS[address2][i]:
             assert json_data[i][k] == TEST_ADDRESSES_TAGS[address2][i][k]
+
+
+def test_address_tags_csv(client, auth, monkeypatch):
+
+    def mock_list_address_tags(*args):
+        check_inputs(currency=args[0])
+        return TEST_ADDRESSES_TAGS.get(args[1])
+
+    monkeypatch.setattr(gsrest.service.common_service, "list_address_tags",
+                        mock_list_address_tags)
+
+    auth.login()
+
+    response = client.get('btc/addresses/{}/tags'.format(address2))
+    assert response.status_code == 200
+    json_data = response.get_json()
+    assert len(json_data) == len(TEST_ADDRESSES_TAGS[address2])
+
+
+# def test_address_neighbors(client, auth, monkeypatch):
+#
+#     def mock_list_address_neighbors(*args):
+#         check_inputs(currency=args[0])
+#         paging_state = None
+#         return paging_state
+#
+#     def mock_list_address_tags(*args):
+#         check_inputs(currency=args[0])
+#         return None
+#
+#     monkeypatch.setattr(gsrest.service.addresses_service,
+#                         "list_address_incoming_relations",
+#                         mock_list_address_neighbors)
+#
+#     monkeypatch.setattr(gsrest.service.addresses_service,
+#                         "list_address_outgoing_relations",
+#                         mock_list_address_neighbors)
+#
+#     monkeypatch.setattr(gsrest.service.common_service,
+#                         "list_address_tags",
+#                         mock_list_address_tags)
+#
+#     auth.login()
+#
