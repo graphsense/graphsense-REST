@@ -1,4 +1,5 @@
 from flask_restplus import Namespace, Resource
+from flask import abort
 
 from gsrest.apis.common import page_parser, tx_response, tx_list_response
 import gsrest.service.txs_service as txsDAO
@@ -22,7 +23,10 @@ class Tx(Resource):
         """
         check_inputs(tx=tx_hash, currency=currency)
         tx = txsDAO.get_tx(currency, tx_hash)
-        return tx
+        if tx:
+            return tx
+        abort(404, "Transaction {} not found in currency {}".format(tx_hash,
+                                                                    currency))
 
 
 @api.route("/")

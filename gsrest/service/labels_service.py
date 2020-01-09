@@ -1,5 +1,3 @@
-from flask import abort
-
 from gsrest.db.cassandra import get_session
 from gsrest.model.tags import Label, Tag
 from gsrest.util.checks import LABEL_PREFIX_LENGTH
@@ -17,7 +15,7 @@ def get_label(label):
     result = session.execute(query, [label_norm_prefix, label_norm])
     if result:
         return Label.from_row(result[0]).to_dict()
-    abort(404, "Label not found")
+    return None
 
 
 def list_tags(label, currency=None):
@@ -34,7 +32,7 @@ def list_tags(label, currency=None):
                     for row in rows if row.currency.lower() == currency]
         return [Tag.from_address_row(row, row.currency).to_dict()
                 for row in rows]
-    abort(404, "Label not found")
+    return None
 
 
 def list_labels(currency, expression):

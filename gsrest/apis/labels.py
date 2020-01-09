@@ -1,4 +1,5 @@
 from flask_restplus import Namespace, Resource
+from flask import abort
 
 from gsrest.apis.common import label_response, tag_response, currency_parser, \
     category_response
@@ -25,7 +26,9 @@ class Label(Resource):
         """
         check_inputs(label=label)
         result = labelsDAO.get_label(label)
-        return result
+        if result:
+            return result
+        abort(404, "Label not found")
 
 
 @api.param('label', 'The label of an entity (e.g., Internet Archive)')
@@ -41,7 +44,9 @@ class LabelTags(Resource):
         currency = currency_parser.parse_args()['currency']
         check_inputs(label=label, currency_optional=currency)
         result = labelsDAO.list_tags(label, currency)
-        return result
+        if result:
+            return result
+        abort(404, "Label not found")
 
 
 @api.route("/categories")

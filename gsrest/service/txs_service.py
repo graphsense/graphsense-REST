@@ -1,5 +1,4 @@
 from cassandra.query import SimpleStatement
-from flask import abort
 
 from gsrest.db.cassandra import get_session
 from gsrest.model.txs import Tx
@@ -20,8 +19,7 @@ def get_tx(currency, tx_hash):
                            get_rates(
                                currency,
                                result[0].height)['rates']).to_dict()
-    abort(404,
-          "Transaction {} not found in currency {}".format(tx_hash, currency))
+    return None
 
 
 def list_txs(currency, paging_state=None):

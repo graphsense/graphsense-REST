@@ -1,4 +1,4 @@
-from flask import Response
+from flask import Response, abort
 from flask_restplus import Namespace, Resource
 
 from gsrest.apis.common import page_size_parser, neighbors_parser, \
@@ -28,9 +28,12 @@ class Address(Resource):
         Returns details and optionally tags of a specific address
         """
         check_inputs(address=address, currency=currency)  # abort if fails
-        addr = commonDAO.get_address(currency, address)  # abort if not found
-        addr['tags'] = commonDAO.list_address_tags(currency, address)
-        return addr
+        addr = commonDAO.get_address(currency, address)
+        if addr:
+            addr['tags'] = commonDAO.list_address_tags(currency, address)
+            return addr
+        abort(404, "Address {} not found in currency {}".format(address,
+                                                                currency))
 
 
 @api.param('currency', 'The cryptocurrency (e.g., btc)')
@@ -50,13 +53,15 @@ class AddressTxs(Resource):
         check_inputs(address=address, currency=currency, page=page,
                      pagesize=pagesize)  # abort if fails
         paging_state = bytes.fromhex(page) if page else None
-        # abort if not found
         paging_state, address_txs = addressesDAO.list_address_txs(currency,
                                                                   address,
                                                                   paging_state,
                                                                   pagesize)
-        return {"next_page": paging_state.hex() if paging_state else None,
-                "address_txs": address_txs}
+        if address_txs:
+            return {"next_page": paging_state.hex() if paging_state else None,
+                    "address_txs": address_txs}
+        abort(404, "Address {} not found in currency {}".format(address,
+                                                                currency))
 
 
 @api.param('currency', 'The cryptocurrency (e.g., btc)')
@@ -119,8 +124,11 @@ class AddressNeighbors(Resource):
             paging_state, relations = addressesDAO\
                 .list_address_outgoing_relations(currency, address,
                                                  paging_state, pagesize)
-        return {"next_page": paging_state.hex() if paging_state else None,
-                "neighbors": relations}
+        if relations is not None:  # None if address not found, else []
+            return {"next_page": paging_state.hex() if paging_state else None,
+                    "neighbors": relations}
+        abort(404, "Address {} not found in currency {}".format(address,
+                                                                currency))
 
 
 @api.param('currency', 'The cryptocurrency (e.g., btc)')
@@ -149,10 +157,14 @@ class AddressNeighborsCSV(Resource):
         while True:
             paging_state, neighbors = query_function(currency, address,
                                                      paging_state, pagesize)
-            for row in flatten_rows(neighbors, columns):
-                data += row
-            if not paging_state:
-                break
+            if neighbors is not None:  # None if address not found, else []
+                for row in flatten_rows(neighbors, columns):
+                    data += row
+                if not paging_state:
+                    break
+            else:
+                abort(404, "Address {} not found in currency {}"
+                      .format(address, currency))
         return Response(data,
                         mimetype="text/csv",
                         headers=create_download_header(
@@ -171,8 +183,10 @@ class AddressEntity(Resource):
         Returns the associated entity for a given address
         """
         check_inputs(address=address, currency=currency)  # abort if fails
-        # abort if not found
         entity = addressesDAO.get_address_entity(currency, address)
-        entity['tags'] = entitiesDAO.list_entity_tags(currency,
-                                                      entity['entity'])
-        return entity
+        if entity:
+            entity['tags'] = entitiesDAO.list_entity_tags(currency,
+                                                          entity['entity'])
+            return entity
+        abort(404, "Address {} not found in currency {}".format(address,
+                                                                currency))

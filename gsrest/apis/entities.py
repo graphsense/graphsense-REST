@@ -28,9 +28,12 @@ class Entity(Resource):
         """
         check_inputs(currency=currency, entity=entity)
         entity_stats = entitiesDAO.get_entity(currency, entity)
-        entity_stats['tags'] = entitiesDAO.\
-            list_entity_tags(currency, entity_stats['entity'])
-        return entity_stats
+        if entity_stats:
+            entity_stats['tags'] = entitiesDAO.\
+                list_entity_tags(currency, entity_stats['entity'])
+            return entity_stats
+        abort(404, "Entity {} not found in currency {}".format(entity,
+                                                               currency))
 
 
 @api.param('currency', 'The cryptocurrency (e.g., btc)')
@@ -123,10 +126,14 @@ class EntityNeighborsCSV(Resource):
         while True:
             paging_state, neighbors = query_function(currency, entity,
                                                      paging_state, pagesize)
-            for row in flatten_rows(neighbors, columns):
-                data += row
-            if not paging_state:
-                break
+            if neighbors is not None:
+                for row in flatten_rows(neighbors, columns):
+                    data += row
+                if not paging_state:
+                    break
+            else:
+                abort(404, "Entity {} not found in currency {}"
+                      .format(entity, currency))
         return Response(data,
                         mimetype="text/csv",
                         headers=create_download_header(
@@ -153,8 +160,11 @@ class EntityAddresses(Resource):
         paging_state = bytes.fromhex(page) if page else None
         paging_state, addresses = entitiesDAO\
             .list_entity_addresses(currency, entity, paging_state, pagesize)
-        return {"next_page": paging_state.hex() if paging_state else None,
-                "addresses": addresses}
+        if addresses:
+            return {"next_page": paging_state.hex() if paging_state else None,
+                    "addresses": addresses}
+        abort(404, "Entity {} not found in currency {}".format(entity,
+                                                               currency))
 
 
 @api.param('currency', 'The cryptocurrency (e.g., btc)')
@@ -182,11 +192,21 @@ class EntitySearchNeighbors(Resource):
         check_inputs(currency=currency, entity=entity, direction=direction,
                      category=category, depth=depth, addresses=addresses)
         if addresses:
-            addresses = [{"address": address,
-                          "entity":
-                              addressesDAO.get_address_entity_id(currency,
-                                                                 address)}
-                         for address in addresses.split(",")]
+            addresses_list = []
+            for address in addresses.split(","):
+                entity = addressesDAO.get_address_entity_id(currency, address)
+                if entity:
+                    addresses_list.append({"address": address,
+                                           "entity": entity})
+                else:
+                    abort(404, "Entity of address {} not found in currency {}"
+                          .format(address, currency))
+            addresses = addresses_list
+        if not [category, addresses].count(None) == 1:
+            abort(400, 'Invalid search arguments: one among category and '
+                       'addresses must be provided')
+        # TODO: why do we get non-empty result when category is missing?
+        # (removing the if above and with addresses=None)
 
         outgoing = True
         if "in" in direction:

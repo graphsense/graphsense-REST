@@ -1,5 +1,4 @@
 from cassandra.query import SimpleStatement
-from flask import abort
 from math import floor
 
 from gsrest.db.cassandra import get_session
@@ -46,8 +45,7 @@ def get_entity(currency, entity_id):
     rates = get_rates(currency)['rates']
     if result:
         return Entity.from_row(result[0], rates).to_dict()
-    abort(404, "Entity {} not found in currency {}"
-          .format(entity_id, currency))
+    return None
 
 
 def list_entity_outgoing_relations(currency, entity_id, paging_state=None,
@@ -119,17 +117,11 @@ def list_entity_addresses(currency, entity_id, paging_state, page_size):
                                                            rates)
                              .to_dict())
         return paging_state, addresses
-    abort(404, "Entity {} not found in currency {}"
-          .format(entity_id, currency))
+    return paging_state, None
 
 
 def list_entity_search_neighbors(currency, entity, category, ids, breadth,
                                  depth, skipNumAddresses, cache, outgoing):
-    if not [category, ids].count(None) == 1:
-        abort(400, 'Invalid search arguments: one among category and '
-                   'addresses must be provided')
-    # TODO: why do we get non-empty result when category is missing?
-    # (removing the if above and with addresses=None)
     if depth <= 0:
         return []
 
