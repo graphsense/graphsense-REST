@@ -30,6 +30,7 @@ RUN apk --no-cache --update add bash python3 py3-gunicorn nginx shadow && \
     chmod -R o+rwx /var/tmp/nginx
 
 COPY conf/nginx.conf /etc/nginx/
+COPY conf/gunicorn-conf.py /home/dockeruser/gunicorn-conf.py
 COPY conf/graphsense-rest.conf /etc/nginx/conf.d/graphsense-rest.conf
 COPY conf/supervisor-app.conf /etc/supervisor/conf.d/
 COPY MANIFEST.in setup.* /srv/graphsense-rest/
