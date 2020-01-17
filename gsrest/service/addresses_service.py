@@ -26,7 +26,7 @@ def get_address_id_id_group(currency, address):
     if address_id:
         id_group = get_id_group(address_id)
         return address_id, id_group
-    return None
+    return None, None
 
 
 def list_address_txs(currency, address, paging_state=None, pagesize=None):
