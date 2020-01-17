@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 
 name = 'gsrest'
-version = '0.4.2'
+version = '0.4.3.dev'
 setup(
     name=name,
     version=version,
