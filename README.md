@@ -140,6 +140,8 @@ Flask app instance folder, e.g., `instance/config.py`. Example
         "zec": ["zec_raw", "zec_transformed"]
     }
 
+If you deploy the API behind a proxy, you can set `USE_PROXY = True`.
+
 The secret key that will be used for signing authentication tokens is read
 from the environment and should be set before starting the app
 

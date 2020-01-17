@@ -19,12 +19,13 @@ def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
     CORS(app, supports_credentials=True)
-    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
     # read the configuration
     if test_config is None:
         # load default config from file
         load_config_from_file(app)
+        if app.config['USE_PROXY']:
+            app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
     else:
         # load the test config if passed in
         app.config.from_mapping(test_config)

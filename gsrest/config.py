@@ -17,6 +17,8 @@ class Config(object):
         "zec": ["zec_raw", "zec_transformed"]
     },
     JWT_ACCESS_TOKEN_EXPIRES_DAYS = 1
+    DUMMY_EXCHANGE_RATES = True
+    USE_PROXY = False
 
     @property
     def DATABASE(self):
