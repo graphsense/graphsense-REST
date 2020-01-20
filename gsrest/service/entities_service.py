@@ -166,8 +166,8 @@ def list_entity_search_neighbors(currency, entity, category, ids, breadth,
 
         if category:
             # find first occurrence of category in tags
-            match = next((True for t in tags
-                          if t["category"].lower() == category.lower()), False)
+            match = next((True for t in tags if t["category"] and
+                          t["category"].lower() == category.lower()), False)
 
         matching_addresses = []
         if match and ids:
