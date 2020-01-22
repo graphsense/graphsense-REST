@@ -1,4 +1,5 @@
 from cassandra.query import SimpleStatement
+from cassandra.concurrent import execute_concurrent
 from math import floor
 
 from gsrest.db.cassandra import get_session
@@ -25,14 +26,30 @@ def list_entity_tags(currency, entity_id):
     entity_group = get_id_group(entity_id)
     query = "SELECT * FROM cluster_tags WHERE cluster_group = %s and cluster" \
             " = %s"
+    concurrent_query = "SELECT * FROM address_by_id_group WHERE " \
+                       "address_id_group = %s and address_id = %s"
+
     results = session.execute(query, [entity_group, entity_id])
-    entity_tags = []
+
+    # concurrent queries
+    statements_and_params = []
     for row in results.current_rows:
         address_id_group = get_id_group(row.address_id)
-        address = get_address_by_id_group(currency, address_id_group,
-                                          row.address_id)
-        entity_tags.append(Tag.from_entity_row(row, address, currency)
-                           .to_dict())
+        params = (address_id_group, row.address_id)
+        statements_and_params.append((concurrent_query, params))
+    addresses = execute_concurrent(session, statements_and_params,
+                                   raise_on_first_error=False)
+    id_address = dict()  # to temporary store the id-address mapping
+    for (success, address) in addresses:
+        if not success:
+            pass
+        else:
+            id_address[address.one().address_id] = address.one().address
+    entity_tags = []
+    for row in results.current_rows:
+        entity_tags.append(Tag.from_entity_row(row, id_address[row.address_id],
+                                               currency).to_dict())
+
     return entity_tags
 
 

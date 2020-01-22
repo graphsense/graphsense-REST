@@ -14,6 +14,8 @@ address2 = '3Aa7BnDG7XeuSZwL7Hzo3p87eiqoaAG3s3'  # txs were easy to fetch
 address3 = '1NDyJtNTjmwk5xPNhjgAMu4HDHigtobu1s'  # binance
 address4 = '1A8pUXyXzqWQzqR6q2djwrXuG4nfici4KY'  # random
 address5 = '1N4RJ9fRGzk1HCWfqZs3jYdSJZprC4D76Y'  # tags error
+address6 = '112AmFATxzhuSpvtz1hfpa3Zrw3BG276pc'  # locky
+address7 = '1NFnCeW8MBpqNJf9pdT7Qk8fpUgYJAZ1bh'  # sextortion talos
 first_tx = TxSummary(577281, 1558549477, bytearray.fromhex(
     '39435696ea53d580f15f85fcae5f084ff9c3ba6b5f1b84d4e1e41d8fceb5d0ba'))
 last_tx = TxSummary(585637, 1563268350, bytearray.fromhex(
