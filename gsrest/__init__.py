@@ -24,7 +24,7 @@ def create_app(test_config=None):
     if test_config is None:
         # load default config from file
         load_config_from_file(app)
-        if app.config['USE_PROXY']:
+        if 'USE_PROXY' in app.config and app.config['USE_PROXY']:
             app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
     else:
         # load the test config if passed in
