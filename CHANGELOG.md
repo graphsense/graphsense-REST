@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 ### Added
+- Updated Docker base image
 - Added gunicorn config file
 - Fix swagger UI behind reverse proxy (ProxyFix from werkzeug), fix #24
 

@@ -1,4 +1,4 @@
-FROM alpine:3.10.3
+FROM alpine:3.11.3
 LABEL maintainer="contact@graphsense.info"
 
 ENV FLASK_APP=gsrest
@@ -26,8 +26,7 @@ RUN apk --no-cache --update add bash python3 py3-gunicorn nginx shadow && \
     apk del build-dependendencies && \
     rm -rf /root/.cache && \
     chmod -R o+rwx /var/log/nginx && \
-    chmod -R o+rwx /var/lib/nginx && \
-    chmod -R o+rwx /var/tmp/nginx
+    chmod -R o+rwx /var/lib/nginx
 
 COPY conf/nginx.conf /etc/nginx/
 COPY conf/gunicorn-conf.py /home/dockeruser/gunicorn-conf.py
