@@ -41,10 +41,12 @@ class Statistics(Resource):
         """
         Returns summary statistics on all available currencies
         """
-        statistics = dict()
+        currencies_stats = dict()
         for currency in current_app.config['MAPPING']:
             if currency != "tagpacks":
-                statistics[currency] = generalDAO.get_statistics(currency)
+                currencies_stats[currency] = generalDAO.get_statistics(currency)
+        statistics = dict()
+        statistics['currencies'] = currencies_stats
         statistics['tools'] = tools
         statistics['notes'] = notes
         statistics['data_sources'] = [tags_source]
