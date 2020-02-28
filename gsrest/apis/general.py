@@ -13,6 +13,26 @@ api = Namespace('general',
                 path='/',
                 description='General operations like stats and search')
 
+version = '0.4.3.dev'
+tools = [{'visible_name': 'GraphSense', 'id': 'ait:graphsense',
+          'version': version, 'titanium_replayable': True,
+          'responsible_for': []}]
+tags_source = {'visible_name': 'GraphSense attribution tags',
+               'id': 'graphsense_tags', 'version': version}
+notes = [{'note': 'Please **note** that the clustering dataset is built with'
+                  ' multi input address clustering to avoid false clustering '
+                  'results due to coinjoins (see titanium glossary '
+                  'http://titanium-project.eu/glossary/#coinjoin), we exclude'
+                  ' coinjoins prior to clustering. This does not eliminate '
+                  'the risk of false results, since coinjoin detection is also'
+                  ' heuristic in nature, but it should decrease the potential '
+                  'for wrong cluster merges.'},
+         {'note': 'Our tags are all manually crawled or from credible sources,'
+                  ' we do not use tags that where automatically extracted '
+                  'without human interaction. Origins of the tags have been '
+                  'saved for reproducibility please contact the GraphSense '
+                  'team for more insight.'}]
+
 
 # TODO: is a response model needed here?
 @api.route("/stats")
@@ -25,6 +45,9 @@ class Statistics(Resource):
         for currency in current_app.config['MAPPING']:
             if currency != "tagpacks":
                 statistics[currency] = generalDAO.get_statistics(currency)
+        statistics['tools'] = tools
+        statistics['notes'] = notes
+        statistics['data_sources'] = [tags_source]
         return statistics
 
 
