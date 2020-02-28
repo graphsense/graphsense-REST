@@ -7,7 +7,7 @@ def get_statistics(currency):
     query = "SELECT * FROM summary_statistics LIMIT 1"
     result = session.execute(query)
     if result:
-        return Statistics.from_row(result[0]).to_dict()
+        return Statistics.from_row(result[0], currency).to_dict()
     return None
 
 

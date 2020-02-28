@@ -2,7 +2,7 @@ class Statistics(object):
     """ Model representing summary statistics of a cryptocurrency """
 
     def __init__(self, no_blocks, no_address_relations, no_addresses,
-                 no_clusters, no_txs, no_tags, timestamp):
+                 no_clusters, no_txs, no_tags, timestamp, currency):
         version = '0.4.3.dev'
         self.no_blocks = no_blocks
         self.no_address_relations = no_address_relations
@@ -16,11 +16,11 @@ class Statistics(object):
                        'version': version,
                        'titanium_replayable': True,
                        'responsible_for': []}]
-        self.data_sources = [{'visible_name': 'Bitcoin Blockchain',
-                              'id': 'bitcoin_ledger',
+        self.data_sources = [{'visible_name': currency.upper() + ' Blockchain',
+                              'id': currency + '_ledger',
                               'version': {'blocks': no_blocks,
                                           'timestamp': timestamp},
-                              'report_uuid': 'btc_ledger'
+                              'report_uuid': currency + '_ledger'
                               },
                              {'visible_name': 'GraphSense attribution tags',
                               'id': 'graphsense_tags',
@@ -45,10 +45,11 @@ class Statistics(object):
                                'more insight.'}]
 
     @staticmethod
-    def from_row(row):
+    def from_row(row, currency):
         return Statistics(row.no_blocks, row.no_address_relations,
                           row.no_addresses, row.no_clusters,
-                          row.no_transactions, row.no_tags, row.timestamp)
+                          row.no_transactions, row.no_tags, row.timestamp,
+                          currency)
 
     def to_dict(self):
         return self.__dict__
