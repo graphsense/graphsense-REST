@@ -13,12 +13,21 @@ api = Namespace('general',
                 path='/',
                 description='General operations like stats and search')
 
-version = '0.4.3.dev'
+version_number = '0.4.3.dev'
+version = {'type': 'object',
+           'additional_properties': False,
+           'properties': {
+               'nr': version_number,
+               'hash': None,
+               'timestamp': None,
+               'file': None
+           }}
 tools = [{'visible_name': 'GraphSense', 'id': 'ait:graphsense',
           'version': version, 'titanium_replayable': True,
           'responsible_for': []}]
 tags_source = {'visible_name': 'GraphSense attribution tags',
-               'id': 'graphsense_tags', 'version': version}
+               'id': 'graphsense_tags', 'version': version,
+               'report_uuid': 'graphsense_tags'}
 notes = [{'note': 'Please **note** that the clustering dataset is built with'
                   ' multi input address clustering to avoid false clustering '
                   'results due to coinjoins (see titanium glossary '
@@ -41,12 +50,12 @@ class Statistics(Resource):
         """
         Returns summary statistics on all available currencies
         """
-        currencies_stats = dict()
+        currency_stats = dict()
         for currency in current_app.config['MAPPING']:
             if currency != "tagpacks":
-                currencies_stats[currency] = generalDAO.get_statistics(currency)
+                currency_stats[currency] = generalDAO.get_statistics(currency)
         statistics = dict()
-        statistics['currencies'] = currencies_stats
+        statistics['currencies'] = currency_stats
         statistics['tools'] = tools
         statistics['notes'] = notes
         statistics['data_sources'] = [tags_source]
