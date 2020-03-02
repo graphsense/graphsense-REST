@@ -13,8 +13,8 @@ class Statistics(object):
         self.tools = []
         self.data_sources = [{'visible_name': currency.upper() + ' Blockchain',
                               'id': currency + '_ledger',
-                              'version': {'nr': no_blocks,
-                                          'timestamp': timestamp},
+                              'version': {'nr': str(no_blocks),
+                                          'timestamp': str(timestamp)},
                               'report_uuid': currency + '_ledger'
                               }]
         self.notes = []
