@@ -8,15 +8,16 @@ import gsrest.service.labels_service as labelsDAO
 import gsrest.service.txs_service as txsDAO
 from gsrest.util.checks import check_inputs
 from gsrest.util.decorator import token_required
+from time import time
 
 api = Namespace('general',
                 path='/',
                 description='General operations like stats and search')
 
 version_number = '0.4.3.dev'
-version = {'nr': None,
+version = {'nr': version_number,
            'hash': None,
-           'timestamp': None,
+           'timestamp': str(int(time())),
            'file': version_number
            }
 tools = [{'visible_name': 'GraphSense', 'id': 'ait:graphsense',
