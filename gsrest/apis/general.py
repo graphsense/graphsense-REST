@@ -14,16 +14,13 @@ api = Namespace('general',
                 description='General operations like stats and search')
 
 version_number = '0.4.3.dev'
-version = {'type': 'object',
-           'additional_properties': False,
-           'properties': {
-               'nr': version_number,
-               'hash': None,
-               'timestamp': None,
-               'file': None
-           }}
+version = {'nr': None,
+           'hash': None,
+           'timestamp': None,
+           'file': version_number
+           }
 tools = [{'visible_name': 'GraphSense', 'id': 'ait:graphsense',
-          'version': version, 'titanium_replayable': True,
+          'version': version_number, 'titanium_replayable': True,
           'responsible_for': []}]
 tags_source = {'visible_name': 'GraphSense attribution tags',
                'id': 'graphsense_tags', 'version': version,
