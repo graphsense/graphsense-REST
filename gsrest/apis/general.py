@@ -115,7 +115,9 @@ class Search(Resource):
 
         result['labels'] = []
         if can_be_label:
-            result['labels'] = labelsDAO.list_labels(args['currency'],
-                                                     expression)[:limit]
+            for currency in currencies:
+                labels = labelsDAO.list_labels(currency, expression)[:limit]
+                if labels:
+                    result['labels'] += labels
 
         return result

@@ -54,6 +54,7 @@ TEST_ADDRESSES_TAGS = {
         "graphsense-tagpacks-private/tree/master/packs/shapeshift.yaml",
         "https://arxiv.org/abs/1810.12786",
         1565128800,
+        True,
         'btc',
     ).to_dict()]
 }

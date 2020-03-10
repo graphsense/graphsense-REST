@@ -85,6 +85,7 @@ tag_model = {
     "tagpack_uri": fields.String(required=True, description="Tagpack URI"),
     "currency": fields.String(required=True, description="Currency"),
     "lastmod": fields.Integer(required=True, description="Last modified"),
+    "active": fields.Boolean(required=True, description="Active address"),
     "category": fields.String(required=False, description="Category"),
     "abuse": fields.String(required=False, description="Abuse")
 }
@@ -209,6 +210,7 @@ entity_tags_response = api.model("entity_tags_response", entity_tags_model)
 neighbor_model = {
     "id": fields.String(required=True, description="Node Id"),
     "node_type": fields.String(required=True, description="Node type"),
+    "labels": fields.List(fields.String, required=True, description="Labels"),
     "balance": fields.Nested(value_response, required=True,
                              description="Balance"),
     "received": fields.Nested(value_response, required=True,

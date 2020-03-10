@@ -30,7 +30,7 @@ def list_address_tags(currency, address):
 
     query = "SELECT * FROM address_tags WHERE address = %s"
     results = session.execute(query, [address])
-    address_tags = [Tag.from_address_row(row, currency).to_dict()
+    address_tags = [Tag.from_address_row(row, currency, True).to_dict()
                     for row in results.current_rows]
 
     return address_tags
