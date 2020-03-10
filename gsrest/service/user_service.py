@@ -20,9 +20,9 @@ def create_user(username, password):
         db.execute('INSERT INTO user (username, password) VALUES (?, ?)',
                    (user.username, user.password_hash))
         db.commit()
-        current_app.logger.info('Created user %s', username)
+        current_app.logger.info('Created user {}'.format(username))
     except IntegrityError:
-        print('Error: Username already exists')
+        current_app.logger.error('Error: Username already exists')
 
 
 def find_user(username):
@@ -49,4 +49,3 @@ def find_user(username):
 def create_user_command(username, password):
     """Clear the existing data and create new tables."""
     create_user(username, password)
-    click.echo('Created user {}'.format(username))

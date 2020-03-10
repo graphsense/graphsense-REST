@@ -1,0 +1,18 @@
+# This file contains instance specific configuration options.
+
+# Replace Cassandra hostnames and keyspaces and copy the file
+# to ./instance/config.py
+
+CASSANDRA_NODES = ["CASSANDRA_HOST_1", "CASSANDRA_HOST_2"]
+
+MAPPING = {
+    "tagpacks": "TAGPACK_KEYSPACE",
+    "btc": ["BTC_RAW_KEYSPACE", "BTC_TRANSFORMED_KEYSPACE"],
+    "bch": ["BCH_RAW_KEYSPACE", "BCH_TRANSFORMED_KEYSPACE"],
+    "ltc": ["LTC_RAW_KEYSPACE", "LTC_TRANSFORMED_KEYSPACE"],
+    "zec": ["ZEC_RAW_KEYSPACE", "ZEC_TRANSFORMED_KEYSPACE"]
+}
+
+DUMMY_EXCHANGE_RATES = True
+
+USE_PROXY = True

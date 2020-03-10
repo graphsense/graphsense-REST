@@ -23,6 +23,5 @@ def test_init_db_command(runner, monkeypatch):
         Recorder.called = True
 
     monkeypatch.setattr('gsrest.db.user_db.init_db', fake_init_db)
-    result = runner.invoke(args=['init-db'])
-    assert 'Initialized' in result.output
+    runner.invoke(args=['init-db'])
     assert Recorder.called

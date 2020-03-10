@@ -36,6 +36,13 @@ for further details.
 
 ## Development (without Docker)
 
+Create an instance folder and copy the configuration file template
+
+    mkdir -p instance
+    cp conf/config.py.tmp instance/config.py
+
+Open `instance/config.py` and enter Cassandra connection configuration
+
 Init the user database
 
     flask init-db
@@ -130,15 +137,7 @@ Logging out will blacklist the JWT
 Default configuration parameters are read from `app/config.py` during startup.
 
 Parameters can be customized by placing a custom configuration file into the
-Flask app instance folder, e.g., `instance/config.py`. Example
-
-    MAPPING = {
-        "tagpacks": "tagpacks",
-        "btc": ["btc_raw", "btc_transformed"],
-        "bch": ["bch_raw", "bch_transformed"],
-        "ltc": ["ltc_raw", "ltc_transformed"],
-        "zec": ["zec_raw", "zec_transformed"]
-    }
+Flask app instance folder, e.g., `instance/config.py`. A configuration template file is provided in `conf/config.py.tmp`.
 
 If you deploy the API behind a proxy, you can set `USE_PROXY = True`.
 

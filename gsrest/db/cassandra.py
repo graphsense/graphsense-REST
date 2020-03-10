@@ -65,8 +65,7 @@ def get_session(currency, keyspace_type):
 
 
 def close_db(e=None):
-    current_app.logger.info("Closing cassandra connection.")
-    cluster = g.pop('ccluster', None)
-
-    if cluster is not None:
+    if 'ccluster' in g:
+        cluster = g.pop('ccluster', None)
         cluster.shutdown()
+        current_app.logger.info("Closed cassandra cluster connection.")

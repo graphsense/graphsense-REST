@@ -4,10 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+
 ### Added
 - Updated Docker base image
 - Added gunicorn config file
-- Fix swagger UI behind reverse proxy (ProxyFix from werkzeug), fix #24
+- Fix swagger UI behind reverse proxy (ProxyFix from werkzeug), fix \#24
+
+### Changed
+- improved and documented handling of config files
+- harmonized logging in user db (now via app_context logger)
+
 
 ## [0.4.2] - 2019-12-20
 ### Added
