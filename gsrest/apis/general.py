@@ -21,7 +21,7 @@ version = {'nr': version_number,
            'file': version_number
            }
 tools = [{'visible_name': 'GraphSense', 'id': 'ait:graphsense',
-          'version': version_number, 'titanium_replayable': True,
+          'version': version_number, 'titanium_replayable': False,
           'responsible_for': []}]
 tags_source = {'visible_name': 'GraphSense attribution tags',
                'id': 'graphsense_tags', 'version': version,
