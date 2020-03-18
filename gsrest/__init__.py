@@ -11,7 +11,6 @@ def create_app(test_config=None):
 
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
-    CORS(app, supports_credentials=True)
 
     # read production config, when not testing
     if test_config is None:
@@ -29,6 +28,15 @@ def create_app(test_config=None):
     else:
         # load the test config if passed in
         app.config.from_mapping(test_config)
+
+    CORS(app, supports_credentials=True, \
+            origins=app.config['ALLOWED_ORIGINS'] if 'ALLOWED_ORIGINS' in app.config else '*')
+
+    # ensure the instance folder exists
+    try:
+        os.makedirs(app.instance_path)
+    except OSError:
+        pass
 
     # register user database
     from gsrest.db import user_db
