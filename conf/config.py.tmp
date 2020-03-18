@@ -16,3 +16,12 @@ MAPPING = {
 DUMMY_EXCHANGE_RATES = True
 
 USE_PROXY = True
+
+# Restrict allowed origins for CORS
+#
+# The origin, or list of origins to allow requests from. The origin(s) may be regular expressions, case-sensitive strings, or else an asterisk
+# (see https://flask-cors.readthedocs.io/en/latest/api.html for further details)
+#
+# Default : ‘*’ 
+# ALLOWED_ORIGINS = ['https://example.com']
+
