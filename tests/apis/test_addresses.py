@@ -51,7 +51,7 @@ TEST_ADDRESSES_TAGS = {
         "Other",
         None,
         "https://git-service.ait.ac.at/dil-graphsense/"
-        "graphsense-tagpacks-private/tree/master/shapeshift.yaml",
+        "graphsense-tagpacks-private/tree/master/packs/shapeshift.yaml",
         "https://arxiv.org/abs/1810.12786",
         1565128800,
         'btc',
