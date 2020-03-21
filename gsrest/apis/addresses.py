@@ -113,8 +113,8 @@ class AddressNeighbors(Resource):
         direction = args.get("direction")
         page = args.get("page")
         pagesize = args.get("pagesize")
-        check_inputs(address=address, currency=currency, direction=direction,
-                     page=page, pagesize=pagesize)
+        check_inputs(address=address, currency=currency, page=page,
+                     pagesize=pagesize)
         paging_state = bytes.fromhex(page) if page else None
         if "in" in direction:
             paging_state, relations = addressesDAO\
@@ -146,8 +146,8 @@ class AddressNeighborsCSV(Resource):
         page = args.get("page")
         pagesize = args.get("pagesize")
         paging_state = bytes.fromhex(page) if page else None
-        check_inputs(address=address, currency=currency, direction=direction,
-                     page=page, pagesize=pagesize)
+        check_inputs(address=address, currency=currency, page=page,
+                     pagesize=pagesize)
         if "in" in direction:
             query_function = addressesDAO.list_address_incoming_relations
         else:

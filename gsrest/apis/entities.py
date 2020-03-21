@@ -85,8 +85,7 @@ class EntityNeighbors(Resource):
         direction = args.get("direction")
         page = args.get("page")
         pagesize = args.get("pagesize")
-        check_inputs(currency=currency, direction=direction, page=page,
-                     pagesize=pagesize)
+        check_inputs(currency=currency, page=page, pagesize=pagesize)
         paging_state = bytes.fromhex(page) if page else None
         if "in" in direction:
             paging_state, relations = entitiesDAO\
@@ -118,8 +117,7 @@ class EntityNeighborsCSV(Resource):
         query_function = entitiesDAO.list_entity_outgoing_relations
         if "in" in direction:
             query_function = entitiesDAO.list_entity_incoming_relations
-        check_inputs(currency=currency, entity=entity, direction=direction,
-                     page=page)
+        check_inputs(currency=currency, entity=entity, page=page)
         paging_state = bytes.fromhex(page) if page else None
         columns = []
         data = ''
@@ -189,8 +187,8 @@ class EntitySearchNeighbors(Resource):
         if not [category, addresses].count(None) == 1:
             abort(400, 'Invalid search arguments: one among category and '
                        'addresses must be provided')
-        check_inputs(currency=currency, entity=entity, direction=direction,
-                     category=category, depth=depth, addresses=addresses)
+        check_inputs(currency=currency, entity=entity, category=category,
+                     depth=depth, addresses=addresses)
         if addresses:
             addresses_list = []
             for address in addresses.split(","):

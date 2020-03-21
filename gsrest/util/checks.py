@@ -23,8 +23,6 @@ def check_inputs(**kwargs):
                 return value
             except ValueError:
                 abort(400, 'Invalid {}'.format(key))
-        if key in ['direction'] and value not in ['in', 'out']:
-            abort(400, 'Invalid {}, it has to be either in or out'.format(key))
         if key in ['currency_optional']:
             if value and value not in current_app.config['MAPPING']:
                 abort(404, 'Unknown currency in config: {}'.format(value))
