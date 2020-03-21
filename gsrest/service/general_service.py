@@ -16,3 +16,10 @@ def list_categories():
     query = session.prepare("SELECT * FROM categories")
     rows = session.execute(query)
     return [Category.from_row(row).to_dict() for row in rows]
+
+
+def list_abuses():
+    session = get_session(currency=None, keyspace_type='tagpacks')
+    query = session.prepare("SELECT * FROM abuses")
+    rows = session.execute(query)
+    return [Abuse.from_row(row).to_dict() for row in rows]

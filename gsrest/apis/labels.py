@@ -2,7 +2,7 @@ from flask_restplus import Namespace, Resource
 from flask import abort, current_app
 
 from gsrest.apis.common import label_response, tag_response, currency_parser, \
-    category_response
+    category_response, abuse_response
 import gsrest.service.general_service as generalDAO
 import gsrest.service.labels_service as labelsDAO
 from gsrest.util.checks import check_inputs
@@ -77,5 +77,16 @@ class Categories(Resource):
         Returns the supported entity categories
         """
         return generalDAO.list_categories()
+
+
+@api.route("/abuses")
+class Abuses(Resource):
+    @token_required
+    @api.marshal_list_with(abuse_response)
+    def get(self):
+        """
+        Returns the supported entity abuses
+        """
+        return generalDAO.list_abuses()
 
 # TODO: add call: from category to list of labels and #addresses

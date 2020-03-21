@@ -43,3 +43,18 @@ class Category(object):
 
     def to_dict(self):
         return self.__dict__
+
+
+class Abuse(object):
+    """ Model representing the abuse of an entity """
+
+    def __init__(self, abuse, id):
+        self.abuse = abuse
+        self.id = id
+
+    @staticmethod
+    def from_row(row):
+        return Abuse(row.abuse, row.id)
+
+    def to_dict(self):
+        return self.__dict__
