@@ -289,6 +289,12 @@ category_model = {
 }
 category_response = api.model("category_response", category_model)
 
+abuse_model = {
+    "abuse": fields.String(required=True, description="Abuse"),
+    "id": fields.Integer(required=True, description="Id")
+}
+abuse_response = api.model("abuse_response", abuse_model)
+
 
 def search_neighbors_recursive(depth=7):
     mapping = {
