@@ -1,5 +1,5 @@
 from gsrest.db.cassandra import get_session
-from gsrest.model.general import Statistics, Category
+from gsrest.model.general import Statistics, Category, Abuse
 
 
 def get_statistics(currency):
