@@ -9,8 +9,8 @@ import gsrest.service.txs_service as txsDAO
 from gsrest.util.checks import check_inputs
 from gsrest.util.decorator import token_required
 
-from time import time
-from datetime import datetime, timezone
+import time
+
 
 api = Namespace('general',
                 path='/',
@@ -19,11 +19,8 @@ api = Namespace('general',
 version_number = '0.4.3.dev'
 version = {'nr': version_number,
            'hash': None,
-           'timestamp': str(datetime.fromtimestamp(int(time()),
-                                                   tz=timezone.utc)
-                            .isoformat()),
-           'file': version_number
-           }
+           'timestamp': time.strftime("%d-%m-%Y %H:%M:%S", time.gmtime()),
+           'file': version_number}
 tools = [{'visible_name': 'GraphSense', 'id': 'ait:graphsense',
           'version': version_number, 'titanium_replayable': False,
           'responsible_for': []}]
