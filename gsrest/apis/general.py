@@ -19,7 +19,7 @@ api = Namespace('general',
 version_number = '0.4.3.dev'
 version = {'nr': version_number,
            'hash': None,
-           'timestamp': time.strftime("%d-%m-%Y %H:%M:%S", time.gmtime()),
+           'timestamp': time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()),
            'file': version_number}
 tools = [{'visible_name': 'GraphSense', 'id': 'ait:graphsense',
           'version': version_number, 'titanium_replayable': False,
