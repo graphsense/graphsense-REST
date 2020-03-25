@@ -1,4 +1,4 @@
-import time
+from datetime import datetime
 
 
 class Statistics(object):
@@ -9,8 +9,8 @@ class Statistics(object):
         ledger = {'visible_name': currency.upper() + ' Blockchain',
                   'id': currency + '_ledger',
                   'version': {'nr': str(no_blocks),
-                              'timestamp': time.strftime("%Y-%m-%d %H:%M:%S",
-                                                         time.gmtime())},
+                              'timestamp': datetime.utcfromtimestamp(timestamp)
+                              .strftime("%Y-%m-%d %H:%M:%S")},
                   'report_uuid': currency + '_ledger'}
         self.no_blocks = no_blocks
         self.no_address_relations = no_address_relations
