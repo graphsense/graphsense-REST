@@ -1,8 +1,17 @@
+import time
+
+
 class Statistics(object):
     """ Model representing summary statistics of a cryptocurrency """
 
     def __init__(self, no_blocks, no_address_relations, no_addresses,
                  no_clusters, no_txs, no_tags, timestamp, currency):
+        ledger = {'visible_name': currency.upper() + ' Blockchain',
+                  'id': currency + '_ledger',
+                  'version': {'nr': str(no_blocks),
+                              'timestamp': time.strftime("%Y-%m-%d %H:%M:%S",
+                                                         time.gmtime())},
+                  'report_uuid': currency + '_ledger'}
         self.no_blocks = no_blocks
         self.no_address_relations = no_address_relations
         self.no_addresses = no_addresses
@@ -11,12 +20,7 @@ class Statistics(object):
         self.no_labels = no_tags
         self.timestamp = timestamp
         self.tools = []
-        self.data_sources = [{'visible_name': currency.upper() + ' Blockchain',
-                              'id': currency + '_ledger',
-                              'version': {'nr': str(no_blocks),
-                                          'timestamp': str(timestamp)},
-                              'report_uuid': currency + '_ledger'
-                              }]
+        self.data_sources = [ledger]
         self.notes = []
 
     @staticmethod
