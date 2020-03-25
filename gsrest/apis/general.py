@@ -8,7 +8,9 @@ import gsrest.service.labels_service as labelsDAO
 import gsrest.service.txs_service as txsDAO
 from gsrest.util.checks import check_inputs
 from gsrest.util.decorator import token_required
+
 from time import time
+from datetime import datetime, timezone
 
 api = Namespace('general',
                 path='/',
@@ -17,7 +19,9 @@ api = Namespace('general',
 version_number = '0.4.3.dev'
 version = {'nr': version_number,
            'hash': None,
-           'timestamp': str(int(time())),
+           'timestamp': str(datetime.fromtimestamp(int(time()),
+                                                   tz=timezone.utc)
+                            .isoformat()),
            'file': version_number
            }
 tools = [{'visible_name': 'GraphSense', 'id': 'ait:graphsense',
@@ -28,7 +32,7 @@ tags_source = {'visible_name': 'GraphSense attribution tags',
                'report_uuid': 'graphsense_tags'}
 notes = [{'note': 'Please **note** that the clustering dataset is built with'
                   ' multi input address clustering to avoid false clustering '
-                  'results due to coinjoins (see titanium glossary '
+                  'results due to coinjoins (see TITANIUM glossary '
                   'http://titanium-project.eu/glossary/#coinjoin), we exclude'
                   ' coinjoins prior to clustering. This does not eliminate '
                   'the risk of false results, since coinjoin detection is also'
@@ -38,7 +42,7 @@ notes = [{'note': 'Please **note** that the clustering dataset is built with'
                   ' we do not use tags that where automatically extracted '
                   'without human interaction. Origins of the tags have been '
                   'saved for reproducibility please contact the GraphSense '
-                  'team for more insight.'}]
+                  'team (contact@graphsense.info) for more insight.'}]
 
 
 # TODO: is a response model needed here?
