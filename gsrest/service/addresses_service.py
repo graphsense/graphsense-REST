@@ -23,7 +23,7 @@ def get_address_id(currency, address):
 
 def get_address_id_id_group(currency, address):
     address_id = get_address_id(currency, address)
-    if address_id:
+    if isinstance(address_id, int):
         id_group = get_id_group(address_id)
         return address_id, id_group
     return None, None
@@ -126,7 +126,7 @@ def get_address_entity_id(currency, address):
     # from address to entity id only
     session = get_session(currency, 'transformed')
     address_id, address_id_group = get_address_id_id_group(currency, address)
-    if address_id:
+    if isinstance(address_id, int):
         query = "SELECT cluster FROM address_cluster WHERE " \
                 "address_id_group = %s AND address_id = %s "
         result = session.execute(query, [address_id_group, address_id])
