@@ -37,7 +37,7 @@ class Entity(object):
 
 
 class EntityIncomingRelations(object):
-    def __init__(self, estimated_value, no_txs, src_properties, rate,
+    def __init__(self, estimated_value, no_txs, tx_list, src_properties, rate,
                  src_cluster, dst_cluster, labels, from_search=False):
         self.id = src_cluster
         self.node_type = 'entity'
@@ -47,6 +47,9 @@ class EntityIncomingRelations(object):
                                        src_properties.total_received.value,
                                        rate)
         self.no_txs = no_txs
+        self.tx_list = None
+        if tx_list:
+            self.tx_list = [tx_hash.hex() for tx_hash in tx_list]
         self.estimated_value = Values(**estimated_value._asdict()).to_dict()
         self.labels = labels
         if from_search:
@@ -56,7 +59,7 @@ class EntityIncomingRelations(object):
     @staticmethod
     def from_row(row, rates, from_search=False):
         return EntityIncomingRelations(row.value, row.no_transactions,
-                                       row.src_properties, rates,
+                                       row.tx_list, row.src_properties, rates,
                                        row.src_cluster, row.dst_cluster,
                                        row.src_labels, from_search)
 
@@ -65,7 +68,7 @@ class EntityIncomingRelations(object):
 
 
 class EntityOutgoingRelations(object):
-    def __init__(self, estimated_value, no_txs, dst_properties, rates,
+    def __init__(self, estimated_value, no_txs, tx_list, dst_properties, rates,
                  dst_cluster, src_cluster, labels, from_search=False):
         self.id = dst_cluster
         self.node_type = 'entity'
@@ -75,6 +78,9 @@ class EntityOutgoingRelations(object):
                                        dst_properties.total_received.value,
                                        rates)
         self.no_txs = no_txs
+        self.tx_list = None
+        if tx_list:
+            self.tx_list = [tx_hash.hex() for tx_hash in tx_list]
         self.estimated_value = Values(**estimated_value._asdict()).to_dict()
         self.labels = labels
         if from_search:
@@ -84,7 +90,7 @@ class EntityOutgoingRelations(object):
     @staticmethod
     def from_row(row, rates, from_search=False):
         return EntityOutgoingRelations(row.value, row.no_transactions,
-                                       row.dst_properties, rates,
+                                       row.tx_list, row.dst_properties, rates,
                                        row.dst_cluster, row.src_cluster,
                                        row.dst_labels, from_search)
 

@@ -222,6 +222,8 @@ neighbor_model = {
                               description="Received amount"),
     "no_txs": fields.Integer(required=True,
                              description="Number of transactions"),
+    "tx_list": fields.List(fields.String,
+                           description="List of transactions"),
     "estimated_value": fields.Nested(value_response, required=True)
 }
 neighbor_response = api.model("neighbor_response", neighbor_model)
