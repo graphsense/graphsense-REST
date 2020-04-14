@@ -3,7 +3,7 @@ from flask_restplus import Namespace, Resource
 
 from gsrest.apis.common import page_size_parser, neighbors_parser, \
     address_txs_response, address_tags_response, entity_tags_response, \
-    tag_response, neighbors_response
+    tag_response, neighbors_response, links_parser, links_response
 import gsrest.service.addresses_service as addressesDAO
 import gsrest.service.common_service as commonDAO
 import gsrest.service.entities_service as entitiesDAO
@@ -190,3 +190,21 @@ class AddressEntity(Resource):
             return entity
         abort(404, "Address {} not found in currency {}".format(address,
                                                                 currency))
+
+
+@api.param('currency', 'The cryptocurrency (e.g., btc)')
+@api.param('address', 'The cryptocurrency address')
+@api.route("/<address>/links")
+class AddressLinks(Resource):
+    @token_required
+    @api.doc(parser=links_parser)
+    @api.marshal_with(links_response)
+    def get(self, currency, address):
+        """
+        Returns an addresses' neighbors in the address graph
+        """
+        args = links_parser.parse_args()
+        neighbor = args.get("neighbor")
+        check_inputs(address=address, currency=currency, neighbor=neighbor)
+        links = addressesDAO.list_addresses_links(currency, address, neighbor)
+        return {'links': links}

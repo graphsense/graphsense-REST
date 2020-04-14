@@ -42,6 +42,9 @@ neighbors_parser.add_argument("direction", required=True, location="args",
                               choices=('in', 'out'),
                               help="Incoming or outgoing neighbors")
 
+links_parser = api.parser()
+links_parser.add_argument("neighbor", required=True, location="args",
+                          help="Outgoing neighbor receiving funds")
 
 search_neighbors_parser = api.parser()
 search_neighbors_parser.add_argument("direction", location="args")
@@ -222,8 +225,6 @@ neighbor_model = {
                               description="Received amount"),
     "no_txs": fields.Integer(required=True,
                              description="Number of transactions"),
-    "tx_list": fields.List(fields.String,
-                           description="List of transactions"),
     "estimated_value": fields.Nested(value_response, required=True)
 }
 neighbor_response = api.model("neighbor_response", neighbor_model)
@@ -234,6 +235,21 @@ neighbors_model = {
                              description="The list of neighbors")
 }
 neighbors_response = api.model("neighbors_response", neighbors_model)
+
+link_model = {
+    "tx_hash": fields.String(required=True, description="Transaction hash"),
+    "height": fields.String(required=True, description="Block height"),
+    "input_value": fields.Nested(value_response, required=True),
+    "output_value": fields.Nested(value_response, required=True)
+}
+link_response = api.model("link_response", link_model)
+
+links_model = {
+    "links": fields.List(fields.Nested(link_response), required=True,
+                         description="A limited list of transactions between "
+                                     "two addresses")
+}
+links_response = api.model("links_response", links_model)
 
 entity_address_model = address_model.copy()
 entity_address_model['entity'] = fields.Integer(required=True,

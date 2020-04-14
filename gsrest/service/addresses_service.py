@@ -1,8 +1,8 @@
-from cassandra.query import SimpleStatement
+from cassandra.query import SimpleStatement, ValueSequence
 
 from gsrest.db.cassandra import get_session
 from gsrest.model.addresses import AddressTx, \
-    AddressOutgoingRelations, AddressIncomingRelations
+    AddressOutgoingRelations, AddressIncomingRelations, Link
 from gsrest.service.entities_service import get_entity, get_id_group
 from gsrest.service.common_service import get_address_by_id_group, \
     ADDRESS_PREFIX_LENGTH
@@ -114,6 +114,45 @@ def list_address_incoming_relations(currency, address, paging_state=None,
                              .to_dict())
         return paging_state, relations
     return None, None
+
+
+def list_addresses_links(currency, address, neighbor):
+    session = get_session(currency, 'transformed')
+
+    address_id, address_id_group = get_address_id_id_group(currency, address)
+    neighbor_id, neighbor_id_group = get_address_id_id_group(currency,
+                                                             neighbor)
+    if address_id and neighbor_id:
+        query = "SELECT tx_list FROM address_outgoing_relations WHERE " \
+                "src_address_id_group = %s AND src_address_id = %s AND " \
+                "dst_address_id = %s"
+        results = session.execute(query, [address_id_group, address_id,
+                                          neighbor_id])
+        if results.current_rows:
+            txs = [tx_hash for tx_hash in
+                   results.current_rows[0].tx_list]
+            query = "SELECT * FROM address_transactions WHERE " \
+                    "address_id_group = %s AND address_id = %s AND " \
+                    "tx_hash IN %s"
+            results1 = session.execute(query, [address_id_group, address_id,
+                                               ValueSequence(txs)])
+            results2 = session.execute(query, [neighbor_id_group, neighbor_id,
+                                               ValueSequence(txs)])
+            if results1.current_rows and results2.current_rows:
+                links = dict()
+                for row in results1.current_rows:
+                    hsh = row.tx_hash.hex()
+                    links[hsh] = dict()
+                    links[hsh]['tx_hash'] = hsh
+                    links[hsh]['height'] = row.height
+                    links[hsh]['input_value'] = row.value
+                for row in results2.current_rows:
+                    hsh = row.tx_hash.hex()
+                    links[hsh]['output_value'] = row.value
+                return [Link.from_dict(e, get_rates(currency,
+                                                    e['height'])['rates'])
+                            .to_dict() for e in links.values()]
+    return []
 
 
 def get_address_entity(currency, address):

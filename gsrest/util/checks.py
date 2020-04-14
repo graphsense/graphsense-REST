@@ -6,7 +6,7 @@ LABEL_PREFIX_LENGTH = 3
 
 def check_inputs(**kwargs):
     for key, value in kwargs.items():
-        if key in ['address', 'tx', 'direction']:
+        if key in ['address', 'tx', 'direction', 'neighbor']:
             if not isinstance(value, str) or not value.isalnum():
                 abort(400, 'Invalid {}'.format(key))
         if key in ['page']:

@@ -53,6 +53,22 @@ class AddressTx(object):
         return self.__dict__
 
 
+class Link(object):
+    def __init__(self, tx_hash, height, input_value, output_value, rates):
+        self.height = height
+        self.tx_hash = tx_hash
+        self.input_value = ConvertedValues(input_value, rates).to_dict()
+        self.output_value = ConvertedValues(output_value, rates).to_dict()
+
+    @staticmethod
+    def from_dict(e, rates):
+        return Link(e['tx_hash'], e['height'], e['input_value'],
+                    e['output_value'], rates)
+
+    def to_dict(self):
+        return self.__dict__
+
+
 class ReceivedSpent(object):
     def __init__(self, total_received, total_spent):
         self.total_received = total_received
@@ -63,8 +79,8 @@ class ReceivedSpent(object):
 
 
 class AddressOutgoingRelations(object):
-    def __init__(self, estimated_value, dst_address, no_txs, tx_list,
-                 dst_properties, labels, rates):
+    def __init__(self, estimated_value, dst_address, no_txs, dst_properties,
+                 labels, rates):
         self.id = dst_address
         self.node_type = 'address'
         self.labels = labels
@@ -74,25 +90,22 @@ class AddressOutgoingRelations(object):
                                        dst_properties.total_received.value,
                                        rates)
         self.no_txs = no_txs
-        self.tx_list = None
-        if tx_list:
-            self.tx_list = [tx_hash.hex() for tx_hash in tx_list]
         self.estimated_value = Values(**estimated_value._asdict()).to_dict()
 
     @staticmethod
     def from_row(row, dst_address, rates):
         return AddressOutgoingRelations(row.estimated_value,
                                         dst_address, row.no_transactions,
-                                        row.tx_list, row.dst_properties,
-                                        row.dst_labels, rates)
+                                        row.dst_properties, row.dst_labels,
+                                        rates)
 
     def to_dict(self):
         return self.__dict__
 
 
 class AddressIncomingRelations(object):
-    def __init__(self, estimated_value, src_address, no_txs, tx_list,
-                 src_properties, labels, rates):
+    def __init__(self, estimated_value, src_address, no_txs, src_properties,
+                 labels, rates):
         self.id = src_address
         self.node_type = 'address'
         self.labels = labels
@@ -102,17 +115,14 @@ class AddressIncomingRelations(object):
                                        src_properties.total_received.value,
                                        rates)
         self.no_txs = no_txs
-        self.tx_list = None
-        if tx_list:
-            self.tx_list = [tx_hash.hex() for tx_hash in tx_list]
         self.estimated_value = Values(**estimated_value._asdict()).to_dict()
 
     @staticmethod
     def from_row(row, src_address, rates):
         return AddressIncomingRelations(row.estimated_value,
                                         src_address, row.no_transactions,
-                                        row.tx_list, row.src_properties,
-                                        row.src_labels, rates)
+                                        row.src_properties, row.src_labels,
+                                        rates)
 
     def to_dict(self):
         return self.__dict__
