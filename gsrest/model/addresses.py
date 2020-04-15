@@ -54,16 +54,17 @@ class AddressTx(object):
 
 
 class Link(object):
-    def __init__(self, tx_hash, height, input_value, output_value, rates):
-        self.height = height
+    def __init__(self, tx_hash, height, timestamp, input_value, output_value, rates):
         self.tx_hash = tx_hash
+        self.height = height
+        self.timestamp = timestamp
         self.input_value = ConvertedValues(input_value, rates).to_dict()
         self.output_value = ConvertedValues(output_value, rates).to_dict()
 
     @staticmethod
     def from_dict(e, rates):
-        return Link(e['tx_hash'], e['height'], e['input_value'],
-                    e['output_value'], rates)
+        return Link(e['tx_hash'], e['height'], e['timestamp'],
+                    e['input_value'], e['output_value'], rates)
 
     def to_dict(self):
         return self.__dict__

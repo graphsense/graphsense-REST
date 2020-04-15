@@ -239,6 +239,8 @@ neighbors_response = api.model("neighbors_response", neighbors_model)
 link_model = {
     "tx_hash": fields.String(required=True, description="Transaction hash"),
     "height": fields.String(required=True, description="Block height"),
+    "timestamp": fields.Integer(required=True,
+                                description="Transaction timestamp"),
     "input_value": fields.Nested(value_response, required=True),
     "output_value": fields.Nested(value_response, required=True)
 }

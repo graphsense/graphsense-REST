@@ -145,6 +145,7 @@ def list_addresses_links(currency, address, neighbor):
                     links[hsh] = dict()
                     links[hsh]['tx_hash'] = hsh
                     links[hsh]['height'] = row.height
+                    links[hsh]['timestamp'] = row.timestamp
                     links[hsh]['input_value'] = row.value
                 for row in results2.current_rows:
                     hsh = row.tx_hash.hex()
