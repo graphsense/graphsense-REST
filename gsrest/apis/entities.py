@@ -183,10 +183,31 @@ class EntitySearchNeighbors(Resource):
         skipNumAddresses = args['skipNumAddresses']  # default and int
         category = args['category']
         addresses = args['addresses']
+        field = args['field']
+        minValue = args['min']
+        maxValue = args['max']
+        fieldcurrency = args['fieldcurrency']
 
-        if not [category, addresses].count(None) == 1:
-            abort(400, 'Invalid search arguments: one among category and '
-                       'addresses must be provided')
+        if not [category, addresses, field].count(None) == 2:
+            abort(400, 'Invalid search arguments: one among category, '
+                       'addresses or field must '
+                       'be provided')
+
+        params = dict()
+
+        if category:
+            params['category'] = category
+
+        if field:
+            if (maxValue is not None and minValue > maxValue):
+                abort(400, 'Min must not be greater than max')
+            elif field not in ['final_balance', 'total_received']:
+                abort(400, 'Field must be "final_balance" or "total_received"')
+            elif fieldcurrency not in ['value', 'eur', 'usd']:
+                abort(400, 'Fieldcurrency must be one of "value", "eur" or "usd"')
+            params['field'] = (field, fieldcurrency, minValue, maxValue)
+
+
         check_inputs(currency=currency, entity=entity, category=category,
                      depth=depth, addresses=addresses)
         if addresses:
@@ -199,20 +220,13 @@ class EntitySearchNeighbors(Resource):
                 else:
                     abort(404, "Entity of address {} not found in currency {}"
                           .format(address, currency))
-            addresses = addresses_list
-        if not [category, addresses].count(None) == 1:
-            abort(400, 'Invalid search arguments: one among category and '
-                       'addresses must be provided')
-        # TODO: why do we get non-empty result when category is missing?
-        # (removing the if above and with addresses=None)
+            params['addresses'] = addresses_list
 
-        outgoing = True
-        if "in" in direction:
-            outgoing = False
+        outgoing = "out" in direction
 
         result = entitiesDAO.\
-            list_entity_search_neighbors(currency, entity, category, addresses,
+            list_entity_search_neighbors(currency, entity, params,
                                          breadth, depth, skipNumAddresses,
-                                         dict(), outgoing)
+                                         outgoing)
 
         return {"paths": result}

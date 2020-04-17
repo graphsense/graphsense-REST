@@ -137,8 +137,9 @@ def list_entity_addresses(currency, entity_id, paging_state, page_size):
     return paging_state, None
 
 
-def list_entity_search_neighbors(currency, entity, category, ids, breadth,
-                                 depth, skipNumAddresses, cache, outgoing):
+def list_entity_search_neighbors(currency, entity, params, breadth,
+                                 depth, skipNumAddresses, outgoing, cache=dict()):
+
     if depth <= 0:
         return []
 
@@ -175,22 +176,30 @@ def list_entity_search_neighbors(currency, entity, category, ids, breadth,
         props = cached(subentity, 'props', lambda: get_entity(currency,
                                                               subentity))
         if props is None:
-            print("empty entity result for " + str(subentity))
             continue
 
         tags = cached(subentity, 'tags', lambda: list_entity_tags(currency,
                                                                   subentity))
-
-        if category:
+        if 'category' in params:
             # find first occurrence of category in tags
             match = next((True for t in tags if t["category"] and
-                          t["category"].lower() == category.lower()), False)
+                          t["category"].lower() == params['category'].lower()), False)
 
         matching_addresses = []
-        if ids:
-            matching_addresses = [id["address"] for id in ids
+        if 'addresses' in params:
+            matching_addresses = [id["address"] for id in params['addresses']
                                   if str(id["entity"]) == str(subentity)]
             match = len(matching_addresses) > 0
+
+        if 'field' in params:
+            (field, fieldcurrency, minValue, maxValue) = params['field']
+            if field == 'final_balance':
+                v = props['balance'][fieldcurrency]
+            elif field == 'total_received':
+                v = props['total_received'][fieldcurrency]
+            else:
+                v = -1
+            match = v >= minValue and (maxValue is None or maxValue >= v)
 
         subpaths = False
         if match:
@@ -198,10 +207,10 @@ def list_entity_search_neighbors(currency, entity, category, ids, breadth,
         elif 'no_addresses' in props \
                 and props['no_addresses'] <= skipNumAddresses:
             subpaths = list_entity_search_neighbors(currency, subentity,
-                                                    category, ids, breadth,
+                                                    params, breadth,
                                                     depth - 1,
                                                     skipNumAddresses,
-                                                    cache, outgoing)
+                                                    outgoing, cache)
 
         if not subpaths:
             continue
