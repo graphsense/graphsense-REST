@@ -192,10 +192,10 @@ class EntitySearchNeighbors(Resource):
         if addresses:
             addresses_list = []
             for address in addresses.split(","):
-                entity = addressesDAO.get_address_entity_id(currency, address)
-                if entity:
+                e = addressesDAO.get_address_entity_id(currency, address)
+                if e:
                     addresses_list.append({"address": address,
-                                           "entity": entity})
+                                           "entity": e})
                 else:
                     abort(404, "Entity of address {} not found in currency {}"
                           .format(address, currency))

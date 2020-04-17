@@ -187,7 +187,7 @@ def list_entity_search_neighbors(currency, entity, category, ids, breadth,
                           t["category"].lower() == category.lower()), False)
 
         matching_addresses = []
-        if match and ids:
+        if ids:
             matching_addresses = [id["address"] for id in ids
                                   if str(id["entity"]) == str(subentity)]
             match = len(matching_addresses) > 0
