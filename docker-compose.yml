@@ -1,0 +1,19 @@
+version: "3.1"
+
+services:
+
+  graphsense-rest:
+    image: graphsense-rest
+    container_name: graphsense-rest
+    hostname: graphsense-rest
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        NUM_WORKER: "${NUM_WORKER}"
+    ports:
+      - 127.0.0.1:9000:9000
+    environment:
+      SECRET_KEY: "${SECRET_KEY}"
+    command: ["supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisor-app.conf"]
+    restart: always

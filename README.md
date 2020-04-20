@@ -78,7 +78,7 @@ Check test coverage
 ## Deployment
 
 When used in production, GraphSense-REST must be deployed to a WSGI server
-because Flask's built-in server is not suitable for production - 
+because Flask's built-in server is not suitable for production -
 it doesn't scale. From several [deployment options][flask-deployment],
 we have chosen [Gunicorn][gunicorn].
 
@@ -92,16 +92,42 @@ Run production server
 
 ### Deployment with docker
 
-After installing docker, build the image and start a container using:
+#### Prerequisites
 
-    docker/build.sh
-    docker/start.sh
+- [Docker][docker], see e.g. https://docs.docker.com/engine/install/
+- Docker Compose: https://docs.docker.com/compose/install/
+
+#### Configuration
+
+Copy `docker/.env.template` to `.env`. Adjust the number of `gunicorn`
+worker processes (variable `NUM_WORKER`, default three processes) and
+set the Flask secret key (variable `SECRET_KEY`), e.g., to to a random
+string using the provided script:
+
+    docker/gen_secret_key.sh
+
+Create an instance folder and copy the configuration file template
+
+    mkdir -p instance
+    cp conf/config.py.tmp instance/config.py
+
+Open `instance/config.py` and enter Cassandra connection configuration.
+
+#### Docker deployment
+
+Build the image
+
+    docker-compose build
+
+and start a container (in detached mode):
+
+    docker-compose up -d
 
 Afterwards add users to the running container instance using
 
     docker/add_user.sh USERNAME PASSWORD
 
-and test the service in a web browser:
+Finally, test the service in a web browser:
 
     http://localhost:9000
 
@@ -126,7 +152,7 @@ This is an example response:
 
 Now use the JWT as part of the `Authorization` header field in subsequent requests:
 
-    curl -X GET "http://localhost:5000/100/blocks/" -H "accept: application/json" -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NzE4MzQxNTMsImlhdCI6MTU3MTc0Nzc0OCwic3ViIjoiam9obiJ9.TxYnzE09A0BYfowvK4K5Zds6uyDJ_UrXkwF3NKqqvvA"    
+    curl -X GET "http://localhost:5000/100/blocks/" -H "accept: application/json" -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NzE4MzQxNTMsImlhdCI6MTU3MTc0Nzc0OCwic3ViIjoiam9obiJ9.TxYnzE09A0BYfowvK4K5Zds6uyDJ_UrXkwF3NKqqvvA"
 
 Logging out will blacklist the JWT
 
@@ -137,7 +163,8 @@ Logging out will blacklist the JWT
 Default configuration parameters are read from `app/config.py` during startup.
 
 Parameters can be customized by placing a custom configuration file into the
-Flask app instance folder, e.g., `instance/config.py`. A configuration template file is provided in `conf/config.py.tmp`.
+Flask app instance folder, e.g., `instance/config.py`.
+A configuration template file is provided in `conf/config.py.tmp`.
 
 If you deploy the API behind a proxy, you can set `USE_PROXY = True`.
 
@@ -153,3 +180,4 @@ from the environment and should be set before starting the app
 [docker]: https://docs.docker.com/install
 [flask-deployment]: https://flask.palletsprojects.com/en/1.1.x/deploying/#self-hosted-options
 [gunicorn]: https://gunicorn.org/#docs
+[docker]: https://www.docker.com
