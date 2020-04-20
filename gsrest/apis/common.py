@@ -54,8 +54,8 @@ search_neighbors_parser.add_argument("breadth", type=int,
 search_neighbors_parser.add_argument("skipNumAddresses", type=int,
                                      default=DEFAULT_BREADTH, location="args")
 search_neighbors_parser.add_argument("field", location="args")
-search_neighbors_parser.add_argument("min", type=int, default=0, 
-                                    location="args")
+search_neighbors_parser.add_argument("min", type=int, default=0,
+                                     location="args")
 search_neighbors_parser.add_argument("max", type=int, location="args")
 search_neighbors_parser.add_argument("fieldcurrency", location="args")
 

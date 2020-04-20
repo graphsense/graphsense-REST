@@ -190,8 +190,7 @@ class EntitySearchNeighbors(Resource):
 
         if not [category, addresses, field].count(None) == 2:
             abort(400, 'Invalid search arguments: one among category, '
-                       'addresses or field must '
-                       'be provided')
+                       'addresses or field must be provided')
 
         params = dict()
 
@@ -199,14 +198,14 @@ class EntitySearchNeighbors(Resource):
             params['category'] = category
 
         if field:
-            if (maxValue is not None and minValue > maxValue):
+            if maxValue is not None and minValue > maxValue:
                 abort(400, 'Min must not be greater than max')
             elif field not in ['final_balance', 'total_received']:
                 abort(400, 'Field must be "final_balance" or "total_received"')
             elif fieldcurrency not in ['value', 'eur', 'usd']:
-                abort(400, 'Fieldcurrency must be one of "value", "eur" or "usd"')
+                abort(400, 'Fieldcurrency must be one of "value", "eur" or '
+                           '"usd"')
             params['field'] = (field, fieldcurrency, minValue, maxValue)
-
 
         check_inputs(currency=currency, entity=entity, category=category,
                      depth=depth, addresses=addresses)

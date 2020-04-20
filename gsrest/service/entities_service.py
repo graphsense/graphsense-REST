@@ -137,9 +137,10 @@ def list_entity_addresses(currency, entity_id, paging_state, page_size):
     return paging_state, None
 
 
-def list_entity_search_neighbors(currency, entity, params, breadth,
-                                 depth, skipNumAddresses, outgoing, cache=dict()):
-
+def list_entity_search_neighbors(currency, entity, params, breadth, depth,
+                                 skipNumAddresses, outgoing, cache=None):
+    if cache is None:
+        cache = dict()
     if depth <= 0:
         return []
 
@@ -183,7 +184,8 @@ def list_entity_search_neighbors(currency, entity, params, breadth,
         if 'category' in params:
             # find first occurrence of category in tags
             match = next((True for t in tags if t["category"] and
-                          t["category"].lower() == params['category'].lower()), False)
+                          t["category"].lower() == params['category'].lower()),
+                         False)
 
         matching_addresses = []
         if 'addresses' in params:
