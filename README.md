@@ -99,10 +99,13 @@ Run production server
 
 #### Configuration
 
-Copy `docker/.env.template` to `.env`. Adjust the number of `gunicorn`
-worker processes (variable `NUM_WORKER`, default three processes) and
-set the Flask secret key (variable `SECRET_KEY`), e.g., to to a random
-string using the provided script:
+Copy `docker/env.template` to `.env`:
+
+    cp docker/env.template .env
+
+Adjust the number of `gunicorn` worker processes (variable `NUM_WORKER`,
+default three processes) and set the Flask secret key (variable `SECRET_KEY`),
+e.g., to to a random string using the provided script:
 
     docker/gen_secret_key.sh
 
