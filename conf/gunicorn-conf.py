@@ -1,4 +1,4 @@
-timeout = 60
+timeout = 300
 capture_output = True
 accesslog = '/home/dockeruser/gunicorn-access.log'
 errorlog = '/home/dockeruser/gunicorn-error.log'
