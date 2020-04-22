@@ -10,7 +10,7 @@ services:
       context: .
       dockerfile: ./Dockerfile
       args:
-        NUM_WORKER: "${NUM_WORKER}"
+        NUM_WORKERS: "${NUM_WORKER}"
     ports:
       - 127.0.0.1:9000:9000
     environment:
