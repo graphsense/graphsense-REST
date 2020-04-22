@@ -15,5 +15,4 @@ services:
       - 127.0.0.1:9000:9000
     environment:
       SECRET_KEY: "${SECRET_KEY}"
-    command: ["supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisor-app.conf"]
     restart: always
