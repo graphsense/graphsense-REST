@@ -3,6 +3,7 @@ capture_output = True
 accesslog = '/home/dockeruser/gunicorn-access.log'
 errorlog = '/home/dockeruser/gunicorn-error.log'
 loglevel = 'debug'
+bind = "0.0.0.0:9000"
 secure_scheme_headers = {
     'X-FORWARDED-PROTOCOL': 'ssl',
     'X-FORWARDED-PROTO': 'https',

@@ -10,10 +10,9 @@ services:
       context: .
       dockerfile: ./Dockerfile
       args:
-        NUM_WORKER: "${NUM_WORKER}"
+        NUM_WORKERS: "${NUM_WORKERS}"
     ports:
       - 127.0.0.1:9000:9000
     environment:
       SECRET_KEY: "${SECRET_KEY}"
-    command: ["supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisor-app.conf"]
     restart: always
