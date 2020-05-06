@@ -59,3 +59,18 @@ class Concept(object):
 
     def to_dict(self):
         return self.__dict__
+
+
+class Taxonomy(object):
+    """ Model representing a taxonomy """
+
+    def __init__(self, taxonomy, uri):
+        self.taxonomy = taxonomy
+        self.uri = uri
+
+    @staticmethod
+    def from_row(row):
+        return Taxonomy(row.key, row.uri)
+
+    def to_dict(self):
+        return self.__dict__

@@ -2,7 +2,7 @@ from flask_restplus import Namespace, Resource
 from flask import abort, current_app
 
 from gsrest.apis.common import label_response, tag_response, label_parser, \
-    concept_response
+    concept_response, taxonomy_response
 import gsrest.service.general_service as generalDAO
 import gsrest.service.tags_service as labelsDAO
 from gsrest.util.checks import check_inputs
@@ -67,8 +67,20 @@ class LabelTags(Resource):
 
 
 @api.param('taxonomy', 'The taxonomy (e.g., entity, abuse)')
-@api.route("/taxonomies/<taxonomy>")
+@api.route("/taxonomies")
 class Taxonomies(Resource):
+    @token_required
+    @api.marshal_list_with(taxonomy_response)
+    def get(self):
+        """
+        Returns the supported taxonomies
+        """
+        return generalDAO.list_taxonomies()
+
+
+@api.param('taxonomy', 'The taxonomy (e.g., entity, abuse)')
+@api.route("/taxonomies/<taxonomy>/concepts")
+class TaxonomiesConcepts(Resource):
     @token_required
     @api.marshal_list_with(concept_response)
     def get(self, taxonomy):

@@ -322,11 +322,11 @@ concept_model = {
 }
 concept_response = api.model("concept_response", concept_model)
 
-abuse_model = {
-    "abuse": fields.String(required=True, description="Abuse"),
-    "id": fields.Integer(required=True, description="Id")
+taxonomy_model = {
+    "taxonomy": fields.String(required=True, description="Taxonomy"),
+    "uri": fields.String(required=True, description="URI"),
 }
-abuse_response = api.model("abuse_response", abuse_model)
+taxonomy_response = api.model("taxonomy_response", taxonomy_model)
 
 
 def search_neighbors_recursive(depth=7):

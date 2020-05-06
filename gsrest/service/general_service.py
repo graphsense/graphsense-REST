@@ -1,5 +1,5 @@
 from gsrest.db.cassandra import get_session
-from gsrest.model.general import Statistics, Concept
+from gsrest.model.general import Statistics, Concept, Taxonomy
 
 
 def get_statistics(currency):
@@ -17,3 +17,11 @@ def list_concepts(taxonomy):
     query = "SELECT * FROM concept_by_taxonomy_id WHERE taxonomy = %s"
     rows = session.execute(query, [taxonomy])
     return [Concept.from_row(row).to_dict() for row in rows]
+
+
+def list_taxonomies():
+    session = get_session(currency=None, keyspace_type='tagpacks')
+
+    query = "SELECT * FROM taxonomy_by_key LIMIT 100"
+    rows = session.execute(query)
+    return [Taxonomy.from_row(row).to_dict() for row in rows]
