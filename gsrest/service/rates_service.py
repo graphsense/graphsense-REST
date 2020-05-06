@@ -80,27 +80,25 @@ def load_rates(currency):
 def get_rates(currency, height=-1):
     """ Returns the exchange rate for a given block height """
 
-    # used in development mode only
-    if current_app.config.get('DUMMY_EXCHANGE_RATES'):
-        return ExchangeRate(height, {'eur': 0.5, 'usd': 0.5}).to_dict()
-
-    currency_rates = CACHED_EXCHANGE_RATES.get(currency)
-    if not currency_rates:
-        raise ValueError("Cannot load exchange rates. Unknown currency: {}"
-                         .format(currency))
     if height == -1:
-        height = LAST_BLOCK_HEIGHT[currency]
-    height_rates = currency_rates.get(height)
-    if not height_rates:
-        raise ValueError("Cannot find height {} in currency {}"
-                         .format(height, currency))
+        height = get_statistics(currency)['no_blocks'] - 1
 
-    return height_rates.to_dict()
+    session = get_session(currency, 'transformed')
+    session.row_factory = dict_factory
+    query = "SELECT * FROM exchange_rates WHERE height = %s"
+    result = session.execute(query, [height])
+    if result.current_rows:
+        r = result.current_rows[0]
+        return ExchangeRate(r['height'], {k: v for k, v in r.items()
+                                          if k != 'height'}).to_dict()
+    raise ValueError("Cannot find height {} in currency {}"
+                     .format(height, currency))
 
 
 def list_rates(currency, heights=-1):
     """ Returns the exchange rates for a list of block heights """
     session = get_session(currency, 'transformed')
+    session.row_factory = dict_factory
 
     if heights == -1:
         heights = [get_statistics(currency)['no_blocks'] - 1]
@@ -111,12 +109,12 @@ def list_rates(currency, heights=-1):
         statements_and_params.append((concurrent_query, [h]))
     rates = execute_concurrent(session, statements_and_params,
                                raise_on_first_error=False)
-    height_rates = dict() # key: height, value: {'eur': 0, 'usd':0}
+    height_rates = dict()  # key: height, value: {'eur': 0, 'usd':0}
     for (success, rate) in rates:
         if not success:
             pass
         else:
-            d = rate.one()._asdict()
+            d = rate.one()
             height_rates[d['height']] = {k: v for k, v in d.items()
                                          if k != 'height'}
     return height_rates

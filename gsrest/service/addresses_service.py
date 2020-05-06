@@ -6,7 +6,7 @@ from gsrest.model.addresses import AddressTx, \
 from gsrest.service.entities_service import get_entity, get_id_group
 from gsrest.service.common_service import get_address_by_id_group, \
     ADDRESS_PREFIX_LENGTH
-from gsrest.service.rates_service import get_rates
+from gsrest.service.rates_service import get_rates, list_rates
 
 ADDRESS_PAGE_SIZE = 100
 
@@ -44,11 +44,9 @@ def list_address_txs(currency, address, paging_state=None, pagesize=None):
                                   paging_state=paging_state)
         paging_state = results.paging_state
         if results:
-            address_txs = [AddressTx.from_row(row,
-                                              address,
-                                              get_rates(currency,
-                                                        row.height)
-                                              ['rates'])
+            heights = [row.height for row in results.current_rows]
+            rates = list_rates(currency, heights)
+            address_txs = [AddressTx.from_row(row, address, rates[row.height])
                            .to_dict() for row in results.current_rows]
             return paging_state, address_txs
     return None, None
@@ -150,9 +148,10 @@ def list_addresses_links(currency, address, neighbor):
                 for row in results2.current_rows:
                     hsh = row.tx_hash.hex()
                     links[hsh]['output_value'] = row.value
-                return [Link.from_dict(e, get_rates(currency,
-                                                    e['height'])['rates'])
-                            .to_dict() for e in links.values()]
+                heights = [e['height'] for e in links.values()]
+                rates = list_rates(currency, heights)
+                return [Link.from_dict(e, rates[e['height']]).to_dict()
+                        for e in links.values()]
     return []
 
 

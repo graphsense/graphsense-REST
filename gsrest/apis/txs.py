@@ -44,6 +44,6 @@ class TxList(Resource):
         check_inputs(currency=currency, page=page)
         paging_state = bytes.fromhex(page) if page else None
 
-        (paging_state, txs) = txsDAO.list_txs(currency, paging_state)
+        paging_state, txs = txsDAO.list_txs(currency, paging_state)
         return {"next_page": paging_state.hex() if paging_state else None,
                 "txs": txs}
