@@ -22,6 +22,7 @@ class ExchangeRate(Resource):
         Returns exchange rate for a given height
         """
         check_inputs(currency=currency, height=height)
+        # rates = ratesDAO.list_rates(currency, [height, height + 1])
         rates = ratesDAO.get_rates(currency, height)
         if not rates:
             abort(404, "Exchange rate for height {} not found in currency {}"

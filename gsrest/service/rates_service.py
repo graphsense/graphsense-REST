@@ -1,4 +1,5 @@
 from cassandra.query import SimpleStatement, dict_factory
+from cassandra.concurrent import execute_concurrent
 from flask import current_app
 
 from gsrest.db.cassandra import (get_session, get_keyspace_mapping,
@@ -95,3 +96,27 @@ def get_rates(currency, height=-1):
                          .format(height, currency))
 
     return height_rates.to_dict()
+
+
+def list_rates(currency, heights=-1):
+    """ Returns the exchange rates for a list of block heights """
+    session = get_session(currency, 'transformed')
+
+    if heights == -1:
+        heights = [get_statistics(currency)['no_blocks'] - 1]
+
+    concurrent_query = "SELECT * FROM exchange_rates WHERE height = %s"
+    statements_and_params = []
+    for h in heights:
+        statements_and_params.append((concurrent_query, [h]))
+    rates = execute_concurrent(session, statements_and_params,
+                               raise_on_first_error=False)
+    height_rates = dict() # key: height, value: {'eur': 0, 'usd':0}
+    for (success, rate) in rates:
+        if not success:
+            pass
+        else:
+            d = rate.one()._asdict()
+            height_rates[d['height']] = {k: v for k, v in d.items()
+                                         if k != 'height'}
+    return height_rates
