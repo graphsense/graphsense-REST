@@ -1,5 +1,5 @@
 from gsrest.db.cassandra import get_session
-from gsrest.model.general import Statistics, Category, Abuse
+from gsrest.model.general import Statistics, Concept
 
 
 def get_statistics(currency):
@@ -11,15 +11,9 @@ def get_statistics(currency):
     return None
 
 
-def list_categories():
+def list_concepts(taxonomy):
     session = get_session(currency=None, keyspace_type='tagpacks')
-    query = session.prepare("SELECT * FROM categories")
-    rows = session.execute(query)
-    return [Category.from_row(row).to_dict() for row in rows]
 
-
-def list_abuses():
-    session = get_session(currency=None, keyspace_type='tagpacks')
-    query = session.prepare("SELECT * FROM abuses")
-    rows = session.execute(query)
-    return [Abuse.from_row(row).to_dict() for row in rows]
+    query = "SELECT * FROM concept_by_taxonomy_id WHERE taxonomy = %s"
+    rows = session.execute(query, [taxonomy])
+    return [Concept.from_row(row).to_dict() for row in rows]

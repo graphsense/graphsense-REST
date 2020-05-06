@@ -1,18 +1,16 @@
 from flask_restplus import Namespace, Resource
 from flask import abort, current_app
 
-from gsrest.apis.common import label_response, tag_response, currency_parser, \
-    category_response, abuse_response
+from gsrest.apis.common import label_response, tag_response, label_parser, \
+    concept_response
 import gsrest.service.general_service as generalDAO
-import gsrest.service.labels_service as labelsDAO
+import gsrest.service.tags_service as labelsDAO
 from gsrest.util.checks import check_inputs
 from gsrest.util.decorator import token_required
 
-api = Namespace('labels',
-                path='/labels',
-                description='Operations related to labels')
-
-# TODO: add /labels/ to get al list of all labels
+api = Namespace('tags',
+                path='/tags',
+                description='Operations related to tags')
 
 
 @api.param('label', 'The label of an entity (e.g., Internet Archive)')
@@ -42,17 +40,17 @@ class Label(Resource):
         abort(404, "Label not found")
 
 
-@api.param('label', 'The label of an entity (e.g., Internet Archive)')
-@api.route("/<label>/tags")
+@api.route("")
 class LabelTags(Resource):
     @token_required
-    @api.doc(parser=currency_parser)
+    @api.doc(parser=label_parser)
     @api.marshal_list_with(tag_response)
-    def get(self, label):
+    def get(self):
         """
         Returns the tags associated with a given label
         """
-        currency = currency_parser.parse_args()['currency']
+        currency = label_parser.parse_args()['currency']
+        label = label_parser.parse_args()['label']
         check_inputs(label=label, currency_optional=currency)
         if currency:
             result = labelsDAO.list_tags(label, currency)
@@ -68,25 +66,15 @@ class LabelTags(Resource):
         abort(404, "Label not found")
 
 
-@api.route("/categories")
-class Categories(Resource):
+@api.param('taxonomy', 'The taxonomy (e.g., entity, abuse)')
+@api.route("/taxonomies/<taxonomy>")
+class Taxonomies(Resource):
     @token_required
-    @api.marshal_list_with(category_response)
-    def get(self):
+    @api.marshal_list_with(concept_response)
+    def get(self, taxonomy):
         """
-        Returns the supported entity categories
+        Returns the supported concepts
         """
-        return generalDAO.list_categories()
-
-
-@api.route("/abuses")
-class Abuses(Resource):
-    @token_required
-    @api.marshal_list_with(abuse_response)
-    def get(self):
-        """
-        Returns the supported entity abuses
-        """
-        return generalDAO.list_abuses()
+        return generalDAO.list_concepts(taxonomy)
 
 # TODO: add call: from category to list of labels and #addresses

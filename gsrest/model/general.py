@@ -34,31 +34,28 @@ class Statistics(object):
         return self.__dict__
 
 
-class Category(object):
-    """ Model representing a category of an entity """
+class Concept(object):
+    """Concept Definition.
 
-    def __init__(self, category, id):
-        self.category = category
+    This class serves as a proxy for a concept that is defined
+    in some remote taxonomy. It just provides the most essential properties.
+
+    A concept can be viewed as an idea or notion; a unit of thought.
+    See: https://www.w3.org/TR/skos-reference/#concepts
+
+    """
+
+    def __init__(self, taxonomy, id, uri, label, description):
+        self.taxonomy = taxonomy
         self.id = id
+        self.uri = uri
+        self.label = label
+        self.description = description
 
     @staticmethod
     def from_row(row):
-        return Category(row.category, row.id)
-
-    def to_dict(self):
-        return self.__dict__
-
-
-class Abuse(object):
-    """ Model representing the abuse of an entity """
-
-    def __init__(self, abuse, id):
-        self.abuse = abuse
-        self.id = id
-
-    @staticmethod
-    def from_row(row):
-        return Abuse(row.abuse, row.id)
+        return Concept(row.taxonomy, row.id, row.uri, row.label,
+                       row.description)
 
     def to_dict(self):
         return self.__dict__

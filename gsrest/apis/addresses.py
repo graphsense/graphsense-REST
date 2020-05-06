@@ -25,7 +25,7 @@ class Address(Resource):
     @api.marshal_with(address_tags_response)
     def get(self, currency, address):
         """
-        Returns details and optionally tags of a specific address
+        Returns details and tags of a specific address
         """
         check_inputs(address=address, currency=currency)  # abort if fails
         addr = commonDAO.get_address(currency, address)

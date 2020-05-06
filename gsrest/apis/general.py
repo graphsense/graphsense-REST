@@ -4,7 +4,7 @@ from flask import current_app
 from gsrest.apis.common import search_parser, search_response
 import gsrest.service.addresses_service as addressesDAO
 import gsrest.service.general_service as generalDAO
-import gsrest.service.labels_service as labelsDAO
+import gsrest.service.tags_service as labelsDAO
 import gsrest.service.txs_service as txsDAO
 from gsrest.util.checks import check_inputs
 from gsrest.util.decorator import token_required
@@ -63,18 +63,19 @@ class Statistics(Resource):
 
 @api.param('expression', 'It can be (the beginning of) an address, '
                          'a transaction or a label')
-@api.route("/search/<expression>")
+@api.route("/search")
 class Search(Resource):
     @token_required
     @api.doc(parser=search_parser)
     @api.marshal_with(search_response)
-    def get(self, expression):
+    def get(self):
         """
         Returns matching addresses, transactions and labels
         """
         # TODO: too slow with bech32 address search
         args = search_parser.parse_args()
         currency = args['currency']
+        expression = args['q']
         limit = args['limit']
         currencies = [c for c in current_app.config['MAPPING']
                       if c != 'tagpacks']

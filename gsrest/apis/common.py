@@ -17,8 +17,10 @@ page_parser = api.parser()
 page_parser.add_argument("page", location="args",
                          help="Resumption token for retrieving the next page")
 
-currency_parser = api.parser()
-currency_parser.add_argument("currency", location="args")
+label_parser = api.parser()
+label_parser.add_argument("currency", location="args")
+label_parser.add_argument("label", required=True, location="args",
+                          help="The label of an entity")
 
 tags_parser = api.parser()
 tags_parser.add_argument("tags", type=bool, location="args",
@@ -30,6 +32,9 @@ query_parser.add_argument("q", location="args")
 search_parser = api.parser()
 search_parser.add_argument("currency", location="args",
                            help="Cryptocurrency")
+search_parser.add_argument("q", location="args", required=True,
+                           help="It can be (the beginning of) an address,"
+                                " a transaction or a label")
 search_parser.add_argument("limit", type=int, location="args",
                            help="Maximum number of search results")
 
@@ -308,11 +313,14 @@ label_model = {
 }
 label_response = api.model("label_response", label_model)
 
-category_model = {
-    "category": fields.String(required=True, description="Category"),
-    "id": fields.Integer(required=True, description="Id")
+concept_model = {
+    "label": fields.String(required=True, description="Label"),
+    "taxonomy": fields.String(required=True, description="Taxonomy"),
+    "uri": fields.String(required=True, description="URI"),
+    "description": fields.String(required=True, description="Description"),
+    "id": fields.String(required=True, description="Id")
 }
-category_response = api.model("category_response", category_model)
+concept_response = api.model("concept_response", concept_model)
 
 abuse_model = {
     "abuse": fields.String(required=True, description="Abuse"),
