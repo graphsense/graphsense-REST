@@ -304,15 +304,6 @@ tx_list_model = {
 }
 tx_list_response = api.model("tx_list_response", tx_list_model)
 
-label_model = {
-    "label": fields.String(required=True, description="Label"),
-    "label_norm": fields.String(required=True, description="Normalized label"),
-    "address_count": fields.Integer(required=True,
-                                    description="Number of addresses "
-                                                "for the label"),
-}
-label_response = api.model("label_response", label_model)
-
 concept_model = {
     "label": fields.String(required=True, description="Label"),
     "taxonomy": fields.String(required=True, description="Taxonomy"),

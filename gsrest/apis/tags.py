@@ -1,7 +1,7 @@
 from flask_restplus import Namespace, Resource
 from flask import abort, current_app
 
-from gsrest.apis.common import label_response, tag_response, label_parser, \
+from gsrest.apis.common import tag_response, label_parser, \
     concept_response, taxonomy_response
 import gsrest.service.general_service as generalDAO
 import gsrest.service.tags_service as labelsDAO
@@ -11,33 +11,6 @@ from gsrest.util.decorator import token_required
 api = Namespace('tags',
                 path='/tags',
                 description='Operations related to tags')
-
-
-@api.param('label', 'The label of an entity (e.g., Internet Archive)')
-@api.route("/<label>")
-class Label(Resource):
-    @token_required
-    @api.marshal_with(label_response)
-    def get(self, label):
-        """
-        Returns details (address count) for a specific label
-        """
-        check_inputs(label=label)
-        result = None
-        address_count = 0
-        currency_result = dict()
-        for currency in current_app.config['MAPPING']:
-            if currency != "tagpacks":
-                currency_result[currency] = labelsDAO.get_label(label,
-                                                                currency)
-                if currency_result[currency] and \
-                        'address_count' in currency_result[currency]:
-                    result = currency_result[currency]
-                    address_count += result['address_count']
-        if address_count:
-            result['address_count'] = address_count
-            return result
-        abort(404, "Label not found")
 
 
 @api.route("")

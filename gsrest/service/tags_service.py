@@ -1,21 +1,7 @@
 from gsrest.db.cassandra import get_session
-from gsrest.model.tags import Label, Tag
+from gsrest.model.tags import Tag
 from gsrest.util.checks import LABEL_PREFIX_LENGTH
 from gsrest.util.string_edit import alphanumeric_lower
-
-
-def get_label(label, currency):
-    label_norm = alphanumeric_lower(label)
-    label_norm_prefix = label_norm[:LABEL_PREFIX_LENGTH]
-
-    session = get_session(currency=currency, keyspace_type='transformed')
-    query = "SELECT label_norm, label_norm_prefix, label, COUNT(address) as " \
-            "address_count FROM tag_by_label WHERE label_norm_prefix = %s " \
-            "and label_norm = %s GROUP BY label_norm_prefix, label_norm"
-    result = session.execute(query, [label_norm_prefix, label_norm])
-    if result:
-        return Label.from_row(result[0]).to_dict()
-    return None
 
 
 def list_tags(label, currency=None):

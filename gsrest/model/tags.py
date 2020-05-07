@@ -28,19 +28,3 @@ class Tag(object):
 
     def to_dict(self):
         return self.__dict__
-
-
-class Label(object):
-    """ Model representing a Label """
-
-    def __init__(self, label, label_norm, address_count):
-        self.label = label
-        self.label_norm = label_norm
-        self.address_count = address_count
-
-    @staticmethod
-    def from_row(row):
-        return Label(row.label, row.label_norm, row.address_count)
-
-    def to_dict(self):
-        return self.__dict__
