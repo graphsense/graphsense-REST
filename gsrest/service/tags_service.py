@@ -1,5 +1,5 @@
 from gsrest.db.cassandra import get_session
-from gsrest.model.tags import Tag
+from gsrest.model.tags import Tag, Concept, Taxonomy
 from gsrest.util.checks import LABEL_PREFIX_LENGTH
 from gsrest.util.string_edit import alphanumeric_lower
 
@@ -36,3 +36,19 @@ def list_labels(currency, expression):
     return list(dict.fromkeys([
         row.label for row in result
         if row.label_norm.startswith(expression_norm)]))
+
+
+def list_concepts(taxonomy):
+    session = get_session(currency=None, keyspace_type='tagpacks')
+
+    query = "SELECT * FROM concept_by_taxonomy_id WHERE taxonomy = %s"
+    rows = session.execute(query, [taxonomy])
+    return [Concept.from_row(row).to_dict() for row in rows]
+
+
+def list_taxonomies():
+    session = get_session(currency=None, keyspace_type='tagpacks')
+
+    query = "SELECT * FROM taxonomy_by_key LIMIT 100"
+    rows = session.execute(query)
+    return [Taxonomy.from_row(row).to_dict() for row in rows]

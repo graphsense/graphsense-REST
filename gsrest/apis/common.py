@@ -22,13 +22,6 @@ label_parser.add_argument("currency", location="args")
 label_parser.add_argument("label", required=True, location="args",
                           help="The label of an entity")
 
-tags_parser = api.parser()
-tags_parser.add_argument("tags", type=bool, location="args",
-                         help="Include tags in response (tags=true if needed)")
-
-query_parser = api.parser()
-query_parser.add_argument("q", location="args")
-
 search_parser = api.parser()
 search_parser.add_argument("currency", location="args",
                            help="Cryptocurrency")
