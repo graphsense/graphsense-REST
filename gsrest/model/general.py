@@ -36,13 +36,10 @@ class Statistics(object):
 
 class Concept(object):
     """Concept Definition.
-
     This class serves as a proxy for a concept that is defined
     in some remote taxonomy. It just provides the most essential properties.
-
     A concept can be viewed as an idea or notion; a unit of thought.
     See: https://www.w3.org/TR/skos-reference/#concepts
-
     """
 
     def __init__(self, taxonomy, id, uri, label, description):
