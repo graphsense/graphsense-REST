@@ -1,7 +1,11 @@
 from flask_restplus import Namespace, Resource
 from flask import abort, current_app
 
+<<<<<<< HEAD
 from gsrest.apis.common import tag_response, label_parser, \
+=======
+from gsrest.apis.common import label_response, tag_response, label_parser, \
+>>>>>>> add taxonomies list
     concept_response, taxonomy_response
 import gsrest.service.general_service as generalDAO
 import gsrest.service.tags_service as labelsDAO
