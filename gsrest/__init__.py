@@ -51,10 +51,6 @@ def create_app(test_config=None):
     from gsrest.db import cassandra
     cassandra.init_app(app)
 
-    # register exchange rates service
-    from gsrest.service import rates_service
-    rates_service.init_app(app)
-
     # register api namespaces
     from gsrest.apis import api
     api.init_app(app)

@@ -22,7 +22,7 @@ currency_parser.add_argument("currency", location="args")
 
 tags_parser = api.parser()
 tags_parser.add_argument("tags", type=bool, location="args",
-                         help="Include tags in repsonse (tags=true if needed)")
+                         help="Include tags in response (tags=true if needed)")
 
 query_parser = api.parser()
 query_parser.add_argument("q", location="args")
@@ -264,7 +264,7 @@ entity_addresses_model = {
     "next_page": fields.String(required=True, description="The next page"),
     "addresses": fields.List(fields.Nested(entity_address_response),
                              required=True,
-                             description="The list of entity adresses")
+                             description="The list of entity addresses")
 }
 entity_addresses_response = api.model("entity_addresses_response",
                                       entity_addresses_model)

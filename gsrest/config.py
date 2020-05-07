@@ -14,7 +14,6 @@ class Config(object):
     SECRET_KEY = os.getenv('SECRET_KEY', 'my_precious_secret_key')
     DEBUG = False
     JWT_ACCESS_TOKEN_EXPIRES_DAYS = 1
-    DUMMY_EXCHANGE_RATES = True
     USE_PROXY = False
 
     def __init__(self, instance_path):
