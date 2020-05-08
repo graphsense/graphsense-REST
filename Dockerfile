@@ -27,6 +27,7 @@ RUN apk --no-cache --update add bash python3 py3-gunicorn shadow && \
 
 COPY conf/gunicorn-conf.py /home/dockeruser/gunicorn-conf.py
 COPY MANIFEST.in setup.* /srv/graphsense-rest/
+COPY README.md /srv/graphsense-rest/
 COPY gsrest /srv/graphsense-rest/gsrest
 COPY instance /usr/var/gsrest-instance
 

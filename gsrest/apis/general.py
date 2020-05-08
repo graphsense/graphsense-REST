@@ -1,6 +1,7 @@
 from flask_restplus import Namespace, Resource
 from flask import current_app
 
+from gsrest._version import __version__ as version_number
 from gsrest.apis.common import search_parser, search_response
 import gsrest.service.addresses_service as addressesDAO
 import gsrest.service.general_service as generalDAO
@@ -16,7 +17,6 @@ api = Namespace('general',
                 path='/',
                 description='General operations like stats and search')
 
-version_number = '0.4.3.dev'
 version = {'nr': version_number,
            'hash': None,
            'timestamp': time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()),

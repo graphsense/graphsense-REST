@@ -1,5 +1,6 @@
 from flask_restplus import Api
 
+from gsrest._version import __version__ as version
 from gsrest.apis.auth import api as auth_api
 from gsrest.apis.addresses import api as addresses_api
 from gsrest.apis.blocks import api as blocks_api
@@ -21,7 +22,7 @@ authorizations = {
 
 api = Api(
     title='GraphSense REST API',
-    version='0.4.3.dev',
+    version=version,
     description='GraphSense REST API',
     authorizations=authorizations,
     security='apikey'
