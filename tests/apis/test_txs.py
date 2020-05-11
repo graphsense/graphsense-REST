@@ -63,7 +63,6 @@ def test_tx_list(client, auth, monkeypatch):
         check_inputs(currency=args[0])  # abort if fails
         return None, [tx for tx in TEST_TXS.values()]
 
-
     # apply the monkeypatch method for txs_service.get_tx
     monkeypatch.setattr(gsrest.service.txs_service, "list_txs", mock_list_txs)
 

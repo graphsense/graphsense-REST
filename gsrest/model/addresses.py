@@ -54,7 +54,8 @@ class AddressTx(object):
 
 
 class Link(object):
-    def __init__(self, tx_hash, height, timestamp, input_value, output_value, rates):
+    def __init__(self, tx_hash, height, timestamp, input_value, output_value,
+                 rates):
         self.tx_hash = tx_hash
         self.height = height
         self.timestamp = timestamp
