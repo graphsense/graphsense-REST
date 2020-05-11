@@ -38,7 +38,6 @@ class LabelTags(Resource):
         abort(404, "Label not found")
 
 
-@api.param('taxonomy', 'The taxonomy (e.g., entity, abuse)')
 @api.route("/taxonomies")
 class Taxonomies(Resource):
     @token_required
