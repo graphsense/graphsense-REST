@@ -1,5 +1,5 @@
 from cassandra.query import SimpleStatement
-from flask import abort
+from cassandra.concurrent import execute_concurrent
 from math import floor
 
 from gsrest.db.cassandra import get_session
@@ -26,14 +26,30 @@ def list_entity_tags(currency, entity_id):
     entity_group = get_id_group(entity_id)
     query = "SELECT * FROM cluster_tags WHERE cluster_group = %s and cluster" \
             " = %s"
+    concurrent_query = "SELECT * FROM address_by_id_group WHERE " \
+                       "address_id_group = %s and address_id = %s"
+
     results = session.execute(query, [entity_group, entity_id])
-    entity_tags = []
+
+    # concurrent queries
+    statements_and_params = []
     for row in results.current_rows:
         address_id_group = get_id_group(row.address_id)
-        address = get_address_by_id_group(currency, address_id_group,
-                                          row.address_id)
-        entity_tags.append(Tag.from_entity_row(row, address, currency)
-                           .to_dict())
+        params = (address_id_group, row.address_id)
+        statements_and_params.append((concurrent_query, params))
+    addresses = execute_concurrent(session, statements_and_params,
+                                   raise_on_first_error=False)
+    id_address = dict()  # to temporary store the id-address mapping
+    for (success, address) in addresses:
+        if not success:
+            pass
+        else:
+            id_address[address.one().address_id] = address.one().address
+    entity_tags = []
+    for row in results.current_rows:
+        entity_tags.append(Tag.from_entity_row(row, id_address[row.address_id],
+                                               currency).to_dict())
+
     return entity_tags
 
 
@@ -46,8 +62,7 @@ def get_entity(currency, entity_id):
     rates = get_rates(currency)['rates']
     if result:
         return Entity.from_row(result[0], rates).to_dict()
-    abort(404, "Entity {} not found in currency {}"
-          .format(entity_id, currency))
+    return None
 
 
 def list_entity_outgoing_relations(currency, entity_id, paging_state=None,
@@ -119,17 +134,13 @@ def list_entity_addresses(currency, entity_id, paging_state, page_size):
                                                            rates)
                              .to_dict())
         return paging_state, addresses
-    abort(404, "Entity {} not found in currency {}"
-          .format(entity_id, currency))
+    return paging_state, None
 
 
-def list_entity_search_neighbors(currency, entity, category, ids, breadth,
-                                 depth, skipNumAddresses, cache, outgoing):
-    if not [category, ids].count(None) == 1:
-        abort(400, 'Invalid search arguments: one among category and '
-                   'addresses must be provided')
-    # TODO: why do we get non-empty result when category is missing?
-    # (removing the if above and with addresses=None)
+def list_entity_search_neighbors(currency, entity, params, breadth, depth,
+                                 skipNumAddresses, outgoing, cache=None):
+    if cache is None:
+        cache = dict()
     if depth <= 0:
         return []
 
@@ -166,22 +177,31 @@ def list_entity_search_neighbors(currency, entity, category, ids, breadth,
         props = cached(subentity, 'props', lambda: get_entity(currency,
                                                               subentity))
         if props is None:
-            print("empty entity result for " + str(subentity))
             continue
 
         tags = cached(subentity, 'tags', lambda: list_entity_tags(currency,
                                                                   subentity))
-
-        if category:
+        if 'category' in params:
             # find first occurrence of category in tags
-            match = next((True for t in tags
-                          if t["category"].lower() == category.lower()), False)
+            match = next((True for t in tags if t["category"] and
+                          t["category"].lower() == params['category'].lower()),
+                         False)
 
         matching_addresses = []
-        if match and ids:
-            matching_addresses = [id["address"] for id in ids
+        if 'addresses' in params:
+            matching_addresses = [id["address"] for id in params['addresses']
                                   if str(id["entity"]) == str(subentity)]
             match = len(matching_addresses) > 0
+
+        if 'field' in params:
+            (field, fieldcurrency, minValue, maxValue) = params['field']
+            if field == 'final_balance':
+                v = props['balance'][fieldcurrency]
+            elif field == 'total_received':
+                v = props['total_received'][fieldcurrency]
+            else:
+                v = -1
+            match = v >= minValue and (maxValue is None or maxValue >= v)
 
         subpaths = False
         if match:
@@ -189,10 +209,10 @@ def list_entity_search_neighbors(currency, entity, category, ids, breadth,
         elif 'no_addresses' in props \
                 and props['no_addresses'] <= skipNumAddresses:
             subpaths = list_entity_search_neighbors(currency, subentity,
-                                                    category, ids, breadth,
+                                                    params, breadth,
                                                     depth - 1,
                                                     skipNumAddresses,
-                                                    cache, outgoing)
+                                                    outgoing, cache)
 
         if not subpaths:
             continue

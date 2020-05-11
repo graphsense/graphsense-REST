@@ -30,6 +30,5 @@ def test_create_user_command(runner, monkeypatch):
 
     monkeypatch.setattr('gsrest.service.user_service.create_user',
                         fake_create_user)
-    result = runner.invoke(create_user_command, ['johnny', 'doey'])
-    assert 'Created user johnny' in result.output
+    runner.invoke(create_user_command, ['johnny', 'doey'])
     assert Recorder.called

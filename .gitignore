@@ -7,3 +7,4 @@ instance
 *.sublime-workspace
 venv
 app/config.json
+.env

@@ -1,7 +1,5 @@
-from flask import abort
-
 from gsrest.db.cassandra import get_session
-from gsrest.model.general import Statistics, Category
+from gsrest.model.general import Statistics
 
 
 def get_statistics(currency):
@@ -9,12 +7,5 @@ def get_statistics(currency):
     query = "SELECT * FROM summary_statistics LIMIT 1"
     result = session.execute(query)
     if result:
-        return Statistics.from_row(result[0]).to_dict()
-    abort(404, 'Statistics not found for currency {}'.format(currency))
-
-
-def list_categories():
-    session = get_session(currency=None, keyspace_type='tagpacks')
-    query = session.prepare("SELECT * FROM categories")
-    rows = session.execute(query)
-    return [Category.from_row(row).to_dict() for row in rows]
+        return Statistics.from_row(result[0], currency).to_dict()
+    return None

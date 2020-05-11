@@ -1,5 +1,5 @@
 from flask_restplus import Namespace, Resource
-from flask import Response
+from flask import Response, abort
 
 from gsrest.apis.common import page_parser, block_response, \
     block_list_response, block_txs_response
@@ -25,7 +25,10 @@ class Block(Resource):
         """
         check_inputs(currency=currency, height=height)
         block = blocksDAO.get_block(currency, height)
-        return block
+        if block:
+            return block
+        abort(404, "Block {} not found in currency {}".format(height,
+                                                              currency))
 
 
 @api.route("/")
@@ -59,7 +62,10 @@ class BlockTxs(Resource):
         """
         check_inputs(currency=currency, height=height)
         block_txs = blocksDAO.list_block_txs(currency, height)
-        return block_txs
+        if block_txs:
+            return block_txs
+        abort(404, "Block {} not found in currency {}".format(height,
+                                                              currency))
 
 
 @api.route("/<int:height>/txs.csv")
@@ -73,7 +79,10 @@ class BlockTxsCSV(Resource):
         """
         check_inputs(currency=currency, height=height)
         block_txs = blocksDAO.list_block_txs(currency, height)
-        return Response(txs_to_csv(block_txs), mimetype="text/csv",
-                        headers=create_download_header(
-                            'transactions of block {} ({}).csv'
-                            .format(height, currency.upper())))
+        if block_txs:
+            return Response(txs_to_csv(block_txs), mimetype="text/csv",
+                            headers=create_download_header(
+                                'transactions of block {} ({}).csv'
+                                .format(height, currency.upper())))
+        abort(404, "Block {} not found in currency {}".format(height,
+                                                              currency))

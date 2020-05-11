@@ -1,5 +1,3 @@
-from flask import abort
-
 from gsrest.db.cassandra import get_session
 from gsrest.model.addresses import Address
 from gsrest.model.tags import Tag
@@ -24,7 +22,7 @@ def get_address(currency, address):
     if result:
         return Address.from_row(result[0],
                                 get_rates(currency)['rates']).to_dict()
-    abort(404, "Address {} not found in currency {}".format(address, currency))
+    return None
 
 
 def list_address_tags(currency, address):
@@ -32,7 +30,7 @@ def list_address_tags(currency, address):
 
     query = "SELECT * FROM address_tags WHERE address = %s"
     results = session.execute(query, [address])
-    address_tags = [Tag.from_address_row(row, currency).to_dict()
+    address_tags = [Tag.from_address_row(row, currency, True).to_dict()
                     for row in results.current_rows]
 
     return address_tags

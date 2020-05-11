@@ -1,17 +1,45 @@
 from flask_restplus import Namespace, Resource
 from flask import current_app
 
+from gsrest._version import __version__ as version_number
 from gsrest.apis.common import search_parser, search_response
 import gsrest.service.addresses_service as addressesDAO
 import gsrest.service.general_service as generalDAO
-import gsrest.service.labels_service as labelsDAO
+import gsrest.service.tags_service as labelsDAO
 import gsrest.service.txs_service as txsDAO
 from gsrest.util.checks import check_inputs
 from gsrest.util.decorator import token_required
 
+import time
+
+
 api = Namespace('general',
                 path='/',
                 description='General operations like stats and search')
+
+version = {'nr': version_number,
+           'hash': None,
+           'timestamp': time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()),
+           'file': version_number}
+tools = [{'visible_name': 'GraphSense', 'id': 'ait:graphsense',
+          'version': version_number, 'titanium_replayable': False,
+          'responsible_for': []}]
+tags_source = {'visible_name': 'GraphSense attribution tags',
+               'id': 'graphsense_tags', 'version': version,
+               'report_uuid': 'graphsense_tags'}
+notes = [{'note': 'Please **note** that the clustering dataset is built with'
+                  ' multi input address clustering to avoid false clustering '
+                  'results due to coinjoins (see TITANIUM glossary '
+                  'http://titanium-project.eu/glossary/#coinjoin), we exclude'
+                  ' coinjoins prior to clustering. This does not eliminate '
+                  'the risk of false results, since coinjoin detection is also'
+                  ' heuristic in nature, but it should decrease the potential '
+                  'for wrong cluster merges.'},
+         {'note': 'Our tags are all manually crawled or from credible sources,'
+                  ' we do not use tags that where automatically extracted '
+                  'without human interaction. Origins of the tags have been '
+                  'saved for reproducibility please contact the GraphSense '
+                  'team (contact@graphsense.info) for more insight.'}]
 
 
 # TODO: is a response model needed here?
@@ -21,27 +49,33 @@ class Statistics(Resource):
         """
         Returns summary statistics on all available currencies
         """
-        statistics = dict()
+        currency_stats = dict()
         for currency in current_app.config['MAPPING']:
             if currency != "tagpacks":
-                statistics[currency] = generalDAO.get_statistics(currency)
+                currency_stats[currency] = generalDAO.get_statistics(currency)
+        statistics = dict()
+        statistics['currencies'] = currency_stats
+        statistics['tools'] = tools
+        statistics['notes'] = notes
+        statistics['data_sources'] = [tags_source]
         return statistics
 
 
 @api.param('expression', 'It can be (the beginning of) an address, '
                          'a transaction or a label')
-@api.route("/search/<expression>")
+@api.route("/search")
 class Search(Resource):
     @token_required
     @api.doc(parser=search_parser)
     @api.marshal_with(search_response)
-    def get(self, expression):
+    def get(self):
         """
         Returns matching addresses, transactions and labels
         """
         # TODO: too slow with bech32 address search
         args = search_parser.parse_args()
         currency = args['currency']
+        expression = args['q']
         limit = args['limit']
         currencies = [c for c in current_app.config['MAPPING']
                       if c != 'tagpacks']
@@ -83,7 +117,9 @@ class Search(Resource):
 
         result['labels'] = []
         if can_be_label:
-            result['labels'] = labelsDAO.list_labels(args['currency'],
-                                                     expression)[:limit]
+            for currency in currencies:
+                labels = labelsDAO.list_labels(currency, expression)[:limit]
+                if labels:
+                    result['labels'] += labels
 
         return result

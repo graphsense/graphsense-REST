@@ -12,7 +12,7 @@ def init_app(app):
 
 def get_cluster():
     if 'ccluster' not in g:
-        current_app.logger.info("Creating new Cassandra cluster connection.")
+        current_app.logger.info("Opening new Cassandra cluster connection.")
         g.ccluster = Cluster(current_app.config["CASSANDRA_NODES"])
 
     return g.ccluster
@@ -50,8 +50,8 @@ def get_keyspace_mapping(currency, keyspace_type):
 
 def get_session(currency, keyspace_type):
     if 'csession' not in g:
-        current_app.logger.info("Creating new Cassandra session.")
         cluster = get_cluster()
+        current_app.logger.info("Creating new Cassandra session.")
         g.csession = cluster.connect()
 
     session = g.csession
@@ -65,8 +65,7 @@ def get_session(currency, keyspace_type):
 
 
 def close_db(e=None):
-    current_app.logger.info("Closing cassandra connection.")
-    cluster = g.pop('ccluster', None)
-
-    if cluster is not None:
+    if 'ccluster' in g:
+        cluster = g.pop('ccluster', None)
         cluster.shutdown()
+        current_app.logger.info("Closed Cassandra cluster connection.")

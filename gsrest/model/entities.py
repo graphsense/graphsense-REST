@@ -38,7 +38,7 @@ class Entity(object):
 
 class EntityIncomingRelations(object):
     def __init__(self, estimated_value, no_txs, src_properties, rate,
-                 src_cluster, dst_cluster, from_search=False):
+                 src_cluster, dst_cluster, labels, from_search=False):
         self.id = src_cluster
         self.node_type = 'entity'
         self.received = Values(**src_properties.total_received._asdict())\
@@ -48,6 +48,7 @@ class EntityIncomingRelations(object):
                                        rate)
         self.no_txs = no_txs
         self.estimated_value = Values(**estimated_value._asdict()).to_dict()
+        self.labels = labels
         if from_search:
             self.src_entity = src_cluster
             self.dst_entity = dst_cluster
@@ -57,7 +58,7 @@ class EntityIncomingRelations(object):
         return EntityIncomingRelations(row.value, row.no_transactions,
                                        row.src_properties, rates,
                                        row.src_cluster, row.dst_cluster,
-                                       from_search)
+                                       row.src_labels, from_search)
 
     def to_dict(self):
         return self.__dict__
@@ -65,7 +66,7 @@ class EntityIncomingRelations(object):
 
 class EntityOutgoingRelations(object):
     def __init__(self, estimated_value, no_txs, dst_properties, rates,
-                 dst_cluster, src_cluster, from_search=False):
+                 dst_cluster, src_cluster, labels, from_search=False):
         self.id = dst_cluster
         self.node_type = 'entity'
         self.received = Values(**dst_properties.total_received._asdict())\
@@ -75,6 +76,7 @@ class EntityOutgoingRelations(object):
                                        rates)
         self.no_txs = no_txs
         self.estimated_value = Values(**estimated_value._asdict()).to_dict()
+        self.labels = labels
         if from_search:
             self.dst_entity = dst_cluster
             self.src_entity = src_cluster
@@ -84,7 +86,7 @@ class EntityOutgoingRelations(object):
         return EntityOutgoingRelations(row.value, row.no_transactions,
                                        row.dst_properties, rates,
                                        row.dst_cluster, row.src_cluster,
-                                       from_search)
+                                       row.dst_labels, from_search)
 
     def to_dict(self):
         return self.__dict__

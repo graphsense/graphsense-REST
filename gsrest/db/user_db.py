@@ -15,12 +15,12 @@ def init_app(app):
 
 def get_db():
     if 'db' not in g:
-        current_app.logger.info("Establishing user DB connection.")
         try:
             g.db = sqlite3.connect(
                 current_app.config['DATABASE'],
                 detect_types=sqlite3.PARSE_DECLTYPES
             )
+            current_app.logger.info("Connected to user DB.")
         except Exception:
             current_app.logger.error("User DB connection error")
             sys.exit()
@@ -52,4 +52,4 @@ def init_db():
 def init_db_command():
     """Clear the existing data and create new tables."""
     init_db()
-    click.echo('Initialized the database.')
+    current_app.logger.info('Initialized the database.')

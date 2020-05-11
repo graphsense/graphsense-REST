@@ -3,6 +3,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.4.3] 2020-05-11
+### Added
+- Updated Docker base image
+- Added gunicorn config file
+- Fix swagger UI behind reverse proxy (ProxyFix from werkzeug), fix \#24
+- New "search neighbors" options
+- List of transactions between one address and its neighbor
+- More information from `stats` call
+### Changed
+- Improved and documented handling of config files
+- Harmonized logging in user db (now via app_context logger)
+- `tags` namespace replaced `labels` and taxonomy integration
+
 ## [0.4.2] - 2019-12-20
 ### Added
 - Checks on input values

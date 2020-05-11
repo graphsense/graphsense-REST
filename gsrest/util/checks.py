@@ -6,7 +6,7 @@ LABEL_PREFIX_LENGTH = 3
 
 def check_inputs(**kwargs):
     for key, value in kwargs.items():
-        if key in ['address', 'tx', 'direction']:
+        if key in ['address', 'tx', 'direction', 'neighbor']:
             if not isinstance(value, str) or not value.isalnum():
                 abort(400, 'Invalid {}'.format(key))
         if key in ['page']:
@@ -23,8 +23,6 @@ def check_inputs(**kwargs):
                 return value
             except ValueError:
                 abort(400, 'Invalid {}'.format(key))
-        if key in ['direction'] and value not in ['in', 'out']:
-            abort(400, 'Invalid {}, it has to be either in or out'.format(key))
         if key in ['currency_optional']:
             if value and value not in current_app.config['MAPPING']:
                 abort(404, 'Unknown currency in config: {}'.format(value))

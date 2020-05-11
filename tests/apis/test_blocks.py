@@ -76,7 +76,7 @@ def test_block_list(client, auth, monkeypatch):
     # apply the monkeypatch method for blocks_service.get_block
     monkeypatch.setattr(gsrest.service.blocks_service, "list_blocks",
                         mock_list_blocks)
-    
+
     auth.login()
 
     # request list of blocks

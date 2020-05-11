@@ -36,13 +36,6 @@ def app(monkeypatch):
     # temp user db location
     db_fd, db_path = tempfile.mkstemp()
 
-    # we don't want to load exchange rates during testing
-    def fake_load_all_rates():
-        pass
-
-    monkeypatch.setattr('gsrest.service.rates_service.load_all_rates',
-                        fake_load_all_rates)
-
     DUMMY_MAPPING = {
         "tagpacks": "tagpacks",
         "btc": ["btc_raw", "btc_transformed_X"],
@@ -58,7 +51,6 @@ def app(monkeypatch):
         'SECRET_KEY': 'testing_secret',
         'MAPPING': DUMMY_MAPPING,
         'CASSANDRA_NODES': None,
-        'DUMMY_EXCHANGE_RATES': True
     }
 
     app = create_app(db_test_conf)

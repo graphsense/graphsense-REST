@@ -1,13 +1,12 @@
-from cassandra.query import SimpleStatement
-from flask import abort
+from cassandra.query import SimpleStatement, ValueSequence
 
 from gsrest.db.cassandra import get_session
 from gsrest.model.addresses import AddressTx, \
-    AddressOutgoingRelations, AddressIncomingRelations
+    AddressOutgoingRelations, AddressIncomingRelations, Link
 from gsrest.service.entities_service import get_entity, get_id_group
 from gsrest.service.common_service import get_address_by_id_group, \
     ADDRESS_PREFIX_LENGTH
-from gsrest.service.rates_service import get_rates
+from gsrest.service.rates_service import get_rates, list_rates
 
 ADDRESS_PAGE_SIZE = 100
 
@@ -19,36 +18,38 @@ def get_address_id(currency, address):
     result = session.execute(query, [address[:ADDRESS_PREFIX_LENGTH], address])
     if result:
         return result[0].address_id
-    abort(404, "Address {} not found in currency {}".format(address, currency))
+    return None
 
 
 def get_address_id_id_group(currency, address):
     address_id = get_address_id(currency, address)
-    return address_id, get_id_group(address_id)
+    if isinstance(address_id, int):
+        id_group = get_id_group(address_id)
+        return address_id, id_group
+    return None, None
 
 
 def list_address_txs(currency, address, paging_state=None, pagesize=None):
     session = get_session(currency, 'transformed')
 
     address_id, address_id_group = get_address_id_id_group(currency, address)
-    query = "SELECT * FROM address_transactions WHERE address_id = %s " \
-            "AND address_id_group = %s"
-    fetch_size = ADDRESS_PAGE_SIZE
-    if pagesize:
-        fetch_size = pagesize
-    statement = SimpleStatement(query, fetch_size=fetch_size)
-    results = session.execute(statement, [address_id, address_id_group],
-                              paging_state=paging_state)
-    paging_state = results.paging_state
-    if results:
-        address_txs = [AddressTx.from_row(row,
-                                          address,
-                                          get_rates(currency,
-                                                    row.height)
-                                          ['rates'])
-                       .to_dict() for row in results.current_rows]
-        return paging_state, address_txs
-    abort(404, "Address {} not found in currency {}".format(address, currency))
+    if address_id:
+        query = "SELECT * FROM address_transactions WHERE address_id = %s " \
+                "AND address_id_group = %s"
+        fetch_size = ADDRESS_PAGE_SIZE
+        if pagesize:
+            fetch_size = pagesize
+        statement = SimpleStatement(query, fetch_size=fetch_size)
+        results = session.execute(statement, [address_id, address_id_group],
+                                  paging_state=paging_state)
+        paging_state = results.paging_state
+        if results:
+            heights = [row.height for row in results.current_rows]
+            rates = list_rates(currency, heights)
+            address_txs = [AddressTx.from_row(row, address, rates[row.height])
+                           .to_dict() for row in results.current_rows]
+            return paging_state, address_txs
+    return None, None
 
 
 def list_address_outgoing_relations(currency, address, paging_state=None,
@@ -56,26 +57,30 @@ def list_address_outgoing_relations(currency, address, paging_state=None,
     session = get_session(currency, 'transformed')
 
     address_id, address_id_group = get_address_id_id_group(currency, address)
-    query = "SELECT * FROM address_outgoing_relations WHERE " \
-            "src_address_id_group = %s AND src_address_id = %s"
-    fetch_size = ADDRESS_PAGE_SIZE
-    if page_size:
-        fetch_size = page_size
-    statement = SimpleStatement(query, fetch_size=fetch_size)
-    results = session.execute(statement, [address_id_group, address_id],
-                              paging_state=paging_state)
-    paging_state = results.paging_state
-    rates = get_rates(currency)['rates']
-    relations = []
-    for row in results.current_rows:
-        dst_address_id_group = get_id_group(row.dst_address_id)
-        dst_address = get_address_by_id_group(currency, dst_address_id_group,
-                                              row.dst_address_id)
+    if address_id:
+        query = "SELECT * FROM address_outgoing_relations WHERE " \
+                "src_address_id_group = %s AND src_address_id = %s"
+        fetch_size = ADDRESS_PAGE_SIZE
+        if page_size:
+            fetch_size = page_size
+        statement = SimpleStatement(query, fetch_size=fetch_size)
+        results = session.execute(statement, [address_id_group, address_id],
+                                  paging_state=paging_state)
+        paging_state = results.paging_state
+        rates = get_rates(currency)['rates']
+        relations = []
+        for row in results.current_rows:
+            dst_address_id_group = get_id_group(row.dst_address_id)
+            dst_address = get_address_by_id_group(currency,
+                                                  dst_address_id_group,
+                                                  row.dst_address_id)
 
-        relations.append(AddressOutgoingRelations.from_row(row, dst_address,
-                                                           rates)
-                         .to_dict())
-    return paging_state, relations
+            relations.append(AddressOutgoingRelations.from_row(row,
+                                                               dst_address,
+                                                               rates)
+                             .to_dict())
+        return paging_state, relations
+    return None, None
 
 
 def list_address_incoming_relations(currency, address, paging_state=None,
@@ -83,45 +88,90 @@ def list_address_incoming_relations(currency, address, paging_state=None,
     session = get_session(currency, 'transformed')
 
     address_id, address_id_group = get_address_id_id_group(currency, address)
-    query = "SELECT * FROM address_incoming_relations WHERE " \
-            "dst_address_id_group = %s AND dst_address_id = %s"
-    fetch_size = ADDRESS_PAGE_SIZE
-    if page_size:
-        fetch_size = page_size
-    statement = SimpleStatement(query, fetch_size=fetch_size)
-    results = session.execute(statement, [address_id_group, address_id],
-                              paging_state=paging_state)
-    paging_state = results.paging_state
-    rates = get_rates(currency)['rates']
-    relations = []
-    for row in results.current_rows:
-        src_address_id_group = get_id_group(row.src_address_id)
-        src_address = get_address_by_id_group(currency, src_address_id_group,
-                                              row.src_address_id)
+    if address_id:
+        query = "SELECT * FROM address_incoming_relations WHERE " \
+                "dst_address_id_group = %s AND dst_address_id = %s"
+        fetch_size = ADDRESS_PAGE_SIZE
+        if page_size:
+            fetch_size = page_size
+        statement = SimpleStatement(query, fetch_size=fetch_size)
+        results = session.execute(statement, [address_id_group, address_id],
+                                  paging_state=paging_state)
+        paging_state = results.paging_state
+        rates = get_rates(currency)['rates']
+        relations = []
+        for row in results.current_rows:
+            src_address_id_group = get_id_group(row.src_address_id)
+            src_address = get_address_by_id_group(currency,
+                                                  src_address_id_group,
+                                                  row.src_address_id)
 
-        relations.append(AddressIncomingRelations.from_row(row, src_address,
-                                                           rates)
-                         .to_dict())
-    return paging_state, relations
+            relations.append(AddressIncomingRelations.from_row(row,
+                                                               src_address,
+                                                               rates)
+                             .to_dict())
+        return paging_state, relations
+    return None, None
+
+
+def list_addresses_links(currency, address, neighbor):
+    session = get_session(currency, 'transformed')
+
+    address_id, address_id_group = get_address_id_id_group(currency, address)
+    neighbor_id, neighbor_id_group = get_address_id_id_group(currency,
+                                                             neighbor)
+    if address_id and neighbor_id:
+        query = "SELECT tx_list FROM address_outgoing_relations WHERE " \
+                "src_address_id_group = %s AND src_address_id = %s AND " \
+                "dst_address_id = %s"
+        results = session.execute(query, [address_id_group, address_id,
+                                          neighbor_id])
+        if results.current_rows:
+            txs = [tx_hash for tx_hash in
+                   results.current_rows[0].tx_list]
+            query = "SELECT * FROM address_transactions WHERE " \
+                    "address_id_group = %s AND address_id = %s AND " \
+                    "tx_hash IN %s"
+            results1 = session.execute(query, [address_id_group, address_id,
+                                               ValueSequence(txs)])
+            results2 = session.execute(query, [neighbor_id_group, neighbor_id,
+                                               ValueSequence(txs)])
+            if results1.current_rows and results2.current_rows:
+                links = dict()
+                for row in results1.current_rows:
+                    hsh = row.tx_hash.hex()
+                    links[hsh] = dict()
+                    links[hsh]['tx_hash'] = hsh
+                    links[hsh]['height'] = row.height
+                    links[hsh]['timestamp'] = row.timestamp
+                    links[hsh]['input_value'] = row.value
+                for row in results2.current_rows:
+                    hsh = row.tx_hash.hex()
+                    links[hsh]['output_value'] = row.value
+                heights = [e['height'] for e in links.values()]
+                rates = list_rates(currency, heights)
+                return [Link.from_dict(e, rates[e['height']]).to_dict()
+                        for e in links.values()]
+    return []
 
 
 def get_address_entity(currency, address):
     # from address to complete entity stats
-    entity_id = get_address_entity_id(currency, address)  # abort if fails
-    return get_entity(currency, entity_id)  # abort if fails
+    entity_id = get_address_entity_id(currency, address)
+    return get_entity(currency, entity_id)
 
 
 def get_address_entity_id(currency, address):
     # from address to entity id only
     session = get_session(currency, 'transformed')
     address_id, address_id_group = get_address_id_id_group(currency, address)
-    query = "SELECT cluster FROM address_cluster WHERE address_id_group = %s" \
-            " AND address_id = %s "
-    result = session.execute(query, [address_id_group, address_id])
-    if result:
-        return result[0].cluster
-    abort(404, "Entity of address {} not found in currency {}"
-          .format(address, currency))
+    if isinstance(address_id, int):
+        query = "SELECT cluster FROM address_cluster WHERE " \
+                "address_id_group = %s AND address_id = %s "
+        result = session.execute(query, [address_id_group, address_id])
+        if result:
+            return result[0].cluster
+    return None
 
 
 def list_matching_addresses(currency, expression):

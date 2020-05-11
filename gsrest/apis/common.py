@@ -17,19 +17,17 @@ page_parser = api.parser()
 page_parser.add_argument("page", location="args",
                          help="Resumption token for retrieving the next page")
 
-currency_parser = api.parser()
-currency_parser.add_argument("currency", location="args")
-
-tags_parser = api.parser()
-tags_parser.add_argument("tags", type=bool, location="args",
-                         help="Include tags in repsonse (tags=true if needed)")
-
-query_parser = api.parser()
-query_parser.add_argument("q", location="args")
+label_parser = api.parser()
+label_parser.add_argument("currency", location="args")
+label_parser.add_argument("label", required=True, location="args",
+                          help="The label of an entity")
 
 search_parser = api.parser()
 search_parser.add_argument("currency", location="args",
                            help="Cryptocurrency")
+search_parser.add_argument("q", location="args", required=True,
+                           help="It can be (the beginning of) an address,"
+                                " a transaction or a label")
 search_parser.add_argument("limit", type=int, location="args",
                            help="Maximum number of search results")
 
@@ -42,6 +40,9 @@ neighbors_parser.add_argument("direction", required=True, location="args",
                               choices=('in', 'out'),
                               help="Incoming or outgoing neighbors")
 
+links_parser = api.parser()
+links_parser.add_argument("neighbor", required=True, location="args",
+                          help="Outgoing neighbor receiving funds")
 
 search_neighbors_parser = api.parser()
 search_neighbors_parser.add_argument("direction", location="args")
@@ -53,6 +54,11 @@ search_neighbors_parser.add_argument("breadth", type=int,
                                      default=DEFAULT_BREADTH, location="args")
 search_neighbors_parser.add_argument("skipNumAddresses", type=int,
                                      default=DEFAULT_BREADTH, location="args")
+search_neighbors_parser.add_argument("field", location="args")
+search_neighbors_parser.add_argument("min", type=int, default=0,
+                                     location="args")
+search_neighbors_parser.add_argument("max", type=int, location="args")
+search_neighbors_parser.add_argument("fieldcurrency", location="args")
 
 
 """
@@ -85,6 +91,7 @@ tag_model = {
     "tagpack_uri": fields.String(required=True, description="Tagpack URI"),
     "currency": fields.String(required=True, description="Currency"),
     "lastmod": fields.Integer(required=True, description="Last modified"),
+    "active": fields.Boolean(required=True, description="Active address"),
     "category": fields.String(required=False, description="Category"),
     "abuse": fields.String(required=False, description="Abuse")
 }
@@ -209,6 +216,7 @@ entity_tags_response = api.model("entity_tags_response", entity_tags_model)
 neighbor_model = {
     "id": fields.String(required=True, description="Node Id"),
     "node_type": fields.String(required=True, description="Node type"),
+    "labels": fields.List(fields.String, required=True, description="Labels"),
     "balance": fields.Nested(value_response, required=True,
                              description="Balance"),
     "received": fields.Nested(value_response, required=True,
@@ -226,6 +234,23 @@ neighbors_model = {
 }
 neighbors_response = api.model("neighbors_response", neighbors_model)
 
+link_model = {
+    "tx_hash": fields.String(required=True, description="Transaction hash"),
+    "height": fields.String(required=True, description="Block height"),
+    "timestamp": fields.Integer(required=True,
+                                description="Transaction timestamp"),
+    "input_value": fields.Nested(value_response, required=True),
+    "output_value": fields.Nested(value_response, required=True)
+}
+link_response = api.model("link_response", link_model)
+
+links_model = {
+    "links": fields.List(fields.Nested(link_response), required=True,
+                         description="A limited list of transactions between "
+                                     "two addresses")
+}
+links_response = api.model("links_response", links_model)
+
 entity_address_model = address_model.copy()
 entity_address_model['entity'] = fields.Integer(required=True,
                                                 description="Entity id")
@@ -237,7 +262,7 @@ entity_addresses_model = {
     "next_page": fields.String(required=True, description="The next page"),
     "addresses": fields.List(fields.Nested(entity_address_response),
                              required=True,
-                             description="The list of entity adresses")
+                             description="The list of entity addresses")
 }
 entity_addresses_response = api.model("entity_addresses_response",
                                       entity_addresses_model)
@@ -272,20 +297,20 @@ tx_list_model = {
 }
 tx_list_response = api.model("tx_list_response", tx_list_model)
 
-label_model = {
+concept_model = {
     "label": fields.String(required=True, description="Label"),
-    "label_norm": fields.String(required=True, description="Normalized label"),
-    "address_count": fields.Integer(required=True,
-                                    description="Number of addresses "
-                                                "for the label"),
+    "taxonomy": fields.String(required=True, description="Taxonomy"),
+    "uri": fields.String(required=True, description="URI"),
+    "description": fields.String(required=True, description="Description"),
+    "id": fields.String(required=True, description="Id")
 }
-label_response = api.model("label_response", label_model)
+concept_response = api.model("concept_response", concept_model)
 
-category_model = {
-    "category": fields.String(required=True, description="Category"),
-    "id": fields.Integer(required=True, description="Id")
+taxonomy_model = {
+    "taxonomy": fields.String(required=True, description="Taxonomy"),
+    "uri": fields.String(required=True, description="URI"),
 }
-category_response = api.model("category_response", category_model)
+taxonomy_response = api.model("taxonomy_response", taxonomy_model)
 
 
 def search_neighbors_recursive(depth=7):

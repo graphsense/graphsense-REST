@@ -1,9 +1,9 @@
-from flask import Response
+from flask import Response, abort
 from flask_restplus import Namespace, Resource
 
 from gsrest.apis.common import page_size_parser, neighbors_parser, \
     address_txs_response, address_tags_response, entity_tags_response, \
-    tag_response, neighbors_response
+    tag_response, neighbors_response, links_parser, links_response
 import gsrest.service.addresses_service as addressesDAO
 import gsrest.service.common_service as commonDAO
 import gsrest.service.entities_service as entitiesDAO
@@ -25,12 +25,15 @@ class Address(Resource):
     @api.marshal_with(address_tags_response)
     def get(self, currency, address):
         """
-        Returns details and optionally tags of a specific address
+        Returns details and tags of a specific address
         """
         check_inputs(address=address, currency=currency)  # abort if fails
-        addr = commonDAO.get_address(currency, address)  # abort if not found
-        addr['tags'] = commonDAO.list_address_tags(currency, address)
-        return addr
+        addr = commonDAO.get_address(currency, address)
+        if addr:
+            addr['tags'] = commonDAO.list_address_tags(currency, address)
+            return addr
+        abort(404, "Address {} not found in currency {}".format(address,
+                                                                currency))
 
 
 @api.param('currency', 'The cryptocurrency (e.g., btc)')
@@ -50,13 +53,15 @@ class AddressTxs(Resource):
         check_inputs(address=address, currency=currency, page=page,
                      pagesize=pagesize)  # abort if fails
         paging_state = bytes.fromhex(page) if page else None
-        # abort if not found
         paging_state, address_txs = addressesDAO.list_address_txs(currency,
                                                                   address,
                                                                   paging_state,
                                                                   pagesize)
-        return {"next_page": paging_state.hex() if paging_state else None,
-                "address_txs": address_txs}
+        if address_txs:
+            return {"next_page": paging_state.hex() if paging_state else None,
+                    "address_txs": address_txs}
+        abort(404, "Address {} not found in currency {}".format(address,
+                                                                currency))
 
 
 @api.param('currency', 'The cryptocurrency (e.g., btc)')
@@ -108,8 +113,8 @@ class AddressNeighbors(Resource):
         direction = args.get("direction")
         page = args.get("page")
         pagesize = args.get("pagesize")
-        check_inputs(address=address, currency=currency, direction=direction,
-                     page=page, pagesize=pagesize)
+        check_inputs(address=address, currency=currency, page=page,
+                     pagesize=pagesize)
         paging_state = bytes.fromhex(page) if page else None
         if "in" in direction:
             paging_state, relations = addressesDAO\
@@ -119,8 +124,11 @@ class AddressNeighbors(Resource):
             paging_state, relations = addressesDAO\
                 .list_address_outgoing_relations(currency, address,
                                                  paging_state, pagesize)
-        return {"next_page": paging_state.hex() if paging_state else None,
-                "neighbors": relations}
+        if relations is not None:  # None if address not found, else []
+            return {"next_page": paging_state.hex() if paging_state else None,
+                    "neighbors": relations}
+        abort(404, "Address {} not found in currency {}".format(address,
+                                                                currency))
 
 
 @api.param('currency', 'The cryptocurrency (e.g., btc)')
@@ -138,8 +146,8 @@ class AddressNeighborsCSV(Resource):
         page = args.get("page")
         pagesize = args.get("pagesize")
         paging_state = bytes.fromhex(page) if page else None
-        check_inputs(address=address, currency=currency, direction=direction,
-                     page=page, pagesize=pagesize)
+        check_inputs(address=address, currency=currency, page=page,
+                     pagesize=pagesize)
         if "in" in direction:
             query_function = addressesDAO.list_address_incoming_relations
         else:
@@ -149,10 +157,14 @@ class AddressNeighborsCSV(Resource):
         while True:
             paging_state, neighbors = query_function(currency, address,
                                                      paging_state, pagesize)
-            for row in flatten_rows(neighbors, columns):
-                data += row
-            if not paging_state:
-                break
+            if neighbors is not None:  # None if address not found, else []
+                for row in flatten_rows(neighbors, columns):
+                    data += row
+                if not paging_state:
+                    break
+            else:
+                abort(404, "Address {} not found in currency {}"
+                      .format(address, currency))
         return Response(data,
                         mimetype="text/csv",
                         headers=create_download_header(
@@ -171,8 +183,28 @@ class AddressEntity(Resource):
         Returns the associated entity for a given address
         """
         check_inputs(address=address, currency=currency)  # abort if fails
-        # abort if not found
         entity = addressesDAO.get_address_entity(currency, address)
-        entity['tags'] = entitiesDAO.list_entity_tags(currency,
-                                                      entity['entity'])
-        return entity
+        if entity:
+            entity['tags'] = entitiesDAO.list_entity_tags(currency,
+                                                          entity['entity'])
+            return entity
+        abort(404, "Address {} not found in currency {}".format(address,
+                                                                currency))
+
+
+@api.param('currency', 'The cryptocurrency (e.g., btc)')
+@api.param('address', 'The cryptocurrency address')
+@api.route("/<address>/links")
+class AddressLinks(Resource):
+    @token_required
+    @api.doc(parser=links_parser)
+    @api.marshal_with(links_response)
+    def get(self, currency, address):
+        """
+        Returns an addresses' neighbors in the address graph
+        """
+        args = links_parser.parse_args()
+        neighbor = args.get("neighbor")
+        check_inputs(address=address, currency=currency, neighbor=neighbor)
+        links = addressesDAO.list_addresses_links(currency, address, neighbor)
+        return {'links': links}

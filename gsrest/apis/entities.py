@@ -28,9 +28,12 @@ class Entity(Resource):
         """
         check_inputs(currency=currency, entity=entity)
         entity_stats = entitiesDAO.get_entity(currency, entity)
-        entity_stats['tags'] = entitiesDAO.\
-            list_entity_tags(currency, entity_stats['entity'])
-        return entity_stats
+        if entity_stats:
+            entity_stats['tags'] = entitiesDAO.\
+                list_entity_tags(currency, entity_stats['entity'])
+            return entity_stats
+        abort(404, "Entity {} not found in currency {}".format(entity,
+                                                               currency))
 
 
 @api.param('currency', 'The cryptocurrency (e.g., btc)')
@@ -82,8 +85,7 @@ class EntityNeighbors(Resource):
         direction = args.get("direction")
         page = args.get("page")
         pagesize = args.get("pagesize")
-        check_inputs(currency=currency, direction=direction, page=page,
-                     pagesize=pagesize)
+        check_inputs(currency=currency, page=page, pagesize=pagesize)
         paging_state = bytes.fromhex(page) if page else None
         if "in" in direction:
             paging_state, relations = entitiesDAO\
@@ -115,18 +117,21 @@ class EntityNeighborsCSV(Resource):
         query_function = entitiesDAO.list_entity_outgoing_relations
         if "in" in direction:
             query_function = entitiesDAO.list_entity_incoming_relations
-        check_inputs(currency=currency, entity=entity, direction=direction,
-                     page=page)
+        check_inputs(currency=currency, entity=entity, page=page)
         paging_state = bytes.fromhex(page) if page else None
         columns = []
         data = ''
         while True:
             paging_state, neighbors = query_function(currency, entity,
                                                      paging_state, pagesize)
-            for row in flatten_rows(neighbors, columns):
-                data += row
-            if not paging_state:
-                break
+            if neighbors is not None:
+                for row in flatten_rows(neighbors, columns):
+                    data += row
+                if not paging_state:
+                    break
+            else:
+                abort(404, "Entity {} not found in currency {}"
+                      .format(entity, currency))
         return Response(data,
                         mimetype="text/csv",
                         headers=create_download_header(
@@ -153,8 +158,11 @@ class EntityAddresses(Resource):
         paging_state = bytes.fromhex(page) if page else None
         paging_state, addresses = entitiesDAO\
             .list_entity_addresses(currency, entity, paging_state, pagesize)
-        return {"next_page": paging_state.hex() if paging_state else None,
-                "addresses": addresses}
+        if addresses:
+            return {"next_page": paging_state.hex() if paging_state else None,
+                    "addresses": addresses}
+        abort(404, "Entity {} not found in currency {}".format(entity,
+                                                               currency))
 
 
 @api.param('currency', 'The cryptocurrency (e.g., btc)')
@@ -175,26 +183,49 @@ class EntitySearchNeighbors(Resource):
         skipNumAddresses = args['skipNumAddresses']  # default and int
         category = args['category']
         addresses = args['addresses']
+        field = args['field']
+        minValue = args['min']
+        maxValue = args['max']
+        fieldcurrency = args['fieldcurrency']
 
-        if not [category, addresses].count(None) == 1:
-            abort(400, 'Invalid search arguments: one among category and '
-                       'addresses must be provided')
-        check_inputs(currency=currency, entity=entity, direction=direction,
-                     category=category, depth=depth, addresses=addresses)
+        if not [category, addresses, field].count(None) == 2:
+            abort(400, 'Invalid search arguments: one among category, '
+                       'addresses or field must be provided')
+
+        params = dict()
+
+        if category:
+            params['category'] = category
+
+        if field:
+            if maxValue is not None and minValue > maxValue:
+                abort(400, 'Min must not be greater than max')
+            elif field not in ['final_balance', 'total_received']:
+                abort(400, 'Field must be "final_balance" or "total_received"')
+            elif fieldcurrency not in ['value', 'eur', 'usd']:
+                abort(400, 'Fieldcurrency must be one of "value", "eur" or '
+                           '"usd"')
+            params['field'] = (field, fieldcurrency, minValue, maxValue)
+
+        check_inputs(currency=currency, entity=entity, category=category,
+                     depth=depth, addresses=addresses)
         if addresses:
-            addresses = [{"address": address,
-                          "entity":
-                              addressesDAO.get_address_entity_id(currency,
-                                                                 address)}
-                         for address in addresses.split(",")]
+            addresses_list = []
+            for address in addresses.split(","):
+                e = addressesDAO.get_address_entity_id(currency, address)
+                if e:
+                    addresses_list.append({"address": address,
+                                           "entity": e})
+                else:
+                    abort(404, "Entity of address {} not found in currency {}"
+                          .format(address, currency))
+            params['addresses'] = addresses_list
 
-        outgoing = True
-        if "in" in direction:
-            outgoing = False
+        outgoing = "out" in direction
 
         result = entitiesDAO.\
-            list_entity_search_neighbors(currency, entity, category, addresses,
+            list_entity_search_neighbors(currency, entity, params,
                                          breadth, depth, skipNumAddresses,
-                                         dict(), outgoing)
+                                         outgoing)
 
         return {"paths": result}
