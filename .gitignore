@@ -8,3 +8,4 @@ instance
 venv
 app/config.json
 .env
+.*.sw?

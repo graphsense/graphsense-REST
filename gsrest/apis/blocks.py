@@ -5,7 +5,7 @@ from gsrest.apis.common import page_parser, block_response, \
     block_list_response, block_txs_response
 import gsrest.service.blocks_service as blocksDAO
 from gsrest.util.checks import check_inputs
-from gsrest.util.csvify import txs_to_csv, create_download_header
+from gsrest.util.csvify import create_download_header, toCSV
 from gsrest.util.decorator import token_required
 
 api = Namespace('blocks',
@@ -78,11 +78,20 @@ class BlockTxsCSV(Resource):
         Returns a CSV with all the transactions of the block
         """
         check_inputs(currency=currency, height=height)
-        block_txs = blocksDAO.list_block_txs(currency, height)
-        if block_txs:
-            return Response(txs_to_csv(block_txs), mimetype="text/csv",
+        def query_function(_):
+            result = blocksDAO.list_block_txs(currency, height)
+            txs = result["txs"]
+            block_height = result["height"]
+            for tx in txs:
+                tx['block_height'] = block_height
+
+            return (None, txs)
+
+        try:
+            return Response(toCSV(query_function), mimetype="text/csv",
                             headers=create_download_header(
                                 'transactions of block {} ({}).csv'
                                 .format(height, currency.upper())))
-        abort(404, "Block {} not found in currency {}".format(height,
+        except ValueError:
+            abort(404, "Block {} not found in currency {}".format(height,
                                                               currency))

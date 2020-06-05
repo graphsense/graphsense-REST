@@ -7,8 +7,7 @@ from gsrest.apis.common import neighbors_parser, page_size_parser, \
 from gsrest.service import addresses_service as addressesDAO
 from gsrest.service import entities_service as entitiesDAO
 from gsrest.util.checks import check_inputs
-from gsrest.util.csvify import tags_to_csv, create_download_header, \
-    flatten_rows
+from gsrest.util.csvify import toCSV, create_download_header
 from gsrest.util.decorator import token_required
 
 api = Namespace('entities',
@@ -61,8 +60,8 @@ class EntityTagsCSV(Resource):
         Returns attribution tags for a given entity as CSV
         """
         check_inputs(currency=currency, entity=entity)
-        tags = entitiesDAO.list_entity_tags(currency, int(entity))
-        return Response(tags_to_csv(tags), mimetype="text/csv",
+        query_function = lambda _: (None, entitiesDAO.list_entity_tags(currency, int(entity)))
+        return Response(toCSV(query_function), mimetype="text/csv",
                         headers=create_download_header('tags of entity {} '
                                                        '({}).csv'
                                                        .format(entity,
@@ -112,31 +111,18 @@ class EntityNeighborsCSV(Resource):
         # TODO: rather slow with 1NDyJtNTjmwk5xPNhjgAMu4HDHigtobu1s
         args = neighbors_parser.parse_args()
         direction = args.get("direction")
-        page = args.get("page")
-        pagesize = args.get("pagesize")
-        query_function = entitiesDAO.list_entity_outgoing_relations
+        check_inputs(currency=currency, entity=entity)
         if "in" in direction:
-            query_function = entitiesDAO.list_entity_incoming_relations
-        check_inputs(currency=currency, entity=entity, page=page)
-        paging_state = bytes.fromhex(page) if page else None
-        columns = []
-        data = ''
-        while True:
-            paging_state, neighbors = query_function(currency, entity,
-                                                     paging_state, pagesize)
-            if neighbors is not None:
-                for row in flatten_rows(neighbors, columns):
-                    data += row
-                if not paging_state:
-                    break
-            else:
-                abort(404, "Entity {} not found in currency {}"
-                      .format(entity, currency))
-        return Response(data,
+            query_function = lambda page_state: entitiesDAO.list_entity_incoming_relations(currency, entity, page_state)
+            direction = 'incoming'
+        else:
+            query_function = lambda page_state: entitiesDAO.list_entity_outgoing_relations(currency, entity, page_state)
+            direction = 'outgoing'
+        return Response(toCSV(query_function),
                         mimetype="text/csv",
                         headers=create_download_header(
-                            'neighbors of entity {} ({}).csv'
-                            .format(entity, currency.upper())))
+                            '{} neighbors of entity {} ({}).csv'
+                            .format(direction, entity, currency.upper())))
 
 
 @api.param('currency', 'The cryptocurrency (e.g., btc)')
