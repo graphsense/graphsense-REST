@@ -206,6 +206,7 @@ entity_model = {
                                       description="Outgoing transactions"),
     "total_received": fields.Nested(value_response, required=True),
     "total_spent": fields.Nested(value_response, required=True),
+    "reliability": fields.Float(required=False, description="Cluster reliability"),
 }
 
 entity_tags_model = entity_model.copy()

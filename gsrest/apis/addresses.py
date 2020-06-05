@@ -10,6 +10,7 @@ import gsrest.service.entities_service as entitiesDAO
 from gsrest.util.csvify import create_download_header, toCSV
 from gsrest.util.checks import check_inputs
 from gsrest.util.decorator import token_required
+from gsrest.util.reliability import calcReliability
 
 api = Namespace('addresses',
                 path='/<currency>/addresses',
@@ -176,6 +177,7 @@ class AddressEntity(Resource):
         if entity:
             entity['tags'] = entitiesDAO.list_entity_tags(currency,
                                                           entity['entity'])
+            entity['reliability'] = calcReliability(entity['tags'])
             return entity
         abort(404, "Address {} not found in currency {}".format(address,
                                                                 currency))

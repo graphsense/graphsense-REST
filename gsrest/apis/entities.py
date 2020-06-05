@@ -9,6 +9,7 @@ from gsrest.service import entities_service as entitiesDAO
 from gsrest.util.checks import check_inputs
 from gsrest.util.csvify import toCSV, create_download_header
 from gsrest.util.decorator import token_required
+from gsrest.util.reliability import calcReliability
 
 api = Namespace('entities',
                 path='/<currency>/entities',
@@ -30,6 +31,7 @@ class Entity(Resource):
         if entity_stats:
             entity_stats['tags'] = entitiesDAO.\
                 list_entity_tags(currency, entity_stats['entity'])
+            entity_stats['reliability'] = calcReliability(entity_stats['tags'])
             return entity_stats
         abort(404, "Entity {} not found in currency {}".format(entity,
                                                                currency))
@@ -213,5 +215,12 @@ class EntitySearchNeighbors(Resource):
             list_entity_search_neighbors(currency, entity, params,
                                          breadth, depth, skipNumAddresses,
                                          outgoing)
+        def addReliability(paths):
+            if not paths: return
+            for path in paths:
+                path['node']['reliability'] = calcReliability(path['node']['tags'])
+                addReliability(path['paths'])
+
+        addReliability(result)
 
         return {"paths": result}

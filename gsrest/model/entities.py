@@ -2,7 +2,6 @@ from gsrest.model.addresses import Address
 from gsrest.model.common import Values, compute_balance
 from gsrest.model.txs import TxSummary
 
-
 class Entity(object):
     """ Model representing an entity """
 
@@ -34,6 +33,10 @@ class Entity(object):
 
     def to_dict(self):
         return self.__dict__
+
+
+
+
 
 
 class EntityIncomingRelations(object):
