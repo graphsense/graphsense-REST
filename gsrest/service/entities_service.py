@@ -65,49 +65,50 @@ def get_entity(currency, entity_id):
     return None
 
 
-def list_entity_outgoing_relations(currency, entity_id, paging_state=None,
-                                   page_size=None, from_search=False):
+def list_entity_relations(currency, entity_id, isOutgoing, targets=None, 
+                                   paging_state=None, page_size=None, 
+                                   from_search=False):
+    table, this, that, cls = ('outgoing', 'src', 'dst', EntityOutgoingRelations) if isOutgoing else ('incoming', 'dst', 'src', EntityIncomingRelations)
     session = get_session(currency, 'transformed')
     entity_id_group = get_id_group(entity_id)
-    query = "SELECT * FROM cluster_outgoing_relations WHERE " \
-            "src_cluster_group = %s AND src_cluster = %s"
+    hasTargets = isinstance(targets, list)
+    parameters = [entity_id_group, entity_id]
+    basequery = "SELECT * FROM cluster_{}_relations WHERE " \
+            "{}_cluster_group = %s AND {}_cluster = %s".format(table, this, this)
+    if hasTargets:
+        if len(targets) == 0: return None
+        query = basequery.replace('*', '{}_cluster'.format(that))
+        query += " AND {}_cluster in ({})".format(that, ','.join(targets))
+    else:
+        query = basequery
     fetch_size = ENTITY_PAGE_SIZE
     if page_size:
         fetch_size = page_size
     statement = SimpleStatement(query, fetch_size=fetch_size)
-    results = session.execute(statement, [entity_id_group, entity_id],
+    results = session.execute(statement, parameters,
                               paging_state=paging_state)
     paging_state = results.paging_state
+    current_rows = results.current_rows
+    if hasTargets:
+        statements_and_params = []
+        query = basequery + " AND {}_cluster = %s".format(that)
+        for row in results.current_rows:
+            params = parameters.copy()
+            params.append(getattr(row, "{}_cluster".format(that)))
+            statements_and_params.append((query, params))
+        results = execute_concurrent(session, statements_and_params,
+                               raise_on_first_error=False)
+        current_rows = []
+        for (success, row) in results:
+            if not success:
+                pass
+            else:
+                current_rows.append(row.one())
+            
     rates = get_rates(currency)['rates']
     relations = []
-    for row in results.current_rows:
-        relations.append(EntityOutgoingRelations.from_row(row,
-                                                          rates,
-                                                          from_search)
-                         .to_dict())
-    return paging_state, relations
-
-
-def list_entity_incoming_relations(currency, entity_id, paging_state=None,
-                                   page_size=None, from_search=False):
-    session = get_session(currency, 'transformed')
-    entity_id_group = get_id_group(entity_id)
-    query = "SELECT * FROM cluster_incoming_relations WHERE " \
-            "dst_cluster_group = %s AND dst_cluster = %s"
-    fetch_size = ENTITY_PAGE_SIZE
-    if page_size:
-        fetch_size = page_size
-    statement = SimpleStatement(query, fetch_size=fetch_size)
-    results = session.execute(statement, [entity_id_group, entity_id],
-                              paging_state=paging_state)
-    paging_state = results.paging_state
-    rates = get_rates(currency)['rates']
-    relations = []
-    for row in results.current_rows:
-        relations.append(EntityIncomingRelations.from_row(row,
-                                                          rates,
-                                                          from_search)
-                         .to_dict())
+    for row in current_rows:
+        relations.append(cls.from_row(row, rates, from_search).to_dict())
     return paging_state, relations
 
 

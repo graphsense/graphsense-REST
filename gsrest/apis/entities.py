@@ -86,16 +86,15 @@ class EntityNeighbors(Resource):
         direction = args.get("direction")
         page = args.get("page")
         pagesize = args.get("pagesize")
+        targets = args.get("targets")
+        if targets is not None:
+            targets = targets.split(',')
+
         check_inputs(currency=currency, page=page, pagesize=pagesize)
         paging_state = bytes.fromhex(page) if page else None
-        if "in" in direction:
-            paging_state, relations = entitiesDAO\
-                .list_entity_incoming_relations(currency, entity,
-                                                paging_state, pagesize)
-        else:
-            paging_state, relations = entitiesDAO\
-                .list_entity_outgoing_relations(currency, entity,
-                                                paging_state, pagesize)
+        paging_state, relations = entitiesDAO\
+            .list_entity_relations(currency, entity, "out" in direction, targets,
+                                            paging_state, pagesize)
         return {"next_page": paging_state.hex() if paging_state else None,
                 "neighbors": relations}
 
@@ -114,12 +113,9 @@ class EntityNeighborsCSV(Resource):
         args = neighbors_parser.parse_args()
         direction = args.get("direction")
         check_inputs(currency=currency, entity=entity)
-        if "in" in direction:
-            query_function = lambda page_state: entitiesDAO.list_entity_incoming_relations(currency, entity, page_state)
-            direction = 'incoming'
-        else:
-            query_function = lambda page_state: entitiesDAO.list_entity_outgoing_relations(currency, entity, page_state)
-            direction = 'outgoing'
+        isOutgoing = "out" in direction
+        query_function = lambda page_state: entitiesDAO.list_entity_relations(currency, entity, isOutgoing, None, page_state)
+        direction = "outgoing" if isOutgoing else "incoming"
         return Response(toCSV(query_function),
                         mimetype="text/csv",
                         headers=create_download_header(
