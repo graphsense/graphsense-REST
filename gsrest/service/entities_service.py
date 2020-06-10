@@ -157,16 +157,10 @@ def list_entity_search_neighbors(currency, entity, params, breadth, depth,
     def cached(cl, key, get):
         return get_cached(cl, key) or set_cached(cl, key, get())
 
-    if outgoing:
-        (_, rows) = cached(entity, 'rows',
-                           lambda: list_entity_outgoing_relations(
-                               currency, entity, paging_state=None,
-                               page_size=breadth, from_search=True))
-    else:
-        (_, rows) = cached(entity, 'rows',
-                           lambda: list_entity_incoming_relations(
-                               currency, entity, paging_state=None,
-                               page_size=breadth, from_search=True))
+    (_, rows) = cached(entity, 'rows',
+                       lambda: list_entity_relations(
+                           currency, entity, outgoing, paging_state=None,
+                           page_size=breadth, from_search=True))
 
     paths = []
 

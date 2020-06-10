@@ -1,7 +1,7 @@
 from difflib import SequenceMatcher
 import time
 
-def calcReliability(tags = []):
+def calcTagCoherence(tags = []):
     if(len(tags) == 1): return 1
     ratios = []
     for i in range(0, len(tags)):
