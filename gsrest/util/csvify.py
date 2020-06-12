@@ -1,5 +1,5 @@
 from werkzeug.datastructures import Headers
-import gsrest.apis as Api
+from gsrest.apis.api import api
 
 
 def create_download_header(filename):
@@ -9,7 +9,7 @@ def create_download_header(filename):
 
 
 def to_csv(query_function):
-    with Api.api.app.app_context():
+    with api.app.app_context():
         fieldnames = []
         flat_dict = {}
         page_state = None
