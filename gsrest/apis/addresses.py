@@ -7,10 +7,10 @@ from gsrest.apis.common import page_size_parser, neighbors_parser, \
 import gsrest.service.addresses_service as addressesDAO
 import gsrest.service.common_service as commonDAO
 import gsrest.service.entities_service as entitiesDAO
-from gsrest.util.csvify import create_download_header, toCSV
+from gsrest.util.csvify import create_download_header, to_csv
 from gsrest.util.checks import check_inputs
 from gsrest.util.decorator import token_required
-from gsrest.util.tag_coherence import calcTagCoherence
+from gsrest.util.tag_coherence import compute_tag_coherence
 
 api = Namespace('addresses',
                 path='/<currency>/addresses',
@@ -93,7 +93,7 @@ class AddressTagsCSV(Resource):
         def query_function(_):
             return (None, commonDAO.list_address_tags(
                 currency, address))
-        return Response(toCSV(query_function), mimetype="text/csv",
+        return Response(to_csv(query_function), mimetype="text/csv",
                         headers=create_download_header('tags of address {} '
                                                        '({}).csv'
                                                        .format(address,
@@ -149,25 +149,24 @@ class AddressNeighborsCSV(Resource):
         check_inputs(address=address, currency=currency)
         if "in" in direction:
             def query_function(page_state):
-                return addressesDAO.list_address_incoming_relations(currency,
-                                                                    address,
-                                                                    page_state)
+                return addressesDAO.list_address_incoming_relations(
+                    currency, address, page_state)
             direction = 'incoming'
         else:
             def query_function(page_state):
-                return addressesDAO.list_address_outgoing_relations(currency,
-                                                                    address,
-                                                                    page_state)
+                return addressesDAO.list_address_outgoing_relations(
+                    currency, address, page_state)
             direction = 'outgoing'
 
         try:
-            return Response(toCSV(query_function),
+            return Response(to_csv(query_function),
                             mimetype="text/csv",
                             headers=create_download_header(
                                 '{} neighbors of address {} ({}).csv'
                                 .format(direction, address, currency.upper())))
         except ValueError:
-            abort(404, "Address {} not found in currency {}"
+            abort(404,
+                  "Address {} not found in currency {}"
                   .format(address, currency))
 
 
@@ -186,7 +185,7 @@ class AddressEntity(Resource):
         if entity:
             entity['tags'] = entitiesDAO.list_entity_tags(currency,
                                                           entity['entity'])
-            entity['tag_coherence'] = calcTagCoherence(entity['tags'])
+            entity['tag_coherence'] = compute_tag_coherence(entity['tags'])
             return entity
         abort(404, "Address {} not found in currency {}".format(address,
                                                                 currency))

@@ -59,6 +59,6 @@ def check_inputs(**kwargs):
             if not can_be_label and not can_be_tx_address:
                 abort(400, 'Invalid search expression')
             return can_be_label, can_be_tx_address
-        elif key in ['height', 'entity']:
+        if key in ['height', 'entity']:
             if value is None:
                 abort(400, 'Invalid {}'.format(key))

@@ -1,7 +1,7 @@
 from gsrest.model.common import ConvertedValues
 
 
-class Block(object):
+class Block:
     """ Model representing block header fields and summary statistics """
 
     def __init__(self, height, block_hash, no_txs, timestamp):
@@ -19,7 +19,7 @@ class Block(object):
         return self.__dict__
 
 
-class BlockTxSummary(object):
+class BlockTxSummary:
     """ Model representing block transaction summary statistics  """
 
     def __init__(self, tx_hash, no_inputs, no_outputs, total_input,
@@ -45,7 +45,7 @@ class BlockTxSummary(object):
         return self.__dict__
 
 
-class BlockTxs(object):
+class BlockTxs:
     """ Model representing all transactions of a given block """
 
     def __init__(self, height, txs):

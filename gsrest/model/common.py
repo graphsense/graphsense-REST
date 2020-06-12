@@ -1,4 +1,4 @@
-class Values(object):
+class Values:
     """ Model representing values in different crypto- and fiat-currencies."""
 
     def __init__(self, **values):

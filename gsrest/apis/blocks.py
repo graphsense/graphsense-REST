@@ -5,7 +5,7 @@ from gsrest.apis.common import page_parser, block_response, \
     block_list_response, block_txs_response
 import gsrest.service.blocks_service as blocksDAO
 from gsrest.util.checks import check_inputs
-from gsrest.util.csvify import create_download_header, toCSV
+from gsrest.util.csvify import create_download_header, to_csv
 from gsrest.util.decorator import token_required
 
 api = Namespace('blocks',
@@ -89,7 +89,7 @@ class BlockTxsCSV(Resource):
             return (None, txs)
 
         try:
-            return Response(toCSV(query_function), mimetype="text/csv",
+            return Response(to_csv(query_function), mimetype="text/csv",
                             headers=create_download_header(
                                 'transactions of block {} ({}).csv'
                                 .format(height, currency.upper())))

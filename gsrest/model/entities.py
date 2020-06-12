@@ -3,7 +3,7 @@ from gsrest.model.common import Values, compute_balance
 from gsrest.model.txs import TxSummary
 
 
-class Entity(object):
+class Entity:
     """ Model representing an entity """
 
     def __init__(self, entity, first_tx, in_degree,
@@ -36,7 +36,7 @@ class Entity(object):
         return self.__dict__
 
 
-class EntityIncomingRelations(object):
+class EntityIncomingRelations:
     def __init__(self, estimated_value, no_txs, src_properties, rate,
                  src_cluster, dst_cluster, labels, from_search=False):
         self.id = src_cluster
@@ -64,7 +64,7 @@ class EntityIncomingRelations(object):
         return self.__dict__
 
 
-class EntityOutgoingRelations(object):
+class EntityOutgoingRelations:
     def __init__(self, estimated_value, no_txs, dst_properties, rates,
                  dst_cluster, src_cluster, labels, from_search=False):
         self.id = dst_cluster

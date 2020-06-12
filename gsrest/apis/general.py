@@ -1,3 +1,4 @@
+import time
 from flask_restplus import Namespace, Resource
 from flask import current_app
 
@@ -9,8 +10,6 @@ import gsrest.service.tags_service as labelsDAO
 import gsrest.service.txs_service as txsDAO
 from gsrest.util.checks import check_inputs
 from gsrest.util.decorator import token_required
-
-import time
 
 
 api = Namespace('general',

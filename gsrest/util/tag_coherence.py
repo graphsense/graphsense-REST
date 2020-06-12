@@ -1,7 +1,7 @@
 from difflib import SequenceMatcher
 
 
-def calcTagCoherence(tags=None):
+def compute_tag_coherence(tags=None):
 
     if len(tags) == 1:
         return 1
@@ -16,4 +16,5 @@ def calcTagCoherence(tags=None):
 
     if not ratios:
         return None
+
     return sum(ratios) / len(ratios)

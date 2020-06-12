@@ -7,7 +7,7 @@ from gsrest.service.blacklist_service import check_blacklist
 from gsrest.util.exceptions import MissingConfigError
 
 
-class User(object):
+class User:
     """ User Model for storing user related details """
 
     def __init__(self, username, password=None):
@@ -39,8 +39,8 @@ class User(object):
 
         payload = {
             'exp': datetime.datetime.utcnow() +
-            datetime.timedelta(days=current_app.config[
-                'JWT_ACCESS_TOKEN_EXPIRES_DAYS']),
+                   datetime.timedelta(days=current_app.config[
+                       'JWT_ACCESS_TOKEN_EXPIRES_DAYS']),
             'iat': datetime.datetime.utcnow(),
             'sub': self.username
         }

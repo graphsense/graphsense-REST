@@ -1,7 +1,7 @@
+from sqlite3 import IntegrityError
 import click
 from flask import current_app
 from flask.cli import with_appcontext
-from sqlite3 import IntegrityError
 
 from gsrest.db.user_db import get_db
 from gsrest.model.user import User

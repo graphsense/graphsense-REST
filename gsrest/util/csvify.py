@@ -8,7 +8,7 @@ def create_download_header(filename):
     return headers
 
 
-def toCSV(query_function):
+def to_csv(query_function):
     with Api.api.app.app_context():
         fieldnames = []
         flat_dict = {}
@@ -19,7 +19,7 @@ def toCSV(query_function):
                 raise ValueError('nothing found')
 
             def flatten(item, name=""):
-                if type(item) is dict:
+                if isinstance(item, dict):
                     for sub_item in item:
                         flatten(item[sub_item], name + sub_item + "_")
                 else:
@@ -29,7 +29,7 @@ def toCSV(query_function):
                 flatten(row)
                 if not fieldnames:
                     fieldnames = ",".join(flat_dict.keys())
-                    yield (fieldnames + "\n")
+                    yield fieldnames + "\n"
                 yield (",".join([str(item) for item in flat_dict.values()]) +
                        "\n")
                 flat_dict = {}

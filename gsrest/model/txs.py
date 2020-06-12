@@ -1,7 +1,7 @@
 from gsrest.model.common import ConvertedValues
 
 
-class Tx(object):
+class Tx:
     """ Model representing a transaction """
 
     def __init__(self, tx_hash, coinbase, height, inputs, outputs, timestamp,
@@ -38,7 +38,7 @@ class Tx(object):
         return self.__dict__
 
 
-class TxInputOutput(object):
+class TxInputOutput:
     def __init__(self, address, value):
         self.address = address[0]
         self.value = value
@@ -47,7 +47,7 @@ class TxInputOutput(object):
         return self.__dict__
 
 
-class TxSummary(object):
+class TxSummary:
     def __init__(self, height, timestamp, tx_hash):
         self.height = height
         self.timestamp = timestamp

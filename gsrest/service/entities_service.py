@@ -1,6 +1,6 @@
+from math import floor
 from cassandra.query import SimpleStatement
 from cassandra.concurrent import execute_concurrent
-from math import floor
 
 from gsrest.db.cassandra import get_session
 from gsrest.model.entities import Entity, EntityIncomingRelations, \
@@ -77,12 +77,12 @@ def list_entity_relations(currency, entity_id, is_outgoing, targets=None,
 
     session = get_session(currency, 'transformed')
     entity_id_group = get_id_group(entity_id)
-    hasTargets = isinstance(targets, list)
+    has_targets = isinstance(targets, list)
     parameters = [entity_id_group, entity_id]
     basequery = "SELECT * FROM cluster_{}_relations WHERE " \
                 "{}_cluster_group = %s AND " \
                 "{}_cluster = %s".format(table, this, this)
-    if hasTargets:
+    if has_targets:
         if len(targets) == 0:
             return None
         query = basequery.replace('*', '{}_cluster'.format(that))
@@ -97,7 +97,7 @@ def list_entity_relations(currency, entity_id, is_outgoing, targets=None,
                               paging_state=paging_state)
     paging_state = results.paging_state
     current_rows = results.current_rows
-    if hasTargets:
+    if has_targets:
         statements_and_params = []
         query = basequery + " AND {}_cluster = %s".format(that)
         for row in results.current_rows:
@@ -147,7 +147,7 @@ def list_entity_addresses(currency, entity_id, paging_state, page_size):
 
 
 def list_entity_search_neighbors(currency, entity, params, breadth, depth,
-                                 skipNumAddresses, outgoing, cache=None):
+                                 skip_num_addresses, outgoing, cache=None):
     if cache is None:
         cache = dict()
     if depth <= 0:
@@ -197,24 +197,24 @@ def list_entity_search_neighbors(currency, entity, params, breadth, depth,
             match = len(matching_addresses) > 0
 
         if 'field' in params:
-            (field, fieldcurrency, minValue, maxValue) = params['field']
+            (field, fieldcurrency, min_value, max_value) = params['field']
             if field == 'final_balance':
                 v = props['balance'][fieldcurrency]
             elif field == 'total_received':
                 v = props['total_received'][fieldcurrency]
             else:
                 v = -1
-            match = v >= minValue and (maxValue is None or maxValue >= v)
+            match = v >= min_value and (max_value is None or max_value >= v)
 
         subpaths = False
         if match:
             subpaths = True
-        elif 'no_addresses' in props \
-                and props['no_addresses'] <= skipNumAddresses:
+        elif 'no_addresses' in props and \
+             props['no_addresses'] <= skip_num_addresses:
             subpaths = list_entity_search_neighbors(currency, subentity,
                                                     params, breadth,
                                                     depth - 1,
-                                                    skipNumAddresses,
+                                                    skip_num_addresses,
                                                     outgoing, cache)
 
         if not subpaths:

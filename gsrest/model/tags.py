@@ -1,4 +1,4 @@
-class Tag(object):
+class Tag:
     """ Model representing a tag """
 
     def __init__(self, address, label, category, abuse, tagpack_uri, source,
@@ -30,7 +30,7 @@ class Tag(object):
         return self.__dict__
 
 
-class Concept(object):
+class Concept:
     """Concept Definition.
     This class serves as a proxy for a concept that is defined
     in some remote taxonomy. It just provides the most essential properties.
@@ -54,7 +54,7 @@ class Concept(object):
         return self.__dict__
 
 
-class Taxonomy(object):
+class Taxonomy:
     """ Model representing a taxonomy """
 
     def __init__(self, taxonomy, uri):
