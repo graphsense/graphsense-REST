@@ -35,11 +35,11 @@ def find_user(username):
     if db_user is None:
         current_app.logger.info('User %s not found', username)
         return None
-    else:
-        user = User(username=db_user['username'])
-        user.password_hash = db_user['password']
-        current_app.logger.info('User %s found', username)
-        return user
+
+    user = User(username=db_user['username'])
+    user.password_hash = db_user['password']
+    current_app.logger.info('User %s found', username)
+    return user
 
 
 @click.command('create-user')
