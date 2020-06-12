@@ -78,6 +78,7 @@ class BlockTxsCSV(Resource):
         Returns a CSV with all the transactions of the block
         """
         check_inputs(currency=currency, height=height)
+
         def query_function(_):
             result = blocksDAO.list_block_txs(currency, height)
             txs = result["txs"]
@@ -93,5 +94,5 @@ class BlockTxsCSV(Resource):
                                 'transactions of block {} ({}).csv'
                                 .format(height, currency.upper())))
         except ValueError:
-            abort(404, "Block {} not found in currency {}".format(height,
-                                                              currency))
+            abort(404,
+                  "Block {} not found in currency {}".format(height, currency))

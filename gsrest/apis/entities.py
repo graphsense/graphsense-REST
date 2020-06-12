@@ -93,8 +93,8 @@ class EntityNeighbors(Resource):
         check_inputs(currency=currency, page=page, pagesize=pagesize)
         paging_state = bytes.fromhex(page) if page else None
         paging_state, relations = entitiesDAO\
-            .list_entity_relations(currency, entity, "out" in direction, targets,
-                                            paging_state, pagesize)
+            .list_entity_relations(currency, entity, "out" in direction,
+                                   targets, paging_state, pagesize)
         return {"next_page": paging_state.hex() if paging_state else None,
                 "neighbors": relations}
 
@@ -211,8 +211,10 @@ class EntitySearchNeighbors(Resource):
             list_entity_search_neighbors(currency, entity, params,
                                          breadth, depth, skipNumAddresses,
                                          outgoing)
+
         def addTagCoherence(paths):
-            if not paths: return
+            if not paths:
+                return
             for path in paths:
                 path['node']['tag_coherence'] = calcTagCoherence(path['node']['tags'])
                 addTagCoherence(path['paths'])

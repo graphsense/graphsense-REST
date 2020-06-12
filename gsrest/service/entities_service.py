@@ -65,18 +65,26 @@ def get_entity(currency, entity_id):
     return None
 
 
-def list_entity_relations(currency, entity_id, isOutgoing, targets=None, 
-                                   paging_state=None, page_size=None, 
-                                   from_search=False):
-    table, this, that, cls = ('outgoing', 'src', 'dst', EntityOutgoingRelations) if isOutgoing else ('incoming', 'dst', 'src', EntityIncomingRelations)
+def list_entity_relations(currency, entity_id, is_outgoing, targets=None,
+                          paging_state=None, page_size=None,
+                          from_search=False):
+    if is_outgoing:
+        table, this, that = ('outgoing', 'src', 'dst')
+        cls = EntityOutgoingRelations
+    else:
+        table, this, that = ('incoming', 'dst', 'src')
+        cls = EntityIncomingRelations
+
     session = get_session(currency, 'transformed')
     entity_id_group = get_id_group(entity_id)
     hasTargets = isinstance(targets, list)
     parameters = [entity_id_group, entity_id]
     basequery = "SELECT * FROM cluster_{}_relations WHERE " \
-            "{}_cluster_group = %s AND {}_cluster = %s".format(table, this, this)
+                "{}_cluster_group = %s AND " \
+                "{}_cluster = %s".format(table, this, this)
     if hasTargets:
-        if len(targets) == 0: return None
+        if len(targets) == 0:
+            return None
         query = basequery.replace('*', '{}_cluster'.format(that))
         query += " AND {}_cluster in ({})".format(that, ','.join(targets))
     else:
@@ -97,14 +105,14 @@ def list_entity_relations(currency, entity_id, isOutgoing, targets=None,
             params.append(getattr(row, "{}_cluster".format(that)))
             statements_and_params.append((query, params))
         results = execute_concurrent(session, statements_and_params,
-                               raise_on_first_error=False)
+                                     raise_on_first_error=False)
         current_rows = []
         for (success, row) in results:
             if not success:
                 pass
             else:
                 current_rows.append(row.one())
-            
+
     rates = get_rates(currency)['rates']
     relations = []
     for row in current_rows:

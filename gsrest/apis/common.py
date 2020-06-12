@@ -40,7 +40,8 @@ neighbors_parser.add_argument("direction", required=True, location="args",
                               choices=('in', 'out'),
                               help="Incoming or outgoing neighbors")
 neighbors_parser.add_argument("targets", required=False, location="args",
-              help="Restrict result to the given set of comma separated ids")
+                              help="Restrict result to the given set of "
+                                   "comma separated ids")
 
 links_parser = api.parser()
 links_parser.add_argument("neighbor", required=True, location="args",

@@ -1,15 +1,17 @@
 from werkzeug.datastructures import Headers
 import gsrest.apis as Api
 
+
 def create_download_header(filename):
     headers = Headers()
     headers.add('Content-Disposition', 'attachment', filename=filename)
     return headers
 
+
 def toCSV(query_function):
     with Api.api.app.app_context():
         fieldnames = []
-        flatDict = {}
+        flat_dict = {}
         page_state = None
         while True:
             (page_state, rows) = query_function(page_state)
@@ -22,17 +24,16 @@ def toCSV(query_function):
                     for sub_item in item:
                         flatten(item[sub_item], name + sub_item + "_")
                 else:
-                    flatDict[name[:-1]] = item
+                    flat_dict[name[:-1]] = item
 
             for row in rows:
-                #for item in row.toJson():
                 flatten(row)
                 if not fieldnames:
-                    fieldnames = ",".join(flatDict.keys())
+                    fieldnames = ",".join(flat_dict.keys())
                     yield (fieldnames + "\n")
-                yield (",".join([str(item) for item in flatDict.values()]) + "\n")
-                flatDict = {}
+                yield (",".join([str(item) for item in flat_dict.values()]) +
+                       "\n")
+                flat_dict = {}
 
             if not page_state:
                 break
-

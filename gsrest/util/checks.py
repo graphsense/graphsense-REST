@@ -31,7 +31,7 @@ def check_inputs(**kwargs):
                 abort(404, 'Unknown currency in config: {}'.format(value))
         if key in ['depth']:
             if value > MAX_DEPTH:
-                abort(400, "Depth must not exceed %d".format(MAX_DEPTH))
+                abort(400, "Depth must not exceed {}".format(MAX_DEPTH))
         if key in ['category']:
             if value and not value.isalpha():
                 abort(400, 'Invalid {}'.format(key))
