@@ -15,7 +15,6 @@ def toCSV(query_function):
         page_state = None
         while True:
             (page_state, rows) = query_function(page_state)
-            print('row {}'.format(rows), flush=True)
             if rows is None:
                 raise ValueError('nothing found')
 

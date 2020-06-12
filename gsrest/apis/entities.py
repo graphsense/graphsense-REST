@@ -63,8 +63,10 @@ class EntityTagsCSV(Resource):
         Returns attribution tags for a given entity as CSV
         """
         check_inputs(currency=currency, entity=entity)
-        query_function = lambda _: (None, entitiesDAO.list_entity_tags(
-            currency, int(entity)))
+
+        def query_function(_):
+            return (None, entitiesDAO.list_entity_tags(
+                                currency, int(entity)))
         return Response(toCSV(query_function), mimetype="text/csv",
                         headers=create_download_header('tags of entity {} '
                                                        '({}).csv'
@@ -116,8 +118,10 @@ class EntityNeighborsCSV(Resource):
         direction = args.get("direction")
         check_inputs(currency=currency, entity=entity)
         isOutgoing = "out" in direction
-        query_function = lambda page_state: entitiesDAO.list_entity_relations(
-            currency, entity, isOutgoing, None, page_state)
+
+        def query_function(page_state):
+            return entitiesDAO.list_entity_relations(
+                currency, entity, isOutgoing, None, page_state)
         direction = "outgoing" if isOutgoing else "incoming"
         return Response(toCSV(query_function),
                         mimetype="text/csv",
