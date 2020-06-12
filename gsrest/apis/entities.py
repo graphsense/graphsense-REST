@@ -31,7 +31,8 @@ class Entity(Resource):
         if entity_stats:
             entity_stats['tags'] = entitiesDAO.\
                 list_entity_tags(currency, entity_stats['entity'])
-            entity_stats['tag_coherence'] = calcTagCoherence(entity_stats['tags'])
+            entity_stats['tag_coherence'] = calcTagCoherence(
+                entity_stats['tags'])
             return entity_stats
         abort(404, "Entity {} not found in currency {}".format(entity,
                                                                currency))
@@ -62,7 +63,8 @@ class EntityTagsCSV(Resource):
         Returns attribution tags for a given entity as CSV
         """
         check_inputs(currency=currency, entity=entity)
-        query_function = lambda _: (None, entitiesDAO.list_entity_tags(currency, int(entity)))
+        query_function = lambda _: (None, entitiesDAO.list_entity_tags(
+            currency, int(entity)))
         return Response(toCSV(query_function), mimetype="text/csv",
                         headers=create_download_header('tags of entity {} '
                                                        '({}).csv'
@@ -114,7 +116,8 @@ class EntityNeighborsCSV(Resource):
         direction = args.get("direction")
         check_inputs(currency=currency, entity=entity)
         isOutgoing = "out" in direction
-        query_function = lambda page_state: entitiesDAO.list_entity_relations(currency, entity, isOutgoing, None, page_state)
+        query_function = lambda page_state: entitiesDAO.list_entity_relations(
+            currency, entity, isOutgoing, None, page_state)
         direction = "outgoing" if isOutgoing else "incoming"
         return Response(toCSV(query_function),
                         mimetype="text/csv",
@@ -216,7 +219,8 @@ class EntitySearchNeighbors(Resource):
             if not paths:
                 return
             for path in paths:
-                path['node']['tag_coherence'] = calcTagCoherence(path['node']['tags'])
+                path['node']['tag_coherence'] = calcTagCoherence(
+                    path['node']['tags'])
                 addTagCoherence(path['paths'])
 
         addTagCoherence(result)

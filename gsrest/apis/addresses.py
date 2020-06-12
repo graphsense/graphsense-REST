@@ -89,7 +89,8 @@ class AddressTagsCSV(Resource):
         Returns attribution tags for a given address as CSV
         """
         check_inputs(address=address, currency=currency)  # abort if fails
-        query_function = lambda _: (None, commonDAO.list_address_tags(currency, address))
+        query_function = lambda _: (None, commonDAO.list_address_tags(
+            currency, address))
         return Response(toCSV(query_function), mimetype="text/csv",
                         headers=create_download_header('tags of address {} '
                                                        '({}).csv'
@@ -145,10 +146,16 @@ class AddressNeighborsCSV(Resource):
         direction = args.get("direction")
         check_inputs(address=address, currency=currency)
         if "in" in direction:
-            query_function = lambda page_state: addressesDAO.list_address_incoming_relations(currency, address, page_state)
+            query_function = lambda page_state: \
+                addressesDAO.list_address_incoming_relations(currency,
+                                                             address,
+                                                             page_state)
             direction = 'incoming'
         else:
-            query_function = lambda page_state: addressesDAO.list_address_outgoing_relations(currency, address, page_state)
+            query_function = lambda page_state: \
+                addressesDAO.list_address_outgoing_relations(currency,
+                                                             address,
+                                                             page_state)
             direction = 'outgoing'
 
         try:
