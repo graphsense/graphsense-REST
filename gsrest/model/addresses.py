@@ -89,7 +89,7 @@ class AddressOutgoingRelations:
         self.received = Values(**dst_properties.total_received._asdict())\
             .to_dict()
         self.balance = compute_balance(dst_properties.total_received.value,
-                                       dst_properties.total_received.value,
+                                       dst_properties.total_spent.value,
                                        rates)
         self.no_txs = no_txs
         self.estimated_value = Values(**estimated_value._asdict()).to_dict()
@@ -114,7 +114,7 @@ class AddressIncomingRelations:
         self.received = Values(**src_properties.total_received._asdict())\
             .to_dict()
         self.balance = compute_balance(src_properties.total_received.value,
-                                       src_properties.total_received.value,
+                                       src_properties.total_spent.value,
                                        rates)
         self.no_txs = no_txs
         self.estimated_value = Values(**estimated_value._asdict()).to_dict()
