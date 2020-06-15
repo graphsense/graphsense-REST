@@ -2,9 +2,8 @@ from difflib import SequenceMatcher
 
 
 def compute_tag_coherence(tags=None):
-    labels = set()
-    for tag in tags:
-        labels.add(tag['label'])
+
+    labels = {tag['label'] for tag in tags}
 
     if len(labels) == 1:
         return 1
