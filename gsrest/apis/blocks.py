@@ -81,12 +81,15 @@ class BlockTxsCSV(Resource):
 
         def query_function(_):
             result = blocksDAO.list_block_txs(currency, height)
-            txs = result["txs"]
-            block_height = result["height"]
-            for tx in txs:
-                tx['block_height'] = block_height
+            if result:
+                txs = result["txs"]
+                block_height = result["height"]
+                for tx in txs:
+                    tx['block_height'] = block_height
 
-            return (None, txs)
+                return None, txs
+            abort(404,
+                  "Block {} not found in currency {}".format(height, currency))
 
         try:
             return Response(to_csv(query_function), mimetype="text/csv",

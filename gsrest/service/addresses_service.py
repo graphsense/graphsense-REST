@@ -158,7 +158,9 @@ def list_addresses_links(currency, address, neighbor):
 def get_address_entity(currency, address):
     # from address to complete entity stats
     entity_id = get_address_entity_id(currency, address)
-    return get_entity(currency, entity_id)
+    if isinstance(entity_id, int):
+        return get_entity(currency, entity_id)
+    return None
 
 
 def get_address_entity_id(currency, address):
