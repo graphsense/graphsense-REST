@@ -2,8 +2,17 @@ from difflib import SequenceMatcher
 
 
 def compute_tag_coherence(tags=None):
+    if not tags:
+        return None
 
-    labels = {tag['label'] for tag in tags}
+    labels = set()
+    labelCount = dict()
+    for tag in tags:
+        label = tag['label']
+        labels.add(label)
+        if label not in labelCount:
+            labelCount[label] = 0
+        labelCount[label] += 1
 
     if len(labels) == 1:
         return 1
@@ -19,4 +28,8 @@ def compute_tag_coherence(tags=None):
     if not ratios:
         return None
 
-    return sum(ratios) / len(ratios)
+    e = 0
+    for c in labelCount.values():
+        e += c * c - c
+
+    return (e + sum(ratios)) / (e + len(ratios))
