@@ -2,16 +2,19 @@ from difflib import SequenceMatcher
 
 
 def compute_tag_coherence(tags=None):
+    labels = set()
+    for tag in tags:
+        labels.add(tag['label'])
 
-    if len(tags) == 1:
+    if len(labels) == 1:
         return 1
 
     ratios = []
-    for i, tag_i in enumerate(tags):
-        for j, tag_j in enumerate(tags):
+    for i, label_i in enumerate(labels):
+        for j, label_j in enumerate(labels):
             if i == j:
                 continue
-            seq_match = SequenceMatcher(None, tag_i['label'], tag_j['label'])
+            seq_match = SequenceMatcher(None, label_i, label_j)
             ratios.append(seq_match.ratio())
 
     if not ratios:
