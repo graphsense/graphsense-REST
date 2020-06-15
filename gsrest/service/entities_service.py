@@ -15,9 +15,9 @@ ENTITY_PAGE_SIZE = 100
 ENTITY_ADDRESSES_PAGE_SIZE = 100
 
 
-def get_id_group(id):
+def get_id_group(id_):
     # if BUCKET_SIZE depends on the currency, we need session = ... here
-    return floor(id / BUCKET_SIZE)
+    return floor(id_ / BUCKET_SIZE)
 
 
 def list_entity_tags(currency, entity_id):

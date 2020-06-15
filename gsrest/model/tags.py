@@ -38,9 +38,9 @@ class Concept:
     See: https://www.w3.org/TR/skos-reference/#concepts
     """
 
-    def __init__(self, taxonomy, id, uri, label, description):
+    def __init__(self, taxonomy, id_, uri, label, description):
         self.taxonomy = taxonomy
-        self.id = id
+        self.id = id_
         self.uri = uri
         self.label = label
         self.description = description
