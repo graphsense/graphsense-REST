@@ -36,12 +36,12 @@ def get_keyspace_mapping(currency, keyspace_type):
         if 'tagpacks' not in ks_mapping:
             raise MissingConfigError('Missing config property: tagpacks')
         return ks_mapping['tagpacks']
-    elif currency is not None and keyspace_type in ('raw', 'transformed'):
+    if currency is not None and keyspace_type in ('raw', 'transformed'):
         if currency not in ks_mapping:
             abort(404, 'Unknown currency in config: {}'.format(currency))
         if keyspace_type == 'raw':
             return ks_mapping[currency][0]
-        elif keyspace_type == 'transformed':
+        if keyspace_type == 'transformed':
             return ks_mapping[currency][1]
     else:
         raise ValueError("Invalid keyspace request: {} {}".format(

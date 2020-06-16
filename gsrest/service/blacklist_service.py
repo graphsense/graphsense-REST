@@ -21,8 +21,6 @@ def check_blacklist(token):
     ).fetchone()
 
     if db_token is None:
-        # print('Token {} is not blacklisted'.format(token))
         return False
-    else:
-        # print('Token {} is blacklisted'.format(token))
-        return True
+
+    return True

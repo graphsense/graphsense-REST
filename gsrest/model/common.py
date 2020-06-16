@@ -1,4 +1,4 @@
-class Values(object):
+class Values:
     """ Model representing values in different crypto- and fiat-currencies."""
 
     def __init__(self, **values):
@@ -12,7 +12,7 @@ class ConvertedValues(Values):
     """ Model representing a crypto value and converted fiat values """
 
     def __init__(self, value, rates):
-        super(Values, self).__init__()
+        Values.__init__(self)
         self.values = self._convert_values(value, rates)
 
     def _convert_values(self, value, rates):

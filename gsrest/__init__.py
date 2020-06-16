@@ -56,7 +56,7 @@ def create_app(test_config=None):
 
     CORS(app, supports_credentials=True,
          origins=app.config['ALLOWED_ORIGINS'] if 'ALLOWED_ORIGINS'
-                                                  in app.config else '*')
+         in app.config else '*')
 
     # ensure the instance folder exists
     try:

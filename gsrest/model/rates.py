@@ -1,4 +1,4 @@
-class ExchangeRate(object):
+class ExchangeRate:
     """ Model representing exchange rate for a given height """
 
     def __init__(self, height, rates):

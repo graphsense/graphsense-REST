@@ -1,7 +1,7 @@
 import datetime
 
 
-class BlacklistToken(object):
+class BlacklistToken:
     """ Token model for storing JWT tokens """
 
     def __init__(self, token):

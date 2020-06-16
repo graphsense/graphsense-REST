@@ -7,9 +7,9 @@ from gsrest.apis.common import neighbors_parser, page_size_parser, \
 from gsrest.service import addresses_service as addressesDAO
 from gsrest.service import entities_service as entitiesDAO
 from gsrest.util.checks import check_inputs
-from gsrest.util.csvify import tags_to_csv, create_download_header, \
-    flatten_rows
+from gsrest.util.csvify import to_csv, create_download_header
 from gsrest.util.decorator import token_required
+from gsrest.util.tag_coherence import compute_tag_coherence
 
 api = Namespace('entities',
                 path='/<currency>/entities',
@@ -31,9 +31,11 @@ class Entity(Resource):
         if entity_stats:
             entity_stats['tags'] = entitiesDAO.\
                 list_entity_tags(currency, entity_stats['entity'])
+            entity_stats['tag_coherence'] = compute_tag_coherence(
+                entity_stats['tags'])
             return entity_stats
-        abort(404, "Entity {} not found in currency {}".format(entity,
-                                                               currency))
+        abort(404,
+              "Entity {} not found in currency {}".format(entity, currency))
 
 
 @api.param('currency', 'The cryptocurrency (e.g., btc)')
@@ -61,8 +63,11 @@ class EntityTagsCSV(Resource):
         Returns attribution tags for a given entity as CSV
         """
         check_inputs(currency=currency, entity=entity)
-        tags = entitiesDAO.list_entity_tags(currency, int(entity))
-        return Response(tags_to_csv(tags), mimetype="text/csv",
+
+        def query_function(_):
+            return (None, entitiesDAO.list_entity_tags(
+                                currency, int(entity)))
+        return Response(to_csv(query_function), mimetype="text/csv",
                         headers=create_download_header('tags of entity {} '
                                                        '({}).csv'
                                                        .format(entity,
@@ -85,16 +90,15 @@ class EntityNeighbors(Resource):
         direction = args.get("direction")
         page = args.get("page")
         pagesize = args.get("pagesize")
+        targets = args.get("targets")
+        if targets is not None:
+            targets = targets.split(',')
+
         check_inputs(currency=currency, page=page, pagesize=pagesize)
         paging_state = bytes.fromhex(page) if page else None
-        if "in" in direction:
-            paging_state, relations = entitiesDAO\
-                .list_entity_incoming_relations(currency, entity,
-                                                paging_state, pagesize)
-        else:
-            paging_state, relations = entitiesDAO\
-                .list_entity_outgoing_relations(currency, entity,
-                                                paging_state, pagesize)
+        paging_state, relations = entitiesDAO\
+            .list_entity_relations(currency, entity, "out" in direction,
+                                   targets, paging_state, pagesize)
         return {"next_page": paging_state.hex() if paging_state else None,
                 "neighbors": relations}
 
@@ -112,31 +116,19 @@ class EntityNeighborsCSV(Resource):
         # TODO: rather slow with 1NDyJtNTjmwk5xPNhjgAMu4HDHigtobu1s
         args = neighbors_parser.parse_args()
         direction = args.get("direction")
-        page = args.get("page")
-        pagesize = args.get("pagesize")
-        query_function = entitiesDAO.list_entity_outgoing_relations
-        if "in" in direction:
-            query_function = entitiesDAO.list_entity_incoming_relations
-        check_inputs(currency=currency, entity=entity, page=page)
-        paging_state = bytes.fromhex(page) if page else None
-        columns = []
-        data = ''
-        while True:
-            paging_state, neighbors = query_function(currency, entity,
-                                                     paging_state, pagesize)
-            if neighbors is not None:
-                for row in flatten_rows(neighbors, columns):
-                    data += row
-                if not paging_state:
-                    break
-            else:
-                abort(404, "Entity {} not found in currency {}"
-                      .format(entity, currency))
-        return Response(data,
+        check_inputs(currency=currency, entity=entity)
+        is_outgoing = "out" in direction
+
+        def query_function(page_state):
+            return entitiesDAO.list_entity_relations(
+                currency, entity, is_outgoing, None, page_state)
+
+        direction = "outgoing" if is_outgoing else "incoming"
+        return Response(to_csv(query_function),
                         mimetype="text/csv",
                         headers=create_download_header(
-                            'neighbors of entity {} ({}).csv'
-                            .format(entity, currency.upper())))
+                            '{} neighbors of entity {} ({}).csv'
+                            .format(direction, entity, currency.upper())))
 
 
 @api.param('currency', 'The cryptocurrency (e.g., btc)')
@@ -180,12 +172,12 @@ class EntitySearchNeighbors(Resource):
         direction = args['direction']
         depth = args['depth']  # default and int
         breadth = args['breadth']  # default and int
-        skipNumAddresses = args['skipNumAddresses']  # default and int
+        skip_num_addresses = args['skipNumAddresses']  # default and int
         category = args['category']
         addresses = args['addresses']
         field = args['field']
-        minValue = args['min']
-        maxValue = args['max']
+        min_value = args['min']
+        max_value = args['max']
         fieldcurrency = args['fieldcurrency']
 
         if not [category, addresses, field].count(None) == 2:
@@ -194,21 +186,21 @@ class EntitySearchNeighbors(Resource):
 
         params = dict()
 
-        if category:
-            params['category'] = category
-
         if field:
-            if maxValue is not None and minValue > maxValue:
+            if max_value is not None and min_value > max_value:
                 abort(400, 'Min must not be greater than max')
             elif field not in ['final_balance', 'total_received']:
                 abort(400, 'Field must be "final_balance" or "total_received"')
             elif fieldcurrency not in ['value', 'eur', 'usd']:
                 abort(400, 'Fieldcurrency must be one of "value", "eur" or '
                            '"usd"')
-            params['field'] = (field, fieldcurrency, minValue, maxValue)
+            params['field'] = (field, fieldcurrency, min_value, max_value)
 
         check_inputs(currency=currency, entity=entity, category=category,
                      depth=depth, addresses=addresses)
+        if category:
+            params['category'] = category.replace(' ', '_')
+
         if addresses:
             addresses_list = []
             for address in addresses.split(","):
@@ -225,7 +217,17 @@ class EntitySearchNeighbors(Resource):
 
         result = entitiesDAO.\
             list_entity_search_neighbors(currency, entity, params,
-                                         breadth, depth, skipNumAddresses,
+                                         breadth, depth, skip_num_addresses,
                                          outgoing)
+
+        def add_tag_coherence(paths):
+            if not paths:
+                return
+            for path in paths:
+                path['node']['tag_coherence'] = compute_tag_coherence(
+                    path['node']['tags'])
+                add_tag_coherence(path['paths'])
+
+        add_tag_coherence(result)
 
         return {"paths": result}

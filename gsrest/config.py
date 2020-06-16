@@ -1,7 +1,7 @@
 import os
 
 
-class Config(object):
+class Config:
     """
     This class defines default configuration parameters for the GraphSense
     REST interface.

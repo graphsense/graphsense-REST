@@ -1,7 +1,7 @@
+from sqlite3 import IntegrityError
 import click
 from flask import current_app
 from flask.cli import with_appcontext
-from sqlite3 import IntegrityError
 
 from gsrest.db.user_db import get_db
 from gsrest.model.user import User
@@ -35,11 +35,11 @@ def find_user(username):
     if db_user is None:
         current_app.logger.info('User %s not found', username)
         return None
-    else:
-        user = User(username=db_user['username'])
-        user.password_hash = db_user['password']
-        current_app.logger.info('User %s found', username)
-        return user
+
+    user = User(username=db_user['username'])
+    user.password_hash = db_user['password']
+    current_app.logger.info('User %s found', username)
+    return user
 
 
 @click.command('create-user')

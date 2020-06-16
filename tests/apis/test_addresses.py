@@ -50,7 +50,7 @@ TEST_ADDRESSES_TAGS = {
     address2: [Tag(
         address2,
         "Shapeshift",
-        "Other",
+        "exchange",
         None,
         "https://git-service.ait.ac.at/dil-graphsense/"
         "graphsense-tagpacks-private/tree/master/packs/shapeshift.yaml",

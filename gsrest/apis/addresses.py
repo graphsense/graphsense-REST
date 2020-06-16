@@ -7,10 +7,10 @@ from gsrest.apis.common import page_size_parser, neighbors_parser, \
 import gsrest.service.addresses_service as addressesDAO
 import gsrest.service.common_service as commonDAO
 import gsrest.service.entities_service as entitiesDAO
-from gsrest.util.csvify import tags_to_csv, create_download_header, \
-    flatten_rows
+from gsrest.util.csvify import create_download_header, to_csv
 from gsrest.util.checks import check_inputs
 from gsrest.util.decorator import token_required
+from gsrest.util.tag_coherence import compute_tag_coherence
 
 api = Namespace('addresses',
                 path='/<currency>/addresses',
@@ -89,8 +89,11 @@ class AddressTagsCSV(Resource):
         Returns attribution tags for a given address as CSV
         """
         check_inputs(address=address, currency=currency)  # abort if fails
-        tags = commonDAO.list_address_tags(currency, address)
-        return Response(tags_to_csv(tags), mimetype="text/csv",
+
+        def query_function(_):
+            return (None, commonDAO.list_address_tags(
+                currency, address))
+        return Response(to_csv(query_function), mimetype="text/csv",
                         headers=create_download_header('tags of address {} '
                                                        '({}).csv'
                                                        .format(address,
@@ -143,33 +146,28 @@ class AddressNeighborsCSV(Resource):
         """
         args = neighbors_parser.parse_args()
         direction = args.get("direction")
-        page = args.get("page")
-        pagesize = args.get("pagesize")
-        paging_state = bytes.fromhex(page) if page else None
-        check_inputs(address=address, currency=currency, page=page,
-                     pagesize=pagesize)
+        check_inputs(address=address, currency=currency)
         if "in" in direction:
-            query_function = addressesDAO.list_address_incoming_relations
+            def query_function(page_state):
+                return addressesDAO.list_address_incoming_relations(
+                    currency, address, page_state)
+            direction = 'incoming'
         else:
-            query_function = addressesDAO.list_address_outgoing_relations
-        columns = []
-        data = ''
-        while True:
-            paging_state, neighbors = query_function(currency, address,
-                                                     paging_state, pagesize)
-            if neighbors is not None:  # None if address not found, else []
-                for row in flatten_rows(neighbors, columns):
-                    data += row
-                if not paging_state:
-                    break
-            else:
-                abort(404, "Address {} not found in currency {}"
-                      .format(address, currency))
-        return Response(data,
-                        mimetype="text/csv",
-                        headers=create_download_header(
-                            'neighbors of address {} ({}).csv'
-                            .format(address, currency.upper())))
+            def query_function(page_state):
+                return addressesDAO.list_address_outgoing_relations(
+                    currency, address, page_state)
+            direction = 'outgoing'
+
+        try:
+            return Response(to_csv(query_function),
+                            mimetype="text/csv",
+                            headers=create_download_header(
+                                '{} neighbors of address {} ({}).csv'
+                                .format(direction, address, currency.upper())))
+        except ValueError:
+            abort(404,
+                  "Address {} not found in currency {}"
+                  .format(address, currency))
 
 
 @api.param('currency', 'The cryptocurrency (e.g., btc)')
@@ -187,6 +185,7 @@ class AddressEntity(Resource):
         if entity:
             entity['tags'] = entitiesDAO.list_entity_tags(currency,
                                                           entity['entity'])
+            entity['tag_coherence'] = compute_tag_coherence(entity['tags'])
             return entity
         abort(404, "Address {} not found in currency {}".format(address,
                                                                 currency))

@@ -3,7 +3,7 @@ from gsrest.model.common import Values, compute_balance
 from gsrest.model.txs import TxSummary
 
 
-class Address(object):
+class Address:
     """ Model representing an address """
 
     def __init__(self, address, first_tx, last_tx, no_incoming_txs,
@@ -35,7 +35,7 @@ class Address(object):
         return self.__dict__
 
 
-class AddressTx(object):
+class AddressTx:
     def __init__(self, address, height, timestamp, tx_hash, value,
                  rates):
         self.address = address
@@ -53,7 +53,7 @@ class AddressTx(object):
         return self.__dict__
 
 
-class Link(object):
+class Link:
     def __init__(self, tx_hash, height, timestamp, input_value, output_value,
                  rates):
         self.tx_hash = tx_hash
@@ -71,7 +71,7 @@ class Link(object):
         return self.__dict__
 
 
-class ReceivedSpent(object):
+class ReceivedSpent:
     def __init__(self, total_received, total_spent):
         self.total_received = total_received
         self.total_spent = total_spent
@@ -80,7 +80,7 @@ class ReceivedSpent(object):
         return self.__dict__
 
 
-class AddressOutgoingRelations(object):
+class AddressOutgoingRelations:
     def __init__(self, estimated_value, dst_address, no_txs, dst_properties,
                  labels, rates):
         self.id = dst_address
@@ -89,7 +89,7 @@ class AddressOutgoingRelations(object):
         self.received = Values(**dst_properties.total_received._asdict())\
             .to_dict()
         self.balance = compute_balance(dst_properties.total_received.value,
-                                       dst_properties.total_received.value,
+                                       dst_properties.total_spent.value,
                                        rates)
         self.no_txs = no_txs
         self.estimated_value = Values(**estimated_value._asdict()).to_dict()
@@ -105,7 +105,7 @@ class AddressOutgoingRelations(object):
         return self.__dict__
 
 
-class AddressIncomingRelations(object):
+class AddressIncomingRelations:
     def __init__(self, estimated_value, src_address, no_txs, src_properties,
                  labels, rates):
         self.id = src_address
@@ -114,7 +114,7 @@ class AddressIncomingRelations(object):
         self.received = Values(**src_properties.total_received._asdict())\
             .to_dict()
         self.balance = compute_balance(src_properties.total_received.value,
-                                       src_properties.total_received.value,
+                                       src_properties.total_spent.value,
                                        rates)
         self.no_txs = no_txs
         self.estimated_value = Values(**estimated_value._asdict()).to_dict()

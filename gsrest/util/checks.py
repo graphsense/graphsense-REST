@@ -31,10 +31,13 @@ def check_inputs(**kwargs):
                 abort(404, 'Unknown currency in config: {}'.format(value))
         if key in ['depth']:
             if value > MAX_DEPTH:
-                abort(400, "Depth must not exceed %d".format(MAX_DEPTH))
+                abort(400, "Depth must not exceed {}".format(MAX_DEPTH))
         if key in ['category']:
-            if value and not value.isalpha():
-                abort(400, 'Invalid {}'.format(key))
+            if value:
+                if not isinstance(value, str):
+                    abort(400, 'Invalid {}'.format(key))
+                elif not value.replace(' ', '').replace('_', '').isalpha():
+                    abort(400, 'Invalid {}'.format(key))
         if key in ['label']:
             if not value:
                 abort(400, "Missing {}, please specify one.".format(key))
@@ -59,6 +62,6 @@ def check_inputs(**kwargs):
             if not can_be_label and not can_be_tx_address:
                 abort(400, 'Invalid search expression')
             return can_be_label, can_be_tx_address
-        elif key in ['height', 'entity']:
+        if key in ['height', 'entity']:
             if value is None:
                 abort(400, 'Invalid {}'.format(key))

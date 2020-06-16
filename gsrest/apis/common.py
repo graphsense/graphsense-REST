@@ -39,6 +39,9 @@ neighbors_parser = page_size_parser.copy()
 neighbors_parser.add_argument("direction", required=True, location="args",
                               choices=('in', 'out'),
                               help="Incoming or outgoing neighbors")
+neighbors_parser.add_argument("targets", required=False, location="args",
+                              help="Restrict result to the given set of "
+                                   "comma separated ids")
 
 links_parser = api.parser()
 links_parser.add_argument("neighbor", required=True, location="args",
@@ -206,6 +209,7 @@ entity_model = {
                                       description="Outgoing transactions"),
     "total_received": fields.Nested(value_response, required=True),
     "total_spent": fields.Nested(value_response, required=True),
+    "tag_coherence": fields.Float(required=False, description="Tag coherence"),
 }
 
 entity_tags_model = entity_model.copy()

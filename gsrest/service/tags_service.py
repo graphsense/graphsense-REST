@@ -31,8 +31,8 @@ def list_labels(currency, expression):
     if currency:
         return list(dict.fromkeys([
             row.label for row in result
-            if row.label_norm.startswith(expression_norm)
-            and row.currency.lower() == currency]))
+            if row.label_norm.startswith(expression_norm) and
+            row.currency.lower() == currency]))
     return list(dict.fromkeys([
         row.label for row in result
         if row.label_norm.startswith(expression_norm)]))

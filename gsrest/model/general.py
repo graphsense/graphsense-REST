@@ -1,16 +1,16 @@
 from datetime import datetime
 
 
-class Statistics(object):
+class Statistics:
     """ Model representing summary statistics of a cryptocurrency """
 
     def __init__(self, no_blocks, no_address_relations, no_addresses,
                  no_clusters, no_txs, no_tags, timestamp, currency):
+        tstamp = datetime.utcfromtimestamp(timestamp) \
+            .strftime("%Y-%m-%d %H:%M:%S")
         ledger = {'visible_name': currency.upper() + ' Blockchain',
                   'id': currency + '_ledger',
-                  'version': {'nr': str(no_blocks),
-                              'timestamp': datetime.utcfromtimestamp(timestamp)
-                              .strftime("%Y-%m-%d %H:%M:%S")},
+                  'version': {'nr': str(no_blocks), 'timestamp': tstamp},
                   'report_uuid': currency + '_ledger'}
         self.no_blocks = no_blocks
         self.no_address_relations = no_address_relations

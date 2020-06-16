@@ -56,18 +56,18 @@ class Auth:
                 })
                 response.set_cookie(header_name, '', httponly=True)
                 return response
-            else:
-                response_object = {
-                    'status': 'fail',
-                    'message': resp
-                }
-                return response_object, 401
-        else:
+
             response_object = {
                 'status': 'fail',
-                'message': 'Provide a valid auth token.'
+                'message': resp
             }
-            return response_object, 403
+            return response_object, 401
+
+        response_object = {
+            'status': 'fail',
+            'message': 'Provide a valid auth token.'
+        }
+        return response_object, 403
 
     @staticmethod
     def get_logged_in_user(new_request):
@@ -90,12 +90,12 @@ class Auth:
                 'message': resp
             }
             return response_object, 401
-        else:
-            response_object = {
-                'status': 'fail',
-                'message': 'Provide a valid auth token.'
-            }
-            return response_object, 401
+
+        response_object = {
+            'status': 'fail',
+            'message': 'Provide a valid auth token.'
+        }
+        return response_object, 401
 
     @staticmethod
     def refresh_token(request):
