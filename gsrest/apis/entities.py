@@ -186,9 +186,6 @@ class EntitySearchNeighbors(Resource):
 
         params = dict()
 
-        if category:
-            params['category'] = category
-
         if field:
             if max_value is not None and min_value > max_value:
                 abort(400, 'Min must not be greater than max')
@@ -201,6 +198,9 @@ class EntitySearchNeighbors(Resource):
 
         check_inputs(currency=currency, entity=entity, category=category,
                      depth=depth, addresses=addresses)
+        if category:
+            params['category'] = category.replace(' ', '_')
+
         if addresses:
             addresses_list = []
             for address in addresses.split(","):

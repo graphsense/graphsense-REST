@@ -33,8 +33,11 @@ def check_inputs(**kwargs):
             if value > MAX_DEPTH:
                 abort(400, "Depth must not exceed {}".format(MAX_DEPTH))
         if key in ['category']:
-            if value and not value.isalpha():
-                abort(400, 'Invalid {}'.format(key))
+            if value:
+                if not isinstance(value, str):
+                    abort(400, 'Invalid {}'.format(key))
+                elif not value.replace(' ', '').replace('_', '').isalpha():
+                    abort(400, 'Invalid {}'.format(key))
         if key in ['label']:
             if not value:
                 abort(400, "Missing {}, please specify one.".format(key))
