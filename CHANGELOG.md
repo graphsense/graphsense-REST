@@ -3,11 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [0.4.4] 2020-06-12
+## [0.4.4] 2020-06-16
 ### Added
 - calculate tag coherence of entities
 - add targets filter for neighbors endpoint, fix #33
-- csv download is streamed
+- CSV download is streamed
 
 ## [0.4.3] 2020-05-11
 ### Added
