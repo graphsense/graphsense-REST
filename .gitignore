@@ -2,7 +2,6 @@ references.txt
 .coverage
 *.egg-info
 __pycache__
-instance
 *.sublime-project
 *.sublime-workspace
 venv
