@@ -13,7 +13,7 @@ class Config:
     USER_DB_FILE = 'users.sqlite'
     SECRET_KEY = os.getenv('SECRET_KEY', 'my_precious_secret_key')
     DEBUG = False
-    JWT_ACCESS_TOKEN_EXPIRES_DAYS = 1
+    JWT_ACCESS_TOKEN_EXPIRES_DAYS = os.getenv('REST_ACCESS_TOKEN_EXPIRES_DAYS', 1)
     USE_PROXY = False
 
     def __init__(self, instance_path):

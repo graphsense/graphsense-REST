@@ -9,8 +9,9 @@ from gsrest.model.tags import Tag
 from gsrest.service.common_service import get_address_by_id_group, \
     get_address_with_tags
 from gsrest.service.rates_service import get_rates
+import os
 
-BUCKET_SIZE = 25000  # TODO: get BUCKET_SIZE from cassandra
+BUCKET_SIZE = os.getenv("BUCKET_SIZE")
 ENTITY_PAGE_SIZE = 100
 ENTITY_ADDRESSES_PAGE_SIZE = 100
 

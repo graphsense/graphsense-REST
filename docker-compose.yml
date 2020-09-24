@@ -12,7 +12,12 @@ services:
       args:
         NUM_WORKERS: "${NUM_WORKERS}"
     ports:
-      - 127.0.0.1:9000:9000
+      - "$REST_PORT:9000"
     environment:
       SECRET_KEY: "${SECRET_KEY}"
     restart: always
+    networks:
+     - graphsense-global-net
+networks:
+  graphsense-global-net:
+    external: true
