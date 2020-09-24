@@ -13,8 +13,6 @@ services:
         NUM_WORKERS: "${NUM_WORKERS}"
     ports:
       - "$REST_PORT:9000"
-    environment:
-      SECRET_KEY: "${SECRET_KEY}"
     restart: always
     networks:
      - graphsense-global-net
