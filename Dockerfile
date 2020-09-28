@@ -36,7 +36,8 @@ RUN mkdir /var/lib/graphsense-rest && \
     pip3 install /srv/graphsense-rest/ && \
     chown -R dockeruser /usr/var/gsrest-instance
 
+#RUN mkdir /usr/var/data && chown -R dockeruser /usr/var/data
+#VOLUME ["/usr/var/data"]
 USER dockeruser
-RUN flask init-db
 
-CMD /usr/bin/gunicorn -c /home/dockeruser/gunicorn-conf.py -w $NUM_WORKERS "gsrest:create_app()"
+CMD flask init-db && /usr/bin/gunicorn -c /home/dockeruser/gunicorn-conf.py -w $NUM_WORKERS "gsrest:create_app()"

@@ -21,4 +21,4 @@ class Config:
 
     @property
     def DATABASE(self):
-        return os.path.join(self.instance_path, self.USER_DB_FILE)
+        return os.path.join("/usr/var/data/", self.USER_DB_FILE)

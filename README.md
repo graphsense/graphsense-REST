@@ -7,6 +7,46 @@ The GraphSense REST Interface provides access to denormalized views computed
 by the [graphsense-transformation][graphsense-transformation] pipeline.
 It is used by the [graphsense-dashboard][graphsense-dashboard] component.
 
+## Quick docker setup
+
+### Prerequisites
+Make sure the latest versions of Docker and docker-compose are installed. https://docs.docker.com/compose/install/
+
+This service assumes that:
+ - There is a cassandra instance running;
+ - Both parser and exporter from `graphsense-blocksci` have completed fetching data into that cassandra instance.
+ - The transformation pipeline has completed.
+ 
+**It is possible to set up all required services using a single docker-compose evironment. For that, check out the `graphsense-setup` project.** Alternatively, you can set up each required service manually, in which case, keep on reading.
+
+### Configure
+Create a new configuration by copying the `env.example` file to `.env`.
+Modify the configuration match your environment, or keep everything intact.
+
+Make sure that: 
+ - `CASSANDRA_HOST` points to an existing cassandra instance;
+ - `BUCKET_SIZE` matches one set in the `.env` file of transformation pipeline.
+
+Run `docker/gen_secret_key.sh` to fill in the `FLASK_KEY` parameter in your `.env`.
+
+Apply the configuation by adding this line to `docker-compose.yml`:
+```yaml
+services:
+    graphsense-rest:
+        ...
+        env_file: .env
+        ...
+```
+
+### Build 
+`docker-compose build`
+
+### Run
+`docker-compose up -d`
+
+The REST API will be reachable at `0.0.0.0:$REST_PORT`; $REST_PORT is set in `.env` file.
+
+
 ## Prerequisites
 
 Make sure you are running Python version >= 3.7

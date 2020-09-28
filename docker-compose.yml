@@ -11,6 +11,8 @@ services:
       dockerfile: ./Dockerfile
       args:
         NUM_WORKERS: "${NUM_WORKERS}"
+    volumes:
+     - "./data:/usr/var/data/"
     ports:
       - "$REST_PORT:9000"
     restart: always
