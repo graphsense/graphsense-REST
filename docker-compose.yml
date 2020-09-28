@@ -12,7 +12,7 @@ services:
       args:
         NUM_WORKERS: "${NUM_WORKERS}"
     volumes:
-     - "./data:/usr/var/data/"
+     - "$PWD/rest_data:/usr/var/data/"
     ports:
       - "$REST_PORT:9000"
     restart: always
