@@ -1,0 +1,341 @@
+openapi: 3.0.0
+info:
+  description: GraphSense API
+  title: GraphSense API
+  version: 0.4.4
+servers:
+- url: http://openapi_server:9000
+paths:
+  /{currency}/blocks:
+    get:
+      operationId: list_blocks
+      parameters:
+      - description: The currency
+        example: btc
+        in: path
+        name: currency
+        required: true
+        schema:
+          type: string
+      - description: Resumption token for retrieving the next page
+        in: query
+        name: page
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/blocks'
+          description: OK
+      security:
+      - api_key: []
+      summary: Get all blocks
+      tags:
+      - blocks
+      x-kong-plugin-rate-limiting:
+        config:
+          minute: 3
+          policy: local
+        enabled: true
+      x-openapi-router-controller: openapi_server.controllers.blocks_controller
+  /{currency}/blocks/{height}:
+    get:
+      operationId: get_block
+      parameters:
+      - description: The currency
+        example: btc
+        in: path
+        name: currency
+        required: true
+        schema:
+          type: string
+      - description: The block height
+        example: 1
+        in: path
+        name: height
+        required: true
+        schema:
+          minimum: 1
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/block'
+          description: OK
+      security:
+      - api_key: []
+      summary: Get a block by its height
+      tags:
+      - blocks
+      x-kong-plugin-rate-limiting:
+        config:
+          minute: 3
+          policy: local
+        enabled: true
+      x-openapi-router-controller: openapi_server.controllers.blocks_controller
+  /{currency}/blocks/{height}/txs:
+    get:
+      operationId: list_block_txs
+      parameters:
+      - description: The currency
+        example: btc
+        in: path
+        name: currency
+        required: true
+        schema:
+          type: string
+      - description: The block height
+        example: 1
+        in: path
+        name: height
+        required: true
+        schema:
+          minimum: 1
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/block_txs'
+          description: OK
+      security:
+      - api_key: []
+      summary: Get all blocks (100 per page)
+      tags:
+      - blocks
+      x-kong-plugin-rate-limiting:
+        config:
+          minute: 3
+          policy: local
+        enabled: true
+      x-openapi-router-controller: openapi_server.controllers.blocks_controller
+  /{currency}/blocks/{height}/txs.csv:
+    get:
+      operationId: list_block_txs_csv
+      parameters:
+      - description: The currency
+        example: btc
+        in: path
+        name: currency
+        required: true
+        schema:
+          type: string
+      - description: The block height
+        example: 1
+        in: path
+        name: height
+        required: true
+        schema:
+          minimum: 1
+          type: integer
+      responses:
+        "200":
+          content:
+            text/csv:
+              schema:
+                items:
+                  $ref: '#/components/schemas/block_tx_summary'
+                type: array
+          description: OK
+      security:
+      - api_key: []
+      summary: Get all blocks as CSV
+      tags:
+      - blocks
+      x-kong-plugin-rate-limiting:
+        config:
+          minute: 3
+          policy: local
+        enabled: true
+      x-openapi-router-controller: openapi_server.controllers.blocks_controller
+  /{currency}/stats:
+    get:
+      operationId: get_statistics
+      parameters:
+      - description: The currency
+        example: btc
+        in: path
+        name: currency
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/currency'
+          description: OK
+      security: []
+      summary: Get statistics of currency
+      tags:
+      - general
+      x-openapi-router-controller: openapi_server.controllers.general_controller
+components:
+  schemas:
+    blocks:
+      example:
+        next_page: next_page
+        blocks:
+        - block_hash: block_hash
+          height: 0
+          no_txs: 6
+          timestamp: 1
+        - block_hash: block_hash
+          height: 0
+          no_txs: 6
+          timestamp: 1
+      properties:
+        next_page:
+          format: string
+          type: string
+        blocks:
+          items:
+            $ref: '#/components/schemas/block'
+          type: array
+      type: object
+    block:
+      example:
+        block_hash: block_hash
+        height: 0
+        no_txs: 6
+        timestamp: 1
+      properties:
+        block_hash:
+          format: string
+          type: string
+        height:
+          format: int64
+          type: integer
+        no_txs:
+          format: int64
+          type: integer
+        timestamp:
+          format: int64
+          type: integer
+      type: object
+    block_txs:
+      example:
+        txs:
+        - total_output:
+            eur: 5
+            usd: 5
+            value: 2
+          no_outputs: 1
+          total_input:
+            eur: 5
+            usd: 5
+            value: 2
+          tx_hash: tx_hash
+          no_inputs: 6
+        - total_output:
+            eur: 5
+            usd: 5
+            value: 2
+          no_outputs: 1
+          total_input:
+            eur: 5
+            usd: 5
+            value: 2
+          tx_hash: tx_hash
+          no_inputs: 6
+        height: 0
+      properties:
+        height:
+          type: integer
+        txs:
+          items:
+            $ref: '#/components/schemas/block_tx_summary'
+          type: array
+      type: object
+    block_tx_summary:
+      example:
+        total_output:
+          eur: 5
+          usd: 5
+          value: 2
+        no_outputs: 1
+        total_input:
+          eur: 5
+          usd: 5
+          value: 2
+        tx_hash: tx_hash
+        no_inputs: 6
+      properties:
+        tx_hash:
+          type: string
+        no_inputs:
+          format: int64
+          type: integer
+        no_outputs:
+          format: int64
+          type: integer
+        total_input:
+          $ref: '#/components/schemas/converted_values'
+        total_output:
+          $ref: '#/components/schemas/converted_values'
+      type: object
+    currency:
+      example:
+        no_addresses: 1
+        no_labels: 2
+        no_entities: 5
+        no_address_relations: 6
+        no_blocks: 0
+        no_txs: 5
+        timestamp: 7
+      properties:
+        no_blocks:
+          format: int64
+          type: integer
+        no_address_relations:
+          format: int64
+          type: integer
+        no_addresses:
+          format: int64
+          type: integer
+        no_entities:
+          format: int64
+          type: integer
+        no_txs:
+          format: int64
+          type: integer
+        no_labels:
+          format: int64
+          type: integer
+        timestamp:
+          format: int64
+          type: integer
+      title: a cryptocurrency
+      type: object
+    next_page:
+      format: string
+      type: string
+    converted_values:
+      example:
+        eur: 5
+        usd: 5
+        value: 2
+      properties:
+        eur:
+          format: int64
+          type: integer
+        usd:
+          format: int64
+          type: integer
+        value:
+          format: int64
+          type: integer
+      type: object
+  securitySchemes:
+    api_key:
+      in: header
+      name: Authorization
+      type: apiKey
+      x-apikeyInfoFunc: openapi_server.controllers.security_controller_.info_from_api_key

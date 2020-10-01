@@ -3,9 +3,9 @@
 import sys
 from setuptools import setup, find_packages
 
-NAME = "openapi_server"
-VERSION = "1.0.0"
-
+NAME = "{{packageName}}"
+VERSION = "{{packageVersion}}"
+{{#apiInfo}}{{#apis}}{{^hasMore}}
 # To install the library, run the following
 #
 # python setup.py install
@@ -25,13 +25,14 @@ with open("README.md", "r") as fh:
 setup(
     name=NAME,
     version=VERSION,
-    description="GraphSense API",
-    author_email="",
-    keywords=["OpenAPI", "GraphSense API"],
+    description="{{appName}}",
+    author_email="{{infoEmail}}",
+    keywords=["OpenAPI", "{{appName}}"],
     python_requires='>=3.6',
     install_requires=REQUIRES,
-    packages=find_packages(),
-    package_data={'': ['openapi/openapi.yaml']},
+    packages=find_packages({{#pythonSrcRoot}}"{{{.}}}"{{/pythonSrcRoot}}),{{#pythonSrcRoot}}
+    package_dir={"": "{{{.}}}"},{{/pythonSrcRoot}}
+    package_data={'': ['{{#pythonSrcRoot}}{{{.}}}/{{/pythonSrcRoot}}openapi/openapi.yaml']},
     include_package_data=True,
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -43,4 +44,4 @@ setup(
         "Operating System :: OS Independent",
     ]
 )
-
+{{/hasMore}}{{/apis}}{{/apiInfo}}

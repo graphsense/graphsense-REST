@@ -1,7 +1,6 @@
 # This file contains instance specific configuration options.
 
-# Replace Cassandra hostnames and keyspaces and copy the file
-# to ./instance/config.py
+# Replace Cassandra hostnames and keyspaces 
 
 CASSANDRA_NODES = ["CASSANDRA_HOST_1", "CASSANDRA_HOST_2"]
 
@@ -12,14 +11,4 @@ MAPPING = {
     "ltc": ["LTC_RAW_KEYSPACE", "LTC_TRANSFORMED_KEYSPACE"],
     "zec": ["ZEC_RAW_KEYSPACE", "ZEC_TRANSFORMED_KEYSPACE"]
 }
-
-USE_PROXY = True
-
-# Restrict allowed origins for CORS
-#
-# The origin, or list of origins to allow requests from. The origin(s) may be regular expressions, case-sensitive strings, or else an asterisk
-# (see https://flask-cors.readthedocs.io/en/latest/api.html for further details)
-#
-# Default : ‘*’ 
-# ALLOWED_ORIGINS = ['https://example.com']
 
