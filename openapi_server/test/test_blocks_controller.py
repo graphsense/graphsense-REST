@@ -23,10 +23,9 @@ class TestBlocksController(BaseTestCase):
         """
         headers = { 
             'Accept': 'application/json',
-            'api_key': 'special-key',
         }
         response = self.client.open(
-            '/{currency}/blocks/{height}'.format(currency=btc, height=1),
+            '/{currency}/blocks/{height}'.format(currency="btc", height="1"),
             method='GET',
             headers=headers)
         self.assert200(response,
@@ -39,10 +38,9 @@ class TestBlocksController(BaseTestCase):
         """
         headers = { 
             'Accept': 'application/json',
-            'api_key': 'special-key',
         }
         response = self.client.open(
-            '/{currency}/blocks/{height}/txs'.format(currency=btc, height=1),
+            '/{currency}/blocks/{height}/txs'.format(currency="btc", height="1"),
             method='GET',
             headers=headers)
         self.assert200(response,
@@ -55,10 +53,9 @@ class TestBlocksController(BaseTestCase):
         """
         headers = { 
             'Accept': 'text/csv',
-            'api_key': 'special-key',
         }
         response = self.client.open(
-            '/{currency}/blocks/{height}/txs.csv'.format(currency=btc, height=1),
+            '/{currency}/blocks/{height}/txs.csv'.format(currency="btc", height="1"),
             method='GET',
             headers=headers)
         self.assert200(response,
@@ -69,13 +66,12 @@ class TestBlocksController(BaseTestCase):
 
         Get all blocks
         """
-        query_string = [('page', 'page_example')]
+        query_string = [('page', '0400030bff00f07fffff9b00')]
         headers = { 
             'Accept': 'application/json',
-            'api_key': 'special-key',
         }
         response = self.client.open(
-            '/{currency}/blocks'.format(currency=btc),
+            '/{currency}/blocks'.format(currency="btc"),
             method='GET',
             headers=headers,
             query_string=query_string)

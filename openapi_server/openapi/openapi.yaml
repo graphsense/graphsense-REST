@@ -12,17 +12,23 @@ paths:
       parameters:
       - description: The currency
         example: btc
+        explode: false
         in: path
         name: currency
         required: true
         schema:
+          format: string
           type: string
+        style: simple
       - description: Resumption token for retrieving the next page
+        example: 0400030bff00f07fffff9b00
+        explode: true
         in: query
         name: page
         required: false
         schema:
           type: string
+        style: form
       responses:
         "200":
           content:
@@ -30,16 +36,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/blocks'
           description: OK
-      security:
-      - api_key: []
       summary: Get all blocks
       tags:
       - blocks
-      x-kong-plugin-rate-limiting:
-        config:
-          minute: 3
-          policy: local
-        enabled: true
       x-openapi-router-controller: openapi_server.controllers.blocks_controller
   /{currency}/blocks/{height}:
     get:
@@ -47,19 +46,24 @@ paths:
       parameters:
       - description: The currency
         example: btc
+        explode: false
         in: path
         name: currency
         required: true
         schema:
+          format: string
           type: string
+        style: simple
       - description: The block height
         example: 1
+        explode: false
         in: path
         name: height
         required: true
         schema:
           minimum: 1
           type: integer
+        style: simple
       responses:
         "200":
           content:
@@ -67,16 +71,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/block'
           description: OK
-      security:
-      - api_key: []
       summary: Get a block by its height
       tags:
       - blocks
-      x-kong-plugin-rate-limiting:
-        config:
-          minute: 3
-          policy: local
-        enabled: true
       x-openapi-router-controller: openapi_server.controllers.blocks_controller
   /{currency}/blocks/{height}/txs:
     get:
@@ -84,19 +81,24 @@ paths:
       parameters:
       - description: The currency
         example: btc
+        explode: false
         in: path
         name: currency
         required: true
         schema:
+          format: string
           type: string
+        style: simple
       - description: The block height
         example: 1
+        explode: false
         in: path
         name: height
         required: true
         schema:
           minimum: 1
           type: integer
+        style: simple
       responses:
         "200":
           content:
@@ -104,16 +106,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/block_txs'
           description: OK
-      security:
-      - api_key: []
       summary: Get all blocks (100 per page)
       tags:
       - blocks
-      x-kong-plugin-rate-limiting:
-        config:
-          minute: 3
-          policy: local
-        enabled: true
       x-openapi-router-controller: openapi_server.controllers.blocks_controller
   /{currency}/blocks/{height}/txs.csv:
     get:
@@ -121,19 +116,24 @@ paths:
       parameters:
       - description: The currency
         example: btc
+        explode: false
         in: path
         name: currency
         required: true
         schema:
+          format: string
           type: string
+        style: simple
       - description: The block height
         example: 1
+        explode: false
         in: path
         name: height
         required: true
         schema:
           minimum: 1
           type: integer
+        style: simple
       responses:
         "200":
           content:
@@ -143,16 +143,9 @@ paths:
                   $ref: '#/components/schemas/block_tx_summary'
                 type: array
           description: OK
-      security:
-      - api_key: []
       summary: Get all blocks as CSV
       tags:
       - blocks
-      x-kong-plugin-rate-limiting:
-        config:
-          minute: 3
-          policy: local
-        enabled: true
       x-openapi-router-controller: openapi_server.controllers.blocks_controller
   /{currency}/stats:
     get:
@@ -160,11 +153,14 @@ paths:
       parameters:
       - description: The currency
         example: btc
+        explode: false
         in: path
         name: currency
         required: true
         schema:
+          format: string
           type: string
+        style: simple
       responses:
         "200":
           content:
@@ -172,33 +168,82 @@ paths:
               schema:
                 $ref: '#/components/schemas/currency'
           description: OK
-      security: []
       summary: Get statistics of currency
       tags:
       - general
       x-openapi-router-controller: openapi_server.controllers.general_controller
 components:
+  parameters:
+    currency:
+      description: The currency
+      example: btc
+      explode: false
+      in: path
+      name: currency
+      required: true
+      schema:
+        format: string
+        type: string
+      style: simple
+    height:
+      description: The block height
+      example: 1
+      explode: false
+      in: path
+      name: height
+      required: true
+      schema:
+        minimum: 1
+        type: integer
+      style: simple
+    page:
+      description: Resumption token for retrieving the next page
+      example: 0400030bff00f07fffff9b00
+      explode: true
+      in: query
+      name: page
+      required: false
+      schema:
+        type: string
+      style: form
   schemas:
-    blocks:
-      example:
-        next_page: next_page
-        blocks:
-        - block_hash: block_hash
-          height: 0
-          no_txs: 6
-          timestamp: 1
-        - block_hash: block_hash
-          height: 0
-          no_txs: 6
-          timestamp: 1
+    stats:
       properties:
-        next_page:
-          format: string
-          type: string
-        blocks:
-          items:
-            $ref: '#/components/schemas/block'
-          type: array
+        currencies:
+          $ref: '#/components/schemas/stats_currencies'
+      type: object
+    currency:
+      example:
+        no_addresses: 1
+        no_labels: 2
+        no_entities: 5
+        no_address_relations: 6
+        no_blocks: 0
+        no_txs: 5
+        timestamp: 7
+      properties:
+        no_blocks:
+          format: int64
+          type: integer
+        no_address_relations:
+          format: int64
+          type: integer
+        no_addresses:
+          format: int64
+          type: integer
+        no_entities:
+          format: int64
+          type: integer
+        no_txs:
+          format: int64
+          type: integer
+        no_labels:
+          format: int64
+          type: integer
+        timestamp:
+          format: int64
+          type: integer
+      title: a cryptocurrency
       type: object
     block:
       example:
@@ -281,42 +326,27 @@ components:
         total_output:
           $ref: '#/components/schemas/converted_values'
       type: object
-    currency:
+    blocks:
       example:
-        no_addresses: 1
-        no_labels: 2
-        no_entities: 5
-        no_address_relations: 6
-        no_blocks: 0
-        no_txs: 5
-        timestamp: 7
+        next_page: next_page
+        blocks:
+        - block_hash: block_hash
+          height: 0
+          no_txs: 6
+          timestamp: 1
+        - block_hash: block_hash
+          height: 0
+          no_txs: 6
+          timestamp: 1
       properties:
-        no_blocks:
-          format: int64
-          type: integer
-        no_address_relations:
-          format: int64
-          type: integer
-        no_addresses:
-          format: int64
-          type: integer
-        no_entities:
-          format: int64
-          type: integer
-        no_txs:
-          format: int64
-          type: integer
-        no_labels:
-          format: int64
-          type: integer
-        timestamp:
-          format: int64
-          type: integer
-      title: a cryptocurrency
+        next_page:
+          format: string
+          type: string
+        blocks:
+          items:
+            $ref: '#/components/schemas/block'
+          type: array
       type: object
-    next_page:
-      format: string
-      type: string
     converted_values:
       example:
         eur: 5
@@ -333,9 +363,16 @@ components:
           format: int64
           type: integer
       type: object
-  securitySchemes:
-    api_key:
-      in: header
-      name: Authorization
-      type: apiKey
-      x-apikeyInfoFunc: openapi_server.controllers.security_controller_.info_from_api_key
+    next_page:
+      format: string
+      type: string
+    stats_currencies:
+      properties:
+        btc:
+          $ref: '#/components/schemas/currency'
+        bch:
+          $ref: '#/components/schemas/currency'
+        ltc:
+          $ref: '#/components/schemas/currency'
+        zec:
+          $ref: '#/components/schemas/currency'

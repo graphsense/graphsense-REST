@@ -22,7 +22,7 @@ class TestGeneralController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/stats'.format(currency=btc),
+            '/{currency}/stats'.format(currency="btc"),
             method='GET',
             headers=headers)
         self.assert200(response,
