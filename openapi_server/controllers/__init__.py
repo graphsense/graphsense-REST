@@ -23,7 +23,7 @@ def init_services(app):
     from gsrest.db import cassandra
     cassandra.init_app(app)
 
-def main(test_config=None):
+def main():
     app = connexion.App(__name__, 
       specification_dir='./openapi/', 
       options={"swagger_ui": True, "serve_spec": True})
