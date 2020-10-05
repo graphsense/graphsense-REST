@@ -6,6 +6,20 @@ info:
 servers:
 - url: http://openapi_server:9000
 paths:
+  /stats:
+    get:
+      operationId: get_statistics
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/stats'
+          description: OK
+      summary: Get statistics of supported currencies
+      tags:
+      - general
+      x-openapi-router-controller: openapi_server.controllers.general_controller
   /{currency}/blocks:
     get:
       operationId: list_blocks
@@ -147,31 +161,6 @@ paths:
       tags:
       - blocks
       x-openapi-router-controller: openapi_server.controllers.blocks_controller
-  /{currency}/stats:
-    get:
-      operationId: get_statistics
-      parameters:
-      - description: The currency
-        example: btc
-        explode: false
-        in: path
-        name: currency
-        required: true
-        schema:
-          format: string
-          type: string
-        style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/currency'
-          description: OK
-      summary: Get statistics of currency
-      tags:
-      - general
-      x-openapi-router-controller: openapi_server.controllers.general_controller
 components:
   parameters:
     currency:
@@ -208,20 +197,43 @@ components:
       style: form
   schemas:
     stats:
+      example:
+        currencies:
+        - no_addresses: 1
+          no_labels: 2
+          name: name
+          no_entities: 5
+          no_address_relations: 6
+          no_blocks: 0
+          no_txs: 5
+          timestamp: 7
+        - no_addresses: 1
+          no_labels: 2
+          name: name
+          no_entities: 5
+          no_address_relations: 6
+          no_blocks: 0
+          no_txs: 5
+          timestamp: 7
       properties:
         currencies:
-          $ref: '#/components/schemas/stats_currencies'
+          items:
+            $ref: '#/components/schemas/currency_stats'
+          type: array
       type: object
-    currency:
+    currency_stats:
       example:
         no_addresses: 1
         no_labels: 2
+        name: name
         no_entities: 5
         no_address_relations: 6
         no_blocks: 0
         no_txs: 5
         timestamp: 7
       properties:
+        name:
+          type: string
         no_blocks:
           format: int64
           type: integer
@@ -243,7 +255,7 @@ components:
         timestamp:
           format: int64
           type: integer
-      title: a cryptocurrency
+      title: statistics of a cryptocurrency
       type: object
     block:
       example:
@@ -366,13 +378,3 @@ components:
     next_page:
       format: string
       type: string
-    stats_currencies:
-      properties:
-        btc:
-          $ref: '#/components/schemas/currency'
-        bch:
-          $ref: '#/components/schemas/currency'
-        ltc:
-          $ref: '#/components/schemas/currency'
-        zec:
-          $ref: '#/components/schemas/currency'

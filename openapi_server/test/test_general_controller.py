@@ -6,7 +6,7 @@ import unittest
 from flask import json
 from six import BytesIO
 
-from openapi_server.models.currency import Currency  # noqa: E501
+from openapi_server.models.stats import Stats  # noqa: E501
 from openapi_server.test import BaseTestCase
 
 
@@ -16,13 +16,13 @@ class TestGeneralController(BaseTestCase):
     def test_get_statistics(self):
         """Test case for get_statistics
 
-        Get statistics of currency
+        Get statistics of supported currencies
         """
         headers = { 
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/stats'.format(currency="btc"),
+            '/stats',
             method='GET',
             headers=headers)
         self.assert200(response,
