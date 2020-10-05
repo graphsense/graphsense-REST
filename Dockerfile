@@ -40,4 +40,4 @@ RUN mkdir /var/lib/graphsense-rest && \
 #VOLUME ["/usr/var/data"]
 USER dockeruser
 
-CMD flask init-db && /usr/bin/gunicorn -c /home/dockeruser/gunicorn-conf.py -w $NUM_WORKERS "gsrest:create_app()"
+CMD /usr/bin/gunicorn -c /home/dockeruser/gunicorn-conf.py -w $NUM_WORKERS "gsrest:create_app()"

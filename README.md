@@ -46,6 +46,8 @@ services:
 
 The REST API will be reachable at `0.0.0.0:$REST_PORT`; $REST_PORT is set in `.env` file.
 
+Make sure to initialize the local SQlite user database by running `./docker/init_db.sh`. 
+
 
 ## Prerequisites
 
