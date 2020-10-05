@@ -11,7 +11,7 @@ from gsrest.service.common_service import get_address_by_id_group, \
 from gsrest.service.rates_service import get_rates
 import os
 
-BUCKET_SIZE = os.getenv("BUCKET_SIZE")
+BUCKET_SIZE = int(os.getenv("BUCKET_SIZE"))
 ENTITY_PAGE_SIZE = 100
 ENTITY_ADDRESSES_PAGE_SIZE = 100
 
