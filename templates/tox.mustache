@@ -1,5 +1,5 @@
 [tox]
-envlist = py3
+envlist = {{#supportPython2}}py27, {{/supportPython2}}py3
 skipsdist=True
 
 [testenv]
@@ -9,4 +9,4 @@ deps=-r{toxinidir}/requirements.txt
 
 commands=
   bash "{toxinidir}/tests/makeCassandraMock.sh"
-  pytest --cov=openapi_server
+  {{^useNose}}pytest --cov={{{pythonSrcRoot}}}{{{packageName}}}{{/useNose}}{{#useNose}}nosetests{{/useNose}}

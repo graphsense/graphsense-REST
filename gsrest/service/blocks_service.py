@@ -34,7 +34,7 @@ def list_blocks(currency, page=None):
     statement = SimpleStatement(query, fetch_size=BLOCKS_PAGE_SIZE)
     results = session.execute(statement, paging_state=paging_state)
 
-    paging_state = results.paging_state.hex()
+    paging_state = results.paging_state.hex() if results.paging_state else None
     block_list = [Block(row.height, row.block_hash.hex(),
                   row.no_transactions, row.timestamp)
                   for row in results.current_rows]
@@ -85,12 +85,13 @@ def list_block_txs_csv(currency, height):
                 'total_output_eur': tx.total_output.eur,
                 'total_output_usd': tx.total_output.usd,
                 'total_output_value': tx.total_output.value}
-                for tx in result.txs]
+               for tx in result.txs]
         abort(404,
               "Block {} not found in currency {}".format(height, currency))
 
     try:
-        return Response(stream_with_context(to_csv(query_function)), mimetype="text/csv",
+        return Response(stream_with_context(to_csv(query_function)),
+                        mimetype="text/csv",
                         headers=create_download_header(
                             'transactions of block {} ({}).csv'
                             .format(height, currency.upper())))

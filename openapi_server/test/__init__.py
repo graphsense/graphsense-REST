@@ -1,4 +1,5 @@
 import logging
+import os
 
 import connexion
 from flask_testing import TestCase
@@ -11,4 +12,4 @@ class BaseTestCase(TestCase):
 
     def create_app(self):
         logging.getLogger('connexion.operation').setLevel('ERROR')
-        return main().app
+        return main(os.path.join(os.getcwd(), 'tests/instance')).app
