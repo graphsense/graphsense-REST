@@ -10,33 +10,42 @@ import gsrest.model.common
 from gsrest.service.rates_service import get_rates
 from flask import Response, abort, stream_with_context
 from gsrest.util.csvify import create_download_header, to_csv
+from gsrest.service.problems import notfound, badrequest
 
 BLOCKS_PAGE_SIZE = 100
 
 
-def get_block(currency, height):
+def get_block(currency, height) -> Block:
     session = get_session(currency, 'raw')
 
     query = "SELECT * FROM block WHERE height = %s"
-    result = session.execute(query, [height])
-    row = result[0]
-    if result:
-        return Block(row.height, row.block_hash.hex(),
-                     row.no_transactions, row.timestamp)
-    return None
+    row = session.execute(query, [height]).one()
+    if not row:
+        return notfound("Block {} not found".format(height))
+    return Block(
+            height=row.height,
+            block_hash=row.block_hash.hex(),
+            no_txs=row.no_transactions,
+            timestamp=row.timestamp)
 
 
 def list_blocks(currency, page=None):
     session = get_session(currency, 'raw')
-    paging_state = bytes.fromhex(page) if page else None
+    try:
+        paging_state = bytes.fromhex(page) if page else None
+    except ValueError as e:
+        return badrequest(str(e))
 
     query = "SELECT * FROM block"
     statement = SimpleStatement(query, fetch_size=BLOCKS_PAGE_SIZE)
     results = session.execute(statement, paging_state=paging_state)
 
     paging_state = results.paging_state.hex() if results.paging_state else None
-    block_list = [Block(row.height, row.block_hash.hex(),
-                  row.no_transactions, row.timestamp)
+    block_list = [Block(
+                    height=row.height,
+                    block_hash=row.block_hash.hex(),
+                    no_txs=row.no_transactions,
+                    timestamp=row.timestamp)
                   for row in results.current_rows]
 
     return Blocks(paging_state, block_list)
@@ -52,17 +61,18 @@ def list_block_txs(currency, height):
         rates = get_rates(currency, height)
 
         tx_summaries = \
-            [BlockTxSummary(tx.tx_hash.hex(),
-             tx.no_inputs,
-             tx.no_outputs,
-             ConvertedValues.from_dict(
+            [BlockTxSummary(
+             no_inputs=tx.no_inputs,
+             no_outputs=tx.no_outputs,
+             total_input=ConvertedValues.from_dict(
                  gsrest.model.common.ConvertedValues(
                      tx.total_input, rates['rates'])
                  .to_dict()),
-             ConvertedValues.from_dict(
+             total_output=ConvertedValues.from_dict(
                  gsrest.model.common.ConvertedValues(
                      tx.total_output, rates['rates'])
-                 .to_dict())
+                 .to_dict()),
+             tx_hash=tx.tx_hash.hex()
              )
              for tx in results[0].txs]
 
@@ -77,7 +87,8 @@ def list_block_txs_csv(currency, height):
         if result:
             return None, \
               [{'block_height': result.height,
-                'tx_hash': tx.tx_hash, 'no_inputs': tx.no_inputs,
+                'tx_hash': tx.tx_hash,
+                'no_inputs': tx.no_inputs,
                 'no_outputs': tx.no_outputs,
                 'total_input_eur': tx.total_input.eur,
                 'total_input_usd': tx.total_input.usd,

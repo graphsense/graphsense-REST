@@ -11,6 +11,7 @@ from openapi_server.models.block_tx_summary import BlockTxSummary  # noqa: E501
 from openapi_server.models.block_txs import BlockTxs  # noqa: E501
 from openapi_server.models.blocks import Blocks  # noqa: E501
 from openapi_server.test import BaseTestCase
+import gsrest.test.blocks_service as test_service
 
 
 class TestBlocksController(BaseTestCase):
@@ -31,6 +32,8 @@ class TestBlocksController(BaseTestCase):
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
+        test_service.get_block(self)
+
     def test_list_block_txs(self):
         """Test case for list_block_txs
 
@@ -46,6 +49,8 @@ class TestBlocksController(BaseTestCase):
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
+        test_service.list_block_txs(self)
+
     def test_list_block_txs_csv(self):
         """Test case for list_block_txs_csv
 
@@ -60,6 +65,8 @@ class TestBlocksController(BaseTestCase):
             headers=headers)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
+
+        test_service.list_block_txs_csv(self)
 
     def test_list_blocks(self):
         """Test case for list_blocks
@@ -77,6 +84,8 @@ class TestBlocksController(BaseTestCase):
             query_string=query_string)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
+
+        test_service.list_blocks(self)
 
 
 if __name__ == '__main__':

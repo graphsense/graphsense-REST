@@ -1,4 +1,5 @@
 from werkzeug.datastructures import Headers
+import operator
 
 
 def create_download_header(filename):
@@ -26,9 +27,9 @@ def to_csv(query_function):
         for row in rows:
             flatten(row)
             if not fieldnames:
-                fieldnames = ",".join(flat_dict.keys())
-                yield fieldnames + "\n"
-            yield (",".join([str(item) for item in flat_dict.values()]) +
+                fieldnames = sorted(flat_dict.keys())
+                yield ','.join(fieldnames) + "\n"
+            yield (",".join([str(flat_dict[key]) for key in fieldnames]) +
                    "\n")
             flat_dict = {}
 

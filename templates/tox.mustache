@@ -1,6 +1,7 @@
 [tox]
 envlist = {{#supportPython2}}py27, {{/supportPython2}}py3
 skipsdist=True
+requires=tox-venv
 
 [testenv]
 deps=-r{toxinidir}/requirements.txt

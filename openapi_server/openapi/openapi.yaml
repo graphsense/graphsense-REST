@@ -260,7 +260,7 @@ components:
     block:
       example:
         block_hash: block_hash
-        height: 0
+        height: 1
         no_txs: 6
         timestamp: 1
       properties:
@@ -269,6 +269,7 @@ components:
           type: string
         height:
           format: int64
+          minimum: 1
           type: integer
         no_txs:
           format: int64
@@ -343,11 +344,11 @@ components:
         next_page: next_page
         blocks:
         - block_hash: block_hash
-          height: 0
+          height: 1
           no_txs: 6
           timestamp: 1
         - block_hash: block_hash
-          height: 0
+          height: 1
           no_txs: 6
           timestamp: 1
       properties:

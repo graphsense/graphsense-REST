@@ -9,6 +9,7 @@ from six import BytesIO
 {{#imports}}{{import}}  # noqa: E501
 {{/imports}}
 from {{packageName}}.test import BaseTestCase
+import gsrest.test.{{classVarName}}_service as test_service
 
 
 class {{#operations}}Test{{classname}}(BaseTestCase):
@@ -49,6 +50,8 @@ class {{#operations}}Test{{classname}}(BaseTestCase):
             query_string=query_string{{/-first}}{{/queryParams}})
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
+
+        test_service.{{operationId}}(self)
 
    {{/operation}}
 {{/operations}}
