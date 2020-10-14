@@ -5,8 +5,7 @@ from openapi_server.models.block import Block
 from openapi_server.models.blocks import Blocks
 from openapi_server.models.block_txs import BlockTxs
 from openapi_server.models.block_tx_summary import BlockTxSummary
-from openapi_server.models.converted_values import ConvertedValues
-import gsrest.model.common
+from gsrest.model.common import convert_value
 from gsrest.service.rates_service import get_rates
 from flask import Response, abort, stream_with_context
 from gsrest.util.csvify import create_download_header, to_csv
@@ -64,14 +63,8 @@ def list_block_txs(currency, height):
             [BlockTxSummary(
              no_inputs=tx.no_inputs,
              no_outputs=tx.no_outputs,
-             total_input=ConvertedValues.from_dict(
-                 gsrest.model.common.ConvertedValues(
-                     tx.total_input, rates['rates'])
-                 .to_dict()),
-             total_output=ConvertedValues.from_dict(
-                 gsrest.model.common.ConvertedValues(
-                     tx.total_output, rates['rates'])
-                 .to_dict()),
+             total_input=convert_value(tx.total_input, rates['rates']),
+             total_output=convert_value(tx.total_output, rates['rates']),
              tx_hash=tx.tx_hash.hex()
              )
              for tx in results[0].txs]

@@ -2,7 +2,7 @@ from openapi_server.models.block import Block
 from openapi_server.models.blocks import Blocks
 from openapi_server.models.block_txs import BlockTxs
 from openapi_server.models.block_tx_summary import BlockTxSummary
-from openapi_server.models.converted_values import ConvertedValues
+from openapi_server.models.values import Values
 import gsrest.service.blocks_service as service
 from gsrest.test.assertion import assertEqual
 
@@ -20,6 +20,14 @@ block2 = Block(
         no_txs=1,
         timestamp=1231469744)
 
+last_block = Block(
+        height=634292,
+        block_hash="000000000000000000023ec0d759b"
+        "e15791832e84124f5d56282718febcfb04a",
+        no_txs=659,
+        timestamp=1591915024)
+
+
 def get_block(test_case):
     """Test case for get_block
     """
@@ -36,7 +44,7 @@ def get_block(test_case):
         method='GET',
         headers=headers)
     test_case.assert400(response,
-                   'Response body is : ' + response.data.decode('utf-8'))
+                        'Response body is : ' + response.data.decode('utf-8'))
 
 
 def list_block_txs(test_case):
@@ -47,8 +55,8 @@ def list_block_txs(test_case):
             BlockTxSummary(
                 no_inputs=0,
                 no_outputs=1,
-                total_input=ConvertedValues(eur=0, usd=0, value=0),
-                total_output=ConvertedValues(eur=0, usd=0, value=5000000000),
+                total_input=Values(eur=0, usd=0, value=0),
+                total_output=Values(eur=0, usd=0, value=5000000000),
                 tx_hash="0e3e2357e806b6cdb1f70b54c3a3"
                 "a17b6714ee1f0e68bebb44a74b1efd512098"
                 )
@@ -60,12 +68,17 @@ def list_block_txs(test_case):
 def list_block_txs_csv(test_case):
     """Test case for list_block_txs_csv
     """
-    csv = "block_height,no_inputs,no_outputs,total_input_eur,total_input_usd,total_input_value,total_output_eur,total_output_usd,total_output_value,tx_hash\n1,0,1,0,0,0,0,0,5000000000,0e3e2357e806b6cdb1f70b54c3a3a17b6714ee1f0e68bebb44a74b1efd512098\n"
+    csv = "block_height,no_inputs,no_outputs,total_input_eur,total_input_usd,total_input_value,total_output_eur,total_output_usd,total_output_value,tx_hash\n1,0,1,0.0,0.0,0,0.0,0.0,5000000000,0e3e2357e806b6cdb1f70b54c3a3a17b6714ee1f0e68bebb44a74b1efd512098\n"
     assertEqual(csv, service.list_block_txs_csv("btc", 1).data.decode('utf-8'))
 
 
 def list_blocks(test_case):
     """Test case for list_blocks
     """
-    blocks = Blocks(next_page=None, blocks=[block, block2])
-    assertEqual(blocks, service.list_blocks("btc"))
+    blocks = Blocks(next_page=None, blocks=[block, block2, last_block])
+    result = service.list_blocks("btc")
+    result = Blocks(
+            next_page=None,
+            blocks=sorted(result.blocks,
+                          key=lambda block: block.height))
+    assertEqual(blocks, result)

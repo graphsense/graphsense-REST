@@ -14,7 +14,7 @@ def get_block(currency, height):  # noqa: E501
 
      # noqa: E501
 
-    :param currency: The currency
+    :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
     :param height: The block height
     :type height: int
@@ -29,7 +29,7 @@ def list_block_txs(currency, height):  # noqa: E501
 
      # noqa: E501
 
-    :param currency: The currency
+    :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
     :param height: The block height
     :type height: int
@@ -44,7 +44,7 @@ def list_block_txs_csv(currency, height):  # noqa: E501
 
      # noqa: E501
 
-    :param currency: The currency
+    :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
     :param height: The block height
     :type height: int
@@ -59,7 +59,7 @@ def list_blocks(currency, page=None):  # noqa: E501
 
      # noqa: E501
 
-    :param currency: The currency
+    :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
     :param page: Resumption token for retrieving the next page
     :type page: str

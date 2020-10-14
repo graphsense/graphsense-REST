@@ -20,11 +20,46 @@ paths:
       tags:
       - general
       x-openapi-router-controller: openapi_server.controllers.general_controller
+  /{currency}/addresses/{address}:
+    get:
+      operationId: get_address_with_tags
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The cryptocurrency address
+        example: 3Hrnn1UN78uXgLNvtqVXMjHwB41PmX66X4
+        explode: false
+        in: path
+        name: address
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/address'
+          description: OK
+      summary: Get an address with tags
+      tags:
+      - addresses
+      x-openapi-router-controller: openapi_server.controllers.addresses_controller
   /{currency}/blocks:
     get:
       operationId: list_blocks
       parameters:
-      - description: The currency
+      - description: The cryptocurrency (e.g., btc)
         example: btc
         explode: false
         in: path
@@ -58,7 +93,7 @@ paths:
     get:
       operationId: get_block
       parameters:
-      - description: The currency
+      - description: The cryptocurrency (e.g., btc)
         example: btc
         explode: false
         in: path
@@ -93,7 +128,7 @@ paths:
     get:
       operationId: list_block_txs
       parameters:
-      - description: The currency
+      - description: The cryptocurrency (e.g., btc)
         example: btc
         explode: false
         in: path
@@ -128,7 +163,7 @@ paths:
     get:
       operationId: list_block_txs_csv
       parameters:
-      - description: The currency
+      - description: The cryptocurrency (e.g., btc)
         example: btc
         explode: false
         in: path
@@ -164,7 +199,7 @@ paths:
 components:
   parameters:
     currency:
-      description: The currency
+      description: The cryptocurrency (e.g., btc)
       example: btc
       explode: false
       in: path
@@ -195,6 +230,17 @@ components:
       schema:
         type: string
       style: form
+    address:
+      description: The cryptocurrency address
+      example: 3Hrnn1UN78uXgLNvtqVXMjHwB41PmX66X4
+      explode: false
+      in: path
+      name: address
+      required: true
+      schema:
+        format: string
+        type: string
+      style: simple
   schemas:
     stats:
       example:
@@ -282,25 +328,25 @@ components:
       example:
         txs:
         - total_output:
-            eur: 5
-            usd: 5
-            value: 2
+            eur: 0
+            usd: 6
+            value: 1
           no_outputs: 1
           total_input:
-            eur: 5
-            usd: 5
-            value: 2
+            eur: 0
+            usd: 6
+            value: 1
           tx_hash: tx_hash
           no_inputs: 6
         - total_output:
-            eur: 5
-            usd: 5
-            value: 2
+            eur: 0
+            usd: 6
+            value: 1
           no_outputs: 1
           total_input:
-            eur: 5
-            usd: 5
-            value: 2
+            eur: 0
+            usd: 6
+            value: 1
           tx_hash: tx_hash
           no_inputs: 6
         height: 0
@@ -315,14 +361,14 @@ components:
     block_tx_summary:
       example:
         total_output:
-          eur: 5
-          usd: 5
-          value: 2
+          eur: 0
+          usd: 6
+          value: 1
         no_outputs: 1
         total_input:
-          eur: 5
-          usd: 5
-          value: 2
+          eur: 0
+          usd: 6
+          value: 1
         tx_hash: tx_hash
         no_inputs: 6
       properties:
@@ -335,9 +381,9 @@ components:
           format: int64
           type: integer
         total_input:
-          $ref: '#/components/schemas/converted_values'
+          $ref: '#/components/schemas/values'
         total_output:
-          $ref: '#/components/schemas/converted_values'
+          $ref: '#/components/schemas/values'
       type: object
     blocks:
       example:
@@ -360,11 +406,113 @@ components:
             $ref: '#/components/schemas/block'
           type: array
       type: object
-    converted_values:
+    address:
       example:
-        eur: 5
-        usd: 5
-        value: 2
+        total_spent:
+          eur: 0
+          usd: 6
+          value: 1
+        in_degree: 2
+        address: address
+        balance:
+          eur: 0
+          usd: 6
+          value: 1
+        no_incoming_txs: 9
+        out_degree: 7
+        no_outgoing_txs: 3
+        first_tx:
+          tx_hash: tx_hash
+          height: 5
+          timestamp: 5
+        last_tx:
+          tx_hash: tx_hash
+          height: 5
+          timestamp: 5
+        total_received:
+          eur: 0
+          usd: 6
+          value: 1
+        tags:
+        - label: label
+        - label: label
+      properties:
+        address:
+          description: Address
+          type: string
+        balance:
+          $ref: '#/components/schemas/values'
+        first_tx:
+          $ref: '#/components/schemas/tx_summary'
+        last_tx:
+          $ref: '#/components/schemas/tx_summary'
+        in_degree:
+          format: int64
+          type: integer
+        out_degree:
+          format: int64
+          type: integer
+        no_incoming_txs:
+          format: int64
+          type: integer
+        no_outgoing_txs:
+          format: int64
+          type: integer
+        total_received:
+          $ref: '#/components/schemas/values'
+        total_spent:
+          $ref: '#/components/schemas/values'
+        tags:
+          description: Tags
+          items:
+            $ref: '#/components/schemas/tag'
+          type: array
+      required:
+      - address
+      - balance
+      - first_tx
+      - in_degree
+      - last_tx
+      - no_incoming_txs
+      - no_outgoing_txs
+      - out_degree
+      - total_received
+      - total_spent
+      type: object
+    tx_summary:
+      example:
+        tx_hash: tx_hash
+        height: 5
+        timestamp: 5
+      properties:
+        height:
+          description: Transaction height
+          format: int64
+          type: integer
+        timestamp:
+          description: Transaction timestamp
+          format: int64
+          type: integer
+        tx_hash:
+          description: Transaction hash
+          type: string
+      required:
+      - height
+      - timestamp
+      - tx_hash
+      type: object
+    tag:
+      example:
+        label: label
+      properties:
+        label:
+          type: string
+      type: object
+    values:
+      example:
+        eur: 0
+        usd: 6
+        value: 1
       properties:
         eur:
           format: int64

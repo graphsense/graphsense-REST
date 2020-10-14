@@ -7,9 +7,18 @@ from gsrest.service.entities_service import get_entity, get_id_group
 from gsrest.service.common_service import get_address_by_id_group, \
     ADDRESS_PREFIX_LENGTH
 from gsrest.service.rates_service import get_rates, list_rates
+import gsrest.service.common_service as commonDAO
 
 ADDRESS_PAGE_SIZE = 100
 
+def get_address_with_tags(currency, address):
+    addr = commonDAO.get_address(currency, address)
+    """
+    if addr:
+        addr['tags'] = commonDAO.list_address_tags(currency, address)
+        return addr
+    """
+    return addr
 
 def get_address_id(currency, address):
     session = get_session(currency, 'transformed')

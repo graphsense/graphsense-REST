@@ -1,3 +1,6 @@
+import openapi_server.models.values as v
+
+
 class Values:
     """ Model representing values in different crypto- and fiat-currencies."""
 
@@ -27,3 +30,11 @@ def compute_balance(total_received_value, total_spent_value, rates):
     balance_value = total_received_value - total_spent_value
     balance = ConvertedValues(balance_value, rates).to_dict()
     return balance
+
+
+def convert_value(value, rates):
+    values = v.Values(
+            value=value,
+            eur=round(value * rates['eur'] * 1e-8, 2),
+            usd=round(value * rates['usd'] * 1e-8, 2))
+    return values
