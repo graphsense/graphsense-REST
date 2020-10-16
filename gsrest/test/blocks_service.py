@@ -20,13 +20,6 @@ block2 = Block(
         no_txs=1,
         timestamp=1231469744)
 
-last_block = Block(
-        height=634292,
-        block_hash="000000000000000000023ec0d759b"
-        "e15791832e84124f5d56282718febcfb04a",
-        no_txs=659,
-        timestamp=1591915024)
-
 
 def get_block(test_case):
     """Test case for get_block
@@ -75,7 +68,7 @@ def list_block_txs_csv(test_case):
 def list_blocks(test_case):
     """Test case for list_blocks
     """
-    blocks = Blocks(next_page=None, blocks=[block, block2, last_block])
+    blocks = Blocks(next_page=None, blocks=[block, block2])
     result = service.list_blocks("btc")
     result = Blocks(
             next_page=None,

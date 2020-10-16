@@ -34,11 +34,13 @@ function run() {
   rm $temp
 }
 
-run transformed summary_statistics           "LIMIT 1"
-no_blocks=`jq .no_blocks $outdir$transformed_dst.summary_statistics`
-last_block=`expr $no_blocks - 1`
-blocks="(1, 2, $last_block)"
+# hard code statistics:
+echo $outdir$transformed_dst.summary_statistics
+cat << EOF > $outdir$transformed_dst.summary_statistics
+{"no_blocks": 3, "bucket_size": 25000, "no_address_relations": 3906549689, "no_addresses": 660644759, "no_clusters": 318170948, "no_tags": 6954, "no_transactions": 538169236, "timestamp": 1591915024}
+EOF
+blocks="(1,2)"
 run raw         block               "where height in $blocks"
-run raw         block_transactions  "where height=1"
+run raw         block_transactions  "where height in $blocks"
 run transformed exchange_rates      "where height in $blocks"
 run transformed address           "limit 3"

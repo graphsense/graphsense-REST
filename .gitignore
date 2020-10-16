@@ -73,4 +73,6 @@ target/
 
 #Flask
 instance
-!tests/instance
+
+#Flask tests
+.runtest

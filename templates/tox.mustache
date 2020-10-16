@@ -9,5 +9,5 @@ deps=-r{toxinidir}/requirements.txt
 	 {toxinidir}
 
 commands=
-  bash "{toxinidir}/tests/makeCassandraMock.sh"
+  bash -c "cd {toxinidir}/tests/ && make test"
   {{^useNose}}pytest --cov={{{pythonSrcRoot}}}{{{packageName}}}{{/useNose}}{{#useNose}}nosetests{{/useNose}}
