@@ -24,12 +24,12 @@ def get_currency_statistics(currency):
     if result is None:
         notfound('statistics for currency {} not found'.format(currency))
     return CurrencyStats(
-            currency,
-            result.no_blocks,
-            result.no_address_relations,
-            result.no_addresses,
-            result.no_clusters,
-            result.no_transactions,
-            result.no_tags,
-            result.timestamp
+            name=currency,
+            no_blocks=result.no_blocks,
+            no_address_relations=result.no_address_relations,
+            no_addresses=result.no_addresses,
+            no_entities=result.no_clusters,
+            no_txs=result.no_transactions,
+            no_labels=result.no_tags,
+            timestamp=result.timestamp
         )
