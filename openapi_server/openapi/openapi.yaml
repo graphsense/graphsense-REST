@@ -49,9 +49,137 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/address'
+                $ref: '#/components/schemas/address_with_tags'
           description: OK
       summary: Get an address with tags
+      tags:
+      - addresses
+      x-openapi-router-controller: openapi_server.controllers.addresses_controller
+  /{currency}/addresses/{address}/tags:
+    get:
+      operationId: list_address_tags
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The cryptocurrency address
+        example: 3Hrnn1UN78uXgLNvtqVXMjHwB41PmX66X4
+        explode: false
+        in: path
+        name: address
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/tag'
+                type: array
+          description: OK
+      summary: Get attribution tags for a given address
+      tags:
+      - addresses
+      x-openapi-router-controller: openapi_server.controllers.addresses_controller
+  /{currency}/addresses/{address}/tags.csv:
+    get:
+      operationId: list_address_tags_csv
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The cryptocurrency address
+        example: 3Hrnn1UN78uXgLNvtqVXMjHwB41PmX66X4
+        explode: false
+        in: path
+        name: address
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/csv:
+              schema:
+                items:
+                  $ref: '#/components/schemas/tag'
+                type: array
+          description: OK
+      summary: Get attribution tags for a given address
+      tags:
+      - addresses
+      x-openapi-router-controller: openapi_server.controllers.addresses_controller
+  /{currency}/addresses/{address}/txs:
+    get:
+      operationId: list_address_txs
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The cryptocurrency address
+        example: 3Hrnn1UN78uXgLNvtqVXMjHwB41PmX66X4
+        explode: false
+        in: path
+        name: address
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: Resumption token for retrieving the next page
+        example: 0400030bff00f07fffff9b00
+        explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          type: string
+        style: form
+        x-graphsense-rest-test-example: ""
+      - description: Number of items returned in a single page
+        example: 10
+        explode: true
+        in: query
+        name: pagesize
+        required: false
+        schema:
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/address_txs'
+          description: OK
+      summary: Get all transactions an address has been involved in
       tags:
       - addresses
       x-openapi-router-controller: openapi_server.controllers.addresses_controller
@@ -78,6 +206,7 @@ paths:
         schema:
           type: string
         style: form
+        x-graphsense-rest-test-example: ""
       responses:
         "200":
           content:
@@ -230,6 +359,17 @@ components:
       schema:
         type: string
       style: form
+      x-graphsense-rest-test-example: ""
+    pagesize:
+      description: Number of items returned in a single page
+      example: 10
+      explode: true
+      in: query
+      name: pagesize
+      required: false
+      schema:
+        type: integer
+      style: form
     address:
       description: The cryptocurrency address
       example: 3Hrnn1UN78uXgLNvtqVXMjHwB41PmX66X4
@@ -314,6 +454,7 @@ components:
           format: string
           type: string
         height:
+          description: Height
           format: int64
           minimum: 1
           type: integer
@@ -328,30 +469,33 @@ components:
       example:
         txs:
         - total_output:
-            eur: 0
-            usd: 6
-            value: 1
+            eur: 1
+            usd: 5
+            value: 5
           no_outputs: 1
           total_input:
-            eur: 0
-            usd: 6
-            value: 1
+            eur: 1
+            usd: 5
+            value: 5
           tx_hash: tx_hash
           no_inputs: 6
         - total_output:
-            eur: 0
-            usd: 6
-            value: 1
+            eur: 1
+            usd: 5
+            value: 5
           no_outputs: 1
           total_input:
-            eur: 0
-            usd: 6
-            value: 1
+            eur: 1
+            usd: 5
+            value: 5
           tx_hash: tx_hash
           no_inputs: 6
-        height: 0
+        height: 1
       properties:
         height:
+          description: Height
+          format: int64
+          minimum: 1
           type: integer
         txs:
           items:
@@ -361,14 +505,14 @@ components:
     block_tx_summary:
       example:
         total_output:
-          eur: 0
-          usd: 6
-          value: 1
+          eur: 1
+          usd: 5
+          value: 5
         no_outputs: 1
         total_input:
-          eur: 0
-          usd: 6
-          value: 1
+          eur: 1
+          usd: 5
+          value: 5
         tx_hash: tx_hash
         no_inputs: 6
       properties:
@@ -407,35 +551,6 @@ components:
           type: array
       type: object
     address:
-      example:
-        total_spent:
-          eur: 0
-          usd: 6
-          value: 1
-        in_degree: 2
-        address: address
-        balance:
-          eur: 0
-          usd: 6
-          value: 1
-        no_incoming_txs: 9
-        out_degree: 7
-        no_outgoing_txs: 3
-        first_tx:
-          tx_hash: tx_hash
-          height: 5
-          timestamp: 5
-        last_tx:
-          tx_hash: tx_hash
-          height: 5
-          timestamp: 5
-        total_received:
-          eur: 0
-          usd: 6
-          value: 1
-        tags:
-        - label: label
-        - label: label
       properties:
         address:
           description: Address
@@ -462,11 +577,6 @@ components:
           $ref: '#/components/schemas/values'
         total_spent:
           $ref: '#/components/schemas/values'
-        tags:
-          description: Tags
-          items:
-            $ref: '#/components/schemas/tag'
-          type: array
       required:
       - address
       - balance
@@ -479,18 +589,77 @@ components:
       - total_received
       - total_spent
       type: object
-    tx_summary:
+    address_with_tags:
+      allOf:
+      - $ref: '#/components/schemas/address'
+      - $ref: '#/components/schemas/address_with_tags_allOf'
+    address_txs:
       example:
-        tx_hash: tx_hash
-        height: 5
-        timestamp: 5
+        next_page: next_page
+        address_txs:
+        - address: address
+          tx_hash: tx_hash
+          value:
+            eur: 1
+            usd: 5
+            value: 5
+          height: 1
+          timestamp: 6
+        - address: address
+          tx_hash: tx_hash
+          value:
+            eur: 1
+            usd: 5
+            value: 5
+          height: 1
+          timestamp: 6
       properties:
+        next_page:
+          format: string
+          type: string
+        address_txs:
+          items:
+            $ref: '#/components/schemas/address_tx'
+          type: array
+      type: object
+    address_tx:
+      example:
+        address: address
+        tx_hash: tx_hash
+        value:
+          eur: 1
+          usd: 5
+          value: 5
+        height: 1
+        timestamp: 6
+      properties:
+        address:
+          description: Address
+          type: string
         height:
-          description: Transaction height
+          description: Height
           format: int64
+          minimum: 1
           type: integer
         timestamp:
-          description: Transaction timestamp
+          description: Timestamp
+          format: int64
+          type: integer
+        tx_hash:
+          description: Transaction hash
+          type: string
+        value:
+          $ref: '#/components/schemas/values'
+      type: object
+    tx_summary:
+      properties:
+        height:
+          description: Height
+          format: int64
+          minimum: 1
+          type: integer
+        timestamp:
+          description: Timestamp
           format: int64
           type: integer
         tx_hash:
@@ -503,16 +672,55 @@ components:
       type: object
     tag:
       example:
+        address: address
+        abuse: abuse
+        active: true
+        currency: currency
         label: label
+        source: source
+        category: category
+        tagpack_uri: tagpack_uri
+        lastmod: 0
       properties:
-        label:
+        address:
+          description: Address
           type: string
+        label:
+          description: Label
+          type: string
+        category:
+          description: Category
+          type: string
+        abuse:
+          description: Abuses
+          type: string
+        tagpack_uri:
+          description: Tagpack URI
+          type: string
+        source:
+          description: Source
+          type: string
+        lastmod:
+          description: Last modified
+          format: int32
+          type: integer
+        active:
+          description: whether the address has been ever used
+          type: boolean
+        currency:
+          description: Currency
+          type: string
+      required:
+      - active
+      - address
+      - currency
+      - label
       type: object
     values:
       example:
-        eur: 0
-        usd: 6
-        value: 1
+        eur: 1
+        usd: 5
+        value: 5
       properties:
         eur:
           format: int64
@@ -527,3 +735,26 @@ components:
     next_page:
       format: string
       type: string
+    address_id:
+      description: Address
+      type: string
+    height:
+      description: Height
+      format: int64
+      minimum: 1
+      type: integer
+    timestamp:
+      description: Timestamp
+      format: int64
+      type: integer
+    tx_hash:
+      description: Transaction hash
+      type: string
+    address_with_tags_allOf:
+      properties:
+        tags:
+          description: Tags
+          items:
+            $ref: '#/components/schemas/tag'
+          type: array
+      type: object

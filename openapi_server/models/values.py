@@ -52,6 +52,17 @@ class Values(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, prefix=""):
+        """Returns the model as a dict:
+
+        :return: The Values as a dict
+        :rtype: dict
+        """
+        return { 'eur': self._eur,
+            'usd': self._usd,
+            'value': self._value }
+
+
     @property
     def eur(self):
         """Gets the eur of this Values.

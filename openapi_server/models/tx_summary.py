@@ -37,8 +37,14 @@ class TxSummary(Model):
             'tx_hash': 'tx_hash'
         }
 
+        if height is None:
+            raise ValueError("Invalid value for `height`, must not be `None`")  # noqa: E501
         self._height = height
+        if timestamp is None:
+            raise ValueError("Invalid value for `timestamp`, must not be `None`")  # noqa: E501
         self._timestamp = timestamp
+        if tx_hash is None:
+            raise ValueError("Invalid value for `tx_hash`, must not be `None`")  # noqa: E501
         self._tx_hash = tx_hash
 
     @classmethod
@@ -52,11 +58,22 @@ class TxSummary(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, prefix=""):
+        """Returns the model as a dict:
+
+        :return: The TxSummary as a dict
+        :rtype: dict
+        """
+        return { 'height': self._height,
+            'timestamp': self._timestamp,
+            'tx_hash': self._tx_hash }
+
+
     @property
     def height(self):
         """Gets the height of this TxSummary.
 
-        Transaction height  # noqa: E501
+        Height  # noqa: E501
 
         :return: The height of this TxSummary.
         :rtype: int
@@ -67,13 +84,15 @@ class TxSummary(Model):
     def height(self, height):
         """Sets the height of this TxSummary.
 
-        Transaction height  # noqa: E501
+        Height  # noqa: E501
 
         :param height: The height of this TxSummary.
         :type height: int
         """
         if height is None:
             raise ValueError("Invalid value for `height`, must not be `None`")  # noqa: E501
+        if height is not None and height < 1:  # noqa: E501
+            raise ValueError("Invalid value for `height`, must be a value greater than or equal to `1`")  # noqa: E501
 
         self._height = height
 
@@ -81,7 +100,7 @@ class TxSummary(Model):
     def timestamp(self):
         """Gets the timestamp of this TxSummary.
 
-        Transaction timestamp  # noqa: E501
+        Timestamp  # noqa: E501
 
         :return: The timestamp of this TxSummary.
         :rtype: int
@@ -92,7 +111,7 @@ class TxSummary(Model):
     def timestamp(self, timestamp):
         """Sets the timestamp of this TxSummary.
 
-        Transaction timestamp  # noqa: E501
+        Timestamp  # noqa: E501
 
         :param timestamp: The timestamp of this TxSummary.
         :type timestamp: int

@@ -18,6 +18,8 @@ def to_csv(query_function):
             raise ValueError('nothing found')
 
         def flatten(item, name=""):
+            if 'to_dict' in dir(item):
+                item = item.to_dict()
             if isinstance(item, dict):
                 for sub_item in item:
                     flatten(item[sub_item], name + sub_item + "_")

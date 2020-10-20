@@ -19,6 +19,8 @@ class TestGeneralController(BaseTestCase):
 
         Get statistics of supported currencies
         """
+        test_service.get_statistics(self)
+
         headers = { 
             'Accept': 'application/json',
         }
@@ -29,7 +31,6 @@ class TestGeneralController(BaseTestCase):
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
-        test_service.get_statistics(self)
 
 
 if __name__ == '__main__':

@@ -1,9 +1,9 @@
 from gsrest.db.cassandra import get_session
 from openapi_server.models.address import Address
-from openapi_server.models.values import Values
+from openapi_server.models.address_with_tags import AddressWithTags
 from openapi_server.models.tx_summary import TxSummary
-from gsrest.model.tags import Tag
-from gsrest.model.common import compute_balance
+from openapi_server.models.tag import Tag
+from gsrest.model.common import compute_balance, convert_value, make_values
 from gsrest.service.rates_service import get_rates
 from gsrest.service.problems import notfound
 
@@ -27,6 +27,7 @@ def get_address(currency, address):
     if not result:
         return notfound("Address {} not found in currency {}".format(
             address, currency))
+    print('result {}'.format(result))
     return Address(
         address=result.address,
         first_tx=TxSummary(
@@ -39,20 +40,22 @@ def get_address(currency, address):
             result.last_tx.tx_hash.hex()),
         no_incoming_txs=result.no_incoming_txs,
         no_outgoing_txs=result.no_outgoing_txs,
-        total_received=Values(
-            result.total_received.eur,
-            result.total_received.usd,
-            result.total_received.value),
-        total_spent=Values(
-            result.total_spent.eur,
-            result.total_spent.usd,
-            result.total_spent.value),
+        total_received=make_values(
+            value=result.total_received.value,
+            eur=result.total_received.eur,
+            usd=result.total_received.usd),
+        total_spent=make_values(
+            eur=result.total_spent.eur,
+            usd=result.total_spent.usd,
+            value=result.total_spent.value),
         in_degree=result.in_degree,
         out_degree=result.out_degree,
-        balance=compute_balance(
-            result.total_received.value,
-            result.total_spent.value,
-            get_rates(currency)['rates'])
+        balance=convert_value(
+                compute_balance(
+                    result.total_received.value,
+                    result.total_spent.value,
+                ),
+                get_rates(currency)['rates'])
         )
 
 
@@ -61,7 +64,20 @@ def list_address_tags(currency, address):
 
     query = "SELECT * FROM address_tags WHERE address = %s"
     results = session.execute(query, [address])
-    address_tags = [Tag.from_address_row(row, currency, True).to_dict()
+    if results is None:
+        return notfound("Address {} not found in currency {}".format(
+            address, currency))
+    address_tags = [Tag(
+                    label=row.label,
+                    address=row.address,
+                    category=row.category,
+                    abuse=row.abuse,
+                    tagpack_uri=row.tagpack_uri,
+                    source=row.source,
+                    lastmod=row.lastmod,
+                    active=True,
+                    currency=currency
+                    )
                     for row in results.current_rows]
 
     return address_tags
@@ -69,6 +85,17 @@ def list_address_tags(currency, address):
 
 def get_address_with_tags(currency, address):
     result = get_address(currency, address)
-    if result:
-        result['tags'] = list_address_tags(currency, address)
+    return AddressWithTags(
+        address=result.address,
+        first_tx=result.first_tx,
+        last_tx=result.last_tx,
+        no_incoming_txs=result.no_incoming_txs,
+        no_outgoing_txs=result.no_outgoing_txs,
+        total_received=result.total_received,
+        total_spent=result.total_spent,
+        in_degree=result.in_degree,
+        out_degree=result.out_degree,
+        balance=result.balance,
+        tags=list_address_tags(currency, address)
+        )
     return result

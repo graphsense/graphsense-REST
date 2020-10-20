@@ -49,10 +49,21 @@ class BlockTxs(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, prefix=""):
+        """Returns the model as a dict:
+
+        :return: The BlockTxs as a dict
+        :rtype: dict
+        """
+        return { 'height': self._height,
+            'txs': self._txs }
+
+
     @property
     def height(self):
         """Gets the height of this BlockTxs.
 
+        Height  # noqa: E501
 
         :return: The height of this BlockTxs.
         :rtype: int
@@ -63,10 +74,13 @@ class BlockTxs(Model):
     def height(self, height):
         """Sets the height of this BlockTxs.
 
+        Height  # noqa: E501
 
         :param height: The height of this BlockTxs.
         :type height: int
         """
+        if height is not None and height < 1:  # noqa: E501
+            raise ValueError("Invalid value for `height`, must be a value greater than or equal to `1`")  # noqa: E501
 
         self._height = height
 

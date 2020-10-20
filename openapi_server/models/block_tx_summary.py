@@ -64,6 +64,19 @@ class BlockTxSummary(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, prefix=""):
+        """Returns the model as a dict:
+
+        :return: The BlockTxSummary as a dict
+        :rtype: dict
+        """
+        return { 'tx_hash': self._tx_hash,
+            'no_inputs': self._no_inputs,
+            'no_outputs': self._no_outputs,
+            'total_input': self._total_input,
+            'total_output': self._total_output }
+
+
     @property
     def tx_hash(self):
         """Gets the tx_hash of this BlockTxSummary.

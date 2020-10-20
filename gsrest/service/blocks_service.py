@@ -7,7 +7,7 @@ from openapi_server.models.block_txs import BlockTxs
 from openapi_server.models.block_tx_summary import BlockTxSummary
 from gsrest.model.common import convert_value
 from gsrest.service.rates_service import get_rates
-from flask import Response, abort, stream_with_context
+from flask import Response, stream_with_context
 from gsrest.util.csvify import create_download_header, to_csv
 from gsrest.service.problems import notfound, badrequest
 
@@ -55,51 +55,32 @@ def list_block_txs(currency, height):
 
     query = "SELECT * FROM block_transactions WHERE height = %s"
     results = session.execute(query, [height])
+    if results is None:
+        return notfound("Block {} not found".format(height))
+    rates = get_rates(currency, height)
 
-    if results:
-        rates = get_rates(currency, height)
+    tx_summaries = \
+        [BlockTxSummary(
+         no_inputs=tx.no_inputs,
+         no_outputs=tx.no_outputs,
+         total_input=convert_value(tx.total_input, rates['rates']),
+         total_output=convert_value(tx.total_output, rates['rates']),
+         tx_hash=tx.tx_hash.hex()
+         )
+         for tx in results[0].txs]
 
-        tx_summaries = \
-            [BlockTxSummary(
-             no_inputs=tx.no_inputs,
-             no_outputs=tx.no_outputs,
-             total_input=convert_value(tx.total_input, rates['rates']),
-             total_output=convert_value(tx.total_output, rates['rates']),
-             tx_hash=tx.tx_hash.hex()
-             )
-             for tx in results[0].txs]
-
-        return BlockTxs(height, tx_summaries)
-
-    return None
+    return BlockTxs(height, tx_summaries)
 
 
 def list_block_txs_csv(currency, height):
     def query_function(_):
         result = list_block_txs(currency, height)
-        if result:
-            return None, \
-              [{'block_height': result.height,
-                'tx_hash': tx.tx_hash,
-                'no_inputs': tx.no_inputs,
-                'no_outputs': tx.no_outputs,
-                'total_input_eur': tx.total_input.eur,
-                'total_input_usd': tx.total_input.usd,
-                'total_input_value': tx.total_input.value,
-                'total_output_eur': tx.total_output.eur,
-                'total_output_usd': tx.total_output.usd,
-                'total_output_value': tx.total_output.value}
-               for tx in result.txs]
-        abort(404,
-              "Block {} not found in currency {}".format(height, currency))
-
-    try:
-        return Response(stream_with_context(to_csv(query_function)),
-                        mimetype="text/csv",
-                        headers=create_download_header(
-                            'transactions of block {} ({}).csv'
-                            .format(height, currency.upper())))
-
-    except ValueError:
-        abort(404,
-              "Block {} not found in currency {}".format(height, currency))
+        txs = [tx.to_dict() for tx in result.txs]
+        for tx in txs:
+            tx['block_height'] = result.height
+        return None, txs
+    return Response(stream_with_context(to_csv(query_function)),
+                    mimetype="text/csv",
+                    headers=create_download_header(
+                        'transactions of block {} ({}).csv'
+                        .format(height, currency.upper())))

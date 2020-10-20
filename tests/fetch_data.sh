@@ -4,7 +4,7 @@ outdir=`dirname $0`/data/
 raw_src=btc_raw_prod
 raw_dst=btc_raw
 
-transformed_src=btc_transformed_20200611
+transformed_src=btc_transformed_20201007
 transformed_dst=btc_transformed
 
 CASSANDRA_HOST=192.168.243.101
@@ -34,13 +34,17 @@ function run() {
   rm $temp
 }
 
-# hard code statistics:
-echo $outdir$transformed_dst.summary_statistics
-cat << EOF > $outdir$transformed_dst.summary_statistics
-{"no_blocks": 3, "bucket_size": 25000, "no_address_relations": 3906549689, "no_addresses": 660644759, "no_clusters": 318170948, "no_tags": 6954, "no_transactions": 538169236, "timestamp": 1591915024}
-EOF
-blocks="(1,2)"
-run raw         block               "where height in $blocks"
-run raw         block_transactions  "where height in $blocks"
-run transformed exchange_rates      "where height in $blocks"
-run transformed address           "limit 3"
+blocks="1,2"
+addresses="'3Hrnn1UN78uXgLNvtqVXMjHwB41PmX66X4','3Hrnn2xbNUBDfqgLQh6CwfutAm9dfVq67u','1Archive1n2C579dMsAu3iC6tWzuQJz8dN'"
+#run raw         block               "where height in ($blocks)"
+#run raw         block_transactions  "where height in ($blocks)"
+#run transformed address           "where address_prefix in ('3Hrnn','1Arch') and address in ($addresses)"
+#address_id=`head -n 1 $outdir$transformed_dst.address | jq ".address_id" -`
+#address_id_group=`expr $address_id \/ 25000`
+#run transformed address_transactions           "where address_id=$address_id and address_id_group=$address_id_group"
+#while read line; do
+  #blocks=$blocks,`echo $line | jq .height -`
+#done < $outdir$transformed_dst.address_transactions
+#run transformed address_tags "where address in ($addresses)"
+#run transformed exchange_rates      "where height in ($blocks)"
+

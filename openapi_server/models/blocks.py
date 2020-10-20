@@ -49,6 +49,16 @@ class Blocks(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, prefix=""):
+        """Returns the model as a dict:
+
+        :return: The Blocks as a dict
+        :rtype: dict
+        """
+        return { 'next_page': self._next_page,
+            'blocks': self._blocks }
+
+
     @property
     def next_page(self):
         """Gets the next_page of this Blocks.

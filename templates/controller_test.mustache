@@ -24,11 +24,13 @@ class {{#operations}}Test{{classname}}(BaseTestCase):
 
         {{{summary}}}
         """
+        test_service.{{operationId}}(self)
+
         {{#bodyParam}}
         {{paramName}} = {{{example}}}
         {{/bodyParam}}
         {{#queryParams}}
-        {{#-first}}query_string = [{{/-first}}{{^-first}}                {{/-first}}('{{^vendorExtensions.x-python-connexion-openapi-name}}{{paramName}}{{/vendorExtensions.x-python-connexion-openapi-name}}{{#vendorExtensions.x-python-connexion-openapi-name}}{{vendorExtensions.x-python-connexion-openapi-name}}{{/vendorExtensions.x-python-connexion-openapi-name}}', '{{{example}}}'){{#hasMore}},{{/hasMore}}{{#-last}}]{{/-last}}
+        {{#-first}}query_string = [{{/-first}}{{^-first}}                {{/-first}}('{{^vendorExtensions.x-python-connexion-openapi-name}}{{paramName}}{{/vendorExtensions.x-python-connexion-openapi-name}}{{#vendorExtensions.x-python-connexion-openapi-name}}{{vendorExtensions.x-python-connexion-openapi-name}}{{/vendorExtensions.x-python-connexion-openapi-name}}', '{{#vendorExtensions.x-graphsense-rest-test-example}}{{{vendorExtensions.x-graphsense-rest-test-example}}}{{/vendorExtensions.x-graphsense-rest-test-example}}{{^vendorExtensions.x-graphsense-rest-test-example}}{{{example}}}{{/vendorExtensions.x-graphsense-rest-test-example}}'){{#hasMore}},{{/hasMore}}{{#-last}}]{{/-last}}
         {{/queryParams}}
         headers = { {{#vendorExtensions.x-prefered-produce}}
             'Accept': '{{mediaType}}',{{/vendorExtensions.x-prefered-produce}}{{#vendorExtensions.x-prefered-consume}}
@@ -51,7 +53,6 @@ class {{#operations}}Test{{classname}}(BaseTestCase):
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
-        test_service.{{operationId}}(self)
 
    {{/operation}}
 {{/operations}}

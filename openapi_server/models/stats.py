@@ -44,6 +44,15 @@ class Stats(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, prefix=""):
+        """Returns the model as a dict:
+
+        :return: The Stats as a dict
+        :rtype: dict
+        """
+        return { 'currencies': self._currencies }
+
+
     @property
     def currencies(self):
         """Gets the currencies of this Stats.

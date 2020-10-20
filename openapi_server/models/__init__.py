@@ -4,6 +4,10 @@
 from __future__ import absolute_import
 # import models into model package
 from openapi_server.models.address import Address
+from openapi_server.models.address_tx import AddressTx
+from openapi_server.models.address_txs import AddressTxs
+from openapi_server.models.address_with_tags import AddressWithTags
+from openapi_server.models.address_with_tags_all_of import AddressWithTagsAllOf
 from openapi_server.models.block import Block
 from openapi_server.models.block_tx_summary import BlockTxSummary
 from openapi_server.models.block_txs import BlockTxs

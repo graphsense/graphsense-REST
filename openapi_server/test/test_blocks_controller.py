@@ -22,6 +22,8 @@ class TestBlocksController(BaseTestCase):
 
         Get a block by its height
         """
+        test_service.get_block(self)
+
         headers = { 
             'Accept': 'application/json',
         }
@@ -32,13 +34,14 @@ class TestBlocksController(BaseTestCase):
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
-        test_service.get_block(self)
 
     def test_list_block_txs(self):
         """Test case for list_block_txs
 
         Get all blocks (100 per page)
         """
+        test_service.list_block_txs(self)
+
         headers = { 
             'Accept': 'application/json',
         }
@@ -49,13 +52,14 @@ class TestBlocksController(BaseTestCase):
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
-        test_service.list_block_txs(self)
 
     def test_list_block_txs_csv(self):
         """Test case for list_block_txs_csv
 
         Get all blocks as CSV
         """
+        test_service.list_block_txs_csv(self)
+
         headers = { 
             'Accept': 'text/csv',
         }
@@ -66,14 +70,15 @@ class TestBlocksController(BaseTestCase):
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
-        test_service.list_block_txs_csv(self)
 
     def test_list_blocks(self):
         """Test case for list_blocks
 
         Get all blocks
         """
-        query_string = [('page', '0400030bff00f07fffff9b00')]
+        test_service.list_blocks(self)
+
+        query_string = [('page', '')]
         headers = { 
             'Accept': 'application/json',
         }
@@ -85,7 +90,6 @@ class TestBlocksController(BaseTestCase):
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
-        test_service.list_blocks(self)
 
 
 if __name__ == '__main__':
