@@ -2,6 +2,8 @@ from openapi_server.models.address_with_tags import AddressWithTags
 from openapi_server.models.values import Values
 from openapi_server.models.tag import Tag
 from openapi_server.models.tx_summary import TxSummary
+from openapi_server.models.neighbors import Neighbors
+from openapi_server.models.neighbor import Neighbor
 import gsrest.service.addresses_service as service
 from gsrest.test.assertion import assertEqual
 from openapi_server.models.address_tx import AddressTx
@@ -84,6 +86,46 @@ addressWithoutTags = AddressWithTags(
    balance=Values(eur=0.0, usd=0.0, value=0)
 )
 
+addressWithTagsOutNeighbors = Neighbors(
+        next_page=None,
+        neighbors=[
+            Neighbor(
+                id="17DfZja1713S3JRWA9jaebCKFM5anUh7GG",
+                node_type='address',
+                labels=[],
+                received=Values(
+                        value=87789282,
+                        usd=142.18,
+                        eur=114.86),
+                balance=Values(
+                        value=0,
+                        usd=0.0,
+                        eur=0.0),
+                no_txs=1,
+                estimated_value=Values(
+                    value=27789282,
+                    usd=87.24,
+                    eur=72.08)
+                ),
+            Neighbor(
+                id="1LpXFVskUaE2cs5xkQE5bDDaX8hff4L2Ej",
+                node_type='address',
+                labels=[],
+                received=Values(
+                        value=67789282,
+                        usd=121.46,
+                        eur=98.72),
+                balance=Values(
+                        value=0,
+                        usd=0.0,
+                        eur=0.0),
+                no_txs=1,
+                estimated_value=Values(
+                    value=27789282,
+                    usd=87.24,
+                    eur=72.08)
+                )])
+
 
 def get_address_with_tags(test_case):
     """Test case for get_address_with_tags
@@ -135,3 +177,11 @@ def list_address_tags_csv(test_case):
     assertEqual(csv, service.list_address_tags_csv(
                         "btc",
                         addressWithTags.address).data.decode('utf-8'))
+
+
+def list_address_neighbors(test_case):
+    result = service.list_address_neighbors(
+        currency='btc',
+        address=addressWithTags.address,
+        direction='out')
+    assertEqual(addressWithTagsOutNeighbors, result)

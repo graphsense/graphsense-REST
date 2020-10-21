@@ -13,6 +13,8 @@ from openapi_server.models.block_tx_summary import BlockTxSummary
 from openapi_server.models.block_txs import BlockTxs
 from openapi_server.models.blocks import Blocks
 from openapi_server.models.currency_stats import CurrencyStats
+from openapi_server.models.neighbor import Neighbor
+from openapi_server.models.neighbors import Neighbors
 from openapi_server.models.stats import Stats
 from openapi_server.models.tag import Tag
 from openapi_server.models.tx_summary import TxSummary

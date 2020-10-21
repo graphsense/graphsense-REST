@@ -39,12 +39,26 @@ addresses="'3Hrnn1UN78uXgLNvtqVXMjHwB41PmX66X4','3Hrnn2xbNUBDfqgLQh6CwfutAm9dfVq
 #run raw         block               "where height in ($blocks)"
 #run raw         block_transactions  "where height in ($blocks)"
 #run transformed address           "where address_prefix in ('3Hrnn','1Arch') and address in ($addresses)"
-#address_id=`head -n 1 $outdir$transformed_dst.address | jq ".address_id" -`
-#address_id_group=`expr $address_id \/ 25000`
+address_id=`head -n 1 $outdir$transformed_dst.address | jq ".address_id" -`
+address_id_group=`expr $address_id \/ 25000`
 #run transformed address_transactions           "where address_id=$address_id and address_id_group=$address_id_group"
 #while read line; do
   #blocks=$blocks,`echo $line | jq .height -`
 #done < $outdir$transformed_dst.address_transactions
 #run transformed address_tags "where address in ($addresses)"
 #run transformed exchange_rates      "where height in ($blocks)"
-
+run transformed address_incoming_relations "where dst_address_id=$address_id and dst_address_id_group=$address_id_group limit 2"
+run transformed address_outgoing_relations "where src_address_id=$address_id and src_address_id_group=$address_id_group limit 2"
+while read line; do
+  aid=`echo $line | jq ".src_address_id"`
+  address_id=$address_id,$aid
+  address_id_group=$address_id_group,`expr $aid \/ 25000`
+done < $outdir$transformed_dst.address_incoming_relations
+while read line; do
+  aid=`echo $line | jq ".dst_address_id"`
+  address_id=$address_id,$aid
+  address_id_group=$address_id_group,`expr $aid \/ 25000`
+done < $outdir$transformed_dst.address_outgoing_relations
+echo "address_ids $address_id"
+echo "address_id_groups $address_id_group"
+run transformed address_by_id_group "where address_id in ($address_id) and address_id_group in ($address_id_group)"

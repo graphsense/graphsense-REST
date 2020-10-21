@@ -3,16 +3,18 @@ from cassandra.query import SimpleStatement, ValueSequence
 from gsrest.db.cassandra import get_session
 from openapi_server.models.address_tx import AddressTx
 from openapi_server.models.address_txs import AddressTxs
-from gsrest.model.addresses import AddressOutgoingRelations, \
-    AddressIncomingRelations, Link
+from openapi_server.models.neighbors import Neighbors
+from openapi_server.models.neighbor import Neighbor
+from gsrest.model.addresses import AddressIncomingRelations, Link
 from gsrest.service.entities_service import get_entity, get_id_group
 from gsrest.service.common_service import get_address_by_id_group, \
     ADDRESS_PREFIX_LENGTH
 from gsrest.service.rates_service import get_rates, list_rates
 import gsrest.service.common_service as commonDAO
-from gsrest.model.common import convert_value
-from flask import Response, stream_with_context, abort
+from gsrest.model.common import convert_value, compute_balance, make_values
+from flask import Response, stream_with_context
 from gsrest.util.csvify import create_download_header, to_csv
+from gsrest.service.problems import notfound
 
 ADDRESS_PAGE_SIZE = 100
 
@@ -85,35 +87,68 @@ def list_address_txs(currency, address, paging_state=None, pagesize=None):
     return None, None
 
 
+def list_address_neighbors(currency, address, direction, paging_state=None,
+                           pagesize=None):
+    paging_state = bytes.fromhex(paging_state) if paging_state else None
+    paging_state, neighbors = \
+        list_address_incoming_relations(currency,
+                                        address,
+                                        paging_state,
+                                        pagesize) \
+        if "in" in direction else \
+        list_address_outgoing_relations(currency,
+                                        address,
+                                        paging_state,
+                                        pagesize)
+    return Neighbors(next_page=paging_state.hex() if paging_state else None,
+                     neighbors=neighbors)
+
+
 def list_address_outgoing_relations(currency, address, paging_state=None,
                                     page_size=None):
     session = get_session(currency, 'transformed')
 
     address_id, address_id_group = get_address_id_id_group(currency, address)
-    if address_id:
-        query = "SELECT * FROM address_outgoing_relations WHERE " \
-                "src_address_id_group = %s AND src_address_id = %s"
-        fetch_size = ADDRESS_PAGE_SIZE
-        if page_size:
-            fetch_size = page_size
-        statement = SimpleStatement(query, fetch_size=fetch_size)
-        results = session.execute(statement, [address_id_group, address_id],
-                                  paging_state=paging_state)
-        paging_state = results.paging_state
-        rates = get_rates(currency)['rates']
-        relations = []
-        for row in results.current_rows:
-            dst_address_id_group = get_id_group(row.dst_address_id)
-            dst_address = get_address_by_id_group(currency,
-                                                  dst_address_id_group,
-                                                  row.dst_address_id)
+    if not address_id:
+        notfound("Address {} not found in currency {}".format(address,
+                                                              currency))
+    query = "SELECT * FROM address_outgoing_relations WHERE " \
+            "src_address_id_group = %s AND src_address_id = %s"
+    fetch_size = ADDRESS_PAGE_SIZE
+    if page_size:
+        fetch_size = page_size
+    statement = SimpleStatement(query, fetch_size=fetch_size)
+    results = session.execute(statement, [address_id_group, address_id],
+                              paging_state=paging_state)
+    paging_state = results.paging_state
+    rates = get_rates(currency)['rates']
+    print('rates {}'.format(rates))
+    relations = []
+    for row in results.current_rows:
+        dst_address_id_group = get_id_group(row.dst_address_id)
+        dst_address = get_address_by_id_group(currency,
+                                              dst_address_id_group,
+                                              row.dst_address_id)
 
-            relations.append(AddressOutgoingRelations.from_row(row,
-                                                               dst_address,
-                                                               rates)
-                             .to_dict())
-        return paging_state, relations
-    return None, None
+        balance = compute_balance(row.dst_properties.total_received.value,
+                                  row.dst_properties.total_spent.value)
+        print('balance {}'.format(balance))
+        relations.append(Neighbor(
+                            id=dst_address,
+                            node_type='address',
+                            labels=row.dst_labels
+                            if row.dst_labels is not None else [],
+                            received=make_values(
+                                value=row.dst_properties.total_received.value,
+                                eur=row.dst_properties.total_received.eur,
+                                usd=row.dst_properties.total_received.usd),
+                            estimated_value=make_values(
+                                value=row.estimated_value.value,
+                                eur=row.estimated_value.eur,
+                                usd=row.estimated_value.usd),
+                            balance=convert_value(balance, rates),
+                            no_txs=row.no_transactions))
+    return paging_state, relations
 
 
 def list_address_incoming_relations(currency, address, paging_state=None,

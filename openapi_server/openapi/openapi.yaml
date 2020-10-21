@@ -55,6 +55,72 @@ paths:
       tags:
       - addresses
       x-openapi-router-controller: openapi_server.controllers.addresses_controller
+  /{currency}/addresses/{address}/neighbors:
+    get:
+      operationId: list_address_neighbors
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The cryptocurrency address
+        example: 3Hrnn1UN78uXgLNvtqVXMjHwB41PmX66X4
+        explode: false
+        in: path
+        name: address
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: Incoming or outgoing neighbors
+        example: out
+        explode: true
+        in: query
+        name: direction
+        required: true
+        schema:
+          enum:
+          - in
+          - out
+          type: string
+        style: form
+      - description: Resumption token for retrieving the next page
+        example: 0400030bff00f07fffff9b00
+        explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          type: string
+        style: form
+        x-graphsense-rest-test-example: ""
+      - description: Number of items returned in a single page
+        example: 10
+        explode: true
+        in: query
+        name: pagesize
+        required: false
+        schema:
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/neighbors'
+          description: OK
+      summary: Get an addresses' neighbors in the address graph
+      tags:
+      - addresses
+      x-openapi-router-controller: openapi_server.controllers.addresses_controller
   /{currency}/addresses/{address}/tags:
     get:
       operationId: list_address_tags
@@ -370,6 +436,19 @@ components:
       schema:
         type: integer
       style: form
+    direction:
+      description: Incoming or outgoing neighbors
+      example: out
+      explode: true
+      in: query
+      name: direction
+      required: true
+      schema:
+        enum:
+        - in
+        - out
+        type: string
+      style: form
     address:
       description: The cryptocurrency address
       example: 3Hrnn1UN78uXgLNvtqVXMjHwB41PmX66X4
@@ -469,25 +548,25 @@ components:
       example:
         txs:
         - total_output:
-            eur: 1
-            usd: 5
-            value: 5
+            eur: 0
+            usd: 6
+            value: 1
           no_outputs: 1
           total_input:
-            eur: 1
-            usd: 5
-            value: 5
+            eur: 0
+            usd: 6
+            value: 1
           tx_hash: tx_hash
           no_inputs: 6
         - total_output:
-            eur: 1
-            usd: 5
-            value: 5
+            eur: 0
+            usd: 6
+            value: 1
           no_outputs: 1
           total_input:
-            eur: 1
-            usd: 5
-            value: 5
+            eur: 0
+            usd: 6
+            value: 1
           tx_hash: tx_hash
           no_inputs: 6
         height: 1
@@ -505,14 +584,14 @@ components:
     block_tx_summary:
       example:
         total_output:
-          eur: 1
-          usd: 5
-          value: 5
+          eur: 0
+          usd: 6
+          value: 1
         no_outputs: 1
         total_input:
-          eur: 1
-          usd: 5
-          value: 5
+          eur: 0
+          usd: 6
+          value: 1
         tx_hash: tx_hash
         no_inputs: 6
       properties:
@@ -600,17 +679,17 @@ components:
         - address: address
           tx_hash: tx_hash
           value:
-            eur: 1
-            usd: 5
-            value: 5
+            eur: 0
+            usd: 6
+            value: 1
           height: 1
           timestamp: 6
         - address: address
           tx_hash: tx_hash
           value:
-            eur: 1
-            usd: 5
-            value: 5
+            eur: 0
+            usd: 6
+            value: 1
           height: 1
           timestamp: 6
       properties:
@@ -627,9 +706,9 @@ components:
         address: address
         tx_hash: tx_hash
         value:
-          eur: 1
-          usd: 5
-          value: 5
+          eur: 0
+          usd: 6
+          value: 1
         height: 1
         timestamp: 6
       properties:
@@ -718,9 +797,9 @@ components:
       type: object
     values:
       example:
-        eur: 1
-        usd: 5
-        value: 5
+        eur: 0
+        usd: 6
+        value: 1
       properties:
         eur:
           format: int64
@@ -750,6 +829,109 @@ components:
     tx_hash:
       description: Transaction hash
       type: string
+    neighbors:
+      example:
+        next_page: next_page
+        neighbors:
+        - node_type: address
+          balance:
+            eur: 0
+            usd: 6
+            value: 1
+          received:
+            eur: 0
+            usd: 6
+            value: 1
+          id: id
+          estimated_value:
+            eur: 0
+            usd: 6
+            value: 1
+          labels:
+          - labels
+          - labels
+          no_txs: 5
+        - node_type: address
+          balance:
+            eur: 0
+            usd: 6
+            value: 1
+          received:
+            eur: 0
+            usd: 6
+            value: 1
+          id: id
+          estimated_value:
+            eur: 0
+            usd: 6
+            value: 1
+          labels:
+          - labels
+          - labels
+          no_txs: 5
+      properties:
+        next_page:
+          format: string
+          type: string
+        neighbors:
+          items:
+            $ref: '#/components/schemas/neighbor'
+          type: array
+      type: object
+    neighbor:
+      example:
+        node_type: address
+        balance:
+          eur: 0
+          usd: 6
+          value: 1
+        received:
+          eur: 0
+          usd: 6
+          value: 1
+        id: id
+        estimated_value:
+          eur: 0
+          usd: 6
+          value: 1
+        labels:
+        - labels
+        - labels
+        no_txs: 5
+      properties:
+        id:
+          description: address or entity id
+          type: string
+        node_type:
+          description: address or entity
+          enum:
+          - address
+          - entity
+          type: string
+        labels:
+          description: labels
+          items:
+            type: string
+          type: array
+        balance:
+          $ref: '#/components/schemas/values'
+        received:
+          $ref: '#/components/schemas/values'
+        estimated_value:
+          $ref: '#/components/schemas/values'
+        no_txs:
+          description: number of transactions
+          format: int32
+          type: integer
+      required:
+      - balance
+      - estimated_value
+      - id
+      - labels
+      - no_txs
+      - node_type
+      - received
+      type: object
     address_with_tags_allOf:
       properties:
         tags:

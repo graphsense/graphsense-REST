@@ -8,6 +8,7 @@ from six import BytesIO
 
 from openapi_server.models.address_txs import AddressTxs  # noqa: E501
 from openapi_server.models.address_with_tags import AddressWithTags  # noqa: E501
+from openapi_server.models.neighbors import Neighbors  # noqa: E501
 from openapi_server.models.tag import Tag  # noqa: E501
 from openapi_server.test import BaseTestCase
 import gsrest.test.addresses_service as test_service
@@ -30,6 +31,28 @@ class TestAddressesController(BaseTestCase):
             '/{currency}/addresses/{address}'.format(currency="btc", address="3Hrnn1UN78uXgLNvtqVXMjHwB41PmX66X4"),
             method='GET',
             headers=headers)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+
+    def test_list_address_neighbors(self):
+        """Test case for list_address_neighbors
+
+        Get an addresses' neighbors in the address graph
+        """
+        test_service.list_address_neighbors(self)
+
+        query_string = [('direction', 'out'),
+                        ('page', ''),
+                        ('pagesize', '10')]
+        headers = { 
+            'Accept': 'application/json',
+        }
+        response = self.client.open(
+            '/{currency}/addresses/{address}/neighbors'.format(currency="btc", address="3Hrnn1UN78uXgLNvtqVXMjHwB41PmX66X4"),
+            method='GET',
+            headers=headers,
+            query_string=query_string)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
