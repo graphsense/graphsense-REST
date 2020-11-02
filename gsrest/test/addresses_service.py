@@ -4,12 +4,38 @@ from openapi_server.models.tag import Tag
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.neighbors import Neighbors
 from openapi_server.models.neighbor import Neighbor
+from openapi_server.models.entity_with_tags import EntityWithTags
 import gsrest.service.addresses_service as service
 from gsrest.test.assertion import assertEqual
 from openapi_server.models.address_tx import AddressTx
 from openapi_server.models.address_txs import AddressTxs
 from gsrest.model.common import convert_value
 from gsrest.service.rates_service import list_rates
+
+
+tag = Tag(
+           category="organization",
+           label="Internet Archive",
+           abuse=None,
+           lastmod=1560290400,
+           source="https://archive.org/donate/cryptocurrency",
+           address="1Archive1n2C579dMsAu3iC6tWzuQJz8dN",
+           tagpack_uri="http://tagpack_uri",
+           active=True,
+           currency='btc'
+        )
+
+tag2 = Tag(
+           category="organization",
+           label="Internet Archive 2",
+           abuse=None,
+           lastmod=1560290400,
+           source="https://archive.org/donate/cryptocurrency",
+           address="1Archive1n2C579dMsAu3iC6tWzuQJz8dN",
+           tagpack_uri="http://tagpack_uri",
+           active=True,
+           currency='btc'
+        )
 
 addressWithTags = AddressWithTags(
    first_tx=TxSummary(
@@ -40,18 +66,7 @@ addressWithTags = AddressWithTags(
    address="1Archive1n2C579dMsAu3iC6tWzuQJz8dN",
    in_degree=5013,
    balance=Values(eur=1.15, usd=2.31, value=115422577),
-   tags=[Tag(
-           category="organization",
-           label="Internet Archive",
-           abuse=None,
-           lastmod=1560290400,
-           source="https://archive.org/donate/cryptocurrency",
-           address="1Archive1n2C579dMsAu3iC6tWzuQJz8dN",
-           tagpack_uri="https://github.com/graphsense"
-           "/graphsense-tagpacks/blob/develop/packs/demo.yaml",
-           active=True,
-           currency='btc'
-        )]
+   tags=[tag]
    )
 
 addressWithoutTags = AddressWithTags(
@@ -127,6 +142,42 @@ addressWithTagsOutNeighbors = Neighbors(
                 )])
 
 
+entityWithTagsOfAddressWithTags = EntityWithTags(
+   no_outgoing_txs=280,
+   last_tx=TxSummary(
+      height=651545,
+      tx_hash="5678",
+      timestamp=1602006938
+   ),
+   total_spent=Values(
+      eur=2291256.5,
+      value=138942266867,
+      usd=2762256.25
+   ),
+   in_degree=4358,
+   no_addresses=110,
+   total_received=Values(
+      usd=2583655.0,
+      eur=2162085.5,
+      value=139057689444
+   ),
+   no_incoming_txs=4859,
+   entity=17642138,
+   out_degree=176,
+   first_tx=TxSummary(
+      timestamp=1323298692,
+      height=156529,
+      tx_hash="4567"
+   ),
+   balance=Values(
+            value=115422577,
+            usd=2.31,
+            eur=1.15),
+   tags=[tag, tag2],
+   tag_coherence=0.9411764705882353
+)
+
+
 def get_address_with_tags(test_case):
     """Test case for get_address_with_tags
     """
@@ -173,7 +224,7 @@ def list_address_tags(test_case):
 
 
 def list_address_tags_csv(test_case):
-    csv = "abuse,active,address,category,currency,label,lastmod,source,tagpack_uri\nNone,True,1Archive1n2C579dMsAu3iC6tWzuQJz8dN,organization,btc,Internet Archive,1560290400,https://archive.org/donate/cryptocurrency,https://github.com/graphsense/graphsense-tagpacks/blob/develop/packs/demo.yaml\n"
+    csv = "abuse,active,address,category,currency,label,lastmod,source,tagpack_uri\nNone,True,1Archive1n2C579dMsAu3iC6tWzuQJz8dN,organization,btc,Internet Archive,1560290400,https://archive.org/donate/cryptocurrency,http://tagpack_uri\n"
     assertEqual(csv, service.list_address_tags_csv(
                         "btc",
                         addressWithTags.address).data.decode('utf-8'))
@@ -194,3 +245,10 @@ def list_address_neighbors_csv(test_case):
         address=addressWithTags.address,
         direction='out')
     assertEqual(csv, result.data.decode('utf-8'))
+
+
+def get_address_entity(test_case):
+    result = service.get_address_entity(
+                currency='btc',
+                address=addressWithTags.address)
+    assertEqual(entityWithTagsOfAddressWithTags, result)

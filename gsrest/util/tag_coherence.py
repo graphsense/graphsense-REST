@@ -2,14 +2,13 @@ from collections import Counter
 from difflib import SequenceMatcher
 
 
-def compute_tag_coherence(tags=None):
-    if not tags:
+def compute_tag_coherence(labels=None):
+    if not labels:
         return None
 
     label_set = set()
     label_count = Counter()
-    for tag in tags:
-        label = tag['label']
+    for label in labels:
         label_set.add(label)
         label_count[label] += 1
 

@@ -1,4 +1,5 @@
 from gsrest.util.tag_coherence import compute_tag_coherence
+from openapi_server.models.tag import Tag
 
 
 def test_compute_tag_coherence():
@@ -6,7 +7,7 @@ def test_compute_tag_coherence():
     assert compute_tag_coherence(tags) is None
 
     def to_tags(labels):
-        return [{'label': label} for label in labels]
+        return labels
 
     tags = to_tags(['foo'])
     assert compute_tag_coherence(tags) == 1

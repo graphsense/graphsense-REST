@@ -5,8 +5,10 @@ from openapi_server.models.address_tx import AddressTx
 from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.neighbors import Neighbors
 from openapi_server.models.neighbor import Neighbor
+from openapi_server.models.entity_with_tags import EntityWithTags
 from gsrest.model.addresses import AddressIncomingRelations, Link
-from gsrest.service.entities_service import get_entity, get_id_group
+from gsrest.service.entities_service import get_entity, get_id_group, \
+        list_entity_tags
 from gsrest.service.common_service import get_address_by_id_group, \
     ADDRESS_PREFIX_LENGTH
 from gsrest.service.rates_service import get_rates, list_rates
@@ -15,6 +17,7 @@ from gsrest.model.common import convert_value, compute_balance, make_values
 from flask import Response, stream_with_context
 from gsrest.util.csvify import create_download_header, to_csv
 from gsrest.service.problems import notfound
+from gsrest.util.tag_coherence import compute_tag_coherence
 
 ADDRESS_PAGE_SIZE = 100
 
@@ -237,23 +240,49 @@ def list_addresses_links(currency, address, neighbor):
 
 def get_address_entity(currency, address):
     # from address to complete entity stats
+    nf = notfound('Entity for address {} not found'.format(address))
+
     entity_id = get_address_entity_id(currency, address)
-    if isinstance(entity_id, int):
-        return get_entity(currency, entity_id)
-    return None
+    if entity_id is None:
+        return nf
+
+    result = get_entity(currency, entity_id)
+    if result is None:
+        return nf
+
+    tags = list_entity_tags(currency, result.entity)
+    return EntityWithTags(
+        entity=result.entity,
+        first_tx=result.first_tx,
+        last_tx=result.last_tx,
+        no_addresses=result.no_addresses,
+        no_incoming_txs=result.no_incoming_txs,
+        no_outgoing_txs=result.no_outgoing_txs,
+        total_received=result.total_received,
+        total_spent=result.total_spent,
+        in_degree=result.in_degree,
+        out_degree=result.out_degree,
+        balance=result.balance,
+        tags=tags,
+        tag_coherence=compute_tag_coherence(tag.label for tag in tags)
+        )
 
 
 def get_address_entity_id(currency, address):
     # from address to entity id only
     session = get_session(currency, 'transformed')
     address_id, address_id_group = get_address_id_id_group(currency, address)
-    if isinstance(address_id, int):
-        query = "SELECT cluster FROM address_cluster WHERE " \
-                "address_id_group = %s AND address_id = %s "
-        result = session.execute(query, [address_id_group, address_id])
-        if result:
-            return result[0].cluster
-    return None
+    if not isinstance(address_id, int):
+        return None
+
+    query = "SELECT cluster FROM address_cluster WHERE " \
+            "address_id_group = %s AND address_id = %s "
+    result = session.execute(query, [address_id_group, address_id])
+    print('ROWOW {}'.format(result))
+    if result is None or result.one() is None:
+        return None
+
+    return result.one().cluster
 
 
 def list_matching_addresses(currency, expression):

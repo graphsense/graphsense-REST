@@ -35,7 +35,7 @@ paths:
           type: string
         style: simple
       - description: The cryptocurrency address
-        example: 3Hrnn1UN78uXgLNvtqVXMjHwB41PmX66X4
+        example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
         explode: false
         in: path
         name: address
@@ -50,6 +50,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/address_with_tags'
+          description: OK
+      summary: Get an address with tags
+      tags:
+      - addresses
+      x-openapi-router-controller: openapi_server.controllers.addresses_controller
+  /{currency}/addresses/{address}/entity:
+    get:
+      operationId: get_address_entity
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The cryptocurrency address
+        example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
+        explode: false
+        in: path
+        name: address
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/entity_with_tags'
           description: OK
       summary: Get an address with tags
       tags:
@@ -70,7 +105,7 @@ paths:
           type: string
         style: simple
       - description: The cryptocurrency address
-        example: 3Hrnn1UN78uXgLNvtqVXMjHwB41PmX66X4
+        example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
         explode: false
         in: path
         name: address
@@ -136,7 +171,7 @@ paths:
           type: string
         style: simple
       - description: The cryptocurrency address
-        example: 3Hrnn1UN78uXgLNvtqVXMjHwB41PmX66X4
+        example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
         explode: false
         in: path
         name: address
@@ -183,7 +218,7 @@ paths:
           type: string
         style: simple
       - description: The cryptocurrency address
-        example: 3Hrnn1UN78uXgLNvtqVXMjHwB41PmX66X4
+        example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
         explode: false
         in: path
         name: address
@@ -220,7 +255,7 @@ paths:
           type: string
         style: simple
       - description: The cryptocurrency address
-        example: 3Hrnn1UN78uXgLNvtqVXMjHwB41PmX66X4
+        example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
         explode: false
         in: path
         name: address
@@ -255,7 +290,7 @@ paths:
           type: string
         style: simple
       - description: The cryptocurrency address
-        example: 3Hrnn1UN78uXgLNvtqVXMjHwB41PmX66X4
+        example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
         explode: false
         in: path
         name: address
@@ -494,7 +529,7 @@ components:
       style: form
     address:
       description: The cryptocurrency address
-      example: 3Hrnn1UN78uXgLNvtqVXMjHwB41PmX66X4
+      example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
       explode: false
       in: path
       name: address
@@ -715,6 +750,53 @@ components:
       allOf:
       - $ref: '#/components/schemas/address'
       - $ref: '#/components/schemas/address_with_tags_allOf'
+    entity:
+      properties:
+        entity:
+          description: Entity id
+          type: string
+        balance:
+          $ref: '#/components/schemas/values'
+        first_tx:
+          $ref: '#/components/schemas/tx_summary'
+        last_tx:
+          $ref: '#/components/schemas/tx_summary'
+        in_degree:
+          format: int64
+          type: integer
+        out_degree:
+          format: int64
+          type: integer
+        no_addresses:
+          format: int64
+          type: integer
+        no_incoming_txs:
+          format: int64
+          type: integer
+        no_outgoing_txs:
+          format: int64
+          type: integer
+        total_received:
+          $ref: '#/components/schemas/values'
+        total_spent:
+          $ref: '#/components/schemas/values'
+      required:
+      - balance
+      - entity
+      - first_tx
+      - in_degree
+      - last_tx
+      - no_addresses
+      - no_incoming_txs
+      - no_outgoing_txs
+      - out_degree
+      - total_received
+      - total_spent
+      type: object
+    entity_with_tags:
+      allOf:
+      - $ref: '#/components/schemas/entity'
+      - $ref: '#/components/schemas/entity_with_tags_allOf'
     address_txs:
       example:
         next_page: next_page
@@ -860,6 +942,9 @@ components:
     address_id:
       description: Address
       type: string
+    entity_id:
+      description: Entity id
+      type: string
     height:
       description: Height
       format: int64
@@ -982,4 +1067,18 @@ components:
           items:
             $ref: '#/components/schemas/tag'
           type: array
+      type: object
+    entity_with_tags_allOf:
+      properties:
+        tags:
+          description: Tags
+          items:
+            $ref: '#/components/schemas/tag'
+          type: array
+        tag_coherence:
+          description: Tag coherence
+          type: float
+      required:
+      - tag_coherence
+      - tags
       type: object

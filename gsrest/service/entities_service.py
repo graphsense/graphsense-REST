@@ -3,12 +3,16 @@ from cassandra.query import SimpleStatement
 from cassandra.concurrent import execute_concurrent
 
 from gsrest.db.cassandra import get_session
-from gsrest.model.entities import Entity, EntityIncomingRelations, \
+from gsrest.model.entities import EntityIncomingRelations, \
     EntityOutgoingRelations, EntityAddress
-from gsrest.model.tags import Tag
 from gsrest.service.common_service import get_address_by_id_group, \
     get_address_with_tags
 from gsrest.service.rates_service import get_rates
+from openapi_server.models.entity import Entity
+from openapi_server.models.tx_summary import TxSummary
+from gsrest.model.common import compute_balance, convert_value, make_values
+from gsrest.service.problems import notfound
+from openapi_server.models.tag import Tag
 
 BUCKET_SIZE = 25000  # TODO: get BUCKET_SIZE from cassandra
 ENTITY_PAGE_SIZE = 100
@@ -47,9 +51,17 @@ def list_entity_tags(currency, entity_id):
             id_address[address.one().address_id] = address.one().address
     entity_tags = []
     for row in results.current_rows:
-        entity_tags.append(Tag.from_entity_row(row, id_address[row.address_id],
-                                               currency).to_dict())
-
+        entity_tags.append(Tag(
+                    label=row.label,
+                    address=row.address,
+                    category=row.category,
+                    abuse=row.abuse,
+                    tagpack_uri=row.tagpack_uri,
+                    source=row.source,
+                    lastmod=row.lastmod,
+                    active=True,
+                    currency=currency
+                    ))
     return entity_tags
 
 
@@ -59,10 +71,40 @@ def get_entity(currency, entity_id):
     entity_id_group = get_id_group(entity_id)
     query = "SELECT * FROM cluster WHERE cluster_group = %s AND cluster = %s "
     result = session.execute(query, [entity_id_group, entity_id])
-    rates = get_rates(currency)['rates']
-    if result:
-        return Entity.from_row(result[0], rates).to_dict()
-    return None
+    if result is None:
+        notfound("Entity {} not found".format(entity_id))
+    result = result.one()
+    print('result {}'.format(result))
+    return Entity(
+        entity=result.cluster,
+        first_tx=TxSummary(
+            result.first_tx.height,
+            result.first_tx.timestamp,
+            result.first_tx.tx_hash.hex()),
+        last_tx=TxSummary(
+            result.last_tx.height,
+            result.last_tx.timestamp,
+            result.last_tx.tx_hash.hex()),
+        no_addresses=result.no_addresses,
+        no_incoming_txs=result.no_incoming_txs,
+        no_outgoing_txs=result.no_outgoing_txs,
+        total_received=make_values(
+            value=result.total_received.value,
+            eur=result.total_received.eur,
+            usd=result.total_received.usd),
+        total_spent=make_values(
+            eur=result.total_spent.eur,
+            usd=result.total_spent.usd,
+            value=result.total_spent.value),
+        in_degree=result.in_degree,
+        out_degree=result.out_degree,
+        balance=convert_value(
+                compute_balance(
+                    result.total_received.value,
+                    result.total_spent.value,
+                ),
+                get_rates(currency)['rates'])
+        )
 
 
 def list_entity_relations(currency, entity_id, is_outgoing, targets=None,

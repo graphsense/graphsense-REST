@@ -3,10 +3,26 @@ import six
 
 from openapi_server.models.address_txs import AddressTxs  # noqa: E501
 from openapi_server.models.address_with_tags import AddressWithTags  # noqa: E501
+from openapi_server.models.entity_with_tags import EntityWithTags  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
 from openapi_server.models.tag import Tag  # noqa: E501
 from openapi_server import util
 import gsrest.service.addresses_service as service
+
+
+def get_address_entity(currency, address):  # noqa: E501
+    """Get an address with tags
+
+     # noqa: E501
+
+    :param currency: The cryptocurrency (e.g., btc)
+    :type currency: str
+    :param address: The cryptocurrency address
+    :type address: str
+
+    :rtype: EntityWithTags
+    """
+    return service.get_address_entity(currency, address)
 
 
 def get_address_with_tags(currency, address):  # noqa: E501
