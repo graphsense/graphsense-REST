@@ -45,6 +45,23 @@ def list_address_neighbors(currency, address, direction, page=None, pagesize=Non
     return service.list_address_neighbors(currency, address, direction, page, pagesize)
 
 
+def list_address_neighbors_csv(currency, address, direction):  # noqa: E501
+    """Get an addresses&#39; neighbors in the address graph as CSV
+
+     # noqa: E501
+
+    :param currency: The cryptocurrency (e.g., btc)
+    :type currency: str
+    :param address: The cryptocurrency address
+    :type address: str
+    :param direction: Incoming or outgoing neighbors
+    :type direction: str
+
+    :rtype: str
+    """
+    return service.list_address_neighbors_csv(currency, address, direction)
+
+
 def list_address_tags(currency, address):  # noqa: E501
     """Get attribution tags for a given address
 
@@ -70,7 +87,7 @@ def list_address_tags_csv(currency, address):  # noqa: E501
     :param address: The cryptocurrency address
     :type address: str
 
-    :rtype: List[Tag]
+    :rtype: str
     """
     return service.list_address_tags_csv(currency, address)
 

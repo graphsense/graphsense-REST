@@ -185,3 +185,12 @@ def list_address_neighbors(test_case):
         address=addressWithTags.address,
         direction='out')
     assertEqual(addressWithTagsOutNeighbors, result)
+
+
+def list_address_neighbors_csv(test_case):
+    csv = "balance_eur,balance_usd,balance_value,estimated_value_eur,estimated_value_usd,estimated_value_value,id,labels,no_txs,node_type,received_eur,received_usd,received_value\n0.0,0.0,0,72.08,87.24,27789282,17DfZja1713S3JRWA9jaebCKFM5anUh7GG,[],1,address,114.86,142.18,87789282\n0.0,0.0,0,72.08,87.24,27789282,1LpXFVskUaE2cs5xkQE5bDDaX8hff4L2Ej,[],1,address,98.72,121.46,67789282\n"
+    result = service.list_address_neighbors_csv(
+        currency='btc',
+        address=addressWithTags.address,
+        direction='out')
+    assertEqual(csv, result.data.decode('utf-8'))

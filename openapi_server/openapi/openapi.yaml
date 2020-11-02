@@ -121,6 +121,53 @@ paths:
       tags:
       - addresses
       x-openapi-router-controller: openapi_server.controllers.addresses_controller
+  /{currency}/addresses/{address}/neighbors.csv:
+    get:
+      operationId: list_address_neighbors_csv
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The cryptocurrency address
+        example: 3Hrnn1UN78uXgLNvtqVXMjHwB41PmX66X4
+        explode: false
+        in: path
+        name: address
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: Incoming or outgoing neighbors
+        example: out
+        explode: true
+        in: query
+        name: direction
+        required: true
+        schema:
+          enum:
+          - in
+          - out
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            text/csv:
+              schema:
+                type: string
+          description: OK
+      summary: Get an addresses' neighbors in the address graph as CSV
+      tags:
+      - addresses
+      x-openapi-router-controller: openapi_server.controllers.addresses_controller
   /{currency}/addresses/{address}/tags:
     get:
       operationId: list_address_tags
@@ -187,9 +234,7 @@ paths:
           content:
             application/csv:
               schema:
-                items:
-                  $ref: '#/components/schemas/tag'
-                type: array
+                type: string
           description: OK
       summary: Get attribution tags for a given address
       tags:
@@ -383,9 +428,7 @@ paths:
           content:
             text/csv:
               schema:
-                items:
-                  $ref: '#/components/schemas/block_tx_summary'
-                type: array
+                type: string
           description: OK
       summary: Get all blocks as CSV
       tags:

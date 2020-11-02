@@ -57,6 +57,26 @@ class TestAddressesController(BaseTestCase):
                        'Response body is : ' + response.data.decode('utf-8'))
 
 
+    def test_list_address_neighbors_csv(self):
+        """Test case for list_address_neighbors_csv
+
+        Get an addresses' neighbors in the address graph as CSV
+        """
+        test_service.list_address_neighbors_csv(self)
+
+        query_string = [('direction', 'out')]
+        headers = { 
+            'Accept': 'text/csv',
+        }
+        response = self.client.open(
+            '/{currency}/addresses/{address}/neighbors.csv'.format(currency="btc", address="3Hrnn1UN78uXgLNvtqVXMjHwB41PmX66X4"),
+            method='GET',
+            headers=headers,
+            query_string=query_string)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+
     def test_list_address_tags(self):
         """Test case for list_address_tags
 

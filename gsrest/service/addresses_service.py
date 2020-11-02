@@ -104,6 +104,18 @@ def list_address_neighbors(currency, address, direction, paging_state=None,
                      neighbors=neighbors)
 
 
+def list_address_neighbors_csv(currency, address, direction):
+    def query_function(page_state):
+        result = list_address_neighbors(currency, address, direction,
+                                        page_state)
+        return (result.next_page, result.neighbors)
+    return Response(stream_with_context(to_csv(query_function)),
+                    mimetype="text/csv",
+                    headers=create_download_header(
+                            '{} neighbors of address {} ({}).csv'
+                            .format(direction, address, currency.upper())))
+
+
 def list_address_outgoing_relations(currency, address, paging_state=None,
                                     page_size=None):
     session = get_session(currency, 'transformed')

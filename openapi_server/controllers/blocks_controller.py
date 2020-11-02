@@ -2,7 +2,6 @@ import connexion
 import six
 
 from openapi_server.models.block import Block  # noqa: E501
-from openapi_server.models.block_tx_summary import BlockTxSummary  # noqa: E501
 from openapi_server.models.block_txs import BlockTxs  # noqa: E501
 from openapi_server.models.blocks import Blocks  # noqa: E501
 from openapi_server import util
@@ -49,7 +48,7 @@ def list_block_txs_csv(currency, height):  # noqa: E501
     :param height: The block height
     :type height: int
 
-    :rtype: List[BlockTxSummary]
+    :rtype: str
     """
     return service.list_block_txs_csv(currency, height)
 
