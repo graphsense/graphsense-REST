@@ -142,6 +142,46 @@ addressWithTagsOutNeighbors = Neighbors(
                     eur=72.08)
                 )])
 
+addressWithTagsInNeighbors = Neighbors(
+        next_page=None,
+        neighbors=[
+            Neighbor(
+                id="1BLCmwzV5KXdd4zuonoxaBC9YobJfrkxFg",
+                node_type='address',
+                labels=[],
+                received=Values(
+                        value=59308362491,
+                        usd=17221.5,
+                        eur=12887.89),
+                balance=Values(
+                        value=606,
+                        usd=0.0,
+                        eur=0.0),
+                no_txs=1,
+                estimated_value=Values(
+                    value=1091,
+                    usd=0.01,
+                    eur=0.0)
+                ),
+            Neighbor(
+                id="1KzsFAeH9rL6nVXDEt9mnFHR3sekBjpNSt",
+                node_type='address',
+                labels=[],
+                received=Values(
+                        value=5000000000,
+                        usd=13.41,
+                        eur=9.87),
+                balance=Values(
+                        value=0,
+                        usd=0.0,
+                        eur=0.0),
+                no_txs=1,
+                estimated_value=Values(
+                    value=50000000,
+                    usd=404.02,
+                    eur=295.7)
+                )])
+
 
 entityWithTagsOfAddressWithTags = EntityWithTags(
    no_outgoing_txs=280,
@@ -237,6 +277,12 @@ def list_address_neighbors(test_case):
         address=addressWithTags.address,
         direction='out')
     assertEqual(addressWithTagsOutNeighbors, result)
+
+    result = service.list_address_neighbors(
+        currency='btc',
+        address=addressWithTags.address,
+        direction='in')
+    assertEqual(addressWithTagsInNeighbors, result)
 
 
 def list_address_neighbors_csv(test_case):

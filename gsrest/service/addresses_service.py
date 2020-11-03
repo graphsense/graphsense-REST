@@ -138,7 +138,6 @@ def list_address_outgoing_relations(currency, address, paging_state=None,
                               paging_state=paging_state)
     paging_state = results.paging_state
     rates = get_rates(currency)['rates']
-    print('rates {}'.format(rates))
     relations = []
     for row in results.current_rows:
         dst_address_id_group = get_id_group(row.dst_address_id)
@@ -148,7 +147,6 @@ def list_address_outgoing_relations(currency, address, paging_state=None,
 
         balance = compute_balance(row.dst_properties.total_received.value,
                                   row.dst_properties.total_spent.value)
-        print('balance {}'.format(balance))
         relations.append(Neighbor(
                             id=dst_address,
                             node_type='address',
@@ -172,30 +170,44 @@ def list_address_incoming_relations(currency, address, paging_state=None,
     session = get_session(currency, 'transformed')
 
     address_id, address_id_group = get_address_id_id_group(currency, address)
-    if address_id:
-        query = "SELECT * FROM address_incoming_relations WHERE " \
-                "dst_address_id_group = %s AND dst_address_id = %s"
-        fetch_size = ADDRESS_PAGE_SIZE
-        if page_size:
-            fetch_size = page_size
-        statement = SimpleStatement(query, fetch_size=fetch_size)
-        results = session.execute(statement, [address_id_group, address_id],
-                                  paging_state=paging_state)
-        paging_state = results.paging_state
-        rates = get_rates(currency)['rates']
-        relations = []
-        for row in results.current_rows:
-            src_address_id_group = get_id_group(row.src_address_id)
-            src_address = get_address_by_id_group(currency,
-                                                  src_address_id_group,
-                                                  row.src_address_id)
+    if not address_id:
+        notfound("Address {} not found in currency {}".format(address,
+                                                              currency))
+    query = "SELECT * FROM address_incoming_relations WHERE " \
+            "dst_address_id_group = %s AND dst_address_id = %s"
+    fetch_size = ADDRESS_PAGE_SIZE
+    if page_size:
+        fetch_size = page_size
+    statement = SimpleStatement(query, fetch_size=fetch_size)
+    results = session.execute(statement, [address_id_group, address_id],
+                              paging_state=paging_state)
+    paging_state = results.paging_state
+    rates = get_rates(currency)['rates']
+    relations = []
+    for row in results.current_rows:
+        src_address_id_group = get_id_group(row.src_address_id)
+        src_address = get_address_by_id_group(currency,
+                                              src_address_id_group,
+                                              row.src_address_id)
 
-            relations.append(AddressIncomingRelations.from_row(row,
-                                                               src_address,
-                                                               rates)
-                             .to_dict())
-        return paging_state, relations
-    return None, None
+        balance = compute_balance(row.src_properties.total_received.value,
+                                  row.src_properties.total_spent.value)
+        relations.append(Neighbor(
+                            id=src_address,
+                            node_type='address',
+                            labels=row.src_labels
+                            if row.src_labels is not None else [],
+                            received=make_values(
+                                value=row.src_properties.total_received.value,
+                                eur=row.src_properties.total_received.eur,
+                                usd=row.src_properties.total_received.usd),
+                            estimated_value=make_values(
+                                value=row.estimated_value.value,
+                                eur=row.estimated_value.eur,
+                                usd=row.estimated_value.usd),
+                            balance=convert_value(balance, rates),
+                            no_txs=row.no_transactions))
+    return paging_state, relations
 
 
 def list_address_links(currency, address, neighbor):
