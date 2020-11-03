@@ -92,3 +92,12 @@ cluster_id=17642138
 cluster_id_group=705
 fetch transformed cluster_incoming_relations "where dst_cluster=$cluster_id and dst_cluster_group=$cluster_id_group limit 2"
 fetch transformed cluster_outgoing_relations "where src_cluster=$cluster_id and src_cluster_group=$cluster_id_group limit 2"
+fetch transformed cluster_addresses "where cluster_group=705 and cluster=17642138 limit 2"
+address_id=-1
+address_id_group=-1
+while read line; do
+  aid=`echo $line | jq ".address_id"`
+  address_id=$address_id,$aid
+  address_id_group=$address_id_group,`expr $aid \/ $bucket_size`
+done < $outdir$transformed_dst.cluster_addresses
+#fetch transformed address_by_id_group "where address_id_group in ($address_id_group) and address_id in ($address_id) limit 2" append

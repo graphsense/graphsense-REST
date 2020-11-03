@@ -14,6 +14,7 @@ from openapi_server.models.block_txs import BlockTxs
 from openapi_server.models.blocks import Blocks
 from openapi_server.models.currency_stats import CurrencyStats
 from openapi_server.models.entity import Entity
+from openapi_server.models.entity_addresses import EntityAddresses
 from openapi_server.models.entity_with_tags import EntityWithTags
 from openapi_server.models.entity_with_tags_all_of import EntityWithTagsAllOf
 from openapi_server.models.link import Link

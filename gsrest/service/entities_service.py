@@ -3,7 +3,6 @@ from cassandra.query import SimpleStatement
 from cassandra.concurrent import execute_concurrent
 
 from gsrest.db.cassandra import get_session
-from gsrest.model.entities import EntityAddress
 from gsrest.service.common_service import get_address_by_id_group, \
     get_address_with_tags
 from gsrest.service.rates_service import get_rates
@@ -17,6 +16,8 @@ from openapi_server.models.neighbors import Neighbors
 from gsrest.util.tag_coherence import compute_tag_coherence
 from flask import Response, stream_with_context
 from gsrest.util.csvify import create_download_header, to_csv
+from openapi_server.models.address import Address
+from openapi_server.models.entity_addresses import EntityAddresses
 
 BUCKET_SIZE = 25000  # TODO: get BUCKET_SIZE from cassandra
 ENTITY_PAGE_SIZE = 100
@@ -246,7 +247,7 @@ def list_entity_neighbors_csv(currency, entity, direction):
                             .format(direction, entity, currency.upper())))
 
 
-def list_entity_addresses(currency, entity, paging_state, page_size):
+def list_entity_addresses(currency, entity, paging_state=None, page_size=None):
     session = get_session(currency, 'transformed')
     entity_id_group = get_id_group(entity)
     query = "SELECT * FROM cluster_addresses WHERE cluster_group = %s AND " \
@@ -257,19 +258,45 @@ def list_entity_addresses(currency, entity, paging_state, page_size):
     statement = SimpleStatement(query, fetch_size=fetch_size)
     results = session.execute(statement, [entity_id_group, entity],
                               paging_state=paging_state)
-    if results:
-        paging_state = results.paging_state
-        rates = get_rates(currency)['rates']
-        addresses = []
-        for row in results.current_rows:
-            address_id_group = get_id_group(row.address_id)
-            address = get_address_by_id_group(currency, address_id_group,
-                                              row.address_id)
-            addresses.append(EntityAddress.from_entity_row(row, address,
-                                                           rates)
-                             .to_dict())
-        return paging_state, addresses
-    return paging_state, None
+    if results is None:
+        raise RuntimeError('No addresses for entity {} found'.format(entity))
+
+    paging_state = results.paging_state
+    addresses = []
+    for row in results.current_rows:
+        address_id_group = get_id_group(row.address_id)
+        address = get_address_by_id_group(currency, address_id_group,
+                                          row.address_id)
+        addresses.append(Address(
+            address=address,
+            first_tx=TxSummary(
+                row.first_tx.height,
+                row.first_tx.timestamp,
+                row.first_tx.tx_hash.hex()),
+            last_tx=TxSummary(
+                row.last_tx.height,
+                row.last_tx.timestamp,
+                row.last_tx.tx_hash.hex()),
+            no_incoming_txs=row.no_incoming_txs,
+            no_outgoing_txs=row.no_outgoing_txs,
+            total_received=make_values(
+                value=row.total_received.value,
+                eur=row.total_received.eur,
+                usd=row.total_received.usd),
+            total_spent=make_values(
+                eur=row.total_spent.eur,
+                usd=row.total_spent.usd,
+                value=row.total_spent.value),
+            in_degree=row.in_degree,
+            out_degree=row.out_degree,
+            balance=convert_value(
+                    compute_balance(
+                        row.total_received.value,
+                        row.total_spent.value,
+                    ),
+                    get_rates(currency)['rates'])
+            ))
+    return EntityAddresses(next_page=paging_state, addresses=addresses)
 
 
 def list_entity_search_neighbors(currency, entity, params, breadth, depth,

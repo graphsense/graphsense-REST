@@ -2,6 +2,8 @@ from gsrest.test.assertion import assertEqual
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.neighbors import Neighbors
 from openapi_server.models.neighbor import Neighbor
+from openapi_server.models.address import Address
+from openapi_server.models.entity_addresses import EntityAddresses
 from openapi_server.models.entity_with_tags import EntityWithTags
 from openapi_server.models.values import Values
 from openapi_server.models.tag import Tag
@@ -158,6 +160,82 @@ entityWithTagsInNeighbors = Neighbors(
           )
         )])
 
+
+entityWithTagsAddresses = EntityAddresses(
+        next_page=None,
+        addresses=[
+            Address(
+               address="17gN64BPHtxi4mEM3qWrxdwhieUvRq8R2r",
+               last_tx=TxSummary(
+                  tx_hash="d325b684f4e6252d6bfdc83b75dc"
+                  "7ea650c9463ce286b023cf4ecaf305cf44a6",
+                  height=572187,
+                  timestamp=1555605191
+               ),
+               no_outgoing_txs=35,
+               balance=Values(
+                  value=0,
+                  eur=0.0,
+                  usd=0.0
+               ),
+               out_degree=27,
+               first_tx=TxSummary(
+                  timestamp=1323298692,
+                  height=156529,
+                  tx_hash="dc035c562acc3230cec8c870293c1"
+                  "119d62e60b13932565231dbe5c407ff7508"
+               ),
+               total_received=Values(
+                  value=95010277876,
+                  eur=16105.63,
+                  usd=21341.98
+               ),
+               total_spent=Values(
+                  value=95010277876,
+                  eur=70943.62,
+                  usd=95316.24
+               ),
+               no_incoming_txs=859,
+               in_degree=1200
+            ),
+            Address(
+               in_degree=1,
+               first_tx=TxSummary(
+                  timestamp=1326139563,
+                  tx_hash="f73df637a912ac5f536d1e3b33695823a18a"
+                  "9e89ae7f3def89d9b06d6a475a52",
+                  height=161451
+               ),
+               total_spent=Values(
+                  eur=0.2,
+                  value=763736,
+                  usd=0.26
+               ),
+               no_outgoing_txs=1,
+               total_received=Values(
+                  usd=0.05,
+                  eur=0.04,
+                  value=763736
+               ),
+               balance=Values(
+                  usd=0.0,
+                  eur=0.0,
+                  value=0
+               ),
+               no_incoming_txs=1,
+               out_degree=1,
+               last_tx=TxSummary(
+                  timestamp=1362160247,
+                  tx_hash="c4f3c81d946d189265929212fdc76b18eabade"
+                  "7ab1fb0a86a2389c18b5851878",
+                  height=223777
+               ),
+               address="1KeDrQdATuXaZFW4CL9tfe2zpQ5SrmBFWc"
+            )
+            ]
+        )
+
+
 def get_entity_with_tags(test_case):
     result = service.get_entity_with_tags(currency='btc', entity=17642138)
     assertEqual(entityWithTags, result)
@@ -196,3 +274,14 @@ def list_entity_neighbors_csv(test_case):
         entity=entityWithTags.entity,
         direction='out')
     assertEqual(csv, result.data.decode('utf-8'))
+
+
+def list_entity_addresses(test_case):
+    result = service.list_entity_addresses(
+                    currency='btc',
+                    entity=entityWithTags.entity)
+    assertEqual(entityWithTagsAddresses, result)
+
+
+
+

@@ -547,6 +547,59 @@ paths:
       tags:
       - entities
       x-openapi-router-controller: openapi_server.controllers.entities_controller
+  /{currency}/entities/{entity}/addresses:
+    get:
+      operationId: list_entity_addresses
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The entity ID
+        example: 67065
+        explode: false
+        in: path
+        name: entity
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      - description: Resumption token for retrieving the next page
+        example: 0400030bff00f07fffff9b00
+        explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Number of items returned in a single page
+        example: 10
+        explode: true
+        in: query
+        name: pagesize
+        required: false
+        schema:
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/entity_addresses'
+          description: OK
+      summary: Get an entity's addresses
+      tags:
+      - entities
+      x-openapi-router-controller: openapi_server.controllers.entities_controller
   /{currency}/entities/{entity}/neighbors:
     get:
       operationId: list_entity_neighbors
@@ -1013,6 +1066,32 @@ components:
           type: array
       type: object
     address:
+      example:
+        total_spent:
+          eur: 1
+          usd: 5
+          value: 5
+        in_degree: 1
+        address: address
+        balance:
+          eur: 1
+          usd: 5
+          value: 5
+        no_incoming_txs: 5
+        out_degree: 5
+        no_outgoing_txs: 2
+        first_tx:
+          tx_hash: tx_hash
+          height: 1
+          timestamp: 6
+        last_tx:
+          tx_hash: tx_hash
+          height: 1
+          timestamp: 6
+        total_received:
+          eur: 1
+          usd: 5
+          value: 5
       properties:
         address:
           description: Address
@@ -1161,6 +1240,10 @@ components:
           $ref: '#/components/schemas/values'
       type: object
     tx_summary:
+      example:
+        tx_hash: tx_hash
+        height: 1
+        timestamp: 6
       properties:
         height:
           description: Height
@@ -1401,6 +1484,69 @@ components:
       - output_value
       - timestamp
       - tx_hash
+      type: object
+    entity_addresses:
+      example:
+        next_page: next_page
+        addresses:
+        - total_spent:
+            eur: 1
+            usd: 5
+            value: 5
+          in_degree: 1
+          address: address
+          balance:
+            eur: 1
+            usd: 5
+            value: 5
+          no_incoming_txs: 5
+          out_degree: 5
+          no_outgoing_txs: 2
+          first_tx:
+            tx_hash: tx_hash
+            height: 1
+            timestamp: 6
+          last_tx:
+            tx_hash: tx_hash
+            height: 1
+            timestamp: 6
+          total_received:
+            eur: 1
+            usd: 5
+            value: 5
+        - total_spent:
+            eur: 1
+            usd: 5
+            value: 5
+          in_degree: 1
+          address: address
+          balance:
+            eur: 1
+            usd: 5
+            value: 5
+          no_incoming_txs: 5
+          out_degree: 5
+          no_outgoing_txs: 2
+          first_tx:
+            tx_hash: tx_hash
+            height: 1
+            timestamp: 6
+          last_tx:
+            tx_hash: tx_hash
+            height: 1
+            timestamp: 6
+          total_received:
+            eur: 1
+            usd: 5
+            value: 5
+      properties:
+        next_page:
+          format: string
+          type: string
+        addresses:
+          items:
+            $ref: '#/components/schemas/address'
+          type: array
       type: object
     address_with_tags_allOf:
       properties:

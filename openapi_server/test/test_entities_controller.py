@@ -6,6 +6,7 @@ import unittest
 from flask import json
 from six import BytesIO
 
+from openapi_server.models.entity_addresses import EntityAddresses  # noqa: E501
 from openapi_server.models.entity_with_tags import EntityWithTags  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
 from openapi_server.models.tag import Tag  # noqa: E501
@@ -30,6 +31,27 @@ class TestEntitiesController(BaseTestCase):
             '/{currency}/entities/{entity}'.format(currency="btc", entity="67065"),
             method='GET',
             headers=headers)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+
+    def test_list_entity_addresses(self):
+        """Test case for list_entity_addresses
+
+        Get an entity's addresses
+        """
+        test_service.list_entity_addresses(self)
+
+        query_string = [
+                        ]
+        headers = { 
+            'Accept': 'application/json',
+        }
+        response = self.client.open(
+            '/{currency}/entities/{entity}/addresses'.format(currency="btc", entity="67065"),
+            method='GET',
+            headers=headers,
+            query_string=query_string)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
