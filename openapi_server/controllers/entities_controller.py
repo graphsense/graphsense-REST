@@ -43,3 +43,22 @@ def list_entity_tags(currency, entity):  # noqa: E501
       return service.list_entity_tags(currency, entity)
     except RuntimeError as e:
       return notfound(str(e))
+from gsrest.service.problems import notfound
+
+
+def list_entity_tags_csv(currency, entity):  # noqa: E501
+    """Get attribution tags for a given entity as CSV
+
+     # noqa: E501
+
+    :param currency: The cryptocurrency (e.g., btc)
+    :type currency: str
+    :param entity: The entity ID
+    :type entity: int
+
+    :rtype: str
+    """
+    try:
+      return service.list_entity_tags_csv(currency, entity)
+    except RuntimeError as e:
+      return notfound(str(e))

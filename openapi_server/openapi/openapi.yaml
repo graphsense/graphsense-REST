@@ -587,6 +587,41 @@ paths:
       tags:
       - entities
       x-openapi-router-controller: openapi_server.controllers.entities_controller
+  /{currency}/entities/{entity}/tags.csv:
+    get:
+      operationId: list_entity_tags_csv
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The entity ID
+        example: "67065"
+        explode: false
+        in: path
+        name: entity
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/csv:
+              schema:
+                type: string
+          description: OK
+      summary: Get attribution tags for a given entity as CSV
+      tags:
+      - entities
+      x-openapi-router-controller: openapi_server.controllers.entities_controller
 components:
   parameters:
     currency:

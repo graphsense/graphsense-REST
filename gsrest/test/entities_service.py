@@ -29,7 +29,7 @@ tag2 = Tag(
            currency='btc'
         )
 
-entityWithTagsOfAddressWithTags = EntityWithTags(
+entityWithTags = EntityWithTags(
    no_outgoing_txs=280,
    last_tx=TxSummary(
       height=651545,
@@ -67,9 +67,16 @@ entityWithTagsOfAddressWithTags = EntityWithTags(
 
 def get_entity_with_tags(test_case):
     result = service.get_entity_with_tags(currency='btc', entity_id=17642138)
-    assertEqual(entityWithTagsOfAddressWithTags, result)
+    assertEqual(entityWithTags, result)
 
 
 def list_entity_tags(test_case):
     result = service.list_entity_tags(currency='btc', entity_id=17642138)
     assertEqual([tag, tag2], result)
+
+
+def list_entity_tags_csv(test_case):
+    csv = "abuse,active,address,category,currency,label,lastmod,source,tagpack_uri\nNone,True,1Archive1n2C579dMsAu3iC6tWzuQJz8dN,organization,btc,Internet Archive,1560290400,https://archive.org/donate/cryptocurrency,http://tagpack_uri\nNone,True,1Archive1n2C579dMsAu3iC6tWzuQJz8dN,organization,btc,Internet Archive 2,1560290400,https://archive.org/donate/cryptocurrency,http://tagpack_uri\n"
+    assertEqual(csv, service.list_entity_tags_csv(
+                        "btc",
+                        entityWithTags.entity).data.decode('utf-8'))

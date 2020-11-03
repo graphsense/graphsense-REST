@@ -51,6 +51,24 @@ class TestEntitiesController(BaseTestCase):
                        'Response body is : ' + response.data.decode('utf-8'))
 
 
+    def test_list_entity_tags_csv(self):
+        """Test case for list_entity_tags_csv
+
+        Get attribution tags for a given entity as CSV
+        """
+        test_service.list_entity_tags_csv(self)
+
+        headers = { 
+            'Accept': 'application/csv',
+        }
+        response = self.client.open(
+            '/{currency}/entities/{entity}/tags.csv'.format(currency="btc", entity="67065"),
+            method='GET',
+            headers=headers)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+
 
 if __name__ == '__main__':
     unittest.main()

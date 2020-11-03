@@ -14,6 +14,8 @@ from gsrest.model.common import compute_balance, convert_value, make_values
 from openapi_server.models.tag import Tag
 from openapi_server.models.entity_with_tags import EntityWithTags
 from gsrest.util.tag_coherence import compute_tag_coherence
+from flask import Response, stream_with_context
+from gsrest.util.csvify import create_download_header, to_csv
 
 BUCKET_SIZE = 25000  # TODO: get BUCKET_SIZE from cassandra
 ENTITY_PAGE_SIZE = 100
@@ -64,6 +66,18 @@ def list_entity_tags(currency, entity_id):
                     currency=currency
                     ))
     return entity_tags
+
+
+def list_entity_tags_csv(currency, entity_id):
+    def query_function(_):
+        tags = list_entity_tags(currency, entity_id)
+        return (None, tags)
+    return Response(stream_with_context(to_csv(query_function)),
+                    mimetype="text/csv",
+                    headers=create_download_header(
+                        'tags of entity {} ({}).csv'
+                        .format(entity_id,
+                                currency.upper())))
 
 
 def get_entity_with_tags(currency, entity_id):
