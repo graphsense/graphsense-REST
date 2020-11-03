@@ -88,3 +88,7 @@ while read line; do
 done < $outdir$transformed_dst.address_cluster
 fetch transformed cluster "where cluster_group in ($cluster_id_group) and cluster in ($cluster_id)"
 fetch transformed cluster_tags "where cluster_group=705 and cluster=17642138 limit 2"
+cluster_id=17642138
+cluster_id_group=705
+fetch transformed cluster_incoming_relations "where dst_cluster=$cluster_id and dst_cluster_group=$cluster_id_group limit 2"
+fetch transformed cluster_outgoing_relations "where src_cluster=$cluster_id and src_cluster_group=$cluster_id_group limit 2"

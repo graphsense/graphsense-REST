@@ -181,7 +181,6 @@ paths:
         schema:
           type: string
         style: form
-        x-graphsense-rest-test-example: ""
       - description: Number of items returned in a single page
         example: 10
         explode: true
@@ -354,7 +353,6 @@ paths:
         schema:
           type: string
         style: form
-        x-graphsense-rest-test-example: ""
       - description: Number of items returned in a single page
         example: 10
         explode: true
@@ -398,7 +396,6 @@ paths:
         schema:
           type: string
         style: form
-        x-graphsense-rest-test-example: ""
       responses:
         "200":
           content:
@@ -530,7 +527,7 @@ paths:
           type: string
         style: simple
       - description: The entity ID
-        example: "67065"
+        example: 67065
         explode: false
         in: path
         name: entity
@@ -550,6 +547,129 @@ paths:
       tags:
       - entities
       x-openapi-router-controller: openapi_server.controllers.entities_controller
+  /{currency}/entities/{entity}/neighbors:
+    get:
+      operationId: list_entity_neighbors
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The entity ID
+        example: 67065
+        explode: false
+        in: path
+        name: entity
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      - description: Incoming or outgoing neighbors
+        example: out
+        explode: true
+        in: query
+        name: direction
+        required: true
+        schema:
+          enum:
+          - in
+          - out
+          type: string
+        style: form
+      - description: Restrict result to given set of comma separated IDs
+        explode: true
+        in: query
+        name: targets
+        required: false
+        schema:
+          items:
+            format: int64
+            type: integer
+          type: array
+        style: form
+      - description: Resumption token for retrieving the next page
+        example: 0400030bff00f07fffff9b00
+        explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Number of items returned in a single page
+        example: 10
+        explode: true
+        in: query
+        name: pagesize
+        required: false
+        schema:
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/neighbors'
+          description: OK
+      summary: Get an entity's neighbors in the entity graph
+      tags:
+      - entities
+      x-openapi-router-controller: openapi_server.controllers.entities_controller
+  /{currency}/entities/{entity}/neighbors.csv:
+    get:
+      operationId: list_entity_neighbors_csv
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The entity ID
+        example: 67065
+        explode: false
+        in: path
+        name: entity
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      - description: Incoming or outgoing neighbors
+        example: out
+        explode: true
+        in: query
+        name: direction
+        required: true
+        schema:
+          enum:
+          - in
+          - out
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            text/csv:
+              schema:
+                type: string
+          description: OK
+      summary: Get an entity's neighbors in the entity graph as CSV
+      tags:
+      - entities
+      x-openapi-router-controller: openapi_server.controllers.entities_controller
   /{currency}/entities/{entity}/tags:
     get:
       operationId: list_entity_tags
@@ -565,7 +685,7 @@ paths:
           type: string
         style: simple
       - description: The entity ID
-        example: "67065"
+        example: 67065
         explode: false
         in: path
         name: entity
@@ -602,7 +722,7 @@ paths:
           type: string
         style: simple
       - description: The entity ID
-        example: "67065"
+        example: 67065
         explode: false
         in: path
         name: entity
@@ -656,7 +776,6 @@ components:
       schema:
         type: string
       style: form
-      x-graphsense-rest-test-example: ""
     pagesize:
       description: Number of items returned in a single page
       example: 10
@@ -703,7 +822,7 @@ components:
       style: form
     entity:
       description: The entity ID
-      example: "67065"
+      example: 67065
       explode: false
       in: path
       name: entity
@@ -712,6 +831,18 @@ components:
         format: int64
         type: integer
       style: simple
+    targets:
+      description: Restrict result to given set of comma separated IDs
+      explode: true
+      in: query
+      name: targets
+      required: false
+      schema:
+        items:
+          format: int64
+          type: integer
+        type: array
+      style: form
   schemas:
     stats:
       example:

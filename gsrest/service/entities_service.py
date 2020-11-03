@@ -3,8 +3,7 @@ from cassandra.query import SimpleStatement
 from cassandra.concurrent import execute_concurrent
 
 from gsrest.db.cassandra import get_session
-from gsrest.model.entities import EntityIncomingRelations, \
-    EntityOutgoingRelations, EntityAddress
+from gsrest.model.entities import EntityAddress
 from gsrest.service.common_service import get_address_by_id_group, \
     get_address_with_tags
 from gsrest.service.rates_service import get_rates
@@ -13,6 +12,8 @@ from openapi_server.models.tx_summary import TxSummary
 from gsrest.model.common import compute_balance, convert_value, make_values
 from openapi_server.models.tag import Tag
 from openapi_server.models.entity_with_tags import EntityWithTags
+from openapi_server.models.neighbor import Neighbor
+from openapi_server.models.neighbors import Neighbors
 from gsrest.util.tag_coherence import compute_tag_coherence
 from flask import Response, stream_with_context
 from gsrest.util.csvify import create_download_header, to_csv
@@ -27,16 +28,16 @@ def get_id_group(id_):
     return floor(id_ / BUCKET_SIZE)
 
 
-def list_entity_tags(currency, entity_id):
+def list_entity_tags(currency, entity):
     # from entity id to list of tags
     session = get_session(currency, 'transformed')
-    entity_group = get_id_group(entity_id)
+    entity_group = get_id_group(entity)
     query = "SELECT * FROM cluster_tags WHERE cluster_group = %s and cluster" \
             " = %s"
     concurrent_query = "SELECT * FROM address_by_id_group WHERE " \
                        "address_id_group = %s and address_id = %s"
 
-    results = session.execute(query, [entity_group, entity_id])
+    results = session.execute(query, [entity_group, entity])
 
     # concurrent queries
     statements_and_params = []
@@ -68,20 +69,20 @@ def list_entity_tags(currency, entity_id):
     return entity_tags
 
 
-def list_entity_tags_csv(currency, entity_id):
+def list_entity_tags_csv(currency, entity):
     def query_function(_):
-        tags = list_entity_tags(currency, entity_id)
+        tags = list_entity_tags(currency, entity)
         return (None, tags)
     return Response(stream_with_context(to_csv(query_function)),
                     mimetype="text/csv",
                     headers=create_download_header(
                         'tags of entity {} ({}).csv'
-                        .format(entity_id,
+                        .format(entity,
                                 currency.upper())))
 
 
-def get_entity_with_tags(currency, entity_id):
-    result = get_entity(currency, entity_id)
+def get_entity_with_tags(currency, entity):
+    result = get_entity(currency, entity)
     tags = list_entity_tags(currency, result.entity)
     return EntityWithTags(
         entity=result.entity,
@@ -100,14 +101,14 @@ def get_entity_with_tags(currency, entity_id):
         )
 
 
-def get_entity(currency, entity_id):
+def get_entity(currency, entity):
     # from entity id to complete entity stats
     session = get_session(currency, 'transformed')
-    entity_id_group = get_id_group(entity_id)
+    entity_id_group = get_id_group(entity)
     query = "SELECT * FROM cluster WHERE cluster_group = %s AND cluster = %s "
-    result = session.execute(query, [entity_id_group, entity_id])
+    result = session.execute(query, [entity_id_group, entity])
     if result is None:
-        raise RuntimeError("Entity {} not found".format(entity_id))
+        raise RuntimeError("Entity {} not found".format(entity))
     result = result.one()
     print('result {}'.format(result))
     return Entity(
@@ -142,20 +143,19 @@ def get_entity(currency, entity_id):
         )
 
 
-def list_entity_relations(currency, entity_id, is_outgoing, targets=None,
+def list_entity_neighbors(currency, entity, direction, targets=None,
                           paging_state=None, page_size=None,
                           from_search=False):
+    is_outgoing = direction == 'out'
     if is_outgoing:
         table, this, that = ('outgoing', 'src', 'dst')
-        cls = EntityOutgoingRelations
     else:
         table, this, that = ('incoming', 'dst', 'src')
-        cls = EntityIncomingRelations
 
     session = get_session(currency, 'transformed')
-    entity_id_group = get_id_group(entity_id)
+    entity_id_group = get_id_group(entity)
     has_targets = isinstance(targets, list)
-    parameters = [entity_id_group, entity_id]
+    parameters = [entity_id_group, entity]
     basequery = "SELECT * FROM cluster_{}_relations WHERE " \
                 "{}_cluster_group = %s AND " \
                 "{}_cluster = %s".format(table, this, this)
@@ -193,20 +193,69 @@ def list_entity_relations(currency, entity_id, is_outgoing, targets=None,
     rates = get_rates(currency)['rates']
     relations = []
     for row in current_rows:
-        relations.append(cls.from_row(row, rates, from_search).to_dict())
-    return paging_state, relations
+        if is_outgoing:
+            balance = compute_balance(row.dst_properties.total_received.value,
+                                      row.dst_properties.total_spent.value)
+            relations.append(
+                Neighbor(
+                    id=row.dst_cluster,
+                    node_type='entity',
+                    labels=row.dst_labels
+                    if row.dst_labels is not None else [],
+                    received=make_values(
+                        value=row.dst_properties.total_received.value,
+                        eur=row.dst_properties.total_received.eur,
+                        usd=row.dst_properties.total_received.usd),
+                    estimated_value=make_values(
+                        value=row.value.value,
+                        eur=row.value.eur,
+                        usd=row.value.usd),
+                    balance=convert_value(balance, rates),
+                    no_txs=row.no_transactions))
+        else:
+            balance = compute_balance(row.src_properties.total_received.value,
+                                      row.src_properties.total_spent.value)
+            relations.append(
+                Neighbor(
+                    id=row.src_cluster,
+                    node_type='entity',
+                    labels=row.src_labels
+                    if row.src_labels is not None else [],
+                    received=make_values(
+                        value=row.src_properties.total_received.value,
+                        eur=row.src_properties.total_received.eur,
+                        usd=row.src_properties.total_received.usd),
+                    estimated_value=make_values(
+                        value=row.value.value,
+                        eur=row.value.eur,
+                        usd=row.value.usd),
+                    balance=convert_value(balance, rates),
+                    no_txs=row.no_transactions))
+    return Neighbors(next_page=paging_state, neighbors=relations)
 
 
-def list_entity_addresses(currency, entity_id, paging_state, page_size):
+def list_entity_neighbors_csv(currency, entity, direction):
+    def query_function(page_state):
+        result = list_entity_neighbors(currency, entity, direction,
+                                       paging_state=page_state)
+        return (result.next_page, result.neighbors)
+    return Response(stream_with_context(to_csv(query_function)),
+                    mimetype="text/csv",
+                    headers=create_download_header(
+                            '{} neighbors of entity {} ({}).csv'
+                            .format(direction, entity, currency.upper())))
+
+
+def list_entity_addresses(currency, entity, paging_state, page_size):
     session = get_session(currency, 'transformed')
-    entity_id_group = get_id_group(entity_id)
+    entity_id_group = get_id_group(entity)
     query = "SELECT * FROM cluster_addresses WHERE cluster_group = %s AND " \
             "cluster = %s"
     fetch_size = ENTITY_ADDRESSES_PAGE_SIZE
     if page_size:
         fetch_size = page_size
     statement = SimpleStatement(query, fetch_size=fetch_size)
-    results = session.execute(statement, [entity_id_group, entity_id],
+    results = session.execute(statement, [entity_id_group, entity],
                               paging_state=paging_state)
     if results:
         paging_state = results.paging_state
@@ -243,7 +292,7 @@ def list_entity_search_neighbors(currency, entity, params, breadth, depth,
         return get_cached(cl, key) or set_cached(cl, key, get())
 
     (_, rows) = cached(entity, 'rows',
-                       lambda: list_entity_relations(
+                       lambda: list_entity_neighbors(
                            currency, entity, outgoing, paging_state=None,
                            page_size=breadth, from_search=True))
 

@@ -7,6 +7,7 @@ from flask import json
 from six import BytesIO
 
 from openapi_server.models.entity_with_tags import EntityWithTags  # noqa: E501
+from openapi_server.models.neighbors import Neighbors  # noqa: E501
 from openapi_server.models.tag import Tag  # noqa: E501
 from openapi_server.test import BaseTestCase
 import gsrest.test.entities_service as test_service
@@ -29,6 +30,49 @@ class TestEntitiesController(BaseTestCase):
             '/{currency}/entities/{entity}'.format(currency="btc", entity="67065"),
             method='GET',
             headers=headers)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+
+    def test_list_entity_neighbors(self):
+        """Test case for list_entity_neighbors
+
+        Get an entity's neighbors in the entity graph
+        """
+        test_service.list_entity_neighbors(self)
+
+        query_string = [('direction', 'out'),('direction', 'out')
+                        
+                        
+                        ]
+        headers = { 
+            'Accept': 'application/json',
+        }
+        response = self.client.open(
+            '/{currency}/entities/{entity}/neighbors'.format(currency="btc", entity="67065"),
+            method='GET',
+            headers=headers,
+            query_string=query_string)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+
+    def test_list_entity_neighbors_csv(self):
+        """Test case for list_entity_neighbors_csv
+
+        Get an entity's neighbors in the entity graph as CSV
+        """
+        test_service.list_entity_neighbors_csv(self)
+
+        query_string = [('direction', 'out')]
+        headers = { 
+            'Accept': 'text/csv',
+        }
+        response = self.client.open(
+            '/{currency}/entities/{entity}/neighbors.csv'.format(currency="btc", entity="67065"),
+            method='GET',
+            headers=headers,
+            query_string=query_string)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
