@@ -14,7 +14,6 @@ import gsrest.service.common_service as commonDAO
 from gsrest.model.common import convert_value, compute_balance, make_values
 from flask import Response, stream_with_context
 from gsrest.util.csvify import create_download_header, to_csv
-from gsrest.service.problems import notfound
 
 ADDRESS_PAGE_SIZE = 100
 
@@ -122,8 +121,8 @@ def list_address_outgoing_relations(currency, address, paging_state=None,
 
     address_id, address_id_group = get_address_id_id_group(currency, address)
     if not address_id:
-        notfound("Address {} not found in currency {}".format(address,
-                                                              currency))
+        raise RuntimeError("Address {} not found in currency {}"
+                           .format(address, currency))
     query = "SELECT * FROM address_outgoing_relations WHERE " \
             "src_address_id_group = %s AND src_address_id = %s"
     fetch_size = ADDRESS_PAGE_SIZE
@@ -167,8 +166,8 @@ def list_address_incoming_relations(currency, address, paging_state=None,
 
     address_id, address_id_group = get_address_id_id_group(currency, address)
     if not address_id:
-        notfound("Address {} not found in currency {}".format(address,
-                                                              currency))
+        raise RuntimeError("Address {} not found in currency {}"
+                           .format(address, currency))
     query = "SELECT * FROM address_incoming_relations WHERE " \
             "dst_address_id_group = %s AND dst_address_id = %s"
     fetch_size = ADDRESS_PAGE_SIZE
@@ -213,8 +212,8 @@ def list_address_links(currency, address, neighbor):
     neighbor_id, neighbor_id_group = get_address_id_id_group(currency,
                                                              neighbor)
     if address_id is None or neighbor_id is None:
-        return notfound("Links between {} and {} not found".format(address,
-                                                                   neighbor))
+        raise RuntimeError("Links between {} and {} not found"
+                           .format(address, neighbor))
 
     query = "SELECT tx_list FROM address_outgoing_relations WHERE " \
             "src_address_id_group = %s AND src_address_id = %s AND " \
@@ -262,15 +261,15 @@ def list_address_links(currency, address, neighbor):
 
 def get_address_entity(currency, address):
     # from address to complete entity stats
-    nf = notfound('Entity for address {} not found'.format(address))
+    e = RuntimeError('Entity for address {} not found'.format(address))
 
     entity_id = get_address_entity_id(currency, address)
     if entity_id is None:
-        return nf
+        raise e
 
     result = get_entity_with_tags(currency, entity_id)
     if result is None:
-        return nf
+        raise e
 
     return result
 

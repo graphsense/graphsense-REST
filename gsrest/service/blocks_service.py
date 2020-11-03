@@ -9,7 +9,6 @@ from gsrest.model.common import convert_value
 from gsrest.service.rates_service import get_rates
 from flask import Response, stream_with_context
 from gsrest.util.csvify import create_download_header, to_csv
-from gsrest.service.problems import notfound, badrequest
 
 BLOCKS_PAGE_SIZE = 100
 
@@ -20,7 +19,7 @@ def get_block(currency, height) -> Block:
     query = "SELECT * FROM block WHERE height = %s"
     row = session.execute(query, [height]).one()
     if not row:
-        return notfound("Block {} not found".format(height))
+        raise RuntimeError("Block {} not found".format(height))
     return Block(
             height=row.height,
             block_hash=row.block_hash.hex(),
@@ -30,10 +29,7 @@ def get_block(currency, height) -> Block:
 
 def list_blocks(currency, page=None):
     session = get_session(currency, 'raw')
-    try:
-        paging_state = bytes.fromhex(page) if page else None
-    except ValueError as e:
-        return badrequest(str(e))
+    paging_state = bytes.fromhex(page) if page else None
 
     query = "SELECT * FROM block"
     statement = SimpleStatement(query, fetch_size=BLOCKS_PAGE_SIZE)
@@ -56,7 +52,7 @@ def list_block_txs(currency, height):
     query = "SELECT * FROM block_transactions WHERE height = %s"
     results = session.execute(query, [height])
     if results is None:
-        return notfound("Block {} not found".format(height))
+        raise RuntimeError("Block {} not found".format(height))
     rates = get_rates(currency, height)
 
     tx_summaries = \

@@ -2,7 +2,6 @@ from flask import current_app
 from gsrest.db.cassandra import get_session
 from openapi_server.models.stats import Stats
 from openapi_server.models.currency_stats import CurrencyStats
-from gsrest.service.problems import notfound
 
 
 def get_statistics():
@@ -22,7 +21,8 @@ def get_currency_statistics(currency):
     query = "SELECT * FROM summary_statistics LIMIT 1"
     result = session.execute(query).one()
     if result is None:
-        notfound('statistics for currency {} not found'.format(currency))
+        raise ValueError('statistics for currency {} not found'
+                         .format(currency))
     return CurrencyStats(
             name=currency,
             no_blocks=result.no_blocks,
