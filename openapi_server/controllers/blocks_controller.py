@@ -6,6 +6,7 @@ from openapi_server.models.block_txs import BlockTxs  # noqa: E501
 from openapi_server.models.blocks import Blocks  # noqa: E501
 from openapi_server import util
 import gsrest.service.blocks_service as service
+from gsrest.service.problems import notfound
 
 
 def get_block(currency, height):  # noqa: E501
@@ -20,7 +21,11 @@ def get_block(currency, height):  # noqa: E501
 
     :rtype: Block
     """
-    return service.get_block(currency, height)
+    try:
+      return service.get_block(currency, height)
+    except RuntimeError as e:
+      return notfound(str(e))
+from gsrest.service.problems import notfound
 
 
 def list_block_txs(currency, height):  # noqa: E501
@@ -35,7 +40,11 @@ def list_block_txs(currency, height):  # noqa: E501
 
     :rtype: BlockTxs
     """
-    return service.list_block_txs(currency, height)
+    try:
+      return service.list_block_txs(currency, height)
+    except RuntimeError as e:
+      return notfound(str(e))
+from gsrest.service.problems import notfound
 
 
 def list_block_txs_csv(currency, height):  # noqa: E501
@@ -50,7 +59,11 @@ def list_block_txs_csv(currency, height):  # noqa: E501
 
     :rtype: str
     """
-    return service.list_block_txs_csv(currency, height)
+    try:
+      return service.list_block_txs_csv(currency, height)
+    except RuntimeError as e:
+      return notfound(str(e))
+from gsrest.service.problems import notfound
 
 
 def list_blocks(currency, page=None):  # noqa: E501
@@ -65,4 +78,7 @@ def list_blocks(currency, page=None):  # noqa: E501
 
     :rtype: Blocks
     """
-    return service.list_blocks(currency, page)
+    try:
+      return service.list_blocks(currency, page)
+    except RuntimeError as e:
+      return notfound(str(e))

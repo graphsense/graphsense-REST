@@ -7,6 +7,7 @@ from {{packageName}} import util
 import gsrest.service.{{classVarName}}_service as service
 {{#operations}}
 {{#operation}}
+from gsrest.service.problems import notfound
 
 
 def {{operationId}}({{#allParams}}{{paramName}}{{^required}}=None{{/required}}{{#hasMore}}, {{/hasMore}}{{/allParams}}):  # noqa: E501
@@ -108,6 +109,9 @@ def {{operationId}}({{#allParams}}{{paramName}}{{^required}}=None{{/required}}{{
             {{/items}}
         {{/isMapContainer}}
     {{/allParams}}
-    return service.{{operationId}}({{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}})
+    try:
+      return service.{{operationId}}({{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}})
+    except RuntimeError as e:
+      return notfound(str(e))
 {{/operation}}
 {{/operations}}

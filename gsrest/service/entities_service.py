@@ -11,8 +11,9 @@ from gsrest.service.rates_service import get_rates
 from openapi_server.models.entity import Entity
 from openapi_server.models.tx_summary import TxSummary
 from gsrest.model.common import compute_balance, convert_value, make_values
-from gsrest.service.problems import notfound
 from openapi_server.models.tag import Tag
+from openapi_server.models.entity_with_tags import EntityWithTags
+from gsrest.util.tag_coherence import compute_tag_coherence
 
 BUCKET_SIZE = 25000  # TODO: get BUCKET_SIZE from cassandra
 ENTITY_PAGE_SIZE = 100
@@ -65,6 +66,26 @@ def list_entity_tags(currency, entity_id):
     return entity_tags
 
 
+def get_entity_with_tags(currency, entity_id):
+    result = get_entity(currency, entity_id)
+    tags = list_entity_tags(currency, result.entity)
+    return EntityWithTags(
+        entity=result.entity,
+        first_tx=result.first_tx,
+        last_tx=result.last_tx,
+        no_addresses=result.no_addresses,
+        no_incoming_txs=result.no_incoming_txs,
+        no_outgoing_txs=result.no_outgoing_txs,
+        total_received=result.total_received,
+        total_spent=result.total_spent,
+        in_degree=result.in_degree,
+        out_degree=result.out_degree,
+        balance=result.balance,
+        tags=tags,
+        tag_coherence=compute_tag_coherence(tag.label for tag in tags)
+        )
+
+
 def get_entity(currency, entity_id):
     # from entity id to complete entity stats
     session = get_session(currency, 'transformed')
@@ -72,7 +93,7 @@ def get_entity(currency, entity_id):
     query = "SELECT * FROM cluster WHERE cluster_group = %s AND cluster = %s "
     result = session.execute(query, [entity_id_group, entity_id])
     if result is None:
-        notfound("Entity {} not found".format(entity_id))
+        raise RuntimeError("Entity {} not found".format(entity_id))
     result = result.one()
     print('result {}'.format(result))
     return Entity(

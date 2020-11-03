@@ -5,11 +5,8 @@ from openapi_server.models.address_tx import AddressTx
 from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.neighbors import Neighbors
 from openapi_server.models.neighbor import Neighbor
-from openapi_server.models.entity_with_tags import EntityWithTags
 from openapi_server.models.link import Link
-from gsrest.model.addresses import AddressIncomingRelations
-from gsrest.service.entities_service import get_entity, get_id_group, \
-        list_entity_tags
+from gsrest.service.entities_service import get_entity_with_tags, get_id_group
 from gsrest.service.common_service import get_address_by_id_group, \
     ADDRESS_PREFIX_LENGTH
 from gsrest.service.rates_service import get_rates, list_rates
@@ -18,7 +15,6 @@ from gsrest.model.common import convert_value, compute_balance, make_values
 from flask import Response, stream_with_context
 from gsrest.util.csvify import create_download_header, to_csv
 from gsrest.service.problems import notfound
-from gsrest.util.tag_coherence import compute_tag_coherence
 
 ADDRESS_PAGE_SIZE = 100
 
@@ -272,26 +268,11 @@ def get_address_entity(currency, address):
     if entity_id is None:
         return nf
 
-    result = get_entity(currency, entity_id)
+    result = get_entity_with_tags(currency, entity_id)
     if result is None:
         return nf
 
-    tags = list_entity_tags(currency, result.entity)
-    return EntityWithTags(
-        entity=result.entity,
-        first_tx=result.first_tx,
-        last_tx=result.last_tx,
-        no_addresses=result.no_addresses,
-        no_incoming_txs=result.no_incoming_txs,
-        no_outgoing_txs=result.no_outgoing_txs,
-        total_received=result.total_received,
-        total_spent=result.total_spent,
-        in_degree=result.in_degree,
-        out_degree=result.out_degree,
-        balance=result.balance,
-        tags=tags,
-        tag_coherence=compute_tag_coherence(tag.label for tag in tags)
-        )
+    return result
 
 
 def get_address_entity_id(currency, address):

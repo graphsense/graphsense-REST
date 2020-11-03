@@ -515,6 +515,41 @@ paths:
       tags:
       - blocks
       x-openapi-router-controller: openapi_server.controllers.blocks_controller
+  /{currency}/entities/{entity}:
+    get:
+      operationId: get_entity_with_tags
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The entity ID
+        example: "67065"
+        explode: false
+        in: path
+        name: entity
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/entity_with_tags'
+          description: OK
+      summary: Get an entity with tags
+      tags:
+      - entities
+      x-openapi-router-controller: openapi_server.controllers.entities_controller
 components:
   parameters:
     currency:
@@ -594,6 +629,17 @@ components:
       schema:
         type: string
       style: form
+    entity:
+      description: The entity ID
+      example: "67065"
+      explode: false
+      in: path
+      name: entity
+      required: true
+      schema:
+        format: int64
+        type: integer
+      style: simple
   schemas:
     stats:
       example:
@@ -1172,6 +1218,5 @@ components:
           description: Tag coherence
           type: float
       required:
-      - tag_coherence
       - tags
       type: object

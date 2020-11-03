@@ -38,8 +38,6 @@ class EntityWithTagsAllOf(Model):
         if tags is None:
             raise ValueError("Invalid value for `tags`, must not be `None`")  # noqa: E501
         self._tags = tags
-        if tag_coherence is None:
-            raise ValueError("Invalid value for `tag_coherence`, must not be `None`")  # noqa: E501
         self._tag_coherence = tag_coherence
 
     @classmethod
@@ -108,7 +106,5 @@ class EntityWithTagsAllOf(Model):
         :param tag_coherence: The tag_coherence of this EntityWithTagsAllOf.
         :type tag_coherence: float
         """
-        if tag_coherence is None:
-            raise ValueError("Invalid value for `tag_coherence`, must not be `None`")  # noqa: E501
 
         self._tag_coherence = tag_coherence
