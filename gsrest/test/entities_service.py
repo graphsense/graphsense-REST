@@ -68,3 +68,8 @@ entityWithTagsOfAddressWithTags = EntityWithTags(
 def get_entity_with_tags(test_case):
     result = service.get_entity_with_tags(currency='btc', entity_id=17642138)
     assertEqual(entityWithTagsOfAddressWithTags, result)
+
+
+def list_entity_tags(test_case):
+    result = service.list_entity_tags(currency='btc', entity_id=17642138)
+    assertEqual([tag, tag2], result)

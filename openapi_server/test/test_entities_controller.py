@@ -7,6 +7,7 @@ from flask import json
 from six import BytesIO
 
 from openapi_server.models.entity_with_tags import EntityWithTags  # noqa: E501
+from openapi_server.models.tag import Tag  # noqa: E501
 from openapi_server.test import BaseTestCase
 import gsrest.test.entities_service as test_service
 
@@ -26,6 +27,24 @@ class TestEntitiesController(BaseTestCase):
         }
         response = self.client.open(
             '/{currency}/entities/{entity}'.format(currency="btc", entity="67065"),
+            method='GET',
+            headers=headers)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+
+    def test_list_entity_tags(self):
+        """Test case for list_entity_tags
+
+        Get attribution tags for a given entity
+        """
+        test_service.list_entity_tags(self)
+
+        headers = { 
+            'Accept': 'application/json',
+        }
+        response = self.client.open(
+            '/{currency}/entities/{entity}/tags'.format(currency="btc", entity="67065"),
             method='GET',
             headers=headers)
         self.assert200(response,
