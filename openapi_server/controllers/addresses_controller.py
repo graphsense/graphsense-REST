@@ -4,6 +4,7 @@ import six
 from openapi_server.models.address_txs import AddressTxs  # noqa: E501
 from openapi_server.models.address_with_tags import AddressWithTags  # noqa: E501
 from openapi_server.models.entity_with_tags import EntityWithTags  # noqa: E501
+from openapi_server.models.link import Link  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
 from openapi_server.models.tag import Tag  # noqa: E501
 from openapi_server import util
@@ -38,6 +39,23 @@ def get_address_with_tags(currency, address):  # noqa: E501
     :rtype: AddressWithTags
     """
     return service.get_address_with_tags(currency, address)
+
+
+def list_address_links(currency, address, neighbor):  # noqa: E501
+    """Get transactions between to addresses
+
+     # noqa: E501
+
+    :param currency: The cryptocurrency (e.g., btc)
+    :type currency: str
+    :param address: The cryptocurrency address
+    :type address: str
+    :param neighbor: Neighbor address
+    :type neighbor: str
+
+    :rtype: List[Link]
+    """
+    return service.list_address_links(currency, address, neighbor)
 
 
 def list_address_neighbors(currency, address, direction, page=None, pagesize=None):  # noqa: E501

@@ -90,6 +90,52 @@ paths:
       tags:
       - addresses
       x-openapi-router-controller: openapi_server.controllers.addresses_controller
+  /{currency}/addresses/{address}/links:
+    get:
+      operationId: list_address_links
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The cryptocurrency address
+        example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
+        explode: false
+        in: path
+        name: address
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: Neighbor address
+        example: 17DfZja1713S3JRWA9jaebCKFM5anUh7GG
+        explode: true
+        in: query
+        name: neighbor
+        required: true
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/link'
+                type: array
+          description: OK
+      summary: Get transactions between to addresses
+      tags:
+      - addresses
+      x-openapi-router-controller: openapi_server.controllers.addresses_controller
   /{currency}/addresses/{address}/neighbors:
     get:
       operationId: list_address_neighbors
@@ -538,6 +584,16 @@ components:
         format: string
         type: string
       style: simple
+    neighbor:
+      description: Neighbor address
+      example: 17DfZja1713S3JRWA9jaebCKFM5anUh7GG
+      explode: true
+      in: query
+      name: neighbor
+      required: true
+      schema:
+        type: string
+      style: form
   schemas:
     stats:
       example:
@@ -626,25 +682,25 @@ components:
       example:
         txs:
         - total_output:
-            eur: 0
-            usd: 6
-            value: 1
+            eur: 1
+            usd: 5
+            value: 5
           no_outputs: 1
           total_input:
-            eur: 0
-            usd: 6
-            value: 1
+            eur: 1
+            usd: 5
+            value: 5
           tx_hash: tx_hash
           no_inputs: 6
         - total_output:
-            eur: 0
-            usd: 6
-            value: 1
+            eur: 1
+            usd: 5
+            value: 5
           no_outputs: 1
           total_input:
-            eur: 0
-            usd: 6
-            value: 1
+            eur: 1
+            usd: 5
+            value: 5
           tx_hash: tx_hash
           no_inputs: 6
         height: 1
@@ -662,14 +718,14 @@ components:
     block_tx_summary:
       example:
         total_output:
-          eur: 0
-          usd: 6
-          value: 1
+          eur: 1
+          usd: 5
+          value: 5
         no_outputs: 1
         total_input:
-          eur: 0
-          usd: 6
-          value: 1
+          eur: 1
+          usd: 5
+          value: 5
         tx_hash: tx_hash
         no_inputs: 6
       properties:
@@ -804,17 +860,17 @@ components:
         - address: address
           tx_hash: tx_hash
           value:
-            eur: 0
-            usd: 6
-            value: 1
+            eur: 1
+            usd: 5
+            value: 5
           height: 1
           timestamp: 6
         - address: address
           tx_hash: tx_hash
           value:
-            eur: 0
-            usd: 6
-            value: 1
+            eur: 1
+            usd: 5
+            value: 5
           height: 1
           timestamp: 6
       properties:
@@ -831,9 +887,9 @@ components:
         address: address
         tx_hash: tx_hash
         value:
-          eur: 0
-          usd: 6
-          value: 1
+          eur: 1
+          usd: 5
+          value: 5
         height: 1
         timestamp: 6
       properties:
@@ -922,9 +978,9 @@ components:
       type: object
     values:
       example:
-        eur: 0
-        usd: 6
-        value: 1
+        eur: 1
+        usd: 5
+        value: 5
       properties:
         eur:
           format: int64
@@ -963,40 +1019,40 @@ components:
         neighbors:
         - node_type: address
           balance:
-            eur: 0
-            usd: 6
-            value: 1
+            eur: 1
+            usd: 5
+            value: 5
           received:
-            eur: 0
-            usd: 6
-            value: 1
+            eur: 1
+            usd: 5
+            value: 5
           id: id
           estimated_value:
-            eur: 0
-            usd: 6
-            value: 1
+            eur: 1
+            usd: 5
+            value: 5
           labels:
           - labels
           - labels
-          no_txs: 5
+          no_txs: 0
         - node_type: address
           balance:
-            eur: 0
-            usd: 6
-            value: 1
+            eur: 1
+            usd: 5
+            value: 5
           received:
-            eur: 0
-            usd: 6
-            value: 1
+            eur: 1
+            usd: 5
+            value: 5
           id: id
           estimated_value:
-            eur: 0
-            usd: 6
-            value: 1
+            eur: 1
+            usd: 5
+            value: 5
           labels:
           - labels
           - labels
-          no_txs: 5
+          no_txs: 0
       properties:
         next_page:
           format: string
@@ -1010,22 +1066,22 @@ components:
       example:
         node_type: address
         balance:
-          eur: 0
-          usd: 6
-          value: 1
+          eur: 1
+          usd: 5
+          value: 5
         received:
-          eur: 0
-          usd: 6
-          value: 1
+          eur: 1
+          usd: 5
+          value: 5
         id: id
         estimated_value:
-          eur: 0
-          usd: 6
-          value: 1
+          eur: 1
+          usd: 5
+          value: 5
         labels:
         - labels
         - labels
-        no_txs: 5
+        no_txs: 0
       properties:
         id:
           description: address or entity id
@@ -1059,6 +1115,43 @@ components:
       - no_txs
       - node_type
       - received
+      type: object
+    link:
+      example:
+        tx_hash: tx_hash
+        output_value:
+          eur: 1
+          usd: 5
+          value: 5
+        input_value:
+          eur: 1
+          usd: 5
+          value: 5
+        height: 1
+        timestamp: 6
+      properties:
+        tx_hash:
+          description: Transaction hash
+          type: string
+        height:
+          description: Height
+          format: int64
+          minimum: 1
+          type: integer
+        timestamp:
+          description: Timestamp
+          format: int64
+          type: integer
+        input_value:
+          $ref: '#/components/schemas/values'
+        output_value:
+          $ref: '#/components/schemas/values'
+      required:
+      - height
+      - input_value
+      - output_value
+      - timestamp
+      - tx_hash
       type: object
     address_with_tags_allOf:
       properties:

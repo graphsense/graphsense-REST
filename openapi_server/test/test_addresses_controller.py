@@ -9,6 +9,7 @@ from six import BytesIO
 from openapi_server.models.address_txs import AddressTxs  # noqa: E501
 from openapi_server.models.address_with_tags import AddressWithTags  # noqa: E501
 from openapi_server.models.entity_with_tags import EntityWithTags  # noqa: E501
+from openapi_server.models.link import Link  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
 from openapi_server.models.tag import Tag  # noqa: E501
 from openapi_server.test import BaseTestCase
@@ -50,6 +51,26 @@ class TestAddressesController(BaseTestCase):
             '/{currency}/addresses/{address}'.format(currency="btc", address="1Archive1n2C579dMsAu3iC6tWzuQJz8dN"),
             method='GET',
             headers=headers)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+
+    def test_list_address_links(self):
+        """Test case for list_address_links
+
+        Get transactions between to addresses
+        """
+        test_service.list_address_links(self)
+
+        query_string = [('neighbor', '17DfZja1713S3JRWA9jaebCKFM5anUh7GG')]
+        headers = { 
+            'Accept': 'application/json',
+        }
+        response = self.client.open(
+            '/{currency}/addresses/{address}/links'.format(currency="btc", address="1Archive1n2C579dMsAu3iC6tWzuQJz8dN"),
+            method='GET',
+            headers=headers,
+            query_string=query_string)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 

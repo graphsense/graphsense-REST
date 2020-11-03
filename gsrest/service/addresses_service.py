@@ -6,7 +6,8 @@ from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.neighbors import Neighbors
 from openapi_server.models.neighbor import Neighbor
 from openapi_server.models.entity_with_tags import EntityWithTags
-from gsrest.model.addresses import AddressIncomingRelations, Link
+from openapi_server.models.link import Link
+from gsrest.model.addresses import AddressIncomingRelations
 from gsrest.service.entities_service import get_entity, get_id_group, \
         list_entity_tags
 from gsrest.service.common_service import get_address_by_id_group, \
@@ -197,45 +198,58 @@ def list_address_incoming_relations(currency, address, paging_state=None,
     return None, None
 
 
-def list_addresses_links(currency, address, neighbor):
+def list_address_links(currency, address, neighbor):
     session = get_session(currency, 'transformed')
 
     address_id, address_id_group = get_address_id_id_group(currency, address)
     neighbor_id, neighbor_id_group = get_address_id_id_group(currency,
                                                              neighbor)
-    if address_id and neighbor_id:
-        query = "SELECT tx_list FROM address_outgoing_relations WHERE " \
-                "src_address_id_group = %s AND src_address_id = %s AND " \
-                "dst_address_id = %s"
-        results = session.execute(query, [address_id_group, address_id,
-                                          neighbor_id])
-        if results.current_rows:
-            txs = [tx_hash for tx_hash in
-                   results.current_rows[0].tx_list]
-            query = "SELECT * FROM address_transactions WHERE " \
-                    "address_id_group = %s AND address_id = %s AND " \
-                    "tx_hash IN %s"
-            results1 = session.execute(query, [address_id_group, address_id,
-                                               ValueSequence(txs)])
-            results2 = session.execute(query, [neighbor_id_group, neighbor_id,
-                                               ValueSequence(txs)])
-            if results1.current_rows and results2.current_rows:
-                links = dict()
-                for row in results1.current_rows:
-                    hsh = row.tx_hash.hex()
-                    links[hsh] = dict()
-                    links[hsh]['tx_hash'] = hsh
-                    links[hsh]['height'] = row.height
-                    links[hsh]['timestamp'] = row.timestamp
-                    links[hsh]['input_value'] = row.value
-                for row in results2.current_rows:
-                    hsh = row.tx_hash.hex()
-                    links[hsh]['output_value'] = row.value
-                heights = [e['height'] for e in links.values()]
-                rates = list_rates(currency, heights)
-                return [Link.from_dict(e, rates[e['height']]).to_dict()
-                        for e in links.values()]
-    return []
+    if address_id is None or neighbor_id is None:
+        return notfound("Links between {} and {} not found".format(address,
+                                                                   neighbor))
+
+    query = "SELECT tx_list FROM address_outgoing_relations WHERE " \
+            "src_address_id_group = %s AND src_address_id = %s AND " \
+            "dst_address_id = %s"
+    results = session.execute(query, [address_id_group, address_id,
+                                      neighbor_id])
+    if not results.current_rows:
+        return []
+
+    txs = [tx_hash for tx_hash in
+           results.current_rows[0].tx_list]
+    query = "SELECT * FROM address_transactions WHERE " \
+            "address_id_group = %s AND address_id = %s AND " \
+            "tx_hash IN %s"
+    results1 = session.execute(query, [address_id_group, address_id,
+                                       ValueSequence(txs)])
+    results2 = session.execute(query, [neighbor_id_group, neighbor_id,
+                                       ValueSequence(txs)])
+
+    if not results1.current_rows or not results2.current_rows:
+        return []
+
+    links = dict()
+    heights = [row.height for row in results1.current_rows]
+    rates = list_rates(currency, heights)
+    for row in results1.current_rows:
+        hsh = row.tx_hash.hex()
+        links[hsh] = dict()
+        links[hsh]['tx_hash'] = hsh
+        links[hsh]['height'] = row.height
+        links[hsh]['timestamp'] = row.timestamp
+        links[hsh]['input_value'] = convert_value(row.value, rates[row.height])
+    for row in results2.current_rows:
+        hsh = row.tx_hash.hex()
+        height = links[hsh]['height']
+        links[hsh]['output_value'] = convert_value(row.value, rates[height])
+    print('links {}'.format(links))
+    return [Link(tx_hash=e['tx_hash'],
+                 height=e['height'],
+                 timestamp=e['timestamp'],
+                 input_value=e['input_value'],
+                 output_value=e['output_value']
+                 ) for e in links.values()]
 
 
 def get_address_entity(currency, address):
