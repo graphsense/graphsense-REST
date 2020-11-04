@@ -1,6 +1,6 @@
 from cassandra.cluster import Cluster
 from cassandra.query import named_tuple_factory
-
+import os
 from flask import current_app, g, abort
 
 from gsrest.util.exceptions import MissingConfigError
@@ -13,7 +13,9 @@ def init_app(app):
 def get_cluster():
     if 'ccluster' not in g:
         current_app.logger.info("Opening new Cassandra cluster connection.")
-        g.ccluster = Cluster(current_app.config["CASSANDRA_NODES"])
+        host = os.environ['CASSANDRA_HOST']
+        port = os.environ['CASSANDRA_PORT']
+        g.ccluster = Cluster([(host, port)])
 
     return g.ccluster
 
