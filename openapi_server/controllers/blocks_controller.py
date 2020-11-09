@@ -25,7 +25,6 @@ def get_block(currency, height):  # noqa: E501
       return service.get_block(currency, height)
     except RuntimeError as e:
       return notfound(str(e))
-from gsrest.service.problems import notfound
 
 
 def list_block_txs(currency, height):  # noqa: E501
@@ -44,7 +43,6 @@ def list_block_txs(currency, height):  # noqa: E501
       return service.list_block_txs(currency, height)
     except RuntimeError as e:
       return notfound(str(e))
-from gsrest.service.problems import notfound
 
 
 def list_block_txs_csv(currency, height):  # noqa: E501
@@ -63,7 +61,6 @@ def list_block_txs_csv(currency, height):  # noqa: E501
       return service.list_block_txs_csv(currency, height)
     except RuntimeError as e:
       return notfound(str(e))
-from gsrest.service.problems import notfound
 
 
 def list_blocks(currency, page=None):  # noqa: E501

@@ -5,9 +5,9 @@ import six
 {{/imports}}
 from {{packageName}} import util
 import gsrest.service.{{classVarName}}_service as service
+from gsrest.service.problems import notfound
 {{#operations}}
 {{#operation}}
-from gsrest.service.problems import notfound
 
 
 def {{operationId}}({{#allParams}}{{paramName}}{{^required}}=None{{/required}}{{#hasMore}}, {{/hasMore}}{{/allParams}}):  # noqa: E501

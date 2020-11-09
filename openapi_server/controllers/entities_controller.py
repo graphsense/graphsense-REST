@@ -26,7 +26,6 @@ def get_entity_with_tags(currency, entity):  # noqa: E501
       return service.get_entity_with_tags(currency, entity)
     except RuntimeError as e:
       return notfound(str(e))
-from gsrest.service.problems import notfound
 
 
 def list_entity_addresses(currency, entity, page=None, pagesize=None):  # noqa: E501
@@ -49,7 +48,6 @@ def list_entity_addresses(currency, entity, page=None, pagesize=None):  # noqa: 
       return service.list_entity_addresses(currency, entity, page, pagesize)
     except RuntimeError as e:
       return notfound(str(e))
-from gsrest.service.problems import notfound
 
 
 def list_entity_neighbors(currency, entity, direction, targets=None, page=None, pagesize=None):  # noqa: E501
@@ -76,7 +74,6 @@ def list_entity_neighbors(currency, entity, direction, targets=None, page=None, 
       return service.list_entity_neighbors(currency, entity, direction, targets, page, pagesize)
     except RuntimeError as e:
       return notfound(str(e))
-from gsrest.service.problems import notfound
 
 
 def list_entity_neighbors_csv(currency, entity, direction):  # noqa: E501
@@ -97,7 +94,6 @@ def list_entity_neighbors_csv(currency, entity, direction):  # noqa: E501
       return service.list_entity_neighbors_csv(currency, entity, direction)
     except RuntimeError as e:
       return notfound(str(e))
-from gsrest.service.problems import notfound
 
 
 def list_entity_tags(currency, entity):  # noqa: E501
@@ -116,7 +112,6 @@ def list_entity_tags(currency, entity):  # noqa: E501
       return service.list_entity_tags(currency, entity)
     except RuntimeError as e:
       return notfound(str(e))
-from gsrest.service.problems import notfound
 
 
 def list_entity_tags_csv(currency, entity):  # noqa: E501

@@ -28,7 +28,6 @@ def get_address_entity(currency, address):  # noqa: E501
       return service.get_address_entity(currency, address)
     except RuntimeError as e:
       return notfound(str(e))
-from gsrest.service.problems import notfound
 
 
 def get_address_with_tags(currency, address):  # noqa: E501
@@ -47,7 +46,6 @@ def get_address_with_tags(currency, address):  # noqa: E501
       return service.get_address_with_tags(currency, address)
     except RuntimeError as e:
       return notfound(str(e))
-from gsrest.service.problems import notfound
 
 
 def list_address_links(currency, address, neighbor):  # noqa: E501
@@ -68,7 +66,6 @@ def list_address_links(currency, address, neighbor):  # noqa: E501
       return service.list_address_links(currency, address, neighbor)
     except RuntimeError as e:
       return notfound(str(e))
-from gsrest.service.problems import notfound
 
 
 def list_address_neighbors(currency, address, direction, page=None, pagesize=None):  # noqa: E501
@@ -93,7 +90,6 @@ def list_address_neighbors(currency, address, direction, page=None, pagesize=Non
       return service.list_address_neighbors(currency, address, direction, page, pagesize)
     except RuntimeError as e:
       return notfound(str(e))
-from gsrest.service.problems import notfound
 
 
 def list_address_neighbors_csv(currency, address, direction):  # noqa: E501
@@ -114,7 +110,6 @@ def list_address_neighbors_csv(currency, address, direction):  # noqa: E501
       return service.list_address_neighbors_csv(currency, address, direction)
     except RuntimeError as e:
       return notfound(str(e))
-from gsrest.service.problems import notfound
 
 
 def list_address_tags(currency, address):  # noqa: E501
@@ -133,7 +128,6 @@ def list_address_tags(currency, address):  # noqa: E501
       return service.list_address_tags(currency, address)
     except RuntimeError as e:
       return notfound(str(e))
-from gsrest.service.problems import notfound
 
 
 def list_address_tags_csv(currency, address):  # noqa: E501
@@ -152,7 +146,6 @@ def list_address_tags_csv(currency, address):  # noqa: E501
       return service.list_address_tags_csv(currency, address)
     except RuntimeError as e:
       return notfound(str(e))
-from gsrest.service.problems import notfound
 
 
 def list_address_txs(currency, address, page=None, pagesize=None):  # noqa: E501

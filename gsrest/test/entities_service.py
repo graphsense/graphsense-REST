@@ -7,6 +7,7 @@ from openapi_server.models.entity_addresses import EntityAddresses
 from openapi_server.models.entity_with_tags import EntityWithTags
 from openapi_server.models.values import Values
 from openapi_server.models.tag import Tag
+import json
 import gsrest.service.entities_service as service
 
 tag = Tag(
@@ -265,6 +266,55 @@ def list_entity_neighbors(test_case):
         entity=entityWithTags.entity,
         direction='in')
     assertEqual(entityWithTagsInNeighbors, result)
+
+    """
+    reducedEntityWithTagsInNeighbors = \
+        entityWithTagsInNeighbors
+    reducedEntityWithTagsInNeighbors.neighbors = \
+        [reducedEntityWithTagsInNeighbors.neighbors[0]]
+        """
+
+    query_string = [('direction', 'in'), ('targets', '67065,144534')]
+    headers = {
+        'Accept': 'application/json',
+    }
+    response = test_case.client.open(
+        '/{currency}/entities/{entity}/neighbors'.format(
+            currency="btc",
+            entity="17642138"),
+        method='GET',
+        headers=headers,
+        query_string=query_string)
+    test_case.assert200(response,
+                        'Response body is : ' + response.data.decode('utf-8'))
+
+    result = json.loads(response.data.decode('utf-8'))
+
+    assertEqual(
+        [n.id for n in entityWithTagsInNeighbors.neighbors],
+        [int(n['id']) for n in result['neighbors']]
+    )
+
+    query_string = [('direction', 'in'), ('targets', '144534')]
+    headers = {
+        'Accept': 'application/json',
+    }
+    response = test_case.client.open(
+        '/{currency}/entities/{entity}/neighbors'.format(
+            currency="btc",
+            entity="17642138"),
+        method='GET',
+        headers=headers,
+        query_string=query_string)
+    test_case.assert200(response,
+                        'Response body is : ' + response.data.decode('utf-8'))
+
+    result = json.loads(response.data.decode('utf-8'))
+
+    assertEqual(
+        [entityWithTagsInNeighbors.neighbors[1].id],
+        [int(n['id']) for n in result['neighbors']]
+    )
 
 
 def list_entity_neighbors_csv(test_case):

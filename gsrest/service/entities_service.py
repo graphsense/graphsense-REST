@@ -111,7 +111,6 @@ def get_entity(currency, entity):
     if result is None:
         raise RuntimeError("Entity {} not found".format(entity))
     result = result.one()
-    print('result {}'.format(result))
     return Entity(
         entity=result.cluster,
         first_tx=TxSummary(
@@ -155,6 +154,7 @@ def list_entity_neighbors(currency, entity, direction, targets=None,
 
     session = get_session(currency, 'transformed')
     entity_id_group = get_id_group(entity)
+
     has_targets = isinstance(targets, list)
     parameters = [entity_id_group, entity]
     basequery = "SELECT * FROM cluster_{}_relations WHERE " \
@@ -164,7 +164,8 @@ def list_entity_neighbors(currency, entity, direction, targets=None,
         if len(targets) == 0:
             return None
         query = basequery.replace('*', '{}_cluster'.format(that))
-        query += " AND {}_cluster in ({})".format(that, ','.join(targets))
+        query += " AND {}_cluster in ({})" \
+            .format(that, ','.join(map(str, targets)))
     else:
         query = basequery
     fetch_size = ENTITY_PAGE_SIZE
