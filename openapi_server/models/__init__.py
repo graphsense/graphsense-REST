@@ -23,5 +23,8 @@ from openapi_server.models.neighbors import Neighbors
 from openapi_server.models.search_paths import SearchPaths
 from openapi_server.models.stats import Stats
 from openapi_server.models.tag import Tag
+from openapi_server.models.tx import Tx
 from openapi_server.models.tx_summary import TxSummary
+from openapi_server.models.tx_value import TxValue
+from openapi_server.models.txs import Txs
 from openapi_server.models.values import Values

@@ -900,6 +900,65 @@ paths:
       tags:
       - entities
       x-openapi-router-controller: openapi_server.controllers.entities_controller
+  /{currency}/txs:
+    get:
+      operationId: list_txs
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/txs'
+          description: OK
+      summary: Returns details of a specific transaction identified by its hash.
+      tags:
+      - txs
+      x-openapi-router-controller: openapi_server.controllers.txs_controller
+  /{currency}/txs/{tx_hash}:
+    get:
+      operationId: get_tx
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The transaction hash
+        example: 0e3e2357e806b6cdb1f70b54c3a3a17b6714ee1f0e68bebb44a74b1efd512098
+        explode: false
+        in: path
+        name: tx_hash
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tx'
+          description: OK
+      summary: Returns details of a specific transaction identified by its hash.
+      tags:
+      - txs
+      x-openapi-router-controller: openapi_server.controllers.txs_controller
 components:
   parameters:
     currency:
@@ -988,6 +1047,16 @@ components:
       schema:
         format: int64
         type: integer
+      style: simple
+    tx_hash:
+      description: The transaction hash
+      example: 0e3e2357e806b6cdb1f70b54c3a3a17b6714ee1f0e68bebb44a74b1efd512098
+      explode: false
+      in: path
+      name: tx_hash
+      required: true
+      schema:
+        type: string
       style: simple
     targets:
       description: Restrict result to given set of comma separated IDs
@@ -1761,6 +1830,185 @@ components:
         matching_addresses:
           items:
             $ref: '#/components/schemas/address_with_tags'
+          type: array
+      type: object
+    tx:
+      example:
+        outputs:
+        - address: address
+          value:
+            eur: 1
+            usd: 5
+            value: 5
+        - address: address
+          value:
+            eur: 1
+            usd: 5
+            value: 5
+        total_output:
+          eur: 1
+          usd: 5
+          value: 5
+        coinbase: true
+        inputs:
+        - address: address
+          value:
+            eur: 1
+            usd: 5
+            value: 5
+        - address: address
+          value:
+            eur: 1
+            usd: 5
+            value: 5
+        total_input:
+          eur: 1
+          usd: 5
+          value: 5
+        tx_hash: tx_hash
+        height: 1
+        timestamp: 6
+      properties:
+        tx_hash:
+          description: Transaction hash
+          type: string
+        coinbase:
+          description: Coinbase transaction flag
+          type: boolean
+        height:
+          description: Height
+          format: int64
+          minimum: 1
+          type: integer
+        inputs:
+          description: Transaction inputs/outputs
+          items:
+            $ref: '#/components/schemas/tx_value'
+          type: array
+        outputs:
+          description: Transaction inputs/outputs
+          items:
+            $ref: '#/components/schemas/tx_value'
+          type: array
+        timestamp:
+          description: Timestamp
+          format: int64
+          type: integer
+        total_input:
+          $ref: '#/components/schemas/values'
+        total_output:
+          $ref: '#/components/schemas/values'
+      required:
+      - coinbase
+      - height
+      - inputs
+      - outputs
+      - timestamp
+      - total_input
+      - total_output
+      - tx_hash
+      type: object
+    tx_values:
+      description: Transaction inputs/outputs
+      items:
+        $ref: '#/components/schemas/tx_value'
+      type: array
+    tx_value:
+      example:
+        address: address
+        value:
+          eur: 1
+          usd: 5
+          value: 5
+      properties:
+        address:
+          description: Address
+          type: string
+        value:
+          $ref: '#/components/schemas/values'
+      required:
+      - address
+      - value
+      type: object
+    txs:
+      example:
+        next_page: next_page
+        txs:
+        - outputs:
+          - address: address
+            value:
+              eur: 1
+              usd: 5
+              value: 5
+          - address: address
+            value:
+              eur: 1
+              usd: 5
+              value: 5
+          total_output:
+            eur: 1
+            usd: 5
+            value: 5
+          coinbase: true
+          inputs:
+          - address: address
+            value:
+              eur: 1
+              usd: 5
+              value: 5
+          - address: address
+            value:
+              eur: 1
+              usd: 5
+              value: 5
+          total_input:
+            eur: 1
+            usd: 5
+            value: 5
+          tx_hash: tx_hash
+          height: 1
+          timestamp: 6
+        - outputs:
+          - address: address
+            value:
+              eur: 1
+              usd: 5
+              value: 5
+          - address: address
+            value:
+              eur: 1
+              usd: 5
+              value: 5
+          total_output:
+            eur: 1
+            usd: 5
+            value: 5
+          coinbase: true
+          inputs:
+          - address: address
+            value:
+              eur: 1
+              usd: 5
+              value: 5
+          - address: address
+            value:
+              eur: 1
+              usd: 5
+              value: 5
+          total_input:
+            eur: 1
+            usd: 5
+            value: 5
+          tx_hash: tx_hash
+          height: 1
+          timestamp: 6
+      properties:
+        next_page:
+          format: string
+          type: string
+        txs:
+          items:
+            $ref: '#/components/schemas/tx'
           type: array
       type: object
     address_with_tags_allOf:

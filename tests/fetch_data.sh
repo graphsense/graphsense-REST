@@ -101,6 +101,4 @@ while read line; do
   address_id_group=$address_id_group,`expr $aid \/ $bucket_size`
 done < $outdir$transformed_dst.cluster_addresses
 #fetch transformed address_by_id_group "where address_id_group in ($address_id_group) and address_id in ($address_id) limit 2" append
-cluster_id=2818641
-cluster_id_group=`expr $cluster_id / $BUCKET_SIZE`
-fetch transformed cluster "where cluster_group in ($cluster_id_group) and cluster in ($cluster_id)"
+fetch raw transaction "limit 2"
