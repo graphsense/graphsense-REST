@@ -77,7 +77,7 @@ class TestBlocksController(BaseTestCase):
         """
         test_service.list_blocks(self)
 
-        query_string = []
+        query_string = [('','')]
         headers = { 
             'Accept': 'application/json',
         }

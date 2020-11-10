@@ -723,6 +723,111 @@ paths:
       tags:
       - entities
       x-openapi-router-controller: openapi_server.controllers.entities_controller
+  /{currency}/entities/{entity}/search:
+    get:
+      operationId: search_entity_neighbors
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The entity ID
+        example: 67065
+        explode: false
+        in: path
+        name: entity
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      - description: Incoming or outgoing neighbors
+        example: out
+        explode: true
+        in: query
+        name: direction
+        required: true
+        schema:
+          enum:
+          - in
+          - out
+          type: string
+        style: form
+      - description: 'Match neighbors against one and only one of these properties:
+          - the category the entity belongs to - addresses the entity contains - total_received:
+          amount the entity received in total - balance: amount the entity holds finally'
+        example: category
+        explode: true
+        in: query
+        name: key
+        required: true
+        schema:
+          enum:
+          - category
+          - addresses
+          - total_received
+          - balance
+          type: string
+        style: form
+      - description: 'If key is - category: comma separated list of category names
+          - addresses: comma separated list of address IDs - total_received/balance:
+          comma separated tuple of (currency, min, max)'
+        example: Miner
+        explode: false
+        in: query
+        name: value
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+        style: simple
+      - description: How many hops should the transaction graph be searched
+        explode: true
+        in: query
+        name: depth
+        required: true
+        schema:
+          format: int32
+          maximum: 7
+          type: integer
+        style: form
+      - description: How many siblings of each neighbor should be tried
+        explode: true
+        in: query
+        name: breadth
+        required: false
+        schema:
+          default: 16
+          format: int32
+          type: integer
+        style: form
+      - description: Skip entities containing more addresses
+        explode: true
+        in: query
+        name: skip_num_addresses
+        required: false
+        schema:
+          format: int32
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/search_paths'
+          description: OK
+      summary: Search deeply for matching neighbors
+      tags:
+      - entities
+      x-openapi-router-controller: openapi_server.controllers.entities_controller
   /{currency}/entities/{entity}/tags:
     get:
       operationId: list_entity_tags
@@ -896,6 +1001,69 @@ components:
           type: integer
         type: array
       style: simple
+    search_key:
+      description: 'Match neighbors against one and only one of these properties:
+        - the category the entity belongs to - addresses the entity contains - total_received:
+        amount the entity received in total - balance: amount the entity holds finally'
+      example: category
+      explode: true
+      in: query
+      name: key
+      required: true
+      schema:
+        enum:
+        - category
+        - addresses
+        - total_received
+        - balance
+        type: string
+      style: form
+    search_value:
+      description: 'If key is - category: comma separated list of category names -
+        addresses: comma separated list of address IDs - total_received/balance: comma
+        separated tuple of (currency, min, max)'
+      example: Miner
+      explode: false
+      in: query
+      name: value
+      required: true
+      schema:
+        items:
+          type: string
+        type: array
+      style: simple
+    depth:
+      description: How many hops should the transaction graph be searched
+      explode: true
+      in: query
+      name: depth
+      required: true
+      schema:
+        format: int32
+        maximum: 7
+        type: integer
+      style: form
+    breadth:
+      description: How many siblings of each neighbor should be tried
+      explode: true
+      in: query
+      name: breadth
+      required: false
+      schema:
+        default: 16
+        format: int32
+        type: integer
+      style: form
+    skip_num_addresses:
+      description: Skip entities containing more addresses
+      explode: true
+      in: query
+      name: skip_num_addresses
+      required: false
+      schema:
+        format: int32
+        type: integer
+      style: form
   schemas:
     stats:
       example:
@@ -1152,6 +1320,7 @@ components:
           format: int64
           type: integer
         no_addresses:
+          description: number of contained addresses
           format: int64
           type: integer
         no_incoming_txs:
@@ -1345,6 +1514,10 @@ components:
     tx_hash:
       description: Transaction hash
       type: string
+    no_addresses:
+      description: number of contained addresses
+      format: int64
+      type: integer
     neighbors:
       example:
         next_page: next_page
@@ -1546,6 +1719,48 @@ components:
         addresses:
           items:
             $ref: '#/components/schemas/address'
+          type: array
+      type: object
+    search_paths:
+      example:
+        paths:
+        - null
+        - null
+        relation:
+          node_type: address
+          balance:
+            eur: 1
+            usd: 5
+            value: 5
+          received:
+            eur: 1
+            usd: 5
+            value: 5
+          id: id
+          estimated_value:
+            eur: 1
+            usd: 5
+            value: 5
+          labels:
+          - labels
+          - labels
+          no_txs: 0
+        matching_addresses:
+        - null
+        - null
+      properties:
+        paths:
+          description: Paths to matching entities
+          items:
+            $ref: '#/components/schemas/search_paths'
+          type: array
+        node:
+          $ref: '#/components/schemas/entity_with_tags'
+        relation:
+          $ref: '#/components/schemas/neighbor'
+        matching_addresses:
+          items:
+            $ref: '#/components/schemas/address_with_tags'
           type: array
       type: object
     address_with_tags_allOf:

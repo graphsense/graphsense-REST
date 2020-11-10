@@ -4,6 +4,7 @@ import six
 from openapi_server.models.entity_addresses import EntityAddresses  # noqa: E501
 from openapi_server.models.entity_with_tags import EntityWithTags  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
+from openapi_server.models.search_paths import SearchPaths  # noqa: E501
 from openapi_server.models.tag import Tag  # noqa: E501
 from openapi_server import util
 import gsrest.service.entities_service as service
@@ -128,5 +129,35 @@ def list_entity_tags_csv(currency, entity):  # noqa: E501
     """
     try:
       return service.list_entity_tags_csv(currency, entity)
+    except RuntimeError as e:
+      return notfound(str(e))
+
+
+def search_entity_neighbors(currency, entity, direction, key, value, depth, breadth=None, skip_num_addresses=None):  # noqa: E501
+    """Search deeply for matching neighbors
+
+     # noqa: E501
+
+    :param currency: The cryptocurrency (e.g., btc)
+    :type currency: str
+    :param entity: The entity ID
+    :type entity: int
+    :param direction: Incoming or outgoing neighbors
+    :type direction: str
+    :param key: Match neighbors against one and only one of these properties: - the category the entity belongs to - addresses the entity contains - total_received: amount the entity received in total - balance: amount the entity holds finally
+    :type key: str
+    :param value: If key is - category: comma separated list of category names - addresses: comma separated list of address IDs - total_received/balance: comma separated tuple of (currency, min, max)
+    :type value: List[str]
+    :param depth: How many hops should the transaction graph be searched
+    :type depth: int
+    :param breadth: How many siblings of each neighbor should be tried
+    :type breadth: int
+    :param skip_num_addresses: Skip entities containing more addresses
+    :type skip_num_addresses: int
+
+    :rtype: SearchPaths
+    """
+    try:
+      return service.search_entity_neighbors(currency, entity, direction, key, value, depth, breadth, skip_num_addresses)
     except RuntimeError as e:
       return notfound(str(e))

@@ -64,6 +64,10 @@ class {{classname}}(Model):
 {{/required}}
         self._{{name}} = {{name}}
 {{/vars}}
+{{#vendorExtensions.x-minProperties}}
+        if [{{#vars}}{{name}}{{#hasMore}},{{/hasMore}}{{/vars}}].count(None) < {{vendorExtensions.x-minProperties}}:
+            raise ValueError("At least one of {{#vars}}{{name}}{{#hasMore}}, {{/hasMore}}{{/vars}} is required")
+{{/vendorExtensions.x-minProperties}}
 
     @classmethod
     def from_dict(cls, dikt){{^supportPython2}} -> '{{classname}}'{{/supportPython2}}:

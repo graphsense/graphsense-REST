@@ -8,7 +8,7 @@ from openapi_server.models.neighbor import Neighbor
 from openapi_server.models.link import Link
 from gsrest.service.entities_service import get_entity_with_tags, get_id_group
 from gsrest.service.common_service import get_address_by_id_group, \
-    ADDRESS_PREFIX_LENGTH
+    ADDRESS_PREFIX_LENGTH, get_address_id_id_group, get_address_entity_id
 from gsrest.service.rates_service import get_rates, list_rates
 import gsrest.service.common_service as commonDAO
 from gsrest.model.common import convert_value, compute_balance, make_values
@@ -36,24 +36,6 @@ def list_address_tags_csv(currency, address):
                         'tags of address {} ({}).csv'
                         .format(address,
                                 currency.upper())))
-
-
-def get_address_id(currency, address):
-    session = get_session(currency, 'transformed')
-    query = "SELECT address_id FROM address WHERE address_prefix = %s " \
-            "AND address = %s"
-    result = session.execute(query, [address[:ADDRESS_PREFIX_LENGTH], address])
-    if result:
-        return result[0].address_id
-    return None
-
-
-def get_address_id_id_group(currency, address):
-    address_id = get_address_id(currency, address)
-    if isinstance(address_id, int):
-        id_group = get_id_group(address_id)
-        return address_id, id_group
-    return None, None
 
 
 def list_address_txs(currency, address, paging_state=None, pagesize=None):
@@ -272,23 +254,6 @@ def get_address_entity(currency, address):
         raise e
 
     return result
-
-
-def get_address_entity_id(currency, address):
-    # from address to entity id only
-    session = get_session(currency, 'transformed')
-    address_id, address_id_group = get_address_id_id_group(currency, address)
-    if not isinstance(address_id, int):
-        return None
-
-    query = "SELECT cluster FROM address_cluster WHERE " \
-            "address_id_group = %s AND address_id = %s "
-    result = session.execute(query, [address_id_group, address_id])
-    print('ROWOW {}'.format(result))
-    if result is None or result.one() is None:
-        return None
-
-    return result.one().cluster
 
 
 def list_matching_addresses(currency, expression):

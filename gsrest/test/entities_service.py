@@ -6,6 +6,7 @@ from openapi_server.models.address import Address
 from openapi_server.models.entity_addresses import EntityAddresses
 from openapi_server.models.entity_with_tags import EntityWithTags
 from openapi_server.models.values import Values
+from openapi_server.models.search_paths import SearchPaths
 from openapi_server.models.tag import Tag
 import json
 import gsrest.service.entities_service as service
@@ -267,13 +268,6 @@ def list_entity_neighbors(test_case):
         direction='in')
     assertEqual(entityWithTagsInNeighbors, result)
 
-    """
-    reducedEntityWithTagsInNeighbors = \
-        entityWithTagsInNeighbors
-    reducedEntityWithTagsInNeighbors.neighbors = \
-        [reducedEntityWithTagsInNeighbors.neighbors[0]]
-        """
-
     query_string = [('direction', 'in'), ('targets', '67065,144534')]
     headers = {
         'Accept': 'application/json',
@@ -333,5 +327,110 @@ def list_entity_addresses(test_case):
     assertEqual(entityWithTagsAddresses, result)
 
 
+def search_entity_neighbors(test_case):
 
+    # Test category matching
 
+    category = 'MyCategory'
+    result = service.search_entity_neighbors(
+                    currency='btc',
+                    entity=entityWithTags.entity,
+                    direction='out',
+                    depth=2,
+                    breadth=10,
+                    key='category',
+                    value=[category]
+                    )
+    assertEqual(2818641, result.paths[0].node.entity)
+    assertEqual(123, result.paths[0].paths[0].node.entity)
+    assertEqual(category, result.paths[0].paths[0].node.tags[0].category)
+
+    category = 'MyCategory'
+    result = service.search_entity_neighbors(
+                    currency='btc',
+                    entity=entityWithTags.entity,
+                    direction='in',
+                    depth=2,
+                    breadth=10,
+                    key='category',
+                    value=[category]
+                    )
+    assertEqual(67065, result.paths[0].node.entity)
+    assertEqual(123, result.paths[0].paths[0].node.entity)
+    assertEqual(category, result.paths[0].paths[0].node.tags[0].category)
+
+    # Test addresses matching
+
+    addresses = ['abcdefg', 'xyz1234']
+    result = service.search_entity_neighbors(
+                    currency='btc',
+                    entity=entityWithTags.entity,
+                    direction='out',
+                    depth=2,
+                    breadth=10,
+                    key='addresses',
+                    value=addresses
+                    )
+    assertEqual(2818641, result.paths[0].node.entity)
+    assertEqual(456, result.paths[0].paths[0].node.entity)
+    assertEqual(addresses, [a.address for a
+                            in result.paths[0].paths[0].matching_addresses])
+
+    addresses = ['abcdefg']
+    result = service.search_entity_neighbors(
+                    currency='btc',
+                    entity=entityWithTags.entity,
+                    direction='out',
+                    depth=2,
+                    breadth=10,
+                    key='addresses',
+                    value=addresses
+                    )
+    assertEqual(2818641, result.paths[0].node.entity)
+    assertEqual(456, result.paths[0].paths[0].node.entity)
+    assertEqual(addresses, [a.address for a
+                            in result.paths[0].paths[0].matching_addresses])
+
+    # Test value matching
+
+    result = service.search_entity_neighbors(
+                    currency='btc',
+                    entity=entityWithTags.entity,
+                    direction='out',
+                    depth=2,
+                    breadth=10,
+                    key='total_received',
+                    value=['value', 5, 150]
+                    )
+    assertEqual(2818641, result.paths[0].node.entity)
+    assertEqual(789, result.paths[0].paths[0].node.entity)
+    assertEqual(10, result.paths[0].paths[0].node.total_received.value)
+
+    # Test value matching
+
+    result = service.search_entity_neighbors(
+                    currency='btc',
+                    entity=entityWithTags.entity,
+                    direction='out',
+                    depth=2,
+                    breadth=10,
+                    key='total_received',
+                    value=['value', 5, 8]
+                    )
+    assertEqual(SearchPaths(paths=[]), result)
+    #
+    # Test value matching
+
+    result = service.search_entity_neighbors(
+                    currency='btc',
+                    entity=entityWithTags.entity,
+                    direction='out',
+                    depth=2,
+                    breadth=10,
+                    key='total_received',
+                    value=['eur', 50, 100]
+                    )
+    print('result {}'.format(result))
+    assertEqual(2818641, result.paths[0].node.entity)
+    assertEqual(789, result.paths[0].paths[0].node.entity)
+    assertEqual(100.0, result.paths[0].paths[0].node.total_received.eur)

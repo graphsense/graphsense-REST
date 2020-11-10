@@ -82,9 +82,9 @@ class TestAddressesController(BaseTestCase):
         """
         test_service.list_address_neighbors(self)
 
-        query_string = [('direction', 'out'),('direction', 'out')
-                        
-                        ]
+        query_string = [('direction', 'out'),
+                        ('',''),
+                        ('','')]
         headers = { 
             'Accept': 'application/json',
         }
@@ -160,8 +160,8 @@ class TestAddressesController(BaseTestCase):
         """
         test_service.list_address_txs(self)
 
-        query_string = [
-                        ]
+        query_string = [('',''),
+                        ('','')]
         headers = { 
             'Accept': 'application/json',
         }

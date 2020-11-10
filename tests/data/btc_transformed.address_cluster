@@ -3,3 +3,5 @@
  {"address_id_group": 404, "address_id": 10102718, "cluster": 10102718}
  {"address_id_group": 406, "address_id": 10164852, "cluster": 10164852}
  {"address_id_group": 705, "address_id": 17642138, "cluster": 17642138}
+ {"address_id_group": 0, "address_id": 456, "cluster": 456}
+ {"address_id_group": 0, "address_id": 789, "cluster": 456}

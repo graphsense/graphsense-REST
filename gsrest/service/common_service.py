@@ -1,3 +1,4 @@
+from math import floor
 from gsrest.db.cassandra import get_session
 from openapi_server.models.address import Address
 from openapi_server.models.address_with_tags import AddressWithTags
@@ -8,6 +9,7 @@ from gsrest.service.rates_service import get_rates
 from gsrest.service.problems import notfound
 
 ADDRESS_PREFIX_LENGTH = 5
+BUCKET_SIZE = 25000  # TODO: get BUCKET_SIZE from cassandra
 
 
 def get_address_by_id_group(currency, address_id_group, address_id):
@@ -25,9 +27,8 @@ def get_address(currency, address):
     result = session.execute(
         query, [address[:ADDRESS_PREFIX_LENGTH], address]).one()
     if not result:
-        return notfound("Address {} not found in currency {}".format(
+        raise RuntimeError("Address {} not found in currency {}".format(
             address, currency))
-    print('result {}'.format(result))
     return Address(
         address=result.address,
         first_tx=TxSummary(
@@ -99,3 +100,39 @@ def get_address_with_tags(currency, address):
         tags=list_address_tags(currency, address)
         )
     return result
+
+
+def get_id_group(id_):
+    # if BUCKET_SIZE depends on the currency, we need session = ... here
+    return floor(id_ / BUCKET_SIZE)
+
+
+def get_address_id(currency, address):
+    session = get_session(currency, 'transformed')
+    query = "SELECT * FROM address WHERE address_prefix = %s " \
+            "AND address = %s"
+    result = session.execute(query, [address[:ADDRESS_PREFIX_LENGTH], address])
+    if result:
+        return result[0].address_id
+    raise RuntimeError('address_id for {} in currency {} not found'
+                       .format(address, currency))
+
+
+def get_address_id_id_group(currency, address):
+    address_id = get_address_id(currency, address)
+    id_group = get_id_group(address_id)
+    return address_id, id_group
+
+
+def get_address_entity_id(currency, address):
+    # from address to entity id only
+    session = get_session(currency, 'transformed')
+    address_id, address_id_group = get_address_id_id_group(currency, address)
+
+    query = "SELECT cluster FROM address_cluster WHERE " \
+            "address_id_group = %s AND address_id = %s "
+    result = session.execute(query, [address_id_group, address_id])
+    if result is None or result.one() is None:
+        raise RuntimeError('cluster for address {} in currency {} not found'
+                           .format(address, currency))
+    return result.one().cluster

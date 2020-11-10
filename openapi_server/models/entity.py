@@ -281,6 +281,7 @@ class Entity(Model):
     def no_addresses(self):
         """Gets the no_addresses of this Entity.
 
+        number of contained addresses  # noqa: E501
 
         :return: The no_addresses of this Entity.
         :rtype: int
@@ -291,6 +292,7 @@ class Entity(Model):
     def no_addresses(self, no_addresses):
         """Sets the no_addresses of this Entity.
 
+        number of contained addresses  # noqa: E501
 
         :param no_addresses: The no_addresses of this Entity.
         :type no_addresses: int

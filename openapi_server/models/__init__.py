@@ -20,6 +20,7 @@ from openapi_server.models.entity_with_tags_all_of import EntityWithTagsAllOf
 from openapi_server.models.link import Link
 from openapi_server.models.neighbor import Neighbor
 from openapi_server.models.neighbors import Neighbors
+from openapi_server.models.search_paths import SearchPaths
 from openapi_server.models.stats import Stats
 from openapi_server.models.tag import Tag
 from openapi_server.models.tx_summary import TxSummary

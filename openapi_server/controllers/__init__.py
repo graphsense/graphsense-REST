@@ -9,7 +9,6 @@ CONFIG_FILE = "config.py"
 
 
 def load_config(app, instance_path):
-    print("instance_path {} {}".format(instance_path, app.instance_path), flush=True)
     instance_path = app.instance_path if not instance_path else instance_path
     # ensure that instance path and config file exists
     config_file_path = os.path.join(instance_path, CONFIG_FILE)

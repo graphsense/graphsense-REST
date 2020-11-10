@@ -1,4 +1,3 @@
-from math import floor
 from cassandra.query import SimpleStatement
 from cassandra.concurrent import execute_concurrent
 
@@ -6,6 +5,7 @@ from gsrest.db.cassandra import get_session
 from gsrest.service.common_service import get_address_by_id_group, \
     get_address_with_tags
 from gsrest.service.rates_service import get_rates
+from gsrest.service.common_service import get_address_entity_id, get_id_group
 from openapi_server.models.entity import Entity
 from openapi_server.models.tx_summary import TxSummary
 from gsrest.model.common import compute_balance, convert_value, make_values
@@ -13,20 +13,15 @@ from openapi_server.models.tag import Tag
 from openapi_server.models.entity_with_tags import EntityWithTags
 from openapi_server.models.neighbor import Neighbor
 from openapi_server.models.neighbors import Neighbors
+from openapi_server.models.search_paths import SearchPaths
 from gsrest.util.tag_coherence import compute_tag_coherence
 from flask import Response, stream_with_context
 from gsrest.util.csvify import create_download_header, to_csv
 from openapi_server.models.address import Address
 from openapi_server.models.entity_addresses import EntityAddresses
 
-BUCKET_SIZE = 25000  # TODO: get BUCKET_SIZE from cassandra
 ENTITY_PAGE_SIZE = 100
 ENTITY_ADDRESSES_PAGE_SIZE = 100
-
-
-def get_id_group(id_):
-    # if BUCKET_SIZE depends on the currency, we need session = ... here
-    return floor(id_ / BUCKET_SIZE)
 
 
 def list_entity_tags(currency, entity):
@@ -300,8 +295,55 @@ def list_entity_addresses(currency, entity, paging_state=None, page_size=None):
     return EntityAddresses(next_page=paging_state, addresses=addresses)
 
 
-def list_entity_search_neighbors(currency, entity, params, breadth, depth,
-                                 skip_num_addresses, outgoing, cache=None):
+def search_entity_neighbors(currency, entity, direction, key, value, depth, breadth, skip_num_addresses=None):  # noqa: E501
+    params = dict()
+    if 'category' in key:
+        params['category'] = value[0]
+
+    elif 'total_received' in key or 'balance' in key:
+        [curr, min_value, *max_value] = value
+        max_value = max_value[0] if len(max_value) > 0 else None
+        if min_value > max_value:
+            raise ValueError('Min must not be greater than max')
+        elif curr not in ['value', 'eur', 'usd']:
+            raise ValueError('Currency must be one of "value", "eur" or '
+                             '"usd"')
+        params['field'] = (key, curr, min_value, max_value)
+
+    elif 'addresses' in key:
+        addresses_list = []
+        for address in value:
+            e = get_address_entity_id(currency, address)
+            if e:
+                addresses_list.append({"address": address,
+                                       "entity": e})
+            else:
+                raise RuntimeError(
+                    "Entity of address {} not found in currency {}"
+                    .format(address, currency))
+        params['addresses'] = addresses_list
+
+    result = \
+        recursive_search(currency, entity, params,
+                         breadth, depth, skip_num_addresses,
+                         direction)
+
+    def add_tag_coherence(paths):
+        if not paths:
+            return
+        for path in paths:
+            path.node.tag_coherence = compute_tag_coherence(
+                t.label for t in path.node.tags)
+            add_tag_coherence(path.paths)
+
+    add_tag_coherence(result)
+
+    return SearchPaths(paths=result)
+
+
+def recursive_search(currency, entity, params, breadth, depth,
+                     skip_num_addresses, direction, cache=None):
+    print('enityt {}'.format(entity))
     if cache is None:
         cache = dict()
     if depth <= 0:
@@ -319,75 +361,63 @@ def list_entity_search_neighbors(currency, entity, params, breadth, depth,
     def cached(cl, key, get):
         return get_cached(cl, key) or set_cached(cl, key, get())
 
-    (_, rows) = cached(entity, 'rows',
+    neighbors = cached(entity, 'neighbors',
                        lambda: list_entity_neighbors(
-                           currency, entity, outgoing, paging_state=None,
-                           page_size=breadth, from_search=True))
+                        currency, entity, direction,
+                        page_size=breadth, from_search=True).neighbors)
 
     paths = []
 
-    for row in rows:
-        subentity = row['dst_entity'] if outgoing else row['src_entity']
-        if not isinstance(subentity, int):
-            continue
+    for neighbor in neighbors:
         match = True
-        props = cached(subentity, 'props', lambda: get_entity(currency,
-                                                              subentity))
+        props = cached(neighbor.id, 'props',
+                       lambda: get_entity_with_tags(currency, neighbor.id))
         if props is None:
             continue
 
-        tags = cached(subentity, 'tags', lambda: list_entity_tags(currency,
-                                                                  subentity))
         if 'category' in params:
             # find first occurrence of category in tags
-            match = next((True for t in tags if t["category"] and
-                          t["category"].lower() == params['category'].lower()),
+            match = next((True for t in props.tags if t.category and
+                          t.category.lower() == params['category'].lower()),
                          False)
 
         matching_addresses = []
         if 'addresses' in params:
             matching_addresses = [id["address"] for id in params['addresses']
-                                  if str(id["entity"]) == str(subentity)]
+                                  if str(id["entity"]) == str(neighbor.id)]
             match = len(matching_addresses) > 0
 
         if 'field' in params:
             (field, fieldcurrency, min_value, max_value) = params['field']
-            if field == 'final_balance':
-                v = props['balance'][fieldcurrency]
-            elif field == 'total_received':
-                v = props['total_received'][fieldcurrency]
-            else:
-                v = -1
+            v = getattr(getattr(props, field), fieldcurrency)
+            print('v {} {} {}'.format(field, fieldcurrency, v))
             match = v >= min_value and (max_value is None or max_value >= v)
 
+        print('params {}'.format(params))
         subpaths = False
         if match:
             subpaths = True
-        elif 'no_addresses' in props and \
-             props['no_addresses'] <= skip_num_addresses:
-            subpaths = list_entity_search_neighbors(currency, subentity,
-                                                    params, breadth,
-                                                    depth - 1,
-                                                    skip_num_addresses,
-                                                    outgoing, cache)
+        elif props.no_addresses is not None and \
+                (skip_num_addresses is None or
+                 props.no_addresses <= skip_num_addresses):
+            subpaths = recursive_search(currency, neighbor.id,
+                                        params, breadth,
+                                        depth - 1,
+                                        skip_num_addresses,
+                                        direction, cache)
 
         if not subpaths:
             continue
-        # re-create the right neighbor to respect the model
-        row_neighbor = row.copy()
-        row_neighbor.pop('src_entity', None)
-        row_neighbor.pop('dst_entity', None)
 
-        props["tags"] = tags
-        obj = {"node": props, "relation": row_neighbor,
-               "matching_addresses": []}
+        obj = SearchPaths(node=props, relation=neighbor,
+                          matching_addresses=[])
         if subpaths is True:
             addresses_with_tags = [get_address_with_tags(currency, address)
                                    for address in matching_addresses]
-            obj["matching_addresses"] = [address for address in
-                                         addresses_with_tags
-                                         if address is not None]
+            obj.matching_addresses = [address for address in
+                                      addresses_with_tags
+                                      if address is not None]
             subpaths = None
-        obj["paths"] = subpaths
+        obj.paths = subpaths
         paths.append(obj)
     return paths
