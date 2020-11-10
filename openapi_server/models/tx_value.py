@@ -21,12 +21,12 @@ class TxValue(Model):
         """TxValue - a model defined in OpenAPI
 
         :param address: The address of this TxValue.  # noqa: E501
-        :type address: str
+        :type address: List[str]
         :param value: The value of this TxValue.  # noqa: E501
         :type value: Values
         """
         self.openapi_types = {
-            'address': str,
+            'address': List[str],
             'value': Values
         }
 
@@ -67,10 +67,9 @@ class TxValue(Model):
     def address(self):
         """Gets the address of this TxValue.
 
-        Address  # noqa: E501
 
         :return: The address of this TxValue.
-        :rtype: str
+        :rtype: List[str]
         """
         return self._address
 
@@ -78,10 +77,9 @@ class TxValue(Model):
     def address(self, address):
         """Sets the address of this TxValue.
 
-        Address  # noqa: E501
 
         :param address: The address of this TxValue.
-        :type address: str
+        :type address: List[str]
         """
         if address is None:
             raise ValueError("Invalid value for `address`, must not be `None`")  # noqa: E501

@@ -914,6 +914,15 @@ paths:
           format: string
           type: string
         style: simple
+      - description: Resumption token for retrieving the next page
+        example: 0400030bff00f07fffff9b00
+        explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          type: string
+        style: form
       responses:
         "200":
           content:
@@ -940,7 +949,7 @@ paths:
           type: string
         style: simple
       - description: The transaction hash
-        example: 0e3e2357e806b6cdb1f70b54c3a3a17b6714ee1f0e68bebb44a74b1efd512098
+        example: ab188013
         explode: false
         in: path
         name: tx_hash
@@ -1050,7 +1059,7 @@ components:
       style: simple
     tx_hash:
       description: The transaction hash
-      example: 0e3e2357e806b6cdb1f70b54c3a3a17b6714ee1f0e68bebb44a74b1efd512098
+      example: ab188013
       explode: false
       in: path
       name: tx_hash
@@ -1835,12 +1844,16 @@ components:
     tx:
       example:
         outputs:
-        - address: address
+        - address:
+          - null
+          - null
           value:
             eur: 1
             usd: 5
             value: 5
-        - address: address
+        - address:
+          - null
+          - null
           value:
             eur: 1
             usd: 5
@@ -1851,12 +1864,16 @@ components:
           value: 5
         coinbase: true
         inputs:
-        - address: address
+        - address:
+          - null
+          - null
           value:
             eur: 1
             usd: 5
             value: 5
-        - address: address
+        - address:
+          - null
+          - null
           value:
             eur: 1
             usd: 5
@@ -1915,15 +1932,18 @@ components:
       type: array
     tx_value:
       example:
-        address: address
+        address:
+        - null
+        - null
         value:
           eur: 1
           usd: 5
           value: 5
       properties:
         address:
-          description: Address
-          type: string
+          items:
+            $ref: '#/components/schemas/address_id'
+          type: array
         value:
           $ref: '#/components/schemas/values'
       required:
@@ -1935,12 +1955,16 @@ components:
         next_page: next_page
         txs:
         - outputs:
-          - address: address
+          - address:
+            - null
+            - null
             value:
               eur: 1
               usd: 5
               value: 5
-          - address: address
+          - address:
+            - null
+            - null
             value:
               eur: 1
               usd: 5
@@ -1951,12 +1975,16 @@ components:
             value: 5
           coinbase: true
           inputs:
-          - address: address
+          - address:
+            - null
+            - null
             value:
               eur: 1
               usd: 5
               value: 5
-          - address: address
+          - address:
+            - null
+            - null
             value:
               eur: 1
               usd: 5
@@ -1969,12 +1997,16 @@ components:
           height: 1
           timestamp: 6
         - outputs:
-          - address: address
+          - address:
+            - null
+            - null
             value:
               eur: 1
               usd: 5
               value: 5
-          - address: address
+          - address:
+            - null
+            - null
             value:
               eur: 1
               usd: 5
@@ -1985,12 +2017,16 @@ components:
             value: 5
           coinbase: true
           inputs:
-          - address: address
+          - address:
+            - null
+            - null
             value:
               eur: 1
               usd: 5
               value: 5
-          - address: address
+          - address:
+            - null
+            - null
             value:
               eur: 1
               usd: 5

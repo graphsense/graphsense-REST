@@ -13,7 +13,7 @@ TX_PREFIX_LENGTH = 5
 
 def from_row(row, rates):
     return Tx(
-            tx_hash=row.tx_hash,
+            tx_hash=row.tx_hash.hex(),
             coinbase=row.coinbase,
             height=row.height,
             inputs=[TxValue(address=i.address,
@@ -33,14 +33,13 @@ def get_tx(currency, tx_hash):
     query = "SELECT * FROM transaction WHERE tx_prefix = %s AND tx_hash = %s"
     result = session.execute(query, [tx_hash[:TX_PREFIX_LENGTH],
                                      bytearray.fromhex(tx_hash)])
+    result = result.one()
     if result is None:
         raise RuntimeError('Transaction {} in keyspace {} not found'
                            .format(tx_hash, currency))
 
-    result = result.one()
-
     rates = get_rates(currency, result.height)['rates']
-    return from_row(result, {result.height: rates})
+    return from_row(result, rates)
 
 
 def list_txs(currency, page=None):

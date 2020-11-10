@@ -26,17 +26,19 @@ def get_tx(currency, tx_hash):  # noqa: E501
       return notfound(str(e))
 
 
-def list_txs(currency):  # noqa: E501
+def list_txs(currency, page=None):  # noqa: E501
     """Returns details of a specific transaction identified by its hash.
 
      # noqa: E501
 
     :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
+    :param page: Resumption token for retrieving the next page
+    :type page: str
 
     :rtype: Txs
     """
     try:
-      return service.list_txs(currency)
+      return service.list_txs(currency, page)
     except RuntimeError as e:
       return notfound(str(e))

@@ -26,7 +26,7 @@ class TestTxsController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/txs/{tx_hash}'.format(currency="btc", tx_hash="0e3e2357e806b6cdb1f70b54c3a3a17b6714ee1f0e68bebb44a74b1efd512098"),
+            '/{currency}/txs/{tx_hash}'.format(currency="btc", tx_hash="ab188013"),
             method='GET',
             headers=headers)
         self.assert200(response,
@@ -40,13 +40,15 @@ class TestTxsController(BaseTestCase):
         """
         test_service.list_txs(self)
 
+        query_string = [('','')]
         headers = { 
             'Accept': 'application/json',
         }
         response = self.client.open(
             '/{currency}/txs'.format(currency="btc"),
             method='GET',
-            headers=headers)
+            headers=headers,
+            query_string=query_string)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
