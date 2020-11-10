@@ -3,17 +3,27 @@ from cassandra.concurrent import execute_concurrent
 
 from gsrest.db.cassandra import get_session
 from gsrest.model.rates import ExchangeRate
-from gsrest.service.general_service import get_currency_statistics
+from openapi_server.models.rates import Rates
+from openapi_server.models.rates_rates import RatesRates
+from gsrest.service.general_service import get_statistics
 
 
 RATES_TABLE = 'exchange_rates'
 
 
-def get_rates(currency, height=-1):
+def get_exchange_rates(currency, height):
+    rates = get_rates(currency, height)
+    return Rates(height=height,
+                 rates=RatesRates(
+                    eur=rates['rates']['eur'],
+                    usd=rates['rates']['usd']))
+
+
+def get_rates(currency, height=None):
     """ Returns the exchange rate for a given block height """
 
-    if height == -1:
-        height = get_currency_statistics(currency).no_blocks - 1
+    if height is None:
+        height = get_statistics(currency)['no_blocks'] - 1
 
     session = get_session(currency, 'transformed')
     session.row_factory = dict_factory
@@ -33,7 +43,7 @@ def list_rates(currency, heights=-1):
     session.row_factory = dict_factory
 
     if heights == -1:
-        heights = [get_currency_statistics(currency).no_blocks - 1]
+        heights = [get_statistics(currency)['no_blocks'] - 1]
 
     concurrent_query = "SELECT * FROM exchange_rates WHERE height = %s"
     statements_and_params = []

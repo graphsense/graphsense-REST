@@ -900,6 +900,41 @@ paths:
       tags:
       - entities
       x-openapi-router-controller: openapi_server.controllers.entities_controller
+  /{currency}/rates/{height}:
+    get:
+      operationId: get_exchange_rates
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The block height
+        example: 1
+        explode: false
+        in: path
+        name: height
+        required: true
+        schema:
+          minimum: 1
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/rates'
+          description: OK
+      summary: Returns exchange rate for a given height
+      tags:
+      - rates
+      x-openapi-router-controller: openapi_server.controllers.rates_controller
   /{currency}/txs:
     get:
       operationId: list_txs
@@ -2047,6 +2082,21 @@ components:
             $ref: '#/components/schemas/tx'
           type: array
       type: object
+    rates:
+      example:
+        rates:
+          eur: ""
+          usd: ""
+        height: 1
+      properties:
+        height:
+          description: Height
+          format: int64
+          minimum: 1
+          type: integer
+        rates:
+          $ref: '#/components/schemas/rates_rates'
+      type: object
     address_with_tags_allOf:
       properties:
         tags:
@@ -2067,4 +2117,16 @@ components:
           type: float
       required:
       - tags
+      type: object
+    rates_rates:
+      example:
+        eur: ""
+        usd: ""
+      properties:
+        eur:
+          description: EUR/Crypto rate
+          type: float
+        usd:
+          description: USD/Crypto rate
+          type: float
       type: object
