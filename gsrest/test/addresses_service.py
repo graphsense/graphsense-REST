@@ -10,7 +10,7 @@ import gsrest.service.addresses_service as service
 from gsrest.test.assertion import assertEqual
 from openapi_server.models.address_tx import AddressTx
 from openapi_server.models.address_txs import AddressTxs
-from gsrest.model.common import convert_value
+from gsrest.util.values import convert_value
 from gsrest.service.rates_service import list_rates
 
 
@@ -265,7 +265,10 @@ def list_address_tags(test_case):
 
 
 def list_address_tags_csv(test_case):
-    csv = "abuse,active,address,category,currency,label,lastmod,source,tagpack_uri\nNone,True,1Archive1n2C579dMsAu3iC6tWzuQJz8dN,organization,btc,Internet Archive,1560290400,https://archive.org/donate/cryptocurrency,http://tagpack_uri\n"
+    csv = ("abuse,active,address,category,currency,label,lastmod,"
+           "source,tagpack_uri\nNone,True,1Archive1n2C579dMsAu3iC6"
+           "tWzuQJz8dN,organization,btc,Internet Archive,1560290400"
+           ",https://archive.org/donate/cryptocurrency,http://tagpack_uri\n")
     assertEqual(csv, service.list_address_tags_csv(
                         "btc",
                         addressWithTags.address).data.decode('utf-8'))
@@ -286,7 +289,13 @@ def list_address_neighbors(test_case):
 
 
 def list_address_neighbors_csv(test_case):
-    csv = "balance_eur,balance_usd,balance_value,estimated_value_eur,estimated_value_usd,estimated_value_value,id,labels,no_txs,node_type,received_eur,received_usd,received_value\n0.0,0.0,0,72.08,87.24,27789282,17DfZja1713S3JRWA9jaebCKFM5anUh7GG,[],1,address,114.86,142.18,87789282\n0.0,0.0,0,72.08,87.24,27789282,1LpXFVskUaE2cs5xkQE5bDDaX8hff4L2Ej,[],1,address,98.72,121.46,67789282\n"
+    csv = ("balance_eur,balance_usd,balance_value,estimated_value_eur,"
+           "estimated_value_usd,estimated_value_value,id,labels,no_txs,"
+           "node_type,received_eur,received_usd,received_value\n0.0,0.0,"
+           "0,72.08,87.24,27789282,17DfZja1713S3JRWA9jaebCKFM5anUh7GG,[]"
+           ",1,address,114.86,142.18,87789282\n0.0,0.0,0,72.08,87.24,27789282"
+           ",1LpXFVskUaE2cs5xkQE5bDDaX8hff4L2Ej,[],1,address,98.72,121.46"
+           ",67789282\n")
     result = service.list_address_neighbors_csv(
         currency='btc',
         address=addressWithTags.address,

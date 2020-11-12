@@ -8,7 +8,7 @@ from gsrest.service.rates_service import get_rates
 from gsrest.service.common_service import get_address_entity_id, get_id_group
 from openapi_server.models.entity import Entity
 from openapi_server.models.tx_summary import TxSummary
-from gsrest.model.common import compute_balance, convert_value, make_values
+from gsrest.util.values import compute_balance, convert_value, make_values
 from openapi_server.models.tag import Tag
 from openapi_server.models.entity_with_tags import EntityWithTags
 from openapi_server.models.neighbor import Neighbor

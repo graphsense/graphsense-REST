@@ -5,7 +5,7 @@ from openapi_server.models.block import Block
 from openapi_server.models.blocks import Blocks
 from openapi_server.models.block_txs import BlockTxs
 from openapi_server.models.block_tx_summary import BlockTxSummary
-from gsrest.model.common import convert_value
+from gsrest.util.values import convert_value
 from gsrest.service.rates_service import get_rates
 from flask import Response, stream_with_context
 from gsrest.util.csvify import create_download_header, to_csv

@@ -11,7 +11,7 @@ from gsrest.service.common_service import get_address_by_id_group, \
     ADDRESS_PREFIX_LENGTH, get_address_id_id_group, get_address_entity_id
 from gsrest.service.rates_service import get_rates, list_rates
 import gsrest.service.common_service as commonDAO
-from gsrest.model.common import convert_value, compute_balance, make_values
+from gsrest.util.values import convert_value, compute_balance, make_values
 from flask import Response, stream_with_context
 from gsrest.util.csvify import create_download_header, to_csv
 

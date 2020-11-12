@@ -5,7 +5,7 @@ from openapi_server.models.tx import Tx
 from openapi_server.models.txs import Txs
 from openapi_server.models.tx_value import TxValue
 from gsrest.service.rates_service import get_rates, list_rates
-from gsrest.model.common import convert_value
+from gsrest.util.values import convert_value
 
 TXS_PAGE_SIZE = 100
 TX_PREFIX_LENGTH = 5

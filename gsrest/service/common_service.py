@@ -4,7 +4,7 @@ from openapi_server.models.address import Address
 from openapi_server.models.address_with_tags import AddressWithTags
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.tag import Tag
-from gsrest.model.common import compute_balance, convert_value, make_values
+from gsrest.util.values import compute_balance, convert_value, make_values
 from gsrest.service.rates_service import get_rates
 from gsrest.service.problems import notfound
 

@@ -2,7 +2,6 @@ from cassandra.query import dict_factory
 from cassandra.concurrent import execute_concurrent
 
 from gsrest.db.cassandra import get_session
-from gsrest.model.rates import ExchangeRate
 from openapi_server.models.rates import Rates
 from openapi_server.models.rates_rates import RatesRates
 from gsrest.service.stats_service import get_currency_statistics
@@ -31,8 +30,8 @@ def get_rates(currency, height=None):
     result = session.execute(query, [height])
     if result.current_rows:
         r = result.current_rows[0]
-        return ExchangeRate(r['height'], {k: v for k, v in r.items()
-                                          if k != 'height'}).to_dict()
+        return {'height': r['height'],
+                'rates': {k: v for k, v in r.items() if k != 'height'}}
     raise ValueError("Cannot find height {} in currency {}"
                      .format(height, currency))
 
