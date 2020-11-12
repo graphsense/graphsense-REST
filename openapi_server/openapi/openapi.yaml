@@ -1356,21 +1356,87 @@ components:
   schemas:
     stats:
       example:
+        notes:
+        - note: note
+        - note: note
+        tags_source:
+          visible_name: visible_name
+          report_uuid: report_uuid
+          id: id
+          version: version
+        version:
+          file: file
+          nr: nr
+          hash: hash
+          timestamp: timestamp
+        tools:
+        - visible_name: visible_name
+          responsible_for:
+          - responsible_for
+          - responsible_for
+          id: id
+          titanium_replayable: true
+          version: version
+        - visible_name: visible_name
+          responsible_for:
+          - responsible_for
+          - responsible_for
+          id: id
+          titanium_replayable: true
+          version: version
         currencies:
-        - no_addresses: 1
+        - notes:
+          - notes
+          - notes
+          no_addresses: 1
           no_labels: 2
           name: name
           no_entities: 5
           no_address_relations: 6
+          tools:
+          - tools
+          - tools
           no_blocks: 0
+          data_sources:
+          - visible_name: visible_name
+            report_uuid: report_uuid
+            id: id
+            version:
+              nr: nr
+              timestamp: timestamp
+          - visible_name: visible_name
+            report_uuid: report_uuid
+            id: id
+            version:
+              nr: nr
+              timestamp: timestamp
           no_txs: 5
           timestamp: 7
-        - no_addresses: 1
+        - notes:
+          - notes
+          - notes
+          no_addresses: 1
           no_labels: 2
           name: name
           no_entities: 5
           no_address_relations: 6
+          tools:
+          - tools
+          - tools
           no_blocks: 0
+          data_sources:
+          - visible_name: visible_name
+            report_uuid: report_uuid
+            id: id
+            version:
+              nr: nr
+              timestamp: timestamp
+          - visible_name: visible_name
+            report_uuid: report_uuid
+            id: id
+            version:
+              nr: nr
+              timestamp: timestamp
           no_txs: 5
           timestamp: 7
       properties:
@@ -1378,15 +1444,108 @@ components:
           items:
             $ref: '#/components/schemas/currency_stats'
           type: array
+        version:
+          $ref: '#/components/schemas/stats_version'
+        tools:
+          items:
+            $ref: '#/components/schemas/stats_tool'
+          type: array
+        tags_source:
+          $ref: '#/components/schemas/stats_tags_source'
+        notes:
+          items:
+            $ref: '#/components/schemas/stats_note'
+          type: array
+      type: object
+    stats_version:
+      example:
+        file: file
+        nr: nr
+        hash: hash
+        timestamp: timestamp
+      properties:
+        nr:
+          type: string
+        hash:
+          type: string
+        timestamp:
+          type: string
+        file:
+          type: string
+      type: object
+    stats_tool:
+      example:
+        visible_name: visible_name
+        responsible_for:
+        - responsible_for
+        - responsible_for
+        id: id
+        titanium_replayable: true
+        version: version
+      properties:
+        visible_name:
+          type: string
+        id:
+          type: string
+        version:
+          type: string
+        titanium_replayable:
+          type: boolean
+        responsible_for:
+          items:
+            type: string
+          type: array
+      type: object
+    stats_tags_source:
+      example:
+        visible_name: visible_name
+        report_uuid: report_uuid
+        id: id
+        version: version
+      properties:
+        visible_name:
+          type: string
+        id:
+          type: string
+        version:
+          type: string
+        report_uuid:
+          type: string
+      type: object
+    stats_note:
+      example:
+        note: note
+      properties:
+        note:
+          type: string
       type: object
     currency_stats:
       example:
+        notes:
+        - notes
+        - notes
         no_addresses: 1
         no_labels: 2
         name: name
         no_entities: 5
         no_address_relations: 6
+        tools:
+        - tools
+        - tools
         no_blocks: 0
+        data_sources:
+        - visible_name: visible_name
+          report_uuid: report_uuid
+          id: id
+          version:
+            nr: nr
+            timestamp: timestamp
+        - visible_name: visible_name
+          report_uuid: report_uuid
+          id: id
+          version:
+            nr: nr
+            timestamp: timestamp
         no_txs: 5
         timestamp: 7
       properties:
@@ -1413,7 +1572,47 @@ components:
         timestamp:
           format: int64
           type: integer
+        tools:
+          items:
+            type: string
+          type: array
+        notes:
+          items:
+            type: string
+          type: array
+        data_sources:
+          items:
+            $ref: '#/components/schemas/stats_ledger'
+          type: array
       title: statistics of a cryptocurrency
+      type: object
+    stats_ledger:
+      example:
+        visible_name: visible_name
+        report_uuid: report_uuid
+        id: id
+        version:
+          nr: nr
+          timestamp: timestamp
+      properties:
+        visible_name:
+          type: string
+        id:
+          type: string
+        version:
+          $ref: '#/components/schemas/stats_ledger_version'
+        report_uuid:
+          type: string
+      type: object
+    stats_ledger_version:
+      example:
+        nr: nr
+        timestamp: timestamp
+      properties:
+        nr:
+          type: string
+        timestamp:
+          type: string
       type: object
     block:
       example:

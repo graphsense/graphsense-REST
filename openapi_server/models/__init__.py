@@ -27,6 +27,12 @@ from openapi_server.models.search_paths import SearchPaths
 from openapi_server.models.search_result import SearchResult
 from openapi_server.models.search_result_by_currency import SearchResultByCurrency
 from openapi_server.models.stats import Stats
+from openapi_server.models.stats_ledger import StatsLedger
+from openapi_server.models.stats_ledger_version import StatsLedgerVersion
+from openapi_server.models.stats_note import StatsNote
+from openapi_server.models.stats_tags_source import StatsTagsSource
+from openapi_server.models.stats_tool import StatsTool
+from openapi_server.models.stats_version import StatsVersion
 from openapi_server.models.tag import Tag
 from openapi_server.models.taxonomy import Taxonomy
 from openapi_server.models.tx import Tx
