@@ -24,6 +24,8 @@ from openapi_server.models.neighbors import Neighbors
 from openapi_server.models.rates import Rates
 from openapi_server.models.rates_rates import RatesRates
 from openapi_server.models.search_paths import SearchPaths
+from openapi_server.models.search_result import SearchResult
+from openapi_server.models.search_result_by_currency import SearchResultByCurrency
 from openapi_server.models.stats import Stats
 from openapi_server.models.tag import Tag
 from openapi_server.models.taxonomy import Taxonomy

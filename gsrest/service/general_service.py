@@ -33,3 +33,7 @@ def get_currency_statistics(currency):
             no_labels=result.no_tags,
             timestamp=result.timestamp
         )
+
+
+def search(q, currency=None, limit=None):
+    return None

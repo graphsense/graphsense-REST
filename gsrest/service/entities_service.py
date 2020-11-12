@@ -139,7 +139,7 @@ def get_entity(currency, entity):
 
 
 def list_entity_neighbors(currency, entity, direction, targets=None,
-                          paging_state=None, page_size=None,
+                          page=None, pagesize=None,
                           from_search=False):
     is_outgoing = direction == 'out'
     if is_outgoing:
@@ -164,11 +164,11 @@ def list_entity_neighbors(currency, entity, direction, targets=None,
     else:
         query = basequery
     fetch_size = ENTITY_PAGE_SIZE
-    if page_size:
-        fetch_size = page_size
+    if pagesize:
+        fetch_size = pagesize
     statement = SimpleStatement(query, fetch_size=fetch_size)
     results = session.execute(statement, parameters,
-                              paging_state=paging_state)
+                              paging_state=page)
     paging_state = results.paging_state
     current_rows = results.current_rows
     if has_targets:
@@ -234,7 +234,7 @@ def list_entity_neighbors(currency, entity, direction, targets=None,
 def list_entity_neighbors_csv(currency, entity, direction):
     def query_function(page_state):
         result = list_entity_neighbors(currency, entity, direction,
-                                       paging_state=page_state)
+                                       page=page_state)
         return (result.next_page, result.neighbors)
     return Response(stream_with_context(to_csv(query_function)),
                     mimetype="text/csv",
@@ -243,17 +243,17 @@ def list_entity_neighbors_csv(currency, entity, direction):
                             .format(direction, entity, currency.upper())))
 
 
-def list_entity_addresses(currency, entity, paging_state=None, page_size=None):
+def list_entity_addresses(currency, entity, page=None, pagesize=None):
     session = get_session(currency, 'transformed')
     entity_id_group = get_id_group(entity)
     query = "SELECT * FROM cluster_addresses WHERE cluster_group = %s AND " \
             "cluster = %s"
     fetch_size = ENTITY_ADDRESSES_PAGE_SIZE
-    if page_size:
-        fetch_size = page_size
+    if pagesize:
+        fetch_size = pagesize
     statement = SimpleStatement(query, fetch_size=fetch_size)
     results = session.execute(statement, [entity_id_group, entity],
-                              paging_state=paging_state)
+                              paging_state=page)
     if results is None:
         raise RuntimeError('No addresses for entity {} found'.format(entity))
 
@@ -364,7 +364,7 @@ def recursive_search(currency, entity, params, breadth, depth,
     neighbors = cached(entity, 'neighbors',
                        lambda: list_entity_neighbors(
                         currency, entity, direction,
-                        page_size=breadth, from_search=True).neighbors)
+                        pagesize=breadth, from_search=True).neighbors)
 
     paths = []
 

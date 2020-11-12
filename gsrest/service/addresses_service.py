@@ -38,7 +38,7 @@ def list_address_tags_csv(currency, address):
                                 currency.upper())))
 
 
-def list_address_txs(currency, address, paging_state=None, pagesize=None):
+def list_address_txs(currency, address, page=None, pagesize=None):
     session = get_session(currency, 'transformed')
 
     address_id, address_id_group = get_address_id_id_group(currency, address)
@@ -50,7 +50,7 @@ def list_address_txs(currency, address, paging_state=None, pagesize=None):
             fetch_size = pagesize
         statement = SimpleStatement(query, fetch_size=fetch_size)
         results = session.execute(statement, [address_id, address_id_group],
-                                  paging_state=paging_state)
+                                  paging_state=page)
         print('result {}'.format(results.current_rows))
         paging_state = results.paging_state
         if results:
@@ -68,9 +68,9 @@ def list_address_txs(currency, address, paging_state=None, pagesize=None):
     return None, None
 
 
-def list_address_neighbors(currency, address, direction, paging_state=None,
+def list_address_neighbors(currency, address, direction, page=None,
                            pagesize=None):
-    paging_state = bytes.fromhex(paging_state) if paging_state else None
+    paging_state = bytes.fromhex(page) if page else None
     paging_state, neighbors = \
         list_address_incoming_relations(currency,
                                         address,
@@ -97,8 +97,8 @@ def list_address_neighbors_csv(currency, address, direction):
                             .format(direction, address, currency.upper())))
 
 
-def list_address_outgoing_relations(currency, address, paging_state=None,
-                                    page_size=None):
+def list_address_outgoing_relations(currency, address, page=None,
+                                    pagesize=None):
     session = get_session(currency, 'transformed')
 
     address_id, address_id_group = get_address_id_id_group(currency, address)
@@ -108,11 +108,11 @@ def list_address_outgoing_relations(currency, address, paging_state=None,
     query = "SELECT * FROM address_outgoing_relations WHERE " \
             "src_address_id_group = %s AND src_address_id = %s"
     fetch_size = ADDRESS_PAGE_SIZE
-    if page_size:
-        fetch_size = page_size
+    if pagesize:
+        fetch_size = pagesize
     statement = SimpleStatement(query, fetch_size=fetch_size)
     results = session.execute(statement, [address_id_group, address_id],
-                              paging_state=paging_state)
+                              paging_state=page)
     paging_state = results.paging_state
     rates = get_rates(currency)['rates']
     relations = []
@@ -142,8 +142,8 @@ def list_address_outgoing_relations(currency, address, paging_state=None,
     return paging_state, relations
 
 
-def list_address_incoming_relations(currency, address, paging_state=None,
-                                    page_size=None):
+def list_address_incoming_relations(currency, address, page=None,
+                                    pagesize=None):
     session = get_session(currency, 'transformed')
 
     address_id, address_id_group = get_address_id_id_group(currency, address)
@@ -153,11 +153,11 @@ def list_address_incoming_relations(currency, address, paging_state=None,
     query = "SELECT * FROM address_incoming_relations WHERE " \
             "dst_address_id_group = %s AND dst_address_id = %s"
     fetch_size = ADDRESS_PAGE_SIZE
-    if page_size:
-        fetch_size = page_size
+    if pagesize:
+        fetch_size = pagesize
     statement = SimpleStatement(query, fetch_size=fetch_size)
     results = session.execute(statement, [address_id_group, address_id],
-                              paging_state=paging_state)
+                              paging_state=page)
     paging_state = results.paging_state
     rates = get_rates(currency)['rates']
     relations = []

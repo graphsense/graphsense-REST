@@ -22,22 +22,22 @@ def list_concepts(taxonomy):  # noqa: E501
         return notfound(str(e))
 
 
-def list_tags(currency, label):  # noqa: E501
+def list_tags(label, currency=None):  # noqa: E501
     """Returns the tags associated with a given label
 
      # noqa: E501
 
-    :param currency: The cryptocurrency (e.g., btc)
-    :type currency: str
     :param label: The label of an entity
     :type label: str
+    :param currency: The cryptocurrency (e.g., btc)
+    :type currency: str
 
     :rtype: List[Tag]
     """
     try:
         return service.list_tags(
-            currency=currency,
-            label=label)
+            label=label,
+            currency=currency)
     except RuntimeError as e:
         return notfound(str(e))
 

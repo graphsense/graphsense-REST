@@ -41,7 +41,7 @@ class TestTagsController(BaseTestCase):
         """
         test_service.list_tags(self)
 
-        query_string = [('currency', 'btc'),
+        query_string = [('',''),
                         ('label', 'cimedy')]
         headers = { 
             'Accept': 'application/json',

@@ -6,6 +6,49 @@ info:
 servers:
 - url: http://openapi_server:9000
 paths:
+  /search:
+    get:
+      operationId: search
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: true
+        in: query
+        name: currency
+        required: false
+        schema:
+          format: string
+          type: string
+        style: form
+      - description: It can be (the beginning of) an address, a transaction or a label
+        example: foo
+        explode: true
+        in: query
+        name: q
+        required: true
+        schema:
+          type: string
+        style: form
+      - description: Maximum number of search results
+        example: 10
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/search_result'
+          description: OK
+      summary: Returns matching addresses, transactions and labels
+      tags:
+      - general
+      x-openapi-router-controller: openapi_server.controllers.general_controller
   /stats:
     get:
       operationId: get_statistics
@@ -29,7 +72,7 @@ paths:
         explode: true
         in: query
         name: currency
-        required: true
+        required: false
         schema:
           format: string
           type: string
@@ -1100,7 +1143,7 @@ components:
       explode: true
       in: query
       name: currency
-      required: true
+      required: false
       schema:
         format: string
         type: string
@@ -1286,6 +1329,26 @@ components:
       schema:
         type: string
       style: simple
+    search_query:
+      description: It can be (the beginning of) an address, a transaction or a label
+      example: foo
+      explode: true
+      in: query
+      name: q
+      required: true
+      schema:
+        type: string
+      style: form
+    limit:
+      description: Maximum number of search results
+      example: 10
+      explode: true
+      in: query
+      name: limit
+      required: false
+      schema:
+        type: integer
+      style: form
   schemas:
     stats:
       example:
@@ -2260,6 +2323,66 @@ components:
     uri:
       description: URI
       type: string
+    search_result:
+      example:
+        currencies:
+        - addresses:
+          - addresses
+          - addresses
+          currency: currency
+          txs:
+          - txs
+          - txs
+        - addresses:
+          - addresses
+          - addresses
+          currency: currency
+          txs:
+          - txs
+          - txs
+        labels:
+        - labels
+        - labels
+      properties:
+        currencies:
+          items:
+            $ref: '#/components/schemas/search_result_by_currency'
+          type: array
+        labels:
+          description: The list of matching labels
+          items:
+            type: string
+          type: array
+      type: object
+    search_result_by_currency:
+      example:
+        addresses:
+        - addresses
+        - addresses
+        currency: currency
+        txs:
+        - txs
+        - txs
+      properties:
+        currency:
+          description: Currency
+          type: string
+        addresses:
+          description: The list of found addresses
+          items:
+            type: string
+          type: array
+        txs:
+          description: The list of found transactions
+          items:
+            type: string
+          type: array
+      type: object
+    search_result_labels:
+      description: The list of matching labels
+      items:
+        type: string
+      type: array
     address_with_tags_allOf:
       properties:
         tags:

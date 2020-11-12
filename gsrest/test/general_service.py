@@ -13,3 +13,7 @@ def get_statistics(test_case):
         test_case.assert200(
                 response,
                 'Response body is : ' + response.data.decode('utf-8'))
+
+
+def search(test_case):
+    return True
