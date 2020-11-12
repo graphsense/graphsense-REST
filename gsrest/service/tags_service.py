@@ -3,8 +3,9 @@ from gsrest.db.cassandra import get_session
 from openapi_server.models.tag import Tag
 from openapi_server.models.taxonomy import Taxonomy
 from openapi_server.models.concept import Concept
-from gsrest.util.checks import LABEL_PREFIX_LENGTH
 from gsrest.util.string_edit import alphanumeric_lower
+
+LABEL_PREFIX_LENGTH = 3
 
 
 def list_tags(label, currency=None):

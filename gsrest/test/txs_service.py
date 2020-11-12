@@ -43,6 +43,23 @@ tx2 = Tx(
              value=Values(eur=0.1, usd=0.2, value=10000000))],
    height=2)
 
+tx3 = Tx(
+   timestamp=1373266967,
+   total_output=Values(eur=0.1, usd=0.2, value=9950000),
+   coinbase=False,
+   tx_hash="00ab188013",
+   total_input=Values(eur=0.1, usd=0.2, value=10000000),
+   outputs=[TxValue(
+             address=["138cWsiAGpW9yqfjMVCCsFcnaiSHyoWMnJ"],
+             value=Values(eur=0.0, usd=0.0, value=1)),
+            TxValue(
+             address=["1CRqaDkksF1zp6wLunY7ygSafXsiftH9FN"],
+             value=Values(eur=0.1, usd=0.2, value=9949999))],
+   inputs=[TxValue(
+             address=["1H8omroLCN2578Mj6sDrWa8YueqWEckNKY"],
+             value=Values(eur=0.1, usd=0.2, value=10000000))],
+   height=2)
+
 
 def get_tx(test_case):
     result = service.get_tx(currency='btc', tx_hash='ab1880')
@@ -51,4 +68,4 @@ def get_tx(test_case):
 
 def list_txs(test_case):
     result = service.list_txs(currency='btc')
-    assertEqual(Txs(next_page=None, txs=[tx1, tx2]), result)
+    assertEqual(Txs(next_page=None, txs=[tx1, tx2, tx3]), result)

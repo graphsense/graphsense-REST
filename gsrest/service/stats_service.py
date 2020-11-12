@@ -1,0 +1,21 @@
+from gsrest.db.cassandra import get_session
+from openapi_server.models.currency_stats import CurrencyStats
+
+
+def get_currency_statistics(currency):
+    session = get_session(currency, 'transformed')
+    query = "SELECT * FROM summary_statistics LIMIT 1"
+    result = session.execute(query).one()
+    if result is None:
+        raise ValueError('statistics for currency {} not found'
+                         .format(currency))
+    return CurrencyStats(
+            name=currency,
+            no_blocks=result.no_blocks,
+            no_address_relations=result.no_address_relations,
+            no_addresses=result.no_addresses,
+            no_entities=result.no_clusters,
+            no_txs=result.no_transactions,
+            no_labels=result.no_tags,
+            timestamp=result.timestamp
+        )

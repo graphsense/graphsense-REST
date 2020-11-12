@@ -257,10 +257,17 @@ def get_address_entity(currency, address):
 
 
 def list_matching_addresses(currency, expression):
-    # TODO: rather slow with bech32 address (loop through pages instead)
     session = get_session(currency, 'transformed')
     query = "SELECT address FROM address WHERE address_prefix = %s"
+    result = None
+    paging_state = None
     statement = SimpleStatement(query, fetch_size=ADDRESS_PAGE_SIZE)
-    result = session.execute(statement, [expression[:ADDRESS_PREFIX_LENGTH]])
-    return [row.address for row in result
-            if row.address.startswith(expression)]
+    rows = []
+    while result is None or paging_state is not None:
+        result = session.execute(
+                    statement,
+                    [expression[:ADDRESS_PREFIX_LENGTH]],
+                    paging_state=paging_state)
+        rows += [row.address for row in result
+                 if row.address.startswith(expression)]
+    return rows

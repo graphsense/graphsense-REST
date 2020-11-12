@@ -5,7 +5,7 @@ from gsrest.db.cassandra import get_session
 from gsrest.model.rates import ExchangeRate
 from openapi_server.models.rates import Rates
 from openapi_server.models.rates_rates import RatesRates
-from gsrest.service.general_service import get_currency_statistics
+from gsrest.service.stats_service import get_currency_statistics
 
 
 RATES_TABLE = 'exchange_rates'

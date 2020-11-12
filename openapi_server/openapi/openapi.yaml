@@ -27,6 +27,8 @@ paths:
         name: q
         required: true
         schema:
+          minLength: 3
+          pattern: ^[\w ]+$
           type: string
         style: form
       - description: Maximum number of search results
@@ -1337,6 +1339,8 @@ components:
       name: q
       required: true
       schema:
+        minLength: 3
+        pattern: ^[\w ]+$
         type: string
       style: form
     limit:
