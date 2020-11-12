@@ -12,6 +12,7 @@ from openapi_server.models.block import Block
 from openapi_server.models.block_tx_summary import BlockTxSummary
 from openapi_server.models.block_txs import BlockTxs
 from openapi_server.models.blocks import Blocks
+from openapi_server.models.concept import Concept
 from openapi_server.models.currency_stats import CurrencyStats
 from openapi_server.models.entity import Entity
 from openapi_server.models.entity_addresses import EntityAddresses
@@ -25,6 +26,7 @@ from openapi_server.models.rates_rates import RatesRates
 from openapi_server.models.search_paths import SearchPaths
 from openapi_server.models.stats import Stats
 from openapi_server.models.tag import Tag
+from openapi_server.models.taxonomy import Taxonomy
 from openapi_server.models.tx import Tx
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.tx_value import TxValue

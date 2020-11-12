@@ -20,6 +20,84 @@ paths:
       tags:
       - general
       x-openapi-router-controller: openapi_server.controllers.general_controller
+  /tags:
+    get:
+      operationId: list_tags
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: true
+        in: query
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: form
+      - description: The label of an entity
+        example: cimedy
+        explode: true
+        in: query
+        name: label
+        required: true
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/tag'
+                type: array
+          description: OK
+      summary: Returns the tags associated with a given label
+      tags:
+      - tags
+      x-openapi-router-controller: openapi_server.controllers.tags_controller
+  /tags/taxonomies:
+    get:
+      operationId: list_taxonomies
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/taxonomy'
+                type: array
+          description: OK
+      summary: Returns the supported taxonomies
+      tags:
+      - tags
+      x-openapi-router-controller: openapi_server.controllers.tags_controller
+  /tags/taxonomies/{taxonomy}/concepts:
+    get:
+      operationId: list_concepts
+      parameters:
+      - description: The taxonomy
+        example: foo
+        explode: false
+        in: path
+        name: taxonomy
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/concept'
+                type: array
+          description: OK
+      summary: Returns the supported concepts of a taxonomy
+      tags:
+      - tags
+      x-openapi-router-controller: openapi_server.controllers.tags_controller
   /{currency}/addresses/{address}:
     get:
       operationId: get_address_with_tags
@@ -1016,6 +1094,17 @@ components:
         format: string
         type: string
       style: simple
+    currency_query:
+      description: The cryptocurrency (e.g., btc)
+      example: btc
+      explode: true
+      in: query
+      name: currency
+      required: true
+      schema:
+        format: string
+        type: string
+      style: form
     height:
       description: The block height
       example: 1
@@ -1177,6 +1266,26 @@ components:
         format: int32
         type: integer
       style: form
+    label:
+      description: The label of an entity
+      example: cimedy
+      explode: true
+      in: query
+      name: label
+      required: true
+      schema:
+        type: string
+      style: form
+    taxonomy:
+      description: The taxonomy
+      example: foo
+      explode: false
+      in: path
+      name: taxonomy
+      required: true
+      schema:
+        type: string
+      style: simple
   schemas:
     stats:
       example:
@@ -2097,6 +2206,60 @@ components:
         rates:
           $ref: '#/components/schemas/rates_rates'
       type: object
+    taxonomy:
+      example:
+        taxonomy: taxonomy
+        uri: uri
+      properties:
+        taxonomy:
+          description: Taxonomy
+          type: string
+        uri:
+          description: URI
+          type: string
+      required:
+      - taxonomy
+      - uri
+      type: object
+    concept:
+      example:
+        description: description
+        label: label
+        taxonomy: taxonomy
+        id: id
+        uri: uri
+      properties:
+        label:
+          description: Label
+          type: string
+        taxonomy:
+          description: Taxonomy
+          type: string
+        uri:
+          description: URI
+          type: string
+        description:
+          description: Description
+          type: string
+        id:
+          description: ID
+          type: string
+      required:
+      - description
+      - id
+      - label
+      - taxonomy
+      - uri
+      type: object
+    taxonomy_key:
+      description: Taxonomy
+      type: string
+    label:
+      description: Label
+      type: string
+    uri:
+      description: URI
+      type: string
     address_with_tags_allOf:
       properties:
         tags:

@@ -1,9 +1,5 @@
-import connexion
-import six
-
 from openapi_server.models.tx import Tx  # noqa: E501
 from openapi_server.models.txs import Txs  # noqa: E501
-from openapi_server import util
 import gsrest.service.txs_service as service
 from gsrest.service.problems import notfound
 
@@ -21,9 +17,11 @@ def get_tx(currency, tx_hash):  # noqa: E501
     :rtype: Tx
     """
     try:
-      return service.get_tx(currency, tx_hash)
+        return service.get_tx(
+            currency=currency,
+            tx_hash=tx_hash)
     except RuntimeError as e:
-      return notfound(str(e))
+        return notfound(str(e))
 
 
 def list_txs(currency, page=None):  # noqa: E501
@@ -39,6 +37,8 @@ def list_txs(currency, page=None):  # noqa: E501
     :rtype: Txs
     """
     try:
-      return service.list_txs(currency, page)
+        return service.list_txs(
+            currency=currency,
+            page=page)
     except RuntimeError as e:
-      return notfound(str(e))
+        return notfound(str(e))

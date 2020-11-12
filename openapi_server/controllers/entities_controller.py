@@ -1,12 +1,8 @@
-import connexion
-import six
-
 from openapi_server.models.entity_addresses import EntityAddresses  # noqa: E501
 from openapi_server.models.entity_with_tags import EntityWithTags  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
 from openapi_server.models.search_paths import SearchPaths  # noqa: E501
 from openapi_server.models.tag import Tag  # noqa: E501
-from openapi_server import util
 import gsrest.service.entities_service as service
 from gsrest.service.problems import notfound
 
@@ -24,9 +20,11 @@ def get_entity_with_tags(currency, entity):  # noqa: E501
     :rtype: EntityWithTags
     """
     try:
-      return service.get_entity_with_tags(currency, entity)
+        return service.get_entity_with_tags(
+            currency=currency,
+            entity=entity)
     except RuntimeError as e:
-      return notfound(str(e))
+        return notfound(str(e))
 
 
 def list_entity_addresses(currency, entity, page=None, pagesize=None):  # noqa: E501
@@ -46,9 +44,13 @@ def list_entity_addresses(currency, entity, page=None, pagesize=None):  # noqa: 
     :rtype: EntityAddresses
     """
     try:
-      return service.list_entity_addresses(currency, entity, page, pagesize)
+        return service.list_entity_addresses(
+            currency=currency,
+            entity=entity,
+            page=page,
+            pagesize=pagesize)
     except RuntimeError as e:
-      return notfound(str(e))
+        return notfound(str(e))
 
 
 def list_entity_neighbors(currency, entity, direction, targets=None, page=None, pagesize=None):  # noqa: E501
@@ -72,9 +74,15 @@ def list_entity_neighbors(currency, entity, direction, targets=None, page=None, 
     :rtype: Neighbors
     """
     try:
-      return service.list_entity_neighbors(currency, entity, direction, targets, page, pagesize)
+        return service.list_entity_neighbors(
+            currency=currency,
+            entity=entity,
+            direction=direction,
+            targets=targets,
+            page=page,
+            pagesize=pagesize)
     except RuntimeError as e:
-      return notfound(str(e))
+        return notfound(str(e))
 
 
 def list_entity_neighbors_csv(currency, entity, direction):  # noqa: E501
@@ -92,9 +100,12 @@ def list_entity_neighbors_csv(currency, entity, direction):  # noqa: E501
     :rtype: str
     """
     try:
-      return service.list_entity_neighbors_csv(currency, entity, direction)
+        return service.list_entity_neighbors_csv(
+            currency=currency,
+            entity=entity,
+            direction=direction)
     except RuntimeError as e:
-      return notfound(str(e))
+        return notfound(str(e))
 
 
 def list_entity_tags(currency, entity):  # noqa: E501
@@ -110,9 +121,11 @@ def list_entity_tags(currency, entity):  # noqa: E501
     :rtype: List[Tag]
     """
     try:
-      return service.list_entity_tags(currency, entity)
+        return service.list_entity_tags(
+            currency=currency,
+            entity=entity)
     except RuntimeError as e:
-      return notfound(str(e))
+        return notfound(str(e))
 
 
 def list_entity_tags_csv(currency, entity):  # noqa: E501
@@ -128,9 +141,11 @@ def list_entity_tags_csv(currency, entity):  # noqa: E501
     :rtype: str
     """
     try:
-      return service.list_entity_tags_csv(currency, entity)
+        return service.list_entity_tags_csv(
+            currency=currency,
+            entity=entity)
     except RuntimeError as e:
-      return notfound(str(e))
+        return notfound(str(e))
 
 
 def search_entity_neighbors(currency, entity, direction, key, value, depth, breadth=None, skip_num_addresses=None):  # noqa: E501
@@ -158,6 +173,14 @@ def search_entity_neighbors(currency, entity, direction, key, value, depth, brea
     :rtype: SearchPaths
     """
     try:
-      return service.search_entity_neighbors(currency, entity, direction, key, value, depth, breadth, skip_num_addresses)
+        return service.search_entity_neighbors(
+            currency=currency,
+            entity=entity,
+            direction=direction,
+            key=key,
+            value=value,
+            depth=depth,
+            breadth=breadth,
+            skip_num_addresses=skip_num_addresses)
     except RuntimeError as e:
-      return notfound(str(e))
+        return notfound(str(e))

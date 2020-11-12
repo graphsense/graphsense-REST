@@ -1,8 +1,4 @@
-import connexion
-import six
-
 from openapi_server.models.rates import Rates  # noqa: E501
-from openapi_server import util
 import gsrest.service.rates_service as service
 from gsrest.service.problems import notfound
 
@@ -20,6 +16,8 @@ def get_exchange_rates(currency, height):  # noqa: E501
     :rtype: Rates
     """
     try:
-      return service.get_exchange_rates(currency, height)
+        return service.get_exchange_rates(
+            currency=currency,
+            height=height)
     except RuntimeError as e:
-      return notfound(str(e))
+        return notfound(str(e))

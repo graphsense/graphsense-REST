@@ -1,10 +1,20 @@
+from flask import current_app
 from gsrest.db.cassandra import get_session
-from gsrest.model.tags import Tag, Concept, Taxonomy
+from openapi_server.models.tag import Tag
+from openapi_server.models.taxonomy import Taxonomy
+from openapi_server.models.concept import Concept
 from gsrest.util.checks import LABEL_PREFIX_LENGTH
 from gsrest.util.string_edit import alphanumeric_lower
 
 
 def list_tags(label, currency=None):
+    if(currency is None):
+        tags = []
+        for currency in current_app.config['MAPPING']:
+            if currency != "tagpacks":
+                tags += list_tags(label, currency)
+        return tags
+
     label_norm = alphanumeric_lower(label)
     label_norm_prefix = label_norm[:LABEL_PREFIX_LENGTH]
 
@@ -12,10 +22,19 @@ def list_tags(label, currency=None):
     query = "SELECT * FROM tag_by_label WHERE label_norm_prefix = %s and " \
             "label_norm = %s"
     rows = session.execute(query, [label_norm_prefix, label_norm])
-    if rows:
-        return [Tag.from_address_row(row, row.currency).to_dict()
-                for row in rows]
-    return None
+    if not rows:
+        return []
+    return [Tag(
+            address=row.address,
+            label=row.label,
+            category=row.category,
+            abuse=row.abuse,
+            tagpack_uri=row.tagpack_uri,
+            source=row.source,
+            lastmod=row.lastmod,
+            active=row.active_address,
+            currency=row.currency)
+            for row in rows]
 
 
 def list_labels(currency, expression):
@@ -43,7 +62,12 @@ def list_concepts(taxonomy):
 
     query = "SELECT * FROM concept_by_taxonomy_id WHERE taxonomy = %s"
     rows = session.execute(query, [taxonomy])
-    return [Concept.from_row(row).to_dict() for row in rows]
+    return [Concept(
+            id=row.id,
+            label=row.label,
+            description=row.description,
+            taxonomy=row.taxonomy,
+            uri=row.uri) for row in rows]
 
 
 def list_taxonomies():
@@ -51,4 +75,4 @@ def list_taxonomies():
 
     query = "SELECT * FROM taxonomy_by_key LIMIT 100"
     rows = session.execute(query)
-    return [Taxonomy.from_row(row).to_dict() for row in rows]
+    return [Taxonomy(taxonomy=row.key, uri=row.uri) for row in rows]

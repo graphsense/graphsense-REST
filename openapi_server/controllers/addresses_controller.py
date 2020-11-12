@@ -1,13 +1,9 @@
-import connexion
-import six
-
 from openapi_server.models.address_txs import AddressTxs  # noqa: E501
 from openapi_server.models.address_with_tags import AddressWithTags  # noqa: E501
 from openapi_server.models.entity_with_tags import EntityWithTags  # noqa: E501
 from openapi_server.models.link import Link  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
 from openapi_server.models.tag import Tag  # noqa: E501
-from openapi_server import util
 import gsrest.service.addresses_service as service
 from gsrest.service.problems import notfound
 
@@ -25,9 +21,11 @@ def get_address_entity(currency, address):  # noqa: E501
     :rtype: EntityWithTags
     """
     try:
-      return service.get_address_entity(currency, address)
+        return service.get_address_entity(
+            currency=currency,
+            address=address)
     except RuntimeError as e:
-      return notfound(str(e))
+        return notfound(str(e))
 
 
 def get_address_with_tags(currency, address):  # noqa: E501
@@ -43,9 +41,11 @@ def get_address_with_tags(currency, address):  # noqa: E501
     :rtype: AddressWithTags
     """
     try:
-      return service.get_address_with_tags(currency, address)
+        return service.get_address_with_tags(
+            currency=currency,
+            address=address)
     except RuntimeError as e:
-      return notfound(str(e))
+        return notfound(str(e))
 
 
 def list_address_links(currency, address, neighbor):  # noqa: E501
@@ -63,9 +63,12 @@ def list_address_links(currency, address, neighbor):  # noqa: E501
     :rtype: List[Link]
     """
     try:
-      return service.list_address_links(currency, address, neighbor)
+        return service.list_address_links(
+            currency=currency,
+            address=address,
+            neighbor=neighbor)
     except RuntimeError as e:
-      return notfound(str(e))
+        return notfound(str(e))
 
 
 def list_address_neighbors(currency, address, direction, page=None, pagesize=None):  # noqa: E501
@@ -87,9 +90,14 @@ def list_address_neighbors(currency, address, direction, page=None, pagesize=Non
     :rtype: Neighbors
     """
     try:
-      return service.list_address_neighbors(currency, address, direction, page, pagesize)
+        return service.list_address_neighbors(
+            currency=currency,
+            address=address,
+            direction=direction,
+            page=page,
+            pagesize=pagesize)
     except RuntimeError as e:
-      return notfound(str(e))
+        return notfound(str(e))
 
 
 def list_address_neighbors_csv(currency, address, direction):  # noqa: E501
@@ -107,9 +115,12 @@ def list_address_neighbors_csv(currency, address, direction):  # noqa: E501
     :rtype: str
     """
     try:
-      return service.list_address_neighbors_csv(currency, address, direction)
+        return service.list_address_neighbors_csv(
+            currency=currency,
+            address=address,
+            direction=direction)
     except RuntimeError as e:
-      return notfound(str(e))
+        return notfound(str(e))
 
 
 def list_address_tags(currency, address):  # noqa: E501
@@ -125,9 +136,11 @@ def list_address_tags(currency, address):  # noqa: E501
     :rtype: List[Tag]
     """
     try:
-      return service.list_address_tags(currency, address)
+        return service.list_address_tags(
+            currency=currency,
+            address=address)
     except RuntimeError as e:
-      return notfound(str(e))
+        return notfound(str(e))
 
 
 def list_address_tags_csv(currency, address):  # noqa: E501
@@ -143,9 +156,11 @@ def list_address_tags_csv(currency, address):  # noqa: E501
     :rtype: str
     """
     try:
-      return service.list_address_tags_csv(currency, address)
+        return service.list_address_tags_csv(
+            currency=currency,
+            address=address)
     except RuntimeError as e:
-      return notfound(str(e))
+        return notfound(str(e))
 
 
 def list_address_txs(currency, address, page=None, pagesize=None):  # noqa: E501
@@ -165,6 +180,10 @@ def list_address_txs(currency, address, page=None, pagesize=None):  # noqa: E501
     :rtype: AddressTxs
     """
     try:
-      return service.list_address_txs(currency, address, page, pagesize)
+        return service.list_address_txs(
+            currency=currency,
+            address=address,
+            page=page,
+            pagesize=pagesize)
     except RuntimeError as e:
-      return notfound(str(e))
+        return notfound(str(e))

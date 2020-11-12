@@ -4,16 +4,37 @@ datadir=`dirname $0`/data
 CASSANDRA_MOCK=$1
 MOCK_CMD="docker exec $CASSANDRA_MOCK cqlsh"
 
+TAG=develop
+
 function schema() {
   temp=`mktemp`
   echo "Fetching $1 ..."
-  curl -Ls https://raw.githubusercontent.com/graphsense/graphsense-transformation/master/scripts/$1 > $temp
+  curl -Ls https://raw.githubusercontent.com/graphsense/graphsense-transformation/$TAG/scripts/$1 > $temp
 
+  create $temp btc btc
+  create $temp btc ltc
+  rm $temp
+}
+
+function tagpacks() {
+  temp=`mktemp`
+  name=tagpack_schema.cql
+  echo "Fetching $name ..."
+  curl -Ls https://raw.githubusercontent.com/graphsense/graphsense-tagpack-tool/$TAG/tagpack/db/$name > $temp
+  create $temp KEYSPACE_NAME tagpacks
+  rm $temp
+}
+
+function create() {
+  temp=$1
+  search=$2
+  replace=$3
+  echo "Replace $search by $replace ..."
+  sed -i "s/$search/$replace/g" $temp
   echo "Copy to mockup database ..."
   docker cp $temp $CASSANDRA_MOCK:/
   echo "Creating schema ..."
   $MOCK_CMD -f /`basename $temp`
-  rm $temp
 }
 
 function insert_data () {
@@ -29,6 +50,7 @@ function insert_data () {
 
 schema "schema_raw.cql"
 schema "schema_transformed.cql"
+tagpacks
 
 for filename in $datadir/*; do
   insert_data $filename `basename $filename`
