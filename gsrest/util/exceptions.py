@@ -1,2 +1,2 @@
-class MissingConfigError(Exception):
+class BadConfigError(Exception):
     pass

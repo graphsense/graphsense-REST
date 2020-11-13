@@ -3,6 +3,7 @@ import importlib
 
 
 def init_app(app):
+    get_connection()
     app.teardown_appcontext(close_connection)
 
 
@@ -19,7 +20,7 @@ def get_connection():
     return g.connection
 
 
-def close_connection():
+def close_connection(e=None):
     if not hasattr(g, 'connection'):
         pass
     g.connection.close()

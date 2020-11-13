@@ -8,6 +8,7 @@
 import connexion
 import os
 import yaml
+import gsrest.db
 
 from {{packageName}} import encoder
 
@@ -39,4 +40,6 @@ def main(instance_path = None):
                 arguments={'title': '{{appName}}'},
                 pythonic_params=True)
     load_config(app.app, instance_path)
+    with app.app.app_context():
+        gsrest.db.init_app(app.app)
     return app

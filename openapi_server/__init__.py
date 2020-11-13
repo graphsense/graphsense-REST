@@ -3,6 +3,7 @@
 import connexion
 import os
 import yaml
+import gsrest.db
 
 from openapi_server import encoder
 
@@ -34,4 +35,6 @@ def main(instance_path = None):
                 arguments={'title': 'GraphSense API'},
                 pythonic_params=True)
     load_config(app.app, instance_path)
+    with app.app.app_context():
+        gsrest.db.init_app(app.app)
     return app

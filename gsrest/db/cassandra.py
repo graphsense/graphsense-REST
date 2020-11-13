@@ -4,7 +4,7 @@ from cassandra.query import named_tuple_factory, SimpleStatement,\
 from cassandra.concurrent import execute_concurrent
 from math import floor
 
-from gsrest.util.exceptions import MissingConfigError
+from gsrest.util.exceptions import BadConfigError
 
 BUCKET_SIZE = 25000  # TODO: get BUCKET_SIZE from cassandra
 
@@ -31,15 +31,25 @@ class Cassandra():
 
     def __init__(self, config):
         if 'currencies' not in config:
-            raise MissingConfigError('Missing config property: currencies')
+            raise BadConfigError('Missing config property: currencies')
         if 'nodes' not in config:
-            raise MissingConfigError('Missing config property: nodes')
+            raise BadConfigError('Missing config property: nodes')
         if 'tagpacks' not in config:
-            raise MissingConfigError('Missing config property: tagpacks')
+            raise BadConfigError('Missing config property: tagpacks')
         self.config = config
         self.cluster = Cluster(config['nodes'])
         self.session = self.cluster.connect()
-        # TODO: check that keyspaces exist
+        self.check_keyspace(config['tagpacks'])
+        for currency in config['currencies']:
+            self.check_keyspace(config['currencies'][currency]['raw'])
+            self.check_keyspace(config['currencies'][currency]['transformed'])
+
+    def check_keyspace(self, keyspace):
+        query = ("SELECT * FROM system_schema.keyspaces "
+                 "where keyspace_name = %s")
+        result = self.session.execute(query, [keyspace])
+        if result is None or result.one() is None:
+            raise BadConfigError("Keyspace {} does not exist".format(keyspace))
 
     def get_prefix_lengths(self):
         return {'address': ADDRESS_PREFIX_LENGTH,
@@ -57,8 +67,8 @@ class Cassandra():
         if keyspace_type not in ('raw', 'transformed'):
             raise ValueError('Unknown keyspace type {}'.format(keyspace_type))
         if currency not in self.config['currencies']:
-            raise MissingConfigError('Unknown currency in config: {}'
-                                     .format(currency))
+            raise BadConfigError('Unknown currency in config: {}'
+                                 .format(currency))
         return self.config['currencies'][currency][keyspace_type]
 
     def get_session(self, currency, keyspace_type):
@@ -458,4 +468,3 @@ class Cassandra():
         if results is None:
             return []
         return results
-
