@@ -15,9 +15,25 @@ Python 3.5.2+
 Create an instance folder and copy the configuration file template
 
     mkdir -p instance
-    cp conf/config.py.tmp instance/config.py
+    cp conf/config.yaml.tmp instance/config.yaml
 
-Open `instance/config.py` and enter Cassandra connection configuration
+Open `instance/config.py` and configure the database connection:
+    
+### Cassandra
+
+```yaml
+database:
+    driver: cassandra
+    nodes: 
+        - {cassandra host}
+        - ...
+    tagpacks: {the tagpacks keyspace}
+    currencies: 
+        {currency}: 
+            raw: {currency's raw keyspace}
+            transformed: {currency's transformed keyspace}
+        ...
+```
 
 ## Usage
 
@@ -37,19 +53,31 @@ docker run -p 9000:9000 openapi_server
 
 ### Generate server stub
 
+```sh
+BRANCH=master
+URL=https://github.com/graphsense/graphsense-openapi/blob/$BRANCH/graphsense.yaml
 docker run --rm \
   -v "${PWD}:/build" \
   -v "${PWD}/templates:/templates" \
   openapitools/openapi-generator-cli \
-  generate -i [**TODO**: Fill in URL to OpenAPI spec as soon as its github repo is public] -g python-flask -o /build -t /templates
+  generate -i "$URL" -g python-flask -o /build -t /templates
+```
 
-The service implementation (`gsrest`) should use the generated models located in `openapi_server/models`.
+The service implementation (`gsrest/service`) should use the generated models located in `openapi_server/models`.
 
-Source code generation is based on templates. See the `templates` directory for currenctly used templates. If you need more templates, retrieve them from the generator like so:
+Source code generation is based on templates. See the `templates` directory for currenctly used templates. If you need more templates, retrieve them from the generator like this:
 
     docker run --rm -v "/tmp/templates:/templates" openapitools/openapi-generator-cli author template -g python-flask -o /templates
 
-This writes the templates to `/tmp/templates`. Copy the needed ones to this project's `templates` directory.
+Templates are written to `/tmp/templates`. Copy the needed ones to this project's `templates` directory.
+
+### Database abstraction
+
+The REST service can be backed by different kinds of databases. `gsrest/db` contains database access implementations. See `cassandra.py` for an example.
+
+### Testing
+
+Service tests are located in `gsrest/test`. These are called from generated controller tests located in `openapi_server/test/`.
 
 To launch the integration tests, use tox:
 ```
