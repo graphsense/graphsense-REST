@@ -6,7 +6,6 @@ from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.tag import Tag
 from gsrest.util.values import compute_balance, convert_value, make_values
 from gsrest.service.rates_service import get_rates
-from gsrest.service.problems import notfound
 
 ADDRESS_PREFIX_LENGTH = 5
 BUCKET_SIZE = 25000  # TODO: get BUCKET_SIZE from cassandra
@@ -65,9 +64,6 @@ def list_address_tags(currency, address):
 
     query = "SELECT * FROM address_tags WHERE address = %s"
     results = session.execute(query, [address])
-    if results is None:
-        return notfound("Address {} not found in currency {}".format(
-            address, currency))
     address_tags = [Tag(
                     label=row.label,
                     address=row.address,
