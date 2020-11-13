@@ -12,11 +12,12 @@ from openapi_server.models.address_tx import AddressTx
 from openapi_server.models.address_txs import AddressTxs
 from gsrest.util.values import convert_value
 from gsrest.service.rates_service import list_rates
+import base64
 
 
 tag = Tag(
            category="organization",
-           label="Internet Archive",
+           label="Internet, Archive",
            abuse=None,
            lastmod=1560290400,
            source="https://archive.org/donate/cryptocurrency",
@@ -214,8 +215,8 @@ entityWithTagsOfAddressWithTags = EntityWithTags(
             value=115422577,
             usd=2.31,
             eur=1.15),
-   tags=[tag, tag2],
-   tag_coherence=0.9411764705882353
+   tags=[tag2, tag],
+   tag_coherence=0
 )
 
 
@@ -266,12 +267,15 @@ def list_address_tags(test_case):
 
 def list_address_tags_csv(test_case):
     csv = ("abuse,active,address,category,currency,label,lastmod,"
-           "source,tagpack_uri\nNone,True,1Archive1n2C579dMsAu3iC6"
-           "tWzuQJz8dN,organization,btc,Internet Archive,1560290400"
-           ",https://archive.org/donate/cryptocurrency,http://tagpack_uri\n")
-    assertEqual(csv, service.list_address_tags_csv(
+           "source,tagpack_uri\r\n,True,1Archive1n2C579dMsAu3iC6"
+           "tWzuQJz8dN,organization,btc,\"Internet, Archive\",1560290400"
+           ",https://archive.org/donate/cryptocurrency,http://tagpack_uri\r\n")
+    csv = base64.b64encode(csv.encode("utf-8"))
+    result = service.list_address_tags_csv(
                         "btc",
-                        addressWithTags.address).data.decode('utf-8'))
+                        addressWithTags.address).data.decode('utf-8')
+    result = base64.b64encode(result.encode("utf-8"))
+    assertEqual(csv, result)
 
 
 def list_address_neighbors(test_case):
@@ -291,11 +295,11 @@ def list_address_neighbors(test_case):
 def list_address_neighbors_csv(test_case):
     csv = ("balance_eur,balance_usd,balance_value,estimated_value_eur,"
            "estimated_value_usd,estimated_value_value,id,labels,no_txs,"
-           "node_type,received_eur,received_usd,received_value\n0.0,0.0,"
+           "node_type,received_eur,received_usd,received_value\r\n0.0,0.0,"
            "0,72.08,87.24,27789282,17DfZja1713S3JRWA9jaebCKFM5anUh7GG,[]"
-           ",1,address,114.86,142.18,87789282\n0.0,0.0,0,72.08,87.24,27789282"
-           ",1LpXFVskUaE2cs5xkQE5bDDaX8hff4L2Ej,[],1,address,98.72,121.46"
-           ",67789282\n")
+           ",1,address,114.86,142.18,87789282\r\n0.0,0.0,0,72.08,87.24,"
+           "27789282,1LpXFVskUaE2cs5xkQE5bDDaX8hff4L2Ej,[],1,address,98.72,"
+           "121.46,67789282\r\n")
     result = service.list_address_neighbors_csv(
         currency='btc',
         address=addressWithTags.address,
@@ -307,6 +311,8 @@ def get_address_entity(test_case):
     result = service.get_address_entity(
                 currency='btc',
                 address=addressWithTags.address)
+    result.tags = sorted(result.tags, key=lambda t: t.label)
+    result.tag_coherence = 0
     assertEqual(entityWithTagsOfAddressWithTags, result)
 
 

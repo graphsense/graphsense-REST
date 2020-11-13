@@ -63,9 +63,9 @@ def list_block_txs_csv(test_case):
     """
     csv = ("block_height,no_inputs,no_outputs,total_input_eur,"
            "total_input_usd,total_input_value,total_output_eur,"
-           "total_output_usd,total_output_value,tx_hash\n1,0,1,0.0"
+           "total_output_usd,total_output_value,tx_hash\r\n1,0,1,0.0"
            ",0.0,0,0.0,0.0,5000000000,0e3e2357e806b6cdb1f70b54c3a3a17b"
-           "6714ee1f0e68bebb44a74b1efd512098\n")
+           "6714ee1f0e68bebb44a74b1efd512098\r\n")
     assertEqual(csv, service.list_block_txs_csv("btc", 1).data.decode('utf-8'))
 
 

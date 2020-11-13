@@ -250,12 +250,12 @@ def list_entity_tags(test_case):
 
 def list_entity_tags_csv(test_case):
     csv = ("abuse,active,address,category,currency,label,lastmod,source,"
-           "tagpack_uri\nNone,True,1Archive1n2C579dMsAu3iC6tWzuQJz8dN,"
+           "tagpack_uri\r\n,True,1Archive1n2C579dMsAu3iC6tWzuQJz8dN,"
            "organization,btc,Internet Archive,1560290400,"
-           "https://archive.org/donate/cryptocurrency,http://tagpack_uri\n"
-           "None,True,1Archive1n2C579dMsAu3iC6tWzuQJz8dN,organization,btc,"
+           "https://archive.org/donate/cryptocurrency,http://tagpack_uri\r\n"
+           ",True,1Archive1n2C579dMsAu3iC6tWzuQJz8dN,organization,btc,"
            "Internet Archive 2,1560290400,https://archive.org/donate/crypto"
-           "currency,http://tagpack_uri\n")
+           "currency,http://tagpack_uri\r\n")
     assertEqual(csv, service.list_entity_tags_csv(
                         "btc",
                         entityWithTags.entity).data.decode('utf-8'))
@@ -320,10 +320,10 @@ def list_entity_neighbors(test_case):
 def list_entity_neighbors_csv(test_case):
     csv = ("balance_eur,balance_usd,balance_value,estimated_value_eur,"
            "estimated_value_usd,estimated_value_value,id,labels,no_txs,"
-           "node_type,received_eur,received_usd,received_value\n0.0,0.0,0"
+           "node_type,received_eur,received_usd,received_value\r\n0.0,0.0,0"
            ",2411.06,3074.92,48610000000,2818641,[],1,entity,2411.06,3074.92,"
-           "48610000000\n0.0,0.0,0,1078.04,1397.54,3375700000,8361735,[],3,"
-           "entity,7064.18,8517.93,7858798000\n")
+           "48610000000\r\n0.0,0.0,0,1078.04,1397.54,3375700000,8361735,[],3,"
+           "entity,7064.18,8517.93,7858798000\r\n")
     result = service.list_entity_neighbors_csv(
         currency='btc',
         entity=entityWithTags.entity,

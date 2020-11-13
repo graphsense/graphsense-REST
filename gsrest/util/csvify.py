@@ -1,5 +1,5 @@
 from werkzeug.datastructures import Headers
-import operator
+from csv import DictWriter
 
 
 def create_download_header(filename):
@@ -8,10 +8,19 @@ def create_download_header(filename):
     return headers
 
 
+class writer:
+    def write(self, str):
+        self.str = str
+
+    def get(self):
+        return self.str
+
+
 def to_csv(query_function):
-    fieldnames = []
     flat_dict = {}
     page_state = None
+    wr = writer()
+    csv = None
     while True:
         (page_state, rows) = query_function(page_state)
         if rows is None:
@@ -28,11 +37,14 @@ def to_csv(query_function):
 
         for row in rows:
             flatten(row)
-            if not fieldnames:
+            if not csv:
                 fieldnames = sorted(flat_dict.keys())
-                yield ','.join(fieldnames) + "\n"
-            yield (",".join([str(flat_dict[key]) for key in fieldnames]) +
-                   "\n")
+                csv = DictWriter(wr, fieldnames)
+                csv.writeheader()
+                yield wr.get()
+
+            csv.writerow(flat_dict)
+            yield wr.get()
             flat_dict = {}
 
         if not page_state:
