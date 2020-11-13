@@ -17,23 +17,7 @@ Create an instance folder and copy the configuration file template
     mkdir -p instance
     cp conf/config.yaml.tmp instance/config.yaml
 
-Open `instance/config.py` and configure the database connection:
-    
-### Cassandra
-
-```yaml
-database:
-    driver: cassandra
-    nodes: 
-        - {cassandra host}
-        - ...
-    tagpacks: {the tagpacks keyspace}
-    currencies: 
-        {currency}: 
-            raw: {currency's raw keyspace}
-            transformed: {currency's transformed keyspace}
-        ...
-```
+Open `instance/config.py` and configure the database connection.
 
 ## Usage
 
@@ -70,12 +54,6 @@ Source code generation is based on templates. See the `templates` directory for 
     docker run --rm -v "/tmp/templates:/templates" openapitools/openapi-generator-cli author template -g python-flask -o /templates
 
 Templates are written to `/tmp/templates`. Copy the needed ones to this project's `templates` directory.
-
-### Database abstraction
-
-The REST service can be backed by different kinds of databases. `gsrest/db` contains database access implementations. See `cassandra.py` for an example.
-
-### Testing
 
 Service tests are located in `gsrest/test`. These are called from generated controller tests located in `openapi_server/test/`.
 
