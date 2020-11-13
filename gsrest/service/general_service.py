@@ -1,5 +1,4 @@
 import time
-from flask import current_app
 from openapi_server.models.stats import Stats
 from openapi_server.models.stats_version import StatsVersion
 from openapi_server.models.stats_tool import StatsTool
@@ -9,10 +8,10 @@ from openapi_server.models.search_result import SearchResult
 from openapi_server.models.search_result_by_currency \
     import SearchResultByCurrency
 from gsrest.service.stats_service import get_currency_statistics
-from gsrest.service.txs_service import TX_PREFIX_LENGTH, list_matching_txs
-from gsrest.service.tags_service import LABEL_PREFIX_LENGTH, list_labels
-from gsrest.service.addresses_service import ADDRESS_PREFIX_LENGTH, \
-        list_matching_addresses
+from gsrest.service.txs_service import list_matching_txs
+from gsrest.service.tags_service import list_labels
+from gsrest.service.addresses_service import list_matching_addresses
+from gsrest.db import get_connection
 
 import yaml
 
@@ -42,9 +41,8 @@ def get_statistics():
         version = input['info']['version']
         title = input['info']['title']
         currency_stats = list()
-        for currency in current_app.config['MAPPING']:
-            if currency == "tagpacks":
-                continue
+        db = get_connection()
+        for currency in db.get_supported_currencies():
             currency_stats.append(get_currency_statistics(currency, version))
         return Stats(
                 currencies=currency_stats,
@@ -71,10 +69,8 @@ def get_statistics():
 
 
 def search(q, currency=None, limit=None):
-    currencies = \
-        [currency] if currency else \
-        [c for c in current_app.config['MAPPING']
-         if c != 'tagpacks']
+    db = get_connection()
+    currencies = db.get_supported_currencies()
     leading_zeros = 0
     pos = 0
     # leading zeros will be lost when casting to int
@@ -85,6 +81,8 @@ def search(q, currency=None, limit=None):
     q = q.strip()
     result = SearchResult(currencies=[], labels=[])
 
+    prefix_lengths = db.get_prefix_lengths()
+
     for currency in currencies:
         element = SearchResultByCurrency(
                     currency=currency,
@@ -93,17 +91,17 @@ def search(q, currency=None, limit=None):
                     )
 
         # Look for addresses and transactions
-        if len(q) >= TX_PREFIX_LENGTH:
+        if len(q) >= prefix_lengths['tx']:
             txs = list_matching_txs(currency, q, leading_zeros)
             element.txs = txs[:limit]
 
-        if len(q) >= ADDRESS_PREFIX_LENGTH:
+        if len(q) >= prefix_lengths['address']:
             addresses = list_matching_addresses(currency, q)
             element.addresses = addresses[:limit]
 
         result.currencies.append(element)
 
-        if len(q) >= LABEL_PREFIX_LENGTH:
+        if len(q) >= prefix_lengths['label']:
             labels = list_labels(currency, q)[:limit]
             if labels:
                 result.labels += labels

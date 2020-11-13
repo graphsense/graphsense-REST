@@ -1,14 +1,13 @@
 from datetime import datetime
-from gsrest.db.cassandra import get_session
+from gsrest.db import get_connection
 from openapi_server.models.currency_stats import CurrencyStats
 from openapi_server.models.stats_ledger import StatsLedger
 from openapi_server.models.stats_ledger_version import StatsLedgerVersion
 
 
 def get_currency_statistics(currency, version=None):
-    session = get_session(currency, 'transformed')
-    query = "SELECT * FROM summary_statistics LIMIT 1"
-    result = session.execute(query).one()
+    db = get_connection()
+    result = db.get_currency_statistics(currency)
     if result is None:
         raise ValueError('statistics for currency {} not found'
                          .format(currency))

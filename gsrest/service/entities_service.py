@@ -1,11 +1,6 @@
-from cassandra.query import SimpleStatement
-from cassandra.concurrent import execute_concurrent
-
-from gsrest.db.cassandra import get_session
-from gsrest.service.common_service import get_address_by_id_group, \
-    get_address_with_tags
+from gsrest.db import get_connection
+from gsrest.service.common_service import get_address_with_tags
 from gsrest.service.rates_service import get_rates
-from gsrest.service.common_service import get_address_entity_id, get_id_group
 from openapi_server.models.entity import Entity
 from openapi_server.models.tx_summary import TxSummary
 from gsrest.util.values import compute_balance, convert_value, make_values
@@ -20,49 +15,20 @@ from gsrest.util.csvify import create_download_header, to_csv
 from openapi_server.models.address import Address
 from openapi_server.models.entity_addresses import EntityAddresses
 
-ENTITY_PAGE_SIZE = 100
-ENTITY_ADDRESSES_PAGE_SIZE = 100
-
 
 def list_entity_tags(currency, entity):
-    # from entity id to list of tags
-    session = get_session(currency, 'transformed')
-    entity_group = get_id_group(entity)
-    query = "SELECT * FROM cluster_tags WHERE cluster_group = %s and cluster" \
-            " = %s"
-    concurrent_query = "SELECT * FROM address_by_id_group WHERE " \
-                       "address_id_group = %s and address_id = %s"
-
-    results = session.execute(query, [entity_group, entity])
-
-    # concurrent queries
-    statements_and_params = []
-    for row in results.current_rows:
-        address_id_group = get_id_group(row.address_id)
-        params = (address_id_group, row.address_id)
-        statements_and_params.append((concurrent_query, params))
-    addresses = execute_concurrent(session, statements_and_params,
-                                   raise_on_first_error=False)
-    id_address = dict()  # to temporary store the id-address mapping
-    for (success, address) in addresses:
-        if not success:
-            pass
-        else:
-            id_address[address.one().address_id] = address.one().address
-    entity_tags = []
-    for row in results.current_rows:
-        entity_tags.append(Tag(
-                    label=row.label,
-                    address=row.address,
-                    category=row.category,
-                    abuse=row.abuse,
-                    tagpack_uri=row.tagpack_uri,
-                    source=row.source,
-                    lastmod=row.lastmod,
-                    active=True,
-                    currency=currency
-                    ))
-    return entity_tags
+    db = get_connection()
+    tags = db.list_entity_tags(currency, entity)
+    return [Tag(label=row.label,
+                address=row.address,
+                category=row.category,
+                abuse=row.abuse,
+                tagpack_uri=row.tagpack_uri,
+                source=row.source,
+                lastmod=row.lastmod,
+                active=True,
+                currency=currency)
+            for row in tags]
 
 
 def list_entity_tags_csv(currency, entity):
@@ -98,14 +64,11 @@ def get_entity_with_tags(currency, entity):
 
 
 def get_entity(currency, entity):
-    # from entity id to complete entity stats
-    session = get_session(currency, 'transformed')
-    entity_id_group = get_id_group(entity)
-    query = "SELECT * FROM cluster WHERE cluster_group = %s AND cluster = %s "
-    result = session.execute(query, [entity_id_group, entity])
+    db = get_connection()
+    result = db.get_entity(currency, entity)
+
     if result is None:
         raise RuntimeError("Entity {} not found".format(entity))
-    result = result.one()
     return Entity(
         entity=result.cluster,
         first_tx=TxSummary(
@@ -139,95 +102,40 @@ def get_entity(currency, entity):
 
 
 def list_entity_neighbors(currency, entity, direction, targets=None,
-                          page=None, pagesize=None,
-                          from_search=False):
-    is_outgoing = direction == 'out'
-    if is_outgoing:
-        table, this, that = ('outgoing', 'src', 'dst')
-    else:
-        table, this, that = ('incoming', 'dst', 'src')
-
-    session = get_session(currency, 'transformed')
-    entity_id_group = get_id_group(entity)
-
-    has_targets = isinstance(targets, list)
-    parameters = [entity_id_group, entity]
-    basequery = "SELECT * FROM cluster_{}_relations WHERE " \
-                "{}_cluster_group = %s AND " \
-                "{}_cluster = %s".format(table, this, this)
-    if has_targets:
-        if len(targets) == 0:
-            return None
-        query = basequery.replace('*', '{}_cluster'.format(that))
-        query += " AND {}_cluster in ({})" \
-            .format(that, ','.join(map(str, targets)))
-    else:
-        query = basequery
-    fetch_size = ENTITY_PAGE_SIZE
-    if pagesize:
-        fetch_size = pagesize
-    statement = SimpleStatement(query, fetch_size=fetch_size)
-    results = session.execute(statement, parameters,
-                              paging_state=page)
-    paging_state = results.paging_state
-    current_rows = results.current_rows
-    if has_targets:
-        statements_and_params = []
-        query = basequery + " AND {}_cluster = %s".format(that)
-        for row in results.current_rows:
-            params = parameters.copy()
-            params.append(getattr(row, "{}_cluster".format(that)))
-            statements_and_params.append((query, params))
-        results = execute_concurrent(session, statements_and_params,
-                                     raise_on_first_error=False)
-        current_rows = []
-        for (success, row) in results:
-            if not success:
-                pass
-            else:
-                current_rows.append(row.one())
+                          page=None, pagesize=None):
+    db = get_connection()
+    is_outgoing = "out" in direction
+    results, paging_state = db.list_entity_neighbors(
+                                currency,
+                                entity,
+                                is_outgoing,
+                                targets,
+                                page,
+                                pagesize)
 
     rates = get_rates(currency)['rates']
     relations = []
-    for row in current_rows:
-        if is_outgoing:
-            balance = compute_balance(row.dst_properties.total_received.value,
-                                      row.dst_properties.total_spent.value)
-            relations.append(
-                Neighbor(
-                    id=row.dst_cluster,
-                    node_type='entity',
-                    labels=row.dst_labels
-                    if row.dst_labels is not None else [],
-                    received=make_values(
-                        value=row.dst_properties.total_received.value,
-                        eur=row.dst_properties.total_received.eur,
-                        usd=row.dst_properties.total_received.usd),
-                    estimated_value=make_values(
-                        value=row.value.value,
-                        eur=row.value.eur,
-                        usd=row.value.usd),
-                    balance=convert_value(balance, rates),
-                    no_txs=row.no_transactions))
-        else:
-            balance = compute_balance(row.src_properties.total_received.value,
-                                      row.src_properties.total_spent.value)
-            relations.append(
-                Neighbor(
-                    id=row.src_cluster,
-                    node_type='entity',
-                    labels=row.src_labels
-                    if row.src_labels is not None else [],
-                    received=make_values(
-                        value=row.src_properties.total_received.value,
-                        eur=row.src_properties.total_received.eur,
-                        usd=row.src_properties.total_received.usd),
-                    estimated_value=make_values(
-                        value=row.value.value,
-                        eur=row.value.eur,
-                        usd=row.value.usd),
-                    balance=convert_value(balance, rates),
-                    no_txs=row.no_transactions))
+    dst = 'dst' if is_outgoing else 'src'
+    for row in results:
+        balance = compute_balance(
+                    getattr(row, dst+'_properties').total_received.value,
+                    getattr(row, dst+'_properties').total_spent.value)
+        relations.append(
+            Neighbor(
+                id=getattr(row, dst+'_cluster'),
+                node_type='entity',
+                labels=getattr(row, dst+'_labels')
+                if getattr(row, dst+'_labels') is not None else [],
+                received=make_values(
+                    value=getattr(row, dst+'_properties').total_received.value,
+                    eur=getattr(row, dst+'_properties').total_received.eur,
+                    usd=getattr(row, dst+'_properties').total_received.usd),
+                estimated_value=make_values(
+                    value=row.value.value,
+                    eur=row.value.eur,
+                    usd=row.value.usd),
+                balance=convert_value(balance, rates),
+                no_txs=row.no_transactions))
     return Neighbors(next_page=paging_state, neighbors=relations)
 
 
@@ -244,59 +152,46 @@ def list_entity_neighbors_csv(currency, entity, direction):
 
 
 def list_entity_addresses(currency, entity, page=None, pagesize=None):
-    session = get_session(currency, 'transformed')
-    entity_id_group = get_id_group(entity)
-    query = "SELECT * FROM cluster_addresses WHERE cluster_group = %s AND " \
-            "cluster = %s"
-    fetch_size = ENTITY_ADDRESSES_PAGE_SIZE
-    if pagesize:
-        fetch_size = pagesize
-    statement = SimpleStatement(query, fetch_size=fetch_size)
-    results = session.execute(statement, [entity_id_group, entity],
-                              paging_state=page)
-    if results is None:
-        raise RuntimeError('No addresses for entity {} found'.format(entity))
+    db = get_connection()
+    addresses, paging_state = \
+        db.list_entity_addresses(currency, entity, page, pagesize)
 
-    paging_state = results.paging_state
-    addresses = []
-    for row in results.current_rows:
-        address_id_group = get_id_group(row.address_id)
-        address = get_address_by_id_group(currency, address_id_group,
-                                          row.address_id)
-        addresses.append(Address(
-            address=address,
+    rates = get_rates(currency)['rates']
+    addresses = [Address(
+            address=row['address'],
             first_tx=TxSummary(
-                row.first_tx.height,
-                row.first_tx.timestamp,
-                row.first_tx.tx_hash.hex()),
+                row['first_tx'].height,
+                row['first_tx'].timestamp,
+                row['first_tx'].tx_hash.hex()),
             last_tx=TxSummary(
-                row.last_tx.height,
-                row.last_tx.timestamp,
-                row.last_tx.tx_hash.hex()),
-            no_incoming_txs=row.no_incoming_txs,
-            no_outgoing_txs=row.no_outgoing_txs,
+                row['last_tx'].height,
+                row['last_tx'].timestamp,
+                row['last_tx'].tx_hash.hex()),
+            no_incoming_txs=row['no_incoming_txs'],
+            no_outgoing_txs=row['no_outgoing_txs'],
             total_received=make_values(
-                value=row.total_received.value,
-                eur=row.total_received.eur,
-                usd=row.total_received.usd),
+                value=row['total_received'].value,
+                eur=row['total_received'].eur,
+                usd=row['total_received'].usd),
             total_spent=make_values(
-                eur=row.total_spent.eur,
-                usd=row.total_spent.usd,
-                value=row.total_spent.value),
-            in_degree=row.in_degree,
-            out_degree=row.out_degree,
+                eur=row['total_spent'].eur,
+                usd=row['total_spent'].usd,
+                value=row['total_spent'].value),
+            in_degree=row['in_degree'],
+            out_degree=row['out_degree'],
             balance=convert_value(
                     compute_balance(
-                        row.total_received.value,
-                        row.total_spent.value,
-                    ),
-                    get_rates(currency)['rates'])
-            ))
+                        row['total_received'].value,
+                        row['total_spent'].value,
+                    ), rates)
+            )
+            for row in addresses]
     return EntityAddresses(next_page=paging_state, addresses=addresses)
 
 
 def search_entity_neighbors(currency, entity, direction, key, value, depth, breadth, skip_num_addresses=None):  # noqa: E501
     params = dict()
+    db = get_connection()
     if 'category' in key:
         params['category'] = value[0]
 
@@ -313,7 +208,7 @@ def search_entity_neighbors(currency, entity, direction, key, value, depth, brea
     elif 'addresses' in key:
         addresses_list = []
         for address in value:
-            e = get_address_entity_id(currency, address)
+            e = db.get_address_entity_id(currency, address)
             if e:
                 addresses_list.append({"address": address,
                                        "entity": e})
@@ -364,7 +259,7 @@ def recursive_search(currency, entity, params, breadth, depth,
     neighbors = cached(entity, 'neighbors',
                        lambda: list_entity_neighbors(
                         currency, entity, direction,
-                        pagesize=breadth, from_search=True).neighbors)
+                        pagesize=breadth).neighbors)
 
     paths = []
 

@@ -2,10 +2,11 @@
 
 import connexion
 import os
+import yaml
 
 from openapi_server import encoder
 
-CONFIG_FILE = "config.py"
+CONFIG_FILE = "config.yaml"
 
 
 def load_config(app, instance_path):
@@ -13,16 +14,15 @@ def load_config(app, instance_path):
     # ensure that instance path and config file exists
     config_file_path = os.path.join(instance_path, CONFIG_FILE)
     if not os.path.exists(config_file_path):
-        app.logger.error("Instance path with config.py file is missing.")
-    # load default config, when not testing
-    # override with instance config, if available
-    app.config.from_pyfile(config_file_path, silent=False)
+        raise ValueError("Instance path with {} file is missing."
+                         .format(CONFIG_FILE))
 
+    with open(config_file_path, 'r') as input_file:
+        config = yaml.safe_load(input_file)
+        app.config.from_object(config)
+        for k,v in config.items():
+            app.config[k] = v
 
-def init_services(app):
-    # register cassandra database
-    from gsrest.db import cassandra
-    cassandra.init_app(app)
 
 def main(instance_path = None):
     app = connexion.App(__name__, 
@@ -34,7 +34,4 @@ def main(instance_path = None):
                 arguments={'title': 'GraphSense API'},
                 pythonic_params=True)
     load_config(app.app, instance_path)
-    init_services(app.app)
     return app
-
-

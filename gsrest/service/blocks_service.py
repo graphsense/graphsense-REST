@@ -1,6 +1,4 @@
-from cassandra.query import SimpleStatement
-
-from gsrest.db.cassandra import get_session
+from gsrest.db import get_connection
 from openapi_server.models.block import Block
 from openapi_server.models.blocks import Blocks
 from openapi_server.models.block_txs import BlockTxs
@@ -10,14 +8,10 @@ from gsrest.service.rates_service import get_rates
 from flask import Response, stream_with_context
 from gsrest.util.csvify import create_download_header, to_csv
 
-BLOCKS_PAGE_SIZE = 100
-
 
 def get_block(currency, height) -> Block:
-    session = get_session(currency, 'raw')
-
-    query = "SELECT * FROM block WHERE height = %s"
-    row = session.execute(query, [height]).one()
+    db = get_connection()
+    row = db.get_block(currency, height)
     if not row:
         raise RuntimeError("Block {} not found".format(height))
     return Block(
@@ -28,14 +22,8 @@ def get_block(currency, height) -> Block:
 
 
 def list_blocks(currency, page=None):
-    session = get_session(currency, 'raw')
-    paging_state = bytes.fromhex(page) if page else None
-
-    query = "SELECT * FROM block"
-    statement = SimpleStatement(query, fetch_size=BLOCKS_PAGE_SIZE)
-    results = session.execute(statement, paging_state=paging_state)
-
-    paging_state = results.paging_state.hex() if results.paging_state else None
+    db = get_connection()
+    results, paging_state = db.list_blocks(currency, page)
     block_list = [Block(
                     height=row.height,
                     block_hash=row.block_hash.hex(),
@@ -47,11 +35,10 @@ def list_blocks(currency, page=None):
 
 
 def list_block_txs(currency, height):
-    session = get_session(currency, 'raw')
+    db = get_connection()
+    result = db.list_block_txs(currency, height)
 
-    query = "SELECT * FROM block_transactions WHERE height = %s"
-    results = session.execute(query, [height])
-    if results is None:
+    if result is None:
         raise RuntimeError("Block {} not found".format(height))
     rates = get_rates(currency, height)
 
@@ -63,7 +50,7 @@ def list_block_txs(currency, height):
          total_output=convert_value(tx.total_output, rates['rates']),
          tx_hash=tx.tx_hash.hex()
          )
-         for tx in results[0].txs]
+         for tx in result.txs]
 
     return BlockTxs(height, tx_summaries)
 

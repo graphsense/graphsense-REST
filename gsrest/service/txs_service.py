@@ -1,14 +1,9 @@
-from cassandra.query import SimpleStatement
-
-from gsrest.db.cassandra import get_session
+from gsrest.db import get_connection
 from openapi_server.models.tx import Tx
 from openapi_server.models.txs import Txs
 from openapi_server.models.tx_value import TxValue
 from gsrest.service.rates_service import get_rates, list_rates
 from gsrest.util.values import convert_value
-
-TXS_PAGE_SIZE = 100
-TX_PREFIX_LENGTH = 5
 
 
 def from_row(row, rates):
@@ -28,12 +23,9 @@ def from_row(row, rates):
 
 
 def get_tx(currency, tx_hash):
-    session = get_session(currency, 'raw')
+    db = get_connection()
+    result = db.get_tx(currency, tx_hash)
 
-    query = "SELECT * FROM transaction WHERE tx_prefix = %s AND tx_hash = %s"
-    result = session.execute(query, [tx_hash[:TX_PREFIX_LENGTH],
-                                     bytearray.fromhex(tx_hash)])
-    result = result.one()
     if result is None:
         raise RuntimeError('Transaction {} in keyspace {} not found'
                            .format(tx_hash, currency))
@@ -43,26 +35,21 @@ def get_tx(currency, tx_hash):
 
 
 def list_txs(currency, page=None):
-    session = get_session(currency, 'raw')
+    db = get_connection()
+    results, paging_state = db.list_txs(currency, page)
 
-    paging_state = bytes.fromhex(page) if page else None
-    query = "SELECT * FROM transaction"
-    statement = SimpleStatement(query, fetch_size=TXS_PAGE_SIZE)
-    results = session.execute(statement, paging_state=paging_state)
-
-    paging_state = results.paging_state
-    heights = [row.height for row in results.current_rows]
+    heights = [row.height for row in results]
     rates = list_rates(currency, heights)
     tx_list = [from_row(row, rates[row.height])
-               for row in results.current_rows]
+               for row in results]
 
     return Txs(next_page=paging_state, txs=tx_list)
 
 
 def list_matching_txs(currency, expression, leading_zeros):
-    session = get_session(currency, 'raw')
-    query = 'SELECT tx_hash from transaction where tx_prefix = %s'
-    results = session.execute(query, [expression[:TX_PREFIX_LENGTH]])
+    db = get_connection()
+    results = db.list_matching_txs(currency, expression, leading_zeros)
+
     txs = ["0" * leading_zeros + str(hex(int.from_bytes(row.tx_hash,
                                                         byteorder="big")))[2:]
            for row in results]

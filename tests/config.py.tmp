@@ -1,6 +1,0 @@
-CASSANDRA_NODES = ["CASSANDRA_MOCK_IP"]
-MAPPING = {
-    "tagpacks": "tagpacks",
-    "btc": ["btc_raw", "btc_transformed"],
-    "ltc": ["ltc_raw", "ltc_transformed"]
-}

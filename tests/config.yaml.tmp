@@ -1,0 +1,11 @@
+database:
+    driver: cassandra
+    nodes: ["CASSANDRA_MOCK_IP"]
+    tagpacks: tagpacks
+    currencies: 
+        btc: 
+            raw: btc_raw
+            transformed: btc_transformed
+        ltc: 
+            raw: ltc_raw
+            transformed: ltc_transformed
