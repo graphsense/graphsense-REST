@@ -317,7 +317,6 @@ class Cassandra():
         return results.current_rows
 
     def get_entity(self, currency, entity):
-        print('entity {}'.format(entity))
         session = self.get_session(currency, 'transformed')
         entity_id_group = self.get_id_group(entity)
         query = ("SELECT * FROM cluster "

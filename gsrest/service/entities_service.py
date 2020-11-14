@@ -238,7 +238,6 @@ def search_entity_neighbors(currency, entity, direction, key, value, depth, brea
 
 def recursive_search(currency, entity, params, breadth, depth,
                      skip_num_addresses, direction, cache=None):
-    print('enityt {}'.format(entity))
     if cache is None:
         cache = dict()
     if depth <= 0:
@@ -285,10 +284,8 @@ def recursive_search(currency, entity, params, breadth, depth,
         if 'field' in params:
             (field, fieldcurrency, min_value, max_value) = params['field']
             v = getattr(getattr(props, field), fieldcurrency)
-            print('v {} {} {}'.format(field, fieldcurrency, v))
             match = v >= min_value and (max_value is None or max_value >= v)
 
-        print('params {}'.format(params))
         subpaths = False
         if match:
             subpaths = True

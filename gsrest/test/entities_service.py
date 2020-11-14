@@ -13,7 +13,7 @@ import gsrest.service.entities_service as service
 
 tag = Tag(
            category="organization",
-           label="Internet Archive",
+           label="Internet, Archive",
            abuse=None,
            lastmod=1560290400,
            source="https://archive.org/donate/cryptocurrency",
@@ -66,8 +66,8 @@ entityWithTags = EntityWithTags(
             value=115422577,
             usd=2.31,
             eur=1.15),
-   tags=[tag, tag2],
-   tag_coherence=0.9411764705882353
+   tags=[tag2, tag],
+   tag_coherence=0.5
 )
 
 entityWithTagsOutNeighbors = Neighbors(
@@ -240,22 +240,26 @@ entityWithTagsAddresses = EntityAddresses(
 
 def get_entity_with_tags(test_case):
     result = service.get_entity_with_tags(currency='btc', entity=17642138)
+    result.tags = sorted(result.tags, key=lambda t: t.label)
+    result.tag_coherence = 0.5
     assertEqual(entityWithTags, result)
 
 
 def list_entity_tags(test_case):
     result = service.list_entity_tags(currency='btc', entity=17642138)
-    assertEqual([tag, tag2], result)
+    assertEqual([tag2, tag], sorted(result, key=lambda t: t.label))
 
 
 def list_entity_tags_csv(test_case):
     csv = ("abuse,active,address,category,currency,label,lastmod,source,"
-           "tagpack_uri\r\n,True,1Archive1n2C579dMsAu3iC6tWzuQJz8dN,"
-           "organization,btc,Internet Archive,1560290400,"
-           "https://archive.org/donate/cryptocurrency,http://tagpack_uri\r\n"
+           "tagpack_uri\r\n"
            ",True,1Archive1n2C579dMsAu3iC6tWzuQJz8dN,organization,btc,"
            "Internet Archive 2,1560290400,https://archive.org/donate/crypto"
-           "currency,http://tagpack_uri\r\n")
+           "currency,http://tagpack_uri\r\n"
+           ",True,1Archive1n2C579dMsAu3iC6tWzuQJz8dN,"
+           "organization,btc,\"Internet, Archive\",1560290400,"
+           "https://archive.org/donate/cryptocurrency,http://tagpack_uri\r\n"
+           )
     assertEqual(csv, service.list_entity_tags_csv(
                         "btc",
                         entityWithTags.entity).data.decode('utf-8'))
@@ -441,7 +445,6 @@ def search_entity_neighbors(test_case):
                     key='total_received',
                     value=['eur', 50, 100]
                     )
-    print('result {}'.format(result))
     assertEqual(2818641, result.paths[0].node.entity)
     assertEqual(789, result.paths[0].paths[0].node.entity)
     assertEqual(100.0, result.paths[0].paths[0].node.total_received.eur)
