@@ -255,7 +255,7 @@ paths:
                   $ref: '#/components/schemas/link'
                 type: array
           description: OK
-      summary: Get transactions between to addresses
+      summary: Get transactions between two addresses
       tags:
       - addresses
       x-openapi-router-controller: openapi_server.controllers.addresses_controller

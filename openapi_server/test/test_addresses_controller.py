@@ -58,7 +58,7 @@ class TestAddressesController(BaseTestCase):
     def test_list_address_links(self):
         """Test case for list_address_links
 
-        Get transactions between to addresses
+        Get transactions between two addresses
         """
         test_service.list_address_links(self)
 

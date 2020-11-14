@@ -49,7 +49,7 @@ def get_address_with_tags(currency, address):  # noqa: E501
 
 
 def list_address_links(currency, address, neighbor):  # noqa: E501
-    """Get transactions between to addresses
+    """Get transactions between two addresses
 
      # noqa: E501
 
