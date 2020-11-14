@@ -13,10 +13,12 @@ def from_row(row, rates):
             height=row.height,
             inputs=[TxValue(address=i.address,
                             value=convert_value(i.value, rates))
-                    for i in row.inputs],
+                    for i in row.inputs]
+            if row.inputs else [],
             outputs=[TxValue(address=i.address,
                              value=convert_value(i.value, rates))
-                     for i in row.outputs],
+                     for i in row.outputs]
+            if row.outputs else [],
             timestamp=row.timestamp,
             total_input=convert_value(row.total_input, rates),
             total_output=convert_value(row.total_output, rates))
