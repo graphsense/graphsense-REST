@@ -53,14 +53,13 @@ def list_address_txs(currency, address, page=None, pagesize=None):
 
 def list_address_neighbors(currency, address, direction, page=None,
                            pagesize=None):
-    paging_state = bytes.fromhex(page) if page else None
     is_outgoing = "out" in direction
     db = get_connection()
     results, paging_state = db.list_address_relations(
                                     currency,
                                     address,
                                     is_outgoing,
-                                    paging_state,
+                                    page,
                                     pagesize)
     dst = 'dst' if is_outgoing else 'src'
     rates = get_rates(currency)['rates']
@@ -85,7 +84,7 @@ def list_address_neighbors(currency, address, direction, page=None,
                 usd=row['estimated_value'].usd),
             balance=convert_value(balance, rates),
             no_txs=row['no_transactions']))
-    return Neighbors(next_page=paging_state.hex() if paging_state else None,
+    return Neighbors(next_page=paging_state,
                      neighbors=relations)
 
 
