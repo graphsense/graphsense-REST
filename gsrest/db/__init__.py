@@ -22,7 +22,7 @@ def get_connection():
 
 def close_connection(e=None):
     if not hasattr(g, 'connection'):
-        pass
+        return
     g.connection.close()
     g.pop('connection', None)
     driver = current_app.config['database']['driver']
