@@ -17,7 +17,7 @@ Create an instance folder and copy the configuration file template
     mkdir -p instance
     cp conf/config.yaml.tmp instance/config.yaml
 
-Open `instance/config.py` and configure the database connection.
+Open `instance/config.yaml` and configure the database connection.
 
 ## Usage
 
