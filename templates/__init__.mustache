@@ -48,3 +48,7 @@ def main(instance_path=None):
          origins=app.config['ALLOWED_ORIGINS'] if 'ALLOWED_ORIGINS'
          in app.app.config else '*')
     return app
+
+
+def flask():
+    return main().app
