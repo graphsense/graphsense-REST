@@ -51,6 +51,17 @@ def list_address_txs(currency, address, page=None, pagesize=None):
     return AddressTxs(next_page=paging_state, address_txs=address_txs)
 
 
+def list_address_txs_csv(currency, address):
+    def query_function(page_state):
+        result = list_address_txs(currency, address, page_state)
+        return (result.next_page, result.address_txs)
+    return Response(stream_with_context(to_csv(query_function)),
+                    mimetype="text/csv",
+                    headers=create_download_header(
+                            'transactions of address {} ({}).csv'
+                            .format(address, currency.upper())))
+
+
 def list_address_neighbors(currency, address, direction, page=None,
                            pagesize=None):
     is_outgoing = "out" in direction
@@ -115,6 +126,17 @@ def list_address_links(currency, address, neighbor):
                  output_value=convert_value(
                      e['output_value'], rates[e['height']]),
                  ) for e in links]
+
+
+def list_address_links_csv(currency, address, neighbor):
+    def query_function(_):
+        result = list_address_links(currency, address, neighbor)
+        return (None, result)
+    return Response(stream_with_context(to_csv(query_function)),
+                    mimetype="text/csv",
+                    headers=create_download_header(
+                            'transactions between {} and {} ({}).csv'
+                            .format(address, neighbor, currency.upper())))
 
 
 def get_address_entity(currency, address):

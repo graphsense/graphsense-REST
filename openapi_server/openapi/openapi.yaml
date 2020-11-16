@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   description: GraphSense API
   title: GraphSense API
-  version: 0.4.4
+  version: 0.4.5
 servers:
 - url: http://openapi_server:9000
 paths:
@@ -259,6 +259,50 @@ paths:
       tags:
       - addresses
       x-openapi-router-controller: openapi_server.controllers.addresses_controller
+  /{currency}/addresses/{address}/links.csv:
+    get:
+      operationId: list_address_links_csv
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The cryptocurrency address
+        example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
+        explode: false
+        in: path
+        name: address
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: Neighbor address
+        example: 17DfZja1713S3JRWA9jaebCKFM5anUh7GG
+        explode: true
+        in: query
+        name: neighbor
+        required: true
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            text/csv:
+              schema:
+                type: string
+          description: OK
+      summary: Get transactions between two addresses as CSV
+      tags:
+      - addresses
+      x-openapi-router-controller: openapi_server.controllers.addresses_controller
   /{currency}/addresses/{address}/neighbors:
     get:
       operationId: list_address_neighbors
@@ -496,6 +540,41 @@ paths:
       tags:
       - addresses
       x-openapi-router-controller: openapi_server.controllers.addresses_controller
+  /{currency}/addresses/{address}/txs.csv:
+    get:
+      operationId: list_address_txs_csv
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The cryptocurrency address
+        example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
+        explode: false
+        in: path
+        name: address
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            text/csv:
+              schema:
+                type: string
+          description: OK
+      summary: Get all transactions an address has been involved in as CSV
+      tags:
+      - addresses
+      x-openapi-router-controller: openapi_server.controllers.addresses_controller
   /{currency}/blocks:
     get:
       operationId: list_blocks
@@ -720,6 +799,41 @@ paths:
                 $ref: '#/components/schemas/entity_addresses'
           description: OK
       summary: Get an entity's addresses
+      tags:
+      - entities
+      x-openapi-router-controller: openapi_server.controllers.entities_controller
+  /{currency}/entities/{entity}/addresses.csv:
+    get:
+      operationId: list_entity_addresses_csv
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The entity ID
+        example: 67065
+        explode: false
+        in: path
+        name: entity
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            text/csv:
+              schema:
+                type: string
+          description: OK
+      summary: Get an entity's addresses as CSV
       tags:
       - entities
       x-openapi-router-controller: openapi_server.controllers.entities_controller
@@ -1088,7 +1202,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/txs'
           description: OK
-      summary: Returns details of a specific transaction identified by its hash.
+      summary: Returns transactions
       tags:
       - txs
       x-openapi-router-controller: openapi_server.controllers.txs_controller

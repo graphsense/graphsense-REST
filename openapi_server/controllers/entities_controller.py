@@ -53,6 +53,26 @@ def list_entity_addresses(currency, entity, page=None, pagesize=None):  # noqa: 
         return notfound(str(e))
 
 
+def list_entity_addresses_csv(currency, entity):  # noqa: E501
+    """Get an entity&#39;s addresses as CSV
+
+     # noqa: E501
+
+    :param currency: The cryptocurrency (e.g., btc)
+    :type currency: str
+    :param entity: The entity ID
+    :type entity: int
+
+    :rtype: str
+    """
+    try:
+        return service.list_entity_addresses_csv(
+            currency=currency,
+            entity=entity)
+    except RuntimeError as e:
+        return notfound(str(e))
+
+
 def list_entity_neighbors(currency, entity, direction, targets=None, page=None, pagesize=None):  # noqa: E501
     """Get an entity&#39;s neighbors in the entity graph
 

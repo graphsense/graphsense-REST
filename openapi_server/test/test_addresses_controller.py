@@ -75,6 +75,26 @@ class TestAddressesController(BaseTestCase):
                        'Response body is : ' + response.data.decode('utf-8'))
 
 
+    def test_list_address_links_csv(self):
+        """Test case for list_address_links_csv
+
+        Get transactions between two addresses as CSV
+        """
+        test_service.list_address_links_csv(self)
+
+        query_string = [('neighbor', '17DfZja1713S3JRWA9jaebCKFM5anUh7GG')]
+        headers = { 
+            'Accept': 'text/csv',
+        }
+        response = self.client.open(
+            '/{currency}/addresses/{address}/links.csv'.format(currency="btc", address="1Archive1n2C579dMsAu3iC6tWzuQJz8dN"),
+            method='GET',
+            headers=headers,
+            query_string=query_string)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+
     def test_list_address_neighbors(self):
         """Test case for list_address_neighbors
 
@@ -170,6 +190,24 @@ class TestAddressesController(BaseTestCase):
             method='GET',
             headers=headers,
             query_string=query_string)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+
+    def test_list_address_txs_csv(self):
+        """Test case for list_address_txs_csv
+
+        Get all transactions an address has been involved in as CSV
+        """
+        test_service.list_address_txs_csv(self)
+
+        headers = { 
+            'Accept': 'text/csv',
+        }
+        response = self.client.open(
+            '/{currency}/addresses/{address}/txs.csv'.format(currency="btc", address="1Archive1n2C579dMsAu3iC6tWzuQJz8dN"),
+            method='GET',
+            headers=headers)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 

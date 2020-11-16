@@ -189,6 +189,17 @@ def list_entity_addresses(currency, entity, page=None, pagesize=None):
     return EntityAddresses(next_page=paging_state, addresses=addresses)
 
 
+def list_entity_addresses_csv(currency, entity):
+    def query_function(page_state):
+        result = list_entity_addresses(currency, entity, page_state)
+        return (result.next_page, result.addresses)
+    return Response(stream_with_context(to_csv(query_function)),
+                    mimetype="text/csv",
+                    headers=create_download_header(
+                            'addresses of entity {} ({}).csv'
+                            .format(entity, currency.upper())))
+
+
 def search_entity_neighbors(currency, entity, direction, key, value, depth, breadth, skip_num_addresses=None):  # noqa: E501
     params = dict()
     db = get_connection()

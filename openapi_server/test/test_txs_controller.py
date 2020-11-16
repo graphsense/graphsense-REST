@@ -36,7 +36,7 @@ class TestTxsController(BaseTestCase):
     def test_list_txs(self):
         """Test case for list_txs
 
-        Returns details of a specific transaction identified by its hash.
+        Returns transactions
         """
         test_service.list_txs(self)
 

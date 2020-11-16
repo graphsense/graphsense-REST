@@ -342,6 +342,16 @@ def list_entity_addresses(test_case):
     assertEqual(entityWithTagsAddresses, result)
 
 
+def list_entity_addresses_csv(test_case):
+    '''
+    result = service.list_entity_addresses_csv(
+                    currency='btc',
+                    entity=entityWithTags.entity)
+    assertEqual("", result.data.decode('utf-8'))
+    '''
+    pass
+
+
 def search_entity_neighbors(test_case):
 
     # Test category matching

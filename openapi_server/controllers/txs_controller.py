@@ -25,7 +25,7 @@ def get_tx(currency, tx_hash):  # noqa: E501
 
 
 def list_txs(currency, page=None):  # noqa: E501
-    """Returns details of a specific transaction identified by its hash.
+    """Returns transactions
 
      # noqa: E501
 

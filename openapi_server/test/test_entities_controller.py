@@ -57,6 +57,24 @@ class TestEntitiesController(BaseTestCase):
                        'Response body is : ' + response.data.decode('utf-8'))
 
 
+    def test_list_entity_addresses_csv(self):
+        """Test case for list_entity_addresses_csv
+
+        Get an entity's addresses as CSV
+        """
+        test_service.list_entity_addresses_csv(self)
+
+        headers = { 
+            'Accept': 'text/csv',
+        }
+        response = self.client.open(
+            '/{currency}/entities/{entity}/addresses.csv'.format(currency="btc", entity="67065"),
+            method='GET',
+            headers=headers)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+
     def test_list_entity_neighbors(self):
         """Test case for list_entity_neighbors
 

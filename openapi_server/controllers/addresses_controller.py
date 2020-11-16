@@ -71,6 +71,29 @@ def list_address_links(currency, address, neighbor):  # noqa: E501
         return notfound(str(e))
 
 
+def list_address_links_csv(currency, address, neighbor):  # noqa: E501
+    """Get transactions between two addresses as CSV
+
+     # noqa: E501
+
+    :param currency: The cryptocurrency (e.g., btc)
+    :type currency: str
+    :param address: The cryptocurrency address
+    :type address: str
+    :param neighbor: Neighbor address
+    :type neighbor: str
+
+    :rtype: str
+    """
+    try:
+        return service.list_address_links_csv(
+            currency=currency,
+            address=address,
+            neighbor=neighbor)
+    except RuntimeError as e:
+        return notfound(str(e))
+
+
 def list_address_neighbors(currency, address, direction, page=None, pagesize=None):  # noqa: E501
     """Get an addresses&#39; neighbors in the address graph
 
@@ -185,5 +208,25 @@ def list_address_txs(currency, address, page=None, pagesize=None):  # noqa: E501
             address=address,
             page=page,
             pagesize=pagesize)
+    except RuntimeError as e:
+        return notfound(str(e))
+
+
+def list_address_txs_csv(currency, address):  # noqa: E501
+    """Get all transactions an address has been involved in as CSV
+
+     # noqa: E501
+
+    :param currency: The cryptocurrency (e.g., btc)
+    :type currency: str
+    :param address: The cryptocurrency address
+    :type address: str
+
+    :rtype: str
+    """
+    try:
+        return service.list_address_txs_csv(
+            currency=currency,
+            address=address)
     except RuntimeError as e:
         return notfound(str(e))

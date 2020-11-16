@@ -260,6 +260,12 @@ def list_address_txs(test_case):
     assertEqual(address_txs, result)
 
 
+def list_address_txs_csv(test_case):
+    # result = service.list_address_txs_csv('btc', addressWithoutTags.address)
+    # assertEqual('', result.data.decode('utf-8'))
+    pass
+
+
 def list_address_tags(test_case):
     result = service.list_address_tags('btc', addressWithTags.address)
     assertEqual(addressWithTags.tags, result)
@@ -328,3 +334,15 @@ def list_address_links(test_case):
                  height=2)]
 
     assertEqual(link, result)
+
+
+def list_address_links_csv(test_case):
+    '''
+    result = service.list_address_links_csv(
+                currency='btc',
+                address=addressWithTags.address,
+                neighbor='17DfZja1713S3JRWA9jaebCKFM5anUh7GG')
+
+    assertEqual("", result.data.decode('utf-8'))
+    '''
+    pass
