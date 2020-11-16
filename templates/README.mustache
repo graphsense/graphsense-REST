@@ -92,6 +92,10 @@ Flask configuration parameters can be added at the top level of
 `instance/config.yaml`. A configuration template file is provided in
 `conf/config.yaml.template`.
 
+You may define `ALLOWED_ORIGINS` in `instance/config.yaml` if the REST 
+interface is to be consumed by a Web browser, eg. 
+by [graphsense-dashboard][graphsense-dashbaord].
+
 ## Development
 
 ### Generate server stub
