@@ -39,8 +39,9 @@ def main(instance_path=None):
     load_config(app.app, instance_path)
     with app.app.app_context():
         gsrest.db.init_app(app.app)
+    app.app.logger.debug('ALLOWED_ORIGINS {}'.format(app.app.config['ALLOWED_ORIGINS']))
     CORS(app.app, supports_credentials=True,
-         origins=app.config['ALLOWED_ORIGINS'] if 'ALLOWED_ORIGINS'
+         origins=app.app.config['ALLOWED_ORIGINS'] if 'ALLOWED_ORIGINS'
          in app.app.config else '*')
     return app
 
