@@ -129,7 +129,7 @@ tox
 ```
 
 This launches a mockup Cassandra database instance and ingests test data from
-`tests/data`. See `tox.ini` (`templates/tox.mustache` resp.) and
+`tests/data`. See `tox.ini` (`templates/tox.mustache` respectively) and
 `tests/Makefile` for further details on test configuration and setup.
 
 Test instance configuration template can be found in `tests/config.yaml.template`.
