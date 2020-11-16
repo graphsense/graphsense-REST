@@ -25,7 +25,7 @@ Make sure you are running Python 3.5+
 
     python3 --version
 
-Create a python environment for required dependencies
+Create a Python environment for required dependencies
 
     python3 -m venv venv
 
