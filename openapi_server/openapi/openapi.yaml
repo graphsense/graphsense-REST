@@ -874,7 +874,7 @@ paths:
           type: string
         style: form
       - description: Restrict result to given set of comma separated IDs
-        explode: false
+        explode: true
         in: query
         name: targets
         required: false
@@ -883,7 +883,7 @@ paths:
             format: int64
             type: integer
           type: array
-        style: simple
+        style: form
       - description: Resumption token for retrieving the next page
         example: 0400030bff00f07fffff9b00
         explode: true
@@ -1016,7 +1016,7 @@ paths:
           - addresses: comma separated list of address IDs - total_received/balance:
           comma separated tuple of (currency, min, max)'
         example: Miner
-        explode: false
+        explode: true
         in: query
         name: value
         required: true
@@ -1024,7 +1024,7 @@ paths:
           items:
             type: string
           type: array
-        style: simple
+        style: form
       - description: How many hops should the transaction graph be searched
         explode: true
         in: query
@@ -1352,7 +1352,7 @@ components:
       style: simple
     targets:
       description: Restrict result to given set of comma separated IDs
-      explode: false
+      explode: true
       in: query
       name: targets
       required: false
@@ -1361,7 +1361,7 @@ components:
           format: int64
           type: integer
         type: array
-      style: simple
+      style: form
     search_key:
       description: 'Match neighbors against one and only one of these properties:
         - the category the entity belongs to - addresses the entity contains - total_received:
@@ -1384,7 +1384,7 @@ components:
         addresses: comma separated list of address IDs - total_received/balance: comma
         separated tuple of (currency, min, max)'
       example: Miner
-      explode: false
+      explode: true
       in: query
       name: value
       required: true
@@ -1392,7 +1392,7 @@ components:
         items:
           type: string
         type: array
-      style: simple
+      style: form
     depth:
       description: How many hops should the transaction graph be searched
       explode: true
@@ -2574,8 +2574,8 @@ components:
     rates:
       example:
         rates:
-          eur: ""
-          usd: ""
+          eur: 6.0274563
+          usd: 1.4658129
         height: 1
       properties:
         height:
@@ -2717,19 +2717,22 @@ components:
           type: array
         tag_coherence:
           description: Tag coherence
-          type: float
+          format: float
+          type: number
       required:
       - tags
       type: object
     rates_rates:
       example:
-        eur: ""
-        usd: ""
+        eur: 6.0274563
+        usd: 1.4658129
       properties:
         eur:
           description: EUR/Crypto rate
-          type: float
+          format: float
+          type: number
         usd:
           description: USD/Crypto rate
-          type: float
+          format: float
+          type: number
       type: object

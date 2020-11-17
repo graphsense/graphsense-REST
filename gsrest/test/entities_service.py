@@ -401,6 +401,27 @@ def search_entity_neighbors(test_case):
     assertEqual(addresses, [a.address for a
                             in result.paths[0].paths[0].matching_addresses])
 
+    query_string = [('direction', 'out'),
+                    ('key', 'addresses'),
+                    ('value', ','.join(addresses)),
+                    ('depth', '7')]
+    headers = {
+        'Accept': 'application/json',
+    }
+    response = test_case.client.open(
+        '/{currency}/entities/{entity}/search'
+        .format(currency="btc", entity=entityWithTags.entity),
+        method='GET',
+        headers=headers,
+        query_string=query_string)
+
+    result = json.loads(response.data.decode('utf-8'))
+    assertEqual(2818641, result['paths'][0]['node']['entity'])
+    assertEqual(456, result['paths'][0]['paths'][0]['node']['entity'])
+    assertEqual(addresses,
+                [a['address'] for a
+                 in result['paths'][0]['paths'][0]['matching_addresses']])
+
     addresses = ['abcdefg']
     result = service.search_entity_neighbors(
                     currency='btc',
