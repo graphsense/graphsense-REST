@@ -1,7 +1,26 @@
+
 # Changelog
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## [0.4.5] 2020-11-18
+
+Complete rewrite on top of a [Connexion](https://github.com/zalando/connexion)
+server stub generated through [OpenAPI Generator](https://openapi-generator.tech)
+given the [Graphsense OpenAPI specification](https://github.com/graphsense/graphsense-openapi).
+
+### Added
+- CSV variants of entity/addresses, address/txs and address/links
+- integration tests of services against cassandra mockup db instance
+- check keyspace existence on startup
+- database layer abstraction
+### Changed
+- changed instance config format to YAML
+- changed interface of entity neighbor search endpoint
+- changed response of addresses/links endpoint
+### Removed
+- authentication (to be handled by a proxy)
 
 ## [0.4.4] 2020-06-16
 ### Added

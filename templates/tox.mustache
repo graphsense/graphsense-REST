@@ -1,0 +1,12 @@
+[tox]
+envlist = {{#supportPython2}}py27, {{/supportPython2}}py3
+skipsdist=True
+requires=tox-venv
+
+[testenv]
+deps=-rrequirements.txt
+     -rtest-requirements.txt
+
+commands=
+  bash -c "cd {toxinidir}/tests/ && make test"
+  {{^useNose}}pytest --cov={{{pythonSrcRoot}}}{{{packageName}}}{{/useNose}}{{#useNose}}nosetests{{/useNose}}

@@ -1,47 +1,69 @@
-from cassandra.query import SimpleStatement
-
-from gsrest.db.cassandra import get_session
-from gsrest.model.blocks import Block, BlockTxs
+from gsrest.db import get_connection
+from openapi_server.models.block import Block
+from openapi_server.models.blocks import Blocks
+from openapi_server.models.block_txs import BlockTxs
+from openapi_server.models.block_tx_summary import BlockTxSummary
+from gsrest.util.values import convert_value
 from gsrest.service.rates_service import get_rates
-
-BLOCKS_PAGE_SIZE = 100
-
-
-def get_block(currency, height):
-    session = get_session(currency, 'raw')
-
-    query = "SELECT * FROM block WHERE height = %s"
-    result = session.execute(query, [height])
-    if result:
-        return Block.from_row(result[0]).to_dict()
-    return None
+from flask import Response, stream_with_context
+from gsrest.util.csvify import create_download_header, to_csv
 
 
-def list_blocks(currency, paging_state=None):
-    session = get_session(currency, 'raw')
+def get_block(currency, height) -> Block:
+    db = get_connection()
+    row = db.get_block(currency, height)
+    if not row:
+        raise RuntimeError("Block {} not found".format(height))
+    return Block(
+            height=row.height,
+            block_hash=row.block_hash.hex(),
+            no_txs=row.no_transactions,
+            timestamp=row.timestamp)
 
-    query = "SELECT * FROM block"
-    statement = SimpleStatement(query, fetch_size=BLOCKS_PAGE_SIZE)
-    results = session.execute(statement, paging_state=paging_state)
 
-    paging_state = results.paging_state
-    block_list = [Block.from_row(row).to_dict()
+def list_blocks(currency, page=None):
+    db = get_connection()
+    results, paging_state = db.list_blocks(currency, page)
+    block_list = [Block(
+                    height=row.height,
+                    block_hash=row.block_hash.hex(),
+                    no_txs=row.no_transactions,
+                    timestamp=row.timestamp)
                   for row in results.current_rows]
 
-    return paging_state, block_list
+    return Blocks(paging_state, block_list)
 
 
 def list_block_txs(currency, height):
-    session = get_session(currency, 'raw')
+    db = get_connection()
+    result = db.list_block_txs(currency, height)
 
-    query = "SELECT * FROM block_transactions WHERE height = %s"
-    results = session.execute(query, [height])
+    if result is None:
+        raise RuntimeError("Block {} not found".format(height))
+    rates = get_rates(currency, height)
 
-    if results:
-        rates = get_rates(currency, height)
+    tx_summaries = \
+        [BlockTxSummary(
+         no_inputs=tx.no_inputs,
+         no_outputs=tx.no_outputs,
+         total_input=convert_value(tx.total_input, rates['rates']),
+         total_output=convert_value(tx.total_output, rates['rates']),
+         tx_hash=tx.tx_hash.hex()
+         )
+         for tx in result.txs]
 
-        block_txs = BlockTxs.from_row(results[0],
-                                      rates['rates']).to_dict()
+    return BlockTxs(height, tx_summaries)
 
-        return block_txs
-    return None
+
+def list_block_txs_csv(currency, height):
+    def query_function(_):
+        result = list_block_txs(currency, height)
+        txs = [tx.to_dict() for tx in result.txs]
+        for tx in txs:
+            tx['block_height'] = result.height
+        return None, txs
+    return Response(stream_with_context(to_csv(query_function)),
+                    mimetype="text/csv",
+                    headers=create_download_header(
+                        'transactions of block {} ({}).csv'
+                        .format(height, currency.upper())))

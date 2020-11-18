@@ -1,2 +1,0 @@
-include gsrest/db/user_db_schema.sql
-global-exclude *.pyc

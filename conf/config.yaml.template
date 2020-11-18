@@ -1,0 +1,31 @@
+# This file contains instance specific configuration options.
+
+# Replace Cassandra hostnames and keyspaces
+
+database:
+    driver: cassandra
+    nodes: ["CASSANDRA_HOST_1", "CASSANDRA_HOST_2"]
+    tagpacks: "TAGPACK_KEYSPACE",
+    currencies:
+        btc:
+            raw: "BTC_RAW_KEYSPACE"
+            transformed: "BTC_TRANSFORMED_KEYSPACE"
+        bch:
+            raw: "BCH_RAW_KEYSPACE"
+            transformed: "BCH_TRANSFORMED_KEYSPACE"
+        ltc:
+            raw: "LTC_RAW_KEYSPACE"
+            transformed: "LTC_TRANSFORMED_KEYSPACE"
+        zec:
+            raw: "ZEC_RAW_KEYSPACE"
+            transformed: "ZEC_TRANSFORMED_KEYSPACE"
+
+# Restrict allowed origins for CORS
+#
+# The origin, or list of origins to allow requests from. The origin(s) may be regular expressions, case-sensitive strings, or else an asterisk
+# (see https://flask-cors.readthedocs.io/en/latest/api.html for further details)
+#
+# Default : ‘*’ 
+# ALLOWED_ORIGINS: 
+#   - 'https://example.com'
+

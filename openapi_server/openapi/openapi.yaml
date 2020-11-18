@@ -1,0 +1,2738 @@
+openapi: 3.0.0
+info:
+  description: GraphSense API
+  title: GraphSense API
+  version: 0.4.5
+servers:
+- url: http://openapi_server:9000
+paths:
+  /search:
+    get:
+      operationId: search
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: true
+        in: query
+        name: currency
+        required: false
+        schema:
+          format: string
+          type: string
+        style: form
+      - description: It can be (the beginning of) an address, a transaction or a label
+        example: foo
+        explode: true
+        in: query
+        name: q
+        required: true
+        schema:
+          minLength: 3
+          pattern: ^[\w ]+$
+          type: string
+        style: form
+      - description: Maximum number of search results
+        example: 10
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/search_result'
+          description: OK
+      summary: Returns matching addresses, transactions and labels
+      tags:
+      - general
+      x-openapi-router-controller: openapi_server.controllers.general_controller
+  /stats:
+    get:
+      operationId: get_statistics
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/stats'
+          description: OK
+      summary: Get statistics of supported currencies
+      tags:
+      - general
+      x-openapi-router-controller: openapi_server.controllers.general_controller
+  /tags:
+    get:
+      operationId: list_tags
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: true
+        in: query
+        name: currency
+        required: false
+        schema:
+          format: string
+          type: string
+        style: form
+      - description: The label of an entity
+        example: cimedy
+        explode: true
+        in: query
+        name: label
+        required: true
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/tag'
+                type: array
+          description: OK
+      summary: Returns the tags associated with a given label
+      tags:
+      - tags
+      x-openapi-router-controller: openapi_server.controllers.tags_controller
+  /tags/taxonomies:
+    get:
+      operationId: list_taxonomies
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/taxonomy'
+                type: array
+          description: OK
+      summary: Returns the supported taxonomies
+      tags:
+      - tags
+      x-openapi-router-controller: openapi_server.controllers.tags_controller
+  /tags/taxonomies/{taxonomy}/concepts:
+    get:
+      operationId: list_concepts
+      parameters:
+      - description: The taxonomy
+        example: foo
+        explode: false
+        in: path
+        name: taxonomy
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/concept'
+                type: array
+          description: OK
+      summary: Returns the supported concepts of a taxonomy
+      tags:
+      - tags
+      x-openapi-router-controller: openapi_server.controllers.tags_controller
+  /{currency}/addresses/{address}:
+    get:
+      operationId: get_address_with_tags
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The cryptocurrency address
+        example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
+        explode: false
+        in: path
+        name: address
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/address_with_tags'
+          description: OK
+      summary: Get an address with tags
+      tags:
+      - addresses
+      x-openapi-router-controller: openapi_server.controllers.addresses_controller
+  /{currency}/addresses/{address}/entity:
+    get:
+      operationId: get_address_entity
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The cryptocurrency address
+        example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
+        explode: false
+        in: path
+        name: address
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/entity_with_tags'
+          description: OK
+      summary: Get an address with tags
+      tags:
+      - addresses
+      x-openapi-router-controller: openapi_server.controllers.addresses_controller
+  /{currency}/addresses/{address}/links:
+    get:
+      operationId: list_address_links
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The cryptocurrency address
+        example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
+        explode: false
+        in: path
+        name: address
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: Neighbor address
+        example: 17DfZja1713S3JRWA9jaebCKFM5anUh7GG
+        explode: true
+        in: query
+        name: neighbor
+        required: true
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/link'
+                type: array
+          description: OK
+      summary: Get transactions between two addresses
+      tags:
+      - addresses
+      x-openapi-router-controller: openapi_server.controllers.addresses_controller
+  /{currency}/addresses/{address}/links.csv:
+    get:
+      operationId: list_address_links_csv
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The cryptocurrency address
+        example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
+        explode: false
+        in: path
+        name: address
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: Neighbor address
+        example: 17DfZja1713S3JRWA9jaebCKFM5anUh7GG
+        explode: true
+        in: query
+        name: neighbor
+        required: true
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            text/csv:
+              schema:
+                type: string
+          description: OK
+      summary: Get transactions between two addresses as CSV
+      tags:
+      - addresses
+      x-openapi-router-controller: openapi_server.controllers.addresses_controller
+  /{currency}/addresses/{address}/neighbors:
+    get:
+      operationId: list_address_neighbors
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The cryptocurrency address
+        example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
+        explode: false
+        in: path
+        name: address
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: Incoming or outgoing neighbors
+        example: out
+        explode: true
+        in: query
+        name: direction
+        required: true
+        schema:
+          enum:
+          - in
+          - out
+          type: string
+        style: form
+      - description: Resumption token for retrieving the next page
+        example: 0400030bff00f07fffff9b00
+        explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Number of items returned in a single page
+        example: 10
+        explode: true
+        in: query
+        name: pagesize
+        required: false
+        schema:
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/neighbors'
+          description: OK
+      summary: Get an addresses' neighbors in the address graph
+      tags:
+      - addresses
+      x-openapi-router-controller: openapi_server.controllers.addresses_controller
+  /{currency}/addresses/{address}/neighbors.csv:
+    get:
+      operationId: list_address_neighbors_csv
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The cryptocurrency address
+        example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
+        explode: false
+        in: path
+        name: address
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: Incoming or outgoing neighbors
+        example: out
+        explode: true
+        in: query
+        name: direction
+        required: true
+        schema:
+          enum:
+          - in
+          - out
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            text/csv:
+              schema:
+                type: string
+          description: OK
+      summary: Get an addresses' neighbors in the address graph as CSV
+      tags:
+      - addresses
+      x-openapi-router-controller: openapi_server.controllers.addresses_controller
+  /{currency}/addresses/{address}/tags:
+    get:
+      operationId: list_address_tags
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The cryptocurrency address
+        example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
+        explode: false
+        in: path
+        name: address
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/tag'
+                type: array
+          description: OK
+      summary: Get attribution tags for a given address
+      tags:
+      - addresses
+      x-openapi-router-controller: openapi_server.controllers.addresses_controller
+  /{currency}/addresses/{address}/tags.csv:
+    get:
+      operationId: list_address_tags_csv
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The cryptocurrency address
+        example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
+        explode: false
+        in: path
+        name: address
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/csv:
+              schema:
+                type: string
+          description: OK
+      summary: Get attribution tags for a given address
+      tags:
+      - addresses
+      x-openapi-router-controller: openapi_server.controllers.addresses_controller
+  /{currency}/addresses/{address}/txs:
+    get:
+      operationId: list_address_txs
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The cryptocurrency address
+        example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
+        explode: false
+        in: path
+        name: address
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: Resumption token for retrieving the next page
+        example: 0400030bff00f07fffff9b00
+        explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Number of items returned in a single page
+        example: 10
+        explode: true
+        in: query
+        name: pagesize
+        required: false
+        schema:
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/address_txs'
+          description: OK
+      summary: Get all transactions an address has been involved in
+      tags:
+      - addresses
+      x-openapi-router-controller: openapi_server.controllers.addresses_controller
+  /{currency}/addresses/{address}/txs.csv:
+    get:
+      operationId: list_address_txs_csv
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The cryptocurrency address
+        example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
+        explode: false
+        in: path
+        name: address
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            text/csv:
+              schema:
+                type: string
+          description: OK
+      summary: Get all transactions an address has been involved in as CSV
+      tags:
+      - addresses
+      x-openapi-router-controller: openapi_server.controllers.addresses_controller
+  /{currency}/blocks:
+    get:
+      operationId: list_blocks
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: Resumption token for retrieving the next page
+        example: 0400030bff00f07fffff9b00
+        explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/blocks'
+          description: OK
+      summary: Get all blocks
+      tags:
+      - blocks
+      x-openapi-router-controller: openapi_server.controllers.blocks_controller
+  /{currency}/blocks/{height}:
+    get:
+      operationId: get_block
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The block height
+        example: 1
+        explode: false
+        in: path
+        name: height
+        required: true
+        schema:
+          minimum: 1
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/block'
+          description: OK
+      summary: Get a block by its height
+      tags:
+      - blocks
+      x-openapi-router-controller: openapi_server.controllers.blocks_controller
+  /{currency}/blocks/{height}/txs:
+    get:
+      operationId: list_block_txs
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The block height
+        example: 1
+        explode: false
+        in: path
+        name: height
+        required: true
+        schema:
+          minimum: 1
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/block_txs'
+          description: OK
+      summary: Get all blocks (100 per page)
+      tags:
+      - blocks
+      x-openapi-router-controller: openapi_server.controllers.blocks_controller
+  /{currency}/blocks/{height}/txs.csv:
+    get:
+      operationId: list_block_txs_csv
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The block height
+        example: 1
+        explode: false
+        in: path
+        name: height
+        required: true
+        schema:
+          minimum: 1
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            text/csv:
+              schema:
+                type: string
+          description: OK
+      summary: Get all blocks as CSV
+      tags:
+      - blocks
+      x-openapi-router-controller: openapi_server.controllers.blocks_controller
+  /{currency}/entities/{entity}:
+    get:
+      operationId: get_entity_with_tags
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The entity ID
+        example: 67065
+        explode: false
+        in: path
+        name: entity
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/entity_with_tags'
+          description: OK
+      summary: Get an entity with tags
+      tags:
+      - entities
+      x-openapi-router-controller: openapi_server.controllers.entities_controller
+  /{currency}/entities/{entity}/addresses:
+    get:
+      operationId: list_entity_addresses
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The entity ID
+        example: 67065
+        explode: false
+        in: path
+        name: entity
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      - description: Resumption token for retrieving the next page
+        example: 0400030bff00f07fffff9b00
+        explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Number of items returned in a single page
+        example: 10
+        explode: true
+        in: query
+        name: pagesize
+        required: false
+        schema:
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/entity_addresses'
+          description: OK
+      summary: Get an entity's addresses
+      tags:
+      - entities
+      x-openapi-router-controller: openapi_server.controllers.entities_controller
+  /{currency}/entities/{entity}/addresses.csv:
+    get:
+      operationId: list_entity_addresses_csv
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The entity ID
+        example: 67065
+        explode: false
+        in: path
+        name: entity
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            text/csv:
+              schema:
+                type: string
+          description: OK
+      summary: Get an entity's addresses as CSV
+      tags:
+      - entities
+      x-openapi-router-controller: openapi_server.controllers.entities_controller
+  /{currency}/entities/{entity}/neighbors:
+    get:
+      operationId: list_entity_neighbors
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The entity ID
+        example: 67065
+        explode: false
+        in: path
+        name: entity
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      - description: Incoming or outgoing neighbors
+        example: out
+        explode: true
+        in: query
+        name: direction
+        required: true
+        schema:
+          enum:
+          - in
+          - out
+          type: string
+        style: form
+      - description: Restrict result to given set of comma separated IDs
+        explode: true
+        in: query
+        name: targets
+        required: false
+        schema:
+          items:
+            format: int64
+            type: integer
+          type: array
+        style: form
+      - description: Resumption token for retrieving the next page
+        example: 0400030bff00f07fffff9b00
+        explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Number of items returned in a single page
+        example: 10
+        explode: true
+        in: query
+        name: pagesize
+        required: false
+        schema:
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/neighbors'
+          description: OK
+      summary: Get an entity's neighbors in the entity graph
+      tags:
+      - entities
+      x-openapi-router-controller: openapi_server.controllers.entities_controller
+  /{currency}/entities/{entity}/neighbors.csv:
+    get:
+      operationId: list_entity_neighbors_csv
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The entity ID
+        example: 67065
+        explode: false
+        in: path
+        name: entity
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      - description: Incoming or outgoing neighbors
+        example: out
+        explode: true
+        in: query
+        name: direction
+        required: true
+        schema:
+          enum:
+          - in
+          - out
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            text/csv:
+              schema:
+                type: string
+          description: OK
+      summary: Get an entity's neighbors in the entity graph as CSV
+      tags:
+      - entities
+      x-openapi-router-controller: openapi_server.controllers.entities_controller
+  /{currency}/entities/{entity}/search:
+    get:
+      operationId: search_entity_neighbors
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The entity ID
+        example: 67065
+        explode: false
+        in: path
+        name: entity
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      - description: Incoming or outgoing neighbors
+        example: out
+        explode: true
+        in: query
+        name: direction
+        required: true
+        schema:
+          enum:
+          - in
+          - out
+          type: string
+        style: form
+      - description: 'Match neighbors against one and only one of these properties:
+          - the category the entity belongs to - addresses the entity contains - total_received:
+          amount the entity received in total - balance: amount the entity holds finally'
+        example: category
+        explode: true
+        in: query
+        name: key
+        required: true
+        schema:
+          enum:
+          - category
+          - addresses
+          - total_received
+          - balance
+          type: string
+        style: form
+      - description: 'If key is - category: comma separated list of category names
+          - addresses: comma separated list of address IDs - total_received/balance:
+          comma separated tuple of (currency, min, max)'
+        example: Miner
+        explode: true
+        in: query
+        name: value
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      - description: How many hops should the transaction graph be searched
+        explode: true
+        in: query
+        name: depth
+        required: true
+        schema:
+          format: int32
+          maximum: 7
+          type: integer
+        style: form
+      - description: How many siblings of each neighbor should be tried
+        explode: true
+        in: query
+        name: breadth
+        required: false
+        schema:
+          default: 16
+          format: int32
+          type: integer
+        style: form
+      - description: Skip entities containing more addresses
+        explode: true
+        in: query
+        name: skip_num_addresses
+        required: false
+        schema:
+          format: int32
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/search_paths'
+          description: OK
+      summary: Search deeply for matching neighbors
+      tags:
+      - entities
+      x-openapi-router-controller: openapi_server.controllers.entities_controller
+  /{currency}/entities/{entity}/tags:
+    get:
+      operationId: list_entity_tags
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The entity ID
+        example: 67065
+        explode: false
+        in: path
+        name: entity
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/tag'
+                type: array
+          description: OK
+      summary: Get attribution tags for a given entity
+      tags:
+      - entities
+      x-openapi-router-controller: openapi_server.controllers.entities_controller
+  /{currency}/entities/{entity}/tags.csv:
+    get:
+      operationId: list_entity_tags_csv
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The entity ID
+        example: 67065
+        explode: false
+        in: path
+        name: entity
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/csv:
+              schema:
+                type: string
+          description: OK
+      summary: Get attribution tags for a given entity as CSV
+      tags:
+      - entities
+      x-openapi-router-controller: openapi_server.controllers.entities_controller
+  /{currency}/rates/{height}:
+    get:
+      operationId: get_exchange_rates
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The block height
+        example: 1
+        explode: false
+        in: path
+        name: height
+        required: true
+        schema:
+          minimum: 1
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/rates'
+          description: OK
+      summary: Returns exchange rate for a given height
+      tags:
+      - rates
+      x-openapi-router-controller: openapi_server.controllers.rates_controller
+  /{currency}/txs:
+    get:
+      operationId: list_txs
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: Resumption token for retrieving the next page
+        example: 0400030bff00f07fffff9b00
+        explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/txs'
+          description: OK
+      summary: Returns transactions
+      tags:
+      - txs
+      x-openapi-router-controller: openapi_server.controllers.txs_controller
+  /{currency}/txs/{tx_hash}:
+    get:
+      operationId: get_tx
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The transaction hash
+        example: ab188013
+        explode: false
+        in: path
+        name: tx_hash
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tx'
+          description: OK
+      summary: Returns details of a specific transaction identified by its hash.
+      tags:
+      - txs
+      x-openapi-router-controller: openapi_server.controllers.txs_controller
+components:
+  parameters:
+    currency:
+      description: The cryptocurrency (e.g., btc)
+      example: btc
+      explode: false
+      in: path
+      name: currency
+      required: true
+      schema:
+        format: string
+        type: string
+      style: simple
+    currency_query:
+      description: The cryptocurrency (e.g., btc)
+      example: btc
+      explode: true
+      in: query
+      name: currency
+      required: false
+      schema:
+        format: string
+        type: string
+      style: form
+    height:
+      description: The block height
+      example: 1
+      explode: false
+      in: path
+      name: height
+      required: true
+      schema:
+        minimum: 1
+        type: integer
+      style: simple
+    page:
+      description: Resumption token for retrieving the next page
+      example: 0400030bff00f07fffff9b00
+      explode: true
+      in: query
+      name: page
+      required: false
+      schema:
+        type: string
+      style: form
+    pagesize:
+      description: Number of items returned in a single page
+      example: 10
+      explode: true
+      in: query
+      name: pagesize
+      required: false
+      schema:
+        type: integer
+      style: form
+    direction:
+      description: Incoming or outgoing neighbors
+      example: out
+      explode: true
+      in: query
+      name: direction
+      required: true
+      schema:
+        enum:
+        - in
+        - out
+        type: string
+      style: form
+    address:
+      description: The cryptocurrency address
+      example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
+      explode: false
+      in: path
+      name: address
+      required: true
+      schema:
+        format: string
+        type: string
+      style: simple
+    neighbor:
+      description: Neighbor address
+      example: 17DfZja1713S3JRWA9jaebCKFM5anUh7GG
+      explode: true
+      in: query
+      name: neighbor
+      required: true
+      schema:
+        type: string
+      style: form
+    entity:
+      description: The entity ID
+      example: 67065
+      explode: false
+      in: path
+      name: entity
+      required: true
+      schema:
+        format: int64
+        type: integer
+      style: simple
+    tx_hash:
+      description: The transaction hash
+      example: ab188013
+      explode: false
+      in: path
+      name: tx_hash
+      required: true
+      schema:
+        type: string
+      style: simple
+    targets:
+      description: Restrict result to given set of comma separated IDs
+      explode: true
+      in: query
+      name: targets
+      required: false
+      schema:
+        items:
+          format: int64
+          type: integer
+        type: array
+      style: form
+    search_key:
+      description: 'Match neighbors against one and only one of these properties:
+        - the category the entity belongs to - addresses the entity contains - total_received:
+        amount the entity received in total - balance: amount the entity holds finally'
+      example: category
+      explode: true
+      in: query
+      name: key
+      required: true
+      schema:
+        enum:
+        - category
+        - addresses
+        - total_received
+        - balance
+        type: string
+      style: form
+    search_value:
+      description: 'If key is - category: comma separated list of category names -
+        addresses: comma separated list of address IDs - total_received/balance: comma
+        separated tuple of (currency, min, max)'
+      example: Miner
+      explode: true
+      in: query
+      name: value
+      required: true
+      schema:
+        items:
+          type: string
+        type: array
+      style: form
+    depth:
+      description: How many hops should the transaction graph be searched
+      explode: true
+      in: query
+      name: depth
+      required: true
+      schema:
+        format: int32
+        maximum: 7
+        type: integer
+      style: form
+    breadth:
+      description: How many siblings of each neighbor should be tried
+      explode: true
+      in: query
+      name: breadth
+      required: false
+      schema:
+        default: 16
+        format: int32
+        type: integer
+      style: form
+    skip_num_addresses:
+      description: Skip entities containing more addresses
+      explode: true
+      in: query
+      name: skip_num_addresses
+      required: false
+      schema:
+        format: int32
+        type: integer
+      style: form
+    label:
+      description: The label of an entity
+      example: cimedy
+      explode: true
+      in: query
+      name: label
+      required: true
+      schema:
+        type: string
+      style: form
+    taxonomy:
+      description: The taxonomy
+      example: foo
+      explode: false
+      in: path
+      name: taxonomy
+      required: true
+      schema:
+        type: string
+      style: simple
+    search_query:
+      description: It can be (the beginning of) an address, a transaction or a label
+      example: foo
+      explode: true
+      in: query
+      name: q
+      required: true
+      schema:
+        minLength: 3
+        pattern: ^[\w ]+$
+        type: string
+      style: form
+    limit:
+      description: Maximum number of search results
+      example: 10
+      explode: true
+      in: query
+      name: limit
+      required: false
+      schema:
+        type: integer
+      style: form
+  schemas:
+    stats:
+      example:
+        notes:
+        - note: note
+        - note: note
+        tags_source:
+          visible_name: visible_name
+          report_uuid: report_uuid
+          id: id
+          version: version
+        version:
+          file: file
+          nr: nr
+          hash: hash
+          timestamp: timestamp
+        tools:
+        - visible_name: visible_name
+          responsible_for:
+          - responsible_for
+          - responsible_for
+          id: id
+          titanium_replayable: true
+          version: version
+        - visible_name: visible_name
+          responsible_for:
+          - responsible_for
+          - responsible_for
+          id: id
+          titanium_replayable: true
+          version: version
+        currencies:
+        - notes:
+          - notes
+          - notes
+          no_addresses: 1
+          no_labels: 2
+          name: name
+          no_entities: 5
+          no_address_relations: 6
+          tools:
+          - tools
+          - tools
+          no_blocks: 0
+          data_sources:
+          - visible_name: visible_name
+            report_uuid: report_uuid
+            id: id
+            version:
+              nr: nr
+              timestamp: timestamp
+          - visible_name: visible_name
+            report_uuid: report_uuid
+            id: id
+            version:
+              nr: nr
+              timestamp: timestamp
+          no_txs: 5
+          timestamp: 7
+        - notes:
+          - notes
+          - notes
+          no_addresses: 1
+          no_labels: 2
+          name: name
+          no_entities: 5
+          no_address_relations: 6
+          tools:
+          - tools
+          - tools
+          no_blocks: 0
+          data_sources:
+          - visible_name: visible_name
+            report_uuid: report_uuid
+            id: id
+            version:
+              nr: nr
+              timestamp: timestamp
+          - visible_name: visible_name
+            report_uuid: report_uuid
+            id: id
+            version:
+              nr: nr
+              timestamp: timestamp
+          no_txs: 5
+          timestamp: 7
+      properties:
+        currencies:
+          items:
+            $ref: '#/components/schemas/currency_stats'
+          type: array
+        version:
+          $ref: '#/components/schemas/stats_version'
+        tools:
+          items:
+            $ref: '#/components/schemas/stats_tool'
+          type: array
+        tags_source:
+          $ref: '#/components/schemas/stats_tags_source'
+        notes:
+          items:
+            $ref: '#/components/schemas/stats_note'
+          type: array
+      type: object
+    stats_version:
+      example:
+        file: file
+        nr: nr
+        hash: hash
+        timestamp: timestamp
+      properties:
+        nr:
+          type: string
+        hash:
+          type: string
+        timestamp:
+          type: string
+        file:
+          type: string
+      type: object
+    stats_tool:
+      example:
+        visible_name: visible_name
+        responsible_for:
+        - responsible_for
+        - responsible_for
+        id: id
+        titanium_replayable: true
+        version: version
+      properties:
+        visible_name:
+          type: string
+        id:
+          type: string
+        version:
+          type: string
+        titanium_replayable:
+          type: boolean
+        responsible_for:
+          items:
+            type: string
+          type: array
+      type: object
+    stats_tags_source:
+      example:
+        visible_name: visible_name
+        report_uuid: report_uuid
+        id: id
+        version: version
+      properties:
+        visible_name:
+          type: string
+        id:
+          type: string
+        version:
+          type: string
+        report_uuid:
+          type: string
+      type: object
+    stats_note:
+      example:
+        note: note
+      properties:
+        note:
+          type: string
+      type: object
+    currency_stats:
+      example:
+        notes:
+        - notes
+        - notes
+        no_addresses: 1
+        no_labels: 2
+        name: name
+        no_entities: 5
+        no_address_relations: 6
+        tools:
+        - tools
+        - tools
+        no_blocks: 0
+        data_sources:
+        - visible_name: visible_name
+          report_uuid: report_uuid
+          id: id
+          version:
+            nr: nr
+            timestamp: timestamp
+        - visible_name: visible_name
+          report_uuid: report_uuid
+          id: id
+          version:
+            nr: nr
+            timestamp: timestamp
+        no_txs: 5
+        timestamp: 7
+      properties:
+        name:
+          type: string
+        no_blocks:
+          format: int64
+          type: integer
+        no_address_relations:
+          format: int64
+          type: integer
+        no_addresses:
+          format: int64
+          type: integer
+        no_entities:
+          format: int64
+          type: integer
+        no_txs:
+          format: int64
+          type: integer
+        no_labels:
+          format: int64
+          type: integer
+        timestamp:
+          format: int64
+          type: integer
+        tools:
+          items:
+            type: string
+          type: array
+        notes:
+          items:
+            type: string
+          type: array
+        data_sources:
+          items:
+            $ref: '#/components/schemas/stats_ledger'
+          type: array
+      title: statistics of a cryptocurrency
+      type: object
+    stats_ledger:
+      example:
+        visible_name: visible_name
+        report_uuid: report_uuid
+        id: id
+        version:
+          nr: nr
+          timestamp: timestamp
+      properties:
+        visible_name:
+          type: string
+        id:
+          type: string
+        version:
+          $ref: '#/components/schemas/stats_ledger_version'
+        report_uuid:
+          type: string
+      type: object
+    stats_ledger_version:
+      example:
+        nr: nr
+        timestamp: timestamp
+      properties:
+        nr:
+          type: string
+        timestamp:
+          type: string
+      type: object
+    block:
+      example:
+        block_hash: block_hash
+        height: 1
+        no_txs: 6
+        timestamp: 1
+      properties:
+        block_hash:
+          format: string
+          type: string
+        height:
+          description: Height
+          format: int64
+          minimum: 1
+          type: integer
+        no_txs:
+          format: int64
+          type: integer
+        timestamp:
+          format: int64
+          type: integer
+      type: object
+    block_txs:
+      example:
+        txs:
+        - total_output:
+            eur: 1
+            usd: 5
+            value: 5
+          no_outputs: 1
+          total_input:
+            eur: 1
+            usd: 5
+            value: 5
+          tx_hash: tx_hash
+          no_inputs: 6
+        - total_output:
+            eur: 1
+            usd: 5
+            value: 5
+          no_outputs: 1
+          total_input:
+            eur: 1
+            usd: 5
+            value: 5
+          tx_hash: tx_hash
+          no_inputs: 6
+        height: 1
+      properties:
+        height:
+          description: Height
+          format: int64
+          minimum: 1
+          type: integer
+        txs:
+          items:
+            $ref: '#/components/schemas/block_tx_summary'
+          type: array
+      type: object
+    block_tx_summary:
+      example:
+        total_output:
+          eur: 1
+          usd: 5
+          value: 5
+        no_outputs: 1
+        total_input:
+          eur: 1
+          usd: 5
+          value: 5
+        tx_hash: tx_hash
+        no_inputs: 6
+      properties:
+        tx_hash:
+          type: string
+        no_inputs:
+          format: int64
+          type: integer
+        no_outputs:
+          format: int64
+          type: integer
+        total_input:
+          $ref: '#/components/schemas/values'
+        total_output:
+          $ref: '#/components/schemas/values'
+      type: object
+    blocks:
+      example:
+        next_page: next_page
+        blocks:
+        - block_hash: block_hash
+          height: 1
+          no_txs: 6
+          timestamp: 1
+        - block_hash: block_hash
+          height: 1
+          no_txs: 6
+          timestamp: 1
+      properties:
+        next_page:
+          format: string
+          type: string
+        blocks:
+          items:
+            $ref: '#/components/schemas/block'
+          type: array
+      type: object
+    address:
+      example:
+        total_spent:
+          eur: 1
+          usd: 5
+          value: 5
+        in_degree: 1
+        address: address
+        balance:
+          eur: 1
+          usd: 5
+          value: 5
+        no_incoming_txs: 5
+        out_degree: 5
+        no_outgoing_txs: 2
+        first_tx:
+          tx_hash: tx_hash
+          height: 1
+          timestamp: 6
+        last_tx:
+          tx_hash: tx_hash
+          height: 1
+          timestamp: 6
+        total_received:
+          eur: 1
+          usd: 5
+          value: 5
+      properties:
+        address:
+          description: Address
+          type: string
+        balance:
+          $ref: '#/components/schemas/values'
+        first_tx:
+          $ref: '#/components/schemas/tx_summary'
+        last_tx:
+          $ref: '#/components/schemas/tx_summary'
+        in_degree:
+          format: int64
+          type: integer
+        out_degree:
+          format: int64
+          type: integer
+        no_incoming_txs:
+          format: int64
+          type: integer
+        no_outgoing_txs:
+          format: int64
+          type: integer
+        total_received:
+          $ref: '#/components/schemas/values'
+        total_spent:
+          $ref: '#/components/schemas/values'
+      required:
+      - address
+      - balance
+      - first_tx
+      - in_degree
+      - last_tx
+      - no_incoming_txs
+      - no_outgoing_txs
+      - out_degree
+      - total_received
+      - total_spent
+      type: object
+    address_with_tags:
+      allOf:
+      - $ref: '#/components/schemas/address'
+      - $ref: '#/components/schemas/address_with_tags_allOf'
+    entity:
+      properties:
+        entity:
+          description: Entity id
+          type: string
+        balance:
+          $ref: '#/components/schemas/values'
+        first_tx:
+          $ref: '#/components/schemas/tx_summary'
+        last_tx:
+          $ref: '#/components/schemas/tx_summary'
+        in_degree:
+          format: int64
+          type: integer
+        out_degree:
+          format: int64
+          type: integer
+        no_addresses:
+          description: number of contained addresses
+          format: int64
+          type: integer
+        no_incoming_txs:
+          format: int64
+          type: integer
+        no_outgoing_txs:
+          format: int64
+          type: integer
+        total_received:
+          $ref: '#/components/schemas/values'
+        total_spent:
+          $ref: '#/components/schemas/values'
+      required:
+      - balance
+      - entity
+      - first_tx
+      - in_degree
+      - last_tx
+      - no_addresses
+      - no_incoming_txs
+      - no_outgoing_txs
+      - out_degree
+      - total_received
+      - total_spent
+      type: object
+    entity_with_tags:
+      allOf:
+      - $ref: '#/components/schemas/entity'
+      - $ref: '#/components/schemas/entity_with_tags_allOf'
+    address_txs:
+      example:
+        next_page: next_page
+        address_txs:
+        - address: address
+          tx_hash: tx_hash
+          value:
+            eur: 1
+            usd: 5
+            value: 5
+          height: 1
+          timestamp: 6
+        - address: address
+          tx_hash: tx_hash
+          value:
+            eur: 1
+            usd: 5
+            value: 5
+          height: 1
+          timestamp: 6
+      properties:
+        next_page:
+          format: string
+          type: string
+        address_txs:
+          items:
+            $ref: '#/components/schemas/address_tx'
+          type: array
+      type: object
+    address_tx:
+      example:
+        address: address
+        tx_hash: tx_hash
+        value:
+          eur: 1
+          usd: 5
+          value: 5
+        height: 1
+        timestamp: 6
+      properties:
+        address:
+          description: Address
+          type: string
+        height:
+          description: Height
+          format: int64
+          minimum: 1
+          type: integer
+        timestamp:
+          description: Timestamp
+          format: int64
+          type: integer
+        tx_hash:
+          description: Transaction hash
+          type: string
+        value:
+          $ref: '#/components/schemas/values'
+      type: object
+    tx_summary:
+      example:
+        tx_hash: tx_hash
+        height: 1
+        timestamp: 6
+      properties:
+        height:
+          description: Height
+          format: int64
+          minimum: 1
+          type: integer
+        timestamp:
+          description: Timestamp
+          format: int64
+          type: integer
+        tx_hash:
+          description: Transaction hash
+          type: string
+      required:
+      - height
+      - timestamp
+      - tx_hash
+      type: object
+    tag:
+      example:
+        address: address
+        abuse: abuse
+        active: true
+        currency: currency
+        label: label
+        source: source
+        category: category
+        tagpack_uri: tagpack_uri
+        lastmod: 0
+      properties:
+        address:
+          description: Address
+          type: string
+        label:
+          description: Label
+          type: string
+        category:
+          description: Category
+          type: string
+        abuse:
+          description: Abuses
+          type: string
+        tagpack_uri:
+          description: Tagpack URI
+          type: string
+        source:
+          description: Source
+          type: string
+        lastmod:
+          description: Last modified
+          format: int32
+          type: integer
+        active:
+          description: whether the address has been ever used
+          type: boolean
+        currency:
+          description: Currency
+          type: string
+      required:
+      - active
+      - address
+      - currency
+      - label
+      type: object
+    values:
+      example:
+        eur: 1
+        usd: 5
+        value: 5
+      properties:
+        eur:
+          format: int64
+          type: integer
+        usd:
+          format: int64
+          type: integer
+        value:
+          format: int64
+          type: integer
+      type: object
+    next_page:
+      format: string
+      type: string
+    address_id:
+      description: Address
+      type: string
+    entity_id:
+      description: Entity id
+      type: string
+    height:
+      description: Height
+      format: int64
+      minimum: 1
+      type: integer
+    timestamp:
+      description: Timestamp
+      format: int64
+      type: integer
+    tx_hash:
+      description: Transaction hash
+      type: string
+    no_addresses:
+      description: number of contained addresses
+      format: int64
+      type: integer
+    neighbors:
+      example:
+        next_page: next_page
+        neighbors:
+        - node_type: address
+          balance:
+            eur: 1
+            usd: 5
+            value: 5
+          received:
+            eur: 1
+            usd: 5
+            value: 5
+          id: id
+          estimated_value:
+            eur: 1
+            usd: 5
+            value: 5
+          labels:
+          - labels
+          - labels
+          no_txs: 0
+        - node_type: address
+          balance:
+            eur: 1
+            usd: 5
+            value: 5
+          received:
+            eur: 1
+            usd: 5
+            value: 5
+          id: id
+          estimated_value:
+            eur: 1
+            usd: 5
+            value: 5
+          labels:
+          - labels
+          - labels
+          no_txs: 0
+      properties:
+        next_page:
+          format: string
+          type: string
+        neighbors:
+          items:
+            $ref: '#/components/schemas/neighbor'
+          type: array
+      type: object
+    neighbor:
+      example:
+        node_type: address
+        balance:
+          eur: 1
+          usd: 5
+          value: 5
+        received:
+          eur: 1
+          usd: 5
+          value: 5
+        id: id
+        estimated_value:
+          eur: 1
+          usd: 5
+          value: 5
+        labels:
+        - labels
+        - labels
+        no_txs: 0
+      properties:
+        id:
+          description: address or entity id
+          type: string
+        node_type:
+          description: address or entity
+          enum:
+          - address
+          - entity
+          type: string
+        labels:
+          description: labels
+          items:
+            type: string
+          type: array
+        balance:
+          $ref: '#/components/schemas/values'
+        received:
+          $ref: '#/components/schemas/values'
+        estimated_value:
+          $ref: '#/components/schemas/values'
+        no_txs:
+          description: number of transactions
+          format: int32
+          type: integer
+      required:
+      - balance
+      - estimated_value
+      - id
+      - labels
+      - no_txs
+      - node_type
+      - received
+      type: object
+    link:
+      example:
+        tx_hash: tx_hash
+        output_value:
+          eur: 1
+          usd: 5
+          value: 5
+        input_value:
+          eur: 1
+          usd: 5
+          value: 5
+        height: 1
+        timestamp: 6
+      properties:
+        tx_hash:
+          description: Transaction hash
+          type: string
+        height:
+          description: Height
+          format: int64
+          minimum: 1
+          type: integer
+        timestamp:
+          description: Timestamp
+          format: int64
+          type: integer
+        input_value:
+          $ref: '#/components/schemas/values'
+        output_value:
+          $ref: '#/components/schemas/values'
+      required:
+      - height
+      - input_value
+      - output_value
+      - timestamp
+      - tx_hash
+      type: object
+    entity_addresses:
+      example:
+        next_page: next_page
+        addresses:
+        - total_spent:
+            eur: 1
+            usd: 5
+            value: 5
+          in_degree: 1
+          address: address
+          balance:
+            eur: 1
+            usd: 5
+            value: 5
+          no_incoming_txs: 5
+          out_degree: 5
+          no_outgoing_txs: 2
+          first_tx:
+            tx_hash: tx_hash
+            height: 1
+            timestamp: 6
+          last_tx:
+            tx_hash: tx_hash
+            height: 1
+            timestamp: 6
+          total_received:
+            eur: 1
+            usd: 5
+            value: 5
+        - total_spent:
+            eur: 1
+            usd: 5
+            value: 5
+          in_degree: 1
+          address: address
+          balance:
+            eur: 1
+            usd: 5
+            value: 5
+          no_incoming_txs: 5
+          out_degree: 5
+          no_outgoing_txs: 2
+          first_tx:
+            tx_hash: tx_hash
+            height: 1
+            timestamp: 6
+          last_tx:
+            tx_hash: tx_hash
+            height: 1
+            timestamp: 6
+          total_received:
+            eur: 1
+            usd: 5
+            value: 5
+      properties:
+        next_page:
+          format: string
+          type: string
+        addresses:
+          items:
+            $ref: '#/components/schemas/address'
+          type: array
+      type: object
+    search_paths:
+      example:
+        paths:
+        - null
+        - null
+        relation:
+          node_type: address
+          balance:
+            eur: 1
+            usd: 5
+            value: 5
+          received:
+            eur: 1
+            usd: 5
+            value: 5
+          id: id
+          estimated_value:
+            eur: 1
+            usd: 5
+            value: 5
+          labels:
+          - labels
+          - labels
+          no_txs: 0
+        matching_addresses:
+        - null
+        - null
+      properties:
+        paths:
+          description: Paths to matching entities
+          items:
+            $ref: '#/components/schemas/search_paths'
+          type: array
+        node:
+          $ref: '#/components/schemas/entity_with_tags'
+        relation:
+          $ref: '#/components/schemas/neighbor'
+        matching_addresses:
+          items:
+            $ref: '#/components/schemas/address_with_tags'
+          type: array
+      type: object
+    tx:
+      example:
+        outputs:
+        - address:
+          - null
+          - null
+          value:
+            eur: 1
+            usd: 5
+            value: 5
+        - address:
+          - null
+          - null
+          value:
+            eur: 1
+            usd: 5
+            value: 5
+        total_output:
+          eur: 1
+          usd: 5
+          value: 5
+        coinbase: true
+        inputs:
+        - address:
+          - null
+          - null
+          value:
+            eur: 1
+            usd: 5
+            value: 5
+        - address:
+          - null
+          - null
+          value:
+            eur: 1
+            usd: 5
+            value: 5
+        total_input:
+          eur: 1
+          usd: 5
+          value: 5
+        tx_hash: tx_hash
+        height: 1
+        timestamp: 6
+      properties:
+        tx_hash:
+          description: Transaction hash
+          type: string
+        coinbase:
+          description: Coinbase transaction flag
+          type: boolean
+        height:
+          description: Height
+          format: int64
+          minimum: 1
+          type: integer
+        inputs:
+          description: Transaction inputs/outputs
+          items:
+            $ref: '#/components/schemas/tx_value'
+          type: array
+        outputs:
+          description: Transaction inputs/outputs
+          items:
+            $ref: '#/components/schemas/tx_value'
+          type: array
+        timestamp:
+          description: Timestamp
+          format: int64
+          type: integer
+        total_input:
+          $ref: '#/components/schemas/values'
+        total_output:
+          $ref: '#/components/schemas/values'
+      required:
+      - coinbase
+      - height
+      - inputs
+      - outputs
+      - timestamp
+      - total_input
+      - total_output
+      - tx_hash
+      type: object
+    tx_values:
+      description: Transaction inputs/outputs
+      items:
+        $ref: '#/components/schemas/tx_value'
+      type: array
+    tx_value:
+      example:
+        address:
+        - null
+        - null
+        value:
+          eur: 1
+          usd: 5
+          value: 5
+      properties:
+        address:
+          items:
+            $ref: '#/components/schemas/address_id'
+          type: array
+        value:
+          $ref: '#/components/schemas/values'
+      required:
+      - address
+      - value
+      type: object
+    txs:
+      example:
+        next_page: next_page
+        txs:
+        - outputs:
+          - address:
+            - null
+            - null
+            value:
+              eur: 1
+              usd: 5
+              value: 5
+          - address:
+            - null
+            - null
+            value:
+              eur: 1
+              usd: 5
+              value: 5
+          total_output:
+            eur: 1
+            usd: 5
+            value: 5
+          coinbase: true
+          inputs:
+          - address:
+            - null
+            - null
+            value:
+              eur: 1
+              usd: 5
+              value: 5
+          - address:
+            - null
+            - null
+            value:
+              eur: 1
+              usd: 5
+              value: 5
+          total_input:
+            eur: 1
+            usd: 5
+            value: 5
+          tx_hash: tx_hash
+          height: 1
+          timestamp: 6
+        - outputs:
+          - address:
+            - null
+            - null
+            value:
+              eur: 1
+              usd: 5
+              value: 5
+          - address:
+            - null
+            - null
+            value:
+              eur: 1
+              usd: 5
+              value: 5
+          total_output:
+            eur: 1
+            usd: 5
+            value: 5
+          coinbase: true
+          inputs:
+          - address:
+            - null
+            - null
+            value:
+              eur: 1
+              usd: 5
+              value: 5
+          - address:
+            - null
+            - null
+            value:
+              eur: 1
+              usd: 5
+              value: 5
+          total_input:
+            eur: 1
+            usd: 5
+            value: 5
+          tx_hash: tx_hash
+          height: 1
+          timestamp: 6
+      properties:
+        next_page:
+          format: string
+          type: string
+        txs:
+          items:
+            $ref: '#/components/schemas/tx'
+          type: array
+      type: object
+    rates:
+      example:
+        rates:
+          eur: 6.0274563
+          usd: 1.4658129
+        height: 1
+      properties:
+        height:
+          description: Height
+          format: int64
+          minimum: 1
+          type: integer
+        rates:
+          $ref: '#/components/schemas/rates_rates'
+      type: object
+    taxonomy:
+      example:
+        taxonomy: taxonomy
+        uri: uri
+      properties:
+        taxonomy:
+          description: Taxonomy
+          type: string
+        uri:
+          description: URI
+          type: string
+      required:
+      - taxonomy
+      - uri
+      type: object
+    concept:
+      example:
+        description: description
+        label: label
+        taxonomy: taxonomy
+        id: id
+        uri: uri
+      properties:
+        label:
+          description: Label
+          type: string
+        taxonomy:
+          description: Taxonomy
+          type: string
+        uri:
+          description: URI
+          type: string
+        description:
+          description: Description
+          type: string
+        id:
+          description: ID
+          type: string
+      required:
+      - description
+      - id
+      - label
+      - taxonomy
+      - uri
+      type: object
+    taxonomy_key:
+      description: Taxonomy
+      type: string
+    label:
+      description: Label
+      type: string
+    uri:
+      description: URI
+      type: string
+    search_result:
+      example:
+        currencies:
+        - addresses:
+          - addresses
+          - addresses
+          currency: currency
+          txs:
+          - txs
+          - txs
+        - addresses:
+          - addresses
+          - addresses
+          currency: currency
+          txs:
+          - txs
+          - txs
+        labels:
+        - labels
+        - labels
+      properties:
+        currencies:
+          items:
+            $ref: '#/components/schemas/search_result_by_currency'
+          type: array
+        labels:
+          description: The list of matching labels
+          items:
+            type: string
+          type: array
+      type: object
+    search_result_by_currency:
+      example:
+        addresses:
+        - addresses
+        - addresses
+        currency: currency
+        txs:
+        - txs
+        - txs
+      properties:
+        currency:
+          description: Currency
+          type: string
+        addresses:
+          description: The list of found addresses
+          items:
+            type: string
+          type: array
+        txs:
+          description: The list of found transactions
+          items:
+            type: string
+          type: array
+      type: object
+    search_result_labels:
+      description: The list of matching labels
+      items:
+        type: string
+      type: array
+    address_with_tags_allOf:
+      properties:
+        tags:
+          description: Tags
+          items:
+            $ref: '#/components/schemas/tag'
+          type: array
+      type: object
+    entity_with_tags_allOf:
+      properties:
+        tags:
+          description: Tags
+          items:
+            $ref: '#/components/schemas/tag'
+          type: array
+        tag_coherence:
+          description: Tag coherence
+          format: float
+          type: number
+      required:
+      - tags
+      type: object
+    rates_rates:
+      example:
+        eur: 6.0274563
+        usd: 1.4658129
+      properties:
+        eur:
+          description: EUR/Crypto rate
+          format: float
+          type: number
+        usd:
+          description: USD/Crypto rate
+          format: float
+          type: number
+      type: object
