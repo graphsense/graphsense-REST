@@ -69,9 +69,11 @@ Install gunicorn
 
     pip install gunicorn
 
-Run production server with 3 workers
+If unspecified gunicorn is run with a number of workers and threads both equal to the number of CPUs x 2. 
 
-    gunicorn -w 3 "openapi_server:main()"
+Run production server, overriding number of workers and threads through command line options (4 workers, 4 threads):
+
+    gunicorn -w 4 --threads 4 "openapi_server:main()"
 
 ### Deployment with docker
 
@@ -82,9 +84,11 @@ Build the image
 
     docker build -t openapi_server .
 
-Start up a container with 3 workers
+You may specifiy the number of workers and threads through the environments variables `NUM_WORKERS` and `NUM_THREADS` respectively.
 
-    docker run -e NUM_WORKERS=3 -p 9000:9000 openapi_server
+Start up a container with 4 workers and 4 threads:
+
+    docker run -e NUM_WORKERS=4 -e NUM_THREADS=4 -p 9000:9000 openapi_server
 
 ## Customize REST interface configuration
 
