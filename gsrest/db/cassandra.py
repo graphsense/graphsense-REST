@@ -6,8 +6,6 @@ from math import floor
 
 from gsrest.util.exceptions import BadConfigError
 
-BUCKET_SIZE = 25000  # TODO: get BUCKET_SIZE from cassandra
-
 BLOCKS_PAGE_SIZE = 100
 ADDRESS_PAGE_SIZE = 100
 TXS_PAGE_SIZE = 100
@@ -40,9 +38,11 @@ class Cassandra():
         self.cluster = Cluster(config['nodes'])
         self.session = self.cluster.connect()
         self.check_keyspace(config['tagpacks'])
+        self.parameters = {}
         for currency in config['currencies']:
             self.check_keyspace(config['currencies'][currency]['raw'])
             self.check_keyspace(config['currencies'][currency]['transformed'])
+            self.load_parameters(currency)
 
     def check_keyspace(self, keyspace):
         query = ("SELECT * FROM system_schema.keyspaces "
@@ -50,6 +50,17 @@ class Cassandra():
         result = self.session.execute(query, [keyspace])
         if result is None or result.one() is None:
             raise BadConfigError("Keyspace {} does not exist".format(keyspace))
+
+    def load_parameters(self, keyspace):
+        session = self.get_session(keyspace, 'transformed')
+        query = "SELECT bech_32_prefix, bucket_size FROM configuration"
+        session.row_factory = dict_factory
+        result = session.execute(query)
+        if result is None or result.one() is None:
+            raise BadConfigError(
+                "No configuration table found for keyspace {}"
+                .format(keyspace))
+        self.parameters[keyspace] = result.one()
 
     def get_prefix_lengths(self):
         return {'address': ADDRESS_PREFIX_LENGTH,
@@ -170,12 +181,11 @@ class Cassandra():
 
     def get_address_id_id_group(self, currency, address):
         address_id = self.get_address_id(currency, address)
-        id_group = self.get_id_group(address_id)
+        id_group = self.get_id_group(currency, address_id)
         return address_id, id_group
 
-    def get_id_group(self, id_):
-        # if BUCKET_SIZE depends on the currency, we need session = ... here
-        return floor(id_ / BUCKET_SIZE)
+    def get_id_group(self, keyspace, id_):
+        return floor(id_ / self.parameters[keyspace]['bucket_size'])
 
     def get_address(self, currency, address):
         session = self.get_session(currency, 'transformed')
@@ -234,7 +244,7 @@ class Cassandra():
 
         for row in results.current_rows:
             address_id_group = \
-                self.get_id_group(row[dst+'_address_id'])
+                self.get_id_group(currency, row[dst+'_address_id'])
             address = \
                 self.get_address_by_id_group(
                      currency,
@@ -306,7 +316,7 @@ class Cassandra():
 
     def list_entity_tags(self, currency, entity):
         session = self.get_session(currency, 'transformed')
-        entity_group = self.get_id_group(entity)
+        entity_group = self.get_id_group(currency, entity)
         query = ("SELECT * FROM cluster_tags "
                  "WHERE cluster_group = %s and cluster"
                  " = %s")
@@ -318,7 +328,7 @@ class Cassandra():
 
     def get_entity(self, currency, entity):
         session = self.get_session(currency, 'transformed')
-        entity_id_group = self.get_id_group(entity)
+        entity_id_group = self.get_id_group(currency, entity)
         query = ("SELECT * FROM cluster "
                  "WHERE cluster_group = %s AND cluster = %s ")
         result = session.execute(query, [entity_id_group, entity])
@@ -329,7 +339,7 @@ class Cassandra():
                               pagesize=None):
         paging_state = from_hex(page)
         session = self.get_session(currency, 'transformed')
-        entity_id_group = self.get_id_group(entity)
+        entity_id_group = self.get_id_group(currency, entity)
         query = ("SELECT * FROM cluster_addresses "
                  "WHERE cluster_group = %s AND cluster = %s")
         fetch_size = ENTITY_ADDRESSES_PAGE_SIZE
@@ -343,7 +353,7 @@ class Cassandra():
             return []
 
         for row in results.current_rows:
-            address_id_group = self.get_id_group(row['address_id'])
+            address_id_group = self.get_id_group(currency, row['address_id'])
             address = self.get_address_by_id_group(currency, address_id_group,
                                                    row['address_id'])
             row['address'] = address
@@ -358,7 +368,7 @@ class Cassandra():
             table, this, that = ('incoming', 'dst', 'src')
 
         session = self.get_session(currency, 'transformed')
-        entity_id_group = self.get_id_group(entity)
+        entity_id_group = self.get_id_group(currency, entity)
 
         has_targets = isinstance(targets, list)
         parameters = [entity_id_group, entity]
