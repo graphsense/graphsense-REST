@@ -172,10 +172,11 @@ class Cassandra():
 
     def get_address_id(self, currency, address):
         session = self.get_session(currency, 'transformed')
+        prefix = self.scrub_prefix(currency, address)
         query = "SELECT * FROM address WHERE address_prefix = %s " \
                 "AND address = %s"
         result = session.execute(query,
-                                 [address[:ADDRESS_PREFIX_LENGTH], address])
+                                 [prefix[:ADDRESS_PREFIX_LENGTH], address])
         if result:
             return result.one().address_id
 
@@ -189,11 +190,11 @@ class Cassandra():
 
     def get_address(self, currency, address):
         session = self.get_session(currency, 'transformed')
-
+        prefix = self.scrub_prefix(currency, address)
         query = \
             "SELECT * FROM address WHERE address_prefix = %s AND address = %s"
         result = session.execute(
-            query, [address[:ADDRESS_PREFIX_LENGTH], address])
+            query, [prefix[:ADDRESS_PREFIX_LENGTH], address])
         if result:
             return result.one()
 
@@ -300,6 +301,7 @@ class Cassandra():
 
     def list_matching_addresses(self, currency, expression):
         session = self.get_session(currency, 'transformed')
+        prefix = self.scrub_prefix(currency, expression)
         query = "SELECT address FROM address WHERE address_prefix = %s"
         result = None
         paging_state = None
@@ -308,7 +310,7 @@ class Cassandra():
         while result is None or paging_state is not None:
             result = session.execute(
                         statement,
-                        [expression[:ADDRESS_PREFIX_LENGTH]],
+                        [prefix[:ADDRESS_PREFIX_LENGTH]],
                         paging_state=paging_state)
             rows += [row.address for row in result
                      if row.address.startswith(expression)]
@@ -477,3 +479,9 @@ class Cassandra():
         if results is None:
             return []
         return results
+
+    def scrub_prefix(self, currency, expression):
+        bech32_prefix = self.parameters[currency]['bech_32_prefix']
+        return expression[len(bech32_prefix):] \
+            if expression.startswith(bech32_prefix) \
+            else expression

@@ -103,6 +103,36 @@ addressWithoutTags = AddressWithTags(
    balance=Values(eur=0.0, usd=0.0, value=0)
 )
 
+addressBech32 = AddressWithTags(
+   out_degree=0,
+   no_incoming_txs=0,
+   total_spent=Values(
+      value=0,
+      usd=0,
+      eur=0
+   ),
+   last_tx=TxSummary(
+      timestamp=0,
+      tx_hash="abcd",
+      height=0
+   ),
+   total_received=Values(
+      eur=0,
+      usd=0,
+      value=0
+   ),
+   in_degree=0,
+   first_tx=TxSummary(
+      tx_hash="abcd",
+      timestamp=0,
+      height=0
+   ),
+   address="bc1xyz123456789",
+   no_outgoing_txs=0,
+   tags=[],
+   balance=Values(eur=0.0, usd=0.0, value=0)
+)
+
 addressWithTagsOutNeighbors = Neighbors(
         next_page=None,
         neighbors=[
@@ -229,6 +259,9 @@ def get_address_with_tags(test_case):
     result = service.get_address_with_tags(
             currency='btc', address=addressWithTags.address)
     assertEqual(addressWithTags, result)
+    result = service.get_address_with_tags(
+                currency='btc', address=addressBech32.address)
+    assertEqual(addressBech32, result)
 
 
 def list_address_txs(test_case):
