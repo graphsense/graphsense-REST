@@ -6,7 +6,7 @@ tagpacks_src=_prod
 
 bucket_size=25000
 
-transformed_src=_20201007
+transformed_src=_20210201_bech32prefix
 
 CASSANDRA_HOST=192.168.243.101
 
@@ -112,3 +112,5 @@ fetch btc transformed tag_by_label "limit 2"
 fetch ltc transformed tag_by_label "limit 2"
 fetch "" tagpacks taxonomy_by_key ""
 fetch "" tagpacks concept_by_taxonomy_id ""
+fetch btc transformed configuration ""
+fetch ltc transformed configuration ""

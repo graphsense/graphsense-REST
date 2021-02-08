@@ -1,0 +1,1 @@
+ {"keyspace_name": "btc_transformed_20210202_prefix_bc1", "bech_32_prefix": "bc1", "bucket_size": 25000, "coinjoin_filtering": true}
