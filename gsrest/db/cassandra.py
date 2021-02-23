@@ -400,7 +400,7 @@ class Cassandra():
                 params.append(getattr(row, "{}_cluster".format(that)))
                 statements_and_params.append((query, params))
             results = self.concurrent(session, statements_and_params)
-        return results, to_hex(results.paging_state)
+        return results, to_hex(paging_state)
 
     def list_tags(self, label, currency=None):
         if(currency is None):
