@@ -141,9 +141,9 @@ addressWithTotalSpent0 = AddressWithTags(
       timestamp=1378415426
    ),
    total_spent=Values(
-      usd=0,
+      usd=0.0,
       value=0,
-      eur=0
+      eur=0.0
    ),
    out_degree=284,
    no_incoming_txs=3981,
@@ -161,7 +161,7 @@ addressWithTotalSpent0 = AddressWithTags(
    ),
    address="13k8QzZMyce7hF4rT18CHVozE3ooNiFgfF",
    in_degree=5013,
-   balance=Values(eur=0.1, usd=0.11, value=18099),
+   balance=Values(eur=0.0, usd=0.0, value=18099),
    tags=[]
    )
 
