@@ -127,7 +127,7 @@ class Cassandra():
         if result:
             return result.one()
 
-    def get_rates(self, currency, height=None):
+    def get_rates(self, currency, height):
         session = self.get_session(currency, 'transformed')
         session.row_factory = dict_factory
         query = "SELECT * FROM exchange_rates WHERE height = %s"
