@@ -7,6 +7,7 @@ from flask import json
 from six import BytesIO
 
 from openapi_server.models.block import Block  # noqa: E501
+from openapi_server.models.block_eth import BlockEth  # noqa: E501
 from openapi_server.models.block_txs import BlockTxs  # noqa: E501
 from openapi_server.models.blocks import Blocks  # noqa: E501
 from openapi_server.test import BaseTestCase
@@ -28,6 +29,24 @@ class TestBlocksController(BaseTestCase):
         }
         response = self.client.open(
             '/{currency}/blocks/{height}'.format(currency="btc", height="1"),
+            method='GET',
+            headers=headers)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+
+    def test_get_block_eth(self):
+        """Test case for get_block_eth
+
+        Get a ethereum block by its height
+        """
+        test_service.get_block_eth(self)
+
+        headers = { 
+            'Accept': 'application/json',
+        }
+        response = self.client.open(
+            '/eth/blocks/{height}'.format(height="1"),
             method='GET',
             headers=headers)
         self.assert200(response,

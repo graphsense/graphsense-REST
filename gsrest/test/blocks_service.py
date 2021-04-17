@@ -1,4 +1,5 @@
 from openapi_server.models.block import Block
+from openapi_server.models.block_eth import BlockEth
 from openapi_server.models.blocks import Blocks
 from openapi_server.models.block_txs import BlockTxs
 from openapi_server.models.block_tx_summary import BlockTxSummary
@@ -19,6 +20,18 @@ block2 = Block(
         "60a8d03705d1ace08b1a19da3fdcc99ddbd",
         no_txs=1,
         timestamp=1231469744)
+
+eth_block = BlockEth(
+        height=1,
+        block_hash="123456",
+        no_txs=5,
+        timestamp=123)
+
+eth_block2 = BlockEth(
+        height=2300001,
+        block_hash="234567",
+        no_txs=0,
+        timestamp=234)
 
 
 def get_block(test_case):
@@ -79,3 +92,22 @@ def list_blocks(test_case):
             blocks=sorted(result.blocks,
                           key=lambda block: block.height))
     assertEqual(blocks, result)
+
+
+def get_block_eth(test_case):
+    """Test case for get_block_eth
+    """
+
+    result = service.get_block_eth(1)
+    assertEqual(eth_block, result)
+    result = service.get_block_eth(2300001)
+    assertEqual(eth_block2, result)
+    headers = {
+        'Accept': 'application/json',
+    }
+    response = test_case.client.open(
+        '/eth/blocks/{height}'.format(currency="btc", height="0"),
+        method='GET',
+        headers=headers)
+    test_case.assert400(response,
+                        'Response body is : ' + response.data.decode('utf-8'))

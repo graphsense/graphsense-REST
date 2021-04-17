@@ -6,6 +6,31 @@ info:
 servers:
 - url: http://openapi_server:9000
 paths:
+  /eth/blocks/{height}:
+    get:
+      operationId: get_block_eth
+      parameters:
+      - description: The block height
+        example: 1
+        explode: false
+        in: path
+        name: height
+        required: true
+        schema:
+          minimum: 1
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/block_eth'
+          description: OK
+      summary: Get a ethereum block by its height
+      tags:
+      - blocks
+      x-openapi-router-controller: openapi_server.controllers.blocks_controller
   /search:
     get:
       operationId: search
@@ -2700,6 +2725,28 @@ components:
       items:
         type: string
       type: array
+    block_eth:
+      example:
+        block_hash: block_hash
+        height: 1
+        no_txs: 6
+        timestamp: 1
+      properties:
+        block_hash:
+          format: string
+          type: string
+        height:
+          description: Height
+          format: int64
+          minimum: 1
+          type: integer
+        no_txs:
+          format: int64
+          type: integer
+        timestamp:
+          format: int64
+          type: integer
+      type: object
     address_with_tags_allOf:
       properties:
         tags:
@@ -2707,7 +2754,6 @@ components:
           items:
             $ref: '#/components/schemas/tag'
           type: array
-      type: object
     entity_with_tags_allOf:
       properties:
         tags:
@@ -2721,7 +2767,6 @@ components:
           type: number
       required:
       - tags
-      type: object
     rates_rates:
       example:
         eur: 6.0274563
@@ -2735,4 +2780,3 @@ components:
           description: USD/Crypto rate
           format: float
           type: number
-      type: object

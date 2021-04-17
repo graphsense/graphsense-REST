@@ -17,6 +17,8 @@ ADDRESS_PREFIX_LENGTH = 5
 LABEL_PREFIX_LENGTH = 3
 TX_PREFIX_LENGTH = 5
 
+ETH_BLOCK_BUCKET_SIZE = 100000
+
 
 def to_hex(paging_state):
     return paging_state.hex() if paging_state is not None else None
@@ -28,7 +30,7 @@ def from_hex(page):
 
 class Cassandra():
 
-    def check_eth(func):
+    def eth(func):
         def check(*args, **kwargs):
             self = args[0]
             currency = args[1]
@@ -116,7 +118,7 @@ class Cassandra():
                                     raise_on_first_error=False)
         return [row.one() for (success, row) in result if success]
 
-    @check_eth
+    @eth
     def get_currency_statistics(self, currency):
         session = self.get_session(currency, 'transformed')
         query = "SELECT * FROM summary_statistics LIMIT 1"
@@ -498,12 +500,19 @@ class Cassandra():
             return []
         return results
 
-    @check_eth
+    @eth
     def scrub_prefix(self, currency, expression):
         bech32_prefix = self.parameters[currency]['bech_32_prefix']
         return expression[len(bech32_prefix):] \
             if expression.startswith(bech32_prefix) \
             else expression
+
+#####################
+# ETHEREUM VARIANTS #
+#####################
+
+    def get_block_group_eth(self, id_):
+        return floor(id_ / 100000)
 
     def get_currency_statistics_eth(self, currency):
         session = self.get_session(currency, 'transformed')
@@ -517,3 +526,9 @@ class Cassandra():
 
     def scrub_prefix_eth(self, currency, expression):
         return expression
+
+    def get_block_eth(self, height):
+        session = self.get_session('eth', 'raw')
+        block_group = self.get_block_group_eth(height)
+        query = "SELECT * FROM block WHERE block_group = %s and number = %s"
+        return session.execute(query, [block_group, height]).one()

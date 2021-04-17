@@ -1,5 +1,6 @@
 from gsrest.db import get_connection
 from openapi_server.models.block import Block
+from openapi_server.models.block_eth import BlockEth
 from openapi_server.models.blocks import Blocks
 from openapi_server.models.block_txs import BlockTxs
 from openapi_server.models.block_tx_summary import BlockTxSummary
@@ -67,3 +68,15 @@ def list_block_txs_csv(currency, height):
                     headers=create_download_header(
                         'transactions of block {} ({}).csv'
                         .format(height, currency.upper())))
+
+
+def get_block_eth(height) -> BlockEth:
+    db = get_connection()
+    row = db.get_block_eth(height)
+    if not row:
+        raise RuntimeError("Ethereum Block {} not found".format(height))
+    return BlockEth(
+            height=row.number,
+            block_hash=row.hash.hex(),
+            no_txs=row.transaction_count,
+            timestamp=row.timestamp)
