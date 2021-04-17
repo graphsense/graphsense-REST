@@ -13,6 +13,14 @@ function schema() {
 
   create $temp btc btc
   create $temp btc ltc
+
+}
+
+function eth_schema() {
+  temp=`mktemp`
+  echo "Fetching $1 ..."
+  cp /tmp/$1 $temp
+  create $temp eth eth
   rm $temp
 }
 
@@ -50,6 +58,8 @@ function insert_data () {
 
 schema "schema_raw.cql"
 schema "schema_transformed.cql"
+eth_schema "schema_raw.cql"
+eth_schema "schema_transformed.cql"
 tagpacks
 
 for filename in $datadir/*; do

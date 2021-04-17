@@ -1,3 +1,4 @@
+from collections import namedtuple
 from cassandra.cluster import Cluster
 from cassandra.query import named_tuple_factory, SimpleStatement,\
     dict_factory, ValueSequence
@@ -27,6 +28,22 @@ def from_hex(page):
 
 class Cassandra():
 
+    def check_eth(func):
+        def check(*args, **kwargs):
+            self = args[0]
+            currency = args[1]
+            if(currency == 'eth'):
+                do = func.__name__ + "_eth"
+                if hasattr(self, do) and callable(getattr(self, do)):
+                    f = getattr(self, do)
+                    print(str(args[0]))
+                    print(str(args[1]))
+                    print(str(len(args)))
+                    args = args[1:]
+                    return f(*args, **kwargs)
+            return func(*args, **kwargs)
+        return check
+
     def __init__(self, config):
         if 'currencies' not in config:
             raise BadConfigError('Missing config property: currencies')
@@ -53,7 +70,7 @@ class Cassandra():
 
     def load_parameters(self, keyspace):
         session = self.get_session(keyspace, 'transformed')
-        query = "SELECT bech_32_prefix, bucket_size FROM configuration"
+        query = "SELECT * FROM configuration"
         session.row_factory = dict_factory
         result = session.execute(query)
         if result is None or result.one() is None:
@@ -99,6 +116,7 @@ class Cassandra():
                                     raise_on_first_error=False)
         return [row.one() for (success, row) in result if success]
 
+    @check_eth
     def get_currency_statistics(self, currency):
         session = self.get_session(currency, 'transformed')
         query = "SELECT * FROM summary_statistics LIMIT 1"
@@ -480,8 +498,22 @@ class Cassandra():
             return []
         return results
 
+    @check_eth
     def scrub_prefix(self, currency, expression):
         bech32_prefix = self.parameters[currency]['bech_32_prefix']
         return expression[len(bech32_prefix):] \
             if expression.startswith(bech32_prefix) \
             else expression
+
+    def get_currency_statistics_eth(self, currency):
+        session = self.get_session(currency, 'transformed')
+        query = "SELECT * FROM summary_statistics LIMIT 1"
+        result = session.execute(query).one()
+        Result = namedtuple('Result', result._fields+('no_clusters',))
+        result = result._asdict()
+        result['no_clusters'] = 0
+        result = Result(**result)
+        return result
+
+    def scrub_prefix_eth(self, currency, expression):
+        return expression

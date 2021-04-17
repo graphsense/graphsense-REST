@@ -1,12 +1,13 @@
 #!/bin/bash
 
 outdir=`dirname $0`/data/
-raw_src=_prod
+#raw_src=_prod
+raw_src=  # empty for eth_raw
 tagpacks_src=_prod
 
 bucket_size=25000
 
-transformed_src=_20210201_bech32prefix
+transformed_src=_20210326_fxr
 
 CASSANDRA_HOST=192.168.243.101
 
@@ -114,3 +115,5 @@ fetch "" tagpacks taxonomy_by_key ""
 fetch "" tagpacks concept_by_taxonomy_id ""
 fetch btc transformed configuration ""
 fetch ltc transformed configuration ""
+fetch eth transformed configuration ""
+fetch eth transformed summary_statistics ""

@@ -30,6 +30,25 @@ stats = Stats(
                 )]
             ),
         CurrencyStats(
+            name='eth',
+            no_entities=0,
+            no_addresses=1,
+            no_blocks=3,
+            timestamp=16,
+            no_txs=10,
+            no_labels=7,
+            no_address_relations=2,
+            notes=[],
+            tools=[],
+            data_sources=[StatsLedger(
+                id='eth_ledger',
+                report_uuid='eth_ledger',
+                visible_name='ETH Blockchain',
+                version=StatsLedgerVersion(
+                    nr='3', timestamp='1970-01-01 00:00:16'),
+                )]
+            ),
+        CurrencyStats(
             name='ltc',
             no_entities=789,
             no_addresses=456,
