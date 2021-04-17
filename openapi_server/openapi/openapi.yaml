@@ -6,6 +6,30 @@ info:
 servers:
 - url: http://openapi_server:9000
 paths:
+  /eth/blocks:
+    get:
+      operationId: list_blocks_eth
+      parameters:
+      - description: Resumption token for retrieving the next page
+        example: 0400030bff00f07fffff9b00
+        explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/blocks_eth'
+          description: OK
+      summary: Get all blocks
+      tags:
+      - blocks
+      x-openapi-router-controller: openapi_server.controllers.blocks_controller
   /eth/blocks/{height}:
     get:
       operationId: get_block_eth
@@ -1858,6 +1882,27 @@ components:
         blocks:
           items:
             $ref: '#/components/schemas/block'
+          type: array
+      type: object
+    blocks_eth:
+      example:
+        next_page: next_page
+        blocks:
+        - block_hash: block_hash
+          height: 1
+          no_txs: 6
+          timestamp: 1
+        - block_hash: block_hash
+          height: 1
+          no_txs: 6
+          timestamp: 1
+      properties:
+        next_page:
+          format: string
+          type: string
+        blocks:
+          items:
+            $ref: '#/components/schemas/block_eth'
           type: array
       type: object
     address:

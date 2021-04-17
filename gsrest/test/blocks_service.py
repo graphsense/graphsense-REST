@@ -1,6 +1,7 @@
 from openapi_server.models.block import Block
 from openapi_server.models.block_eth import BlockEth
 from openapi_server.models.blocks import Blocks
+from openapi_server.models.blocks_eth import BlocksEth
 from openapi_server.models.block_txs import BlockTxs
 from openapi_server.models.block_tx_summary import BlockTxSummary
 from openapi_server.models.values import Values
@@ -111,3 +112,15 @@ def get_block_eth(test_case):
         headers=headers)
     test_case.assert400(response,
                         'Response body is : ' + response.data.decode('utf-8'))
+
+
+def list_blocks_eth(test_case):
+    """Test case for list_blocks_eth
+    """
+    blocks = BlocksEth(next_page=None, blocks=[eth_block, eth_block2])
+    result = service.list_blocks_eth()
+    result = BlocksEth(
+            next_page=None,
+            blocks=sorted(result.blocks,
+                          key=lambda block: block.height))
+    assertEqual(blocks, result)

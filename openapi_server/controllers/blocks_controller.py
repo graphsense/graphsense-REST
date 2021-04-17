@@ -2,6 +2,7 @@ from openapi_server.models.block import Block  # noqa: E501
 from openapi_server.models.block_eth import BlockEth  # noqa: E501
 from openapi_server.models.block_txs import BlockTxs  # noqa: E501
 from openapi_server.models.blocks import Blocks  # noqa: E501
+from openapi_server.models.blocks_eth import BlocksEth  # noqa: E501
 import gsrest.service.blocks_service as service
 from gsrest.service.problems import notfound
 
@@ -98,6 +99,23 @@ def list_blocks(currency, page=None):  # noqa: E501
     try:
         return service.list_blocks(
             currency=currency,
+            page=page)
+    except RuntimeError as e:
+        return notfound(str(e))
+
+
+def list_blocks_eth(page=None):  # noqa: E501
+    """Get all blocks
+
+     # noqa: E501
+
+    :param page: Resumption token for retrieving the next page
+    :type page: str
+
+    :rtype: BlocksEth
+    """
+    try:
+        return service.list_blocks_eth(
             page=page)
     except RuntimeError as e:
         return notfound(str(e))

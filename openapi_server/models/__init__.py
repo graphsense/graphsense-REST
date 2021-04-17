@@ -13,6 +13,7 @@ from openapi_server.models.block_eth import BlockEth
 from openapi_server.models.block_tx_summary import BlockTxSummary
 from openapi_server.models.block_txs import BlockTxs
 from openapi_server.models.blocks import Blocks
+from openapi_server.models.blocks_eth import BlocksEth
 from openapi_server.models.concept import Concept
 from openapi_server.models.currency_stats import CurrencyStats
 from openapi_server.models.entity import Entity

@@ -2,6 +2,7 @@ from gsrest.db import get_connection
 from openapi_server.models.block import Block
 from openapi_server.models.block_eth import BlockEth
 from openapi_server.models.blocks import Blocks
+from openapi_server.models.blocks_eth import BlocksEth
 from openapi_server.models.block_txs import BlockTxs
 from openapi_server.models.block_tx_summary import BlockTxSummary
 from gsrest.util.values import convert_value
@@ -80,3 +81,16 @@ def get_block_eth(height) -> BlockEth:
             block_hash=row.hash.hex(),
             no_txs=row.transaction_count,
             timestamp=row.timestamp)
+
+
+def list_blocks_eth(page=None):
+    db = get_connection()
+    results, paging_state = db.list_blocks_eth(page)
+    block_list = [BlockEth(
+                    height=row.number,
+                    block_hash=row.hash.hex(),
+                    no_txs=row.transaction_count,
+                    timestamp=row.timestamp)
+                  for row in results.current_rows]
+
+    return BlocksEth(paging_state, block_list)
