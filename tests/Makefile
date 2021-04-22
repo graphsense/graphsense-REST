@@ -3,7 +3,7 @@ CASSANDRA_MOCK=cassandra_mock
 testcmd=docker exec $(CASSANDRA_MOCK) cqlsh -e 'describe keyspaces'
 
 $(MARKER): $(wildcard data/*)
-	./make_cassandra_mock.sh $(CASSANDRA_MOCK)
+	./make_cassandra_mock.sh $(CASSANDRA_MOCK) "$?"
 	touch $(MARKER)
 
 clean:

@@ -39,6 +39,30 @@ tag2 = Tag(
            currency='btc'
         )
 
+eth_tag = Tag(
+           category=None,
+           label="TagA",
+           abuse=None,
+           lastmod=1,
+           source="sourceX",
+           address="abcdef",
+           tagpack_uri="uriX",
+           active=True,
+           currency='eth'
+        )
+
+eth_tag2 = Tag(
+           category=None,
+           label="TagB",
+           abuse=None,
+           lastmod=1,
+           source="sourceY",
+           address="abcdef",
+           tagpack_uri="uriY",
+           active=True,
+           currency='eth'
+        )
+
 addressWithTags = AddressWithTags(
    first_tx=TxSummary(
       tx_hash="04d92601677d62a985310b61a301e74870fa942c"
@@ -281,6 +305,36 @@ entityWithTagsOfAddressWithTags = EntityWithTags(
    tag_coherence=0
 )
 
+eth_addressWithTags = AddressWithTags(
+   first_tx=TxSummary(
+      tx_hash="abcdef",
+      height=1,
+      timestamp=11
+   ),
+   total_spent=Values(
+      eur=30.33,
+      value=12300000000,
+      usd=40.44
+   ),
+   out_degree=6,
+   no_incoming_txs=5,
+   no_outgoing_txs=10,
+   total_received=Values(
+      eur=10.11,
+      value=23400000000,
+      usd=20.22
+   ),
+   last_tx=TxSummary(
+      tx_hash="123456",
+      height=1,
+      timestamp=12
+   ),
+   address="abcdef",
+   in_degree=5,
+   balance=Values(eur=111.0, usd=222.0, value=11100000000),
+   tags=[eth_tag, eth_tag2]
+   )
+
 
 def get_address_with_tags(test_case):
     """Test case for get_address_with_tags
@@ -297,6 +351,11 @@ def get_address_with_tags(test_case):
     result = service.get_address_with_tags(
                 currency='btc', address=addressWithTotalSpent0.address)
     assertEqual(addressWithTotalSpent0, result)
+
+    # ETH
+    result = service.get_address_with_tags(
+            currency='eth', address=eth_addressWithTags.address)
+    assertEqual(eth_addressWithTags, result)
 
 
 def list_address_txs(test_case):

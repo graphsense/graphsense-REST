@@ -6,23 +6,23 @@ from openapi_server.models.neighbor import Neighbor
 from openapi_server.models.link import Link
 from gsrest.service.entities_service import get_entity_with_tags
 from gsrest.service.rates_service import get_rates, list_rates
-import gsrest.service.common_service as commonDAO
+import gsrest.service.common_service as common
 from gsrest.util.values import convert_value, compute_balance, make_values
 from flask import Response, stream_with_context
 from gsrest.util.csvify import create_download_header, to_csv
 
 
 def get_address_with_tags(currency, address):
-    return commonDAO.get_address_with_tags(currency, address)
+    return common.get_address_with_tags(currency, address)
 
 
 def list_address_tags(currency, address):
-    return commonDAO.list_address_tags(currency, address)
+    return common.list_address_tags(currency, address)
 
 
 def list_address_tags_csv(currency, address):
     def query_function(_):
-        tags = commonDAO.list_address_tags(currency, address)
+        tags = common.list_address_tags(currency, address)
         return (None, tags)
     return Response(stream_with_context(to_csv(query_function)),
                     mimetype="text/csv",

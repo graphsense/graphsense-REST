@@ -38,9 +38,19 @@ class Cassandra():
                 do = func.__name__ + "_eth"
                 if hasattr(self, do) and callable(getattr(self, do)):
                     f = getattr(self, do)
-                    print(str(args[0]))
-                    print(str(args[1]))
-                    print(str(len(args)))
+                    args = args[1:]
+                    return f(*args, **kwargs)
+            return func(*args, **kwargs)
+        return check
+
+    def new(func):
+        def check(*args, **kwargs):
+            self = args[0]
+            currency = args[1]
+            if(currency == 'eth'):
+                do = func.__name__ + "_new"
+                if hasattr(self, do) and callable(getattr(self, do)):
+                    f = getattr(self, do)
                     args = args[1:]
                     return f(*args, **kwargs)
             return func(*args, **kwargs)
@@ -147,6 +157,7 @@ class Cassandra():
         if result:
             return result.one()
 
+    @new
     def get_rates(self, currency, height):
         session = self.get_session(currency, 'transformed')
         session.row_factory = dict_factory
@@ -190,6 +201,7 @@ class Cassandra():
         result = session.execute(query, [address_id_group, address_id])
         return result.one().address if result else None
 
+    @new
     def get_address_id(self, currency, address):
         session = self.get_session(currency, 'transformed')
         prefix = self.scrub_prefix(currency, address)
@@ -202,12 +214,16 @@ class Cassandra():
 
     def get_address_id_id_group(self, currency, address):
         address_id = self.get_address_id(currency, address)
+        if not address_id:
+            raise RuntimeError("Address {} not found in currency {}"
+                               .format(address, currency))
         id_group = self.get_id_group(currency, address_id)
         return address_id, id_group
 
     def get_id_group(self, keyspace, id_):
         return floor(id_ / self.parameters[keyspace]['bucket_size'])
 
+    @new
     def get_address(self, currency, address):
         session = self.get_session(currency, 'transformed')
         prefix = self.scrub_prefix(currency, address)
@@ -218,6 +234,7 @@ class Cassandra():
         if result:
             return result.one()
 
+    @new
     def list_address_tags(self, currency, address):
         session = self.get_session(currency, 'transformed')
 
@@ -480,6 +497,18 @@ class Cassandra():
         if result:
             return result.one()
 
+    def get_transaction_by_id(self, currency, id):
+        session = self.get_session(currency, 'transformed')
+
+        id_group = self.get_id_group(currency, id)
+
+        query = (
+            "SELECT transaction FROM transaction_ids_by_transaction_id_group "
+            "WHERE transaction_id_group = %s AND transaction_id = %s")
+        result = session.execute(query, [id_group, id])
+        if result:
+            return result.one().transaction
+
     def list_txs(self, currency, page=None):
         session = self.get_session(currency, 'raw')
 
@@ -542,3 +571,98 @@ class Cassandra():
         results = session.execute(statement, paging_state=paging_state)
 
         return results, to_hex(results.paging_state)
+
+##################################
+# VARIANTS USING NEW DATA SCHEME #
+##################################
+
+    def backport_currencies(self, currency, values):
+        currencies = list(map(lambda x: x.lower(),
+                              self.parameters[currency]['fiat_currencies']))
+        Values = namedtuple('Values', values._fields + (* currencies,))
+        values = values._asdict()
+        for (fiat, curr) in zip(values['fiat_values'], currencies):
+            values[curr.lower()] = fiat
+        return Values(**values)
+
+    def get_address_id_new(self, currency, address):
+        session = self.get_session(currency, 'transformed')
+        prefix = self.scrub_prefix(currency, address)
+        query = (
+            "SELECT address_id FROM address_ids_by_address_prefix "
+            "WHERE address_prefix = %s AND address = %s")
+        result = session.execute(
+            query, [prefix[:ADDRESS_PREFIX_LENGTH], bytes.fromhex(address)])
+        return result.one().address_id if result else None
+
+    def get_address_new(self, currency, address):
+        session = self.get_session(currency, 'transformed')
+        address_id, address_id_group = \
+            self.get_address_id_id_group(currency, address)
+
+        query = (
+            "SELECT * FROM address WHERE "
+            "address_id_group = %s AND address_id = %s")
+        result = session.execute(
+            query, [address_id_group, address_id])
+        if not result:
+            return None
+
+        result = result.one()
+
+        result = result._replace(
+            total_received=self.backport_currencies(
+                currency, result.total_received),
+            total_spent=self.backport_currencies(
+                currency, result.total_spent))
+
+        first_tx_hash = \
+            self.get_transaction_by_id(
+                currency,
+                result.first_tx.transaction_id)
+        last_tx_hash = \
+            self.get_transaction_by_id(
+                currency,
+                result.last_tx.transaction_id)
+
+        TxSummary = namedtuple('TxSummary', ['height', 'timestamp', 'tx_hash'])
+        Result = namedtuple('Result', result._fields+('address',))
+
+        first_tx = TxSummary(
+                    height=result.first_tx.height,
+                    timestamp=result.first_tx.block_timestamp,
+                    tx_hash=first_tx_hash)
+        last_tx = TxSummary(
+                    height=result.last_tx.height,
+                    timestamp=result.last_tx.block_timestamp,
+                    tx_hash=last_tx_hash)
+
+        result = result._asdict()
+        result['address'] = address
+        result = Result(**result)
+        return result._replace(first_tx=first_tx, last_tx=last_tx)
+
+    def list_address_tags_new(self, currency, address):
+        session = self.get_session(currency, 'transformed')
+        address_id, _ = \
+            self.get_address_id_id_group(currency, address)
+
+        query = "SELECT * FROM address_tags WHERE address_id = %s"
+        results = session.execute(query, [address_id])
+        if results is None:
+            return []
+        return results.current_rows
+
+    def get_rates_new(self, currency, height):
+        session = self.get_session(currency, 'transformed')
+        session.row_factory = dict_factory
+        query = "SELECT * FROM exchange_rates WHERE height = %s"
+        result = session.execute(query, [height])
+        if result is None:
+            return None
+        row = result.current_rows[0]
+        for (fiat, curr) in zip(
+                row['fiat_values'],
+                self.parameters[currency]['fiat_currencies']):
+            row[curr.lower()] = fiat
+        return row

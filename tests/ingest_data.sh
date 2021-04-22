@@ -2,6 +2,7 @@
 
 datadir=`dirname $0`/data
 CASSANDRA_MOCK=$1
+data="$2"
 MOCK_CMD="docker exec $CASSANDRA_MOCK cqlsh"
 
 TAG=develop
@@ -47,6 +48,7 @@ function create() {
 
 function insert_data () {
     echo "Insert test data from file $1 into Cassandra table $2..."
+    $MOCK_CMD -e "TRUNCATE TABLE $2;"
     while IFS= read -r line
     do
         #line=`echo "$line" | sed -e 's/^[ \t\n\s]*//' | sed -e 's/[ \t\s\n]*$//'`
@@ -62,6 +64,6 @@ eth_schema "schema_raw.cql"
 eth_schema "schema_transformed.cql"
 tagpacks
 
-for filename in $datadir/*; do
+for filename in $data; do
   insert_data $filename `basename $filename`
 done
