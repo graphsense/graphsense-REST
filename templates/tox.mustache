@@ -8,5 +8,5 @@ deps=-rrequirements.txt
      -rtest-requirements.txt
 
 commands=
-  bash -c "cd {toxinidir}/tests/ && make test"
-  {{^useNose}}pytest -k get_address_with_tags --cov={{{pythonSrcRoot}}}{{{packageName}}}{{/useNose}}{{#useNose}}nosetests{{/useNose}}
+  bash -c "cd {toxinidir}/tests/ && make .runtest"
+  {{^useNose}}pytest --cov={{{pythonSrcRoot}}}{{{packageName}}}{{/useNose}}{{#useNose}}nosetests{{/useNose}}
