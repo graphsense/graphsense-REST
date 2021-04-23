@@ -353,6 +353,7 @@ class Cassandra():
                      if row.address.startswith(expression)]
         return rows
 
+    @eth
     def list_entity_tags(self, currency, entity):
         session = self.get_session(currency, 'transformed')
         entity_group = self.get_id_group(currency, entity)
@@ -365,6 +366,7 @@ class Cassandra():
             return []
         return results.current_rows
 
+    @eth
     def get_entity(self, currency, entity):
         session = self.get_session(currency, 'transformed')
         entity_id_group = self.get_id_group(currency, entity)
@@ -572,6 +574,28 @@ class Cassandra():
 
         return results, to_hex(results.paging_state)
 
+    def address_to_entity_id(self, address):
+        return address + '_'
+
+    def entity_to_address_id(self, entity):
+        return entity[:-1]
+
+    def get_entity_eth(self, currency, entity):
+        # mockup entity by address
+        address = self.get_address_new(currency,
+                                       self.entity_to_address_id(entity))
+        Entity = namedtuple('Entity',
+                            address._fields + ('cluster', 'no_addresses',))
+        entity = address._asdict()
+        entity['cluster'] = self.address_to_entity_id(entity['address'])
+        entity['no_addresses'] = 1
+        return Entity(**entity)
+
+    def list_entity_tags_eth(self, currency, entity):
+        return self.list_address_tags_new(currency,
+                                          self.entity_to_address_id(entity))
+
+
 ##################################
 # VARIANTS USING NEW DATA SCHEME #
 ##################################
@@ -651,7 +675,15 @@ class Cassandra():
         results = session.execute(query, [address_id])
         if results is None:
             return []
-        return results.current_rows
+        tags = []
+        for tag in results.current_rows:
+            Tag = namedtuple('Tag', tag._fields + ('address',))
+            tag = tag._asdict()
+            tag['address'] = address
+            tags.append(Tag(**tag))
+        return tags
+
+
 
     def get_rates_new(self, currency, height):
         session = self.get_session(currency, 'transformed')

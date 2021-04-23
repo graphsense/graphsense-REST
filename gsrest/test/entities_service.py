@@ -10,6 +10,7 @@ from openapi_server.models.search_paths import SearchPaths
 from openapi_server.models.tag import Tag
 import json
 import gsrest.service.entities_service as service
+from gsrest.test.addresses_service import eth_addressWithTags
 
 tag = Tag(
            category="organization",
@@ -67,6 +68,22 @@ entityWithTags = EntityWithTags(
             usd=2.31,
             eur=1.15),
    tags=[tag2, tag],
+   tag_coherence=0.5
+)
+
+eth_entityWithTags = EntityWithTags(
+   no_outgoing_txs=eth_addressWithTags.no_outgoing_txs,
+   last_tx=eth_addressWithTags.last_tx,
+   total_spent=eth_addressWithTags.total_spent,
+   in_degree=eth_addressWithTags.in_degree,
+   no_addresses=1,
+   total_received=eth_addressWithTags.total_received,
+   no_incoming_txs=eth_addressWithTags.no_incoming_txs,
+   entity=eth_addressWithTags.address + '_',
+   out_degree=eth_addressWithTags.out_degree,
+   first_tx=eth_addressWithTags.first_tx,
+   balance=eth_addressWithTags.balance,
+   tags=eth_addressWithTags.tags,
    tag_coherence=0.5
 )
 
@@ -239,10 +256,19 @@ entityWithTagsAddresses = EntityAddresses(
 
 
 def get_entity_with_tags(test_case):
-    result = service.get_entity_with_tags(currency='btc', entity=17642138)
-    result.tags = sorted(result.tags, key=lambda t: t.label)
+    result = service.get_entity_with_tags(currency='btc',
+                                          entity=entityWithTags.entity)
+
+    # tag_coherence tested by tests/util/test_tag_coherence.py so hardcode here
     result.tag_coherence = 0.5
     assertEqual(entityWithTags, result)
+
+    result = service.get_entity_with_tags(currency='eth',
+                                          entity=eth_entityWithTags.entity)
+
+    # tag_coherence tested by tests/util/test_tag_coherence.py so hardcode here
+    result.tag_coherence = 0.5
+    assertEqual(eth_entityWithTags, result)
 
 
 def list_entity_tags(test_case):

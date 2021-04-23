@@ -53,7 +53,7 @@ def list_address_tags(currency, address):
         return []
     address_tags = [Tag(
                     label=row.label,
-                    address=address,
+                    address=row.address,
                     category=row.category,
                     abuse=row.abuse,
                     tagpack_uri=row.tagpack_uri,
