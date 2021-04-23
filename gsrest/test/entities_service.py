@@ -261,19 +261,23 @@ def get_entity_with_tags(test_case):
 
     # tag_coherence tested by tests/util/test_tag_coherence.py so hardcode here
     result.tag_coherence = 0.5
-    assertEqual(entityWithTags, result)
+    test_case.assertEqual(entityWithTags, result)
 
     result = service.get_entity_with_tags(currency='eth',
                                           entity=eth_entityWithTags.entity)
 
     # tag_coherence tested by tests/util/test_tag_coherence.py so hardcode here
     result.tag_coherence = 0.5
-    assertEqual(eth_entityWithTags, result)
+    test_case.assertEqual(eth_entityWithTags, result)
 
 
 def list_entity_tags(test_case):
-    result = service.list_entity_tags(currency='btc', entity=17642138)
-    assertEqual([tag2, tag], sorted(result, key=lambda t: t.label))
+    result = service.list_entity_tags(currency='btc',
+                                      entity=entityWithTags.entity)
+    test_case.assertEqual([tag2, tag], result)
+    result = service.list_entity_tags(currency='eth',
+                                      entity=eth_entityWithTags.entity)
+    test_case.assertEqual(eth_entityWithTags.tags, result)
 
 
 def list_entity_tags_csv(test_case):
