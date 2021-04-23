@@ -81,9 +81,8 @@ def search(q, currency=None, limit=None):
     q = q.strip()
     result = SearchResult(currencies=[], labels=[])
 
-    prefix_lengths = db.get_prefix_lengths()
-
     for curr in currencies:
+        prefix_lengths = db.get_prefix_lengths(curr)
         if currency is not None and currency.lower() != curr.lower():
             continue
         element = SearchResultByCurrency(

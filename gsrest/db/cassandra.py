@@ -18,6 +18,7 @@ LABEL_PREFIX_LENGTH = 3
 TX_PREFIX_LENGTH = 5
 
 ETH_BLOCK_BUCKET_SIZE = 100000
+ETH_ADDRESS_PREFIX_LENGTH = 4
 
 
 def to_hex(paging_state):
@@ -91,8 +92,10 @@ class Cassandra():
                 .format(keyspace))
         self.parameters[keyspace] = result.one()
 
-    def get_prefix_lengths(self):
-        return {'address': ADDRESS_PREFIX_LENGTH,
+    def get_prefix_lengths(self, currency):
+        prefix_length = ADDRESS_PREFIX_LENGTH \
+            if currency != 'eth' else ETH_ADDRESS_PREFIX_LENGTH
+        return {'address': prefix_length,
                 'tx': TX_PREFIX_LENGTH,
                 'label': LABEL_PREFIX_LENGTH}
 
@@ -615,8 +618,10 @@ class Cassandra():
         query = (
             "SELECT address_id FROM address_ids_by_address_prefix "
             "WHERE address_prefix = %s AND address = %s")
+        prefix_length = ADDRESS_PREFIX_LENGTH \
+            if currency != 'eth' else ETH_ADDRESS_PREFIX_LENGTH
         result = session.execute(
-            query, [prefix[:ADDRESS_PREFIX_LENGTH], bytes.fromhex(address)])
+            query, [prefix[:prefix_length], bytes.fromhex(address)])
         return result.one().address_id if result else None
 
     def get_address_new(self, currency, address):
@@ -682,8 +687,6 @@ class Cassandra():
             tag['address'] = address
             tags.append(Tag(**tag))
         return tags
-
-
 
     def get_rates_new(self, currency, height):
         session = self.get_session(currency, 'transformed')
