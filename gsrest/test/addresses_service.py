@@ -397,6 +397,9 @@ def list_address_tags(test_case):
     result = service.list_address_tags('btc', addressWithTags.address)
     assertEqual(addressWithTags.tags, result)
 
+    result = service.list_address_tags('eth', eth_addressWithTags.address)
+    assertEqual(eth_addressWithTags.tags, result)
+
 
 def list_address_tags_csv(test_case):
     csv = ("abuse,active,address,category,currency,label,lastmod,"
