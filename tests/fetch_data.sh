@@ -125,4 +125,5 @@ fetch eth transformed exchange_rates "limit 2"
 fetch eth transformed address_tags "limit 2"
 fetch eth transformed transaction_ids_by_transaction_id_group "limit 2"
 fetch eth transformed transaction_ids_by_transaction_prefix "limit 2"
+fetch eth transformed address_outgoing_relations "limit 2"
 

@@ -198,6 +198,7 @@ class Cassandra():
             return [], None
         return results.current_rows, to_hex(results.paging_state)
 
+    @new
     def get_address_by_id_group(self, currency, address_id_group, address_id):
         session = self.get_session(currency, 'transformed')
         query = "SELECT address FROM address_by_id_group WHERE " \
@@ -259,8 +260,12 @@ class Cassandra():
         if result:
             return result.one().cluster
 
-    def list_address_relations(self, currency, address, is_outgoing,
-                               page=None, pagesize=None):
+    @new
+    def list_address_relations(self, *args, **kwargs):
+        return self.list_address_relations_(*args, **kwargs)
+
+    def list_address_relations_(self, currency, address, is_outgoing,
+                                page=None, pagesize=None):
         paging_state = from_hex(page)
         session = self.get_session(currency, 'transformed')
 
@@ -734,3 +739,31 @@ class Cassandra():
             rows += [row.address.hex() for row in result
                      if row.address.hex().startswith(expression)]
         return rows
+
+    def get_address_by_id_group_new(self, currency,
+                                    address_id_group, address_id):
+        session = self.get_session(currency, 'transformed')
+        query = "SELECT address FROM address_ids_by_address_id_group WHERE " \
+                "address_id_group = %s and address_id = %s"
+        result = session.execute(query, [address_id_group, address_id])
+        return result.one().address.hex() if result else None
+
+    def list_address_relations_new(self, currency, address, is_outgoing,
+                                   page=None, pagesize=None):
+        neighbors, page = self.list_address_relations_(
+                            currency, address, is_outgoing, page, pagesize)
+        dr = 'dst' if is_outgoing else 'src'
+        props = dr + '_properties'
+        for neighbor in neighbors:
+            neighbor[props] = neighbor[props]._replace(
+                total_received=self.backport_currencies(
+                    currency,
+                    neighbor[props].total_received),
+                total_spent=self.backport_currencies(
+                    currency,
+                    neighbor[props].total_spent))
+
+            neighbor['estimated_value'] = \
+                self.backport_currencies(currency, neighbor['value'])
+            neighbor[dr + '_labels'] = []
+        return neighbors, page

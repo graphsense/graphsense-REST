@@ -335,6 +335,28 @@ eth_addressWithTags = AddressWithTags(
    tags=[eth_tag, eth_tag2]
    )
 
+eth_addressWithTagsOutNeighbors = Neighbors(
+        next_page=None,
+        neighbors=[
+            Neighbor(
+                id="123456",
+                node_type='address',
+                labels=[],
+                received=Values(
+                        value=12300000000,
+                        eur=22.22,
+                        usd=33.33),
+                balance=Values(
+                        value=2300000000,
+                        usd=46.0,
+                        eur=23.0),
+                no_txs=4,
+                estimated_value=Values(
+                    value=1000000000,
+                    usd=20.0,
+                    eur=10.0)
+                )])
+
 
 def get_address_with_tags(test_case):
     """Test case for get_address_with_tags
@@ -419,13 +441,19 @@ def list_address_neighbors(test_case):
         currency='btc',
         address=addressWithTags.address,
         direction='out')
-    assertEqual(addressWithTagsOutNeighbors, result)
+    test_case.assertEqual(addressWithTagsOutNeighbors, result)
 
     result = service.list_address_neighbors(
         currency='btc',
         address=addressWithTags.address,
         direction='in')
-    assertEqual(addressWithTagsInNeighbors, result)
+    test_case.assertEqual(addressWithTagsInNeighbors, result)
+
+    result = service.list_address_neighbors(
+        currency='eth',
+        address=eth_addressWithTags.address,
+        direction='out')
+    test_case.assertEqual(eth_addressWithTagsOutNeighbors, result)
 
 
 def list_address_neighbors_csv(test_case):
