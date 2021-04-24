@@ -249,6 +249,7 @@ class Cassandra():
             return []
         return results.current_rows
 
+    @eth
     def get_address_entity_id(self, currency, address):
         session = self.get_session(currency, 'transformed')
         address_id, address_id_group = \
@@ -606,6 +607,8 @@ class Cassandra():
         return self.list_address_tags_new(currency,
                                           self.entity_to_address_id(entity))
 
+    def get_address_entity_id_eth(self, currency, address):
+        return self.address_to_entity_id(address)
 
 ##################################
 # VARIANTS USING NEW DATA SCHEME #

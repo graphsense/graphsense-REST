@@ -357,6 +357,21 @@ eth_addressWithTagsOutNeighbors = Neighbors(
                     eur=10.0)
                 )])
 
+eth_entityWithTags = EntityWithTags(
+   no_outgoing_txs=eth_addressWithTags.no_outgoing_txs,
+   last_tx=eth_addressWithTags.last_tx,
+   total_spent=eth_addressWithTags.total_spent,
+   in_degree=eth_addressWithTags.in_degree,
+   no_addresses=1,
+   total_received=eth_addressWithTags.total_received,
+   no_incoming_txs=eth_addressWithTags.no_incoming_txs,
+   entity=eth_addressWithTags.address + '_',
+   out_degree=eth_addressWithTags.out_degree,
+   first_tx=eth_addressWithTags.first_tx,
+   balance=eth_addressWithTags.balance,
+   tags=eth_addressWithTags.tags,
+   tag_coherence=0.5
+)
 
 def get_address_with_tags(test_case):
     """Test case for get_address_with_tags
@@ -475,9 +490,14 @@ def get_address_entity(test_case):
     result = service.get_address_entity(
                 currency='btc',
                 address=addressWithTags.address)
-    result.tags = sorted(result.tags, key=lambda t: t.label)
     result.tag_coherence = 0
-    assertEqual(entityWithTagsOfAddressWithTags, result)
+    test_case.assertEqual(entityWithTagsOfAddressWithTags, result)
+
+    result = service.get_address_entity(
+                currency='eth',
+                address=eth_addressWithTags.address)
+    result.tag_coherence = eth_entityWithTags.tag_coherence
+    test_case.assertEqual(eth_entityWithTags, result)
 
 
 def list_address_links(test_case):
