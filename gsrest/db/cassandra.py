@@ -19,6 +19,7 @@ TX_PREFIX_LENGTH = 5
 
 ETH_BLOCK_BUCKET_SIZE = 100000
 ETH_ADDRESS_PREFIX_LENGTH = 4
+ETH_TX_PREFIX_LENGTH = 4
 
 
 def to_hex(paging_state):
@@ -93,10 +94,10 @@ class Cassandra():
         self.parameters[keyspace] = result.one()
 
     def get_prefix_lengths(self, currency):
-        prefix_length = ADDRESS_PREFIX_LENGTH \
-            if currency != 'eth' else ETH_ADDRESS_PREFIX_LENGTH
-        return {'address': prefix_length,
-                'tx': TX_PREFIX_LENGTH,
+        return {'address': ADDRESS_PREFIX_LENGTH
+                if currency != 'eth' else ETH_ADDRESS_PREFIX_LENGTH,
+                'tx': TX_PREFIX_LENGTH
+                if currency != 'eth' else ETH_TX_PREFIX_LENGTH,
                 'label': LABEL_PREFIX_LENGTH}
 
     def get_supported_currencies(self):
@@ -339,6 +340,7 @@ class Cassandra():
             links[hsh]['output_value'] = row.value
         return links.values()
 
+    @new
     def list_matching_addresses(self, currency, expression):
         session = self.get_session(currency, 'transformed')
         prefix = self.scrub_prefix(currency, expression)
@@ -526,13 +528,14 @@ class Cassandra():
             return [], None
         return results.current_rows, to_hex(results.paging_state)
 
+    @new
     def list_matching_txs(self, currency, expression, leading_zeros):
         session = self.get_session(currency, 'raw')
         query = 'SELECT tx_hash from transaction where tx_prefix = %s'
         results = session.execute(query, [expression[:TX_PREFIX_LENGTH]])
         if results is None:
             return []
-        return results
+        return results.current_rows
 
     @eth
     def scrub_prefix(self, currency, expression):
@@ -618,10 +621,9 @@ class Cassandra():
         query = (
             "SELECT address_id FROM address_ids_by_address_prefix "
             "WHERE address_prefix = %s AND address = %s")
-        prefix_length = ADDRESS_PREFIX_LENGTH \
-            if currency != 'eth' else ETH_ADDRESS_PREFIX_LENGTH
+        prefix_length = self.get_prefix_lengths(currency)['address']
         result = session.execute(
-            query, [prefix[:prefix_length], bytes.fromhex(address)])
+            query, [prefix[:prefix_length].upper(), bytes.fromhex(address)])
         return result.one().address_id if result else None
 
     def get_address_new(self, currency, address):
@@ -701,3 +703,34 @@ class Cassandra():
                 self.parameters[currency]['fiat_currencies']):
             row[curr.lower()] = fiat
         return row
+
+    def list_matching_txs_new(self, currency, expression, leading_zeros):
+        session = self.get_session(currency, 'transformed')
+        query = ('SELECT transaction from transaction_ids_by_transaction_pre'
+                 'fix where transaction_prefix = %s')
+        prefix_length = self.get_prefix_lengths(currency)
+        prefix = expression[:prefix_length['tx']].upper()
+        results = session.execute(query, [prefix])
+        if results is None:
+            return []
+        Tx = namedtuple('Tx', ('tx_hash',))
+        return [Tx(tx_hash=row.transaction) for row in results.current_rows]
+
+    def list_matching_addresses_new(self, currency, expression):
+        session = self.get_session(currency, 'transformed')
+        prefix = self.scrub_prefix(currency, expression)
+        query = ("SELECT address FROM address_ids_by_address_prefix "
+                 "WHERE address_prefix = %s")
+        result = None
+        paging_state = None
+        statement = SimpleStatement(query, fetch_size=ADDRESS_PAGE_SIZE)
+        prefix_length = self.get_prefix_lengths(currency)['address']
+        rows = []
+        while result is None or paging_state is not None:
+            result = session.execute(
+                        statement,
+                        [prefix[:prefix_length].upper()],
+                        paging_state=paging_state)
+            rows += [row.address.hex() for row in result
+                     if row.address.hex().startswith(expression)]
+        return rows

@@ -40,6 +40,8 @@ function create() {
   replace=$3
   echo "Replace $search by $replace ..."
   sed -i "s/$search/$replace/g" $temp
+  echo "Remove DROP ..."
+  sed -i -r "s/^DROP KEYSPACE.+//" $temp
   echo "Copy to mockup database ..."
   docker cp $temp $CASSANDRA_MOCK:/
   echo "Creating schema ..."

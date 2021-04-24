@@ -86,6 +86,10 @@ def search(test_case):
                         SearchResultByCurrency(
                             currency='ltc',
                             addresses=[],
+                            txs=[]),
+                        SearchResultByCurrency(
+                            currency='eth',
+                            addresses=[],
                             txs=[])],
                     labels=[])
 
@@ -139,4 +143,30 @@ def search(test_case):
     expected.labels = ['isolinks']
 
     result = service.search(q='iso')
+    test_case.assertEqual(expected, result)
+
+    expected = base_search_results()
+    expected.currencies[2] = \
+        SearchResultByCurrency(
+            currency='eth',
+            txs=['af6e0000', 'af6e0003'],
+            addresses=[])
+
+    result = service.search(q='af6e')
+    test_case.assertEqual(expected, result)
+
+    # test results from multiple currences
+    expected = base_search_results()
+    expected.currencies[0] = \
+        SearchResultByCurrency(
+            currency='btc',
+            txs=[],
+            addresses=['abcdefg'])
+    expected.currencies[2] = \
+        SearchResultByCurrency(
+            currency='eth',
+            txs=[],
+            addresses=['abcdef'])
+
+    result = service.search(q='abcde')
     test_case.assertEqual(expected, result)
