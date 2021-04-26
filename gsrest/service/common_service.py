@@ -3,6 +3,8 @@ from openapi_server.models.address import Address
 from openapi_server.models.address_with_tags import AddressWithTags
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.tag import Tag
+from openapi_server.models.neighbors import Neighbors
+from openapi_server.models.neighbor import Neighbor
 from gsrest.util.values import compute_balance, convert_value, make_values
 from gsrest.service.rates_service import get_rates
 
@@ -94,3 +96,45 @@ def get_address_entity_id(currency, address):
         raise RuntimeError('cluster for address {} in currency {} not found'
                            .format(address, currency))
     return result.cluster
+
+
+def list_neighbors(currency, id, direction, node_type,
+                   targets=None, page=None, pagesize=None):
+    if node_type not in ['address', 'entity']:
+        raise RuntimeError(f'Unknown node type {node_type}')
+    is_outgoing = "out" in direction
+    db = get_connection()
+    results, paging_state = db.list_neighbors(
+                                    currency,
+                                    id,
+                                    is_outgoing,
+                                    node_type,
+                                    targets=targets,
+                                    page=page,
+                                    pagesize=pagesize)
+    dst = 'dst' if is_outgoing else 'src'
+    rates = get_rates(currency)['rates']
+    relations = []
+    if results is None:
+        return Neighbors()
+    ntype = node_type if node_type == 'address' else 'cluster'
+    for row in results:
+        balance = compute_balance(row[dst+'_properties'].total_received.value,
+                                  row[dst+'_properties'].total_spent.value)
+        relations.append(Neighbor(
+            id=row[f'{dst}_{ntype}'],
+            node_type=node_type,
+            labels=row[dst+'_labels']
+            if row[dst+'_labels'] is not None else [],
+            received=make_values(
+                value=row[dst+'_properties'].total_received.value,
+                eur=row[dst+'_properties'].total_received.eur,
+                usd=row[dst+'_properties'].total_received.usd),
+            estimated_value=make_values(
+                value=row['estimated_value'].value,
+                eur=row['estimated_value'].eur,
+                usd=row['estimated_value'].usd),
+            balance=convert_value(balance, rates),
+            no_txs=row['no_transactions']))
+    return Neighbors(next_page=paging_state,
+                     neighbors=relations)

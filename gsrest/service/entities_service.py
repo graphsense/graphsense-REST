@@ -14,6 +14,7 @@ from flask import Response, stream_with_context
 from gsrest.util.csvify import create_download_header, to_csv
 from openapi_server.models.address import Address
 from openapi_server.models.entity_addresses import EntityAddresses
+import gsrest.service.common_service as common
 
 
 def list_entity_tags(currency, entity):
@@ -103,40 +104,8 @@ def get_entity(currency, entity):
 
 def list_entity_neighbors(currency, entity, direction, targets=None,
                           page=None, pagesize=None):
-    db = get_connection()
-    is_outgoing = "out" in direction
-    results, paging_state = db.list_entity_neighbors(
-                                currency,
-                                entity,
-                                is_outgoing,
-                                targets,
-                                page,
-                                pagesize)
-
-    rates = get_rates(currency)['rates']
-    relations = []
-    dst = 'dst' if is_outgoing else 'src'
-    for row in results:
-        balance = compute_balance(
-                    getattr(row, dst+'_properties').total_received.value,
-                    getattr(row, dst+'_properties').total_spent.value)
-        relations.append(
-            Neighbor(
-                id=getattr(row, dst+'_cluster'),
-                node_type='entity',
-                labels=getattr(row, dst+'_labels')
-                if getattr(row, dst+'_labels') is not None else [],
-                received=make_values(
-                    value=getattr(row, dst+'_properties').total_received.value,
-                    eur=getattr(row, dst+'_properties').total_received.eur,
-                    usd=getattr(row, dst+'_properties').total_received.usd),
-                estimated_value=make_values(
-                    value=row.value.value,
-                    eur=row.value.eur,
-                    usd=row.value.usd),
-                balance=convert_value(balance, rates),
-                no_txs=row.no_transactions))
-    return Neighbors(next_page=paging_state, neighbors=relations)
+    return common.list_neighbors(currency, entity, direction, 'entity',
+                                 targets=targets, page=page, pagesize=pagesize)
 
 
 def list_entity_neighbors_csv(currency, entity, direction):

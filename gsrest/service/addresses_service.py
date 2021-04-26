@@ -1,13 +1,11 @@
 from gsrest.db import get_connection
 from openapi_server.models.address_tx import AddressTx
 from openapi_server.models.address_txs import AddressTxs
-from openapi_server.models.neighbors import Neighbors
-from openapi_server.models.neighbor import Neighbor
 from openapi_server.models.link import Link
 from gsrest.service.entities_service import get_entity_with_tags
-from gsrest.service.rates_service import get_rates, list_rates
+from gsrest.service.rates_service import list_rates
 import gsrest.service.common_service as common
-from gsrest.util.values import convert_value, compute_balance, make_values
+from gsrest.util.values import convert_value
 from flask import Response, stream_with_context
 from gsrest.util.csvify import create_download_header, to_csv
 
@@ -64,39 +62,8 @@ def list_address_txs_csv(currency, address):
 
 def list_address_neighbors(currency, address, direction, page=None,
                            pagesize=None):
-    is_outgoing = "out" in direction
-    db = get_connection()
-    results, paging_state = db.list_address_relations(
-                                    currency,
-                                    address,
-                                    is_outgoing,
-                                    page,
-                                    pagesize)
-    dst = 'dst' if is_outgoing else 'src'
-    rates = get_rates(currency)['rates']
-    relations = []
-    if results is None:
-        return Neighbors()
-    for row in results:
-        balance = compute_balance(row[dst+'_properties'].total_received.value,
-                                  row[dst+'_properties'].total_spent.value)
-        relations.append(Neighbor(
-            id=row['id'],
-            node_type='address',
-            labels=row[dst+'_labels']
-            if row[dst+'_labels'] is not None else [],
-            received=make_values(
-                value=row[dst+'_properties'].total_received.value,
-                eur=row[dst+'_properties'].total_received.eur,
-                usd=row[dst+'_properties'].total_received.usd),
-            estimated_value=make_values(
-                value=row['estimated_value'].value,
-                eur=row['estimated_value'].eur,
-                usd=row['estimated_value'].usd),
-            balance=convert_value(balance, rates),
-            no_txs=row['no_transactions']))
-    return Neighbors(next_page=paging_state,
-                     neighbors=relations)
+    return common.list_neighbors(currency, address, direction, 'address',
+                                 page=page, pagesize=pagesize)
 
 
 def list_address_neighbors_csv(currency, address, direction):

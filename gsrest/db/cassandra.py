@@ -261,46 +261,6 @@ class Cassandra():
         if result:
             return result.one().cluster
 
-    @new
-    def list_address_relations(self, *args, **kwargs):
-        return self.list_address_relations_(*args, **kwargs)
-
-    def list_address_relations_(self, currency, address, is_outgoing,
-                                page=None, pagesize=None):
-        paging_state = from_hex(page)
-        session = self.get_session(currency, 'transformed')
-
-        address_id, address_id_group = \
-            self.get_address_id_id_group(currency, address)
-        if not address_id:
-            raise RuntimeError("Address {} not found in currency {}"
-                               .format(address, currency))
-        src, dst, table = ('src', 'dst', 'outgoing') \
-            if is_outgoing else ('dst', 'src', 'incoming')
-
-        query = "SELECT * FROM address_"+table+"_relations WHERE " \
-                + src + "_address_id_group = %s AND "+src+"_address_id = %s"
-        fetch_size = ADDRESS_PAGE_SIZE
-        if pagesize:
-            fetch_size = pagesize
-        statement = SimpleStatement(query, fetch_size=fetch_size)
-        session.row_factory = dict_factory
-        results = session.execute(statement, [address_id_group, address_id],
-                                  paging_state=paging_state)
-        if results is None:
-            return [], None
-
-        for row in results.current_rows:
-            address_id_group = \
-                self.get_id_group(currency, row[dst+'_address_id'])
-            address = \
-                self.get_address_by_id_group(
-                     currency,
-                     address_id_group,
-                     row[dst+'_address_id'])
-            row['id'] = address
-        return results.current_rows, to_hex(results.paging_state)
-
     def list_address_links(self, currency, address, neighbor):
         session = self.get_session(currency, 'transformed')
 
@@ -411,45 +371,71 @@ class Cassandra():
             row['address'] = address
         return results.current_rows, to_hex(results.paging_state)
 
-    def list_entity_neighbors(self, currency, entity, is_outgoing,
-                              targets=None, page=None, pagesize=None):
-        paging_state = from_hex(page)
+    @new
+    def list_neighbors(self, *args, **kwargs):
+        return self.list_neighbors_(*args, **kwargs)
+
+    def list_neighbors_(self, currency, id, is_outgoing, node_type,
+                        targets=None, page=None, pagesize=None):
+        if node_type == 'entity':
+            node_type = 'cluster'
         if is_outgoing:
-            table, this, that = ('outgoing', 'src', 'dst')
+            direction, this, that = ('outgoing', 'src', 'dst')
         else:
-            table, this, that = ('incoming', 'dst', 'src')
+            direction, this, that = ('incoming', 'dst', 'src')
+
+        id_suffix = '_id' if node_type == 'address' else ''
+
+        if node_type == 'address':
+            id = self.get_address_id(currency, id)
 
         session = self.get_session(currency, 'transformed')
-        entity_id_group = self.get_id_group(currency, entity)
+        id_group = self.get_id_group(currency, id)
 
         has_targets = isinstance(targets, list)
-        parameters = [entity_id_group, entity]
-        basequery = "SELECT * FROM cluster_{}_relations WHERE " \
-                    "{}_cluster_group = %s AND " \
-                    "{}_cluster = %s".format(table, this, this)
+        parameters = [id_group, id]
+        basequery = (f"SELECT * FROM {node_type}_{direction}_relations WHERE "
+                     f"{this}_{node_type}{id_suffix}_group = %s AND "
+                     f"{this}_{node_type}{id_suffix} = %s")
         if has_targets:
             if len(targets) == 0:
                 return None
-            query = basequery.replace('*', '{}_cluster'.format(that))
-            query += " AND {}_cluster in ({})" \
-                .format(that, ','.join(map(str, targets)))
+            query = basequery.replace('*', f'{that}_{node_type}')
+            targets = ','.join(map(str, targets))
+            query += f' AND {that}_{node_type} in ({targets})'
         else:
             query = basequery
         fetch_size = ENTITY_PAGE_SIZE
         if pagesize:
             fetch_size = pagesize
+        session.row_factory = dict_factory
         statement = SimpleStatement(query, fetch_size=fetch_size)
+        paging_state = from_hex(page)
         results = session.execute(statement, parameters,
                                   paging_state=paging_state)
         paging_state = results.paging_state
+        results = results.current_rows
         if has_targets:
             statements_and_params = []
-            query = basequery + " AND {}_cluster = %s".format(that)
-            for row in results.current_rows:
+            query = basequery + f" AND {that}_{node_type} = %s"
+            for row in results:
                 params = parameters.copy()
-                params.append(getattr(row, "{}_cluster".format(that)))
+                params.append(row[f'{that}_{node_type}'])
                 statements_and_params.append((query, params))
             results = self.concurrent(session, statements_and_params)
+        if node_type == 'address':
+            for row in results:
+                address_id_group = \
+                    self.get_id_group(currency, row[that+'_address_id'])
+                address = \
+                    self.get_address_by_id_group(
+                         currency,
+                         address_id_group,
+                         row[that+'_address_id'])
+                row[f'{that}_address'] = address
+        if node_type == 'cluster':
+            for row in results:
+                row['estimated_value'] = row['value']
         return results, to_hex(paging_state)
 
     def list_tags(self, label, currency=None):
@@ -751,10 +737,15 @@ class Cassandra():
         result = session.execute(query, [address_id_group, address_id])
         return result.one().address.hex() if result else None
 
-    def list_address_relations_new(self, currency, address, is_outgoing,
-                                   page=None, pagesize=None):
-        neighbors, page = self.list_address_relations_(
-                            currency, address, is_outgoing, page, pagesize)
+    def list_neighbors_new(self, currency, id, is_outgoing, node_type,
+                           targets=None, page=None, pagesize=None):
+        neighbors, page = self.list_neighbors_(currency,
+                                               id,
+                                               is_outgoing,
+                                               node_type,
+                                               targets,
+                                               page,
+                                               pagesize)
         dr = 'dst' if is_outgoing else 'src'
         props = dr + '_properties'
         for neighbor in neighbors:
