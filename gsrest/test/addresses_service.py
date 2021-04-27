@@ -339,6 +339,24 @@ eth_addressWithTagsOutNeighbors = Neighbors(
         next_page=None,
         neighbors=[
             Neighbor(
+                id="abcdef",
+                node_type='address',
+                labels=[],
+                received=Values(
+                        value=12300000000,
+                        eur=22.22,
+                        usd=33.33),
+                balance=Values(
+                        value=2300000000,
+                        usd=46.0,
+                        eur=23.0),
+                no_txs=4,
+                estimated_value=Values(
+                    value=1000000000,
+                    usd=20.0,
+                    eur=10.0)
+                ),
+            Neighbor(
                 id="123456",
                 node_type='address',
                 labels=[],

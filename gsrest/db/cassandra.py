@@ -372,8 +372,13 @@ class Cassandra():
         return results.current_rows, to_hex(results.paging_state)
 
     @new
-    def list_neighbors(self, *args, **kwargs):
-        return self.list_neighbors_(*args, **kwargs)
+    def list_neighbors(self, currency, id, is_outgoing, node_type,
+                       targets=None, page=None, pagesize=None):
+        if node_type == 'address':
+            id = self.get_address_id(currency, id)
+        return self.list_neighbors_(currency, id, is_outgoing, node_type,
+                                    targets=targets, page=page,
+                                    pagesize=pagesize)
 
     def list_neighbors_(self, currency, id, is_outgoing, node_type,
                         targets=None, page=None, pagesize=None):
@@ -386,9 +391,6 @@ class Cassandra():
 
         id_suffix = '_id' if node_type == 'address' else ''
 
-        if node_type == 'address':
-            id = self.get_address_id(currency, id)
-
         session = self.get_session(currency, 'transformed')
         id_group = self.get_id_group(currency, id)
 
@@ -397,6 +399,7 @@ class Cassandra():
         basequery = (f"SELECT * FROM {node_type}_{direction}_relations WHERE "
                      f"{this}_{node_type}{id_suffix}_group = %s AND "
                      f"{this}_{node_type}{id_suffix} = %s")
+        print(f'targets {targets}')
         if has_targets:
             if len(targets) == 0:
                 return None
@@ -739,6 +742,14 @@ class Cassandra():
 
     def list_neighbors_new(self, currency, id, is_outgoing, node_type,
                            targets=None, page=None, pagesize=None):
+        orig_node_type = node_type
+        if node_type == 'address':
+            id = self.get_address_id(currency, id)
+        elif node_type == 'entity' and currency == 'eth':
+            id = self.entity_to_address_id(id)
+            id = self.get_address_id(currency, id)
+            node_type = 'address'
+
         neighbors, page = self.list_neighbors_(currency,
                                                id,
                                                is_outgoing,
@@ -760,4 +771,8 @@ class Cassandra():
             neighbor['estimated_value'] = \
                 self.backport_currencies(currency, neighbor['value'])
             neighbor[dr + '_labels'] = []
+
+            if orig_node_type == 'entity' and currency == 'eth':
+                neighbor[dr + '_cluster'] = \
+                    self.address_to_entity_id(neighbor[dr + '_address'])
         return neighbors, page

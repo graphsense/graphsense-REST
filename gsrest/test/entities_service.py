@@ -10,7 +10,8 @@ from openapi_server.models.search_paths import SearchPaths
 from openapi_server.models.tag import Tag
 import json
 import gsrest.service.entities_service as service
-from gsrest.test.addresses_service import eth_addressWithTags
+from gsrest.test.addresses_service import eth_addressWithTags, \
+        eth_addressWithTagsOutNeighbors
 
 tag = Tag(
            category="organization",
@@ -86,6 +87,17 @@ eth_entityWithTags = EntityWithTags(
    tags=eth_addressWithTags.tags,
    tag_coherence=0.5
 )
+
+eth_neighbors = []
+for n in eth_addressWithTagsOutNeighbors.neighbors:
+    nn = Neighbor(**n.to_dict())
+    nn.id += '_'
+    nn.node_type = 'entity'
+    eth_neighbors.append(nn)
+
+eth_entityWithTagsOutNeighbors = Neighbors(
+        next_page=None,
+        neighbors=eth_neighbors)
 
 entityWithTagsOutNeighbors = Neighbors(
     next_page=None,
@@ -300,13 +312,19 @@ def list_entity_neighbors(test_case):
         currency='btc',
         entity=entityWithTags.entity,
         direction='out')
-    assertEqual(entityWithTagsOutNeighbors, result)
+    test_case.assertEqual(entityWithTagsOutNeighbors, result)
 
     result = service.list_entity_neighbors(
         currency='btc',
         entity=entityWithTags.entity,
         direction='in')
-    assertEqual(entityWithTagsInNeighbors, result)
+    test_case.assertEqual(entityWithTagsInNeighbors, result)
+
+    result = service.list_entity_neighbors(
+        currency='eth',
+        entity=eth_entityWithTags.entity,
+        direction='out')
+    test_case.assertEqual(eth_entityWithTagsOutNeighbors, result)
 
     query_string = [('direction', 'in'), ('targets', '67065,144534')]
     headers = {
@@ -345,7 +363,7 @@ def list_entity_neighbors(test_case):
 
     result = json.loads(response.data.decode('utf-8'))
 
-    assertEqual(
+    test_case.assertEqual(
         [entityWithTagsInNeighbors.neighbors[1].id],
         [int(n['id']) for n in result['neighbors']]
     )
