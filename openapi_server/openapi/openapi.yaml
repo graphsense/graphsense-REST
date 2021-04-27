@@ -55,6 +55,31 @@ paths:
       tags:
       - blocks
       x-openapi-router-controller: openapi_server.controllers.blocks_controller
+  /eth/blocks/{height}/txs:
+    get:
+      operationId: list_block_txs_eth
+      parameters:
+      - description: The block height
+        example: 1
+        explode: false
+        in: path
+        name: height
+        required: true
+        schema:
+          minimum: 1
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/txs_eth'
+          description: OK
+      summary: Get block transactions (100 per page)
+      tags:
+      - blocks
+      x-openapi-router-controller: openapi_server.controllers.blocks_controller
   /search:
     get:
       operationId: search
@@ -724,7 +749,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/block_txs'
           description: OK
-      summary: Get all blocks (100 per page)
+      summary: Get block transactions (100 per page)
       tags:
       - blocks
       x-openapi-router-controller: openapi_server.controllers.blocks_controller
@@ -759,7 +784,7 @@ paths:
               schema:
                 type: string
           description: OK
-      summary: Get all blocks as CSV
+      summary: Get block transactions as CSV
       tags:
       - blocks
       x-openapi-router-controller: openapi_server.controllers.blocks_controller
@@ -2640,6 +2665,59 @@ components:
           items:
             $ref: '#/components/schemas/tx'
           type: array
+      type: object
+    txs_eth:
+      example:
+        txs:
+        - values:
+            eur: 1
+            usd: 5
+            value: 5
+          tx_hash: tx_hash
+          height: 1
+          timestamp: 6
+        - values:
+            eur: 1
+            usd: 5
+            value: 5
+          tx_hash: tx_hash
+          height: 1
+          timestamp: 6
+      properties:
+        txs:
+          items:
+            $ref: '#/components/schemas/tx_eth'
+          type: array
+      type: object
+    tx_eth:
+      example:
+        values:
+          eur: 1
+          usd: 5
+          value: 5
+        tx_hash: tx_hash
+        height: 1
+        timestamp: 6
+      properties:
+        tx_hash:
+          description: Transaction hash
+          type: string
+        height:
+          description: Height
+          format: int64
+          minimum: 1
+          type: integer
+        timestamp:
+          description: Timestamp
+          format: int64
+          type: integer
+        values:
+          $ref: '#/components/schemas/values'
+      required:
+      - height
+      - timestamp
+      - tx_hash
+      - values
       type: object
     rates:
       example:

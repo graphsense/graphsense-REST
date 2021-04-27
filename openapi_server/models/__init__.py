@@ -38,7 +38,9 @@ from openapi_server.models.stats_version import StatsVersion
 from openapi_server.models.tag import Tag
 from openapi_server.models.taxonomy import Taxonomy
 from openapi_server.models.tx import Tx
+from openapi_server.models.tx_eth import TxEth
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.tx_value import TxValue
 from openapi_server.models.txs import Txs
+from openapi_server.models.txs_eth import TxsEth
 from openapi_server.models.values import Values

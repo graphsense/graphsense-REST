@@ -4,6 +4,8 @@ from openapi_server.models.block_eth import BlockEth
 from openapi_server.models.blocks import Blocks
 from openapi_server.models.blocks_eth import BlocksEth
 from openapi_server.models.block_txs import BlockTxs
+from openapi_server.models.txs_eth import TxsEth
+from openapi_server.models.tx_eth import TxEth
 from openapi_server.models.block_tx_summary import BlockTxSummary
 from gsrest.util.values import convert_value
 from gsrest.service.rates_service import get_rates
@@ -94,3 +96,22 @@ def list_blocks_eth(page=None):
                   for row in results.current_rows]
 
     return BlocksEth(paging_state, block_list)
+
+
+def list_block_txs_eth(height):
+    db = get_connection()
+    result = db.list_block_txs_eth(height)
+
+    if result is None:
+        raise RuntimeError("Block {} not found".format(height))
+
+    rates = get_rates('eth', height)
+    tx_summaries = \
+        [TxEth(
+         timestamp=tx.block_timestamp,
+         height=tx.block_number,
+         values=convert_value(tx.value, rates['rates']),
+         tx_hash=tx.hash.hex())
+         for tx in result]
+
+    return TxsEth(tx_summaries)

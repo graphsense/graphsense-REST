@@ -7,7 +7,7 @@ tagpacks_src=_prod
 
 bucket_size=25000
 
-transformed_src=_20210326_fxr
+transformed_src=_20210326_balanced_partitioning
 
 CASSANDRA_HOST=192.168.243.101
 
@@ -118,6 +118,7 @@ fetch ltc transformed configuration ""
 fetch eth transformed configuration ""
 fetch eth transformed summary_statistics ""
 fetch eth raw block "limit 3"
+fetch eth raw transaction "limit 3"
 fetch eth transformed address "limit 2"
 fetch eth transformed address_ids_by_address_prefix "limit 2"
 fetch eth transformed address_ids_by_address_id_group "limit 2"
@@ -126,4 +127,5 @@ fetch eth transformed address_tags "limit 2"
 fetch eth transformed transaction_ids_by_transaction_id_group "limit 2"
 fetch eth transformed transaction_ids_by_transaction_prefix "limit 2"
 fetch eth transformed address_outgoing_relations "limit 2"
+fetch eth transformed block_transactions "limit 2"
 

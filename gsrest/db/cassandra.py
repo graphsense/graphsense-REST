@@ -2,7 +2,8 @@ from collections import namedtuple
 from cassandra.cluster import Cluster
 from cassandra.query import named_tuple_factory, SimpleStatement,\
     dict_factory, ValueSequence
-from cassandra.concurrent import execute_concurrent
+from cassandra.concurrent import execute_concurrent, \
+    execute_concurrent_with_args
 from math import floor
 
 from gsrest.util.exceptions import BadConfigError
@@ -399,7 +400,6 @@ class Cassandra():
         basequery = (f"SELECT * FROM {node_type}_{direction}_relations WHERE "
                      f"{this}_{node_type}{id_suffix}_group = %s AND "
                      f"{this}_{node_type}{id_suffix} = %s")
-        print(f'targets {targets}')
         if has_targets:
             if len(targets) == 0:
                 return None
@@ -598,6 +598,35 @@ class Cassandra():
 
     def get_address_entity_id_eth(self, currency, address):
         return self.address_to_entity_id(address)
+
+    def list_block_txs_eth(self, height):
+        currency = 'eth'
+        session = self.get_session(currency, 'transformed')
+        height_group = self.get_block_group_eth(height)
+        query = ("SELECT txs FROM block_transactions WHERE "
+                 "height_group = %s and height = %s")
+        result = session.execute(query, [height_group, height])
+        if result is None:
+            raise RuntimeError(
+                    f'block {height} not found in currency {currency}')
+        result = result.one()
+        params = [[self.get_id_group(currency, tx), tx] for tx in result.txs]
+        statement = (
+            'SELECT transaction from transaction_ids_by_transaction_id_group'
+            ' where transaction_id_group = %s and transaction_id = %s')
+        result = execute_concurrent_with_args(session, statement, params,
+                                              results_generator=True)
+        prefix = self.get_prefix_lengths(currency)
+        params = [[row.one().transaction.hex()[:prefix['tx']].upper(),
+                   row.one().transaction]
+                  for (success, row) in result if success]
+        session = self.get_session(currency, 'raw')
+        statement = (
+            'SELECT hash, block_number, block_timestamp, value from '
+            'transaction where hash_prefix=%s and hash=%s')
+        result = execute_concurrent_with_args(session, statement, params,
+                                              results_generator=True)
+        return [row.one() for (success, row) in result if success]
 
 ##################################
 # VARIANTS USING NEW DATA SCHEME #

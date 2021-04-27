@@ -307,7 +307,7 @@ entityWithTagsOfAddressWithTags = EntityWithTags(
 
 eth_addressWithTags = AddressWithTags(
    first_tx=TxSummary(
-      tx_hash="abcdef",
+      tx_hash="af6e0000",
       height=1,
       timestamp=11
    ),
@@ -325,7 +325,7 @@ eth_addressWithTags = AddressWithTags(
       usd=20.22
    ),
    last_tx=TxSummary(
-      tx_hash="123456",
+      tx_hash="af6e0003",
       height=1,
       timestamp=12
    ),
@@ -396,21 +396,21 @@ def get_address_with_tags(test_case):
     """
     result = service.get_address_with_tags(
             currency='btc', address=addressWithoutTags.address)
-    assertEqual(addressWithoutTags, result)
+    test_case.assertEqual(addressWithoutTags, result)
     result = service.get_address_with_tags(
             currency='btc', address=addressWithTags.address)
-    assertEqual(addressWithTags, result)
+    test_case.assertEqual(addressWithTags, result)
     result = service.get_address_with_tags(
                 currency='btc', address=addressBech32.address)
-    assertEqual(addressBech32, result)
+    test_case.assertEqual(addressBech32, result)
     result = service.get_address_with_tags(
                 currency='btc', address=addressWithTotalSpent0.address)
-    assertEqual(addressWithTotalSpent0, result)
+    test_case.assertEqual(addressWithTotalSpent0, result)
 
     # ETH
     result = service.get_address_with_tags(
             currency='eth', address=eth_addressWithTags.address)
-    assertEqual(eth_addressWithTags, result)
+    test_case.assertEqual(eth_addressWithTags, result)
 
 
 def list_address_txs(test_case):

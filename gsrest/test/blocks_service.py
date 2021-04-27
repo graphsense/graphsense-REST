@@ -3,6 +3,8 @@ from openapi_server.models.block_eth import BlockEth
 from openapi_server.models.blocks import Blocks
 from openapi_server.models.blocks_eth import BlocksEth
 from openapi_server.models.block_txs import BlockTxs
+from openapi_server.models.txs_eth import TxsEth
+from openapi_server.models.tx_eth import TxEth
 from openapi_server.models.block_tx_summary import BlockTxSummary
 from openapi_server.models.values import Values
 import gsrest.service.blocks_service as service
@@ -100,14 +102,14 @@ def get_block_eth(test_case):
     """
 
     result = service.get_block_eth(1)
-    assertEqual(eth_block, result)
+    test_case.assertEqual(eth_block, result)
     result = service.get_block_eth(2300001)
-    assertEqual(eth_block2, result)
+    test_case.assertEqual(eth_block2, result)
     headers = {
         'Accept': 'application/json',
     }
     response = test_case.client.open(
-        '/eth/blocks/{height}'.format(currency="btc", height="0"),
+        '/eth/blocks/{height}'.format(height="0"),
         method='GET',
         headers=headers)
     test_case.assert400(response,
@@ -123,4 +125,24 @@ def list_blocks_eth(test_case):
             next_page=None,
             blocks=sorted(result.blocks,
                           key=lambda block: block.height))
-    assertEqual(blocks, result)
+    test_case.assertEqual(blocks, result)
+
+
+def list_block_txs_eth(test_case):
+    """Test case for list_block_txs_eth
+    """
+
+    block_txs = TxsEth(txs=[
+            TxEth(
+                tx_hash='af6e0000',
+                height=1,
+                timestamp=15,
+                values=Values(eur=123.0, usd=246.0, value=12300000000)),
+            TxEth(
+                tx_hash='af6e0003',
+                height=1,
+                timestamp=16,
+                values=Values(eur=234.0, usd=468.0, value=23400000000))
+            ])
+    result = service.list_block_txs_eth(1)
+    test_case.assertEqual(block_txs, result)
