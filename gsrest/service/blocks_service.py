@@ -108,10 +108,22 @@ def list_block_txs_eth(height):
     rates = get_rates('eth', height)
     tx_summaries = \
         [TxEth(
+         tx_hash=tx.hash.hex(),
          timestamp=tx.block_timestamp,
          height=tx.block_number,
-         values=convert_value(tx.value, rates['rates']),
-         tx_hash=tx.hash.hex())
+         values=convert_value(tx.value, rates['rates']))
          for tx in result]
 
     return TxsEth(tx_summaries)
+
+
+def list_block_txs_csv_eth(height):
+    def query_function(_):
+        result = list_block_txs_eth(height)
+        txs = [tx.to_dict() for tx in result.txs]
+        return None, txs
+    return Response(stream_with_context(to_csv(query_function)),
+                    mimetype="text/csv",
+                    headers=create_download_header(
+                        'transactions of block {} ({}).csv'
+                        .format(height, 'ETH')))

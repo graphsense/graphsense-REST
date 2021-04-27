@@ -80,6 +80,31 @@ paths:
       tags:
       - blocks
       x-openapi-router-controller: openapi_server.controllers.blocks_controller
+  /eth/blocks/{height}/txs.csv:
+    get:
+      operationId: list_block_txs_csv_eth
+      parameters:
+      - description: The block height
+        example: 1
+        explode: false
+        in: path
+        name: height
+        required: true
+        schema:
+          minimum: 1
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            text/csv:
+              schema:
+                type: string
+          description: OK
+      summary: Get block transactions as CSV
+      tags:
+      - blocks
+      x-openapi-router-controller: openapi_server.controllers.blocks_controller
   /search:
     get:
       operationId: search

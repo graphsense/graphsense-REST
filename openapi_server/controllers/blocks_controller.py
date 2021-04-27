@@ -85,6 +85,23 @@ def list_block_txs_csv(currency, height):  # noqa: E501
         return notfound(str(e))
 
 
+def list_block_txs_csv_eth(height):  # noqa: E501
+    """Get block transactions as CSV
+
+     # noqa: E501
+
+    :param height: The block height
+    :type height: int
+
+    :rtype: str
+    """
+    try:
+        return service.list_block_txs_csv_eth(
+            height=height)
+    except RuntimeError as e:
+        return notfound(str(e))
+
+
 def list_block_txs_eth(height):  # noqa: E501
     """Get block transactions (100 per page)
 

@@ -91,6 +91,24 @@ class TestBlocksController(BaseTestCase):
                        'Response body is : ' + response.data.decode('utf-8'))
 
 
+    def test_list_block_txs_csv_eth(self):
+        """Test case for list_block_txs_csv_eth
+
+        Get block transactions as CSV
+        """
+        test_service.list_block_txs_csv_eth(self)
+
+        headers = { 
+            'Accept': 'text/csv',
+        }
+        response = self.client.open(
+            '/eth/blocks/{height}/txs.csv'.format(height="1"),
+            method='GET',
+            headers=headers)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+
     def test_list_block_txs_eth(self):
         """Test case for list_block_txs_eth
 

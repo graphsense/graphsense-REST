@@ -8,7 +8,6 @@ from openapi_server.models.tx_eth import TxEth
 from openapi_server.models.block_tx_summary import BlockTxSummary
 from openapi_server.models.values import Values
 import gsrest.service.blocks_service as service
-from gsrest.test.assertion import assertEqual
 
 block = Block(
         height=1,
@@ -42,9 +41,9 @@ def get_block(test_case):
     """
 
     result = service.get_block("btc", 1)
-    assertEqual(block, result)
+    test_case.assertEqual(block, result)
     result = service.get_block("btc", 2)
-    assertEqual(block2, result)
+    test_case.assertEqual(block2, result)
     headers = {
         'Accept': 'application/json',
     }
@@ -71,7 +70,7 @@ def list_block_txs(test_case):
                 )
             ])
     result = service.list_block_txs("btc", 1)
-    assertEqual(block_txs, result)
+    test_case.assertEqual(block_txs, result)
 
 
 def list_block_txs_csv(test_case):
@@ -82,7 +81,9 @@ def list_block_txs_csv(test_case):
            "total_output_usd,total_output_value,tx_hash\r\n1,0,1,0.0"
            ",0.0,0,0.0,0.0,5000000000,0e3e2357e806b6cdb1f70b54c3a3a17b"
            "6714ee1f0e68bebb44a74b1efd512098\r\n")
-    assertEqual(csv, service.list_block_txs_csv("btc", 1).data.decode('utf-8'))
+    test_case.assertEqual(csv,
+                          service.list_block_txs_csv("btc", 1)
+                          .data.decode('utf-8'))
 
 
 def list_blocks(test_case):
@@ -94,7 +95,7 @@ def list_blocks(test_case):
             next_page=None,
             blocks=sorted(result.blocks,
                           key=lambda block: block.height))
-    assertEqual(blocks, result)
+    test_case.assertEqual(blocks, result)
 
 
 def get_block_eth(test_case):
@@ -146,3 +147,14 @@ def list_block_txs_eth(test_case):
             ])
     result = service.list_block_txs_eth(1)
     test_case.assertEqual(block_txs, result)
+
+
+def list_block_txs_csv_eth(test_case):
+    """Test case for list_block_txs_csv_eth
+    """
+    csv = ("height,timestamp,tx_hash,values_eur,values_usd,values_value\r\n"
+           "1,15,af6e0000,123.0,246.0,12300000000\r\n"
+           "1,16,af6e0003,234.0,468.0,23400000000\r\n")
+    test_case.assertEqual(csv,
+                          service.list_block_txs_csv_eth(1)
+                          .data.decode('utf-8'))
