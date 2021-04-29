@@ -2,6 +2,8 @@ from gsrest.db import get_connection
 from openapi_server.models.address_tx import AddressTx
 from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.link import Link
+from openapi_server.models.txs_eth import TxsEth
+from openapi_server.models.tx_eth import TxEth
 from gsrest.service.entities_service import get_entity_with_tags
 from gsrest.service.rates_service import list_rates
 import gsrest.service.common_service as common
@@ -125,3 +127,33 @@ def get_address_entity(currency, address):
 def list_matching_addresses(currency, expression):
     db = get_connection()
     return db.list_matching_addresses(currency, expression)
+
+
+def list_address_txs_eth(address, page=None, pagesize=None):
+    db = get_connection()
+    results, paging_state = \
+        db.list_address_txs_eth(address, page, pagesize)
+    txs = []
+    if results:
+        heights = [row.block_number for row in results]
+        rates = list_rates('eth', heights)
+        txs = [TxEth(
+         tx_hash=tx.hash.hex(),
+         timestamp=tx.block_timestamp,
+         height=tx.block_number,
+         values=convert_value(tx.value, rates[tx.block_number]))
+                       for tx in results]
+    return TxsEth(next_page=paging_state, txs=txs)
+
+
+def list_address_txs_csv_eth(address):
+    currency = 'eth'
+
+    def query_function(page_state):
+        result = list_address_txs_eth(address, page_state)
+        return (result.next_page, result.txs)
+    return Response(stream_with_context(to_csv(query_function)),
+                    mimetype="text/csv",
+                    headers=create_download_header(
+                            'transactions of address {} ({}).csv'
+                            .format(address, currency.upper())))

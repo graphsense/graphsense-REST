@@ -12,6 +12,7 @@ from openapi_server.models.entity_with_tags import EntityWithTags  # noqa: E501
 from openapi_server.models.link import Link  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
 from openapi_server.models.tag import Tag  # noqa: E501
+from openapi_server.models.txs_eth import TxsEth  # noqa: E501
 from openapi_server.test import BaseTestCase
 import gsrest.test.addresses_service as test_service
 
@@ -208,6 +209,45 @@ class TestAddressesController(BaseTestCase):
             '/{currency}/addresses/{address}/txs.csv'.format(currency="btc", address="1Archive1n2C579dMsAu3iC6tWzuQJz8dN"),
             method='GET',
             headers=headers)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+
+    def test_list_address_txs_csv_eth(self):
+        """Test case for list_address_txs_csv_eth
+
+        Get all transactions an address has been involved in as CSV
+        """
+        test_service.list_address_txs_csv_eth(self)
+
+        headers = { 
+            'Accept': 'text/csv',
+        }
+        response = self.client.open(
+            '/eth/addresses/{address}/txs.csv'.format(address="123456"),
+            method='GET',
+            headers=headers)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+
+    def test_list_address_txs_eth(self):
+        """Test case for list_address_txs_eth
+
+        Get all transactions an address has been involved in
+        """
+        test_service.list_address_txs_eth(self)
+
+        query_string = [('',''),
+                        ('','')]
+        headers = { 
+            'Accept': 'application/json',
+        }
+        response = self.client.open(
+            '/eth/addresses/{address}/txs'.format(address="123456"),
+            method='GET',
+            headers=headers,
+            query_string=query_string)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 

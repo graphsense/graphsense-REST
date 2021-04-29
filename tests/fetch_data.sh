@@ -128,4 +128,6 @@ fetch eth transformed transaction_ids_by_transaction_id_group "limit 2"
 fetch eth transformed transaction_ids_by_transaction_prefix "limit 2"
 fetch eth transformed address_outgoing_relations "limit 2"
 fetch eth transformed block_transactions "limit 2"
+fetch eth transformed address_transactions "limit 2"
+fetch eth transformed address_transactions_secondary_ids "limit 2"
 

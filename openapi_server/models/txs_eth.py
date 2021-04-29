@@ -17,20 +17,25 @@ class TxsEth(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, txs=None):  # noqa: E501
+    def __init__(self, next_page=None, txs=None):  # noqa: E501
         """TxsEth - a model defined in OpenAPI
 
+        :param next_page: The next_page of this TxsEth.  # noqa: E501
+        :type next_page: str
         :param txs: The txs of this TxsEth.  # noqa: E501
         :type txs: List[TxEth]
         """
         self.openapi_types = {
+            'next_page': str,
             'txs': List[TxEth]
         }
 
         self.attribute_map = {
+            'next_page': 'next_page',
             'txs': 'txs'
         }
 
+        self._next_page = next_page
         self._txs = txs
 
     @classmethod
@@ -50,8 +55,30 @@ class TxsEth(Model):
         :return: The TxsEth as a dict
         :rtype: dict
         """
-        return { 'txs': self._txs }
+        return { 'next_page': self._next_page,
+            'txs': self._txs }
 
+
+    @property
+    def next_page(self):
+        """Gets the next_page of this TxsEth.
+
+
+        :return: The next_page of this TxsEth.
+        :rtype: str
+        """
+        return self._next_page
+
+    @next_page.setter
+    def next_page(self, next_page):
+        """Sets the next_page of this TxsEth.
+
+
+        :param next_page: The next_page of this TxsEth.
+        :type next_page: str
+        """
+
+        self._next_page = next_page
 
     @property
     def txs(self):

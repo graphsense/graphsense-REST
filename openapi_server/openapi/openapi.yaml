@@ -6,6 +6,74 @@ info:
 servers:
 - url: http://openapi_server:9000
 paths:
+  /eth/addresses/{address}/txs:
+    get:
+      operationId: list_address_txs_eth
+      parameters:
+      - description: The cryptocurrency address in hexadecimal representation
+        example: "123456"
+        explode: false
+        in: path
+        name: address
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: Resumption token for retrieving the next page
+        example: 0400030bff00f07fffff9b00
+        explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Number of items returned in a single page
+        example: 10
+        explode: true
+        in: query
+        name: pagesize
+        required: false
+        schema:
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/txs_eth'
+          description: OK
+      summary: Get all transactions an address has been involved in
+      tags:
+      - addresses
+      x-openapi-router-controller: openapi_server.controllers.addresses_controller
+  /eth/addresses/{address}/txs.csv:
+    get:
+      operationId: list_address_txs_csv_eth
+      parameters:
+      - description: The cryptocurrency address in hexadecimal representation
+        example: "123456"
+        explode: false
+        in: path
+        name: address
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            text/csv:
+              schema:
+                type: string
+          description: OK
+      summary: Get all transactions an address has been involved in as CSV
+      tags:
+      - addresses
+      x-openapi-router-controller: openapi_server.controllers.addresses_controller
   /eth/blocks:
     get:
       operationId: list_blocks_eth
@@ -1418,6 +1486,17 @@ components:
         format: string
         type: string
       style: simple
+    hex_address:
+      description: The cryptocurrency address in hexadecimal representation
+      example: "123456"
+      explode: false
+      in: path
+      name: address
+      required: true
+      schema:
+        format: string
+        type: string
+      style: simple
     neighbor:
       description: Neighbor address
       example: 17DfZja1713S3JRWA9jaebCKFM5anUh7GG
@@ -2693,6 +2772,7 @@ components:
       type: object
     txs_eth:
       example:
+        next_page: next_page
         txs:
         - values:
             eur: 1
@@ -2709,6 +2789,9 @@ components:
           height: 1
           timestamp: 6
       properties:
+        next_page:
+          format: string
+          type: string
         txs:
           items:
             $ref: '#/components/schemas/tx_eth'

@@ -6,6 +6,8 @@ from openapi_server.models.neighbors import Neighbors
 from openapi_server.models.neighbor import Neighbor
 from openapi_server.models.entity_with_tags import EntityWithTags
 from openapi_server.models.link import Link
+from openapi_server.models.txs_eth import TxsEth
+from openapi_server.models.tx_eth import TxEth
 import gsrest.service.addresses_service as service
 from gsrest.test.assertion import assertEqual
 from openapi_server.models.address_tx import AddressTx
@@ -443,9 +445,44 @@ def list_address_txs(test_case):
 
 
 def list_address_txs_csv(test_case):
-    # result = service.list_address_txs_csv('btc', addressWithoutTags.address)
-    # assertEqual('', result.data.decode('utf-8'))
-    pass
+    result = service.list_address_txs_csv('btc', addressWithoutTags.address)
+    test_case.assertEqual(
+        'address,height,timestamp,tx_hash,value_eur,value_usd,value_value\r\n'
+        '3Hrnn1UN78uXgLNvtqVXMjHwB41PmX66X4,2,1510347493,123456,0.01,0.03,'
+        '1260000\r\n'
+        '3Hrnn1UN78uXgLNvtqVXMjHwB41PmX66X4,2,1511153263,abcdef,-0.01,-0.03,'
+        '-1260000\r\n', result.data.decode('utf-8'))
+
+
+def list_address_txs_eth(test_case):
+    """Test case for list_address_txs_eth
+
+    Get all transactions an address has been involved in
+    """
+    txs = TxsEth(txs=[
+            TxEth(
+                tx_hash='af6e0000',
+                height=1,
+                timestamp=15,
+                values=Values(eur=123.0, usd=246.0, value=12300000000)),
+            TxEth(
+                tx_hash='af6e0003',
+                height=1,
+                timestamp=16,
+                values=Values(eur=234.0, usd=468.0, value=23400000000))
+            ])
+
+    result = service.list_address_txs_eth(eth_addressWithTags.address)
+    test_case.assertEqual(txs, result)
+
+
+def list_address_txs_csv_eth(test_case):
+    result = service.list_address_txs_csv_eth(eth_addressWithTags.address)
+    test_case.assertEqual(
+        'height,timestamp,tx_hash,values_eur,values_usd,values_value\r\n'
+        '1,15,af6e0000,123.0,246.0,12300000000\r\n'
+        '1,16,af6e0003,234.0,468.0,23400000000\r\n',
+        result.data.decode('utf-8'))
 
 
 def list_address_tags(test_case):

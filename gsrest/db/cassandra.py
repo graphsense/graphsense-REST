@@ -133,6 +133,12 @@ class Cassandra():
                                     raise_on_first_error=False)
         return [row.one() for (success, row) in result if success]
 
+    def concurrent_with_args(self, session, statement, params):
+        result = execute_concurrent_with_args(
+            session, statement, params, raise_on_first_error=False,
+            results_generator=True)
+        return [row.one() for (success, row) in result if success]
+
     @eth
     def get_currency_statistics(self, currency):
         session = self.get_session(currency, 'transformed')
@@ -172,6 +178,7 @@ class Cassandra():
             return None
         return result.current_rows[0]
 
+    @new
     def list_rates(self, currency, heights):
         session = self.get_session(currency, 'transformed')
         session.row_factory = dict_factory
@@ -609,8 +616,44 @@ class Cassandra():
         if result is None:
             raise RuntimeError(
                     f'block {height} not found in currency {currency}')
-        result = result.one()
-        params = [[self.get_id_group(currency, tx), tx] for tx in result.txs]
+        result = self.list_txs_by_ids_eth(result.one().txs)
+        return [row.one() for (success, row) in result if success]
+
+    def get_secondary_id_group_eth(self, table, id_group):
+        session = self.get_session('eth', 'transformed')
+        query = (f"SELECT max_secondary_id FROM {table}_"
+                 "secondary_ids WHERE address_id_group = %s")
+        result = session.execute(query, [id_group])
+        return 0 if result is None else \
+            result.one().max_secondary_id
+
+    def list_address_txs_eth(self, address, page=None, pagesize=None):
+        currency = 'eth'
+        paging_state = from_hex(page)
+        session = self.get_session(currency, 'transformed')
+        address_id, id_group = self.get_address_id_id_group(currency, address)
+        secondary_id_group = \
+            self.get_secondary_id_group_eth('address_transactions', id_group)
+        query = ("SELECT transaction_id FROM address_transactions WHERE "
+                 "address_id_group = %s and address_id_secondary_group = %s"
+                 " and address_id = %s")
+        fetch_size = pagesize if pagesize else TXS_PAGE_SIZE
+        statement = SimpleStatement(query, fetch_size=fetch_size)
+        result = session.execute(statement,
+                                 [id_group, secondary_id_group, address_id],
+                                 paging_state=paging_state)
+        if result is None:
+            return [], None
+        txs = [row.transaction_id for row in result.current_rows]
+        paging_state = result.paging_state
+        result = self.list_txs_by_ids_eth(txs)
+        return [row.one() for (success, row) in result if success], \
+            to_hex(paging_state)
+
+    def list_txs_by_ids_eth(self, ids):
+        currency = 'eth'
+        session = self.get_session(currency, 'transformed')
+        params = [[self.get_id_group(currency, id), id] for id in ids]
         statement = (
             'SELECT transaction from transaction_ids_by_transaction_id_group'
             ' where transaction_id_group = %s and transaction_id = %s')
@@ -624,9 +667,8 @@ class Cassandra():
         statement = (
             'SELECT hash, block_number, block_timestamp, value from '
             'transaction where hash_prefix=%s and hash=%s')
-        result = execute_concurrent_with_args(session, statement, params,
-                                              results_generator=True)
-        return [row.one() for (success, row) in result if success]
+        return execute_concurrent_with_args(session, statement, params,
+                                            results_generator=True)
 
 ##################################
 # VARIANTS USING NEW DATA SCHEME #
@@ -723,12 +765,26 @@ class Cassandra():
         result = session.execute(query, [height])
         if result is None:
             return None
-        row = result.current_rows[0]
+        row = result.one()
+        self.backport_values(currency, row)
+        return row
+
+    def backport_values(self, currency, row):
         for (fiat, curr) in zip(
                 row['fiat_values'],
                 self.parameters[currency]['fiat_currencies']):
             row[curr.lower()] = fiat
-        return row
+
+    def list_rates_new(self, currency, heights):
+        session = self.get_session(currency, 'transformed')
+        session.row_factory = dict_factory
+        result = self.concurrent_with_args(
+            session,
+            "SELECT * FROM exchange_rates WHERE height = %s",
+            [[h] for h in heights])
+        for row in result:
+            self.backport_values(currency, row)
+        return result
 
     def list_matching_txs_new(self, currency, expression, leading_zeros):
         session = self.get_session(currency, 'transformed')

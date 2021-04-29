@@ -106,7 +106,7 @@ def list_block_txs_eth(height):
         raise RuntimeError("Block {} not found".format(height))
 
     rates = get_rates('eth', height)
-    tx_summaries = \
+    txs = \
         [TxEth(
          tx_hash=tx.hash.hex(),
          timestamp=tx.block_timestamp,
@@ -114,7 +114,7 @@ def list_block_txs_eth(height):
          values=convert_value(tx.value, rates['rates']))
          for tx in result]
 
-    return TxsEth(tx_summaries)
+    return TxsEth(next_page=None, txs=txs)
 
 
 def list_block_txs_csv_eth(height):
