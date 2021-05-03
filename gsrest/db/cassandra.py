@@ -402,12 +402,20 @@ class Cassandra():
 
         session = self.get_session(currency, 'transformed')
         id_group = self.get_id_group(currency, id)
+        parameters = [id_group, id]
+        sec_condition = ''
+        if currency == 'eth':
+            secondary_id_group = \
+                self.get_secondary_id_group_eth(
+                    f'address_{direction}_relations',
+                    id_group)
+            sec_condition = f' AND {this}_address_id_secondary_group = %s'
+            parameters.append(secondary_id_group)
 
         has_targets = isinstance(targets, list)
-        parameters = [id_group, id]
         basequery = (f"SELECT * FROM {node_type}_{direction}_relations WHERE "
                      f"{this}_{node_type}{id_suffix}_group = %s AND "
-                     f"{this}_{node_type}{id_suffix} = %s")
+                     f"{this}_{node_type}{id_suffix} = %s {sec_condition}")
         if has_targets:
             if len(targets) == 0:
                 return None
@@ -618,11 +626,17 @@ class Cassandra():
         return [row.one() for (success, row) in result if success]
 
     def get_secondary_id_group_eth(self, table, id_group):
+        column_prefix = ''
+        if table == 'address_incoming_relations':
+            column_prefix = 'dst_'
+        elif table == 'address_outgoing_relations':
+            column_prefix = 'src_'
+
         session = self.get_session('eth', 'transformed')
         query = (f"SELECT max_secondary_id FROM {table}_"
-                 "secondary_ids WHERE address_id_group = %s")
+                 f"secondary_ids WHERE {column_prefix}address_id_group = %s")
         result = session.execute(query, [id_group])
-        return 0 if result is None else \
+        return 0 if result.one() is None else \
             result.one().max_secondary_id
 
     def list_address_txs_eth(self, address, page=None, pagesize=None):

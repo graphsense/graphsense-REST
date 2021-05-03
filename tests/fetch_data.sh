@@ -130,4 +130,6 @@ fetch eth transformed address_outgoing_relations "limit 2"
 fetch eth transformed block_transactions "limit 2"
 fetch eth transformed address_transactions "limit 2"
 fetch eth transformed address_transactions_secondary_ids "limit 2"
+fetch eth transformed address_incoming_relations_secondary_ids "limit 2"
+fetch eth transformed address_outgoing_relations_secondary_ids "limit 2"
 
