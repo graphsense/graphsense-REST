@@ -49,6 +49,7 @@ def list_tags(test_case):
     result = service.list_tags(label='cimedy')
     assertEqual([tag2, tag3], sorted(result, key=lambda x: x.currency))
 
+
 conceptA = Concept(
    uri="https://conceptA",
    id="conceptA",

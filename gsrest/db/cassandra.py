@@ -449,13 +449,8 @@ class Cassandra():
                 row['estimated_value'] = row['value']
         return results, to_hex(paging_state)
 
-    def list_tags(self, label, currency=None):
-        if(currency is None):
-            tags = []
-            for currency in self.config['currencies']:
-                tags += self.list_tags(label, currency)
-            return tags
-
+    @new
+    def list_tags(self, currency, label):
         label_norm_prefix = label[:LABEL_PREFIX_LENGTH]
 
         session = self.get_session(currency=currency,
@@ -467,6 +462,7 @@ class Cassandra():
             return []
         return rows
 
+    @new
     def list_labels(self, currency, expression_norm):
         expression_norm_prefix = expression_norm[:LABEL_PREFIX_LENGTH]
 
@@ -880,3 +876,28 @@ class Cassandra():
                 neighbor[dr + '_cluster'] = \
                     self.address_to_entity_id(neighbor[dr + '_address'])
         return neighbors, page
+
+    def list_tags_new(self, currency, label):
+        label_norm_prefix = label[:LABEL_PREFIX_LENGTH]
+
+        session = self.get_session(currency=currency,
+                                   keyspace_type='transformed')
+        query = ("SELECT * FROM address_tag_by_label WHERE label_norm_prefix"
+                 "= %s and label_norm = %s")
+        rows = session.execute(query, [label_norm_prefix, label])
+        if rows is None:
+            return []
+        return rows
+
+    def list_labels_new(self, currency, expression_norm):
+        expression_norm_prefix = expression_norm[:LABEL_PREFIX_LENGTH]
+
+        session = self.get_session(currency=currency,
+                                   keyspace_type='transformed')
+        query = ("SELECT label, label_norm, currency FROM address_tag_by_label"
+                 " WHERE label_norm_prefix = %s GROUP BY label_norm_prefix, "
+                 "label_norm")
+        result = session.execute(query, [expression_norm_prefix])
+        if result is None:
+            return []
+        return result

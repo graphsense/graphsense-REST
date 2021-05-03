@@ -8,7 +8,12 @@ from gsrest.util.string_edit import alphanumeric_lower
 def list_tags(label, currency=None):
     db = get_connection()
     label = alphanumeric_lower(label)
-    tags = db.list_tags(label, currency)
+    if(currency is None):
+        tags = []
+        for currency in db.get_supported_currencies():
+            tags += db.list_tags(currency, label)
+    else:
+        tags = db.list_tags(currency, label)
 
     return [Tag(
             address=row.address,
