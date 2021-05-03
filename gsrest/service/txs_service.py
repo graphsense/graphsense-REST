@@ -1,6 +1,7 @@
 from gsrest.db import get_connection
 from openapi_server.models.tx import Tx
 from openapi_server.models.txs import Txs
+from openapi_server.models.tx_eth import TxEth
 from openapi_server.models.tx_value import TxValue
 from gsrest.service.rates_service import get_rates, list_rates
 from gsrest.util.values import convert_value
@@ -36,6 +37,22 @@ def get_tx(currency, tx_hash):
     return from_row(result, rates)
 
 
+def get_tx_eth(tx_hash):
+    db = get_connection()
+    result = db.get_tx_eth(tx_hash)
+
+    if result is None:
+        raise RuntimeError('Transaction {} in keyspace {} not found'
+                           .format(tx_hash, 'ETH'))
+
+    rates = get_rates('eth', result.block_number)['rates']
+    return TxEth(
+         tx_hash=result.hash.hex(),
+         timestamp=result.block_timestamp,
+         height=result.block_number,
+         values=convert_value(result.value, rates))
+
+
 def list_txs(currency, page=None):
     db = get_connection()
     results, paging_state = db.list_txs(currency, page)
@@ -48,9 +65,16 @@ def list_txs(currency, page=None):
     return Txs(next_page=paging_state, txs=tx_list)
 
 
-def list_matching_txs(currency, expression, leading_zeros):
+def list_matching_txs(currency, expression):
     db = get_connection()
-    results = db.list_matching_txs(currency, expression, leading_zeros)
+    results = db.list_matching_txs(currency, expression)
+
+    leading_zeros = 0
+    pos = 0
+    # leading zeros will be lost when casting to int
+    while expression[pos] == "0":
+        pos += 1
+        leading_zeros += 1
 
     txs = ["0" * leading_zeros + str(hex(int.from_bytes(row.tx_hash,
                                                         byteorder="big")))[2:]

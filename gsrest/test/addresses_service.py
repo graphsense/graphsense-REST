@@ -7,13 +7,13 @@ from openapi_server.models.neighbor import Neighbor
 from openapi_server.models.entity_with_tags import EntityWithTags
 from openapi_server.models.link import Link
 from openapi_server.models.txs_eth import TxsEth
-from openapi_server.models.tx_eth import TxEth
 import gsrest.service.addresses_service as service
 from gsrest.test.assertion import assertEqual
 from openapi_server.models.address_tx import AddressTx
 from openapi_server.models.address_txs import AddressTxs
 from gsrest.util.values import convert_value
 from gsrest.service.rates_service import list_rates
+from gsrest.test.txs_service import tx1_eth, tx2_eth
 import base64
 
 
@@ -393,6 +393,7 @@ eth_entityWithTags = EntityWithTags(
    tag_coherence=0.5
 )
 
+
 def get_address_with_tags(test_case):
     """Test case for get_address_with_tags
     """
@@ -459,18 +460,7 @@ def list_address_txs_eth(test_case):
 
     Get all transactions an address has been involved in
     """
-    txs = TxsEth(txs=[
-            TxEth(
-                tx_hash='af6e0000',
-                height=1,
-                timestamp=15,
-                values=Values(eur=123.0, usd=246.0, value=12300000000)),
-            TxEth(
-                tx_hash='af6e0003',
-                height=1,
-                timestamp=16,
-                values=Values(eur=234.0, usd=468.0, value=23400000000))
-            ])
+    txs = TxsEth(txs=[tx1_eth, tx2_eth])
 
     result = service.list_address_txs_eth(eth_addressWithTags.address)
     test_case.assertEqual(txs, result)

@@ -1,5 +1,6 @@
 from openapi_server.models.tx import Tx
 from openapi_server.models.txs import Txs
+from openapi_server.models.tx_eth import TxEth
 from openapi_server.models.tx_value import TxValue
 from openapi_server.models.values import Values
 from gsrest.test.assertion import assertEqual
@@ -60,10 +61,27 @@ tx3 = Tx(
              value=Values(eur=0.1, usd=0.2, value=10000000))],
    height=2)
 
+tx1_eth = TxEth(
+   tx_hash='af6e0000',
+   height=1,
+   timestamp=15,
+   values=Values(eur=123.0, usd=246.0, value=12300000000))
+
+tx2_eth = TxEth(
+   tx_hash='af6e0003',
+   height=1,
+   timestamp=16,
+   values=Values(eur=234.0, usd=468.0, value=23400000000))
+
 
 def get_tx(test_case):
     result = service.get_tx(currency='btc', tx_hash='ab1880')
-    assertEqual(tx1, result)
+    test_case.assertEqual(tx1, result)
+
+
+def get_tx_eth(test_case):
+    result = service.get_tx_eth(tx_hash='af6e0000')
+    test_case.assertEqual(tx1_eth, result)
 
 
 def list_txs(test_case):

@@ -173,6 +173,30 @@ paths:
       tags:
       - blocks
       x-openapi-router-controller: openapi_server.controllers.blocks_controller
+  /eth/txs/{tx_hash}:
+    get:
+      operationId: get_tx_eth
+      parameters:
+      - description: The transaction hash
+        example: ab188013
+        explode: false
+        in: path
+        name: tx_hash
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tx_eth'
+          description: OK
+      summary: Returns details of a specific transaction identified by its hash.
+      tags:
+      - txs
+      x-openapi-router-controller: openapi_server.controllers.txs_controller
   /search:
     get:
       operationId: search

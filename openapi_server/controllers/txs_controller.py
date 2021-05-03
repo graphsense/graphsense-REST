@@ -1,4 +1,5 @@
 from openapi_server.models.tx import Tx  # noqa: E501
+from openapi_server.models.tx_eth import TxEth  # noqa: E501
 from openapi_server.models.txs import Txs  # noqa: E501
 import gsrest.service.txs_service as service
 from gsrest.service.problems import notfound
@@ -19,6 +20,23 @@ def get_tx(currency, tx_hash):  # noqa: E501
     try:
         return service.get_tx(
             currency=currency,
+            tx_hash=tx_hash)
+    except RuntimeError as e:
+        return notfound(str(e))
+
+
+def get_tx_eth(tx_hash):  # noqa: E501
+    """Returns details of a specific transaction identified by its hash.
+
+     # noqa: E501
+
+    :param tx_hash: The transaction hash
+    :type tx_hash: str
+
+    :rtype: TxEth
+    """
+    try:
+        return service.get_tx_eth(
             tx_hash=tx_hash)
     except RuntimeError as e:
         return notfound(str(e))

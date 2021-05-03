@@ -176,7 +176,7 @@ class Cassandra():
         result = session.execute(query, [height])
         if result is None:
             return None
-        return result.current_rows[0]
+        return result.one()
 
     @new
     def list_rates(self, currency, heights):
@@ -497,6 +497,7 @@ class Cassandra():
             return []
         return rows
 
+    @eth
     def get_tx(self, currency, tx_hash):
         session = self.get_session(currency, 'raw')
 
@@ -532,7 +533,7 @@ class Cassandra():
         return results.current_rows, to_hex(results.paging_state)
 
     @new
-    def list_matching_txs(self, currency, expression, leading_zeros):
+    def list_matching_txs(self, currency, expression):
         session = self.get_session(currency, 'raw')
         query = 'SELECT tx_hash from transaction where tx_prefix = %s'
         results = session.execute(query, [expression[:TX_PREFIX_LENGTH]])
@@ -674,6 +675,20 @@ class Cassandra():
     def list_address_links_eth(self, currency, address, neighbor):
         return []
 
+    def get_tx_eth(self, tx_hash):
+        currency = 'eth'
+        session = self.get_session(currency, 'raw')
+        query = (
+            'SELECT hash, block_number, block_timestamp, value from '
+            'transaction where hash_prefix=%s and hash=%s')
+        prefix_length = self.get_prefix_lengths(currency)
+        prefix = tx_hash[:prefix_length['tx']].upper()
+        result = session.execute(query, [prefix, bytearray.fromhex(tx_hash)])
+        if result is None:
+            return None
+        return result.one()
+
+
 ##################################
 # VARIANTS USING NEW DATA SCHEME #
 ##################################
@@ -790,7 +805,7 @@ class Cassandra():
             self.backport_values(currency, row)
         return result
 
-    def list_matching_txs_new(self, currency, expression, leading_zeros):
+    def list_matching_txs_new(self, currency, expression):
         session = self.get_session(currency, 'transformed')
         query = ('SELECT transaction from transaction_ids_by_transaction_pre'
                  'fix where transaction_prefix = %s')
