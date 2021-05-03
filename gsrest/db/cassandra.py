@@ -269,6 +269,7 @@ class Cassandra():
         if result:
             return result.one().cluster
 
+    @eth
     def list_address_links(self, currency, address, neighbor):
         session = self.get_session(currency, 'transformed')
 
@@ -669,6 +670,9 @@ class Cassandra():
             'transaction where hash_prefix=%s and hash=%s')
         return execute_concurrent_with_args(session, statement, params,
                                             results_generator=True)
+
+    def list_address_links_eth(self, currency, address, neighbor):
+        return []
 
 ##################################
 # VARIANTS USING NEW DATA SCHEME #
