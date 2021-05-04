@@ -234,7 +234,7 @@ class Cassandra():
         return address_id, id_group
 
     def get_id_group(self, keyspace, id_):
-        return floor(id_ / self.parameters[keyspace]['bucket_size'])
+        return floor(int(id_) / self.parameters[keyspace]['bucket_size'])
 
     @new
     def get_address(self, currency, address):
@@ -337,6 +337,7 @@ class Cassandra():
     def list_entity_tags(self, currency, entity):
         session = self.get_session(currency, 'transformed')
         entity_group = self.get_id_group(currency, entity)
+        entity = int(entity)
         query = ("SELECT * FROM cluster_tags "
                  "WHERE cluster_group = %s and cluster"
                  " = %s")
@@ -350,17 +351,20 @@ class Cassandra():
     def get_entity(self, currency, entity):
         session = self.get_session(currency, 'transformed')
         entity_id_group = self.get_id_group(currency, entity)
+        entity = int(entity)
         query = ("SELECT * FROM cluster "
                  "WHERE cluster_group = %s AND cluster = %s ")
         result = session.execute(query, [entity_id_group, entity])
         if result:
             return result.one()
 
+    @eth
     def list_entity_addresses(self, currency, entity, page=None,
                               pagesize=None):
         paging_state = from_hex(page)
         session = self.get_session(currency, 'transformed')
         entity_id_group = self.get_id_group(currency, entity)
+        entity = int(entity)
         query = ("SELECT * FROM cluster_addresses "
                  "WHERE cluster_group = %s AND cluster = %s")
         fetch_size = ENTITY_ADDRESSES_PAGE_SIZE
@@ -385,6 +389,9 @@ class Cassandra():
                        targets=None, page=None, pagesize=None):
         if node_type == 'address':
             id = self.get_address_id(currency, id)
+        else:
+            id = int(id)
+
         return self.list_neighbors_(currency, id, is_outgoing, node_type,
                                     targets=targets, page=page,
                                     pagesize=pagesize)
@@ -403,6 +410,7 @@ class Cassandra():
         session = self.get_session(currency, 'transformed')
         id_group = self.get_id_group(currency, id)
         parameters = [id_group, id]
+        has_targets = isinstance(targets, list)
         sec_condition = ''
         if currency == 'eth':
             secondary_id_group = \
@@ -411,17 +419,29 @@ class Cassandra():
                     id_group)
             sec_condition = f' AND {this}_address_id_secondary_group = %s'
             parameters.append(secondary_id_group)
+            if has_targets:
+                prefix = self.get_prefix_lengths('eth')
+                params = []
+                for target in targets:
+                    address = self.entity_to_address_id(target)
+                    params.append((address[:prefix['address']].upper(),
+                                   bytes.fromhex(address)))
+                targets = self.concurrent_with_args(
+                    session,
+                    "SELECT address_id FROM address_ids_by_address_prefix "
+                    "WHERE address_prefix = %s AND address = %s", params)
+                targets = [target.address_id for target in targets]
 
-        has_targets = isinstance(targets, list)
         basequery = (f"SELECT * FROM {node_type}_{direction}_relations WHERE "
                      f"{this}_{node_type}{id_suffix}_group = %s AND "
                      f"{this}_{node_type}{id_suffix} = %s {sec_condition}")
         if has_targets:
             if len(targets) == 0:
                 return None
-            query = basequery.replace('*', f'{that}_{node_type}')
+
+            query = basequery.replace('*', f'{that}_{node_type}{id_suffix}')
             targets = ','.join(map(str, targets))
-            query += f' AND {that}_{node_type} in ({targets})'
+            query += f' AND {that}_{node_type}{id_suffix} in ({targets})'
         else:
             query = basequery
         fetch_size = ENTITY_PAGE_SIZE
@@ -436,10 +456,10 @@ class Cassandra():
         results = results.current_rows
         if has_targets:
             statements_and_params = []
-            query = basequery + f" AND {that}_{node_type} = %s"
+            query = basequery + f" AND {that}_{node_type}{id_suffix} = %s"
             for row in results:
                 params = parameters.copy()
-                params.append(row[f'{that}_{node_type}'])
+                params.append(row[f'{that}_{node_type}{id_suffix}'])
                 statements_and_params.append((query, params))
             results = self.concurrent(session, statements_and_params)
         if node_type == 'address':
@@ -596,6 +616,7 @@ class Cassandra():
 
     def get_entity_eth(self, currency, entity):
         # mockup entity by address
+        address = self.entity_to_address_id(entity)
         address = self.get_address_new(currency,
                                        self.entity_to_address_id(entity))
         Entity = namedtuple('Entity',
@@ -697,6 +718,15 @@ class Cassandra():
         if result is None:
             return None
         return result.one()
+
+    def list_entity_addresses_eth(self, currency, entity, page=None,
+                                  pagesize=None):
+        address = self.entity_to_address_id(entity)
+        address = self.get_address_new(currency, address)
+        if address is None:
+            return None
+        return [address._asdict()], None
+
 
 
 ##################################

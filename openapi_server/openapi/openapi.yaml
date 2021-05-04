@@ -920,14 +920,13 @@ paths:
           type: string
         style: simple
       - description: The entity ID
-        example: 67065
+        example: "67065"
         explode: false
         in: path
         name: entity
         required: true
         schema:
-          format: int64
-          type: integer
+          type: string
         style: simple
       responses:
         "200":
@@ -955,14 +954,13 @@ paths:
           type: string
         style: simple
       - description: The entity ID
-        example: 67065
+        example: "67065"
         explode: false
         in: path
         name: entity
         required: true
         schema:
-          format: int64
-          type: integer
+          type: string
         style: simple
       - description: Resumption token for retrieving the next page
         example: 0400030bff00f07fffff9b00
@@ -1008,14 +1006,13 @@ paths:
           type: string
         style: simple
       - description: The entity ID
-        example: 67065
+        example: "67065"
         explode: false
         in: path
         name: entity
         required: true
         schema:
-          format: int64
-          type: integer
+          type: string
         style: simple
       responses:
         "200":
@@ -1043,14 +1040,13 @@ paths:
           type: string
         style: simple
       - description: The entity ID
-        example: 67065
+        example: "67065"
         explode: false
         in: path
         name: entity
         required: true
         schema:
-          format: int64
-          type: integer
+          type: string
         style: simple
       - description: Incoming or outgoing neighbors
         example: out
@@ -1071,8 +1067,7 @@ paths:
         required: false
         schema:
           items:
-            format: int64
-            type: integer
+            type: string
           type: array
         style: form
       - description: Resumption token for retrieving the next page
@@ -1119,14 +1114,13 @@ paths:
           type: string
         style: simple
       - description: The entity ID
-        example: 67065
+        example: "67065"
         explode: false
         in: path
         name: entity
         required: true
         schema:
-          format: int64
-          type: integer
+          type: string
         style: simple
       - description: Incoming or outgoing neighbors
         example: out
@@ -1166,14 +1160,13 @@ paths:
           type: string
         style: simple
       - description: The entity ID
-        example: 67065
+        example: "67065"
         explode: false
         in: path
         name: entity
         required: true
         schema:
-          format: int64
-          type: integer
+          type: string
         style: simple
       - description: Incoming or outgoing neighbors
         example: out
@@ -1271,14 +1264,13 @@ paths:
           type: string
         style: simple
       - description: The entity ID
-        example: 67065
+        example: "67065"
         explode: false
         in: path
         name: entity
         required: true
         schema:
-          format: int64
-          type: integer
+          type: string
         style: simple
       responses:
         "200":
@@ -1308,14 +1300,13 @@ paths:
           type: string
         style: simple
       - description: The entity ID
-        example: 67065
+        example: "67065"
         explode: false
         in: path
         name: entity
         required: true
         schema:
-          format: int64
-          type: integer
+          type: string
         style: simple
       responses:
         "200":
@@ -1533,14 +1524,13 @@ components:
       style: form
     entity:
       description: The entity ID
-      example: 67065
+      example: "67065"
       explode: false
       in: path
       name: entity
       required: true
       schema:
-        format: int64
-        type: integer
+        type: string
       style: simple
     tx_hash:
       description: The transaction hash
@@ -1560,8 +1550,7 @@ components:
       required: false
       schema:
         items:
-          format: int64
-          type: integer
+          type: string
         type: array
       style: form
     search_key:

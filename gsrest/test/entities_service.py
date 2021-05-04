@@ -368,6 +368,29 @@ def list_entity_neighbors(test_case):
         [int(n['id']) for n in result['neighbors']]
     )
 
+    query_string = [('direction', 'out'),
+                    ('targets',
+                     eth_entityWithTagsOutNeighbors.neighbors[0].id)]
+    headers = {
+        'Accept': 'application/json',
+    }
+    response = test_case.client.open(
+        '/{currency}/entities/{entity}/neighbors'.format(
+            currency="eth",
+            entity=eth_entityWithTags.entity),
+        method='GET',
+        headers=headers,
+        query_string=query_string)
+    test_case.assert200(response,
+                        'Response body is : ' + response.data.decode('utf-8'))
+
+    result = json.loads(response.data.decode('utf-8'))
+
+    test_case.assertEqual(
+        [eth_entityWithTagsOutNeighbors.neighbors[0].id],
+        [n['id'] for n in result['neighbors']]
+    )
+
 
 def list_entity_neighbors_csv(test_case):
     csv = ("balance_eur,balance_usd,balance_value,estimated_value_eur,"
@@ -387,7 +410,27 @@ def list_entity_addresses(test_case):
     result = service.list_entity_addresses(
                     currency='btc',
                     entity=entityWithTags.entity)
-    assertEqual(entityWithTagsAddresses, result)
+    test_case.assertEqual(entityWithTagsAddresses, result)
+
+    result = service.list_entity_addresses(
+                    currency='eth',
+                    entity=eth_entityWithTags.entity)
+    expected = Address(
+            address=eth_addressWithTags.address,
+            first_tx=eth_addressWithTags.first_tx,
+            last_tx=eth_addressWithTags.last_tx,
+            no_incoming_txs=eth_addressWithTags.no_incoming_txs,
+            no_outgoing_txs=eth_addressWithTags.no_outgoing_txs,
+            total_received=eth_addressWithTags.total_received,
+            total_spent=eth_addressWithTags.total_spent,
+            in_degree=eth_addressWithTags.in_degree,
+            out_degree=eth_addressWithTags.out_degree,
+            balance=eth_addressWithTags.balance
+            )
+
+    assertEqual(EntityAddresses(
+        next_page=None,
+        addresses=[expected]), result)
 
 
 def list_entity_addresses_csv(test_case):

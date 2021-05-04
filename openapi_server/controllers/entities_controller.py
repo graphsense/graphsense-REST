@@ -15,7 +15,7 @@ def get_entity_with_tags(currency, entity):  # noqa: E501
     :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
     :param entity: The entity ID
-    :type entity: int
+    :type entity: str
 
     :rtype: EntityWithTags
     """
@@ -35,7 +35,7 @@ def list_entity_addresses(currency, entity, page=None, pagesize=None):  # noqa: 
     :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
     :param entity: The entity ID
-    :type entity: int
+    :type entity: str
     :param page: Resumption token for retrieving the next page
     :type page: str
     :param pagesize: Number of items returned in a single page
@@ -61,7 +61,7 @@ def list_entity_addresses_csv(currency, entity):  # noqa: E501
     :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
     :param entity: The entity ID
-    :type entity: int
+    :type entity: str
 
     :rtype: str
     """
@@ -81,11 +81,11 @@ def list_entity_neighbors(currency, entity, direction, targets=None, page=None, 
     :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
     :param entity: The entity ID
-    :type entity: int
+    :type entity: str
     :param direction: Incoming or outgoing neighbors
     :type direction: str
     :param targets: Restrict result to given set of comma separated IDs
-    :type targets: List[int]
+    :type targets: List[str]
     :param page: Resumption token for retrieving the next page
     :type page: str
     :param pagesize: Number of items returned in a single page
@@ -113,7 +113,7 @@ def list_entity_neighbors_csv(currency, entity, direction):  # noqa: E501
     :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
     :param entity: The entity ID
-    :type entity: int
+    :type entity: str
     :param direction: Incoming or outgoing neighbors
     :type direction: str
 
@@ -136,7 +136,7 @@ def list_entity_tags(currency, entity):  # noqa: E501
     :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
     :param entity: The entity ID
-    :type entity: int
+    :type entity: str
 
     :rtype: List[Tag]
     """
@@ -156,7 +156,7 @@ def list_entity_tags_csv(currency, entity):  # noqa: E501
     :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
     :param entity: The entity ID
-    :type entity: int
+    :type entity: str
 
     :rtype: str
     """
@@ -176,7 +176,7 @@ def search_entity_neighbors(currency, entity, direction, key, value, depth, brea
     :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
     :param entity: The entity ID
-    :type entity: int
+    :type entity: str
     :param direction: Incoming or outgoing neighbors
     :type direction: str
     :param key: Match neighbors against one and only one of these properties: - the category the entity belongs to - addresses the entity contains - total_received: amount the entity received in total - balance: amount the entity holds finally
