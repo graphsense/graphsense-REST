@@ -137,7 +137,8 @@ class Cassandra():
         result = execute_concurrent_with_args(
             session, statement, params, raise_on_first_error=False,
             results_generator=True)
-        return [row.one() for (success, row) in result if success]
+        return [row.one() for (success, row) in result
+                if success and row.one()]
 
     @eth
     def get_currency_statistics(self, currency):
@@ -417,8 +418,9 @@ class Cassandra():
                 self.get_secondary_id_group_eth(
                     f'address_{direction}_relations',
                     id_group)
-            sec_condition = f' AND {this}_address_id_secondary_group = %s'
-            parameters.append(secondary_id_group)
+            sec_in = self.sec_in(secondary_id_group)
+            sec_condition = \
+                f' AND {this}_address_id_secondary_group in {sec_in}'
             if has_targets:
                 prefix = self.get_prefix_lengths('eth')
                 params = []
@@ -643,8 +645,7 @@ class Cassandra():
         if result is None:
             raise RuntimeError(
                     f'block {height} not found in currency {currency}')
-        result = self.list_txs_by_ids_eth(result.one().txs)
-        return [row.one() for (success, row) in result if success]
+        return self.list_txs_by_ids_eth(result.one().txs)
 
     def get_secondary_id_group_eth(self, table, id_group):
         column_prefix = ''
@@ -667,21 +668,23 @@ class Cassandra():
         address_id, id_group = self.get_address_id_id_group(currency, address)
         secondary_id_group = \
             self.get_secondary_id_group_eth('address_transactions', id_group)
+        sec_in = self.sec_in(secondary_id_group)
         query = ("SELECT transaction_id FROM address_transactions WHERE "
-                 "address_id_group = %s and address_id_secondary_group = %s"
+                 "address_id_group = %s and "
+                 f"address_id_secondary_group in {sec_in}"
                  " and address_id = %s")
         fetch_size = pagesize if pagesize else TXS_PAGE_SIZE
         statement = SimpleStatement(query, fetch_size=fetch_size)
         result = session.execute(statement,
-                                 [id_group, secondary_id_group, address_id],
+                                 [id_group,
+                                  address_id],
                                  paging_state=paging_state)
         if result is None:
             return [], None
         txs = [row.transaction_id for row in result.current_rows]
         paging_state = result.paging_state
         result = self.list_txs_by_ids_eth(txs)
-        return [row.one() for (success, row) in result if success], \
-            to_hex(paging_state)
+        return result, to_hex(paging_state)
 
     def list_txs_by_ids_eth(self, ids):
         currency = 'eth'
@@ -690,18 +693,16 @@ class Cassandra():
         statement = (
             'SELECT transaction from transaction_ids_by_transaction_id_group'
             ' where transaction_id_group = %s and transaction_id = %s')
-        result = execute_concurrent_with_args(session, statement, params,
-                                              results_generator=True)
+        result = self.concurrent_with_args(session, statement, params)
         prefix = self.get_prefix_lengths(currency)
-        params = [[row.one().transaction.hex()[:prefix['tx']].upper(),
-                   row.one().transaction]
-                  for (success, row) in result if success]
+        params = [[row.transaction.hex()[:prefix['tx']],
+                   row.transaction]
+                  for row in result]
         session = self.get_session(currency, 'raw')
         statement = (
             'SELECT hash, block_number, block_timestamp, value from '
             'transaction where hash_prefix=%s and hash=%s')
-        return execute_concurrent_with_args(session, statement, params,
-                                            results_generator=True)
+        return self.concurrent_with_args(session, statement, params)
 
     def list_address_links_eth(self, currency, address, neighbor):
         return []
@@ -713,7 +714,7 @@ class Cassandra():
             'SELECT hash, block_number, block_timestamp, value from '
             'transaction where hash_prefix=%s and hash=%s')
         prefix_length = self.get_prefix_lengths(currency)
-        prefix = tx_hash[:prefix_length['tx']].upper()
+        prefix = tx_hash[:prefix_length['tx']]
         result = session.execute(query, [prefix, bytearray.fromhex(tx_hash)])
         if result is None:
             return None
@@ -726,8 +727,6 @@ class Cassandra():
         if address is None:
             return None
         return [address._asdict()], None
-
-
 
 ##################################
 # VARIANTS USING NEW DATA SCHEME #
@@ -945,3 +944,6 @@ class Cassandra():
         if result is None:
             return []
         return result
+
+    def sec_in(self, id):
+        return "(" + ','.join(map(str, range(0, id+1))) + ")"
