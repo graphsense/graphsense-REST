@@ -6,6 +6,40 @@ info:
 servers:
 - url: http://openapi_server:9000
 paths:
+  /eth/addresses/{address}/links:
+    get:
+      operationId: list_address_links_eth
+      parameters:
+      - description: The cryptocurrency address in hexadecimal representation
+        example: "123456"
+        explode: false
+        in: path
+        name: address
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: Neighbor address in hexadecimal representation
+        example: "123456"
+        explode: true
+        in: query
+        name: neighbor
+        required: true
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/txs_eth'
+          description: OK
+      summary: Get transactions between two addresses
+      tags:
+      - addresses
+      x-openapi-router-controller: openapi_server.controllers.addresses_controller
   /eth/addresses/{address}/txs:
     get:
       operationId: list_address_txs_eth
@@ -1515,6 +1549,16 @@ components:
     neighbor:
       description: Neighbor address
       example: 17DfZja1713S3JRWA9jaebCKFM5anUh7GG
+      explode: true
+      in: query
+      name: neighbor
+      required: true
+      schema:
+        type: string
+      style: form
+    hex_neighbor:
+      description: Neighbor address in hexadecimal representation
+      example: "123456"
       explode: true
       in: query
       name: neighbor

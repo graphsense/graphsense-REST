@@ -582,7 +582,15 @@ def list_address_links(test_case):
                  timestamp=1361497172,
                  height=2)]
 
-    assertEqual(link, result)
+    test_case.assertEqual(link, result)
+
+
+def list_address_links_eth(test_case):
+    result = service.list_address_links_eth(
+                address=eth_addressWithTags.address,
+                neighbor='123456')
+    txs = TxsEth(txs=[tx1_eth, tx2_eth])
+    test_case.assertEqual(txs, result)
 
 
 def list_address_links_csv(test_case):

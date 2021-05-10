@@ -96,6 +96,26 @@ class TestAddressesController(BaseTestCase):
                        'Response body is : ' + response.data.decode('utf-8'))
 
 
+    def test_list_address_links_eth(self):
+        """Test case for list_address_links_eth
+
+        Get transactions between two addresses
+        """
+        test_service.list_address_links_eth(self)
+
+        query_string = [('neighbor', '123456')]
+        headers = { 
+            'Accept': 'application/json',
+        }
+        response = self.client.open(
+            '/eth/addresses/{address}/links'.format(address="123456"),
+            method='GET',
+            headers=headers,
+            query_string=query_string)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+
     def test_list_address_neighbors(self):
         """Test case for list_address_neighbors
 

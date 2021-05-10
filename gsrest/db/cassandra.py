@@ -699,8 +699,28 @@ class Cassandra():
             'transaction where hash_prefix=%s and hash=%s')
         return self.concurrent_with_args(session, statement, params)
 
-    def list_address_links_eth(self, currency, address, neighbor):
-        return []
+    def list_address_links_eth(self, address, neighbor):
+        currency = 'eth'
+        session = self.get_session(currency, 'transformed')
+        address_id, id_group = self.get_address_id_id_group(currency, address)
+        neighbor_id, n_id_group = \
+            self.get_address_id_id_group(currency, neighbor)
+        secondary_id_group = \
+            self.get_secondary_id_group_eth('address_outgoing_relations',
+                                            id_group)
+        sec_in = self.sec_in(secondary_id_group)
+        query = ("SELECT transaction_ids FROM address_outgoing_relations "
+                 "WHERE src_address_id_group = %s and "
+                 f"src_address_id_secondary_group in {sec_in}"
+                 " and src_address_id = %s and dst_address_id = %s")
+        statement = SimpleStatement(query)
+        result = session.execute(statement, [id_group, address_id,
+                                             neighbor_id])
+        if result is None or result.one() is None:
+            return [], None
+        txs = result.one().transaction_ids
+        result = self.list_txs_by_ids_eth(txs)
+        return result, None
 
     def get_tx_eth(self, tx_hash):
         currency = 'eth'

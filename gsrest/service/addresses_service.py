@@ -133,17 +133,7 @@ def list_address_txs_eth(address, page=None, pagesize=None):
     db = get_connection()
     results, paging_state = \
         db.list_address_txs_eth(address, page, pagesize)
-    txs = []
-    if results:
-        heights = [row.block_number for row in results]
-        rates = list_rates('eth', heights)
-        txs = [TxEth(
-         tx_hash=tx.hash.hex(),
-         timestamp=tx.block_timestamp,
-         height=tx.block_number,
-         values=convert_value(tx.value, rates[tx.block_number]))
-                       for tx in results]
-    return TxsEth(next_page=paging_state, txs=txs)
+    return wrap_txs_eth(results, paging_state)
 
 
 def list_address_txs_csv_eth(address):
@@ -157,3 +147,24 @@ def list_address_txs_csv_eth(address):
                     headers=create_download_header(
                             'transactions of address {} ({}).csv'
                             .format(address, currency.upper())))
+
+
+def list_address_links_eth(address, neighbor):
+    db = get_connection()
+    results, paging_state = db.list_address_links_eth(address, neighbor)
+    return wrap_txs_eth(results, paging_state)
+
+
+def wrap_txs_eth(results, paging_state):
+    currency = 'eth'
+    txs = []
+    if results:
+        heights = [row.block_number for row in results]
+        rates = list_rates(currency, heights)
+        txs = [TxEth(
+         tx_hash=tx.hash.hex(),
+         timestamp=tx.block_timestamp,
+         height=tx.block_number,
+         values=convert_value(tx.value, rates[tx.block_number]))
+                       for tx in results]
+    return TxsEth(next_page=paging_state, txs=txs)

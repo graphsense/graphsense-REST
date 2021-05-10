@@ -95,6 +95,26 @@ def list_address_links_csv(currency, address, neighbor):  # noqa: E501
         return notfound(str(e))
 
 
+def list_address_links_eth(address, neighbor):  # noqa: E501
+    """Get transactions between two addresses
+
+     # noqa: E501
+
+    :param address: The cryptocurrency address in hexadecimal representation
+    :type address: str
+    :param neighbor: Neighbor address in hexadecimal representation
+    :type neighbor: str
+
+    :rtype: TxsEth
+    """
+    try:
+        return service.list_address_links_eth(
+            address=address,
+            neighbor=neighbor)
+    except RuntimeError as e:
+        return notfound(str(e))
+
+
 def list_address_neighbors(currency, address, direction, page=None, pagesize=None):  # noqa: E501
     """Get an addresses&#39; neighbors in the address graph
 
