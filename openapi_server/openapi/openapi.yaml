@@ -40,6 +40,40 @@ paths:
       tags:
       - addresses
       x-openapi-router-controller: openapi_server.controllers.addresses_controller
+  /eth/addresses/{address}/links.csv:
+    get:
+      operationId: list_address_links_csv_eth
+      parameters:
+      - description: The cryptocurrency address in hexadecimal representation
+        example: "123456"
+        explode: false
+        in: path
+        name: address
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: Neighbor address in hexadecimal representation
+        example: "123456"
+        explode: true
+        in: query
+        name: neighbor
+        required: true
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            text/csv:
+              schema:
+                type: string
+          description: OK
+      summary: Get transactions between two addresses as CSV
+      tags:
+      - addresses
+      x-openapi-router-controller: openapi_server.controllers.addresses_controller
   /eth/addresses/{address}/txs:
     get:
       operationId: list_address_txs_eth

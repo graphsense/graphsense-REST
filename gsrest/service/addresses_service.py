@@ -155,6 +155,18 @@ def list_address_links_eth(address, neighbor):
     return wrap_txs_eth(results, paging_state)
 
 
+def list_address_links_csv_eth(address, neighbor):
+    def query_function(_):
+        result = list_address_links_eth(address, neighbor)
+        return (None, result.txs)
+    currency = 'eth'
+    return Response(stream_with_context(to_csv(query_function)),
+                    mimetype="text/csv",
+                    headers=create_download_header(
+                            'transactions between {} and {} ({}).csv'
+                            .format(address, neighbor, currency.upper())))
+
+
 def wrap_txs_eth(results, paging_state):
     currency = 'eth'
     txs = []

@@ -603,3 +603,7 @@ def list_address_links_csv(test_case):
     assertEqual("", result.data.decode('utf-8'))
     '''
     pass
+
+
+def list_address_links_csv_eth(test_case):
+    pass
