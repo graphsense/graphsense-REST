@@ -1,8 +1,8 @@
 from openapi_server.models.entity_addresses import EntityAddresses  # noqa: E501
+from openapi_server.models.entity_tag import EntityTag  # noqa: E501
 from openapi_server.models.entity_with_tags import EntityWithTags  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
 from openapi_server.models.search_paths import SearchPaths  # noqa: E501
-from openapi_server.models.tag import Tag  # noqa: E501
 import gsrest.service.entities_service as service
 from gsrest.service.problems import notfound
 
@@ -128,7 +128,7 @@ def list_entity_neighbors_csv(currency, entity, direction):  # noqa: E501
         return notfound(str(e))
 
 
-def list_entity_tags(currency, entity):  # noqa: E501
+def list_tags_by_entity(currency, entity):  # noqa: E501
     """Get attribution tags for a given entity
 
      # noqa: E501
@@ -138,17 +138,17 @@ def list_entity_tags(currency, entity):  # noqa: E501
     :param entity: The entity ID
     :type entity: str
 
-    :rtype: List[Tag]
+    :rtype: List[EntityTag]
     """
     try:
-        return service.list_entity_tags(
+        return service.list_tags_by_entity(
             currency=currency,
             entity=entity)
     except RuntimeError as e:
         return notfound(str(e))
 
 
-def list_entity_tags_csv(currency, entity):  # noqa: E501
+def list_tags_by_entity_csv(currency, entity):  # noqa: E501
     """Get attribution tags for a given entity as CSV
 
      # noqa: E501
@@ -161,7 +161,7 @@ def list_entity_tags_csv(currency, entity):  # noqa: E501
     :rtype: str
     """
     try:
-        return service.list_entity_tags_csv(
+        return service.list_tags_by_entity_csv(
             currency=currency,
             entity=entity)
     except RuntimeError as e:

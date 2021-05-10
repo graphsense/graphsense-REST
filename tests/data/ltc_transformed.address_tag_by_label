@@ -1,0 +1,2 @@
+ {"label_norm_prefix": "cim", "label_norm": "cimedy", "label": "cimedy", "address": "addressA", "currency": "LTC", "source": "source", "tagpack_uri": "https://tagpack_uri", "abuse": null, "active": true, "category": "exchange", "lastmod": 3}
+ {"label_norm_prefix": "coi", "label_norm": "coinbase", "label": "coinbase", "address": "addressB", "currency": "LTC", "source": "Team", "tagpack_uri": "https://tagpack_uri", "abuse": null, "active": true, "category": "exchange", "lastmod": 4}

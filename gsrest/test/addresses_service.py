@@ -1,6 +1,7 @@
 from openapi_server.models.address_with_tags import AddressWithTags
 from openapi_server.models.values import Values
-from openapi_server.models.tag import Tag
+from openapi_server.models.address_tag import AddressTag
+from openapi_server.models.entity_tag import EntityTag
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.neighbors import Neighbors
 from openapi_server.models.neighbor import Neighbor
@@ -17,7 +18,7 @@ from gsrest.test.txs_service import tx1_eth, tx2_eth
 import base64
 
 
-tag = Tag(
+tag = AddressTag(
            category="organization",
            label="Internet, Archive",
            abuse=None,
@@ -29,7 +30,7 @@ tag = Tag(
            currency='btc'
         )
 
-tag2 = Tag(
+tag2 = AddressTag(
            category="organization",
            label="Internet Archive 2",
            abuse=None,
@@ -41,7 +42,7 @@ tag2 = Tag(
            currency='btc'
         )
 
-eth_tag = Tag(
+eth_tag = AddressTag(
            category=None,
            label="TagA",
            abuse=None,
@@ -53,7 +54,7 @@ eth_tag = Tag(
            currency='eth'
         )
 
-eth_tag2 = Tag(
+eth_tag2 = AddressTag(
            category=None,
            label="TagB",
            abuse=None,
@@ -64,6 +65,31 @@ eth_tag2 = Tag(
            active=True,
            currency='eth'
         )
+
+etag = EntityTag(
+           category="organization",
+           label="Internet, Archive",
+           abuse=None,
+           lastmod=1560290400,
+           source="https://archive.org/donate/cryptocurrency",
+           entity=17642138,
+           tagpack_uri="http://tagpack_uri",
+           active=True,
+           currency='btc'
+        )
+
+etag2 = EntityTag(
+           category="organization",
+           label="Internet Archive 2",
+           abuse=None,
+           lastmod=1560290400,
+           source="https://archive.org/donate/cryptocurrency",
+           entity=17642138,
+           tagpack_uri="http://tagpack_uri",
+           active=True,
+           currency='btc'
+        )
+
 
 addressWithTags = AddressWithTags(
    first_tx=TxSummary(
@@ -197,7 +223,7 @@ addressWithTagsOutNeighbors = Neighbors(
             Neighbor(
                 id="17DfZja1713S3JRWA9jaebCKFM5anUh7GG",
                 node_type='address',
-                labels=[],
+                has_labels=False,
                 received=Values(
                         value=87789282,
                         usd=142.18,
@@ -215,7 +241,7 @@ addressWithTagsOutNeighbors = Neighbors(
             Neighbor(
                 id="1LpXFVskUaE2cs5xkQE5bDDaX8hff4L2Ej",
                 node_type='address',
-                labels=[],
+                has_labels=False,
                 received=Values(
                         value=67789282,
                         usd=121.46,
@@ -237,7 +263,7 @@ addressWithTagsInNeighbors = Neighbors(
             Neighbor(
                 id="1BLCmwzV5KXdd4zuonoxaBC9YobJfrkxFg",
                 node_type='address',
-                labels=[],
+                has_labels=False,
                 received=Values(
                         value=59308362491,
                         usd=17221.5,
@@ -255,7 +281,7 @@ addressWithTagsInNeighbors = Neighbors(
             Neighbor(
                 id="1KzsFAeH9rL6nVXDEt9mnFHR3sekBjpNSt",
                 node_type='address',
-                labels=[],
+                has_labels=False,
                 received=Values(
                         value=5000000000,
                         usd=13.41,
@@ -303,7 +329,7 @@ entityWithTagsOfAddressWithTags = EntityWithTags(
             value=115422577,
             usd=2.31,
             eur=1.15),
-   tags=[tag2, tag],
+   tags=[etag2, etag],
    tag_coherence=0
 )
 
@@ -343,7 +369,7 @@ eth_addressWithTagsOutNeighbors = Neighbors(
             Neighbor(
                 id="abcdef",
                 node_type='address',
-                labels=[],
+                has_labels=False,
                 received=Values(
                         value=12300000000,
                         eur=22.22,
@@ -361,7 +387,7 @@ eth_addressWithTagsOutNeighbors = Neighbors(
             Neighbor(
                 id="123456",
                 node_type='address',
-                labels=[],
+                has_labels=False,
                 received=Values(
                         value=12300000000,
                         eur=22.22,
@@ -389,7 +415,7 @@ eth_entityWithTags = EntityWithTags(
    out_degree=eth_addressWithTags.out_degree,
    first_tx=eth_addressWithTags.first_tx,
    balance=eth_addressWithTags.balance,
-   tags=eth_addressWithTags.tags,
+   tags=[],
    tag_coherence=0.5
 )
 
@@ -475,21 +501,21 @@ def list_address_txs_csv_eth(test_case):
         result.data.decode('utf-8'))
 
 
-def list_address_tags(test_case):
-    result = service.list_address_tags('btc', addressWithTags.address)
+def list_tags_by_address(test_case):
+    result = service.list_tags_by_address('btc', addressWithTags.address)
     assertEqual(addressWithTags.tags, result)
 
-    result = service.list_address_tags('eth', eth_addressWithTags.address)
+    result = service.list_tags_by_address('eth', eth_addressWithTags.address)
     assertEqual(eth_addressWithTags.tags, result)
 
 
-def list_address_tags_csv(test_case):
+def list_tags_by_address_csv(test_case):
     csv = ("abuse,active,address,category,currency,label,lastmod,"
            "source,tagpack_uri\r\n,True,1Archive1n2C579dMsAu3iC6"
            "tWzuQJz8dN,organization,btc,\"Internet, Archive\",1560290400"
            ",https://archive.org/donate/cryptocurrency,http://tagpack_uri\r\n")
     csv = base64.b64encode(csv.encode("utf-8"))
-    result = service.list_address_tags_csv(
+    result = service.list_tags_by_address_csv(
                         "btc",
                         addressWithTags.address).data.decode('utf-8')
     result = base64.b64encode(result.encode("utf-8"))
@@ -518,11 +544,11 @@ def list_address_neighbors(test_case):
 
 def list_address_neighbors_csv(test_case):
     csv = ("balance_eur,balance_usd,balance_value,estimated_value_eur,"
-           "estimated_value_usd,estimated_value_value,id,labels,no_txs,"
+           "estimated_value_usd,estimated_value_value,has_labels,id,no_txs,"
            "node_type,received_eur,received_usd,received_value\r\n0.0,0.0,"
-           "0,72.08,87.24,27789282,17DfZja1713S3JRWA9jaebCKFM5anUh7GG,[]"
+           "0,72.08,87.24,27789282,False,17DfZja1713S3JRWA9jaebCKFM5anUh7GG"
            ",1,address,114.86,142.18,87789282\r\n0.0,0.0,0,72.08,87.24,"
-           "27789282,1LpXFVskUaE2cs5xkQE5bDDaX8hff4L2Ej,[],1,address,98.72,"
+           "27789282,False,1LpXFVskUaE2cs5xkQE5bDDaX8hff4L2Ej,1,address,98.72,"
            "121.46,67789282\r\n")
     result = service.list_address_neighbors_csv(
         currency='btc',

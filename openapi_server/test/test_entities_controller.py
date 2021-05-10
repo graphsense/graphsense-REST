@@ -7,10 +7,10 @@ from flask import json
 from six import BytesIO
 
 from openapi_server.models.entity_addresses import EntityAddresses  # noqa: E501
+from openapi_server.models.entity_tag import EntityTag  # noqa: E501
 from openapi_server.models.entity_with_tags import EntityWithTags  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
 from openapi_server.models.search_paths import SearchPaths  # noqa: E501
-from openapi_server.models.tag import Tag  # noqa: E501
 from openapi_server.test import BaseTestCase
 import gsrest.test.entities_service as test_service
 
@@ -118,12 +118,12 @@ class TestEntitiesController(BaseTestCase):
                        'Response body is : ' + response.data.decode('utf-8'))
 
 
-    def test_list_entity_tags(self):
-        """Test case for list_entity_tags
+    def test_list_tags_by_entity(self):
+        """Test case for list_tags_by_entity
 
         Get attribution tags for a given entity
         """
-        test_service.list_entity_tags(self)
+        test_service.list_tags_by_entity(self)
 
         headers = { 
             'Accept': 'application/json',
@@ -136,12 +136,12 @@ class TestEntitiesController(BaseTestCase):
                        'Response body is : ' + response.data.decode('utf-8'))
 
 
-    def test_list_entity_tags_csv(self):
-        """Test case for list_entity_tags_csv
+    def test_list_tags_by_entity_csv(self):
+        """Test case for list_tags_by_entity_csv
 
         Get attribution tags for a given entity as CSV
         """
-        test_service.list_entity_tags_csv(self)
+        test_service.list_tags_by_entity_csv(self)
 
         headers = { 
             'Accept': 'application/csv',

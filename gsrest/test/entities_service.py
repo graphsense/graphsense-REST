@@ -7,31 +7,31 @@ from openapi_server.models.entity_addresses import EntityAddresses
 from openapi_server.models.entity_with_tags import EntityWithTags
 from openapi_server.models.values import Values
 from openapi_server.models.search_paths import SearchPaths
-from openapi_server.models.tag import Tag
+from openapi_server.models.entity_tag import EntityTag
 import json
 import gsrest.service.entities_service as service
 from gsrest.test.addresses_service import eth_addressWithTags, \
         eth_addressWithTagsOutNeighbors
 
-tag = Tag(
+tag = EntityTag(
            category="organization",
            label="Internet, Archive",
            abuse=None,
            lastmod=1560290400,
            source="https://archive.org/donate/cryptocurrency",
-           address="1Archive1n2C579dMsAu3iC6tWzuQJz8dN",
+           entity=17642138,
            tagpack_uri="http://tagpack_uri",
            active=True,
            currency='btc'
         )
 
-tag2 = Tag(
+tag2 = EntityTag(
            category="organization",
            label="Internet Archive 2",
            abuse=None,
            lastmod=1560290400,
            source="https://archive.org/donate/cryptocurrency",
-           address="1Archive1n2C579dMsAu3iC6tWzuQJz8dN",
+           entity=17642138,
            tagpack_uri="http://tagpack_uri",
            active=True,
            currency='btc'
@@ -84,7 +84,7 @@ eth_entityWithTags = EntityWithTags(
    out_degree=eth_addressWithTags.out_degree,
    first_tx=eth_addressWithTags.first_tx,
    balance=eth_addressWithTags.balance,
-   tags=eth_addressWithTags.tags,
+   tags=[],
    tag_coherence=0.5
 )
 
@@ -115,7 +115,7 @@ entityWithTagsOutNeighbors = Neighbors(
           ),
           id=2818641,
           node_type='entity',
-          labels=[],
+          has_labels=False,
           no_txs=1,
           balance=Values(
              eur=0.0,
@@ -136,7 +136,7 @@ entityWithTagsOutNeighbors = Neighbors(
           ),
           id=8361735,
           node_type='entity',
-          labels=[],
+          has_labels=False,
           no_txs=3,
           balance=Values(
              eur=0.0,
@@ -161,7 +161,7 @@ entityWithTagsInNeighbors = Neighbors(
           ),
           id=67065,
           node_type='entity',
-          labels=[],
+          has_labels=False,
           no_txs=10,
           balance=Values(
              eur=0.0,
@@ -182,7 +182,7 @@ entityWithTagsInNeighbors = Neighbors(
           ),
           id=144534,
           node_type='entity',
-          labels=[],
+          has_labels=False,
           no_txs=1,
           balance=Values(
              eur=0.0,
@@ -283,26 +283,26 @@ def get_entity_with_tags(test_case):
     test_case.assertEqual(eth_entityWithTags, result)
 
 
-def list_entity_tags(test_case):
-    result = service.list_entity_tags(currency='btc',
-                                      entity=entityWithTags.entity)
+def list_tags_by_entity(test_case):
+    result = service.list_tags_by_entity(currency='btc',
+                                         entity=entityWithTags.entity)
     test_case.assertEqual([tag2, tag], result)
-    result = service.list_entity_tags(currency='eth',
-                                      entity=eth_entityWithTags.entity)
+    result = service.list_tags_by_entity(currency='eth',
+                                         entity=eth_entityWithTags.entity)
     test_case.assertEqual(eth_entityWithTags.tags, result)
 
 
-def list_entity_tags_csv(test_case):
-    csv = ("abuse,active,address,category,currency,label,lastmod,source,"
+def list_tags_by_entity_csv(test_case):
+    csv = ("abuse,active,category,currency,entity,label,lastmod,source,"
            "tagpack_uri\r\n"
-           ",True,1Archive1n2C579dMsAu3iC6tWzuQJz8dN,organization,btc,"
+           ",True,organization,btc,17642138,"
            "Internet Archive 2,1560290400,https://archive.org/donate/crypto"
            "currency,http://tagpack_uri\r\n"
-           ",True,1Archive1n2C579dMsAu3iC6tWzuQJz8dN,"
-           "organization,btc,\"Internet, Archive\",1560290400,"
+           ",True,"
+           "organization,btc,17642138,\"Internet, Archive\",1560290400,"
            "https://archive.org/donate/cryptocurrency,http://tagpack_uri\r\n"
            )
-    assertEqual(csv, service.list_entity_tags_csv(
+    assertEqual(csv, service.list_tags_by_entity_csv(
                         "btc",
                         entityWithTags.entity).data.decode('utf-8'))
 
@@ -394,11 +394,11 @@ def list_entity_neighbors(test_case):
 
 def list_entity_neighbors_csv(test_case):
     csv = ("balance_eur,balance_usd,balance_value,estimated_value_eur,"
-           "estimated_value_usd,estimated_value_value,id,labels,no_txs,"
+           "estimated_value_usd,estimated_value_value,has_labels,id,no_txs,"
            "node_type,received_eur,received_usd,received_value\r\n0.0,0.0,0"
-           ",2411.06,3074.92,48610000000,2818641,[],1,entity,2411.06,3074.92,"
-           "48610000000\r\n0.0,0.0,0,1078.04,1397.54,3375700000,8361735,[],3,"
-           "entity,7064.18,8517.93,7858798000\r\n")
+           ",2411.06,3074.92,48610000000,False,2818641,1,entity,2411.06,"
+           "3074.92,48610000000\r\n0.0,0.0,0,1078.04,1397.54,3375700000,"
+           "False,8361735,3,entity,7064.18,8517.93,7858798000\r\n")
     result = service.list_entity_neighbors_csv(
         currency='btc',
         entity=entityWithTags.entity,

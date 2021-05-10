@@ -2,7 +2,7 @@ from gsrest.db import get_connection
 from openapi_server.models.address import Address
 from openapi_server.models.address_with_tags import AddressWithTags
 from openapi_server.models.tx_summary import TxSummary
-from openapi_server.models.tag import Tag
+from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.neighbors import Neighbors
 from openapi_server.models.neighbor import Neighbor
 from gsrest.util.values import compute_balance, convert_value, make_values
@@ -47,13 +47,13 @@ def get_address(currency, address):
         )
 
 
-def list_address_tags(currency, address):
+def list_tags_by_address(currency, address):
     db = get_connection()
-    results = db.list_address_tags(currency, address)
+    results = db.list_tags_by_address(currency, address)
 
     if results is None:
         return []
-    address_tags = [Tag(
+    address_tags = [AddressTag(
                     label=row.label,
                     address=row.address,
                     category=row.category,
@@ -82,7 +82,7 @@ def get_address_with_tags(currency, address):
         in_degree=result.in_degree,
         out_degree=result.out_degree,
         balance=result.balance,
-        tags=list_address_tags(currency, address)
+        tags=list_tags_by_address(currency, address)
         )
     return result
 
@@ -124,8 +124,8 @@ def list_neighbors(currency, id, direction, node_type,
         relations.append(Neighbor(
             id=row[f'{dst}_{ntype}'],
             node_type=node_type,
-            labels=row[dst+'_labels']
-            if row[dst+'_labels'] is not None else [],
+            has_labels=row[f'has_{dst}_labels']
+            if row[f'has_{dst}_labels'] is not None else False,
             received=make_values(
                 value=row[dst+'_properties'].total_received.value,
                 eur=row[dst+'_properties'].total_received.eur,

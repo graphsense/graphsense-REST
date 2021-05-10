@@ -249,7 +249,7 @@ class Cassandra():
             return result.one()
 
     @new
-    def list_address_tags(self, currency, address):
+    def list_tags_by_address(self, currency, address):
         session = self.get_session(currency, 'transformed')
 
         query = "SELECT * FROM address_tags WHERE address = %s"
@@ -335,14 +335,11 @@ class Cassandra():
         return rows
 
     @eth
-    def list_entity_tags(self, currency, entity):
+    def list_tags_by_entity(self, currency, entity):
         session = self.get_session(currency, 'transformed')
-        entity_group = self.get_id_group(currency, entity)
         entity = int(entity)
-        query = ("SELECT * FROM cluster_tags "
-                 "WHERE cluster_group = %s and cluster"
-                 " = %s")
-        results = session.execute(query, [entity_group, entity])
+        query = ("SELECT * FROM cluster_tags WHERE cluster = %s")
+        results = session.execute(query, [entity])
 
         if results is None:
             return []
@@ -479,27 +476,26 @@ class Cassandra():
                 row['estimated_value'] = row['value']
         return results, to_hex(paging_state)
 
-    @new
-    def list_tags(self, currency, label):
+    def list_address_tags(self, currency, label):
         label_norm_prefix = label[:LABEL_PREFIX_LENGTH]
 
         session = self.get_session(currency=currency,
                                    keyspace_type='transformed')
-        query = "SELECT * FROM tag_by_label WHERE label_norm_prefix = %s and "\
-                "label_norm = %s"
+        query = ("SELECT * FROM address_tag_by_label WHERE "
+                 "label_norm_prefix = %s and label_norm = %s")
         rows = session.execute(query, [label_norm_prefix, label])
         if rows is None:
             return []
         return rows
 
-    @new
     def list_labels(self, currency, expression_norm):
         expression_norm_prefix = expression_norm[:LABEL_PREFIX_LENGTH]
 
         session = self.get_session(currency=currency,
                                    keyspace_type='transformed')
-        query = "SELECT label, label_norm, currency FROM tag_by_label WHERE " \
-                "label_norm_prefix = %s GROUP BY label_norm_prefix, label_norm"
+        query = ("SELECT label, label_norm, currency FROM address_tag_by_label"
+                 " WHERE label_norm_prefix = %s GROUP BY label_norm_prefix, "
+                 "label_norm")
         result = session.execute(query, [expression_norm_prefix])
         if result is None:
             return []
@@ -628,9 +624,8 @@ class Cassandra():
         entity['no_addresses'] = 1
         return Entity(**entity)
 
-    def list_entity_tags_eth(self, currency, entity):
-        return self.list_address_tags_new(currency,
-                                          self.entity_to_address_id(entity))
+    def list_tags_by_entity_eth(self, currency, entity):
+        return []
 
     def get_address_entity_id_eth(self, currency, address):
         return self.address_to_entity_id(address)
@@ -799,7 +794,7 @@ class Cassandra():
         result = Result(**result)
         return result._replace(first_tx=first_tx, last_tx=last_tx)
 
-    def list_address_tags_new(self, currency, address):
+    def list_tags_by_address_new(self, currency, address):
         session = self.get_session(currency, 'transformed')
         address_id, _ = \
             self.get_address_id_id_group(currency, address)
@@ -931,19 +926,6 @@ class Cassandra():
         if rows is None:
             return []
         return rows
-
-    def list_labels_new(self, currency, expression_norm):
-        expression_norm_prefix = expression_norm[:LABEL_PREFIX_LENGTH]
-
-        session = self.get_session(currency=currency,
-                                   keyspace_type='transformed')
-        query = ("SELECT label, label_norm, currency FROM address_tag_by_label"
-                 " WHERE label_norm_prefix = %s GROUP BY label_norm_prefix, "
-                 "label_norm")
-        result = session.execute(query, [expression_norm_prefix])
-        if result is None:
-            return []
-        return result
 
     def sec_in(self, id):
         return "(" + ','.join(map(str, range(0, id+1))) + ")"

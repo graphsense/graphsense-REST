@@ -1,21 +1,21 @@
 from gsrest.db import get_connection
-from openapi_server.models.tag import Tag
+from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.taxonomy import Taxonomy
 from openapi_server.models.concept import Concept
 from gsrest.util.string_edit import alphanumeric_lower
 
 
-def list_tags(label, currency=None):
+def list_address_tags(label, currency=None):
     db = get_connection()
     label = alphanumeric_lower(label)
     if(currency is None):
         tags = []
         for currency in db.get_supported_currencies():
-            tags += db.list_tags(currency, label)
+            tags += db.list_address_tags(currency, label)
     else:
-        tags = db.list_tags(currency, label)
+        tags = db.list_address_tags(currency, label)
 
-    return [Tag(
+    return [AddressTag(
             address=row.address,
             label=row.label,
             category=row.category,
@@ -23,7 +23,7 @@ def list_tags(label, currency=None):
             tagpack_uri=row.tagpack_uri,
             source=row.source,
             lastmod=row.lastmod,
-            active=row.active_address,
+            active=row.active,
             currency=row.currency)
             for row in tags]
 

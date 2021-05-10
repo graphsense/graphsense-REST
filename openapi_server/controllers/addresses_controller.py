@@ -1,9 +1,9 @@
+from openapi_server.models.address_tag import AddressTag  # noqa: E501
 from openapi_server.models.address_txs import AddressTxs  # noqa: E501
 from openapi_server.models.address_with_tags import AddressWithTags  # noqa: E501
 from openapi_server.models.entity_with_tags import EntityWithTags  # noqa: E501
 from openapi_server.models.link import Link  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
-from openapi_server.models.tag import Tag  # noqa: E501
 from openapi_server.models.txs_eth import TxsEth  # noqa: E501
 import gsrest.service.addresses_service as service
 from gsrest.service.problems import notfound
@@ -147,46 +147,6 @@ def list_address_neighbors_csv(currency, address, direction):  # noqa: E501
         return notfound(str(e))
 
 
-def list_address_tags(currency, address):  # noqa: E501
-    """Get attribution tags for a given address
-
-     # noqa: E501
-
-    :param currency: The cryptocurrency (e.g., btc)
-    :type currency: str
-    :param address: The cryptocurrency address
-    :type address: str
-
-    :rtype: List[Tag]
-    """
-    try:
-        return service.list_address_tags(
-            currency=currency,
-            address=address)
-    except RuntimeError as e:
-        return notfound(str(e))
-
-
-def list_address_tags_csv(currency, address):  # noqa: E501
-    """Get attribution tags for a given address
-
-     # noqa: E501
-
-    :param currency: The cryptocurrency (e.g., btc)
-    :type currency: str
-    :param address: The cryptocurrency address
-    :type address: str
-
-    :rtype: str
-    """
-    try:
-        return service.list_address_tags_csv(
-            currency=currency,
-            address=address)
-    except RuntimeError as e:
-        return notfound(str(e))
-
-
 def list_address_txs(currency, address, page=None, pagesize=None):  # noqa: E501
     """Get all transactions an address has been involved in
 
@@ -269,5 +229,45 @@ def list_address_txs_eth(address, page=None, pagesize=None):  # noqa: E501
             address=address,
             page=page,
             pagesize=pagesize)
+    except RuntimeError as e:
+        return notfound(str(e))
+
+
+def list_tags_by_address(currency, address):  # noqa: E501
+    """Get attribution tags for a given address
+
+     # noqa: E501
+
+    :param currency: The cryptocurrency (e.g., btc)
+    :type currency: str
+    :param address: The cryptocurrency address
+    :type address: str
+
+    :rtype: List[AddressTag]
+    """
+    try:
+        return service.list_tags_by_address(
+            currency=currency,
+            address=address)
+    except RuntimeError as e:
+        return notfound(str(e))
+
+
+def list_tags_by_address_csv(currency, address):  # noqa: E501
+    """Get attribution tags for a given address
+
+     # noqa: E501
+
+    :param currency: The cryptocurrency (e.g., btc)
+    :type currency: str
+    :param address: The cryptocurrency address
+    :type address: str
+
+    :rtype: str
+    """
+    try:
+        return service.list_tags_by_address_csv(
+            currency=currency,
+            address=address)
     except RuntimeError as e:
         return notfound(str(e))

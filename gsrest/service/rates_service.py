@@ -32,7 +32,6 @@ def get_rates(currency, height=None):
 def list_rates(currency, heights):
     db = get_connection()
     rates = db.list_rates(currency, heights)
-    print(f'raw rates {rates}')
 
     height_rates = dict()  # key: height, value: {'eur': 0, 'usd':0}
     for rate in rates:

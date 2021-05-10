@@ -6,12 +6,12 @@ import unittest
 from flask import json
 from six import BytesIO
 
+from openapi_server.models.address_tag import AddressTag  # noqa: E501
 from openapi_server.models.address_txs import AddressTxs  # noqa: E501
 from openapi_server.models.address_with_tags import AddressWithTags  # noqa: E501
 from openapi_server.models.entity_with_tags import EntityWithTags  # noqa: E501
 from openapi_server.models.link import Link  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
-from openapi_server.models.tag import Tag  # noqa: E501
 from openapi_server.models.txs_eth import TxsEth  # noqa: E501
 from openapi_server.test import BaseTestCase
 import gsrest.test.addresses_service as test_service
@@ -138,42 +138,6 @@ class TestAddressesController(BaseTestCase):
                        'Response body is : ' + response.data.decode('utf-8'))
 
 
-    def test_list_address_tags(self):
-        """Test case for list_address_tags
-
-        Get attribution tags for a given address
-        """
-        test_service.list_address_tags(self)
-
-        headers = { 
-            'Accept': 'application/json',
-        }
-        response = self.client.open(
-            '/{currency}/addresses/{address}/tags'.format(currency="btc", address="1Archive1n2C579dMsAu3iC6tWzuQJz8dN"),
-            method='GET',
-            headers=headers)
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
-
-
-    def test_list_address_tags_csv(self):
-        """Test case for list_address_tags_csv
-
-        Get attribution tags for a given address
-        """
-        test_service.list_address_tags_csv(self)
-
-        headers = { 
-            'Accept': 'application/csv',
-        }
-        response = self.client.open(
-            '/{currency}/addresses/{address}/tags.csv'.format(currency="btc", address="1Archive1n2C579dMsAu3iC6tWzuQJz8dN"),
-            method='GET',
-            headers=headers)
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
-
-
     def test_list_address_txs(self):
         """Test case for list_address_txs
 
@@ -248,6 +212,42 @@ class TestAddressesController(BaseTestCase):
             method='GET',
             headers=headers,
             query_string=query_string)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+
+    def test_list_tags_by_address(self):
+        """Test case for list_tags_by_address
+
+        Get attribution tags for a given address
+        """
+        test_service.list_tags_by_address(self)
+
+        headers = { 
+            'Accept': 'application/json',
+        }
+        response = self.client.open(
+            '/{currency}/addresses/{address}/tags'.format(currency="btc", address="1Archive1n2C579dMsAu3iC6tWzuQJz8dN"),
+            method='GET',
+            headers=headers)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+
+    def test_list_tags_by_address_csv(self):
+        """Test case for list_tags_by_address_csv
+
+        Get attribution tags for a given address
+        """
+        test_service.list_tags_by_address_csv(self)
+
+        headers = { 
+            'Accept': 'application/csv',
+        }
+        response = self.client.open(
+            '/{currency}/addresses/{address}/tags.csv'.format(currency="btc", address="1Archive1n2C579dMsAu3iC6tWzuQJz8dN"),
+            method='GET',
+            headers=headers)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 

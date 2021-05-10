@@ -258,7 +258,7 @@ paths:
       x-openapi-router-controller: openapi_server.controllers.general_controller
   /tags:
     get:
-      operationId: list_tags
+      operationId: list_address_tags
       parameters:
       - description: The cryptocurrency (e.g., btc)
         example: btc
@@ -285,10 +285,10 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/tag'
+                  $ref: '#/components/schemas/address_tag'
                 type: array
           description: OK
-      summary: Returns the tags associated with a given label
+      summary: Returns the address tags associated with a given label
       tags:
       - tags
       x-openapi-router-controller: openapi_server.controllers.tags_controller
@@ -608,7 +608,7 @@ paths:
       x-openapi-router-controller: openapi_server.controllers.addresses_controller
   /{currency}/addresses/{address}/tags:
     get:
-      operationId: list_address_tags
+      operationId: list_tags_by_address
       parameters:
       - description: The cryptocurrency (e.g., btc)
         example: btc
@@ -636,7 +636,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/tag'
+                  $ref: '#/components/schemas/address_tag'
                 type: array
           description: OK
       summary: Get attribution tags for a given address
@@ -645,7 +645,7 @@ paths:
       x-openapi-router-controller: openapi_server.controllers.addresses_controller
   /{currency}/addresses/{address}/tags.csv:
     get:
-      operationId: list_address_tags_csv
+      operationId: list_tags_by_address_csv
       parameters:
       - description: The cryptocurrency (e.g., btc)
         example: btc
@@ -1251,7 +1251,7 @@ paths:
       x-openapi-router-controller: openapi_server.controllers.entities_controller
   /{currency}/entities/{entity}/tags:
     get:
-      operationId: list_entity_tags
+      operationId: list_tags_by_entity
       parameters:
       - description: The cryptocurrency (e.g., btc)
         example: btc
@@ -1278,7 +1278,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/tag'
+                  $ref: '#/components/schemas/entity_tag'
                 type: array
           description: OK
       summary: Get attribution tags for a given entity
@@ -1287,7 +1287,7 @@ paths:
       x-openapi-router-controller: openapi_server.controllers.entities_controller
   /{currency}/entities/{entity}/tags.csv:
     get:
-      operationId: list_entity_tags_csv
+      operationId: list_tags_by_entity_csv
       parameters:
       - description: The cryptocurrency (e.g., btc)
         example: btc
@@ -2245,21 +2245,16 @@ components:
       - timestamp
       - tx_hash
       type: object
+    address_tag:
+      allOf:
+      - $ref: '#/components/schemas/tag'
+      - $ref: '#/components/schemas/address_tag_allOf'
+    entity_tag:
+      allOf:
+      - $ref: '#/components/schemas/tag'
+      - $ref: '#/components/schemas/entity_tag_allOf'
     tag:
-      example:
-        address: address
-        abuse: abuse
-        active: true
-        currency: currency
-        label: label
-        source: source
-        category: category
-        tagpack_uri: tagpack_uri
-        lastmod: 0
       properties:
-        address:
-          description: Address
-          type: string
         label:
           description: Label
           type: string
@@ -2287,7 +2282,6 @@ components:
           type: string
       required:
       - active
-      - address
       - currency
       - label
       type: object
@@ -2350,9 +2344,7 @@ components:
             eur: 1
             usd: 5
             value: 5
-          labels:
-          - labels
-          - labels
+          has_labels: true
           no_txs: 0
         - node_type: address
           balance:
@@ -2368,9 +2360,7 @@ components:
             eur: 1
             usd: 5
             value: 5
-          labels:
-          - labels
-          - labels
+          has_labels: true
           no_txs: 0
       properties:
         next_page:
@@ -2397,9 +2387,7 @@ components:
           eur: 1
           usd: 5
           value: 5
-        labels:
-        - labels
-        - labels
+        has_labels: true
         no_txs: 0
       properties:
         id:
@@ -2411,11 +2399,9 @@ components:
           - address
           - entity
           type: string
-        labels:
-          description: labels
-          items:
-            type: string
-          type: array
+        has_labels:
+          description: has labels
+          type: boolean
         balance:
           $ref: '#/components/schemas/values'
         received:
@@ -2429,8 +2415,8 @@ components:
       required:
       - balance
       - estimated_value
+      - has_labels
       - id
-      - labels
       - no_txs
       - node_type
       - received
@@ -2555,9 +2541,7 @@ components:
             eur: 1
             usd: 5
             value: 5
-          labels:
-          - labels
-          - labels
+          has_labels: true
           no_txs: 0
         matching_addresses:
         - null
@@ -3011,6 +2995,20 @@ components:
           type: number
       required:
       - tags
+    address_tag_allOf:
+      properties:
+        address:
+          description: Address
+          type: string
+      required:
+      - address
+    entity_tag_allOf:
+      properties:
+        entity:
+          description: Entity id
+          type: string
+      required:
+      - entity
     rates_rates:
       example:
         eur: 6.0274563

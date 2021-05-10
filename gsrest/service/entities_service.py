@@ -4,10 +4,8 @@ from gsrest.service.rates_service import get_rates
 from openapi_server.models.entity import Entity
 from openapi_server.models.tx_summary import TxSummary
 from gsrest.util.values import compute_balance, convert_value, make_values
-from openapi_server.models.tag import Tag
+from openapi_server.models.entity_tag import EntityTag
 from openapi_server.models.entity_with_tags import EntityWithTags
-from openapi_server.models.neighbor import Neighbor
-from openapi_server.models.neighbors import Neighbors
 from openapi_server.models.search_paths import SearchPaths
 from gsrest.util.tag_coherence import compute_tag_coherence
 from flask import Response, stream_with_context
@@ -17,24 +15,24 @@ from openapi_server.models.entity_addresses import EntityAddresses
 import gsrest.service.common_service as common
 
 
-def list_entity_tags(currency, entity):
+def list_tags_by_entity(currency, entity):
     db = get_connection()
-    tags = db.list_entity_tags(currency, entity)
-    return [Tag(label=row.label,
-                address=row.address,
-                category=row.category,
-                abuse=row.abuse,
-                tagpack_uri=row.tagpack_uri,
-                source=row.source,
-                lastmod=row.lastmod,
-                active=True,
-                currency=currency)
+    tags = db.list_tags_by_entity(currency, entity)
+    return [EntityTag(label=row.label,
+                      entity=row.cluster,
+                      category=row.category,
+                      abuse=row.abuse,
+                      tagpack_uri=row.tagpack_uri,
+                      source=row.source,
+                      lastmod=row.lastmod,
+                      active=True,
+                      currency=currency)
             for row in tags]
 
 
-def list_entity_tags_csv(currency, entity):
+def list_tags_by_entity_csv(currency, entity):
     def query_function(_):
-        tags = list_entity_tags(currency, entity)
+        tags = list_tags_by_entity(currency, entity)
         return (None, tags)
     return Response(stream_with_context(to_csv(query_function)),
                     mimetype="text/csv",
@@ -46,7 +44,7 @@ def list_entity_tags_csv(currency, entity):
 
 def get_entity_with_tags(currency, entity):
     result = get_entity(currency, entity)
-    tags = list_entity_tags(currency, result.entity)
+    tags = list_tags_by_entity(currency, result.entity)
     return EntityWithTags(
         entity=result.entity,
         first_tx=result.first_tx,

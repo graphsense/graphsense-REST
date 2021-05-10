@@ -4,6 +4,8 @@
 from __future__ import absolute_import
 # import models into model package
 from openapi_server.models.address import Address
+from openapi_server.models.address_tag import AddressTag
+from openapi_server.models.address_tag_all_of import AddressTagAllOf
 from openapi_server.models.address_tx import AddressTx
 from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.address_with_tags import AddressWithTags
@@ -18,6 +20,8 @@ from openapi_server.models.concept import Concept
 from openapi_server.models.currency_stats import CurrencyStats
 from openapi_server.models.entity import Entity
 from openapi_server.models.entity_addresses import EntityAddresses
+from openapi_server.models.entity_tag import EntityTag
+from openapi_server.models.entity_tag_all_of import EntityTagAllOf
 from openapi_server.models.entity_with_tags import EntityWithTags
 from openapi_server.models.entity_with_tags_all_of import EntityWithTagsAllOf
 from openapi_server.models.link import Link

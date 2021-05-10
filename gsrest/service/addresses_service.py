@@ -16,13 +16,13 @@ def get_address_with_tags(currency, address):
     return common.get_address_with_tags(currency, address)
 
 
-def list_address_tags(currency, address):
-    return common.list_address_tags(currency, address)
+def list_tags_by_address(currency, address):
+    return common.list_tags_by_address(currency, address)
 
 
-def list_address_tags_csv(currency, address):
+def list_tags_by_address_csv(currency, address):
     def query_function(_):
-        tags = common.list_address_tags(currency, address)
+        tags = common.list_tags_by_address(currency, address)
         return (None, tags)
     return Response(stream_with_context(to_csv(query_function)),
                     mimetype="text/csv",
