@@ -1,3 +1,6 @@
+import connexion
+import six
+
 from openapi_server.models.tx import Tx  # noqa: E501
 from openapi_server.models.tx_eth import TxEth  # noqa: E501
 from openapi_server.models.txs import Txs  # noqa: E501

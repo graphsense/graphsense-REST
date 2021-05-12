@@ -36,7 +36,6 @@ class TestTagsController(BaseTestCase):
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
-
     def test_list_concepts(self):
         """Test case for list_concepts
 
@@ -48,12 +47,11 @@ class TestTagsController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/tags/taxonomies/{taxonomy}/concepts'.format(taxonomy="foo"),
+            '/tags/taxonomies/{taxonomy}/concepts'.format(taxonomy='foo'),
             method='GET',
             headers=headers)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
     def test_list_taxonomies(self):
         """Test case for list_taxonomies
@@ -71,7 +69,6 @@ class TestTagsController(BaseTestCase):
             headers=headers)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
 
 if __name__ == '__main__':

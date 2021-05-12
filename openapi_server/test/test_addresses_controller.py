@@ -31,12 +31,11 @@ class TestAddressesController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/addresses/{address}/entity'.format(currency="btc", address="1Archive1n2C579dMsAu3iC6tWzuQJz8dN"),
+            '/{currency}/addresses/{address}/entity'.format(currency='btc', address='1Archive1n2C579dMsAu3iC6tWzuQJz8dN'),
             method='GET',
             headers=headers)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
     def test_get_address_with_tags(self):
         """Test case for get_address_with_tags
@@ -49,12 +48,11 @@ class TestAddressesController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/addresses/{address}'.format(currency="btc", address="1Archive1n2C579dMsAu3iC6tWzuQJz8dN"),
+            '/{currency}/addresses/{address}'.format(currency='btc', address='1Archive1n2C579dMsAu3iC6tWzuQJz8dN'),
             method='GET',
             headers=headers)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
     def test_list_address_links(self):
         """Test case for list_address_links
@@ -68,13 +66,12 @@ class TestAddressesController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/addresses/{address}/links'.format(currency="btc", address="1Archive1n2C579dMsAu3iC6tWzuQJz8dN"),
+            '/{currency}/addresses/{address}/links'.format(currency='btc', address='1Archive1n2C579dMsAu3iC6tWzuQJz8dN'),
             method='GET',
             headers=headers,
             query_string=query_string)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
     def test_list_address_links_csv(self):
         """Test case for list_address_links_csv
@@ -88,13 +85,12 @@ class TestAddressesController(BaseTestCase):
             'Accept': 'text/csv',
         }
         response = self.client.open(
-            '/{currency}/addresses/{address}/links.csv'.format(currency="btc", address="1Archive1n2C579dMsAu3iC6tWzuQJz8dN"),
+            '/{currency}/addresses/{address}/links.csv'.format(currency='btc', address='1Archive1n2C579dMsAu3iC6tWzuQJz8dN'),
             method='GET',
             headers=headers,
             query_string=query_string)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
     def test_list_address_links_csv_eth(self):
         """Test case for list_address_links_csv_eth
@@ -108,13 +104,12 @@ class TestAddressesController(BaseTestCase):
             'Accept': 'text/csv',
         }
         response = self.client.open(
-            '/eth/addresses/{address}/links.csv'.format(address="123456"),
+            '/eth/addresses/{address}/links.csv'.format(address='123456'),
             method='GET',
             headers=headers,
             query_string=query_string)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
     def test_list_address_links_eth(self):
         """Test case for list_address_links_eth
@@ -128,13 +123,12 @@ class TestAddressesController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/eth/addresses/{address}/links'.format(address="123456"),
+            '/eth/addresses/{address}/links'.format(address='123456'),
             method='GET',
             headers=headers,
             query_string=query_string)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
     def test_list_address_neighbors(self):
         """Test case for list_address_neighbors
@@ -150,13 +144,12 @@ class TestAddressesController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/addresses/{address}/neighbors'.format(currency="btc", address="1Archive1n2C579dMsAu3iC6tWzuQJz8dN"),
+            '/{currency}/addresses/{address}/neighbors'.format(currency='btc', address='1Archive1n2C579dMsAu3iC6tWzuQJz8dN'),
             method='GET',
             headers=headers,
             query_string=query_string)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
     def test_list_address_neighbors_csv(self):
         """Test case for list_address_neighbors_csv
@@ -170,13 +163,12 @@ class TestAddressesController(BaseTestCase):
             'Accept': 'text/csv',
         }
         response = self.client.open(
-            '/{currency}/addresses/{address}/neighbors.csv'.format(currency="btc", address="1Archive1n2C579dMsAu3iC6tWzuQJz8dN"),
+            '/{currency}/addresses/{address}/neighbors.csv'.format(currency='btc', address='1Archive1n2C579dMsAu3iC6tWzuQJz8dN'),
             method='GET',
             headers=headers,
             query_string=query_string)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
     def test_list_address_txs(self):
         """Test case for list_address_txs
@@ -191,13 +183,12 @@ class TestAddressesController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/addresses/{address}/txs'.format(currency="btc", address="1Archive1n2C579dMsAu3iC6tWzuQJz8dN"),
+            '/{currency}/addresses/{address}/txs'.format(currency='btc', address='1Archive1n2C579dMsAu3iC6tWzuQJz8dN'),
             method='GET',
             headers=headers,
             query_string=query_string)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
     def test_list_address_txs_csv(self):
         """Test case for list_address_txs_csv
@@ -210,12 +201,11 @@ class TestAddressesController(BaseTestCase):
             'Accept': 'text/csv',
         }
         response = self.client.open(
-            '/{currency}/addresses/{address}/txs.csv'.format(currency="btc", address="1Archive1n2C579dMsAu3iC6tWzuQJz8dN"),
+            '/{currency}/addresses/{address}/txs.csv'.format(currency='btc', address='1Archive1n2C579dMsAu3iC6tWzuQJz8dN'),
             method='GET',
             headers=headers)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
     def test_list_address_txs_csv_eth(self):
         """Test case for list_address_txs_csv_eth
@@ -228,12 +218,11 @@ class TestAddressesController(BaseTestCase):
             'Accept': 'text/csv',
         }
         response = self.client.open(
-            '/eth/addresses/{address}/txs.csv'.format(address="123456"),
+            '/eth/addresses/{address}/txs.csv'.format(address='123456'),
             method='GET',
             headers=headers)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
     def test_list_address_txs_eth(self):
         """Test case for list_address_txs_eth
@@ -248,13 +237,12 @@ class TestAddressesController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/eth/addresses/{address}/txs'.format(address="123456"),
+            '/eth/addresses/{address}/txs'.format(address='123456'),
             method='GET',
             headers=headers,
             query_string=query_string)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
     def test_list_tags_by_address(self):
         """Test case for list_tags_by_address
@@ -267,12 +255,11 @@ class TestAddressesController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/addresses/{address}/tags'.format(currency="btc", address="1Archive1n2C579dMsAu3iC6tWzuQJz8dN"),
+            '/{currency}/addresses/{address}/tags'.format(currency='btc', address='1Archive1n2C579dMsAu3iC6tWzuQJz8dN'),
             method='GET',
             headers=headers)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
     def test_list_tags_by_address_csv(self):
         """Test case for list_tags_by_address_csv
@@ -285,12 +272,11 @@ class TestAddressesController(BaseTestCase):
             'Accept': 'application/csv',
         }
         response = self.client.open(
-            '/{currency}/addresses/{address}/tags.csv'.format(currency="btc", address="1Archive1n2C579dMsAu3iC6tWzuQJz8dN"),
+            '/{currency}/addresses/{address}/tags.csv'.format(currency='btc', address='1Archive1n2C579dMsAu3iC6tWzuQJz8dN'),
             method='GET',
             headers=headers)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
 
 if __name__ == '__main__':

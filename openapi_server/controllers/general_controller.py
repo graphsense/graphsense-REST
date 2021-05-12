@@ -1,3 +1,6 @@
+import connexion
+import six
+
 from openapi_server.models.search_result import SearchResult  # noqa: E501
 from openapi_server.models.stats import Stats  # noqa: E501
 import gsrest.service.general_service as service

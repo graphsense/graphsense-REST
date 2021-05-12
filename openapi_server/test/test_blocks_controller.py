@@ -30,12 +30,11 @@ class TestBlocksController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/blocks/{height}'.format(currency="btc", height="1"),
+            '/{currency}/blocks/{height}'.format(currency='btc', height=1),
             method='GET',
             headers=headers)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
     def test_get_block_eth(self):
         """Test case for get_block_eth
@@ -48,12 +47,11 @@ class TestBlocksController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/eth/blocks/{height}'.format(height="1"),
+            '/eth/blocks/{height}'.format(height=1),
             method='GET',
             headers=headers)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
     def test_list_block_txs(self):
         """Test case for list_block_txs
@@ -66,12 +64,11 @@ class TestBlocksController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/blocks/{height}/txs'.format(currency="btc", height="1"),
+            '/{currency}/blocks/{height}/txs'.format(currency='btc', height=1),
             method='GET',
             headers=headers)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
     def test_list_block_txs_csv(self):
         """Test case for list_block_txs_csv
@@ -84,12 +81,11 @@ class TestBlocksController(BaseTestCase):
             'Accept': 'text/csv',
         }
         response = self.client.open(
-            '/{currency}/blocks/{height}/txs.csv'.format(currency="btc", height="1"),
+            '/{currency}/blocks/{height}/txs.csv'.format(currency='btc', height=1),
             method='GET',
             headers=headers)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
     def test_list_block_txs_csv_eth(self):
         """Test case for list_block_txs_csv_eth
@@ -102,12 +98,11 @@ class TestBlocksController(BaseTestCase):
             'Accept': 'text/csv',
         }
         response = self.client.open(
-            '/eth/blocks/{height}/txs.csv'.format(height="1"),
+            '/eth/blocks/{height}/txs.csv'.format(height=1),
             method='GET',
             headers=headers)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
     def test_list_block_txs_eth(self):
         """Test case for list_block_txs_eth
@@ -120,12 +115,11 @@ class TestBlocksController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/eth/blocks/{height}/txs'.format(height="1"),
+            '/eth/blocks/{height}/txs'.format(height=1),
             method='GET',
             headers=headers)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
     def test_list_blocks(self):
         """Test case for list_blocks
@@ -139,13 +133,12 @@ class TestBlocksController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/blocks'.format(currency="btc"),
+            '/{currency}/blocks'.format(currency='btc'),
             method='GET',
             headers=headers,
             query_string=query_string)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
     def test_list_blocks_eth(self):
         """Test case for list_blocks_eth
@@ -165,7 +158,6 @@ class TestBlocksController(BaseTestCase):
             query_string=query_string)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
 
 if __name__ == '__main__':

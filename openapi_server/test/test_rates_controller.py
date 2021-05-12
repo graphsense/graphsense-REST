@@ -25,12 +25,11 @@ class TestRatesController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/rates/{height}'.format(currency="btc", height="1"),
+            '/{currency}/rates/{height}'.format(currency='btc', height=1),
             method='GET',
             headers=headers)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
 
 if __name__ == '__main__':

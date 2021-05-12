@@ -1,3 +1,6 @@
+import connexion
+import six
+
 from openapi_server.models.block import Block  # noqa: E501
 from openapi_server.models.block_eth import BlockEth  # noqa: E501
 from openapi_server.models.block_txs import BlockTxs  # noqa: E501

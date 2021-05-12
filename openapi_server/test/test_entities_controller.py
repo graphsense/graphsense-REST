@@ -29,12 +29,11 @@ class TestEntitiesController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/entities/{entity}'.format(currency="btc", entity="67065"),
+            '/{currency}/entities/{entity}'.format(currency='btc', entity='67065'),
             method='GET',
             headers=headers)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
     def test_list_entity_addresses(self):
         """Test case for list_entity_addresses
@@ -49,13 +48,12 @@ class TestEntitiesController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/entities/{entity}/addresses'.format(currency="btc", entity="67065"),
+            '/{currency}/entities/{entity}/addresses'.format(currency='btc', entity='67065'),
             method='GET',
             headers=headers,
             query_string=query_string)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
     def test_list_entity_addresses_csv(self):
         """Test case for list_entity_addresses_csv
@@ -68,12 +66,11 @@ class TestEntitiesController(BaseTestCase):
             'Accept': 'text/csv',
         }
         response = self.client.open(
-            '/{currency}/entities/{entity}/addresses.csv'.format(currency="btc", entity="67065"),
+            '/{currency}/entities/{entity}/addresses.csv'.format(currency='btc', entity='67065'),
             method='GET',
             headers=headers)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
     def test_list_entity_neighbors(self):
         """Test case for list_entity_neighbors
@@ -90,13 +87,12 @@ class TestEntitiesController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/entities/{entity}/neighbors'.format(currency="btc", entity="67065"),
+            '/{currency}/entities/{entity}/neighbors'.format(currency='btc', entity='67065'),
             method='GET',
             headers=headers,
             query_string=query_string)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
     def test_list_entity_neighbors_csv(self):
         """Test case for list_entity_neighbors_csv
@@ -110,13 +106,12 @@ class TestEntitiesController(BaseTestCase):
             'Accept': 'text/csv',
         }
         response = self.client.open(
-            '/{currency}/entities/{entity}/neighbors.csv'.format(currency="btc", entity="67065"),
+            '/{currency}/entities/{entity}/neighbors.csv'.format(currency='btc', entity='67065'),
             method='GET',
             headers=headers,
             query_string=query_string)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
     def test_list_tags_by_entity(self):
         """Test case for list_tags_by_entity
@@ -129,12 +124,11 @@ class TestEntitiesController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/entities/{entity}/tags'.format(currency="btc", entity="67065"),
+            '/{currency}/entities/{entity}/tags'.format(currency='btc', entity='67065'),
             method='GET',
             headers=headers)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
     def test_list_tags_by_entity_csv(self):
         """Test case for list_tags_by_entity_csv
@@ -147,12 +141,11 @@ class TestEntitiesController(BaseTestCase):
             'Accept': 'application/csv',
         }
         response = self.client.open(
-            '/{currency}/entities/{entity}/tags.csv'.format(currency="btc", entity="67065"),
+            '/{currency}/entities/{entity}/tags.csv'.format(currency='btc', entity='67065'),
             method='GET',
             headers=headers)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
     def test_search_entity_neighbors(self):
         """Test case for search_entity_neighbors
@@ -163,21 +156,20 @@ class TestEntitiesController(BaseTestCase):
 
         query_string = [('direction', 'out'),
                         ('key', 'category'),
-                        ('value', 'Miner'),
-                        ('depth', '7'),
+                        ('value', ['Miner']),
+                        ('depth', 2),
                         ('',''),
                         ('','')]
         headers = { 
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/entities/{entity}/search'.format(currency="btc", entity="67065"),
+            '/{currency}/entities/{entity}/search'.format(currency='btc', entity='67065'),
             method='GET',
             headers=headers,
             query_string=query_string)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
 
 if __name__ == '__main__':

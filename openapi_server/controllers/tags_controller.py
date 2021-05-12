@@ -1,3 +1,6 @@
+import connexion
+import six
+
 from openapi_server.models.address_tag import AddressTag  # noqa: E501
 from openapi_server.models.concept import Concept  # noqa: E501
 from openapi_server.models.taxonomy import Taxonomy  # noqa: E501

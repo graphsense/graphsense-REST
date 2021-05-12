@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 NAME = "{{packageName}}"
 VERSION = "{{packageVersion}}"
-{{#apiInfo}}{{#apis}}{{^hasMore}}
+{{#apiInfo}}{{#apis}}{{#-last}}
 # To install the library, run the following
 #
 # python setup.py install
@@ -16,7 +16,8 @@ VERSION = "{{packageVersion}}"
 REQUIRES = [
     "connexion>=2.0.2",
     "swagger-ui-bundle>=0.0.2",
-    "python_dateutil>=2.6.0"
+    "python_dateutil>=2.6.0"{{#supportPython2}},
+    "typing>=3.5.2.2"{{/supportPython2}}
 ]
 
 with open("README.md", "r") as fh:
@@ -34,6 +35,8 @@ setup(
     package_dir={"": "{{{.}}}"},{{/pythonSrcRoot}}
     package_data={'': ['{{#pythonSrcRoot}}{{{.}}}/{{/pythonSrcRoot}}openapi/openapi.yaml']},
     include_package_data=True,
+    entry_points={
+        'console_scripts': ['{{packageName}}={{packageName}}.__main__:main']},
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/graphsense/graphsense-REST/',
@@ -44,4 +47,4 @@ setup(
         "Operating System :: OS Independent",
     ]
 )
-{{/hasMore}}{{/apis}}{{/apiInfo}}
+{{/-last}}{{/apis}}{{/apiInfo}}

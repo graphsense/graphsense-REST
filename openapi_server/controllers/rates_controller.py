@@ -1,3 +1,6 @@
+import connexion
+import six
+
 from openapi_server.models.rates import Rates  # noqa: E501
 import gsrest.service.rates_service as service
 from gsrest.service.problems import notfound
