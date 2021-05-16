@@ -6,7 +6,6 @@ from openapi_server.models.block_eth import BlockEth  # noqa: E501
 from openapi_server.models.block_txs import BlockTxs  # noqa: E501
 from openapi_server.models.blocks import Blocks  # noqa: E501
 from openapi_server.models.blocks_eth import BlocksEth  # noqa: E501
-from openapi_server.models.txs_eth import TxsEth  # noqa: E501
 import gsrest.service.blocks_service as service
 from gsrest.service.problems import notfound
 
@@ -83,40 +82,6 @@ def list_block_txs_csv(currency, height):  # noqa: E501
     try:
         return service.list_block_txs_csv(
             currency=currency,
-            height=height)
-    except RuntimeError as e:
-        return notfound(str(e))
-
-
-def list_block_txs_csv_eth(height):  # noqa: E501
-    """Get block transactions as CSV
-
-     # noqa: E501
-
-    :param height: The block height
-    :type height: int
-
-    :rtype: str
-    """
-    try:
-        return service.list_block_txs_csv_eth(
-            height=height)
-    except RuntimeError as e:
-        return notfound(str(e))
-
-
-def list_block_txs_eth(height):  # noqa: E501
-    """Get block transactions (100 per page)
-
-     # noqa: E501
-
-    :param height: The block height
-    :type height: int
-
-    :rtype: TxsEth
-    """
-    try:
-        return service.list_block_txs_eth(
             height=height)
     except RuntimeError as e:
         return notfound(str(e))

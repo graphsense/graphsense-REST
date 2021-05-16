@@ -6,40 +6,6 @@ info:
 servers:
 - url: http://openapi_server:9000
 paths:
-  /eth/addresses/{address}/links:
-    get:
-      operationId: list_address_links_eth
-      parameters:
-      - description: The cryptocurrency address in hexadecimal representation
-        example: "123456"
-        explode: false
-        in: path
-        name: address
-        required: true
-        schema:
-          format: string
-          type: string
-        style: simple
-      - description: Neighbor address in hexadecimal representation
-        example: "123456"
-        explode: true
-        in: query
-        name: neighbor
-        required: true
-        schema:
-          type: string
-        style: form
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/txs_eth'
-          description: OK
-      summary: Get transactions between two addresses
-      tags:
-      - addresses
-      x-openapi-router-controller: openapi_server.controllers.addresses_controller
   /eth/addresses/{address}/links.csv:
     get:
       operationId: list_address_links_csv_eth
@@ -71,74 +37,6 @@ paths:
                 type: string
           description: OK
       summary: Get transactions between two addresses as CSV
-      tags:
-      - addresses
-      x-openapi-router-controller: openapi_server.controllers.addresses_controller
-  /eth/addresses/{address}/txs:
-    get:
-      operationId: list_address_txs_eth
-      parameters:
-      - description: The cryptocurrency address in hexadecimal representation
-        example: "123456"
-        explode: false
-        in: path
-        name: address
-        required: true
-        schema:
-          format: string
-          type: string
-        style: simple
-      - description: Resumption token for retrieving the next page
-        example: 0400030bff00f07fffff9b00
-        explode: true
-        in: query
-        name: page
-        required: false
-        schema:
-          type: string
-        style: form
-      - description: Number of items returned in a single page
-        example: 10
-        explode: true
-        in: query
-        name: pagesize
-        required: false
-        schema:
-          type: integer
-        style: form
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/txs_eth'
-          description: OK
-      summary: Get all transactions an address has been involved in
-      tags:
-      - addresses
-      x-openapi-router-controller: openapi_server.controllers.addresses_controller
-  /eth/addresses/{address}/txs.csv:
-    get:
-      operationId: list_address_txs_csv_eth
-      parameters:
-      - description: The cryptocurrency address in hexadecimal representation
-        example: "123456"
-        explode: false
-        in: path
-        name: address
-        required: true
-        schema:
-          format: string
-          type: string
-        style: simple
-      responses:
-        "200":
-          content:
-            text/csv:
-              schema:
-                type: string
-          description: OK
-      summary: Get all transactions an address has been involved in as CSV
       tags:
       - addresses
       x-openapi-router-controller: openapi_server.controllers.addresses_controller
@@ -191,80 +89,6 @@ paths:
       tags:
       - blocks
       x-openapi-router-controller: openapi_server.controllers.blocks_controller
-  /eth/blocks/{height}/txs:
-    get:
-      operationId: list_block_txs_eth
-      parameters:
-      - description: The block height
-        example: 1
-        explode: false
-        in: path
-        name: height
-        required: true
-        schema:
-          minimum: 1
-          type: integer
-        style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/txs_eth'
-          description: OK
-      summary: Get block transactions (100 per page)
-      tags:
-      - blocks
-      x-openapi-router-controller: openapi_server.controllers.blocks_controller
-  /eth/blocks/{height}/txs.csv:
-    get:
-      operationId: list_block_txs_csv_eth
-      parameters:
-      - description: The block height
-        example: 1
-        explode: false
-        in: path
-        name: height
-        required: true
-        schema:
-          minimum: 1
-          type: integer
-        style: simple
-      responses:
-        "200":
-          content:
-            text/csv:
-              schema:
-                type: string
-          description: OK
-      summary: Get block transactions as CSV
-      tags:
-      - blocks
-      x-openapi-router-controller: openapi_server.controllers.blocks_controller
-  /eth/txs/{tx_hash}:
-    get:
-      operationId: get_tx_eth
-      parameters:
-      - description: The transaction hash
-        example: ab188013
-        explode: false
-        in: path
-        name: tx_hash
-        required: true
-        schema:
-          type: string
-        style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/tx_eth'
-          description: OK
-      summary: Returns details of a specific transaction identified by its hash.
-      tags:
-      - txs
-      x-openapi-router-controller: openapi_server.controllers.txs_controller
   /search:
     get:
       operationId: search
@@ -2070,24 +1894,24 @@ components:
       example:
         txs:
         - total_output:
-            eur: 1
-            usd: 5
+            eur: 1.4658129
+            usd: 5.962134
             value: 5
           no_outputs: 1
           total_input:
-            eur: 1
-            usd: 5
+            eur: 1.4658129
+            usd: 5.962134
             value: 5
           tx_hash: tx_hash
           no_inputs: 6
         - total_output:
-            eur: 1
-            usd: 5
+            eur: 1.4658129
+            usd: 5.962134
             value: 5
           no_outputs: 1
           total_input:
-            eur: 1
-            usd: 5
+            eur: 1.4658129
+            usd: 5.962134
             value: 5
           tx_hash: tx_hash
           no_inputs: 6
@@ -2109,13 +1933,13 @@ components:
     block_tx_summary:
       example:
         total_output:
-          eur: 1
-          usd: 5
+          eur: 1.4658129
+          usd: 5.962134
           value: 5
         no_outputs: 1
         total_input:
-          eur: 1
-          usd: 5
+          eur: 1.4658129
+          usd: 5.962134
           value: 5
         tx_hash: tx_hash
         no_inputs: 6
@@ -2188,14 +2012,14 @@ components:
     address:
       example:
         total_spent:
-          eur: 1
-          usd: 5
+          eur: 1.4658129
+          usd: 5.962134
           value: 5
         in_degree: 1
         address: address
         balance:
-          eur: 1
-          usd: 5
+          eur: 1.4658129
+          usd: 5.962134
           value: 5
         no_incoming_txs: 5
         out_degree: 5
@@ -2209,8 +2033,8 @@ components:
           height: 1
           timestamp: 6
         total_received:
-          eur: 1
-          usd: 5
+          eur: 1.4658129
+          usd: 5.962134
           value: 5
       properties:
         address:
@@ -2317,16 +2141,16 @@ components:
         - address: address
           tx_hash: tx_hash
           value:
-            eur: 1
-            usd: 5
+            eur: 1.4658129
+            usd: 5.962134
             value: 5
           height: 1
           timestamp: 6
         - address: address
           tx_hash: tx_hash
           value:
-            eur: 1
-            usd: 5
+            eur: 1.4658129
+            usd: 5.962134
             value: 5
           height: 1
           timestamp: 6
@@ -2347,8 +2171,8 @@ components:
         address: address
         tx_hash: tx_hash
         value:
-          eur: 1
-          usd: 5
+          eur: 1.4658129
+          usd: 5.962134
           value: 5
         height: 1
         timestamp: 6
@@ -2456,18 +2280,18 @@ components:
       type: object
     values:
       example:
-        eur: 1
-        usd: 5
+        eur: 1.4658129
+        usd: 5.962134
         value: 5
       properties:
         eur:
-          format: int64
+          format: float
           title: eur
-          type: integer
+          type: number
         usd:
-          format: int64
+          format: float
           title: usd
-          type: integer
+          type: number
         value:
           format: int64
           title: value
@@ -2496,6 +2320,9 @@ components:
       format: int64
       title: timestamp
       type: integer
+    currency_type:
+      description: Discriminator for different kinds of currency types
+      type: string
     tx_hash:
       description: Transaction hash
       title: tx_hash
@@ -2510,33 +2337,33 @@ components:
         neighbors:
         - node_type: address
           balance:
-            eur: 1
-            usd: 5
+            eur: 1.4658129
+            usd: 5.962134
             value: 5
           received:
-            eur: 1
-            usd: 5
+            eur: 1.4658129
+            usd: 5.962134
             value: 5
           id: id
           estimated_value:
-            eur: 1
-            usd: 5
+            eur: 1.4658129
+            usd: 5.962134
             value: 5
           has_labels: true
           no_txs: 0
         - node_type: address
           balance:
-            eur: 1
-            usd: 5
+            eur: 1.4658129
+            usd: 5.962134
             value: 5
           received:
-            eur: 1
-            usd: 5
+            eur: 1.4658129
+            usd: 5.962134
             value: 5
           id: id
           estimated_value:
-            eur: 1
-            usd: 5
+            eur: 1.4658129
+            usd: 5.962134
             value: 5
           has_labels: true
           no_txs: 0
@@ -2556,17 +2383,17 @@ components:
       example:
         node_type: address
         balance:
-          eur: 1
-          usd: 5
+          eur: 1.4658129
+          usd: 5.962134
           value: 5
         received:
-          eur: 1
-          usd: 5
+          eur: 1.4658129
+          usd: 5.962134
           value: 5
         id: id
         estimated_value:
-          eur: 1
-          usd: 5
+          eur: 1.4658129
+          usd: 5.962134
           value: 5
         has_labels: true
         no_txs: 0
@@ -2611,12 +2438,12 @@ components:
       example:
         tx_hash: tx_hash
         output_value:
-          eur: 1
-          usd: 5
+          eur: 1.4658129
+          usd: 5.962134
           value: 5
         input_value:
-          eur: 1
-          usd: 5
+          eur: 1.4658129
+          usd: 5.962134
           value: 5
         height: 1
         timestamp: 6
@@ -2653,14 +2480,14 @@ components:
         next_page: next_page
         addresses:
         - total_spent:
-            eur: 1
-            usd: 5
+            eur: 1.4658129
+            usd: 5.962134
             value: 5
           in_degree: 1
           address: address
           balance:
-            eur: 1
-            usd: 5
+            eur: 1.4658129
+            usd: 5.962134
             value: 5
           no_incoming_txs: 5
           out_degree: 5
@@ -2674,18 +2501,18 @@ components:
             height: 1
             timestamp: 6
           total_received:
-            eur: 1
-            usd: 5
+            eur: 1.4658129
+            usd: 5.962134
             value: 5
         - total_spent:
-            eur: 1
-            usd: 5
+            eur: 1.4658129
+            usd: 5.962134
             value: 5
           in_degree: 1
           address: address
           balance:
-            eur: 1
-            usd: 5
+            eur: 1.4658129
+            usd: 5.962134
             value: 5
           no_incoming_txs: 5
           out_degree: 5
@@ -2699,8 +2526,8 @@ components:
             height: 1
             timestamp: 6
           total_received:
-            eur: 1
-            usd: 5
+            eur: 1.4658129
+            usd: 5.962134
             value: 5
       properties:
         next_page:
@@ -2722,17 +2549,17 @@ components:
         relation:
           node_type: address
           balance:
-            eur: 1
-            usd: 5
+            eur: 1.4658129
+            usd: 5.962134
             value: 5
           received:
-            eur: 1
-            usd: 5
+            eur: 1.4658129
+            usd: 5.962134
             value: 5
           id: id
           estimated_value:
-            eur: 1
-            usd: 5
+            eur: 1.4658129
+            usd: 5.962134
             value: 5
           has_labels: true
           no_txs: 0
@@ -2757,58 +2584,17 @@ components:
           type: array
       title: search_paths
       type: object
-    tx:
-      example:
-        outputs:
-        - address:
-          - null
-          - null
-          value:
-            eur: 1
-            usd: 5
-            value: 5
-        - address:
-          - null
-          - null
-          value:
-            eur: 1
-            usd: 5
-            value: 5
-        total_output:
-          eur: 1
-          usd: 5
-          value: 5
-        coinbase: true
-        inputs:
-        - address:
-          - null
-          - null
-          value:
-            eur: 1
-            usd: 5
-            value: 5
-        - address:
-          - null
-          - null
-          value:
-            eur: 1
-            usd: 5
-            value: 5
-        total_input:
-          eur: 1
-          usd: 5
-          value: 5
-        tx_hash: tx_hash
-        height: 1
-        timestamp: 6
+    tx_utxo:
       properties:
+        currency_type:
+          default: utxo
+          type: string
         tx_hash:
           description: Transaction hash
           title: tx_hash
           type: string
         coinbase:
           description: Coinbase transaction flag
-          title: coinbase
           type: boolean
         height:
           description: Height
@@ -2820,13 +2606,11 @@ components:
           description: Transaction inputs/outputs
           items:
             $ref: '#/components/schemas/tx_value'
-          title: inputs
           type: array
         outputs:
           description: Transaction inputs/outputs
           items:
             $ref: '#/components/schemas/tx_value'
-          title: inputs
           type: array
         timestamp:
           description: Timestamp
@@ -2839,6 +2623,7 @@ components:
           $ref: '#/components/schemas/values'
       required:
       - coinbase
+      - currency_type
       - height
       - inputs
       - outputs
@@ -2846,23 +2631,13 @@ components:
       - total_input
       - total_output
       - tx_hash
-      title: tx
       type: object
     tx_values:
       description: Transaction inputs/outputs
       items:
         $ref: '#/components/schemas/tx_value'
-      title: inputs
       type: array
     tx_value:
-      example:
-        address:
-        - null
-        - null
-        value:
-          eur: 1
-          usd: 5
-          value: 5
       properties:
         address:
           items:
@@ -2880,90 +2655,8 @@ components:
       example:
         next_page: next_page
         txs:
-        - outputs:
-          - address:
-            - null
-            - null
-            value:
-              eur: 1
-              usd: 5
-              value: 5
-          - address:
-            - null
-            - null
-            value:
-              eur: 1
-              usd: 5
-              value: 5
-          total_output:
-            eur: 1
-            usd: 5
-            value: 5
-          coinbase: true
-          inputs:
-          - address:
-            - null
-            - null
-            value:
-              eur: 1
-              usd: 5
-              value: 5
-          - address:
-            - null
-            - null
-            value:
-              eur: 1
-              usd: 5
-              value: 5
-          total_input:
-            eur: 1
-            usd: 5
-            value: 5
-          tx_hash: tx_hash
-          height: 1
-          timestamp: 6
-        - outputs:
-          - address:
-            - null
-            - null
-            value:
-              eur: 1
-              usd: 5
-              value: 5
-          - address:
-            - null
-            - null
-            value:
-              eur: 1
-              usd: 5
-              value: 5
-          total_output:
-            eur: 1
-            usd: 5
-            value: 5
-          coinbase: true
-          inputs:
-          - address:
-            - null
-            - null
-            value:
-              eur: 1
-              usd: 5
-              value: 5
-          - address:
-            - null
-            - null
-            value:
-              eur: 1
-              usd: 5
-              value: 5
-          total_input:
-            eur: 1
-            usd: 5
-            value: 5
-          tx_hash: tx_hash
-          height: 1
-          timestamp: 6
+        - null
+        - null
       properties:
         next_page:
           format: string
@@ -2976,46 +2669,11 @@ components:
           type: array
       title: txs
       type: object
-    txs_eth:
-      example:
-        next_page: next_page
-        txs:
-        - values:
-            eur: 1
-            usd: 5
-            value: 5
-          tx_hash: tx_hash
-          height: 1
-          timestamp: 6
-        - values:
-            eur: 1
-            usd: 5
-            value: 5
-          tx_hash: tx_hash
-          height: 1
-          timestamp: 6
+    tx_account:
       properties:
-        next_page:
-          format: string
-          title: next_page
+        currency_type:
+          default: account
           type: string
-        txs:
-          items:
-            $ref: '#/components/schemas/tx_eth'
-          title: txs
-          type: array
-      title: txs_eth
-      type: object
-    tx_eth:
-      example:
-        values:
-          eur: 1
-          usd: 5
-          value: 5
-        tx_hash: tx_hash
-        height: 1
-        timestamp: 6
-      properties:
         tx_hash:
           description: Transaction hash
           title: tx_hash
@@ -3034,12 +2692,22 @@ components:
         values:
           $ref: '#/components/schemas/values'
       required:
+      - currency_type
       - height
       - timestamp
       - tx_hash
       - values
-      title: tx_eth
       type: object
+    tx:
+      discriminator:
+        mapping:
+          utxo: '#/components/schemas/tx_utxo'
+          account: '#/components/schemas/tx_account'
+        propertyName: currency_type
+      oneOf:
+      - $ref: '#/components/schemas/tx_utxo'
+      - $ref: '#/components/schemas/tx_account'
+      title: tx
     rates:
       example:
         rates:

@@ -7,7 +7,7 @@ from openapi_server.models.neighbors import Neighbors
 from openapi_server.models.neighbor import Neighbor
 from openapi_server.models.entity_with_tags import EntityWithTags
 from openapi_server.models.link import Link
-from openapi_server.models.txs_eth import TxsEth
+from openapi_server.models.txs import Txs
 import gsrest.service.addresses_service as service
 from gsrest.test.assertion import assertEqual
 from openapi_server.models.address_tx import AddressTx
@@ -486,7 +486,7 @@ def list_address_txs_eth(test_case):
 
     Get all transactions an address has been involved in
     """
-    txs = TxsEth(txs=[tx1_eth, tx2_eth])
+    txs = Txs(txs=[tx1_eth, tx2_eth])
 
     result = service.list_address_txs_eth(eth_addressWithTags.address)
     test_case.assertEqual(txs, result)
@@ -589,7 +589,7 @@ def list_address_links_eth(test_case):
     result = service.list_address_links_eth(
                 address=eth_addressWithTags.address,
                 neighbor='123456')
-    txs = TxsEth(txs=[tx1_eth, tx2_eth])
+    txs = Txs(txs=[tx1_eth, tx2_eth])
     test_case.assertEqual(txs, result)
 
 

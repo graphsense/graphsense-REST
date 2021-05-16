@@ -722,8 +722,7 @@ class Cassandra():
         result = self.list_txs_by_ids_eth(txs)
         return result, None
 
-    def get_tx_eth(self, tx_hash):
-        currency = 'eth'
+    def get_tx_eth(self, currency, tx_hash):
         session = self.get_session(currency, 'raw')
         query = (
             'SELECT hash, block_number, block_timestamp, value from '

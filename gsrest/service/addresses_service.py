@@ -2,8 +2,8 @@ from gsrest.db import get_connection
 from openapi_server.models.address_tx import AddressTx
 from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.link import Link
-from openapi_server.models.txs_eth import TxsEth
-from openapi_server.models.tx_eth import TxEth
+from openapi_server.models.txs import Txs
+from openapi_server.models.tx_account import TxAccount
 from gsrest.service.entities_service import get_entity_with_tags
 from gsrest.service.rates_service import list_rates
 import gsrest.service.common_service as common
@@ -173,10 +173,10 @@ def wrap_txs_eth(results, paging_state):
     if results:
         heights = [row.block_number for row in results]
         rates = list_rates(currency, heights)
-        txs = [TxEth(
+        txs = [TxAccount(
          tx_hash=tx.hash.hex(),
          timestamp=tx.block_timestamp,
          height=tx.block_number,
          values=convert_value(tx.value, rates[tx.block_number]))
                        for tx in results]
-    return TxsEth(next_page=paging_state, txs=txs)
+    return Txs(next_page=paging_state, txs=txs)

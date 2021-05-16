@@ -3,8 +3,8 @@ from openapi_server.models.block_eth import BlockEth
 from openapi_server.models.blocks import Blocks
 from openapi_server.models.blocks_eth import BlocksEth
 from openapi_server.models.block_txs import BlockTxs
-from openapi_server.models.txs_eth import TxsEth
-from openapi_server.models.tx_eth import TxEth
+from openapi_server.models.txs import Txs
+from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.block_tx_summary import BlockTxSummary
 from openapi_server.models.values import Values
 import gsrest.service.blocks_service as service
@@ -133,13 +133,13 @@ def list_block_txs_eth(test_case):
     """Test case for list_block_txs_eth
     """
 
-    block_txs = TxsEth(txs=[
-            TxEth(
+    block_txs = Txs(txs=[
+            TxAccount(
                 tx_hash='af6e0000',
                 height=1,
                 timestamp=15,
                 values=Values(eur=123.0, usd=246.0, value=12300000000)),
-            TxEth(
+            TxAccount(
                 tx_hash='af6e0003',
                 height=1,
                 timestamp=16,

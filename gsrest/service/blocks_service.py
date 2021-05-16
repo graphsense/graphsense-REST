@@ -4,8 +4,8 @@ from openapi_server.models.block_eth import BlockEth
 from openapi_server.models.blocks import Blocks
 from openapi_server.models.blocks_eth import BlocksEth
 from openapi_server.models.block_txs import BlockTxs
-from openapi_server.models.txs_eth import TxsEth
-from openapi_server.models.tx_eth import TxEth
+from openapi_server.models.txs import Txs
+from openapi_server.models.tx import TxAccount
 from openapi_server.models.block_tx_summary import BlockTxSummary
 from gsrest.util.values import convert_value
 from gsrest.service.rates_service import get_rates
@@ -107,14 +107,14 @@ def list_block_txs_eth(height):
 
     rates = get_rates('eth', height)
     txs = \
-        [TxEth(
+        [TxAccount(
          tx_hash=tx.hash.hex(),
          timestamp=tx.block_timestamp,
          height=tx.block_number,
          values=convert_value(tx.value, rates['rates']))
          for tx in result]
 
-    return TxsEth(next_page=None, txs=txs)
+    return Txs(next_page=None, txs=txs)
 
 
 def list_block_txs_csv_eth(height):

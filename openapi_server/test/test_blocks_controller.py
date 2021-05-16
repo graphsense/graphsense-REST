@@ -11,7 +11,6 @@ from openapi_server.models.block_eth import BlockEth  # noqa: E501
 from openapi_server.models.block_txs import BlockTxs  # noqa: E501
 from openapi_server.models.blocks import Blocks  # noqa: E501
 from openapi_server.models.blocks_eth import BlocksEth  # noqa: E501
-from openapi_server.models.txs_eth import TxsEth  # noqa: E501
 from openapi_server.test import BaseTestCase
 import gsrest.test.blocks_service as test_service
 
@@ -82,40 +81,6 @@ class TestBlocksController(BaseTestCase):
         }
         response = self.client.open(
             '/{currency}/blocks/{height}/txs.csv'.format(currency='btc', height=1),
-            method='GET',
-            headers=headers)
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
-
-    def test_list_block_txs_csv_eth(self):
-        """Test case for list_block_txs_csv_eth
-
-        Get block transactions as CSV
-        """
-        test_service.list_block_txs_csv_eth(self)
-
-        headers = { 
-            'Accept': 'text/csv',
-        }
-        response = self.client.open(
-            '/eth/blocks/{height}/txs.csv'.format(height=1),
-            method='GET',
-            headers=headers)
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
-
-    def test_list_block_txs_eth(self):
-        """Test case for list_block_txs_eth
-
-        Get block transactions (100 per page)
-        """
-        test_service.list_block_txs_eth(self)
-
-        headers = { 
-            'Accept': 'application/json',
-        }
-        response = self.client.open(
-            '/eth/blocks/{height}/txs'.format(height=1),
             method='GET',
             headers=headers)
         self.assert200(response,

@@ -7,7 +7,6 @@ from openapi_server.models.address_with_tags import AddressWithTags  # noqa: E50
 from openapi_server.models.entity_with_tags import EntityWithTags  # noqa: E501
 from openapi_server.models.link import Link  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
-from openapi_server.models.txs_eth import TxsEth  # noqa: E501
 import gsrest.service.addresses_service as service
 from gsrest.service.problems import notfound
 
@@ -118,26 +117,6 @@ def list_address_links_csv_eth(address, neighbor):  # noqa: E501
         return notfound(str(e))
 
 
-def list_address_links_eth(address, neighbor):  # noqa: E501
-    """Get transactions between two addresses
-
-     # noqa: E501
-
-    :param address: The cryptocurrency address in hexadecimal representation
-    :type address: str
-    :param neighbor: Neighbor address in hexadecimal representation
-    :type neighbor: str
-
-    :rtype: TxsEth
-    """
-    try:
-        return service.list_address_links_eth(
-            address=address,
-            neighbor=neighbor)
-    except RuntimeError as e:
-        return notfound(str(e))
-
-
 def list_address_neighbors(currency, address, direction, page=None, pagesize=None):  # noqa: E501
     """Get an addresses&#39; neighbors in the address graph
 
@@ -232,46 +211,6 @@ def list_address_txs_csv(currency, address):  # noqa: E501
         return service.list_address_txs_csv(
             currency=currency,
             address=address)
-    except RuntimeError as e:
-        return notfound(str(e))
-
-
-def list_address_txs_csv_eth(address):  # noqa: E501
-    """Get all transactions an address has been involved in as CSV
-
-     # noqa: E501
-
-    :param address: The cryptocurrency address in hexadecimal representation
-    :type address: str
-
-    :rtype: str
-    """
-    try:
-        return service.list_address_txs_csv_eth(
-            address=address)
-    except RuntimeError as e:
-        return notfound(str(e))
-
-
-def list_address_txs_eth(address, page=None, pagesize=None):  # noqa: E501
-    """Get all transactions an address has been involved in
-
-     # noqa: E501
-
-    :param address: The cryptocurrency address in hexadecimal representation
-    :type address: str
-    :param page: Resumption token for retrieving the next page
-    :type page: str
-    :param pagesize: Number of items returned in a single page
-    :type pagesize: int
-
-    :rtype: TxsEth
-    """
-    try:
-        return service.list_address_txs_eth(
-            address=address,
-            page=page,
-            pagesize=pagesize)
     except RuntimeError as e:
         return notfound(str(e))
 
