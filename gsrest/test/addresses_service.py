@@ -7,7 +7,6 @@ from openapi_server.models.neighbors import Neighbors
 from openapi_server.models.neighbor import Neighbor
 from openapi_server.models.entity_with_tags import EntityWithTags
 from openapi_server.models.link_utxo import LinkUtxo
-from openapi_server.models.txs import Txs
 import gsrest.service.addresses_service as service
 from gsrest.test.assertion import assertEqual
 from openapi_server.models.address_tx_utxo import AddressTxUtxo
@@ -582,16 +581,26 @@ def list_address_links(test_case):
 
 
 def list_address_links_csv(test_case):
-    '''
     result = service.list_address_links_csv(
                 currency='btc',
                 address=addressWithTags.address,
                 neighbor='17DfZja1713S3JRWA9jaebCKFM5anUh7GG')
 
-    assertEqual("", result.data.decode('utf-8'))
-    '''
-    pass
+    csv = ('currency_type,height,input_value_eur,input_value_usd,'
+           'input_value_value,output_value_eur,output_value_usd,'
+           'output_value_value,timestamp,tx_hash\r\n'
+           'utxo,2,-0.1,-0.2,-10000000,-0.1,-0.2,-10000000,'
+           '1361497172,123456\r\n')
 
+    test_case.assertEqual(csv, result.data.decode('utf-8'))
 
-def list_address_links_csv_eth(test_case):
-    pass
+    result = service.list_address_links_csv(
+                currency='eth',
+                address=eth_addressWithTags.address,
+                neighbor='123456')
+
+    csv = ('currency_type,height,timestamp,tx_hash,values_eur,'
+           'values_usd,values_value\r\n'
+           'account,1,15,af6e0000,123.0,246.0,12300000000\r\n'
+           'account,1,16,af6e0003,234.0,468.0,23400000000\r\n')
+    test_case.assertEqual(csv, result.data.decode('utf-8'))
