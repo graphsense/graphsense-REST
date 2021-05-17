@@ -1,7 +1,5 @@
 from openapi_server.models.block import Block
-from openapi_server.models.block_eth import BlockEth
 from openapi_server.models.blocks import Blocks
-from openapi_server.models.blocks_eth import BlocksEth
 from openapi_server.models.txs import Txs
 from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.block_tx_utxo import BlockTxUtxo
@@ -23,13 +21,13 @@ block2 = Block(
         no_txs=1,
         timestamp=1231469744)
 
-eth_block = BlockEth(
+eth_block = Block(
         height=1,
         block_hash="123456",
         no_txs=5,
         timestamp=123)
 
-eth_block2 = BlockEth(
+eth_block2 = Block(
         height=2300001,
         block_hash="234567",
         no_txs=0,
@@ -129,9 +127,9 @@ def get_block_eth(test_case):
 def list_blocks_eth(test_case):
     """Test case for list_blocks_eth
     """
-    blocks = BlocksEth(next_page=None, blocks=[eth_block, eth_block2])
+    blocks = Blocks(next_page=None, blocks=[eth_block, eth_block2])
     result = service.list_blocks_eth()
-    result = BlocksEth(
+    result = Blocks(
             next_page=None,
             blocks=sorted(result.blocks,
                           key=lambda block: block.height))

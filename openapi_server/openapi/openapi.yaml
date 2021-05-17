@@ -6,55 +6,6 @@ info:
 servers:
 - url: http://openapi_server:9000
 paths:
-  /eth/blocks:
-    get:
-      operationId: list_blocks_eth
-      parameters:
-      - description: Resumption token for retrieving the next page
-        example: 0400030bff00f07fffff9b00
-        explode: true
-        in: query
-        name: page
-        required: false
-        schema:
-          type: string
-        style: form
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/blocks_eth'
-          description: OK
-      summary: Get all blocks
-      tags:
-      - blocks
-      x-openapi-router-controller: openapi_server.controllers.blocks_controller
-  /eth/blocks/{height}:
-    get:
-      operationId: get_block_eth
-      parameters:
-      - description: The block height
-        example: 1
-        explode: false
-        in: path
-        name: height
-        required: true
-        schema:
-          minimum: 1
-          type: integer
-        style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/block_eth'
-          description: OK
-      summary: Get a ethereum block by its height
-      tags:
-      - blocks
-      x-openapi-router-controller: openapi_server.controllers.blocks_controller
   /search:
     get:
       operationId: search
@@ -1917,30 +1868,6 @@ components:
           type: array
       title: blocks
       type: object
-    blocks_eth:
-      example:
-        next_page: next_page
-        blocks:
-        - block_hash: block_hash
-          height: 1
-          no_txs: 6
-          timestamp: 1
-        - block_hash: block_hash
-          height: 1
-          no_txs: 6
-          timestamp: 1
-      properties:
-        next_page:
-          format: string
-          title: next_page
-          type: string
-        blocks:
-          items:
-            $ref: '#/components/schemas/block_eth'
-          title: blocks
-          type: array
-      title: blocks_eth
-      type: object
     address:
       example:
         total_spent:
@@ -2783,33 +2710,6 @@ components:
         type: string
       title: labels
       type: array
-    block_eth:
-      example:
-        block_hash: block_hash
-        height: 1
-        no_txs: 6
-        timestamp: 1
-      properties:
-        block_hash:
-          format: string
-          title: block_hash
-          type: string
-        height:
-          description: Height
-          format: int64
-          minimum: 1
-          title: height
-          type: integer
-        no_txs:
-          format: int64
-          title: no_txs
-          type: integer
-        timestamp:
-          format: int64
-          title: timestamp
-          type: integer
-      title: block_eth
-      type: object
     address_with_tags_allOf:
       properties:
         tags:
