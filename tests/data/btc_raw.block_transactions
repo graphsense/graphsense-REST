@@ -1,2 +1,2 @@
- {"height": 1, "txs": [{"tx_hash": "0x0e3e2357e806b6cdb1f70b54c3a3a17b6714ee1f0e68bebb44a74b1efd512098", "no_inputs": 0, "no_outputs": 1, "total_input": 0, "total_output": 5000000000}]}
- {"height": 2, "txs": [{"tx_hash": "0x9b0fc92260312ce44e74ef369f5c66bbb85848f2eddd5a7a1cde251e54ccfdd5", "no_inputs": 0, "no_outputs": 1, "total_input": 0, "total_output": 5000000000}]}
+ {"height": 1, "txs": [{"tx_hash": "0xab1880", "no_inputs": 0, "no_outputs": 1, "total_input": 0, "total_output": 5000000000}]}
+ {"height": 2, "txs": [{"tx_hash": "0xab188013", "no_inputs": 0, "no_outputs": 1, "total_input": 0, "total_output": 5000000000}]}

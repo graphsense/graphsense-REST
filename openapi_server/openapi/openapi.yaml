@@ -756,7 +756,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/block_txs'
+                items:
+                  $ref: '#/components/schemas/block_tx'
+                type: array
           description: OK
       summary: Get block transactions (100 per page)
       tags:
@@ -1890,76 +1892,33 @@ components:
           type: integer
       title: block
       type: object
-    block_txs:
-      example:
-        txs:
-        - total_output:
-            eur: 1.4658129
-            usd: 5.962134
-            value: 5
-          no_outputs: 1
-          total_input:
-            eur: 1.4658129
-            usd: 5.962134
-            value: 5
-          tx_hash: tx_hash
-          no_inputs: 6
-        - total_output:
-            eur: 1.4658129
-            usd: 5.962134
-            value: 5
-          no_outputs: 1
-          total_input:
-            eur: 1.4658129
-            usd: 5.962134
-            value: 5
-          tx_hash: tx_hash
-          no_inputs: 6
-        height: 1
+    block_tx:
+      discriminator:
+        mapping:
+          utxo: '#/components/schemas/block_tx_utxo'
+          account: '#/components/schemas/tx_account'
+        propertyName: currency_type
+      oneOf:
+      - $ref: '#/components/schemas/block_tx_utxo'
+      - $ref: '#/components/schemas/tx_account'
+      title: block_tx
+    block_tx_utxo:
       properties:
-        height:
-          description: Height
-          format: int64
-          minimum: 1
-          title: height
-          type: integer
-        txs:
-          items:
-            $ref: '#/components/schemas/block_tx_summary'
-          title: txs
-          type: array
-      title: block_txs
-      type: object
-    block_tx_summary:
-      example:
-        total_output:
-          eur: 1.4658129
-          usd: 5.962134
-          value: 5
-        no_outputs: 1
-        total_input:
-          eur: 1.4658129
-          usd: 5.962134
-          value: 5
-        tx_hash: tx_hash
-        no_inputs: 6
-      properties:
+        currency_type:
+          default: utxo
+          type: string
         tx_hash:
-          title: tx_hash
           type: string
         no_inputs:
           format: int64
-          title: no_inputs
           type: integer
         no_outputs:
           format: int64
-          title: no_outputs
           type: integer
         total_input:
           $ref: '#/components/schemas/values'
         total_output:
           $ref: '#/components/schemas/values'
-      title: block_tx_summary
       type: object
     blocks:
       example:

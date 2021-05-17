@@ -8,7 +8,7 @@ from six import BytesIO
 
 from openapi_server.models.block import Block  # noqa: E501
 from openapi_server.models.block_eth import BlockEth  # noqa: E501
-from openapi_server.models.block_txs import BlockTxs  # noqa: E501
+from openapi_server.models.block_tx import BlockTx  # noqa: E501
 from openapi_server.models.blocks import Blocks  # noqa: E501
 from openapi_server.models.blocks_eth import BlocksEth  # noqa: E501
 from openapi_server.test import BaseTestCase

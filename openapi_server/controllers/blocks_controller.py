@@ -3,7 +3,7 @@ import six
 
 from openapi_server.models.block import Block  # noqa: E501
 from openapi_server.models.block_eth import BlockEth  # noqa: E501
-from openapi_server.models.block_txs import BlockTxs  # noqa: E501
+from openapi_server.models.block_tx import BlockTx  # noqa: E501
 from openapi_server.models.blocks import Blocks  # noqa: E501
 from openapi_server.models.blocks_eth import BlocksEth  # noqa: E501
 import gsrest.service.blocks_service as service
@@ -57,7 +57,7 @@ def list_block_txs(currency, height):  # noqa: E501
     :param height: The block height
     :type height: int
 
-    :rtype: BlockTxs
+    :rtype: List[BlockTx]
     """
     try:
         return service.list_block_txs(

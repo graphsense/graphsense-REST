@@ -3,14 +3,28 @@ from openapi_server.models.block import Block
 from openapi_server.models.block_eth import BlockEth
 from openapi_server.models.blocks import Blocks
 from openapi_server.models.blocks_eth import BlocksEth
-from openapi_server.models.block_txs import BlockTxs
 from openapi_server.models.txs import Txs
 from openapi_server.models.tx import TxAccount
-from openapi_server.models.block_tx_summary import BlockTxSummary
+from openapi_server.models.block_tx_utxo import BlockTxUtxo
 from gsrest.util.values import convert_value
 from gsrest.service.rates_service import get_rates
 from flask import Response, stream_with_context
 from gsrest.util.csvify import create_download_header, to_csv
+
+
+def from_row(currency, row, rates):
+    if currency == 'eth':
+        return TxAccount(
+            tx_hash=row.hash.hex(),
+            timestamp=row.block_timestamp,
+            height=row.block_number,
+            values=convert_value(row.value, rates))
+    return BlockTxUtxo(
+         no_inputs=row.no_inputs,
+         no_outputs=row.no_outputs,
+         total_input=convert_value(row.total_input, rates),
+         total_output=convert_value(row.total_output, rates),
+         tx_hash=row.tx_hash.hex())
 
 
 def get_block(currency, height) -> Block:
@@ -40,31 +54,20 @@ def list_blocks(currency, page=None):
 
 def list_block_txs(currency, height):
     db = get_connection()
-    result = db.list_block_txs(currency, height)
+    txs = db.list_block_txs(currency, height)
 
-    if result is None:
+    if txs is None:
         raise RuntimeError("Block {} not found".format(height))
     rates = get_rates(currency, height)
 
-    tx_summaries = \
-        [BlockTxSummary(
-         no_inputs=tx.no_inputs,
-         no_outputs=tx.no_outputs,
-         total_input=convert_value(tx.total_input, rates['rates']),
-         total_output=convert_value(tx.total_output, rates['rates']),
-         tx_hash=tx.tx_hash.hex()
-         )
-         for tx in result.txs]
-
-    return BlockTxs(height, tx_summaries)
+    return [from_row(currency, tx, rates['rates'])
+            for tx in txs]
 
 
 def list_block_txs_csv(currency, height):
     def query_function(_):
         result = list_block_txs(currency, height)
-        txs = [tx.to_dict() for tx in result.txs]
-        for tx in txs:
-            tx['block_height'] = result.height
+        txs = [tx.to_dict() for tx in result]
         return None, txs
     return Response(stream_with_context(to_csv(query_function)),
                     mimetype="text/csv",

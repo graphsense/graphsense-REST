@@ -161,13 +161,15 @@ class Cassandra():
 
         return results, to_hex(results.paging_state)
 
+    @eth
     def list_block_txs(self, currency, height):
         session = self.get_session(currency, 'raw')
 
         query = "SELECT * FROM block_transactions WHERE height = %s"
         result = session.execute(query, [height])
-        if result:
-            return result.one()
+        if result is None or result.one() is None:
+            return None
+        return result.one().txs
 
     @new
     def get_rates(self, currency, height):
@@ -521,14 +523,9 @@ class Cassandra():
 
     @eth
     def get_tx(self, currency, tx_hash):
-        session = self.get_session(currency, 'raw')
-
-        query = \
-            "SELECT * FROM transaction WHERE tx_prefix = %s AND tx_hash = %s"
-        result = session.execute(query, [tx_hash[:TX_PREFIX_LENGTH],
-                                         bytearray.fromhex(tx_hash)])
+        result = self.list_txs_by_hashes(currency, [tx_hash])
         if result:
-            return result.one()
+            return result[0]
 
     def get_transaction_by_id(self, currency, id):
         session = self.get_session(currency, 'transformed')
@@ -569,6 +566,17 @@ class Cassandra():
         return expression[len(bech32_prefix):] \
             if expression.startswith(bech32_prefix) \
             else expression
+
+    @eth
+    def list_txs_by_hashes(self, currency, hashes):
+        prefix = self.get_prefix_lengths(currency)
+        params = [[hash[:prefix['tx']],
+                   bytearray.fromhex(hash)]
+                  for hash in hashes]
+        session = self.get_session(currency, 'raw')
+        statement = ('SELECT * from transaction where '
+                     'tx_prefix=%s and tx_hash=%s')
+        return self.concurrent_with_args(session, statement, params)
 
 #####################
 # ETHEREUM VARIANTS #
@@ -630,8 +638,7 @@ class Cassandra():
     def get_address_entity_id_eth(self, currency, address):
         return self.address_to_entity_id(address)
 
-    def list_block_txs_eth(self, height):
-        currency = 'eth'
+    def list_block_txs_eth(self, currency, height):
         session = self.get_session(currency, 'transformed')
         height_group = self.get_block_group_eth(height)
         query = ("SELECT txs FROM block_transactions WHERE "
@@ -689,10 +696,13 @@ class Cassandra():
             'SELECT transaction from transaction_ids_by_transaction_id_group'
             ' where transaction_id_group = %s and transaction_id = %s')
         result = self.concurrent_with_args(session, statement, params)
+        return self.list_txs_by_hashes(currency,
+                                       [row.transaction for row in result])
+
+    def list_txs_by_hashes_eth(self, currency, hashes):
         prefix = self.get_prefix_lengths(currency)
-        params = [[row.transaction.hex()[:prefix['tx']],
-                   row.transaction]
-                  for row in result]
+        params = [[hash.hex()[:prefix['tx']], hash]
+                  for hash in hashes]
         session = self.get_session(currency, 'raw')
         statement = (
             'SELECT hash, block_number, block_timestamp, value from '

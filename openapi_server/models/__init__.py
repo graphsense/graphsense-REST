@@ -12,8 +12,8 @@ from openapi_server.models.address_with_tags import AddressWithTags
 from openapi_server.models.address_with_tags_all_of import AddressWithTagsAllOf
 from openapi_server.models.block import Block
 from openapi_server.models.block_eth import BlockEth
-from openapi_server.models.block_tx_summary import BlockTxSummary
-from openapi_server.models.block_txs import BlockTxs
+from openapi_server.models.block_tx import BlockTx
+from openapi_server.models.block_tx_utxo import BlockTxUtxo
 from openapi_server.models.blocks import Blocks
 from openapi_server.models.blocks_eth import BlocksEth
 from openapi_server.models.concept import Concept
