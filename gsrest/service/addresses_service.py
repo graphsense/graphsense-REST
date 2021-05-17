@@ -1,5 +1,5 @@
 from gsrest.db import get_connection
-from openapi_server.models.address_tx import AddressTx
+from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.link import Link
 from openapi_server.models.txs import Txs
@@ -10,6 +10,26 @@ import gsrest.service.common_service as common
 from gsrest.util.values import convert_value
 from flask import Response, stream_with_context
 from gsrest.util.csvify import create_download_header, to_csv
+
+
+def from_rows(currency, rows):
+    if currency == 'eth':
+        heights = [row.block_number for row in rows]
+        rates = list_rates(currency, heights)
+        return [TxAccount(
+                    tx_hash=row.hash.hex(),
+                    timestamp=row.block_timestamp,
+                    height=row.block_number,
+                    values=convert_value(row.value, rates[row.block_number]))
+                for row in rows]
+    heights = [row.height for row in rows]
+    rates = list_rates(currency, heights)
+    return [AddressTxUtxo(
+            height=row.height,
+            timestamp=row.timestamp,
+            tx_hash=row.tx_hash.hex(),
+            value=convert_value(row.value, rates[row.height]))
+            for row in rows]
 
 
 def get_address_with_tags(currency, address):
@@ -36,18 +56,7 @@ def list_address_txs(currency, address, page=None, pagesize=None):
     db = get_connection()
     results, paging_state = \
         db.list_address_txs(currency, address, page, pagesize)
-    address_txs = []
-    if results:
-        heights = [row.height for row in results]
-        rates = list_rates(currency, heights)
-        address_txs = [AddressTx(
-                        address=address,
-                        height=row.height,
-                        timestamp=row.timestamp,
-                        tx_hash=row.tx_hash.hex(),
-                        value=convert_value(row.value, rates[row.height])
-                        )
-                       for row in results]
+    address_txs = from_rows(currency, results)
     return AddressTxs(next_page=paging_state, address_txs=address_txs)
 
 

@@ -10,7 +10,7 @@ from openapi_server.models.link import Link
 from openapi_server.models.txs import Txs
 import gsrest.service.addresses_service as service
 from gsrest.test.assertion import assertEqual
-from openapi_server.models.address_tx import AddressTx
+from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from openapi_server.models.address_txs import AddressTxs
 from gsrest.util.values import convert_value
 from gsrest.service.rates_service import list_rates
@@ -448,56 +448,45 @@ def list_address_txs(test_case):
     Get all transactions an address has been involved in
     """
     rates = list_rates(currency='btc', heights=[2])
-
     address_txs = AddressTxs(
                     next_page=None,
                     address_txs=[
-                        AddressTx(
+                        AddressTxUtxo(
                             tx_hash="123456",
                             value=convert_value(1260000, rates[2]),
                             height=2,
-                            address=addressWithoutTags.address,
                             timestamp=1510347493),
-                        AddressTx(
+                        AddressTxUtxo(
                             tx_hash="abcdef",
                             value=convert_value(-1260000, rates[2]),
                             height=2,
-                            address=addressWithoutTags.address,
                             timestamp=1511153263)
                         ]
                     )
-
     result = service.list_address_txs('btc', addressWithoutTags.address)
-    assertEqual(address_txs, result)
+    test_case.assertEqual(address_txs, result)
+
+    txs = AddressTxs(address_txs=[tx1_eth, tx2_eth])
+    result = service.list_address_txs('eth', eth_addressWithTags.address)
+    test_case.assertEqual(txs, result)
 
 
 def list_address_txs_csv(test_case):
     result = service.list_address_txs_csv('btc', addressWithoutTags.address)
     test_case.assertEqual(
-        'address,height,timestamp,tx_hash,value_eur,value_usd,value_value\r\n'
-        '3Hrnn1UN78uXgLNvtqVXMjHwB41PmX66X4,2,1510347493,123456,0.01,0.03,'
+        'currency_type,height,timestamp,tx_hash,value_eur,value_usd,'
+        'value_value\r\n'
+        'utxo,2,1510347493,123456,0.01,0.03,'
         '1260000\r\n'
-        '3Hrnn1UN78uXgLNvtqVXMjHwB41PmX66X4,2,1511153263,abcdef,-0.01,-0.03,'
+        'utxo,2,1511153263,abcdef,-0.01,-0.03,'
         '-1260000\r\n', result.data.decode('utf-8'))
 
-
-def list_address_txs_eth(test_case):
-    """Test case for list_address_txs_eth
-
-    Get all transactions an address has been involved in
-    """
-    txs = Txs(txs=[tx1_eth, tx2_eth])
-
-    result = service.list_address_txs_eth(eth_addressWithTags.address)
-    test_case.assertEqual(txs, result)
-
-
-def list_address_txs_csv_eth(test_case):
-    result = service.list_address_txs_csv_eth(eth_addressWithTags.address)
+    result = service.list_address_txs_csv('eth', eth_addressWithTags.address)
     test_case.assertEqual(
-        'height,timestamp,tx_hash,values_eur,values_usd,values_value\r\n'
-        '1,15,af6e0000,123.0,246.0,12300000000\r\n'
-        '1,16,af6e0003,234.0,468.0,23400000000\r\n',
+        'currency_type,height,timestamp,tx_hash,values_eur,values_usd,'
+        'values_value\r\n'
+        'account,1,15,af6e0000,123.0,246.0,12300000000\r\n'
+        'account,1,16,af6e0003,234.0,468.0,23400000000\r\n',
         result.data.decode('utf-8'))
 
 

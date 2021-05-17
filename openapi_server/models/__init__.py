@@ -7,6 +7,7 @@ from openapi_server.models.address import Address
 from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.address_tag_all_of import AddressTagAllOf
 from openapi_server.models.address_tx import AddressTx
+from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.address_with_tags import AddressWithTags
 from openapi_server.models.address_with_tags_all_of import AddressWithTagsAllOf

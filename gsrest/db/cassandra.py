@@ -192,6 +192,7 @@ class Cassandra():
             statements_and_params.append((concurrent_query, [h]))
         return self.concurrent(session, statements_and_params)
 
+    @eth
     def list_address_txs(self, currency, address, page=None, pagesize=None):
         paging_state = from_hex(page)
         address_id, address_id_group = \
@@ -206,7 +207,8 @@ class Cassandra():
         results = session.execute(statement, [address_id, address_id_group],
                                   paging_state=paging_state)
         if results is None:
-            return [], None
+            raise RuntimeError(
+                f'address {address} not found in currency {currency}')
         return results.current_rows, to_hex(results.paging_state)
 
     @new
@@ -663,8 +665,8 @@ class Cassandra():
         return 0 if result.one() is None else \
             result.one().max_secondary_id
 
-    def list_address_txs_eth(self, address, page=None, pagesize=None):
-        currency = 'eth'
+    def list_address_txs_eth(self, currency, address,
+                             page=None, pagesize=None):
         paging_state = from_hex(page)
         session = self.get_session(currency, 'transformed')
         address_id, id_group = self.get_address_id_id_group(currency, address)
@@ -682,7 +684,8 @@ class Cassandra():
                                   address_id],
                                  paging_state=paging_state)
         if result is None:
-            return [], None
+            raise RuntimeError(
+                    f'address {address} not found in currency {currency}')
         txs = [row.transaction_id for row in result.current_rows]
         paging_state = result.paging_state
         result = self.list_txs_by_ids_eth(txs)

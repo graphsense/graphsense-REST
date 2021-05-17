@@ -1998,7 +1998,7 @@ components:
       properties:
         address:
           description: Address
-          title: address_id
+          title: address
           type: string
         balance:
           $ref: '#/components/schemas/values'
@@ -2097,22 +2097,8 @@ components:
       example:
         next_page: next_page
         address_txs:
-        - address: address
-          tx_hash: tx_hash
-          value:
-            eur: 1.4658129
-            usd: 5.962134
-            value: 5
-          height: 1
-          timestamp: 6
-        - address: address
-          tx_hash: tx_hash
-          value:
-            eur: 1.4658129
-            usd: 5.962134
-            value: 5
-          height: 1
-          timestamp: 6
+        - null
+        - null
       properties:
         next_page:
           format: string
@@ -2126,19 +2112,19 @@ components:
       title: address_txs
       type: object
     address_tx:
-      example:
-        address: address
-        tx_hash: tx_hash
-        value:
-          eur: 1.4658129
-          usd: 5.962134
-          value: 5
-        height: 1
-        timestamp: 6
+      discriminator:
+        mapping:
+          utxo: '#/components/schemas/address_tx_utxo'
+          account: '#/components/schemas/tx_account'
+        propertyName: currency_type
+      oneOf:
+      - $ref: '#/components/schemas/address_tx_utxo'
+      - $ref: '#/components/schemas/tx_account'
+      title: address_tx
+    address_tx_utxo:
       properties:
-        address:
-          description: Address
-          title: address_id
+        currency_type:
+          default: utxo
           type: string
         height:
           description: Height
@@ -2157,7 +2143,6 @@ components:
           type: string
         value:
           $ref: '#/components/schemas/values'
-      title: address_tx
       type: object
     tx_summary:
       example:
@@ -2263,7 +2248,7 @@ components:
       type: string
     address_id:
       description: Address
-      title: address_id
+      title: address
       type: string
     entity_id:
       description: Entity id
@@ -2871,7 +2856,7 @@ components:
       properties:
         address:
           description: Address
-          title: address_id
+          title: address
           type: string
       required:
       - address
