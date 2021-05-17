@@ -67,6 +67,8 @@ class AddressTx(Model):
         if tx_hash is None:
             raise ValueError("Invalid value for `tx_hash`, must not be `None`")  # noqa: E501
         self._tx_hash = tx_hash
+        if value is None:
+            raise ValueError("Invalid value for `value`, must not be `None`")  # noqa: E501
         self._value = value
         if values is None:
             raise ValueError("Invalid value for `values`, must not be `None`")  # noqa: E501
@@ -215,6 +217,8 @@ class AddressTx(Model):
         :param value: The value of this AddressTx.
         :type value: Values
         """
+        if value is None:
+            raise ValueError("Invalid value for `value`, must not be `None`")  # noqa: E501
 
         self._value = value
 

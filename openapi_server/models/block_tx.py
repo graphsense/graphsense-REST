@@ -73,9 +73,17 @@ class BlockTx(Model):
         if tx_hash is None:
             raise ValueError("Invalid value for `tx_hash`, must not be `None`")  # noqa: E501
         self._tx_hash = tx_hash
+        if no_inputs is None:
+            raise ValueError("Invalid value for `no_inputs`, must not be `None`")  # noqa: E501
         self._no_inputs = no_inputs
+        if no_outputs is None:
+            raise ValueError("Invalid value for `no_outputs`, must not be `None`")  # noqa: E501
         self._no_outputs = no_outputs
+        if total_input is None:
+            raise ValueError("Invalid value for `total_input`, must not be `None`")  # noqa: E501
         self._total_input = total_input
+        if total_output is None:
+            raise ValueError("Invalid value for `total_output`, must not be `None`")  # noqa: E501
         self._total_output = total_output
         if height is None:
             raise ValueError("Invalid value for `height`, must not be `None`")  # noqa: E501
@@ -181,6 +189,8 @@ class BlockTx(Model):
         :param no_inputs: The no_inputs of this BlockTx.
         :type no_inputs: int
         """
+        if no_inputs is None:
+            raise ValueError("Invalid value for `no_inputs`, must not be `None`")  # noqa: E501
 
         self._no_inputs = no_inputs
 
@@ -202,6 +212,8 @@ class BlockTx(Model):
         :param no_outputs: The no_outputs of this BlockTx.
         :type no_outputs: int
         """
+        if no_outputs is None:
+            raise ValueError("Invalid value for `no_outputs`, must not be `None`")  # noqa: E501
 
         self._no_outputs = no_outputs
 
@@ -223,6 +235,8 @@ class BlockTx(Model):
         :param total_input: The total_input of this BlockTx.
         :type total_input: Values
         """
+        if total_input is None:
+            raise ValueError("Invalid value for `total_input`, must not be `None`")  # noqa: E501
 
         self._total_input = total_input
 
@@ -244,6 +258,8 @@ class BlockTx(Model):
         :param total_output: The total_output of this BlockTx.
         :type total_output: Values
         """
+        if total_output is None:
+            raise ValueError("Invalid value for `total_output`, must not be `None`")  # noqa: E501
 
         self._total_output = total_output
 

@@ -51,11 +51,23 @@ class BlockTxUtxo(Model):
             'total_output': 'total_output'
         }
 
+        if currency_type is None:
+            raise ValueError("Invalid value for `currency_type`, must not be `None`")  # noqa: E501
         self._currency_type = currency_type
+        if tx_hash is None:
+            raise ValueError("Invalid value for `tx_hash`, must not be `None`")  # noqa: E501
         self._tx_hash = tx_hash
+        if no_inputs is None:
+            raise ValueError("Invalid value for `no_inputs`, must not be `None`")  # noqa: E501
         self._no_inputs = no_inputs
+        if no_outputs is None:
+            raise ValueError("Invalid value for `no_outputs`, must not be `None`")  # noqa: E501
         self._no_outputs = no_outputs
+        if total_input is None:
+            raise ValueError("Invalid value for `total_input`, must not be `None`")  # noqa: E501
         self._total_input = total_input
+        if total_output is None:
+            raise ValueError("Invalid value for `total_output`, must not be `None`")  # noqa: E501
         self._total_output = total_output
 
     @classmethod
@@ -101,6 +113,8 @@ class BlockTxUtxo(Model):
         :param currency_type: The currency_type of this BlockTxUtxo.
         :type currency_type: str
         """
+        if currency_type is None:
+            raise ValueError("Invalid value for `currency_type`, must not be `None`")  # noqa: E501
 
         self._currency_type = currency_type
 
@@ -122,6 +136,8 @@ class BlockTxUtxo(Model):
         :param tx_hash: The tx_hash of this BlockTxUtxo.
         :type tx_hash: str
         """
+        if tx_hash is None:
+            raise ValueError("Invalid value for `tx_hash`, must not be `None`")  # noqa: E501
 
         self._tx_hash = tx_hash
 
@@ -143,6 +159,8 @@ class BlockTxUtxo(Model):
         :param no_inputs: The no_inputs of this BlockTxUtxo.
         :type no_inputs: int
         """
+        if no_inputs is None:
+            raise ValueError("Invalid value for `no_inputs`, must not be `None`")  # noqa: E501
 
         self._no_inputs = no_inputs
 
@@ -164,6 +182,8 @@ class BlockTxUtxo(Model):
         :param no_outputs: The no_outputs of this BlockTxUtxo.
         :type no_outputs: int
         """
+        if no_outputs is None:
+            raise ValueError("Invalid value for `no_outputs`, must not be `None`")  # noqa: E501
 
         self._no_outputs = no_outputs
 
@@ -185,6 +205,8 @@ class BlockTxUtxo(Model):
         :param total_input: The total_input of this BlockTxUtxo.
         :type total_input: Values
         """
+        if total_input is None:
+            raise ValueError("Invalid value for `total_input`, must not be `None`")  # noqa: E501
 
         self._total_input = total_input
 
@@ -206,5 +228,7 @@ class BlockTxUtxo(Model):
         :param total_output: The total_output of this BlockTxUtxo.
         :type total_output: Values
         """
+        if total_output is None:
+            raise ValueError("Invalid value for `total_output`, must not be `None`")  # noqa: E501
 
         self._total_output = total_output

@@ -47,10 +47,20 @@ class AddressTxUtxo(Model):
             'value': 'value'
         }
 
+        if currency_type is None:
+            raise ValueError("Invalid value for `currency_type`, must not be `None`")  # noqa: E501
         self._currency_type = currency_type
+        if height is None:
+            raise ValueError("Invalid value for `height`, must not be `None`")  # noqa: E501
         self._height = height
+        if timestamp is None:
+            raise ValueError("Invalid value for `timestamp`, must not be `None`")  # noqa: E501
         self._timestamp = timestamp
+        if tx_hash is None:
+            raise ValueError("Invalid value for `tx_hash`, must not be `None`")  # noqa: E501
         self._tx_hash = tx_hash
+        if value is None:
+            raise ValueError("Invalid value for `value`, must not be `None`")  # noqa: E501
         self._value = value
 
     @classmethod
@@ -95,6 +105,8 @@ class AddressTxUtxo(Model):
         :param currency_type: The currency_type of this AddressTxUtxo.
         :type currency_type: str
         """
+        if currency_type is None:
+            raise ValueError("Invalid value for `currency_type`, must not be `None`")  # noqa: E501
 
         self._currency_type = currency_type
 
@@ -118,6 +130,8 @@ class AddressTxUtxo(Model):
         :param height: The height of this AddressTxUtxo.
         :type height: int
         """
+        if height is None:
+            raise ValueError("Invalid value for `height`, must not be `None`")  # noqa: E501
         if height is not None and height < 1:  # noqa: E501
             raise ValueError("Invalid value for `height`, must be a value greater than or equal to `1`")  # noqa: E501
 
@@ -143,6 +157,8 @@ class AddressTxUtxo(Model):
         :param timestamp: The timestamp of this AddressTxUtxo.
         :type timestamp: int
         """
+        if timestamp is None:
+            raise ValueError("Invalid value for `timestamp`, must not be `None`")  # noqa: E501
 
         self._timestamp = timestamp
 
@@ -166,6 +182,8 @@ class AddressTxUtxo(Model):
         :param tx_hash: The tx_hash of this AddressTxUtxo.
         :type tx_hash: str
         """
+        if tx_hash is None:
+            raise ValueError("Invalid value for `tx_hash`, must not be `None`")  # noqa: E501
 
         self._tx_hash = tx_hash
 
@@ -187,5 +205,7 @@ class AddressTxUtxo(Model):
         :param value: The value of this AddressTxUtxo.
         :type value: Values
         """
+        if value is None:
+            raise ValueError("Invalid value for `value`, must not be `None`")  # noqa: E501
 
         self._value = value

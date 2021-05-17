@@ -712,8 +712,7 @@ class Cassandra():
             'transaction where hash_prefix=%s and hash=%s')
         return self.concurrent_with_args(session, statement, params)
 
-    def list_address_links_eth(self, address, neighbor):
-        currency = 'eth'
+    def list_address_links_eth(self, currency, address, neighbor):
         session = self.get_session(currency, 'transformed')
         address_id, id_group = self.get_address_id_id_group(currency, address)
         neighbor_id, n_id_group = \
@@ -732,8 +731,7 @@ class Cassandra():
         if result is None or result.one() is None:
             return [], None
         txs = result.one().transaction_ids
-        result = self.list_txs_by_ids_eth(txs)
-        return result, None
+        return self.list_txs_by_ids_eth(txs)
 
     def get_tx_eth(self, currency, tx_hash):
         session = self.get_session(currency, 'raw')

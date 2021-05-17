@@ -6,7 +6,7 @@ from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.neighbors import Neighbors
 from openapi_server.models.neighbor import Neighbor
 from openapi_server.models.entity_with_tags import EntityWithTags
-from openapi_server.models.link import Link
+from openapi_server.models.link_utxo import LinkUtxo
 from openapi_server.models.txs import Txs
 import gsrest.service.addresses_service as service
 from gsrest.test.assertion import assertEqual
@@ -565,20 +565,19 @@ def list_address_links(test_case):
                 currency='btc',
                 address=addressWithTags.address,
                 neighbor='17DfZja1713S3JRWA9jaebCKFM5anUh7GG')
-    link = [Link(tx_hash='123456',
-                 input_value=Values(eur=-0.1, usd=-0.2, value=-10000000),
-                 output_value=Values(eur=-0.1, usd=-0.2, value=-10000000),
-                 timestamp=1361497172,
-                 height=2)]
+    link = [LinkUtxo(tx_hash='123456',
+                     input_value=Values(eur=-0.1, usd=-0.2, value=-10000000),
+                     output_value=Values(eur=-0.1, usd=-0.2, value=-10000000),
+                     timestamp=1361497172,
+                     height=2)]
 
     test_case.assertEqual(link, result)
 
-
-def list_address_links_eth(test_case):
-    result = service.list_address_links_eth(
+    result = service.list_address_links(
+                currency='eth',
                 address=eth_addressWithTags.address,
                 neighbor='123456')
-    txs = Txs(txs=[tx1_eth, tx2_eth])
+    txs = [tx1_eth, tx2_eth]
     test_case.assertEqual(txs, result)
 
 

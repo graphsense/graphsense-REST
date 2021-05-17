@@ -6,40 +6,6 @@ info:
 servers:
 - url: http://openapi_server:9000
 paths:
-  /eth/addresses/{address}/links.csv:
-    get:
-      operationId: list_address_links_csv_eth
-      parameters:
-      - description: The cryptocurrency address in hexadecimal representation
-        example: "123456"
-        explode: false
-        in: path
-        name: address
-        required: true
-        schema:
-          format: string
-          type: string
-        style: simple
-      - description: Neighbor address in hexadecimal representation
-        example: "123456"
-        explode: true
-        in: query
-        name: neighbor
-        required: true
-        schema:
-          type: string
-        style: form
-      responses:
-        "200":
-          content:
-            text/csv:
-              schema:
-                type: string
-          description: OK
-      summary: Get transactions between two addresses as CSV
-      tags:
-      - addresses
-      x-openapi-router-controller: openapi_server.controllers.addresses_controller
   /eth/blocks:
     get:
       operationId: list_blocks_eth
@@ -1919,6 +1885,13 @@ components:
           $ref: '#/components/schemas/values'
         total_output:
           $ref: '#/components/schemas/values'
+      required:
+      - currency_type
+      - no_inputs
+      - no_outputs
+      - total_input
+      - total_output
+      - tx_hash
       type: object
     blocks:
       example:
@@ -1971,15 +1944,15 @@ components:
     address:
       example:
         total_spent:
-          eur: 1.4658129
-          usd: 5.962134
-          value: 5
+          eur: 0.8008282
+          usd: 6.0274563
+          value: 1
         in_degree: 1
         address: address
         balance:
-          eur: 1.4658129
-          usd: 5.962134
-          value: 5
+          eur: 0.8008282
+          usd: 6.0274563
+          value: 1
         no_incoming_txs: 5
         out_degree: 5
         no_outgoing_txs: 2
@@ -1992,9 +1965,9 @@ components:
           height: 1
           timestamp: 6
         total_received:
-          eur: 1.4658129
-          usd: 5.962134
-          value: 5
+          eur: 0.8008282
+          usd: 6.0274563
+          value: 1
       properties:
         address:
           description: Address
@@ -2143,6 +2116,12 @@ components:
           type: string
         value:
           $ref: '#/components/schemas/values'
+      required:
+      - currency_type
+      - height
+      - timestamp
+      - tx_hash
+      - value
       type: object
     tx_summary:
       example:
@@ -2224,9 +2203,9 @@ components:
       type: object
     values:
       example:
-        eur: 1.4658129
-        usd: 5.962134
-        value: 5
+        eur: 0.8008282
+        usd: 6.0274563
+        value: 1
       properties:
         eur:
           format: float
@@ -2281,36 +2260,36 @@ components:
         neighbors:
         - node_type: address
           balance:
-            eur: 1.4658129
-            usd: 5.962134
-            value: 5
+            eur: 0.8008282
+            usd: 6.0274563
+            value: 1
           received:
-            eur: 1.4658129
-            usd: 5.962134
-            value: 5
+            eur: 0.8008282
+            usd: 6.0274563
+            value: 1
           id: id
           estimated_value:
-            eur: 1.4658129
-            usd: 5.962134
-            value: 5
+            eur: 0.8008282
+            usd: 6.0274563
+            value: 1
           has_labels: true
-          no_txs: 0
+          no_txs: 5
         - node_type: address
           balance:
-            eur: 1.4658129
-            usd: 5.962134
-            value: 5
+            eur: 0.8008282
+            usd: 6.0274563
+            value: 1
           received:
-            eur: 1.4658129
-            usd: 5.962134
-            value: 5
+            eur: 0.8008282
+            usd: 6.0274563
+            value: 1
           id: id
           estimated_value:
-            eur: 1.4658129
-            usd: 5.962134
-            value: 5
+            eur: 0.8008282
+            usd: 6.0274563
+            value: 1
           has_labels: true
-          no_txs: 0
+          no_txs: 5
       properties:
         next_page:
           format: string
@@ -2327,20 +2306,20 @@ components:
       example:
         node_type: address
         balance:
-          eur: 1.4658129
-          usd: 5.962134
-          value: 5
+          eur: 0.8008282
+          usd: 6.0274563
+          value: 1
         received:
-          eur: 1.4658129
-          usd: 5.962134
-          value: 5
+          eur: 0.8008282
+          usd: 6.0274563
+          value: 1
         id: id
         estimated_value:
-          eur: 1.4658129
-          usd: 5.962134
-          value: 5
+          eur: 0.8008282
+          usd: 6.0274563
+          value: 1
         has_labels: true
-        no_txs: 0
+        no_txs: 5
       properties:
         id:
           description: address or entity id
@@ -2379,19 +2358,20 @@ components:
       title: neighbor
       type: object
     link:
-      example:
-        tx_hash: tx_hash
-        output_value:
-          eur: 1.4658129
-          usd: 5.962134
-          value: 5
-        input_value:
-          eur: 1.4658129
-          usd: 5.962134
-          value: 5
-        height: 1
-        timestamp: 6
+      discriminator:
+        mapping:
+          utxo: '#/components/schemas/link_utxo'
+          account: '#/components/schemas/tx_account'
+        propertyName: currency_type
+      oneOf:
+      - $ref: '#/components/schemas/link_utxo'
+      - $ref: '#/components/schemas/tx_account'
+      title: link
+    link_utxo:
       properties:
+        currency_type:
+          default: utxo
+          type: string
         tx_hash:
           description: Transaction hash
           title: tx_hash
@@ -2412,27 +2392,27 @@ components:
         output_value:
           $ref: '#/components/schemas/values'
       required:
+      - currency_type
       - height
       - input_value
       - output_value
       - timestamp
       - tx_hash
-      title: link
       type: object
     entity_addresses:
       example:
         next_page: next_page
         addresses:
         - total_spent:
-            eur: 1.4658129
-            usd: 5.962134
-            value: 5
+            eur: 0.8008282
+            usd: 6.0274563
+            value: 1
           in_degree: 1
           address: address
           balance:
-            eur: 1.4658129
-            usd: 5.962134
-            value: 5
+            eur: 0.8008282
+            usd: 6.0274563
+            value: 1
           no_incoming_txs: 5
           out_degree: 5
           no_outgoing_txs: 2
@@ -2445,19 +2425,19 @@ components:
             height: 1
             timestamp: 6
           total_received:
-            eur: 1.4658129
-            usd: 5.962134
-            value: 5
+            eur: 0.8008282
+            usd: 6.0274563
+            value: 1
         - total_spent:
-            eur: 1.4658129
-            usd: 5.962134
-            value: 5
+            eur: 0.8008282
+            usd: 6.0274563
+            value: 1
           in_degree: 1
           address: address
           balance:
-            eur: 1.4658129
-            usd: 5.962134
-            value: 5
+            eur: 0.8008282
+            usd: 6.0274563
+            value: 1
           no_incoming_txs: 5
           out_degree: 5
           no_outgoing_txs: 2
@@ -2470,9 +2450,9 @@ components:
             height: 1
             timestamp: 6
           total_received:
-            eur: 1.4658129
-            usd: 5.962134
-            value: 5
+            eur: 0.8008282
+            usd: 6.0274563
+            value: 1
       properties:
         next_page:
           format: string
@@ -2493,20 +2473,20 @@ components:
         relation:
           node_type: address
           balance:
-            eur: 1.4658129
-            usd: 5.962134
-            value: 5
+            eur: 0.8008282
+            usd: 6.0274563
+            value: 1
           received:
-            eur: 1.4658129
-            usd: 5.962134
-            value: 5
+            eur: 0.8008282
+            usd: 6.0274563
+            value: 1
           id: id
           estimated_value:
-            eur: 1.4658129
-            usd: 5.962134
-            value: 5
+            eur: 0.8008282
+            usd: 6.0274563
+            value: 1
           has_labels: true
-          no_txs: 0
+          no_txs: 5
         matching_addresses:
         - null
         - null

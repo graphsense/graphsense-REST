@@ -1,8 +1,7 @@
 from gsrest.db import get_connection
 from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from openapi_server.models.address_txs import AddressTxs
-from openapi_server.models.link import Link
-from openapi_server.models.txs import Txs
+from openapi_server.models.link_utxo import LinkUtxo
 from openapi_server.models.tx_account import TxAccount
 from gsrest.service.entities_service import get_entity_with_tags
 from gsrest.service.rates_service import list_rates
@@ -93,17 +92,27 @@ def list_address_links(currency, address, neighbor):
     db = get_connection()
     links = db.list_address_links(currency, address, neighbor)
 
+    if currency == 'eth':
+        heights = [row.block_number for row in links]
+        rates = list_rates(currency, heights)
+        return [TxAccount(
+                    tx_hash=row.hash.hex(),
+                    timestamp=row.block_timestamp,
+                    height=row.block_number,
+                    values=convert_value(row.value, rates[row.block_number]))
+                for row in links]
+
     heights = [row['height'] for row in links]
     rates = list_rates(currency, heights)
 
-    return [Link(tx_hash=e['tx_hash'],
-                 height=e['height'],
-                 timestamp=e['timestamp'],
-                 input_value=convert_value(
-                     e['input_value'], rates[e['height']]),
-                 output_value=convert_value(
-                     e['output_value'], rates[e['height']]),
-                 ) for e in links]
+    return [LinkUtxo(tx_hash=e['tx_hash'],
+                     height=e['height'],
+                     timestamp=e['timestamp'],
+                     input_value=convert_value(
+                         e['input_value'], rates[e['height']]),
+                     output_value=convert_value(
+                         e['output_value'], rates[e['height']]),
+                     ) for e in links]
 
 
 def list_address_links_csv(currency, address, neighbor):
@@ -136,56 +145,3 @@ def get_address_entity(currency, address):
 def list_matching_addresses(currency, expression):
     db = get_connection()
     return db.list_matching_addresses(currency, expression)
-
-
-def list_address_txs_eth(address, page=None, pagesize=None):
-    db = get_connection()
-    results, paging_state = \
-        db.list_address_txs_eth(address, page, pagesize)
-    return wrap_txs_eth(results, paging_state)
-
-
-def list_address_txs_csv_eth(address):
-    currency = 'eth'
-
-    def query_function(page_state):
-        result = list_address_txs_eth(address, page_state)
-        return (result.next_page, result.txs)
-    return Response(stream_with_context(to_csv(query_function)),
-                    mimetype="text/csv",
-                    headers=create_download_header(
-                            'transactions of address {} ({}).csv'
-                            .format(address, currency.upper())))
-
-
-def list_address_links_eth(address, neighbor):
-    db = get_connection()
-    results, paging_state = db.list_address_links_eth(address, neighbor)
-    return wrap_txs_eth(results, paging_state)
-
-
-def list_address_links_csv_eth(address, neighbor):
-    def query_function(_):
-        result = list_address_links_eth(address, neighbor)
-        return (None, result.txs)
-    currency = 'eth'
-    return Response(stream_with_context(to_csv(query_function)),
-                    mimetype="text/csv",
-                    headers=create_download_header(
-                            'transactions between {} and {} ({}).csv'
-                            .format(address, neighbor, currency.upper())))
-
-
-def wrap_txs_eth(results, paging_state):
-    currency = 'eth'
-    txs = []
-    if results:
-        heights = [row.block_number for row in results]
-        rates = list_rates(currency, heights)
-        txs = [TxAccount(
-         tx_hash=tx.hash.hex(),
-         timestamp=tx.block_timestamp,
-         height=tx.block_number,
-         values=convert_value(tx.value, rates[tx.block_number]))
-                       for tx in results]
-    return Txs(next_page=paging_state, txs=txs)
