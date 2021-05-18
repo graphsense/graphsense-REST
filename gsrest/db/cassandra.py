@@ -243,6 +243,7 @@ class Cassandra():
         prefix = self.scrub_prefix(currency, address)
         query = \
             "SELECT * FROM address WHERE address_prefix = %s AND address = %s"
+        session.row_factory = dict_factory
         result = session.execute(
             query, [prefix[:ADDRESS_PREFIX_LENGTH], address])
         if result:
@@ -521,17 +522,16 @@ class Cassandra():
         if result:
             return result[0]
 
-    def get_transaction_by_id(self, currency, id):
+    def get_transactions_by_ids(self, currency, ids):
         session = self.get_session(currency, 'transformed')
 
-        id_group = self.get_id_group(currency, id)
-
-        query = (
-            "SELECT transaction FROM transaction_ids_by_transaction_id_group "
-            "WHERE transaction_id_group = %s AND transaction_id = %s")
-        result = session.execute(query, [id_group, id])
-        if result:
-            return result.one().transaction
+        params = [[self.get_id_group(currency, id),
+                   id] for id in ids]
+        query = ("SELECT transaction_id, transaction FROM "
+                 "transaction_ids_by_transaction_id_group "
+                 "WHERE transaction_id_group = %s AND transaction_id = %s")
+        return [(row.transaction_id, row.transaction)
+                for row in self.concurrent_with_args(session, query, params)]
 
     def list_txs(self, currency, page=None):
         session = self.get_session(currency, 'raw')
@@ -570,6 +570,26 @@ class Cassandra():
         statement = ('SELECT * from transaction where '
                      'tx_prefix=%s and tx_hash=%s')
         return self.concurrent_with_args(session, statement, params)
+
+    @new
+    def list_addresses(self, currency, ids=None, page=None, pagesize=None):
+        session = self.get_session(currency, 'transformed')
+        fetch_size = min(pagesize or PAGE_SIZE, PAGE_SIZE)
+        paging_state = from_hex(page)
+        session.row_factory = dict_factory
+        query = \
+            "SELECT * FROM address"
+        has_ids = isinstance(ids, list)
+        if has_ids:
+            prefix_length = self.get_prefix_lengths(currency)['address']
+            query += " WHERE address_prefix = %s AND address = %s"
+            params = [[self.scrub_prefix(currency, id)[:prefix_length],
+                       id] for id in ids]
+            return self.concurrent_with_args(session, query, params), None
+
+        statement = SimpleStatement(query, fetch_size=fetch_size)
+        result = session.execute(statement, paging_state=paging_state)
+        return result.current_rows, to_hex(result.paging_state)
 
 #####################
 # ETHEREUM VARIANTS #
@@ -618,8 +638,8 @@ class Cassandra():
         address = self.get_address_new(currency,
                                        self.entity_to_address_id(entity))
         Entity = namedtuple('Entity',
-                            address._fields + ('cluster', 'no_addresses',))
-        entity = address._asdict()
+                            list(address.keys()) + ['cluster', 'no_addresses'])
+        entity = address
         entity['cluster'] = self.address_to_entity_id(entity['address'])
         entity['no_addresses'] = 1
         return Entity(**entity)
@@ -741,7 +761,7 @@ class Cassandra():
         address = self.get_address_new(currency, address)
         if address is None:
             return None
-        return [address._asdict()], None
+        return [address], None
 
 ##################################
 # VARIANTS USING NEW DATA SCHEME #
@@ -772,6 +792,7 @@ class Cassandra():
         address_id, address_id_group = \
             self.get_address_id_id_group(currency, address)
 
+        session.row_factory = dict_factory
         query = (
             "SELECT * FROM address WHERE "
             "address_id_group = %s AND address_id = %s")
@@ -781,38 +802,8 @@ class Cassandra():
             return None
 
         result = result.one()
-
-        result = result._replace(
-            total_received=self.backport_currencies(
-                currency, result.total_received),
-            total_spent=self.backport_currencies(
-                currency, result.total_spent))
-
-        first_tx_hash = \
-            self.get_transaction_by_id(
-                currency,
-                result.first_tx.transaction_id)
-        last_tx_hash = \
-            self.get_transaction_by_id(
-                currency,
-                result.last_tx.transaction_id)
-
-        TxSummary = namedtuple('TxSummary', ['height', 'timestamp', 'tx_hash'])
-        Result = namedtuple('Result', result._fields+('address',))
-
-        first_tx = TxSummary(
-                    height=result.first_tx.height,
-                    timestamp=result.first_tx.block_timestamp,
-                    tx_hash=first_tx_hash)
-        last_tx = TxSummary(
-                    height=result.last_tx.height,
-                    timestamp=result.last_tx.block_timestamp,
-                    tx_hash=last_tx_hash)
-
-        result = result._asdict()
         result['address'] = address
-        result = Result(**result)
-        return result._replace(first_tx=first_tx, last_tx=last_tx)
+        return self.finish_addresses(currency, [result])[0]
 
     def list_tags_by_address_new(self, currency, address):
         session = self.get_session(currency, 'transformed')
@@ -949,3 +940,67 @@ class Cassandra():
 
     def sec_in(self, id):
         return "(" + ','.join(map(str, range(0, id+1))) + ")"
+
+    def list_addresses_new(self, currency, ids=None, page=None, pagesize=None):
+        session = self.get_session(currency, 'transformed')
+        query = "SELECT address_id, address FROM address_ids_by_address_prefix"
+        has_ids = isinstance(ids, list)
+        if has_ids:
+            prefix_length = self.get_prefix_lengths(currency)['address']
+            query += " WHERE address_prefix = %s AND address = %s"
+            params = [[self.scrub_prefix(currency, id)[:prefix_length].upper(),
+                       bytearray.fromhex(id)] for id in ids]
+            ids = self.concurrent_with_args(session, query, params)
+            paging_state = None
+        else:
+            fetch_size = min(pagesize or PAGE_SIZE, PAGE_SIZE)
+            statement = SimpleStatement(query, fetch_size=fetch_size)
+            result = session.execute(statement, paging_state=from_hex(page))
+            ids = result.current_rows
+            paging_state = result.paging_state
+
+        query = (
+            "SELECT * FROM address WHERE "
+            "address_id_group = %s AND address_id = %s")
+
+        ids = [((self.get_id_group(currency, row.address_id),
+                 row.address_id),
+                row.address)
+               for row in ids]
+        ids.sort()
+        params = [param[0] for param in ids]
+        session.row_factory = dict_factory
+        result = self.concurrent_with_args(session, query, params)
+        for (row, param) in zip(result, ids):
+            row['address'] = param[1].hex()
+        return self.finish_addresses(currency, result), to_hex(paging_state)
+
+    def finish_addresses(self, currency, rows):
+        ids = []
+        for row in rows:
+            ids.append(row['first_tx'].transaction_id)
+            ids.append(row['last_tx'].transaction_id)
+            row['total_received'] = \
+                self.backport_currencies(currency, row['total_received'])
+            row['total_spent'] = \
+                self.backport_currencies(currency, row['total_spent'])
+
+        txs = self.get_transactions_by_ids(currency, ids)
+        TxSummary = namedtuple('TxSummary', ['height', 'timestamp',
+                                             'tx_hash', 'transaction_id'])
+
+        for i, (transaction_id, transaction) in enumerate(txs):
+            row = rows[i//2]
+            if row['first_tx'].transaction_id == transaction_id:
+                row['first_tx'] = TxSummary(
+                            height=row['first_tx'].height,
+                            timestamp=row['first_tx'].block_timestamp,
+                            transaction_id=transaction_id,
+                            tx_hash=transaction)
+            if row['last_tx'].transaction_id == transaction_id:
+                row['last_tx'] = TxSummary(
+                            height=row['last_tx'].height,
+                            timestamp=row['last_tx'].block_timestamp,
+                            transaction_id=transaction_id,
+                            tx_hash=transaction)
+        return rows

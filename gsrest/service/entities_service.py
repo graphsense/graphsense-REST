@@ -100,10 +100,10 @@ def get_entity(currency, entity):
         )
 
 
-def list_entity_neighbors(currency, entity, direction, targets=None,
+def list_entity_neighbors(currency, entity, direction, ids=None,
                           page=None, pagesize=None):
     return common.list_neighbors(currency, entity, direction, 'entity',
-                                 targets=targets, page=page, pagesize=pagesize)
+                                 ids=ids, page=page, pagesize=pagesize)
 
 
 def list_entity_neighbors_csv(currency, entity, direction):

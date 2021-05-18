@@ -326,7 +326,7 @@ def list_entity_neighbors(test_case):
         direction='out')
     test_case.assertEqual(eth_entityWithTagsOutNeighbors, result)
 
-    query_string = [('direction', 'in'), ('targets', '67065,144534')]
+    query_string = [('direction', 'in'), ('ids', '67065,144534')]
     headers = {
         'Accept': 'application/json',
     }
@@ -347,7 +347,7 @@ def list_entity_neighbors(test_case):
         [int(n['id']) for n in result['neighbors']]
     )
 
-    query_string = [('direction', 'in'), ('targets', '144534')]
+    query_string = [('direction', 'in'), ('ids', '144534')]
     headers = {
         'Accept': 'application/json',
     }
@@ -369,7 +369,7 @@ def list_entity_neighbors(test_case):
     )
 
     query_string = [('direction', 'out'),
-                    ('targets',
+                    ('ids',
                      eth_entityWithTagsOutNeighbors.neighbors[0].id)]
     headers = {
         'Accept': 'application/json',

@@ -1,6 +1,7 @@
 from gsrest.db import get_connection
 from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from openapi_server.models.address_txs import AddressTxs
+from openapi_server.models.addresses import Addresses
 from openapi_server.models.link_utxo import LinkUtxo
 from openapi_server.models.tx_account import TxAccount
 from gsrest.service.entities_service import get_entity_with_tags
@@ -9,6 +10,7 @@ import gsrest.service.common_service as common
 from gsrest.util.values import convert_value
 from flask import Response, stream_with_context
 from gsrest.util.csvify import create_download_header, to_csv
+from gsrest.service.rates_service import get_rates
 
 
 def from_rows(currency, rows):
@@ -145,3 +147,13 @@ def get_address_entity(currency, address):
 def list_matching_addresses(currency, expression):
     db = get_connection()
     return db.list_matching_addresses(currency, expression)
+
+
+def list_addresses(currency, ids=None, page=None, pagesize=None):
+    db = get_connection()
+    result, paging_state = db.list_addresses(currency, ids, page, pagesize)
+    rates = get_rates(currency)['rates']
+    return Addresses(
+            paging_state,
+            [common.address_from_row(row, rates)
+             for row in result])

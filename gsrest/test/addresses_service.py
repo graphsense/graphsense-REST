@@ -1,3 +1,5 @@
+from openapi_server.models.address import Address
+from openapi_server.models.addresses import Addresses
 from openapi_server.models.address_with_tags import AddressWithTags
 from openapi_server.models.values import Values
 from openapi_server.models.address_tag import AddressTag
@@ -89,8 +91,7 @@ etag2 = EntityTag(
            currency='btc'
         )
 
-
-addressWithTags = AddressWithTags(
+address = Address(
    first_tx=TxSummary(
       tx_hash="04d92601677d62a985310b61a301e74870fa942c"
       "8be0648e16b1db23b996a8cd",
@@ -119,10 +120,15 @@ addressWithTags = AddressWithTags(
    address="1Archive1n2C579dMsAu3iC6tWzuQJz8dN",
    in_degree=5013,
    balance=Values(eur=1.15, usd=2.31, value=115422577),
+        )
+
+addressWithTags = AddressWithTags(
+   **address.to_dict(),
    tags=[tag]
    )
 
-addressWithoutTags = AddressWithTags(
+
+address2 = Address(
    out_degree=1,
    no_incoming_txs=1,
    total_spent=Values(
@@ -150,7 +156,42 @@ addressWithoutTags = AddressWithTags(
    ),
    address="3Hrnn1UN78uXgLNvtqVXMjHwB41PmX66X4",
    no_outgoing_txs=1,
-   tags=[],
+   balance=Values(eur=0.0, usd=0.0, value=0)
+   )
+
+addressWithoutTags = AddressWithTags(
+   **address2.to_dict(),
+   tags=[]
+)
+
+address3 = Address(
+   first_tx=TxSummary(
+      timestamp=1540073277,
+      tx_hash="8b3f09b110628cf596fa67d470db46d1f65"
+              "2fe6ae01b6fb95ebf4b5b7d767df5",
+      height=1
+   ),
+   out_degree=1,
+   total_received=Values(
+      usd=0.45,
+      eur=0.39,
+      value=6896
+   ),
+   address="3Hrnn2xbNUBDfqgLQh6CwfutAm9dfVq67u",
+   no_incoming_txs=1,
+   in_degree=1,
+   no_outgoing_txs=1,
+   total_spent=Values(
+      value=6896,
+      usd=0.45,
+      eur=0.39
+   ),
+   last_tx=TxSummary(
+      tx_hash="e87135937ff07e6cf35ecae8224345d1cf"
+              "07363d62a0316b9add6137010b022c",
+      timestamp=1540074500,
+      height=2
+   ),
    balance=Values(eur=0.0, usd=0.0, value=0)
 )
 
@@ -332,7 +373,7 @@ entityWithTagsOfAddressWithTags = EntityWithTags(
    tag_coherence=0
 )
 
-eth_addressWithTags = AddressWithTags(
+eth_address = Address(
    first_tx=TxSummary(
       tx_hash="af6e0000",
       height=1,
@@ -358,9 +399,44 @@ eth_addressWithTags = AddressWithTags(
    ),
    address="abcdef",
    in_degree=5,
-   balance=Values(eur=111.0, usd=222.0, value=11100000000),
+   balance=Values(eur=111.0, usd=222.0, value=11100000000))
+
+
+eth_addressWithTags = AddressWithTags(
+   **eth_address.to_dict(),
    tags=[eth_tag, eth_tag2]
    )
+
+
+eth_address2 = Address(
+   last_tx=TxSummary(
+      tx_hash="af6e0003",
+      height=2,
+      timestamp=22
+   ),
+   in_degree=1,
+   no_incoming_txs=1,
+   out_degree=2,
+   total_received=Values(
+            value=45600000000,
+            eur=40.44,
+            usd=50.56),
+   balance=Values(
+            value=11100000000,
+            usd=222.0,
+            eur=111.0),
+   no_outgoing_txs=2,
+   total_spent=Values(
+            value=34500000000,
+            eur=50.56,
+            usd=60.67),
+   first_tx=TxSummary(
+      timestamp=21,
+      tx_hash="af6e0000",
+      height=1
+   ),
+   address="123456"
+)
 
 eth_addressWithTagsOutNeighbors = Neighbors(
         next_page=None,
@@ -604,3 +680,30 @@ def list_address_links_csv(test_case):
            'account,1,15,af6e0000,123.0,246.0,12300000000\r\n'
            'account,1,16,af6e0003,234.0,468.0,23400000000\r\n')
     test_case.assertEqual(csv, result.data.decode('utf-8'))
+
+
+def list_addresses(test_case):
+    result = service.list_addresses('btc', pagesize=2)
+    test_case.assertEqual([address2, address3],
+                          result.addresses)
+    test_case.assertIsNot(result.next_page, None)
+
+    ids = [address.address,
+           address3.address,
+           'doesnotexist']
+    result = service.list_addresses('btc', ids=ids)
+
+    test_case.assertEqual(Addresses(
+                            next_page=None,
+                            addresses=[address, address3]),
+                          result)
+
+    result = service.list_addresses('eth')
+    assertEqual([eth_address, eth_address2], result.addresses)
+    test_case.assertIs(result.next_page, None)
+
+    ids = [eth_address2.address, 'aaaa']
+
+    result = service.list_addresses('eth', ids=ids)
+    assertEqual([eth_address2], result.addresses)
+    test_case.assertIs(result.next_page, None)

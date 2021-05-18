@@ -40,7 +40,4 @@ USER dockeruser
 
 WORKDIR /srv/graphsense-rest
 
-CMD /usr/bin/gunicorn \
-    --limit-request-line 0 \
-    -c /home/dockeruser/gunicorn-conf.py \
-    "openapi_server:main()"
+CMD /usr/bin/gunicorn -c /home/dockeruser/gunicorn-conf.py "openapi_server:main()"

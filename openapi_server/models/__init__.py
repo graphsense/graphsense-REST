@@ -11,6 +11,7 @@ from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.address_with_tags import AddressWithTags
 from openapi_server.models.address_with_tags_all_of import AddressWithTagsAllOf
+from openapi_server.models.addresses import Addresses
 from openapi_server.models.block import Block
 from openapi_server.models.block_tx import BlockTx
 from openapi_server.models.block_tx_utxo import BlockTxUtxo

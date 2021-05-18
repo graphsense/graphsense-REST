@@ -9,6 +9,38 @@ from gsrest.util.values import compute_balance, convert_value, make_values
 from gsrest.service.rates_service import get_rates
 
 
+def address_from_row(row, rates):
+    return Address(
+        address=row['address'],
+        first_tx=TxSummary(
+            row['first_tx'].height,
+            row['first_tx'].timestamp,
+            row['first_tx'].tx_hash.hex()),
+        last_tx=TxSummary(
+            row['last_tx'].height,
+            row['last_tx'].timestamp,
+            row['last_tx'].tx_hash.hex()),
+        no_incoming_txs=row['no_incoming_txs'],
+        no_outgoing_txs=row['no_outgoing_txs'],
+        total_received=make_values(
+            value=row['total_received'].value,
+            eur=row['total_received'].eur,
+            usd=row['total_received'].usd),
+        total_spent=make_values(
+            eur=row['total_spent'].eur,
+            usd=row['total_spent'].usd,
+            value=row['total_spent'].value),
+        in_degree=row['in_degree'],
+        out_degree=row['out_degree'],
+        balance=convert_value(
+                compute_balance(
+                    row['total_received'].value,
+                    row['total_spent'].value,
+                ),
+                rates)
+        )
+
+
 def get_address(currency, address):
     db = get_connection()
     result = db.get_address(currency, address)
@@ -16,35 +48,7 @@ def get_address(currency, address):
     if not result:
         raise RuntimeError("Address {} not found in currency {}".format(
             address, currency))
-    return Address(
-        address=result.address,
-        first_tx=TxSummary(
-            result.first_tx.height,
-            result.first_tx.timestamp,
-            result.first_tx.tx_hash.hex()),
-        last_tx=TxSummary(
-            result.last_tx.height,
-            result.last_tx.timestamp,
-            result.last_tx.tx_hash.hex()),
-        no_incoming_txs=result.no_incoming_txs,
-        no_outgoing_txs=result.no_outgoing_txs,
-        total_received=make_values(
-            value=result.total_received.value,
-            eur=result.total_received.eur,
-            usd=result.total_received.usd),
-        total_spent=make_values(
-            eur=result.total_spent.eur,
-            usd=result.total_spent.usd,
-            value=result.total_spent.value),
-        in_degree=result.in_degree,
-        out_degree=result.out_degree,
-        balance=convert_value(
-                compute_balance(
-                    result.total_received.value,
-                    result.total_spent.value,
-                ),
-                get_rates(currency)['rates'])
-        )
+    return address_from_row(result, get_rates(currency)['rates'])
 
 
 def list_tags_by_address(currency, address):
@@ -99,7 +103,7 @@ def get_address_entity_id(currency, address):
 
 
 def list_neighbors(currency, id, direction, node_type,
-                   targets=None, page=None, pagesize=None):
+                   ids=None, page=None, pagesize=None):
     if node_type not in ['address', 'entity']:
         raise RuntimeError(f'Unknown node type {node_type}')
     is_outgoing = "out" in direction
@@ -109,7 +113,7 @@ def list_neighbors(currency, id, direction, node_type,
                                     id,
                                     is_outgoing,
                                     node_type,
-                                    targets=targets,
+                                    targets=ids,
                                     page=page,
                                     pagesize=pagesize)
     dst = 'dst' if is_outgoing else 'src'
