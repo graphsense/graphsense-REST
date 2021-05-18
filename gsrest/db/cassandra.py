@@ -8,11 +8,8 @@ from math import floor
 
 from gsrest.util.exceptions import BadConfigError
 
-BLOCKS_PAGE_SIZE = 100
-ADDRESS_PAGE_SIZE = 100
-TXS_PAGE_SIZE = 100
-ENTITY_PAGE_SIZE = 100
-ENTITY_ADDRESSES_PAGE_SIZE = 100
+PAGE_SIZE = 1000
+SEARCH_PAGE_SIZE = 100
 
 ADDRESS_PREFIX_LENGTH = 5
 LABEL_PREFIX_LENGTH = 3
@@ -119,6 +116,7 @@ class Cassandra():
     def get_session(self, currency, keyspace_type):
         # enforce standard row factory (can be overridden on service-level)
         self.session.row_factory = named_tuple_factory
+        self.session.default_fetch_size = PAGE_SIZE
 
         keyspace = self.get_keyspace_mapping(currency, keyspace_type)
         self.session.set_keyspace(keyspace)
@@ -156,8 +154,7 @@ class Cassandra():
         paging_state = from_hex(page)
 
         query = "SELECT * FROM block"
-        statement = SimpleStatement(query, fetch_size=BLOCKS_PAGE_SIZE)
-        results = session.execute(statement, paging_state=paging_state)
+        results = session.execute(query, paging_state=paging_state)
 
         return results, to_hex(results.paging_state)
 
@@ -193,16 +190,15 @@ class Cassandra():
         return self.concurrent(session, statements_and_params)
 
     @eth
-    def list_address_txs(self, currency, address, page=None, pagesize=None):
+    def list_address_txs(self, currency, address, page=None,
+                         pagesize=None):
         paging_state = from_hex(page)
         address_id, address_id_group = \
             self.get_address_id_id_group(currency, address)
         session = self.get_session(currency, 'transformed')
         query = "SELECT * FROM address_transactions WHERE address_id = %s " \
                 "AND address_id_group = %s"
-        fetch_size = ADDRESS_PAGE_SIZE
-        if pagesize:
-            fetch_size = pagesize
+        fetch_size = min(pagesize or PAGE_SIZE, PAGE_SIZE)
         statement = SimpleStatement(query, fetch_size=fetch_size)
         results = session.execute(statement, [address_id, address_id_group],
                                   paging_state=paging_state)
@@ -327,7 +323,7 @@ class Cassandra():
         query = "SELECT address FROM address WHERE address_prefix = %s"
         result = None
         paging_state = None
-        statement = SimpleStatement(query, fetch_size=ADDRESS_PAGE_SIZE)
+        statement = SimpleStatement(query, fetch_size=SEARCH_PAGE_SIZE)
         rows = []
         while result is None or paging_state is not None:
             result = session.execute(
@@ -369,9 +365,7 @@ class Cassandra():
         entity = int(entity)
         query = ("SELECT * FROM cluster_addresses "
                  "WHERE cluster_group = %s AND cluster = %s")
-        fetch_size = ENTITY_ADDRESSES_PAGE_SIZE
-        if pagesize:
-            fetch_size = pagesize
+        fetch_size = min(pagesize or PAGE_SIZE, PAGE_SIZE)
         statement = SimpleStatement(query, fetch_size=fetch_size)
         session.row_factory = dict_factory
         results = session.execute(statement, [entity_id_group, entity],
@@ -447,10 +441,8 @@ class Cassandra():
             query += f' AND {that}_{node_type}{id_suffix} in ({targets})'
         else:
             query = basequery
-        fetch_size = ENTITY_PAGE_SIZE
-        if pagesize:
-            fetch_size = pagesize
         session.row_factory = dict_factory
+        fetch_size = min(pagesize or PAGE_SIZE, PAGE_SIZE)
         statement = SimpleStatement(query, fetch_size=fetch_size)
         paging_state = from_hex(page)
         results = session.execute(statement, parameters,
@@ -546,8 +538,7 @@ class Cassandra():
 
         paging_state = from_hex(page)
         query = "SELECT * FROM transaction"
-        statement = SimpleStatement(query, fetch_size=TXS_PAGE_SIZE)
-        results = session.execute(statement, paging_state=paging_state)
+        results = session.execute(query, paging_state=paging_state)
 
         if results is None:
             return [], None
@@ -611,8 +602,7 @@ class Cassandra():
         paging_state = from_hex(page)
 
         query = "SELECT * FROM block"
-        statement = SimpleStatement(query, fetch_size=BLOCKS_PAGE_SIZE)
-        results = session.execute(statement, paging_state=paging_state)
+        results = session.execute(query, paging_state=paging_state)
 
         return results, to_hex(results.paging_state)
 
@@ -677,7 +667,7 @@ class Cassandra():
                  "address_id_group = %s and "
                  f"address_id_secondary_group in {sec_in}"
                  " and address_id = %s")
-        fetch_size = pagesize if pagesize else TXS_PAGE_SIZE
+        fetch_size = min(pagesize or PAGE_SIZE, PAGE_SIZE)
         statement = SimpleStatement(query, fetch_size=fetch_size)
         result = session.execute(statement,
                                  [id_group,
@@ -888,7 +878,7 @@ class Cassandra():
                  "WHERE address_prefix = %s")
         result = None
         paging_state = None
-        statement = SimpleStatement(query, fetch_size=ADDRESS_PAGE_SIZE)
+        statement = SimpleStatement(query, fetch_size=SEARCH_PAGE_SIZE)
         prefix_length = self.get_prefix_lengths(currency)['address']
         rows = []
         while result is None or paging_state is not None:
