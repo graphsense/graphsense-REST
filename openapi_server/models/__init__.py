@@ -18,6 +18,7 @@ from openapi_server.models.block_tx_utxo import BlockTxUtxo
 from openapi_server.models.blocks import Blocks
 from openapi_server.models.concept import Concept
 from openapi_server.models.currency_stats import CurrencyStats
+from openapi_server.models.entities import Entities
 from openapi_server.models.entity import Entity
 from openapi_server.models.entity_addresses import EntityAddresses
 from openapi_server.models.entity_tag import EntityTag

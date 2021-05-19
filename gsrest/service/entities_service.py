@@ -2,6 +2,7 @@ from gsrest.db import get_connection
 from gsrest.service.common_service import get_address_with_tags
 from gsrest.service.rates_service import get_rates
 from openapi_server.models.entity import Entity
+from openapi_server.models.entities import Entities
 from openapi_server.models.tx_summary import TxSummary
 from gsrest.util.values import compute_balance, convert_value, make_values
 from openapi_server.models.entity_tag import EntityTag
@@ -13,6 +14,39 @@ from gsrest.util.csvify import create_download_header, to_csv
 from openapi_server.models.address import Address
 from openapi_server.models.entity_addresses import EntityAddresses
 import gsrest.service.common_service as common
+
+
+def from_row(row, rates):
+    return Entity(
+        entity=row['cluster'],
+        first_tx=TxSummary(
+            row['first_tx'].height,
+            row['first_tx'].timestamp,
+            row['first_tx'].tx_hash.hex()),
+        last_tx=TxSummary(
+            row['last_tx'].height,
+            row['last_tx'].timestamp,
+            row['last_tx'].tx_hash.hex()),
+        no_addresses=row['no_addresses'],
+        no_incoming_txs=row['no_incoming_txs'],
+        no_outgoing_txs=row['no_outgoing_txs'],
+        total_received=make_values(
+            value=row['total_received'].value,
+            eur=row['total_received'].eur,
+            usd=row['total_received'].usd),
+        total_spent=make_values(
+            eur=row['total_spent'].eur,
+            usd=row['total_spent'].usd,
+            value=row['total_spent'].value),
+        in_degree=row['in_degree'],
+        out_degree=row['out_degree'],
+        balance=convert_value(
+                compute_balance(
+                    row['total_received'].value,
+                    row['total_spent'].value,
+                ),
+                rates)
+        )
 
 
 def list_tags_by_entity(currency, entity):
@@ -46,17 +80,7 @@ def get_entity_with_tags(currency, entity):
     result = get_entity(currency, entity)
     tags = list_tags_by_entity(currency, result.entity)
     return EntityWithTags(
-        entity=result.entity,
-        first_tx=result.first_tx,
-        last_tx=result.last_tx,
-        no_addresses=result.no_addresses,
-        no_incoming_txs=result.no_incoming_txs,
-        no_outgoing_txs=result.no_outgoing_txs,
-        total_received=result.total_received,
-        total_spent=result.total_spent,
-        in_degree=result.in_degree,
-        out_degree=result.out_degree,
-        balance=result.balance,
+        **result.to_dict(),
         tags=tags,
         tag_coherence=compute_tag_coherence(tag.label for tag in tags)
         )
@@ -68,36 +92,15 @@ def get_entity(currency, entity):
 
     if result is None:
         raise RuntimeError("Entity {} not found".format(entity))
-    return Entity(
-        entity=result.cluster,
-        first_tx=TxSummary(
-            result.first_tx.height,
-            result.first_tx.timestamp,
-            result.first_tx.tx_hash.hex()),
-        last_tx=TxSummary(
-            result.last_tx.height,
-            result.last_tx.timestamp,
-            result.last_tx.tx_hash.hex()),
-        no_addresses=result.no_addresses,
-        no_incoming_txs=result.no_incoming_txs,
-        no_outgoing_txs=result.no_outgoing_txs,
-        total_received=make_values(
-            value=result.total_received.value,
-            eur=result.total_received.eur,
-            usd=result.total_received.usd),
-        total_spent=make_values(
-            eur=result.total_spent.eur,
-            usd=result.total_spent.usd,
-            value=result.total_spent.value),
-        in_degree=result.in_degree,
-        out_degree=result.out_degree,
-        balance=convert_value(
-                compute_balance(
-                    result.total_received.value,
-                    result.total_spent.value,
-                ),
-                get_rates(currency)['rates'])
-        )
+    return from_row(result, get_rates(currency)['rates'])
+
+
+def list_entities(currency, ids=None, page=None, pagesize=None):
+    db = get_connection()
+    result, next_page = db.list_entities(currency, ids, page, pagesize)
+    rates = get_rates(currency)['rates']
+    return Entities(entities=[from_row(row, rates) for row in result],
+                    next_page=next_page)
 
 
 def list_entity_neighbors(currency, entity, direction, ids=None,

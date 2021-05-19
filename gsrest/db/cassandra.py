@@ -351,11 +351,31 @@ class Cassandra():
         session = self.get_session(currency, 'transformed')
         entity_id_group = self.get_id_group(currency, entity)
         entity = int(entity)
+        session.row_factory = dict_factory
         query = ("SELECT * FROM cluster "
                  "WHERE cluster_group = %s AND cluster = %s ")
         result = session.execute(query, [entity_id_group, entity])
         if result:
             return result.one()
+
+    @eth
+    def list_entities(self, currency, ids, page=None, pagesize=None):
+        session = self.get_session(currency, 'transformed')
+        fetch_size = min(pagesize or PAGE_SIZE, PAGE_SIZE)
+        paging_state = from_hex(page)
+        session.row_factory = dict_factory
+        query = \
+            "SELECT * FROM cluster"
+        has_ids = isinstance(ids, list)
+        if has_ids:
+            query += " WHERE cluster_group = %s AND cluster = %s"
+            params = [[self.get_id_group(currency, id),
+                       id] for id in ids]
+            return self.concurrent_with_args(session, query, params), None
+
+        statement = SimpleStatement(query, fetch_size=fetch_size)
+        result = session.execute(statement, paging_state=paging_state)
+        return result.current_rows, to_hex(result.paging_state)
 
     @eth
     def list_entity_addresses(self, currency, entity, page=None,
@@ -635,14 +655,22 @@ class Cassandra():
     def get_entity_eth(self, currency, entity):
         # mockup entity by address
         address = self.entity_to_address_id(entity)
-        address = self.get_address_new(currency,
-                                       self.entity_to_address_id(entity))
-        Entity = namedtuple('Entity',
-                            list(address.keys()) + ['cluster', 'no_addresses'])
+        address = self.get_address_new(currency, address)
         entity = address
         entity['cluster'] = self.address_to_entity_id(entity['address'])
         entity['no_addresses'] = 1
-        return Entity(**entity)
+        return entity
+
+    def list_entities_eth(self, currency, ids, page=None, pagesize=None):
+        if isinstance(ids, list):
+            ids = [self.entity_to_address_id(id) for id in ids]
+        result, paging_state = \
+            self.list_addresses(currency, ids, page, pagesize)
+
+        for address in result:
+            address['cluster'] = self.address_to_entity_id(address['address'])
+            address['no_addresses'] = 1
+        return result, paging_state
 
     def list_tags_by_entity_eth(self, currency, entity):
         return []

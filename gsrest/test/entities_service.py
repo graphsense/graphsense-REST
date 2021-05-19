@@ -4,6 +4,7 @@ from openapi_server.models.neighbors import Neighbors
 from openapi_server.models.neighbor import Neighbor
 from openapi_server.models.address import Address
 from openapi_server.models.entity_addresses import EntityAddresses
+from openapi_server.models.entity import Entity
 from openapi_server.models.entity_with_tags import EntityWithTags
 from openapi_server.models.values import Values
 from openapi_server.models.search_paths import SearchPaths
@@ -72,7 +73,7 @@ entityWithTags = EntityWithTags(
    tag_coherence=0.5
 )
 
-eth_entityWithTags = EntityWithTags(
+eth_entity = Entity(
    no_outgoing_txs=eth_addressWithTags.no_outgoing_txs,
    last_tx=eth_addressWithTags.last_tx,
    total_spent=eth_addressWithTags.total_spent,
@@ -83,10 +84,13 @@ eth_entityWithTags = EntityWithTags(
    entity=eth_addressWithTags.address + '_',
    out_degree=eth_addressWithTags.out_degree,
    first_tx=eth_addressWithTags.first_tx,
-   balance=eth_addressWithTags.balance,
-   tags=[],
-   tag_coherence=0.5
+   balance=eth_addressWithTags.balance
 )
+
+eth_entityWithTags = EntityWithTags(
+   **eth_entity.to_dict(),
+   tags=[],
+   tag_coherence=0.5)
 
 eth_neighbors = []
 for n in eth_addressWithTagsOutNeighbors.neighbors:
@@ -281,6 +285,27 @@ def get_entity_with_tags(test_case):
     # tag_coherence tested by tests/util/test_tag_coherence.py so hardcode here
     result.tag_coherence = 0.5
     test_case.assertEqual(eth_entityWithTags, result)
+
+
+def list_entities(test_case):
+    result = service.list_entities(currency='btc')
+    ids = [67065, 144534, 10102718, 10164852, 17642138, 2818641,
+           8361735, 123, 456, 789]
+    test_case.assertEqual(ids.sort(),
+                          [row.entity for row in result.entities].sort())
+
+    result = service.list_entities(currency='btc', ids=[67065, 456, 42])
+    ids = [67065, 456]
+    test_case.assertEqual(sorted(ids),
+                          sorted([row.entity for row in result.entities]))
+
+    result = service.list_entities(currency='eth')
+    test_case.assertEqual(['123456_', 'abcdef_'],
+                          sorted([row.entity for row in result.entities]))
+
+    result = service.list_entities(currency='eth', ids=['abcdef_'])
+    test_case.assertEqual([eth_entity],
+                          result.entities)
 
 
 def list_tags_by_entity(test_case):

@@ -775,6 +775,61 @@ paths:
       tags:
       - blocks
       x-openapi-router-controller: openapi_server.controllers.blocks_controller
+  /{currency}/entities:
+    get:
+      operationId: list_entities
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: Restrict result to given set of comma separated IDs
+        explode: true
+        in: query
+        name: ids
+        required: false
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      - description: Resumption token for retrieving the next page
+        example: 0400030bff00f07fffff9b00
+        explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Number of items returned in a single page
+        example: 10
+        explode: true
+        in: query
+        name: pagesize
+        required: false
+        schema:
+          maximum: 1000
+          minimum: 1
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/entities'
+          description: OK
+      summary: Get entities
+      tags:
+      - entities
+      x-openapi-router-controller: openapi_server.controllers.entities_controller
   /{currency}/entities/{entity}:
     get:
       operationId: get_entity_with_tags
@@ -2076,9 +2131,37 @@ components:
       title: addresses
       type: object
     entity:
+      example:
+        total_spent:
+          eur: 0.8008282
+          usd: 6.0274563
+          value: 1
+        in_degree: 0
+        balance:
+          eur: 0.8008282
+          usd: 6.0274563
+          value: 1
+        no_addresses: 1
+        no_incoming_txs: 5
+        out_degree: 6
+        no_outgoing_txs: 5
+        first_tx:
+          tx_hash: tx_hash
+          height: 1
+          timestamp: 5
+        last_tx:
+          tx_hash: tx_hash
+          height: 1
+          timestamp: 5
+        entity: entity
+        total_received:
+          eur: 0.8008282
+          usd: 6.0274563
+          value: 1
       properties:
         entity:
           description: Entity id
+          title: entity
           type: string
         balance:
           $ref: '#/components/schemas/values'
@@ -2088,19 +2171,24 @@ components:
           $ref: '#/components/schemas/tx_summary'
         in_degree:
           format: int64
+          title: in_degree
           type: integer
         out_degree:
           format: int64
+          title: out_degree
           type: integer
         no_addresses:
           description: number of contained addresses
           format: int64
+          title: no_addresses
           type: integer
         no_incoming_txs:
           format: int64
+          title: no_incoming_txs
           type: integer
         no_outgoing_txs:
           format: int64
+          title: no_outgoing_txs
           type: integer
         total_received:
           $ref: '#/components/schemas/values'
@@ -2118,12 +2206,81 @@ components:
       - out_degree
       - total_received
       - total_spent
+      title: entity
       type: object
     entity_with_tags:
       allOf:
       - $ref: '#/components/schemas/entity'
       - $ref: '#/components/schemas/entity_with_tags_allOf'
       title: entity_with_tags
+    entities:
+      example:
+        next_page: next_page
+        entities:
+        - total_spent:
+            eur: 0.8008282
+            usd: 6.0274563
+            value: 1
+          in_degree: 0
+          balance:
+            eur: 0.8008282
+            usd: 6.0274563
+            value: 1
+          no_addresses: 1
+          no_incoming_txs: 5
+          out_degree: 6
+          no_outgoing_txs: 5
+          first_tx:
+            tx_hash: tx_hash
+            height: 1
+            timestamp: 5
+          last_tx:
+            tx_hash: tx_hash
+            height: 1
+            timestamp: 5
+          entity: entity
+          total_received:
+            eur: 0.8008282
+            usd: 6.0274563
+            value: 1
+        - total_spent:
+            eur: 0.8008282
+            usd: 6.0274563
+            value: 1
+          in_degree: 0
+          balance:
+            eur: 0.8008282
+            usd: 6.0274563
+            value: 1
+          no_addresses: 1
+          no_incoming_txs: 5
+          out_degree: 6
+          no_outgoing_txs: 5
+          first_tx:
+            tx_hash: tx_hash
+            height: 1
+            timestamp: 5
+          last_tx:
+            tx_hash: tx_hash
+            height: 1
+            timestamp: 5
+          entity: entity
+          total_received:
+            eur: 0.8008282
+            usd: 6.0274563
+            value: 1
+      properties:
+        next_page:
+          format: string
+          title: next_page
+          type: string
+        entities:
+          items:
+            $ref: '#/components/schemas/entity'
+          title: entities
+          type: array
+      title: entities
+      type: object
     address_txs:
       example:
         next_page: next_page
@@ -2289,6 +2446,7 @@ components:
       type: string
     entity_id:
       description: Entity id
+      title: entity
       type: string
     height:
       description: Height
@@ -2311,6 +2469,7 @@ components:
     no_addresses:
       description: number of contained addresses
       format: int64
+      title: no_addresses
       type: integer
     neighbors:
       example:
@@ -2876,6 +3035,7 @@ components:
       properties:
         entity:
           description: Entity id
+          title: entity
           type: string
       required:
       - entity
