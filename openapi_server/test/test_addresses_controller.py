@@ -197,9 +197,7 @@ class TestAddressesController(BaseTestCase):
         """
         test_service.list_addresses_csv(self)
 
-        query_string = [('',''),
-                        ('',''),
-                        ('','')]
+        query_string = [('ids', "1,2")]
         headers = { 
             'Accept': 'application/csv',
         }

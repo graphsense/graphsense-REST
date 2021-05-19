@@ -710,7 +710,9 @@ def list_addresses(test_case):
 
 
 def list_addresses_csv(test_case):
-    result = service.list_addresses_csv("btc").data.decode('utf-8')
-    assertEqual(11, len(result.split("\r\n")))
-    result = service.list_addresses_csv("eth").data.decode('utf-8')
-    assertEqual(4, len(result.split("\r\n")))
+    result = service.list_addresses_csv(
+                "btc", [address.address]).data.decode('utf-8')
+    assertEqual(3, len(result.split("\r\n")))
+    result = service.list_addresses_csv(
+                "eth", [eth_address.address]).data.decode('utf-8')
+    assertEqual(3, len(result.split("\r\n")))

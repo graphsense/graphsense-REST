@@ -212,36 +212,17 @@ paths:
           format: string
           type: string
         style: simple
-      - description: Restrict result to given set of comma separated IDs
+      - description: Set of comma separated IDs
         explode: true
         in: query
         name: ids
-        required: false
+        required: true
         schema:
           items:
             type: string
           type: array
         style: form
-      - description: Resumption token for retrieving the next page
-        example: 0400030bff00f07fffff9b00
-        explode: true
-        in: query
-        name: page
-        required: false
-        schema:
-          type: string
-        style: form
-      - description: Number of items returned in a single page
-        example: 10
-        explode: true
-        in: query
-        name: pagesize
-        required: false
-        schema:
-          maximum: 1000
-          minimum: 1
-          type: integer
-        style: form
+        x-graphsense-rest-test-example: '"1,2"'
       responses:
         "200":
           content:
@@ -899,36 +880,17 @@ paths:
           format: string
           type: string
         style: simple
-      - description: Restrict result to given set of comma separated IDs
+      - description: Set of comma separated IDs
         explode: true
         in: query
         name: ids
-        required: false
+        required: true
         schema:
           items:
             type: string
           type: array
         style: form
-      - description: Resumption token for retrieving the next page
-        example: 0400030bff00f07fffff9b00
-        explode: true
-        in: query
-        name: page
-        required: false
-        schema:
-          type: string
-        style: form
-      - description: Number of items returned in a single page
-        example: 10
-        explode: true
-        in: query
-        name: pagesize
-        required: false
-        schema:
-          maximum: 1000
-          minimum: 1
-          type: integer
-        style: form
+        x-graphsense-rest-test-example: '"1,2"'
       responses:
         "200":
           content:
@@ -1605,6 +1567,18 @@ components:
           type: string
         type: array
       style: form
+    ids_required:
+      description: Set of comma separated IDs
+      explode: true
+      in: query
+      name: ids
+      required: true
+      schema:
+        items:
+          type: string
+        type: array
+      style: form
+      x-graphsense-rest-test-example: '"1,2"'
     search_key:
       description: 'Match neighbors against one and only one of these properties:
         - the category the entity belongs to - addresses the entity contains - total_received:

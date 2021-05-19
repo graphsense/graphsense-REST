@@ -159,9 +159,9 @@ def list_addresses(currency, ids=None, page=None, pagesize=None):
              for row in result])
 
 
-def list_addresses_csv(currency, ids=None, page=None, pagesize=None):
+def list_addresses_csv(currency, ids=None):
     def query_function(page_state):
-        result = list_addresses(currency, ids, page, pagesize)
+        result = list_addresses(currency, ids, page_state)
         return (result.next_page, result.addresses)
     return Response(stream_with_context(to_csv(query_function)),
                     mimetype="text/csv",

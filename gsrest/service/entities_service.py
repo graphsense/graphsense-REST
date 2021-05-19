@@ -103,15 +103,16 @@ def list_entities(currency, ids=None, page=None, pagesize=None):
                     next_page=next_page)
 
 
-def list_entities_csv(currency, ids=None, page=None, pagesize=None):
+def list_entities_csv(currency, ids):
     def query_function(page_state):
-        result = list_entities(currency, ids, page, pagesize)
+        result = list_entities(currency, ids, page_state)
         return (result.next_page, result.entities)
     return Response(stream_with_context(to_csv(query_function)),
                     mimetype="text/csv",
                     headers=create_download_header(
                             'entities ({}).csv'
                             .format(currency.upper())))
+
 
 def list_entity_neighbors(currency, entity, direction, ids=None,
                           page=None, pagesize=None):
