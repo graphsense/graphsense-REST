@@ -13,7 +13,7 @@ from gsrest.service.problems import notfound, badrequest, internalerror
 
 
 def get_address_entity(currency, address):  # noqa: E501
-    """Get an address with tags
+    """Get the entity of an address
 
      # noqa: E501
 

@@ -300,7 +300,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/entity_with_tags'
           description: OK
-      summary: Get an address with tags
+      summary: Get the entity of an address
       tags:
       - addresses
       x-openapi-router-controller: openapi_server.controllers.addresses_controller
@@ -1245,7 +1245,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/search_paths'
+                items:
+                  $ref: '#/components/schemas/search_result_level1'
+                type: array
           description: OK
       summary: Search deeply for matching neighbors
       tags:
@@ -2766,38 +2768,28 @@ components:
           type: array
       title: entity_addresses
       type: object
-    search_paths:
-      example:
-        paths:
-        - null
-        - null
-        relation:
-          node_type: address
-          balance:
-            eur: 0.8008282
-            usd: 6.0274563
-            value: 1
-          received:
-            eur: 0.8008282
-            usd: 6.0274563
-            value: 1
-          id: id
-          estimated_value:
-            eur: 0.8008282
-            usd: 6.0274563
-            value: 1
-          has_labels: true
-          no_txs: 0
-        matching_addresses:
-        - null
-        - null
+    search_result_level1:
+      allOf:
+      - $ref: '#/components/schemas/search_result_leaf'
+      - $ref: '#/components/schemas/search_result_level1_allOf'
+      title: search_result_level1
+    search_result_level2:
+      allOf:
+      - $ref: '#/components/schemas/search_result_leaf'
+      - $ref: '#/components/schemas/search_result_level2_allOf'
+      title: search_result_level2
+    search_result_level3:
+      allOf:
+      - $ref: '#/components/schemas/search_result_leaf'
+      - $ref: '#/components/schemas/search_result_level3_allOf'
+      title: search_result_level3
+    search_result_level4:
+      allOf:
+      - $ref: '#/components/schemas/search_result_leaf'
+      - $ref: '#/components/schemas/search_result_level4_allOf'
+      title: search_result_level4
+    search_result_leaf:
       properties:
-        paths:
-          description: Paths to matching entities
-          items:
-            $ref: '#/components/schemas/search_paths'
-          title: paths
-          type: array
         node:
           $ref: '#/components/schemas/entity_with_tags'
         relation:
@@ -2807,7 +2799,7 @@ components:
             $ref: '#/components/schemas/address_with_tags'
           title: matching_addresses
           type: array
-      title: search_paths
+      title: search_result_leaf
       type: object
     tx_utxo:
       properties:
@@ -3123,6 +3115,38 @@ components:
           type: string
       required:
       - entity
+      type: object
+    search_result_level1_allOf:
+      properties:
+        paths:
+          description: Branches to matching entities
+          items:
+            $ref: '#/components/schemas/search_result_level2'
+          type: array
+      type: object
+    search_result_level2_allOf:
+      properties:
+        paths:
+          description: Branches to matching entities
+          items:
+            $ref: '#/components/schemas/search_result_level3'
+          type: array
+      type: object
+    search_result_level3_allOf:
+      properties:
+        paths:
+          description: Branches to matching entities
+          items:
+            $ref: '#/components/schemas/search_result_level4'
+          type: array
+      type: object
+    search_result_level4_allOf:
+      properties:
+        paths:
+          description: Branches to matching entities
+          items:
+            $ref: '#/components/schemas/search_result_leaf'
+          type: array
       type: object
     rates_rates:
       example:

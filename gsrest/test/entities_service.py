@@ -7,7 +7,7 @@ from openapi_server.models.entity_addresses import EntityAddresses
 from openapi_server.models.entity import Entity
 from openapi_server.models.entity_with_tags import EntityWithTags
 from openapi_server.models.values import Values
-from openapi_server.models.search_paths import SearchPaths
+from openapi_server.models.search_result_level1 import SearchResultLevel1
 from openapi_server.models.entity_tag import EntityTag
 import json
 import gsrest.service.entities_service as service
@@ -588,7 +588,7 @@ def search_entity_neighbors(test_case):
                     key='total_received',
                     value=['value', 5, 8]
                     )
-    assertEqual(SearchPaths(paths=[]), result)
+    assertEqual(SearchResultLevel1(paths=[]), result)
     #
     # Test value matching
 

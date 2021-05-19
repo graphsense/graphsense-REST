@@ -7,13 +7,16 @@ from openapi_server.models.tx_summary import TxSummary
 from gsrest.util.values import compute_balance, convert_value, make_values
 from openapi_server.models.entity_tag import EntityTag
 from openapi_server.models.entity_with_tags import EntityWithTags
-from openapi_server.models.search_paths import SearchPaths
+from openapi_server.models.search_result_level1 import SearchResultLevel1
 from gsrest.util.tag_coherence import compute_tag_coherence
 from flask import Response, stream_with_context
 from gsrest.util.csvify import create_download_header, to_csv
 from openapi_server.models.address import Address
 from openapi_server.models.entity_addresses import EntityAddresses
 import gsrest.service.common_service as common
+import importlib
+
+MAX_DEPTH = 3
 
 
 def from_row(row, rates):
@@ -210,9 +213,10 @@ def search_entity_neighbors(currency, entity, direction, key, value, depth, brea
                     .format(address, currency))
         params['addresses'] = addresses_list
 
+    level = 2
     result = \
         recursive_search(currency, entity, params,
-                         breadth, depth, skip_num_addresses,
+                         breadth, depth, level, skip_num_addresses,
                          direction)
 
     def add_tag_coherence(paths):
@@ -225,10 +229,10 @@ def search_entity_neighbors(currency, entity, direction, key, value, depth, brea
 
     add_tag_coherence(result)
 
-    return SearchPaths(paths=result)
+    return SearchResultLevel1(paths=result)
 
 
-def recursive_search(currency, entity, params, breadth, depth,
+def recursive_search(currency, entity, params, breadth, depth, level,
                      skip_num_addresses, direction, cache=None):
     if cache is None:
         cache = dict()
@@ -282,19 +286,27 @@ def recursive_search(currency, entity, params, breadth, depth,
         if match:
             subpaths = True
         elif props.no_addresses is not None and \
+                level < MAX_DEPTH and \
                 (skip_num_addresses is None or
                  props.no_addresses <= skip_num_addresses):
             subpaths = recursive_search(currency, neighbor.id,
                                         params, breadth,
                                         depth - 1,
+                                        level + 1,
                                         skip_num_addresses,
                                         direction, cache)
 
         if not subpaths:
             continue
 
-        obj = SearchPaths(node=props, relation=neighbor,
-                          matching_addresses=[])
+        if level < MAX_DEPTH:
+            mod = importlib.import_module(f'openapi_server.models.search_result_level{level}')
+            levelClass = getattr(mod, f'SearchResultLevel{level}')
+        else:
+            mod = importlib.import_module('openapi_server.models.search_result_leaf')
+            levelClass = getattr(mod, 'SearchResultLeaf')
+        obj = levelClass(node=props, relation=neighbor,
+                         matching_addresses=[])
         if subpaths is True:
             addresses_with_tags = [get_address_with_tags(currency, address)
                                    for address in matching_addresses]

@@ -23,7 +23,7 @@ class TestAddressesController(BaseTestCase):
     def test_get_address_entity(self):
         """Test case for get_address_entity
 
-        Get an address with tags
+        Get the entity of an address
         """
         test_service.get_address_entity(self)
 

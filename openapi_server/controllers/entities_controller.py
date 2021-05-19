@@ -6,7 +6,7 @@ from openapi_server.models.entity_addresses import EntityAddresses  # noqa: E501
 from openapi_server.models.entity_tag import EntityTag  # noqa: E501
 from openapi_server.models.entity_with_tags import EntityWithTags  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
-from openapi_server.models.search_paths import SearchPaths  # noqa: E501
+from openapi_server.models.search_result_level1 import SearchResultLevel1  # noqa: E501
 import gsrest.service.entities_service as service
 from gsrest.service.problems import notfound, badrequest, internalerror
 
@@ -276,7 +276,7 @@ def search_entity_neighbors(currency, entity, direction, key, value, depth, brea
     :param skip_num_addresses: Skip entities containing more addresses
     :type skip_num_addresses: int
 
-    :rtype: SearchPaths
+    :rtype: List[SearchResultLevel1]
     """
     try:
         return service.search_entity_neighbors(
