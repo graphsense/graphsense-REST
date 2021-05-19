@@ -33,8 +33,8 @@ def from_rows(currency, rows):
             for row in rows]
 
 
-def get_address_with_tags(currency, address):
-    return common.get_address_with_tags(currency, address)
+def get_address(currency, address, include_tags=False):
+    return common.get_address(currency, address, include_tags)
 
 
 def list_tags_by_address(currency, address):

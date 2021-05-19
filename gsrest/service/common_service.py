@@ -1,6 +1,5 @@
 from gsrest.db import get_connection
 from openapi_server.models.address import Address
-from openapi_server.models.address_with_tags import AddressWithTags
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.neighbors import Neighbors
@@ -9,7 +8,7 @@ from gsrest.util.values import compute_balance, convert_value, make_values
 from gsrest.service.rates_service import get_rates
 
 
-def address_from_row(row, rates):
+def address_from_row(row, rates, tags=None):
     return Address(
         address=row['address'],
         first_tx=TxSummary(
@@ -37,18 +36,23 @@ def address_from_row(row, rates):
                     row['total_received'].value,
                     row['total_spent'].value,
                 ),
-                rates)
+                rates),
+        tags=tags
         )
 
 
-def get_address(currency, address):
+def get_address(currency, address, include_tags=False):
     db = get_connection()
     result = db.get_address(currency, address)
+
+    tags = None
+    if include_tags:
+        tags = list_tags_by_address(currency, address)
 
     if not result:
         raise RuntimeError("Address {} not found in currency {}".format(
             address, currency))
-    return address_from_row(result, get_rates(currency)['rates'])
+    return address_from_row(result, get_rates(currency)['rates'], tags)
 
 
 def list_tags_by_address(currency, address):
@@ -71,24 +75,6 @@ def list_tags_by_address(currency, address):
                     for row in results]
 
     return address_tags
-
-
-def get_address_with_tags(currency, address):
-    result = get_address(currency, address)
-    return AddressWithTags(
-        address=result.address,
-        first_tx=result.first_tx,
-        last_tx=result.last_tx,
-        no_incoming_txs=result.no_incoming_txs,
-        no_outgoing_txs=result.no_outgoing_txs,
-        total_received=result.total_received,
-        total_spent=result.total_spent,
-        in_degree=result.in_degree,
-        out_degree=result.out_degree,
-        balance=result.balance,
-        tags=list_tags_by_address(currency, address)
-        )
-    return result
 
 
 def get_address_entity_id(currency, address):

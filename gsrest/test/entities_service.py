@@ -11,7 +11,7 @@ from openapi_server.models.search_result_level1 import SearchResultLevel1
 from openapi_server.models.entity_tag import EntityTag
 import json
 import gsrest.service.entities_service as service
-from gsrest.test.addresses_service import eth_addressWithTags, \
+from gsrest.test.addresses_service import eth_address, \
         eth_addressWithTagsOutNeighbors
 
 tag = EntityTag(
@@ -74,17 +74,17 @@ entityWithTags = EntityWithTags(
 )
 
 eth_entity = Entity(
-   no_outgoing_txs=eth_addressWithTags.no_outgoing_txs,
-   last_tx=eth_addressWithTags.last_tx,
-   total_spent=eth_addressWithTags.total_spent,
-   in_degree=eth_addressWithTags.in_degree,
+   no_outgoing_txs=eth_address.no_outgoing_txs,
+   last_tx=eth_address.last_tx,
+   total_spent=eth_address.total_spent,
+   in_degree=eth_address.in_degree,
    no_addresses=1,
-   total_received=eth_addressWithTags.total_received,
-   no_incoming_txs=eth_addressWithTags.no_incoming_txs,
-   entity=eth_addressWithTags.address + '_',
-   out_degree=eth_addressWithTags.out_degree,
-   first_tx=eth_addressWithTags.first_tx,
-   balance=eth_addressWithTags.balance
+   total_received=eth_address.total_received,
+   no_incoming_txs=eth_address.no_incoming_txs,
+   entity=eth_address.address + '_',
+   out_degree=eth_address.out_degree,
+   first_tx=eth_address.first_tx,
+   balance=eth_address.balance
 )
 
 eth_entityWithTags = EntityWithTags(
@@ -450,16 +450,16 @@ def list_entity_addresses(test_case):
                     currency='eth',
                     entity=eth_entityWithTags.entity)
     expected = Address(
-            address=eth_addressWithTags.address,
-            first_tx=eth_addressWithTags.first_tx,
-            last_tx=eth_addressWithTags.last_tx,
-            no_incoming_txs=eth_addressWithTags.no_incoming_txs,
-            no_outgoing_txs=eth_addressWithTags.no_outgoing_txs,
-            total_received=eth_addressWithTags.total_received,
-            total_spent=eth_addressWithTags.total_spent,
-            in_degree=eth_addressWithTags.in_degree,
-            out_degree=eth_addressWithTags.out_degree,
-            balance=eth_addressWithTags.balance
+            address=eth_address.address,
+            first_tx=eth_address.first_tx,
+            last_tx=eth_address.last_tx,
+            no_incoming_txs=eth_address.no_incoming_txs,
+            no_outgoing_txs=eth_address.no_outgoing_txs,
+            total_received=eth_address.total_received,
+            total_spent=eth_address.total_spent,
+            in_degree=eth_address.in_degree,
+            out_degree=eth_address.out_degree,
+            balance=eth_address.balance
             )
 
     assertEqual(EntityAddresses(
@@ -533,7 +533,7 @@ def search_entity_neighbors(test_case):
                     depth=2,
                     breadth=10,
                     key='entities',
-                    value=[123]
+                    value=['123']
                     )
     assertEqual(2818641, result.paths[0].node.entity)
     assertEqual(123, result.paths[0].paths[0].node.entity)

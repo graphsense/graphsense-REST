@@ -6,9 +6,9 @@ import unittest
 from flask import json
 from six import BytesIO
 
+from openapi_server.models.address import Address  # noqa: E501
 from openapi_server.models.address_tag import AddressTag  # noqa: E501
 from openapi_server.models.address_txs import AddressTxs  # noqa: E501
-from openapi_server.models.address_with_tags import AddressWithTags  # noqa: E501
 from openapi_server.models.addresses import Addresses  # noqa: E501
 from openapi_server.models.entity_with_tags import EntityWithTags  # noqa: E501
 from openapi_server.models.link import Link  # noqa: E501
@@ -19,6 +19,25 @@ import gsrest.test.addresses_service as test_service
 
 class TestAddressesController(BaseTestCase):
     """AddressesController integration test stubs"""
+
+    def test_get_address(self):
+        """Test case for get_address
+
+        Get an address, optionally with tags
+        """
+        test_service.get_address(self)
+
+        query_string = [('','')]
+        headers = { 
+            'Accept': 'application/json',
+        }
+        response = self.client.open(
+            '/{currency}/addresses/{address}'.format(currency='btc', address='1Archive1n2C579dMsAu3iC6tWzuQJz8dN'),
+            method='GET',
+            headers=headers,
+            query_string=query_string)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
 
     def test_get_address_entity(self):
         """Test case for get_address_entity
@@ -32,23 +51,6 @@ class TestAddressesController(BaseTestCase):
         }
         response = self.client.open(
             '/{currency}/addresses/{address}/entity'.format(currency='btc', address='1Archive1n2C579dMsAu3iC6tWzuQJz8dN'),
-            method='GET',
-            headers=headers)
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
-
-    def test_get_address_with_tags(self):
-        """Test case for get_address_with_tags
-
-        Get an address with tags
-        """
-        test_service.get_address_with_tags(self)
-
-        headers = { 
-            'Accept': 'application/json',
-        }
-        response = self.client.open(
-            '/{currency}/addresses/{address}'.format(currency='btc', address='1Archive1n2C579dMsAu3iC6tWzuQJz8dN'),
             method='GET',
             headers=headers)
         self.assert200(response,

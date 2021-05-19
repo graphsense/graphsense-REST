@@ -1,15 +1,42 @@
 import connexion
 import six
 
+from openapi_server.models.address import Address  # noqa: E501
 from openapi_server.models.address_tag import AddressTag  # noqa: E501
 from openapi_server.models.address_txs import AddressTxs  # noqa: E501
-from openapi_server.models.address_with_tags import AddressWithTags  # noqa: E501
 from openapi_server.models.addresses import Addresses  # noqa: E501
 from openapi_server.models.entity_with_tags import EntityWithTags  # noqa: E501
 from openapi_server.models.link import Link  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
 import gsrest.service.addresses_service as service
 from gsrest.service.problems import notfound, badrequest, internalerror
+
+
+def get_address(currency, address, include_tags=None):  # noqa: E501
+    """Get an address, optionally with tags
+
+     # noqa: E501
+
+    :param currency: The cryptocurrency (e.g., btc)
+    :type currency: str
+    :param address: The cryptocurrency address
+    :type address: str
+    :param include_tags: Whether tags should be included
+    :type include_tags: bool
+
+    :rtype: Address
+    """
+    try:
+        return service.get_address(
+            currency=currency,
+            address=address,
+            include_tags=include_tags)
+    except RuntimeError as e:
+        return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        return internalerror(str(e))
 
 
 def get_address_entity(currency, address):  # noqa: E501
@@ -26,30 +53,6 @@ def get_address_entity(currency, address):  # noqa: E501
     """
     try:
         return service.get_address_entity(
-            currency=currency,
-            address=address)
-    except RuntimeError as e:
-        return notfound(str(e))
-    except ValueError as e:
-        return badrequest(str(e))
-    except Exception as e:
-        return internalerror(str(e))
-
-
-def get_address_with_tags(currency, address):  # noqa: E501
-    """Get an address with tags
-
-     # noqa: E501
-
-    :param currency: The cryptocurrency (e.g., btc)
-    :type currency: str
-    :param address: The cryptocurrency address
-    :type address: str
-
-    :rtype: AddressWithTags
-    """
-    try:
-        return service.get_address_with_tags(
             currency=currency,
             address=address)
     except RuntimeError as e:

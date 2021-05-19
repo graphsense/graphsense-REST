@@ -1,6 +1,5 @@
 from openapi_server.models.address import Address
 from openapi_server.models.addresses import Addresses
-from openapi_server.models.address_with_tags import AddressWithTags
 from openapi_server.models.values import Values
 from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.entity_tag import EntityTag
@@ -122,10 +121,10 @@ address = Address(
    balance=Values(eur=1.15, usd=2.31, value=115422577),
         )
 
-addressWithTags = AddressWithTags(
-   **address.to_dict(),
-   tags=[tag]
+addressWithTags = Address(
+   **address.to_dict()
    )
+addressWithTags.tags = [tag]
 
 
 address2 = Address(
@@ -159,10 +158,10 @@ address2 = Address(
    balance=Values(eur=0.0, usd=0.0, value=0)
    )
 
-addressWithoutTags = AddressWithTags(
-   **address2.to_dict(),
-   tags=[]
+addressWithoutTags = Address(
+   **address2.to_dict()
 )
+addressWithoutTags.tags = []
 
 address3 = Address(
    first_tx=TxSummary(
@@ -195,7 +194,7 @@ address3 = Address(
    balance=Values(eur=0.0, usd=0.0, value=0)
 )
 
-addressBech32 = AddressWithTags(
+addressBech32 = Address(
    out_degree=0,
    no_incoming_txs=0,
    total_spent=Values(
@@ -221,11 +220,10 @@ addressBech32 = AddressWithTags(
    ),
    address="bc1xyz123456789",
    no_outgoing_txs=0,
-   tags=[],
    balance=Values(eur=0.0, usd=0.0, value=0)
 )
 
-addressWithTotalSpent0 = AddressWithTags(
+addressWithTotalSpent0 = Address(
    first_tx=TxSummary(
       tx_hash="04d92601677d62a985310b61a301e74870fa942c"
       "8be0648e16b1db23b996a8cd",
@@ -253,8 +251,7 @@ addressWithTotalSpent0 = AddressWithTags(
    ),
    address="13k8QzZMyce7hF4rT18CHVozE3ooNiFgfF",
    in_degree=5013,
-   balance=Values(eur=0.0, usd=0.0, value=18099),
-   tags=[]
+   balance=Values(eur=0.0, usd=0.0, value=18099)
    )
 
 addressWithTagsOutNeighbors = Neighbors(
@@ -402,10 +399,10 @@ eth_address = Address(
    balance=Values(eur=111.0, usd=222.0, value=11100000000))
 
 
-eth_addressWithTags = AddressWithTags(
-   **eth_address.to_dict(),
-   tags=[eth_tag, eth_tag2]
+eth_addressWithTags = Address(
+   **eth_address.to_dict()
    )
+eth_addressWithTags.tags = [eth_tag, eth_tag2]
 
 
 eth_address2 = Address(
@@ -479,42 +476,42 @@ eth_addressWithTagsOutNeighbors = Neighbors(
                 )])
 
 eth_entityWithTags = EntityWithTags(
-   no_outgoing_txs=eth_addressWithTags.no_outgoing_txs,
-   last_tx=eth_addressWithTags.last_tx,
-   total_spent=eth_addressWithTags.total_spent,
-   in_degree=eth_addressWithTags.in_degree,
+   no_outgoing_txs=eth_address.no_outgoing_txs,
+   last_tx=eth_address.last_tx,
+   total_spent=eth_address.total_spent,
+   in_degree=eth_address.in_degree,
    no_addresses=1,
-   total_received=eth_addressWithTags.total_received,
-   no_incoming_txs=eth_addressWithTags.no_incoming_txs,
-   entity=eth_addressWithTags.address + '_',
-   out_degree=eth_addressWithTags.out_degree,
-   first_tx=eth_addressWithTags.first_tx,
-   balance=eth_addressWithTags.balance,
+   total_received=eth_address.total_received,
+   no_incoming_txs=eth_address.no_incoming_txs,
+   entity=eth_address.address + '_',
+   out_degree=eth_address.out_degree,
+   first_tx=eth_address.first_tx,
+   balance=eth_address.balance,
    tags=[],
    tag_coherence=0.5
 )
 
 
-def get_address_with_tags(test_case):
-    """Test case for get_address_with_tags
+def get_address(test_case):
+    """Test case for get_address
     """
-    result = service.get_address_with_tags(
-            currency='btc', address=addressWithoutTags.address)
+    result = service.get_address(
+            'btc', addressWithoutTags.address, True)
     test_case.assertEqual(addressWithoutTags, result)
-    result = service.get_address_with_tags(
-            currency='btc', address=addressWithTags.address)
-    test_case.assertEqual(addressWithTags, result)
-    result = service.get_address_with_tags(
-                currency='btc', address=addressBech32.address)
+    result = service.get_address(
+            'btc', addressWithTags.address, True)
+    assertEqual(addressWithTags, result)
+    result = service.get_address(
+                'btc', addressBech32.address, False)
     test_case.assertEqual(addressBech32, result)
-    result = service.get_address_with_tags(
+    result = service.get_address(
                 currency='btc', address=addressWithTotalSpent0.address)
     test_case.assertEqual(addressWithTotalSpent0, result)
 
     # ETH
-    result = service.get_address_with_tags(
-            currency='eth', address=eth_addressWithTags.address)
-    test_case.assertEqual(eth_addressWithTags, result)
+    result = service.get_address(
+            'eth', eth_addressWithTags.address)
+    test_case.assertEqual(eth_address, result)
 
 
 def list_address_txs(test_case):
@@ -538,16 +535,16 @@ def list_address_txs(test_case):
                             timestamp=1511153263)
                         ]
                     )
-    result = service.list_address_txs('btc', addressWithoutTags.address)
+    result = service.list_address_txs('btc', address2.address)
     test_case.assertEqual(address_txs, result)
 
     txs = AddressTxs(address_txs=[tx1_eth, tx2_eth])
-    result = service.list_address_txs('eth', eth_addressWithTags.address)
+    result = service.list_address_txs('eth', eth_address.address)
     test_case.assertEqual(txs, result)
 
 
 def list_address_txs_csv(test_case):
-    result = service.list_address_txs_csv('btc', addressWithoutTags.address)
+    result = service.list_address_txs_csv('btc', address2.address)
     test_case.assertEqual(
         'currency_type,height,timestamp,tx_hash,value_eur,value_usd,'
         'value_value\r\n'
@@ -556,7 +553,7 @@ def list_address_txs_csv(test_case):
         'utxo,2,1511153263,abcdef,-0.01,-0.03,'
         '-1260000\r\n', result.data.decode('utf-8'))
 
-    result = service.list_address_txs_csv('eth', eth_addressWithTags.address)
+    result = service.list_address_txs_csv('eth', eth_address.address)
     test_case.assertEqual(
         'currency_type,height,timestamp,tx_hash,values_eur,values_usd,'
         'values_value\r\n'
@@ -581,7 +578,7 @@ def list_tags_by_address_csv(test_case):
     csv = base64.b64encode(csv.encode("utf-8"))
     result = service.list_tags_by_address_csv(
                         "btc",
-                        addressWithTags.address).data.decode('utf-8')
+                        address.address).data.decode('utf-8')
     result = base64.b64encode(result.encode("utf-8"))
     assertEqual(csv, result)
 
@@ -589,19 +586,19 @@ def list_tags_by_address_csv(test_case):
 def list_address_neighbors(test_case):
     result = service.list_address_neighbors(
         currency='btc',
-        address=addressWithTags.address,
+        address=address.address,
         direction='out')
     test_case.assertEqual(addressWithTagsOutNeighbors, result)
 
     result = service.list_address_neighbors(
         currency='btc',
-        address=addressWithTags.address,
+        address=address.address,
         direction='in')
     test_case.assertEqual(addressWithTagsInNeighbors, result)
 
     result = service.list_address_neighbors(
         currency='eth',
-        address=eth_addressWithTags.address,
+        address=eth_address.address,
         direction='out')
     test_case.assertEqual(eth_addressWithTagsOutNeighbors, result)
 
@@ -616,7 +613,7 @@ def list_address_neighbors_csv(test_case):
            "121.46,67789282\r\n")
     result = service.list_address_neighbors_csv(
         currency='btc',
-        address=addressWithTags.address,
+        address=address.address,
         direction='out')
     assertEqual(csv, result.data.decode('utf-8'))
 
@@ -624,13 +621,13 @@ def list_address_neighbors_csv(test_case):
 def get_address_entity(test_case):
     result = service.get_address_entity(
                 currency='btc',
-                address=addressWithTags.address)
+                address=address.address)
     result.tag_coherence = 0
     test_case.assertEqual(entityWithTagsOfAddressWithTags, result)
 
     result = service.get_address_entity(
                 currency='eth',
-                address=eth_addressWithTags.address)
+                address=eth_address.address)
     result.tag_coherence = eth_entityWithTags.tag_coherence
     test_case.assertEqual(eth_entityWithTags, result)
 
@@ -638,7 +635,7 @@ def get_address_entity(test_case):
 def list_address_links(test_case):
     result = service.list_address_links(
                 currency='btc',
-                address=addressWithTags.address,
+                address=address.address,
                 neighbor='17DfZja1713S3JRWA9jaebCKFM5anUh7GG')
     link = [LinkUtxo(tx_hash='123456',
                      input_value=Values(eur=-0.1, usd=-0.2, value=-10000000),
@@ -650,7 +647,7 @@ def list_address_links(test_case):
 
     result = service.list_address_links(
                 currency='eth',
-                address=eth_addressWithTags.address,
+                address=eth_address.address,
                 neighbor='123456')
     txs = [tx1_eth, tx2_eth]
     test_case.assertEqual(txs, result)
@@ -659,7 +656,7 @@ def list_address_links(test_case):
 def list_address_links_csv(test_case):
     result = service.list_address_links_csv(
                 currency='btc',
-                address=addressWithTags.address,
+                address=address.address,
                 neighbor='17DfZja1713S3JRWA9jaebCKFM5anUh7GG')
 
     csv = ('currency_type,height,input_value_eur,input_value_usd,'
@@ -672,7 +669,7 @@ def list_address_links_csv(test_case):
 
     result = service.list_address_links_csv(
                 currency='eth',
-                address=eth_addressWithTags.address,
+                address=eth_address.address,
                 neighbor='123456')
 
     csv = ('currency_type,height,timestamp,tx_hash,values_eur,'

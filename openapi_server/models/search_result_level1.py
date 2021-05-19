@@ -6,7 +6,7 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from openapi_server.models.base_model_ import Model
-from openapi_server.models.address_with_tags import AddressWithTags
+from openapi_server.models.address import Address
 from openapi_server.models.entity_with_tags import EntityWithTags
 from openapi_server.models.neighbor import Neighbor
 from openapi_server.models.search_result_leaf import SearchResultLeaf
@@ -14,7 +14,7 @@ from openapi_server.models.search_result_level1_all_of import SearchResultLevel1
 from openapi_server.models.search_result_level2 import SearchResultLevel2
 from openapi_server import util
 
-from openapi_server.models.address_with_tags import AddressWithTags  # noqa: E501
+from openapi_server.models.address import Address  # noqa: E501
 from openapi_server.models.entity_with_tags import EntityWithTags  # noqa: E501
 from openapi_server.models.neighbor import Neighbor  # noqa: E501
 from openapi_server.models.search_result_leaf import SearchResultLeaf  # noqa: E501
@@ -35,14 +35,14 @@ class SearchResultLevel1(Model):
         :param relation: The relation of this SearchResultLevel1.  # noqa: E501
         :type relation: Neighbor
         :param matching_addresses: The matching_addresses of this SearchResultLevel1.  # noqa: E501
-        :type matching_addresses: List[AddressWithTags]
+        :type matching_addresses: List[Address]
         :param paths: The paths of this SearchResultLevel1.  # noqa: E501
         :type paths: List[SearchResultLevel2]
         """
         self.openapi_types = {
             'node': EntityWithTags,
             'relation': Neighbor,
-            'matching_addresses': List[AddressWithTags],
+            'matching_addresses': List[Address],
             'paths': List[SearchResultLevel2]
         }
 
@@ -129,7 +129,7 @@ class SearchResultLevel1(Model):
 
 
         :return: The matching_addresses of this SearchResultLevel1.
-        :rtype: List[AddressWithTags]
+        :rtype: List[Address]
         """
         return self._matching_addresses
 
@@ -139,7 +139,7 @@ class SearchResultLevel1(Model):
 
 
         :param matching_addresses: The matching_addresses of this SearchResultLevel1.
-        :type matching_addresses: List[AddressWithTags]
+        :type matching_addresses: List[Address]
         """
 
         self._matching_addresses = matching_addresses

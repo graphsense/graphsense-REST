@@ -236,7 +236,7 @@ paths:
       x-openapi-router-controller: openapi_server.controllers.addresses_controller
   /{currency}/addresses/{address}:
     get:
-      operationId: get_address_with_tags
+      operationId: get_address
       parameters:
       - description: The cryptocurrency (e.g., btc)
         example: btc
@@ -258,14 +258,22 @@ paths:
           format: string
           type: string
         style: simple
+      - description: Whether tags should be included
+        explode: true
+        in: query
+        name: include_tags
+        required: false
+        schema:
+          type: boolean
+        style: form
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/address_with_tags'
+                $ref: '#/components/schemas/address'
           description: OK
-      summary: Get an address with tags
+      summary: Get an address, optionally with tags
       tags:
       - addresses
       x-openapi-router-controller: openapi_server.controllers.addresses_controller
@@ -1583,6 +1591,15 @@ components:
         type: array
       style: form
       x-graphsense-rest-test-example: '"1,2"'
+    include_tags:
+      description: Whether tags should be included
+      explode: true
+      in: query
+      name: include_tags
+      required: false
+      schema:
+        type: boolean
+      style: form
     search_key:
       description: 'Match neighbors against one and only one of these properties:
         - the category the entity belongs to - addresses the entity contains - total_received:
@@ -2105,6 +2122,23 @@ components:
           eur: 0.8008282
           usd: 6.0274563
           value: 1
+        tags:
+        - abuse: abuse
+          active: true
+          currency: currency
+          label: label
+          source: source
+          category: category
+          tagpack_uri: tagpack_uri
+          lastmod: 2
+        - abuse: abuse
+          active: true
+          currency: currency
+          label: label
+          source: source
+          category: category
+          tagpack_uri: tagpack_uri
+          lastmod: 2
       properties:
         address:
           description: Address
@@ -2136,6 +2170,12 @@ components:
           $ref: '#/components/schemas/values'
         total_spent:
           $ref: '#/components/schemas/values'
+        tags:
+          description: Tags
+          items:
+            $ref: '#/components/schemas/tag'
+          title: tags
+          type: array
       required:
       - address
       - balance
@@ -2149,11 +2189,6 @@ components:
       - total_spent
       title: address
       type: object
-    address_with_tags:
-      allOf:
-      - $ref: '#/components/schemas/address'
-      - $ref: '#/components/schemas/address_with_tags_allOf'
-      title: address_with_tags
     addresses:
       example:
         next_page: next_page
@@ -2183,6 +2218,23 @@ components:
             eur: 0.8008282
             usd: 6.0274563
             value: 1
+          tags:
+          - abuse: abuse
+            active: true
+            currency: currency
+            label: label
+            source: source
+            category: category
+            tagpack_uri: tagpack_uri
+            lastmod: 2
+          - abuse: abuse
+            active: true
+            currency: currency
+            label: label
+            source: source
+            category: category
+            tagpack_uri: tagpack_uri
+            lastmod: 2
         - total_spent:
             eur: 0.8008282
             usd: 6.0274563
@@ -2208,6 +2260,23 @@ components:
             eur: 0.8008282
             usd: 6.0274563
             value: 1
+          tags:
+          - abuse: abuse
+            active: true
+            currency: currency
+            label: label
+            source: source
+            category: category
+            tagpack_uri: tagpack_uri
+            lastmod: 2
+          - abuse: abuse
+            active: true
+            currency: currency
+            label: label
+            source: source
+            category: category
+            tagpack_uri: tagpack_uri
+            lastmod: 2
       properties:
         next_page:
           format: string
@@ -2466,6 +2535,15 @@ components:
       - $ref: '#/components/schemas/entity_tag_allOf'
       title: entity_tag
     tag:
+      example:
+        abuse: abuse
+        active: true
+        currency: currency
+        label: label
+        source: source
+        category: category
+        tagpack_uri: tagpack_uri
+        lastmod: 2
       properties:
         label:
           description: Label
@@ -2735,6 +2813,23 @@ components:
             eur: 0.8008282
             usd: 6.0274563
             value: 1
+          tags:
+          - abuse: abuse
+            active: true
+            currency: currency
+            label: label
+            source: source
+            category: category
+            tagpack_uri: tagpack_uri
+            lastmod: 2
+          - abuse: abuse
+            active: true
+            currency: currency
+            label: label
+            source: source
+            category: category
+            tagpack_uri: tagpack_uri
+            lastmod: 2
         - total_spent:
             eur: 0.8008282
             usd: 6.0274563
@@ -2760,6 +2855,23 @@ components:
             eur: 0.8008282
             usd: 6.0274563
             value: 1
+          tags:
+          - abuse: abuse
+            active: true
+            currency: currency
+            label: label
+            source: source
+            category: category
+            tagpack_uri: tagpack_uri
+            lastmod: 2
+          - abuse: abuse
+            active: true
+            currency: currency
+            label: label
+            source: source
+            category: category
+            tagpack_uri: tagpack_uri
+            lastmod: 2
       properties:
         next_page:
           format: string
@@ -2800,7 +2912,7 @@ components:
           $ref: '#/components/schemas/neighbor'
         matching_addresses:
           items:
-            $ref: '#/components/schemas/address_with_tags'
+            $ref: '#/components/schemas/address'
           title: matching_addresses
           type: array
       title: search_result_leaf
@@ -3080,14 +3192,6 @@ components:
         type: string
       title: labels
       type: array
-    address_with_tags_allOf:
-      properties:
-        tags:
-          description: Tags
-          items:
-            $ref: '#/components/schemas/tag'
-          type: array
-      type: object
     entity_with_tags_allOf:
       properties:
         tags:

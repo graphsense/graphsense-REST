@@ -1,5 +1,5 @@
 from gsrest.db import get_connection
-from gsrest.service.common_service import get_address_with_tags
+from gsrest.service.common_service import get_address
 from gsrest.service.rates_service import get_rates
 from openapi_server.models.entity import Entity
 from openapi_server.models.entities import Entities
@@ -306,15 +306,17 @@ def recursive_search(currency, entity, params, breadth, depth, level,
             continue
 
         if level < MAX_DEPTH:
-            mod = importlib.import_module(f'openapi_server.models.search_result_level{level}')
+            mod = importlib.import_module(
+                f'openapi_server.models.search_result_level{level}')
             levelClass = getattr(mod, f'SearchResultLevel{level}')
         else:
-            mod = importlib.import_module('openapi_server.models.search_result_leaf')
+            mod = importlib.import_module(
+                'openapi_server.models.search_result_leaf')
             levelClass = getattr(mod, 'SearchResultLeaf')
         obj = levelClass(node=props, relation=neighbor,
                          matching_addresses=[])
         if subpaths is True:
-            addresses_with_tags = [get_address_with_tags(currency, address)
+            addresses_with_tags = [get_address(currency, address, True)
                                    for address in matching_addresses]
             obj.matching_addresses = [address for address in
                                       addresses_with_tags
