@@ -213,6 +213,9 @@ def search_entity_neighbors(currency, entity, direction, key, value, depth, brea
                     .format(address, currency))
         params['addresses'] = addresses_list
 
+    elif 'entities' in key:
+        params['entities'] = value
+
     level = 2
     result = \
         recursive_search(currency, entity, params,
@@ -276,6 +279,9 @@ def recursive_search(currency, entity, params, breadth, depth, level,
             matching_addresses = [id["address"] for id in params['addresses']
                                   if str(id["entity"]) == str(neighbor.id)]
             match = len(matching_addresses) > 0
+
+        if 'entities' in params:
+            match = str(neighbor.id) in params['entities']
 
         if 'field' in params:
             (field, fieldcurrency, min_value, max_value) = params['field']

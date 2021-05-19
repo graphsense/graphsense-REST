@@ -526,6 +526,18 @@ def search_entity_neighbors(test_case):
     assertEqual(addresses, [a.address for a
                             in result.paths[0].paths[0].matching_addresses])
 
+    result = service.search_entity_neighbors(
+                    currency='btc',
+                    entity=entityWithTags.entity,
+                    direction='out',
+                    depth=2,
+                    breadth=10,
+                    key='entities',
+                    value=[123]
+                    )
+    assertEqual(2818641, result.paths[0].node.entity)
+    assertEqual(123, result.paths[0].paths[0].node.entity)
+
     query_string = [('direction', 'out'),
                     ('key', 'addresses'),
                     ('value', ','.join(addresses)),

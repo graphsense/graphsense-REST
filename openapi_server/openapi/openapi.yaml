@@ -1193,13 +1193,15 @@ paths:
           enum:
           - category
           - addresses
+          - entities
           - total_received
           - balance
           type: string
         style: form
       - description: 'If key is - category: comma separated list of category names
-          - addresses: comma separated list of address IDs - total_received/balance:
-          comma separated tuple of (currency, min, max)'
+          - addresses: comma separated list of address IDs - entities: comma separated
+          list of entity IDs - total_received/balance: comma separated tuple of (currency,
+          min, max)'
         example: Miner
         explode: true
         in: query
@@ -1594,14 +1596,16 @@ components:
         enum:
         - category
         - addresses
+        - entities
         - total_received
         - balance
         type: string
       style: form
     search_value:
       description: 'If key is - category: comma separated list of category names -
-        addresses: comma separated list of address IDs - total_received/balance: comma
-        separated tuple of (currency, min, max)'
+        addresses: comma separated list of address IDs - entities: comma separated
+        list of entity IDs - total_received/balance: comma separated tuple of (currency,
+        min, max)'
       example: Miner
       explode: true
       in: query
