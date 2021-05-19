@@ -65,6 +65,36 @@ def list_entities(currency, ids=None, page=None, pagesize=None):  # noqa: E501
         return internalerror(str(e))
 
 
+def list_entities_csv(currency, ids=None, page=None, pagesize=None):  # noqa: E501
+    """Get entities as CSV
+
+     # noqa: E501
+
+    :param currency: The cryptocurrency (e.g., btc)
+    :type currency: str
+    :param ids: Restrict result to given set of comma separated IDs
+    :type ids: List[str]
+    :param page: Resumption token for retrieving the next page
+    :type page: str
+    :param pagesize: Number of items returned in a single page
+    :type pagesize: int
+
+    :rtype: str
+    """
+    try:
+        return service.list_entities_csv(
+            currency=currency,
+            ids=ids,
+            page=page,
+            pagesize=pagesize)
+    except RuntimeError as e:
+        return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        return internalerror(str(e))
+
+
 def list_entity_addresses(currency, entity, page=None, pagesize=None):  # noqa: E501
     """Get an entity&#39;s addresses
 

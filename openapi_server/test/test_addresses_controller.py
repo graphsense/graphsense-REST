@@ -190,6 +190,27 @@ class TestAddressesController(BaseTestCase):
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
+    def test_list_addresses_csv(self):
+        """Test case for list_addresses_csv
+
+        Get addresses as CSV
+        """
+        test_service.list_addresses_csv(self)
+
+        query_string = [('',''),
+                        ('',''),
+                        ('','')]
+        headers = { 
+            'Accept': 'application/csv',
+        }
+        response = self.client.open(
+            '/{currency}/addresses.csv'.format(currency='btc'),
+            method='GET',
+            headers=headers,
+            query_string=query_string)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
     def test_list_tags_by_address(self):
         """Test case for list_tags_by_address
 

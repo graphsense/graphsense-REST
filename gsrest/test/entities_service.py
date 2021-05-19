@@ -308,6 +308,13 @@ def list_entities(test_case):
                           result.entities)
 
 
+def list_entities_csv(test_case):
+    result = service.list_entities_csv("btc").data.decode('utf-8')
+    assertEqual(12, len(result.split("\r\n")))
+    result = service.list_entities_csv("eth").data.decode('utf-8')
+    assertEqual(4, len(result.split("\r\n")))
+
+
 def list_tags_by_entity(test_case):
     result = service.list_tags_by_entity(currency='btc',
                                          entity=entityWithTags.entity)

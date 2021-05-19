@@ -157,3 +157,14 @@ def list_addresses(currency, ids=None, page=None, pagesize=None):
             paging_state,
             [common.address_from_row(row, rates)
              for row in result])
+
+
+def list_addresses_csv(currency, ids=None, page=None, pagesize=None):
+    def query_function(page_state):
+        result = list_addresses(currency, ids, page, pagesize)
+        return (result.next_page, result.addresses)
+    return Response(stream_with_context(to_csv(query_function)),
+                    mimetype="text/csv",
+                    headers=create_download_header(
+                            'addresses ({}).csv'
+                            .format(currency.upper())))

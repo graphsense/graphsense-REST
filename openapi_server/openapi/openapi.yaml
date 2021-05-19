@@ -198,6 +198,61 @@ paths:
       tags:
       - addresses
       x-openapi-router-controller: openapi_server.controllers.addresses_controller
+  /{currency}/addresses.csv:
+    get:
+      operationId: list_addresses_csv
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: Restrict result to given set of comma separated IDs
+        explode: true
+        in: query
+        name: ids
+        required: false
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      - description: Resumption token for retrieving the next page
+        example: 0400030bff00f07fffff9b00
+        explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Number of items returned in a single page
+        example: 10
+        explode: true
+        in: query
+        name: pagesize
+        required: false
+        schema:
+          maximum: 1000
+          minimum: 1
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/csv:
+              schema:
+                type: string
+          description: OK
+      summary: Get addresses as CSV
+      tags:
+      - addresses
+      x-openapi-router-controller: openapi_server.controllers.addresses_controller
   /{currency}/addresses/{address}:
     get:
       operationId: get_address_with_tags
@@ -827,6 +882,61 @@ paths:
                 $ref: '#/components/schemas/entities'
           description: OK
       summary: Get entities
+      tags:
+      - entities
+      x-openapi-router-controller: openapi_server.controllers.entities_controller
+  /{currency}/entities.csv:
+    get:
+      operationId: list_entities_csv
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: Restrict result to given set of comma separated IDs
+        explode: true
+        in: query
+        name: ids
+        required: false
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      - description: Resumption token for retrieving the next page
+        example: 0400030bff00f07fffff9b00
+        explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Number of items returned in a single page
+        example: 10
+        explode: true
+        in: query
+        name: pagesize
+        required: false
+        schema:
+          maximum: 1000
+          minimum: 1
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/csv:
+              schema:
+                type: string
+          description: OK
+      summary: Get entities as CSV
       tags:
       - entities
       x-openapi-router-controller: openapi_server.controllers.entities_controller
