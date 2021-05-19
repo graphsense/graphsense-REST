@@ -9,7 +9,7 @@ from openapi_server.models.entity_with_tags import EntityWithTags  # noqa: E501
 from openapi_server.models.link import Link  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
 import gsrest.service.addresses_service as service
-from gsrest.service.problems import notfound
+from gsrest.service.problems import notfound, badrequest, internalerror
 
 
 def get_address_entity(currency, address):  # noqa: E501
@@ -30,6 +30,10 @@ def get_address_entity(currency, address):  # noqa: E501
             address=address)
     except RuntimeError as e:
         return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        return internalerror(str(e))
 
 
 def get_address_with_tags(currency, address):  # noqa: E501
@@ -50,6 +54,10 @@ def get_address_with_tags(currency, address):  # noqa: E501
             address=address)
     except RuntimeError as e:
         return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        return internalerror(str(e))
 
 
 def list_address_links(currency, address, neighbor):  # noqa: E501
@@ -73,6 +81,10 @@ def list_address_links(currency, address, neighbor):  # noqa: E501
             neighbor=neighbor)
     except RuntimeError as e:
         return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        return internalerror(str(e))
 
 
 def list_address_links_csv(currency, address, neighbor):  # noqa: E501
@@ -96,6 +108,10 @@ def list_address_links_csv(currency, address, neighbor):  # noqa: E501
             neighbor=neighbor)
     except RuntimeError as e:
         return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        return internalerror(str(e))
 
 
 def list_address_neighbors(currency, address, direction, page=None, pagesize=None):  # noqa: E501
@@ -125,6 +141,10 @@ def list_address_neighbors(currency, address, direction, page=None, pagesize=Non
             pagesize=pagesize)
     except RuntimeError as e:
         return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        return internalerror(str(e))
 
 
 def list_address_neighbors_csv(currency, address, direction):  # noqa: E501
@@ -148,6 +168,10 @@ def list_address_neighbors_csv(currency, address, direction):  # noqa: E501
             direction=direction)
     except RuntimeError as e:
         return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        return internalerror(str(e))
 
 
 def list_address_txs(currency, address, page=None, pagesize=None):  # noqa: E501
@@ -174,6 +198,10 @@ def list_address_txs(currency, address, page=None, pagesize=None):  # noqa: E501
             pagesize=pagesize)
     except RuntimeError as e:
         return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        return internalerror(str(e))
 
 
 def list_address_txs_csv(currency, address):  # noqa: E501
@@ -194,6 +222,10 @@ def list_address_txs_csv(currency, address):  # noqa: E501
             address=address)
     except RuntimeError as e:
         return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        return internalerror(str(e))
 
 
 def list_addresses(currency, ids=None, page=None, pagesize=None):  # noqa: E501
@@ -220,6 +252,10 @@ def list_addresses(currency, ids=None, page=None, pagesize=None):  # noqa: E501
             pagesize=pagesize)
     except RuntimeError as e:
         return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        return internalerror(str(e))
 
 
 def list_tags_by_address(currency, address):  # noqa: E501
@@ -240,6 +276,10 @@ def list_tags_by_address(currency, address):  # noqa: E501
             address=address)
     except RuntimeError as e:
         return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        return internalerror(str(e))
 
 
 def list_tags_by_address_csv(currency, address):  # noqa: E501
@@ -260,3 +300,7 @@ def list_tags_by_address_csv(currency, address):  # noqa: E501
             address=address)
     except RuntimeError as e:
         return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        return internalerror(str(e))

@@ -4,7 +4,7 @@ import six
 from openapi_server.models.search_result import SearchResult  # noqa: E501
 from openapi_server.models.stats import Stats  # noqa: E501
 import gsrest.service.general_service as service
-from gsrest.service.problems import notfound
+from gsrest.service.problems import notfound, badrequest, internalerror
 
 
 def get_statistics():  # noqa: E501
@@ -20,6 +20,10 @@ def get_statistics():  # noqa: E501
             )
     except RuntimeError as e:
         return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        return internalerror(str(e))
 
 
 def search(q, currency=None, limit=None):  # noqa: E501
@@ -43,3 +47,7 @@ def search(q, currency=None, limit=None):  # noqa: E501
             limit=limit)
     except RuntimeError as e:
         return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        return internalerror(str(e))

@@ -5,7 +5,7 @@ from openapi_server.models.address_tag import AddressTag  # noqa: E501
 from openapi_server.models.concept import Concept  # noqa: E501
 from openapi_server.models.taxonomy import Taxonomy  # noqa: E501
 import gsrest.service.tags_service as service
-from gsrest.service.problems import notfound
+from gsrest.service.problems import notfound, badrequest, internalerror
 
 
 def list_address_tags(label, currency=None):  # noqa: E501
@@ -26,6 +26,10 @@ def list_address_tags(label, currency=None):  # noqa: E501
             currency=currency)
     except RuntimeError as e:
         return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        return internalerror(str(e))
 
 
 def list_concepts(taxonomy):  # noqa: E501
@@ -43,6 +47,10 @@ def list_concepts(taxonomy):  # noqa: E501
             taxonomy=taxonomy)
     except RuntimeError as e:
         return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        return internalerror(str(e))
 
 
 def list_taxonomies():  # noqa: E501
@@ -58,3 +66,7 @@ def list_taxonomies():  # noqa: E501
             )
     except RuntimeError as e:
         return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        return internalerror(str(e))

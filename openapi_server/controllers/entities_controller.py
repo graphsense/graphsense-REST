@@ -7,7 +7,7 @@ from openapi_server.models.entity_with_tags import EntityWithTags  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
 from openapi_server.models.search_paths import SearchPaths  # noqa: E501
 import gsrest.service.entities_service as service
-from gsrest.service.problems import notfound
+from gsrest.service.problems import notfound, badrequest, internalerror
 
 
 def get_entity_with_tags(currency, entity):  # noqa: E501
@@ -28,6 +28,10 @@ def get_entity_with_tags(currency, entity):  # noqa: E501
             entity=entity)
     except RuntimeError as e:
         return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        return internalerror(str(e))
 
 
 def list_entity_addresses(currency, entity, page=None, pagesize=None):  # noqa: E501
@@ -54,6 +58,10 @@ def list_entity_addresses(currency, entity, page=None, pagesize=None):  # noqa: 
             pagesize=pagesize)
     except RuntimeError as e:
         return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        return internalerror(str(e))
 
 
 def list_entity_addresses_csv(currency, entity):  # noqa: E501
@@ -74,6 +82,10 @@ def list_entity_addresses_csv(currency, entity):  # noqa: E501
             entity=entity)
     except RuntimeError as e:
         return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        return internalerror(str(e))
 
 
 def list_entity_neighbors(currency, entity, direction, ids=None, page=None, pagesize=None):  # noqa: E501
@@ -106,6 +118,10 @@ def list_entity_neighbors(currency, entity, direction, ids=None, page=None, page
             pagesize=pagesize)
     except RuntimeError as e:
         return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        return internalerror(str(e))
 
 
 def list_entity_neighbors_csv(currency, entity, direction):  # noqa: E501
@@ -129,6 +145,10 @@ def list_entity_neighbors_csv(currency, entity, direction):  # noqa: E501
             direction=direction)
     except RuntimeError as e:
         return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        return internalerror(str(e))
 
 
 def list_tags_by_entity(currency, entity):  # noqa: E501
@@ -149,6 +169,10 @@ def list_tags_by_entity(currency, entity):  # noqa: E501
             entity=entity)
     except RuntimeError as e:
         return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        return internalerror(str(e))
 
 
 def list_tags_by_entity_csv(currency, entity):  # noqa: E501
@@ -169,6 +193,10 @@ def list_tags_by_entity_csv(currency, entity):  # noqa: E501
             entity=entity)
     except RuntimeError as e:
         return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        return internalerror(str(e))
 
 
 def search_entity_neighbors(currency, entity, direction, key, value, depth, breadth=None, skip_num_addresses=None):  # noqa: E501
@@ -207,3 +235,7 @@ def search_entity_neighbors(currency, entity, direction, key, value, depth, brea
             skip_num_addresses=skip_num_addresses)
     except RuntimeError as e:
         return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        return internalerror(str(e))

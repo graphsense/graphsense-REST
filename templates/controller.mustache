@@ -4,7 +4,7 @@ import six
 {{#imports}}{{import}}  # noqa: E501
 {{/imports}}
 import gsrest.service.{{baseName}}_service as service
-from gsrest.service.problems import notfound
+from gsrest.service.problems import notfound, badrequest, internalerror
 {{#operations}}
 {{#operation}}
 
@@ -114,5 +114,9 @@ def {{operationId}}({{#allParams}}{{paramName}}{{^required}}=None{{/required}}{{
             {{/-last}}{{/allParams}})
     except RuntimeError as e:
         return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        return internalerror(str(e))
 {{/operation}}
 {{/operations}}

@@ -3,7 +3,7 @@ import six
 
 from openapi_server.models.rates import Rates  # noqa: E501
 import gsrest.service.rates_service as service
-from gsrest.service.problems import notfound
+from gsrest.service.problems import notfound, badrequest, internalerror
 
 
 def get_exchange_rates(currency, height):  # noqa: E501
@@ -24,3 +24,7 @@ def get_exchange_rates(currency, height):  # noqa: E501
             height=height)
     except RuntimeError as e:
         return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        return internalerror(str(e))
