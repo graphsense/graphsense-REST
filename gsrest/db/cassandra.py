@@ -339,8 +339,10 @@ class Cassandra():
     def list_tags_by_entity(self, currency, entity):
         session = self.get_session(currency, 'transformed')
         entity = int(entity)
-        query = ("SELECT * FROM cluster_tags WHERE cluster = %s")
-        results = session.execute(query, [entity])
+        group = self.get_id_group(currency, entity)
+        query = ("SELECT * FROM cluster_tags "
+                 "WHERE cluster_group = %s and cluster = %s")
+        results = session.execute(query, [group, entity])
 
         if results is None:
             return []
