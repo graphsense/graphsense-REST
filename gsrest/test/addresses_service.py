@@ -3,6 +3,7 @@ from openapi_server.models.addresses import Addresses
 from openapi_server.models.values import Values
 from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.entity_tag import EntityTag
+from openapi_server.models.tags_by_entity import TagsByEntity
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.neighbors import Neighbors
 from openapi_server.models.neighbor import Neighbor
@@ -89,6 +90,31 @@ etag2 = EntityTag(
            active=True,
            currency='btc'
         )
+
+atag1 = AddressTag(
+    abuse=None,
+    active=True,
+    address='17gN64BPHtxi4mEM3qWrxdwhieUvRq8R2r',
+    category='organization',
+    currency='btc',
+    label='addressTag1',
+    lastmod=1,
+    source='https://archive.org/donate/cryptocurrency',
+    tagpack_uri='http://tagpack_uri'
+)
+
+atag2 = AddressTag(
+    abuse=None,
+    active=True,
+    address='1KeDrQdATuXaZFW4CL9tfe2zpQ5SrmBFWc',
+    category='organization',
+    currency='btc',
+    label='addressTag2',
+    lastmod=2,
+    source='https://archive.org/donate/cryptocurrency',
+    tagpack_uri='http://tagpack_uri'
+)
+
 
 address = Address(
    first_tx=TxSummary(
@@ -366,8 +392,10 @@ entityWithTagsOfAddressWithTags = Entity(
             value=115422577,
             usd=2.31,
             eur=1.15),
-   tags=[etag2, etag],
-   tag_coherence=0
+   tags=TagsByEntity(
+       entity_tags=[etag2, etag],
+       address_tags=[atag1, atag2],
+       tag_coherence=None)
 )
 
 eth_address = Address(
@@ -487,8 +515,7 @@ eth_entityWithTags = Entity(
    out_degree=eth_address.out_degree,
    first_tx=eth_address.first_tx,
    balance=eth_address.balance,
-   tags=[],
-   tag_coherence=0.5
+   tags=TagsByEntity(address_tags=[], entity_tags=[], tag_coherence=None)
 )
 
 
@@ -623,14 +650,14 @@ def get_address_entity(test_case):
                 currency='btc',
                 address=address.address,
                 include_tags=True)
-    result.tag_coherence = 0
+    result.tags.tag_coherence = None
     test_case.assertEqual(entityWithTagsOfAddressWithTags, result)
 
     result = service.get_address_entity(
                 currency='eth',
                 address=eth_address.address,
                 include_tags=True)
-    result.tag_coherence = eth_entityWithTags.tag_coherence
+    result.tags.tag_coherence = None
     test_case.assertEqual(eth_entityWithTags, result)
 
 

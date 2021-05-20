@@ -9,9 +9,9 @@ from six import BytesIO
 from openapi_server.models.entities import Entities  # noqa: E501
 from openapi_server.models.entity import Entity  # noqa: E501
 from openapi_server.models.entity_addresses import EntityAddresses  # noqa: E501
-from openapi_server.models.entity_tag import EntityTag  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
 from openapi_server.models.search_result_level1 import SearchResultLevel1  # noqa: E501
+from openapi_server.models.tags_by_entity import TagsByEntity  # noqa: E501
 from openapi_server.test import BaseTestCase
 import gsrest.test.entities_service as test_service
 
@@ -159,7 +159,7 @@ class TestEntitiesController(BaseTestCase):
     def test_list_tags_by_entity(self):
         """Test case for list_tags_by_entity
 
-        Get attribution tags for a given entity
+        Get tags for a given entity
         """
         test_service.list_tags_by_entity(self)
 
@@ -173,20 +173,22 @@ class TestEntitiesController(BaseTestCase):
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
-    def test_list_tags_by_entity_csv(self):
-        """Test case for list_tags_by_entity_csv
+    def test_list_tags_by_entity_by_level_csv(self):
+        """Test case for list_tags_by_entity_by_level_csv
 
-        Get attribution tags for a given entity as CSV
+        Get address or entity tags for a given entity as CSV
         """
-        test_service.list_tags_by_entity_csv(self)
+        test_service.list_tags_by_entity_by_level_csv(self)
 
+        query_string = [('level', 'address')]
         headers = { 
             'Accept': 'application/csv',
         }
         response = self.client.open(
             '/{currency}/entities/{entity}/tags.csv'.format(currency='btc', entity='67065'),
             method='GET',
-            headers=headers)
+            headers=headers,
+            query_string=query_string)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 

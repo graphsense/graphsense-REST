@@ -208,12 +208,14 @@ class Cassandra():
         return results.current_rows, to_hex(results.paging_state)
 
     @new
-    def get_address_by_id_group(self, currency, address_id_group, address_id):
+    def get_addresses_by_ids(self, currency, address_ids):
+        params = [(self.get_id_group(currency, address_id),
+                   address_id) for address_id in address_ids]
         session = self.get_session(currency, 'transformed')
         query = "SELECT address FROM address_by_id_group WHERE " \
                 "address_id_group = %s and address_id = %s"
-        result = session.execute(query, [address_id_group, address_id])
-        return result.one().address if result else None
+        return [row.address for row in
+                self.concurrent_with_args(session, query, params)]
 
     @new
     def get_address_id(self, currency, address):
@@ -336,7 +338,7 @@ class Cassandra():
         return rows
 
     @eth
-    def list_tags_by_entity(self, currency, entity):
+    def list_entity_tags_by_entity(self, currency, entity):
         session = self.get_session(currency, 'transformed')
         entity = int(entity)
         group = self.get_id_group(currency, entity)
@@ -346,6 +348,24 @@ class Cassandra():
 
         if results is None:
             return []
+        return results.current_rows
+
+    @eth
+    def list_address_tags_by_entity(self, currency, entity):
+        session = self.get_session(currency, 'transformed')
+        entity = int(entity)
+        group = self.get_id_group(currency, entity)
+        query = ("SELECT * FROM cluster_address_tags "
+                 "WHERE cluster_group = %s and cluster = %s")
+        session.row_factory = dict_factory
+        results = session.execute(query, [group, entity])
+
+        if results is None:
+            return []
+        ids = [row['address_id'] for row in results.current_rows]
+        addresses = self.get_addresses_by_ids(currency, ids)
+        for (row, address) in zip(results.current_rows, addresses):
+            row['address'] = address
         return results.current_rows
 
     @eth
@@ -396,10 +416,9 @@ class Cassandra():
         if results is None:
             return []
 
-        for row in results.current_rows:
-            address_id_group = self.get_id_group(currency, row['address_id'])
-            address = self.get_address_by_id_group(currency, address_id_group,
-                                                   row['address_id'])
+        ids = [row['address_id'] for row in results.current_rows]
+        addresses = self.get_addresses_by_ids(currency, ids)
+        for (row, address) in zip(results.current_rows, addresses):
             row['address'] = address
         return results.current_rows, to_hex(results.paging_state)
 
@@ -481,14 +500,9 @@ class Cassandra():
                 statements_and_params.append((query, params))
             results = self.concurrent(session, statements_and_params)
         if node_type == 'address':
-            for row in results:
-                address_id_group = \
-                    self.get_id_group(currency, row[that+'_address_id'])
-                address = \
-                    self.get_address_by_id_group(
-                         currency,
-                         address_id_group,
-                         row[that+'_address_id'])
+            ids = [row[that+'_address_id'] for row in results]
+            addresses = self.get_addresses_by_ids(currency, ids)
+            for (row, address) in zip(results, addresses):
                 row[f'{that}_address'] = address
         if node_type == 'cluster':
             for row in results:
@@ -674,7 +688,10 @@ class Cassandra():
             address['no_addresses'] = 1
         return result, paging_state
 
-    def list_tags_by_entity_eth(self, currency, entity):
+    def list_entity_tags_by_entity_eth(self, currency, entity):
+        return []
+
+    def list_address_tags_by_entity_eth(self, currency, entity):
         return []
 
     def get_address_entity_id_eth(self, currency, address):
@@ -911,13 +928,14 @@ class Cassandra():
                      if row.address.hex().startswith(expression)]
         return rows
 
-    def get_address_by_id_group_new(self, currency,
-                                    address_id_group, address_id):
+    def get_addresses_by_ids_new(self, currency, address_ids):
+        params = [(self.get_id_group(currency, address_id),
+                   address_id) for address_id in address_ids]
         session = self.get_session(currency, 'transformed')
         query = "SELECT address FROM address_ids_by_address_id_group WHERE " \
                 "address_id_group = %s and address_id = %s"
-        result = session.execute(query, [address_id_group, address_id])
-        return result.one().address.hex() if result else None
+        return [row.address.hex() for row in
+                self.concurrent_with_args(session, query, params)]
 
     def list_neighbors_new(self, currency, id, is_outgoing, node_type,
                            targets=None, page=None, pagesize=None):

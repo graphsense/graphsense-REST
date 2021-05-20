@@ -8,10 +8,11 @@ from openapi_server.models.entity import Entity
 from openapi_server.models.values import Values
 from openapi_server.models.search_result_level1 import SearchResultLevel1
 from openapi_server.models.entity_tag import EntityTag
+from openapi_server.models.tags_by_entity import TagsByEntity
 import json
 import gsrest.service.entities_service as service
 from gsrest.test.addresses_service import eth_address, \
-        eth_addressWithTagsOutNeighbors
+        eth_addressWithTagsOutNeighbors, atag1, atag2
 
 tag = EntityTag(
            category="organization",
@@ -68,8 +69,10 @@ entityWithTags = Entity(
             value=115422577,
             usd=2.31,
             eur=1.15),
-   tags=[tag2, tag],
-   tag_coherence=0.5
+   tags=TagsByEntity(
+       entity_tags=[tag2, tag],
+       address_tags=[atag1, atag2],
+       tag_coherence=0.5)
 )
 
 eth_entity = Entity(
@@ -87,8 +90,7 @@ eth_entity = Entity(
 )
 
 eth_entityWithTags = Entity(**eth_entity.to_dict())
-eth_entityWithTags.tags = []
-eth_entityWithTags.tag_coherence = 0.5
+eth_entityWithTags.tags = TagsByEntity(address_tags=[], entity_tags=[])
 
 eth_neighbors = []
 for n in eth_addressWithTagsOutNeighbors.neighbors:
@@ -275,7 +277,7 @@ def get_entity(test_case):
                                 include_tags=True)
 
     # tag_coherence tested by tests/util/test_tag_coherence.py so hardcode here
-    result.tag_coherence = 0.5
+    result.tags.tag_coherence = 0.5
     test_case.assertEqual(entityWithTags, result)
 
     result = service.get_entity(currency='eth',
@@ -322,13 +324,14 @@ def list_entities_csv(test_case):
 def list_tags_by_entity(test_case):
     result = service.list_tags_by_entity(currency='btc',
                                          entity=entityWithTags.entity)
-    test_case.assertEqual([tag2, tag], result)
+    result.tag_coherence = 0.5
+    test_case.assertEqual(entityWithTags.tags, result)
     result = service.list_tags_by_entity(currency='eth',
                                          entity=eth_entityWithTags.entity)
     test_case.assertEqual(eth_entityWithTags.tags, result)
 
 
-def list_tags_by_entity_csv(test_case):
+def list_tags_by_entity_by_level_csv(test_case):
     csv = ("abuse,active,category,currency,entity,label,lastmod,source,"
            "tagpack_uri\r\n"
            ",True,organization,btc,17642138,"
@@ -338,9 +341,11 @@ def list_tags_by_entity_csv(test_case):
            "organization,btc,17642138,\"Internet, Archive\",1560290400,"
            "https://archive.org/donate/cryptocurrency,http://tagpack_uri\r\n"
            )
-    assertEqual(csv, service.list_tags_by_entity_csv(
-                        "btc",
-                        entityWithTags.entity).data.decode('utf-8'))
+    assertEqual(
+        csv,
+        service.list_tags_by_entity_by_level_csv(
+            "btc", entityWithTags.entity, 'entity')
+        .data.decode('utf-8'))
 
 
 def list_entity_neighbors(test_case):
@@ -495,7 +500,8 @@ def search_entity_neighbors(test_case):
                     )
     assertEqual(2818641, result.paths[0].node.entity)
     assertEqual(123, result.paths[0].paths[0].node.entity)
-    assertEqual(category, result.paths[0].paths[0].node.tags[0].category)
+    assertEqual(category,
+                result.paths[0].paths[0].node.tags.entity_tags[0].category)
 
     category = 'MyCategory'
     result = service.search_entity_neighbors(
@@ -509,7 +515,8 @@ def search_entity_neighbors(test_case):
                     )
     assertEqual(67065, result.paths[0].node.entity)
     assertEqual(123, result.paths[0].paths[0].node.entity)
-    assertEqual(category, result.paths[0].paths[0].node.tags[0].category)
+    assertEqual(category,
+                result.paths[0].paths[0].node.tags.entity_tags[0].category)
 
     # Test addresses matching
 

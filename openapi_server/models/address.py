@@ -6,12 +6,12 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from openapi_server.models.base_model_ import Model
-from openapi_server.models.tag import Tag
+from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.values import Values
 from openapi_server import util
 
-from openapi_server.models.tag import Tag  # noqa: E501
+from openapi_server.models.address_tag import AddressTag  # noqa: E501
 from openapi_server.models.tx_summary import TxSummary  # noqa: E501
 from openapi_server.models.values import Values  # noqa: E501
 
@@ -45,7 +45,7 @@ class Address(Model):
         :param total_spent: The total_spent of this Address.  # noqa: E501
         :type total_spent: Values
         :param tags: The tags of this Address.  # noqa: E501
-        :type tags: List[Tag]
+        :type tags: List[AddressTag]
         """
         self.openapi_types = {
             'address': str,
@@ -58,7 +58,7 @@ class Address(Model):
             'no_outgoing_txs': int,
             'total_received': Values,
             'total_spent': Values,
-            'tags': List[Tag]
+            'tags': List[AddressTag]
         }
 
         self.attribute_map = {
@@ -376,7 +376,7 @@ class Address(Model):
         Tags  # noqa: E501
 
         :return: The tags of this Address.
-        :rtype: List[Tag]
+        :rtype: List[AddressTag]
         """
         return self._tags
 
@@ -387,7 +387,7 @@ class Address(Model):
         Tags  # noqa: E501
 
         :param tags: The tags of this Address.
-        :type tags: List[Tag]
+        :type tags: List[AddressTag]
         """
 
         self._tags = tags

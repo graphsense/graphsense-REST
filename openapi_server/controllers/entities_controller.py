@@ -4,9 +4,9 @@ import six
 from openapi_server.models.entities import Entities  # noqa: E501
 from openapi_server.models.entity import Entity  # noqa: E501
 from openapi_server.models.entity_addresses import EntityAddresses  # noqa: E501
-from openapi_server.models.entity_tag import EntityTag  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
 from openapi_server.models.search_result_level1 import SearchResultLevel1  # noqa: E501
+from openapi_server.models.tags_by_entity import TagsByEntity  # noqa: E501
 import gsrest.service.entities_service as service
 from gsrest.service.problems import notfound, badrequest, internalerror
 
@@ -210,7 +210,7 @@ def list_entity_neighbors_csv(currency, entity, direction):  # noqa: E501
 
 
 def list_tags_by_entity(currency, entity):  # noqa: E501
-    """Get attribution tags for a given entity
+    """Get tags for a given entity
 
      # noqa: E501
 
@@ -219,7 +219,7 @@ def list_tags_by_entity(currency, entity):  # noqa: E501
     :param entity: The entity ID
     :type entity: str
 
-    :rtype: List[EntityTag]
+    :rtype: TagsByEntity
     """
     try:
         return service.list_tags_by_entity(
@@ -233,8 +233,8 @@ def list_tags_by_entity(currency, entity):  # noqa: E501
         return internalerror(str(e))
 
 
-def list_tags_by_entity_csv(currency, entity):  # noqa: E501
-    """Get attribution tags for a given entity as CSV
+def list_tags_by_entity_by_level_csv(currency, entity, level):  # noqa: E501
+    """Get address or entity tags for a given entity as CSV
 
      # noqa: E501
 
@@ -242,13 +242,16 @@ def list_tags_by_entity_csv(currency, entity):  # noqa: E501
     :type currency: str
     :param entity: The entity ID
     :type entity: str
+    :param level: Whether tags on the address or entity level are requested
+    :type level: str
 
     :rtype: str
     """
     try:
-        return service.list_tags_by_entity_csv(
+        return service.list_tags_by_entity_by_level_csv(
             currency=currency,
-            entity=entity)
+            entity=entity,
+            level=level)
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:

@@ -1307,17 +1307,15 @@ paths:
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/entity_tag'
-                type: array
+                $ref: '#/components/schemas/tags_by_entity'
           description: OK
-      summary: Get attribution tags for a given entity
+      summary: Get tags for a given entity
       tags:
       - entities
       x-openapi-router-controller: openapi_server.controllers.entities_controller
   /{currency}/entities/{entity}/tags.csv:
     get:
-      operationId: list_tags_by_entity_csv
+      operationId: list_tags_by_entity_by_level_csv
       parameters:
       - description: The cryptocurrency (e.g., btc)
         example: btc
@@ -1338,6 +1336,18 @@ paths:
         schema:
           type: string
         style: simple
+      - description: Whether tags on the address or entity level are requested
+        example: address
+        explode: true
+        in: query
+        name: level
+        required: true
+        schema:
+          enum:
+          - address
+          - entity
+          type: string
+        style: form
       responses:
         "200":
           content:
@@ -1345,7 +1355,7 @@ paths:
               schema:
                 type: string
           description: OK
-      summary: Get attribution tags for a given entity as CSV
+      summary: Get address or entity tags for a given entity as CSV
       tags:
       - entities
       x-openapi-router-controller: openapi_server.controllers.entities_controller
@@ -1615,6 +1625,19 @@ components:
       required: false
       schema:
         type: boolean
+      style: form
+    tag_level:
+      description: Whether tags on the address or entity level are requested
+      example: address
+      explode: true
+      in: query
+      name: level
+      required: true
+      schema:
+        enum:
+        - address
+        - entity
+        type: string
       style: form
     search_key:
       description: 'Match neighbors against one and only one of these properties:
@@ -2139,22 +2162,8 @@ components:
           usd: 6.0274563
           value: 1
         tags:
-        - abuse: abuse
-          active: true
-          currency: currency
-          label: label
-          source: source
-          category: category
-          tagpack_uri: tagpack_uri
-          lastmod: 2
-        - abuse: abuse
-          active: true
-          currency: currency
-          label: label
-          source: source
-          category: category
-          tagpack_uri: tagpack_uri
-          lastmod: 2
+        - null
+        - null
       properties:
         address:
           description: Address
@@ -2189,7 +2198,7 @@ components:
         tags:
           description: Tags
           items:
-            $ref: '#/components/schemas/tag'
+            $ref: '#/components/schemas/address_tag'
           title: tags
           type: array
       required:
@@ -2235,22 +2244,8 @@ components:
             usd: 6.0274563
             value: 1
           tags:
-          - abuse: abuse
-            active: true
-            currency: currency
-            label: label
-            source: source
-            category: category
-            tagpack_uri: tagpack_uri
-            lastmod: 2
-          - abuse: abuse
-            active: true
-            currency: currency
-            label: label
-            source: source
-            category: category
-            tagpack_uri: tagpack_uri
-            lastmod: 2
+          - null
+          - null
         - total_spent:
             eur: 0.8008282
             usd: 6.0274563
@@ -2277,22 +2272,8 @@ components:
             usd: 6.0274563
             value: 1
           tags:
-          - abuse: abuse
-            active: true
-            currency: currency
-            label: label
-            source: source
-            category: category
-            tagpack_uri: tagpack_uri
-            lastmod: 2
-          - abuse: abuse
-            active: true
-            currency: currency
-            label: label
-            source: source
-            category: category
-            tagpack_uri: tagpack_uri
-            lastmod: 2
+          - null
+          - null
       properties:
         next_page:
           format: string
@@ -2312,36 +2293,18 @@ components:
           usd: 6.0274563
           value: 1
         in_degree: 0
-        no_addresses: 1
-        out_degree: 6
-        first_tx:
-          tx_hash: tx_hash
-          height: 1
-          timestamp: 5
-        tag_coherence: 2.302136
-        tags:
-        - abuse: abuse
-          active: true
-          currency: currency
-          label: label
-          source: source
-          category: category
-          tagpack_uri: tagpack_uri
-          lastmod: 2
-        - abuse: abuse
-          active: true
-          currency: currency
-          label: label
-          source: source
-          category: category
-          tagpack_uri: tagpack_uri
-          lastmod: 2
         balance:
           eur: 0.8008282
           usd: 6.0274563
           value: 1
+        no_addresses: 1
         no_incoming_txs: 5
+        out_degree: 6
         no_outgoing_txs: 5
+        first_tx:
+          tx_hash: tx_hash
+          height: 1
+          timestamp: 5
         last_tx:
           tx_hash: tx_hash
           height: 1
@@ -2351,6 +2314,14 @@ components:
           eur: 0.8008282
           usd: 6.0274563
           value: 1
+        tags:
+          entity_tags:
+          - null
+          - null
+          address_tags:
+          - null
+          - null
+          tag_coherence: 2.302136
       properties:
         entity:
           description: Entity id
@@ -2388,16 +2359,7 @@ components:
         total_spent:
           $ref: '#/components/schemas/values'
         tags:
-          description: Tags
-          items:
-            $ref: '#/components/schemas/tag'
-          title: tags
-          type: array
-        tag_coherence:
-          description: Tag coherence
-          format: float
-          title: tag_coherence
-          type: number
+          $ref: '#/components/schemas/tags_by_entity'
       required:
       - balance
       - entity
@@ -2412,6 +2374,38 @@ components:
       - total_spent
       title: entity
       type: object
+    tags_by_entity:
+      example:
+        entity_tags:
+        - null
+        - null
+        address_tags:
+        - null
+        - null
+        tag_coherence: 2.302136
+      properties:
+        address_tags:
+          description: Aggregated tags of contained addresses
+          items:
+            $ref: '#/components/schemas/entity_tag'
+          title: address_tags
+          type: array
+        entity_tags:
+          description: Tags of this entity
+          items:
+            $ref: '#/components/schemas/entity_tag'
+          title: entity_tags
+          type: array
+        tag_coherence:
+          description: Tag coherence
+          format: float
+          title: tag_coherence
+          type: number
+      required:
+      - address_tags
+      - entity_tags
+      title: tags_by_entity
+      type: object
     entities:
       example:
         next_page: next_page
@@ -2421,36 +2415,18 @@ components:
             usd: 6.0274563
             value: 1
           in_degree: 0
-          no_addresses: 1
-          out_degree: 6
-          first_tx:
-            tx_hash: tx_hash
-            height: 1
-            timestamp: 5
-          tag_coherence: 2.302136
-          tags:
-          - abuse: abuse
-            active: true
-            currency: currency
-            label: label
-            source: source
-            category: category
-            tagpack_uri: tagpack_uri
-            lastmod: 2
-          - abuse: abuse
-            active: true
-            currency: currency
-            label: label
-            source: source
-            category: category
-            tagpack_uri: tagpack_uri
-            lastmod: 2
           balance:
             eur: 0.8008282
             usd: 6.0274563
             value: 1
+          no_addresses: 1
           no_incoming_txs: 5
+          out_degree: 6
           no_outgoing_txs: 5
+          first_tx:
+            tx_hash: tx_hash
+            height: 1
+            timestamp: 5
           last_tx:
             tx_hash: tx_hash
             height: 1
@@ -2460,41 +2436,31 @@ components:
             eur: 0.8008282
             usd: 6.0274563
             value: 1
+          tags:
+            entity_tags:
+            - null
+            - null
+            address_tags:
+            - null
+            - null
+            tag_coherence: 2.302136
         - total_spent:
             eur: 0.8008282
             usd: 6.0274563
             value: 1
           in_degree: 0
-          no_addresses: 1
-          out_degree: 6
-          first_tx:
-            tx_hash: tx_hash
-            height: 1
-            timestamp: 5
-          tag_coherence: 2.302136
-          tags:
-          - abuse: abuse
-            active: true
-            currency: currency
-            label: label
-            source: source
-            category: category
-            tagpack_uri: tagpack_uri
-            lastmod: 2
-          - abuse: abuse
-            active: true
-            currency: currency
-            label: label
-            source: source
-            category: category
-            tagpack_uri: tagpack_uri
-            lastmod: 2
           balance:
             eur: 0.8008282
             usd: 6.0274563
             value: 1
+          no_addresses: 1
           no_incoming_txs: 5
+          out_degree: 6
           no_outgoing_txs: 5
+          first_tx:
+            tx_hash: tx_hash
+            height: 1
+            timestamp: 5
           last_tx:
             tx_hash: tx_hash
             height: 1
@@ -2504,6 +2470,14 @@ components:
             eur: 0.8008282
             usd: 6.0274563
             value: 1
+          tags:
+            entity_tags:
+            - null
+            - null
+            address_tags:
+            - null
+            - null
+            tag_coherence: 2.302136
       properties:
         next_page:
           format: string
@@ -2611,15 +2585,6 @@ components:
       - $ref: '#/components/schemas/entity_tag_allOf'
       title: entity_tag
     tag:
-      example:
-        abuse: abuse
-        active: true
-        currency: currency
-        label: label
-        source: source
-        category: category
-        tagpack_uri: tagpack_uri
-        lastmod: 2
       properties:
         label:
           description: Label
@@ -2627,38 +2592,30 @@ components:
           type: string
         category:
           description: Category
-          title: category
           type: string
         abuse:
           description: Abuses
-          title: abuse
           type: string
         tagpack_uri:
           description: Tagpack URI
-          title: tagpack_uri
           type: string
         source:
           description: Source
-          title: source
           type: string
         lastmod:
           description: Last modified
           format: int32
-          title: lastmod
           type: integer
         active:
           description: whether the address has been ever used
-          title: active
           type: boolean
         currency:
           description: Currency
-          title: currency
           type: string
       required:
       - active
       - currency
       - label
-      title: tag
       type: object
     values:
       example:
@@ -2890,22 +2847,8 @@ components:
             usd: 6.0274563
             value: 1
           tags:
-          - abuse: abuse
-            active: true
-            currency: currency
-            label: label
-            source: source
-            category: category
-            tagpack_uri: tagpack_uri
-            lastmod: 2
-          - abuse: abuse
-            active: true
-            currency: currency
-            label: label
-            source: source
-            category: category
-            tagpack_uri: tagpack_uri
-            lastmod: 2
+          - null
+          - null
         - total_spent:
             eur: 0.8008282
             usd: 6.0274563
@@ -2932,22 +2875,8 @@ components:
             usd: 6.0274563
             value: 1
           tags:
-          - abuse: abuse
-            active: true
-            currency: currency
-            label: label
-            source: source
-            category: category
-            tagpack_uri: tagpack_uri
-            lastmod: 2
-          - abuse: abuse
-            active: true
-            currency: currency
-            label: label
-            source: source
-            category: category
-            tagpack_uri: tagpack_uri
-            lastmod: 2
+          - null
+          - null
       properties:
         next_page:
           format: string

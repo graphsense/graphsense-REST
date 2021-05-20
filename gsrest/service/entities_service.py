@@ -6,6 +6,8 @@ from openapi_server.models.entities import Entities
 from openapi_server.models.tx_summary import TxSummary
 from gsrest.util.values import compute_balance, convert_value, make_values
 from openapi_server.models.entity_tag import EntityTag
+from openapi_server.models.address_tag import AddressTag
+from openapi_server.models.tags_by_entity import TagsByEntity
 from openapi_server.models.search_result_level1 import SearchResultLevel1
 from gsrest.util.tag_coherence import compute_tag_coherence
 from flask import Response, stream_with_context
@@ -19,8 +21,6 @@ MAX_DEPTH = 3
 
 
 def from_row(row, rates, tags=None):
-    tag_coherence = compute_tag_coherence(tag.label for tag in tags) \
-                    if tags else None
     return Entity(
         entity=row['cluster'],
         first_tx=TxSummary(
@@ -50,14 +50,35 @@ def from_row(row, rates, tags=None):
                     row['total_spent'].value,
                 ),
                 rates),
-        tags=tags,
-        tag_coherence=tag_coherence
+        tags=tags
         )
 
 
 def list_tags_by_entity(currency, entity):
+    entity_tags = list_entity_tags_by_entity(currency, entity)
+    address_tags = list_address_tags_by_entity(currency, entity)
+    tag_coherence = compute_tag_coherence(tag.label for tag in entity_tags)
+    return TagsByEntity(entity_tags=entity_tags,
+                        address_tags=address_tags,
+                        tag_coherence=tag_coherence)
+
+
+def list_tags_by_entity_by_level_csv(currency, entity, level):
+    def query_function(_):
+        tags = list_entity_tags_by_entity(currency, entity) \
+            if level == 'entity' \
+            else list_address_tags_by_entity(currency, entity)
+        return (None, tags)
+    return Response(stream_with_context(to_csv(query_function)),
+                    mimetype="text/csv",
+                    headers=create_download_header(
+                        '{} tags of entity {} ({}).csv'
+                        .format(level, entity, currency.upper())))
+
+
+def list_entity_tags_by_entity(currency, entity):
     db = get_connection()
-    tags = db.list_tags_by_entity(currency, entity)
+    entity_tags = db.list_entity_tags_by_entity(currency, entity)
     return [EntityTag(label=row.label,
                       entity=row.cluster,
                       category=row.category,
@@ -67,19 +88,22 @@ def list_tags_by_entity(currency, entity):
                       lastmod=row.lastmod,
                       active=True,
                       currency=currency)
-            for row in tags]
+            for row in entity_tags]
 
 
-def list_tags_by_entity_csv(currency, entity):
-    def query_function(_):
-        tags = list_tags_by_entity(currency, entity)
-        return (None, tags)
-    return Response(stream_with_context(to_csv(query_function)),
-                    mimetype="text/csv",
-                    headers=create_download_header(
-                        'tags of entity {} ({}).csv'
-                        .format(entity,
-                                currency.upper())))
+def list_address_tags_by_entity(currency, entity):
+    db = get_connection()
+    address_tags = db.list_address_tags_by_entity(currency, entity)
+    return [AddressTag(label=row['label'],
+                       address=row['address'],
+                       category=row['category'],
+                       abuse=row['abuse'],
+                       tagpack_uri=row['tagpack_uri'],
+                       source=row['source'],
+                       lastmod=row['lastmod'],
+                       active=True,
+                       currency=currency)
+            for row in address_tags]
 
 
 def get_entity(currency, entity, include_tags=False):
@@ -218,16 +242,6 @@ def search_entity_neighbors(currency, entity, direction, key, value, depth, brea
                          breadth, depth, level, skip_num_addresses,
                          direction)
 
-    def add_tag_coherence(paths):
-        if not paths:
-            return
-        for path in paths:
-            path.node.tag_coherence = compute_tag_coherence(
-                t.label for t in path.node.tags)
-            add_tag_coherence(path.paths)
-
-    add_tag_coherence(result)
-
     return SearchResultLevel1(paths=result)
 
 
@@ -266,7 +280,8 @@ def recursive_search(currency, entity, params, breadth, depth, level,
 
         if 'category' in params:
             # find first occurrence of category in tags
-            match = next((True for t in props.tags if t.category and
+            match = next((True for t in props.tags.entity_tags
+                          if t.category and
                           t.category.lower() == params['category'].lower()),
                          False)
 
