@@ -7,7 +7,7 @@ from typing import List, Dict  # noqa: F401
 
 from openapi_server.models.base_model_ import Model
 from openapi_server.models.address import Address
-from openapi_server.models.entity_with_tags import EntityWithTags
+from openapi_server.models.entity import Entity
 from openapi_server.models.neighbor import Neighbor
 from openapi_server.models.search_result_leaf import SearchResultLeaf
 from openapi_server.models.search_result_level2_all_of import SearchResultLevel2AllOf
@@ -15,7 +15,7 @@ from openapi_server.models.search_result_level3 import SearchResultLevel3
 from openapi_server import util
 
 from openapi_server.models.address import Address  # noqa: E501
-from openapi_server.models.entity_with_tags import EntityWithTags  # noqa: E501
+from openapi_server.models.entity import Entity  # noqa: E501
 from openapi_server.models.neighbor import Neighbor  # noqa: E501
 from openapi_server.models.search_result_leaf import SearchResultLeaf  # noqa: E501
 from openapi_server.models.search_result_level2_all_of import SearchResultLevel2AllOf  # noqa: E501
@@ -31,7 +31,7 @@ class SearchResultLevel2(Model):
         """SearchResultLevel2 - a model defined in OpenAPI
 
         :param node: The node of this SearchResultLevel2.  # noqa: E501
-        :type node: EntityWithTags
+        :type node: Entity
         :param relation: The relation of this SearchResultLevel2.  # noqa: E501
         :type relation: Neighbor
         :param matching_addresses: The matching_addresses of this SearchResultLevel2.  # noqa: E501
@@ -40,7 +40,7 @@ class SearchResultLevel2(Model):
         :type paths: List[SearchResultLevel3]
         """
         self.openapi_types = {
-            'node': EntityWithTags,
+            'node': Entity,
             'relation': Neighbor,
             'matching_addresses': List[Address],
             'paths': List[SearchResultLevel3]
@@ -87,7 +87,7 @@ class SearchResultLevel2(Model):
 
 
         :return: The node of this SearchResultLevel2.
-        :rtype: EntityWithTags
+        :rtype: Entity
         """
         return self._node
 
@@ -97,7 +97,7 @@ class SearchResultLevel2(Model):
 
 
         :param node: The node of this SearchResultLevel2.
-        :type node: EntityWithTags
+        :type node: Entity
         """
 
         self._node = node

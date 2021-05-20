@@ -7,9 +7,9 @@ from flask import json
 from six import BytesIO
 
 from openapi_server.models.entities import Entities  # noqa: E501
+from openapi_server.models.entity import Entity  # noqa: E501
 from openapi_server.models.entity_addresses import EntityAddresses  # noqa: E501
 from openapi_server.models.entity_tag import EntityTag  # noqa: E501
-from openapi_server.models.entity_with_tags import EntityWithTags  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
 from openapi_server.models.search_result_level1 import SearchResultLevel1  # noqa: E501
 from openapi_server.test import BaseTestCase
@@ -19,20 +19,22 @@ import gsrest.test.entities_service as test_service
 class TestEntitiesController(BaseTestCase):
     """EntitiesController integration test stubs"""
 
-    def test_get_entity_with_tags(self):
-        """Test case for get_entity_with_tags
+    def test_get_entity(self):
+        """Test case for get_entity
 
-        Get an entity with tags
+        Get an entity, optionally with tags
         """
-        test_service.get_entity_with_tags(self)
+        test_service.get_entity(self)
 
+        query_string = [('','')]
         headers = { 
             'Accept': 'application/json',
         }
         response = self.client.open(
             '/{currency}/entities/{entity}'.format(currency='btc', entity='67065'),
             method='GET',
-            headers=headers)
+            headers=headers,
+            query_string=query_string)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 

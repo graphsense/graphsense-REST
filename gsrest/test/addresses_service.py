@@ -6,7 +6,7 @@ from openapi_server.models.entity_tag import EntityTag
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.neighbors import Neighbors
 from openapi_server.models.neighbor import Neighbor
-from openapi_server.models.entity_with_tags import EntityWithTags
+from openapi_server.models.entity import Entity
 from openapi_server.models.link_utxo import LinkUtxo
 import gsrest.service.addresses_service as service
 from gsrest.test.assertion import assertEqual
@@ -335,7 +335,7 @@ addressWithTagsInNeighbors = Neighbors(
                 )])
 
 
-entityWithTagsOfAddressWithTags = EntityWithTags(
+entityWithTagsOfAddressWithTags = Entity(
    no_outgoing_txs=280,
    last_tx=TxSummary(
       height=651545,
@@ -475,7 +475,7 @@ eth_addressWithTagsOutNeighbors = Neighbors(
                     eur=10.0)
                 )])
 
-eth_entityWithTags = EntityWithTags(
+eth_entityWithTags = Entity(
    no_outgoing_txs=eth_address.no_outgoing_txs,
    last_tx=eth_address.last_tx,
    total_spent=eth_address.total_spent,
@@ -621,13 +621,15 @@ def list_address_neighbors_csv(test_case):
 def get_address_entity(test_case):
     result = service.get_address_entity(
                 currency='btc',
-                address=address.address)
+                address=address.address,
+                include_tags=True)
     result.tag_coherence = 0
     test_case.assertEqual(entityWithTagsOfAddressWithTags, result)
 
     result = service.get_address_entity(
                 currency='eth',
-                address=eth_address.address)
+                address=eth_address.address,
+                include_tags=True)
     result.tag_coherence = eth_entityWithTags.tag_coherence
     test_case.assertEqual(eth_entityWithTags, result)
 

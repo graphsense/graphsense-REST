@@ -2,17 +2,17 @@ import connexion
 import six
 
 from openapi_server.models.entities import Entities  # noqa: E501
+from openapi_server.models.entity import Entity  # noqa: E501
 from openapi_server.models.entity_addresses import EntityAddresses  # noqa: E501
 from openapi_server.models.entity_tag import EntityTag  # noqa: E501
-from openapi_server.models.entity_with_tags import EntityWithTags  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
 from openapi_server.models.search_result_level1 import SearchResultLevel1  # noqa: E501
 import gsrest.service.entities_service as service
 from gsrest.service.problems import notfound, badrequest, internalerror
 
 
-def get_entity_with_tags(currency, entity):  # noqa: E501
-    """Get an entity with tags
+def get_entity(currency, entity, include_tags=None):  # noqa: E501
+    """Get an entity, optionally with tags
 
      # noqa: E501
 
@@ -20,13 +20,16 @@ def get_entity_with_tags(currency, entity):  # noqa: E501
     :type currency: str
     :param entity: The entity ID
     :type entity: str
+    :param include_tags: Whether tags should be included
+    :type include_tags: bool
 
-    :rtype: EntityWithTags
+    :rtype: Entity
     """
     try:
-        return service.get_entity_with_tags(
+        return service.get_entity(
             currency=currency,
-            entity=entity)
+            entity=entity,
+            include_tags=include_tags)
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:

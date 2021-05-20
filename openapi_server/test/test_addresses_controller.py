@@ -10,7 +10,7 @@ from openapi_server.models.address import Address  # noqa: E501
 from openapi_server.models.address_tag import AddressTag  # noqa: E501
 from openapi_server.models.address_txs import AddressTxs  # noqa: E501
 from openapi_server.models.addresses import Addresses  # noqa: E501
-from openapi_server.models.entity_with_tags import EntityWithTags  # noqa: E501
+from openapi_server.models.entity import Entity  # noqa: E501
 from openapi_server.models.link import Link  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
 from openapi_server.test import BaseTestCase
@@ -46,13 +46,15 @@ class TestAddressesController(BaseTestCase):
         """
         test_service.get_address_entity(self)
 
+        query_string = [('','')]
         headers = { 
             'Accept': 'application/json',
         }
         response = self.client.open(
             '/{currency}/addresses/{address}/entity'.format(currency='btc', address='1Archive1n2C579dMsAu3iC6tWzuQJz8dN'),
             method='GET',
-            headers=headers)
+            headers=headers,
+            query_string=query_string)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 

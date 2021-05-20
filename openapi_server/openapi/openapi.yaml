@@ -301,12 +301,20 @@ paths:
           format: string
           type: string
         style: simple
+      - description: Whether tags should be included
+        explode: true
+        in: query
+        name: include_tags
+        required: false
+        schema:
+          type: boolean
+        style: form
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/entity_with_tags'
+                $ref: '#/components/schemas/entity'
           description: OK
       summary: Get the entity of an address
       tags:
@@ -912,7 +920,7 @@ paths:
       x-openapi-router-controller: openapi_server.controllers.entities_controller
   /{currency}/entities/{entity}:
     get:
-      operationId: get_entity_with_tags
+      operationId: get_entity
       parameters:
       - description: The cryptocurrency (e.g., btc)
         example: btc
@@ -933,14 +941,22 @@ paths:
         schema:
           type: string
         style: simple
+      - description: Whether tags should be included
+        explode: true
+        in: query
+        name: include_tags
+        required: false
+        schema:
+          type: boolean
+        style: form
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/entity_with_tags'
+                $ref: '#/components/schemas/entity'
           description: OK
-      summary: Get an entity with tags
+      summary: Get an entity, optionally with tags
       tags:
       - entities
       x-openapi-router-controller: openapi_server.controllers.entities_controller
@@ -2296,18 +2312,36 @@ components:
           usd: 6.0274563
           value: 1
         in_degree: 0
-        balance:
-          eur: 0.8008282
-          usd: 6.0274563
-          value: 1
         no_addresses: 1
-        no_incoming_txs: 5
         out_degree: 6
-        no_outgoing_txs: 5
         first_tx:
           tx_hash: tx_hash
           height: 1
           timestamp: 5
+        tag_coherence: 2.302136
+        tags:
+        - abuse: abuse
+          active: true
+          currency: currency
+          label: label
+          source: source
+          category: category
+          tagpack_uri: tagpack_uri
+          lastmod: 2
+        - abuse: abuse
+          active: true
+          currency: currency
+          label: label
+          source: source
+          category: category
+          tagpack_uri: tagpack_uri
+          lastmod: 2
+        balance:
+          eur: 0.8008282
+          usd: 6.0274563
+          value: 1
+        no_incoming_txs: 5
+        no_outgoing_txs: 5
         last_tx:
           tx_hash: tx_hash
           height: 1
@@ -2353,6 +2387,17 @@ components:
           $ref: '#/components/schemas/values'
         total_spent:
           $ref: '#/components/schemas/values'
+        tags:
+          description: Tags
+          items:
+            $ref: '#/components/schemas/tag'
+          title: tags
+          type: array
+        tag_coherence:
+          description: Tag coherence
+          format: float
+          title: tag_coherence
+          type: number
       required:
       - balance
       - entity
@@ -2367,11 +2412,6 @@ components:
       - total_spent
       title: entity
       type: object
-    entity_with_tags:
-      allOf:
-      - $ref: '#/components/schemas/entity'
-      - $ref: '#/components/schemas/entity_with_tags_allOf'
-      title: entity_with_tags
     entities:
       example:
         next_page: next_page
@@ -2381,18 +2421,36 @@ components:
             usd: 6.0274563
             value: 1
           in_degree: 0
-          balance:
-            eur: 0.8008282
-            usd: 6.0274563
-            value: 1
           no_addresses: 1
-          no_incoming_txs: 5
           out_degree: 6
-          no_outgoing_txs: 5
           first_tx:
             tx_hash: tx_hash
             height: 1
             timestamp: 5
+          tag_coherence: 2.302136
+          tags:
+          - abuse: abuse
+            active: true
+            currency: currency
+            label: label
+            source: source
+            category: category
+            tagpack_uri: tagpack_uri
+            lastmod: 2
+          - abuse: abuse
+            active: true
+            currency: currency
+            label: label
+            source: source
+            category: category
+            tagpack_uri: tagpack_uri
+            lastmod: 2
+          balance:
+            eur: 0.8008282
+            usd: 6.0274563
+            value: 1
+          no_incoming_txs: 5
+          no_outgoing_txs: 5
           last_tx:
             tx_hash: tx_hash
             height: 1
@@ -2407,18 +2465,36 @@ components:
             usd: 6.0274563
             value: 1
           in_degree: 0
-          balance:
-            eur: 0.8008282
-            usd: 6.0274563
-            value: 1
           no_addresses: 1
-          no_incoming_txs: 5
           out_degree: 6
-          no_outgoing_txs: 5
           first_tx:
             tx_hash: tx_hash
             height: 1
             timestamp: 5
+          tag_coherence: 2.302136
+          tags:
+          - abuse: abuse
+            active: true
+            currency: currency
+            label: label
+            source: source
+            category: category
+            tagpack_uri: tagpack_uri
+            lastmod: 2
+          - abuse: abuse
+            active: true
+            currency: currency
+            label: label
+            source: source
+            category: category
+            tagpack_uri: tagpack_uri
+            lastmod: 2
+          balance:
+            eur: 0.8008282
+            usd: 6.0274563
+            value: 1
+          no_incoming_txs: 5
+          no_outgoing_txs: 5
           last_tx:
             tx_hash: tx_hash
             height: 1
@@ -2907,7 +2983,7 @@ components:
     search_result_leaf:
       properties:
         node:
-          $ref: '#/components/schemas/entity_with_tags'
+          $ref: '#/components/schemas/entity'
         relation:
           $ref: '#/components/schemas/neighbor'
         matching_addresses:
@@ -3192,20 +3268,6 @@ components:
         type: string
       title: labels
       type: array
-    entity_with_tags_allOf:
-      properties:
-        tags:
-          description: Tags
-          items:
-            $ref: '#/components/schemas/tag'
-          type: array
-        tag_coherence:
-          description: Tag coherence
-          format: float
-          type: number
-      required:
-      - tags
-      type: object
     address_tag_allOf:
       properties:
         address:

@@ -5,7 +5,6 @@ from openapi_server.models.neighbor import Neighbor
 from openapi_server.models.address import Address
 from openapi_server.models.entity_addresses import EntityAddresses
 from openapi_server.models.entity import Entity
-from openapi_server.models.entity_with_tags import EntityWithTags
 from openapi_server.models.values import Values
 from openapi_server.models.search_result_level1 import SearchResultLevel1
 from openapi_server.models.entity_tag import EntityTag
@@ -38,7 +37,7 @@ tag2 = EntityTag(
            currency='btc'
         )
 
-entityWithTags = EntityWithTags(
+entityWithTags = Entity(
    no_outgoing_txs=280,
    last_tx=TxSummary(
       height=651545,
@@ -87,10 +86,9 @@ eth_entity = Entity(
    balance=eth_address.balance
 )
 
-eth_entityWithTags = EntityWithTags(
-   **eth_entity.to_dict(),
-   tags=[],
-   tag_coherence=0.5)
+eth_entityWithTags = Entity(**eth_entity.to_dict())
+eth_entityWithTags.tags = []
+eth_entityWithTags.tag_coherence = 0.5
 
 eth_neighbors = []
 for n in eth_addressWithTagsOutNeighbors.neighbors:
@@ -271,20 +269,24 @@ entityWithTagsAddresses = EntityAddresses(
         )
 
 
-def get_entity_with_tags(test_case):
-    result = service.get_entity_with_tags(currency='btc',
-                                          entity=entityWithTags.entity)
+def get_entity(test_case):
+    result = service.get_entity(currency='btc',
+                                entity=entityWithTags.entity,
+                                include_tags=True)
 
     # tag_coherence tested by tests/util/test_tag_coherence.py so hardcode here
     result.tag_coherence = 0.5
     test_case.assertEqual(entityWithTags, result)
 
-    result = service.get_entity_with_tags(currency='eth',
-                                          entity=eth_entityWithTags.entity)
+    result = service.get_entity(currency='eth',
+                                entity=eth_entityWithTags.entity,
+                                include_tags=True)
 
-    # tag_coherence tested by tests/util/test_tag_coherence.py so hardcode here
-    result.tag_coherence = 0.5
-    test_case.assertEqual(eth_entityWithTags, result)
+    result = service.get_entity(currency='eth',
+                                entity=eth_entity.entity,
+                                include_tags=False)
+
+    test_case.assertEqual(eth_entity, result)
 
 
 def list_entities(test_case):

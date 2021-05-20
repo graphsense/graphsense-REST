@@ -4,7 +4,7 @@ from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.addresses import Addresses
 from openapi_server.models.link_utxo import LinkUtxo
 from openapi_server.models.tx_account import TxAccount
-from gsrest.service.entities_service import get_entity_with_tags
+from gsrest.service.entities_service import get_entity
 from gsrest.service.rates_service import list_rates
 import gsrest.service.common_service as common
 from gsrest.util.values import convert_value
@@ -128,7 +128,7 @@ def list_address_links_csv(currency, address, neighbor):
                             .format(address, neighbor, currency.upper())))
 
 
-def get_address_entity(currency, address):
+def get_address_entity(currency, address, include_tags=False):
     # from address to complete entity stats
     e = RuntimeError('Entity for address {} not found'.format(address))
     db = get_connection()
@@ -137,7 +137,7 @@ def get_address_entity(currency, address):
     if entity_id is None:
         raise e
 
-    result = get_entity_with_tags(currency, entity_id)
+    result = get_entity(currency, entity_id, include_tags)
     if result is None:
         raise e
 

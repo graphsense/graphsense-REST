@@ -6,10 +6,12 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from openapi_server.models.base_model_ import Model
+from openapi_server.models.tag import Tag
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.values import Values
 from openapi_server import util
 
+from openapi_server.models.tag import Tag  # noqa: E501
 from openapi_server.models.tx_summary import TxSummary  # noqa: E501
 from openapi_server.models.values import Values  # noqa: E501
 
@@ -19,7 +21,7 @@ class Entity(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, entity=None, balance=None, first_tx=None, last_tx=None, in_degree=None, out_degree=None, no_addresses=None, no_incoming_txs=None, no_outgoing_txs=None, total_received=None, total_spent=None):  # noqa: E501
+    def __init__(self, entity=None, balance=None, first_tx=None, last_tx=None, in_degree=None, out_degree=None, no_addresses=None, no_incoming_txs=None, no_outgoing_txs=None, total_received=None, total_spent=None, tags=None, tag_coherence=None):  # noqa: E501
         """Entity - a model defined in OpenAPI
 
         :param entity: The entity of this Entity.  # noqa: E501
@@ -44,6 +46,10 @@ class Entity(Model):
         :type total_received: Values
         :param total_spent: The total_spent of this Entity.  # noqa: E501
         :type total_spent: Values
+        :param tags: The tags of this Entity.  # noqa: E501
+        :type tags: List[Tag]
+        :param tag_coherence: The tag_coherence of this Entity.  # noqa: E501
+        :type tag_coherence: float
         """
         self.openapi_types = {
             'entity': str,
@@ -56,7 +62,9 @@ class Entity(Model):
             'no_incoming_txs': int,
             'no_outgoing_txs': int,
             'total_received': Values,
-            'total_spent': Values
+            'total_spent': Values,
+            'tags': List[Tag],
+            'tag_coherence': float
         }
 
         self.attribute_map = {
@@ -70,7 +78,9 @@ class Entity(Model):
             'no_incoming_txs': 'no_incoming_txs',
             'no_outgoing_txs': 'no_outgoing_txs',
             'total_received': 'total_received',
-            'total_spent': 'total_spent'
+            'total_spent': 'total_spent',
+            'tags': 'tags',
+            'tag_coherence': 'tag_coherence'
         }
 
         if entity is None:
@@ -106,6 +116,8 @@ class Entity(Model):
         if total_spent is None:
             raise ValueError("Invalid value for `total_spent`, must not be `None`")  # noqa: E501
         self._total_spent = total_spent
+        self._tags = tags
+        self._tag_coherence = tag_coherence
 
     @classmethod
     def from_dict(cls, dikt) -> 'Entity':
@@ -134,7 +146,9 @@ class Entity(Model):
             'no_incoming_txs': self._no_incoming_txs,
             'no_outgoing_txs': self._no_outgoing_txs,
             'total_received': self._total_received,
-            'total_spent': self._total_spent }
+            'total_spent': self._total_spent,
+            'tags': self._tags,
+            'tag_coherence': self._tag_coherence }
 
 
     @property
@@ -393,3 +407,49 @@ class Entity(Model):
             raise ValueError("Invalid value for `total_spent`, must not be `None`")  # noqa: E501
 
         self._total_spent = total_spent
+
+    @property
+    def tags(self):
+        """Gets the tags of this Entity.
+
+        Tags  # noqa: E501
+
+        :return: The tags of this Entity.
+        :rtype: List[Tag]
+        """
+        return self._tags
+
+    @tags.setter
+    def tags(self, tags):
+        """Sets the tags of this Entity.
+
+        Tags  # noqa: E501
+
+        :param tags: The tags of this Entity.
+        :type tags: List[Tag]
+        """
+
+        self._tags = tags
+
+    @property
+    def tag_coherence(self):
+        """Gets the tag_coherence of this Entity.
+
+        Tag coherence  # noqa: E501
+
+        :return: The tag_coherence of this Entity.
+        :rtype: float
+        """
+        return self._tag_coherence
+
+    @tag_coherence.setter
+    def tag_coherence(self, tag_coherence):
+        """Sets the tag_coherence of this Entity.
+
+        Tag coherence  # noqa: E501
+
+        :param tag_coherence: The tag_coherence of this Entity.
+        :type tag_coherence: float
+        """
+
+        self._tag_coherence = tag_coherence

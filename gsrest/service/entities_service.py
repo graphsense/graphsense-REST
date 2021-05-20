@@ -6,7 +6,6 @@ from openapi_server.models.entities import Entities
 from openapi_server.models.tx_summary import TxSummary
 from gsrest.util.values import compute_balance, convert_value, make_values
 from openapi_server.models.entity_tag import EntityTag
-from openapi_server.models.entity_with_tags import EntityWithTags
 from openapi_server.models.search_result_level1 import SearchResultLevel1
 from gsrest.util.tag_coherence import compute_tag_coherence
 from flask import Response, stream_with_context
@@ -19,7 +18,9 @@ import importlib
 MAX_DEPTH = 3
 
 
-def from_row(row, rates):
+def from_row(row, rates, tags=None):
+    tag_coherence = compute_tag_coherence(tag.label for tag in tags) \
+                    if tags else None
     return Entity(
         entity=row['cluster'],
         first_tx=TxSummary(
@@ -48,7 +49,9 @@ def from_row(row, rates):
                     row['total_received'].value,
                     row['total_spent'].value,
                 ),
-                rates)
+                rates),
+        tags=tags,
+        tag_coherence=tag_coherence
         )
 
 
@@ -79,23 +82,16 @@ def list_tags_by_entity_csv(currency, entity):
                                 currency.upper())))
 
 
-def get_entity_with_tags(currency, entity):
-    result = get_entity(currency, entity)
-    tags = list_tags_by_entity(currency, result.entity)
-    return EntityWithTags(
-        **result.to_dict(),
-        tags=tags,
-        tag_coherence=compute_tag_coherence(tag.label for tag in tags)
-        )
-
-
-def get_entity(currency, entity):
+def get_entity(currency, entity, include_tags=False):
     db = get_connection()
     result = db.get_entity(currency, entity)
 
     if result is None:
         raise RuntimeError("Entity {} not found".format(entity))
-    return from_row(result, get_rates(currency)['rates'])
+
+    tags = list_tags_by_entity(currency, result['cluster']) \
+        if include_tags else None
+    return from_row(result, get_rates(currency)['rates'], tags)
 
 
 def list_entities(currency, ids=None, page=None, pagesize=None):
@@ -264,7 +260,7 @@ def recursive_search(currency, entity, params, breadth, depth, level,
     for neighbor in neighbors:
         match = True
         props = cached(neighbor.id, 'props',
-                       lambda: get_entity_with_tags(currency, neighbor.id))
+                       lambda: get_entity(currency, neighbor.id, True))
         if props is None:
             continue
 

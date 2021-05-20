@@ -5,7 +5,7 @@ from openapi_server.models.address import Address  # noqa: E501
 from openapi_server.models.address_tag import AddressTag  # noqa: E501
 from openapi_server.models.address_txs import AddressTxs  # noqa: E501
 from openapi_server.models.addresses import Addresses  # noqa: E501
-from openapi_server.models.entity_with_tags import EntityWithTags  # noqa: E501
+from openapi_server.models.entity import Entity  # noqa: E501
 from openapi_server.models.link import Link  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
 import gsrest.service.addresses_service as service
@@ -39,7 +39,7 @@ def get_address(currency, address, include_tags=None):  # noqa: E501
         return internalerror(str(e))
 
 
-def get_address_entity(currency, address):  # noqa: E501
+def get_address_entity(currency, address, include_tags=None):  # noqa: E501
     """Get the entity of an address
 
      # noqa: E501
@@ -48,13 +48,16 @@ def get_address_entity(currency, address):  # noqa: E501
     :type currency: str
     :param address: The cryptocurrency address
     :type address: str
+    :param include_tags: Whether tags should be included
+    :type include_tags: bool
 
-    :rtype: EntityWithTags
+    :rtype: Entity
     """
     try:
         return service.get_address_entity(
             currency=currency,
-            address=address)
+            address=address,
+            include_tags=include_tags)
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:

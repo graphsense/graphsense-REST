@@ -21,8 +21,6 @@ from openapi_server.models.entity import Entity
 from openapi_server.models.entity_addresses import EntityAddresses
 from openapi_server.models.entity_tag import EntityTag
 from openapi_server.models.entity_tag_all_of import EntityTagAllOf
-from openapi_server.models.entity_with_tags import EntityWithTags
-from openapi_server.models.entity_with_tags_all_of import EntityWithTagsAllOf
 from openapi_server.models.link import Link
 from openapi_server.models.link_utxo import LinkUtxo
 from openapi_server.models.neighbor import Neighbor
