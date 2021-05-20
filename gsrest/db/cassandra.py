@@ -333,8 +333,9 @@ class Cassandra():
                         statement,
                         [prefix[:ADDRESS_PREFIX_LENGTH]],
                         paging_state=paging_state)
-            rows += [row.address for row in result
+            rows += [row.address for row in result.current_rows
                      if row.address.startswith(expression)]
+            paging_state = result.paging_state
         return rows
 
     @eth

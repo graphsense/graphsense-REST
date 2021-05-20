@@ -77,21 +77,21 @@ def get_statistics(test_case):
 
 def search(test_case):
     def base_search_results():
-            return SearchResult(
-                    currencies=[
-                        SearchResultByCurrency(
-                            currency='btc',
-                            addresses=[],
-                            txs=[]),
-                        SearchResultByCurrency(
-                            currency='ltc',
-                            addresses=[],
-                            txs=[]),
-                        SearchResultByCurrency(
-                            currency='eth',
-                            addresses=[],
-                            txs=[])],
-                    labels=[])
+        return SearchResult(
+                currencies=[
+                    SearchResultByCurrency(
+                        currency='btc',
+                        addresses=[],
+                        txs=[]),
+                    SearchResultByCurrency(
+                        currency='ltc',
+                        addresses=[],
+                        txs=[]),
+                    SearchResultByCurrency(
+                        currency='eth',
+                        addresses=[],
+                        txs=[])],
+                labels=[])
 
     expected = base_search_results()
     expected.currencies[0] = \
