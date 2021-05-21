@@ -25,7 +25,7 @@ class Entity(Model):
         """Entity - a model defined in OpenAPI
 
         :param entity: The entity of this Entity.  # noqa: E501
-        :type entity: str
+        :type entity: int
         :param balance: The balance of this Entity.  # noqa: E501
         :type balance: Values
         :param first_tx: The first_tx of this Entity.  # noqa: E501
@@ -50,7 +50,7 @@ class Entity(Model):
         :type tags: TagsByEntity
         """
         self.openapi_types = {
-            'entity': str,
+            'entity': int,
             'balance': Values,
             'first_tx': TxSummary,
             'last_tx': TxSummary,
@@ -152,7 +152,7 @@ class Entity(Model):
         Entity id  # noqa: E501
 
         :return: The entity of this Entity.
-        :rtype: str
+        :rtype: int
         """
         return self._entity
 
@@ -163,7 +163,7 @@ class Entity(Model):
         Entity id  # noqa: E501
 
         :param entity: The entity of this Entity.
-        :type entity: str
+        :type entity: int
         """
         if entity is None:
             raise ValueError("Invalid value for `entity`, must not be `None`")  # noqa: E501

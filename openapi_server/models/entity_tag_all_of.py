@@ -19,10 +19,10 @@ class EntityTagAllOf(Model):
         """EntityTagAllOf - a model defined in OpenAPI
 
         :param entity: The entity of this EntityTagAllOf.  # noqa: E501
-        :type entity: str
+        :type entity: int
         """
         self.openapi_types = {
-            'entity': str
+            'entity': int
         }
 
         self.attribute_map = {
@@ -60,7 +60,7 @@ class EntityTagAllOf(Model):
         Entity id  # noqa: E501
 
         :return: The entity of this EntityTagAllOf.
-        :rtype: str
+        :rtype: int
         """
         return self._entity
 
@@ -71,7 +71,7 @@ class EntityTagAllOf(Model):
         Entity id  # noqa: E501
 
         :param entity: The entity of this EntityTagAllOf.
-        :type entity: str
+        :type entity: int
         """
         if entity is None:
             raise ValueError("Invalid value for `entity`, must not be `None`")  # noqa: E501

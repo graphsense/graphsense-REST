@@ -39,7 +39,7 @@ class EntityTag(Model):
         :param currency: The currency of this EntityTag.  # noqa: E501
         :type currency: str
         :param entity: The entity of this EntityTag.  # noqa: E501
-        :type entity: str
+        :type entity: int
         """
         self.openapi_types = {
             'label': str,
@@ -50,7 +50,7 @@ class EntityTag(Model):
             'lastmod': int,
             'active': bool,
             'currency': str,
-            'entity': str
+            'entity': int
         }
 
         self.attribute_map = {
@@ -308,7 +308,7 @@ class EntityTag(Model):
         Entity id  # noqa: E501
 
         :return: The entity of this EntityTag.
-        :rtype: str
+        :rtype: int
         """
         return self._entity
 
@@ -319,7 +319,7 @@ class EntityTag(Model):
         Entity id  # noqa: E501
 
         :param entity: The entity of this EntityTag.
-        :type entity: str
+        :type entity: int
         """
         if entity is None:
             raise ValueError("Invalid value for `entity`, must not be `None`")  # noqa: E501

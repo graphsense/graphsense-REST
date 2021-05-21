@@ -2301,15 +2301,15 @@ components:
           eur: 0.8008282
           usd: 6.0274563
           value: 1
-        in_degree: 0
+        in_degree: 6
         balance:
           eur: 0.8008282
           usd: 6.0274563
           value: 1
-        no_addresses: 1
+        no_addresses: 5
         no_incoming_txs: 5
-        out_degree: 6
-        no_outgoing_txs: 5
+        out_degree: 1
+        no_outgoing_txs: 2
         first_tx:
           tx_hash: tx_hash
           height: 1
@@ -2318,7 +2318,7 @@ components:
           tx_hash: tx_hash
           height: 1
           timestamp: 5
-        entity: entity
+        entity: 0
         total_received:
           eur: 0.8008282
           usd: 6.0274563
@@ -2330,12 +2330,13 @@ components:
           address_tags:
           - null
           - null
-          tag_coherence: 2.302136
+          tag_coherence: 7.0614014
       properties:
         entity:
           description: Entity id
+          format: int64
           title: entity
-          type: string
+          type: integer
         balance:
           $ref: '#/components/schemas/values'
         first_tx:
@@ -2391,7 +2392,7 @@ components:
         address_tags:
         - null
         - null
-        tag_coherence: 2.302136
+        tag_coherence: 7.0614014
       properties:
         address_tags:
           description: Aggregated tags of contained addresses
@@ -2423,15 +2424,15 @@ components:
             eur: 0.8008282
             usd: 6.0274563
             value: 1
-          in_degree: 0
+          in_degree: 6
           balance:
             eur: 0.8008282
             usd: 6.0274563
             value: 1
-          no_addresses: 1
+          no_addresses: 5
           no_incoming_txs: 5
-          out_degree: 6
-          no_outgoing_txs: 5
+          out_degree: 1
+          no_outgoing_txs: 2
           first_tx:
             tx_hash: tx_hash
             height: 1
@@ -2440,7 +2441,7 @@ components:
             tx_hash: tx_hash
             height: 1
             timestamp: 5
-          entity: entity
+          entity: 0
           total_received:
             eur: 0.8008282
             usd: 6.0274563
@@ -2452,20 +2453,20 @@ components:
             address_tags:
             - null
             - null
-            tag_coherence: 2.302136
+            tag_coherence: 7.0614014
         - total_spent:
             eur: 0.8008282
             usd: 6.0274563
             value: 1
-          in_degree: 0
+          in_degree: 6
           balance:
             eur: 0.8008282
             usd: 6.0274563
             value: 1
-          no_addresses: 1
+          no_addresses: 5
           no_incoming_txs: 5
-          out_degree: 6
-          no_outgoing_txs: 5
+          out_degree: 1
+          no_outgoing_txs: 2
           first_tx:
             tx_hash: tx_hash
             height: 1
@@ -2474,7 +2475,7 @@ components:
             tx_hash: tx_hash
             height: 1
             timestamp: 5
-          entity: entity
+          entity: 0
           total_received:
             eur: 0.8008282
             usd: 6.0274563
@@ -2486,7 +2487,7 @@ components:
             address_tags:
             - null
             - null
-            tag_coherence: 2.302136
+            tag_coherence: 7.0614014
       properties:
         next_page:
           format: string
@@ -2656,8 +2657,9 @@ components:
       type: string
     entity_id:
       description: Entity id
+      format: int64
       title: entity
-      type: string
+      type: integer
     height:
       description: Height
       format: int64
@@ -3219,8 +3221,9 @@ components:
       properties:
         entity:
           description: Entity id
+          format: int64
           title: entity
-          type: string
+          type: integer
       required:
       - entity
       type: object
