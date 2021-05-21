@@ -46,7 +46,7 @@ from openapi_server.models.stats_tags_source import StatsTagsSource
 from openapi_server.models.stats_tool import StatsTool
 from openapi_server.models.stats_version import StatsVersion
 from openapi_server.models.tag import Tag
-from openapi_server.models.tags_by_entity import TagsByEntity
+from openapi_server.models.tags import Tags
 from openapi_server.models.taxonomy import Taxonomy
 from openapi_server.models.tx import Tx
 from openapi_server.models.tx_account import TxAccount

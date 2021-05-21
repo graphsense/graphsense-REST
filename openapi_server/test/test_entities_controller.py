@@ -11,7 +11,7 @@ from openapi_server.models.entity import Entity  # noqa: E501
 from openapi_server.models.entity_addresses import EntityAddresses  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
 from openapi_server.models.search_result_level1 import SearchResultLevel1  # noqa: E501
-from openapi_server.models.tags_by_entity import TagsByEntity  # noqa: E501
+from openapi_server.models.tags import Tags  # noqa: E501
 from openapi_server.test import BaseTestCase
 import gsrest.test.entities_service as test_service
 

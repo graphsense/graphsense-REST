@@ -7,7 +7,7 @@ from openapi_server.models.tx_summary import TxSummary
 from gsrest.util.values import compute_balance, convert_value, make_values
 from openapi_server.models.entity_tag import EntityTag
 from openapi_server.models.address_tag import AddressTag
-from openapi_server.models.tags_by_entity import TagsByEntity
+from openapi_server.models.tags import Tags
 from openapi_server.models.search_result_level1 import SearchResultLevel1
 from gsrest.util.tag_coherence import compute_tag_coherence
 from flask import Response, stream_with_context
@@ -58,9 +58,9 @@ def list_tags_by_entity(currency, entity):
     entity_tags = list_entity_tags_by_entity(currency, entity)
     address_tags = list_address_tags_by_entity(currency, entity)
     tag_coherence = compute_tag_coherence(tag.label for tag in address_tags)
-    return TagsByEntity(entity_tags=entity_tags,
-                        address_tags=address_tags,
-                        tag_coherence=tag_coherence)
+    return Tags(entity_tags=entity_tags,
+                address_tags=address_tags,
+                tag_coherence=tag_coherence)
 
 
 def list_tags_by_entity_by_level_csv(currency, entity, level):

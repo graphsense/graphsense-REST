@@ -6,7 +6,7 @@ from openapi_server.models.entity import Entity  # noqa: E501
 from openapi_server.models.entity_addresses import EntityAddresses  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
 from openapi_server.models.search_result_level1 import SearchResultLevel1  # noqa: E501
-from openapi_server.models.tags_by_entity import TagsByEntity  # noqa: E501
+from openapi_server.models.tags import Tags  # noqa: E501
 import gsrest.service.entities_service as service
 from gsrest.service.problems import notfound, badrequest, internalerror
 
@@ -219,7 +219,7 @@ def list_tags_by_entity(currency, entity):  # noqa: E501
     :param entity: The entity ID
     :type entity: int
 
-    :rtype: TagsByEntity
+    :rtype: Tags
     """
     try:
         return service.list_tags_by_entity(

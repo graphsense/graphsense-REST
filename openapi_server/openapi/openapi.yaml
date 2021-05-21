@@ -67,7 +67,7 @@ paths:
       x-openapi-router-controller: openapi_server.controllers.general_controller
   /tags:
     get:
-      operationId: list_address_tags
+      operationId: list_tags
       parameters:
       - description: The cryptocurrency (e.g., btc)
         example: btc
@@ -94,10 +94,10 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/address_tag'
+                  $ref: '#/components/schemas/tags'
                 type: array
           description: OK
-      summary: Returns the address tags associated with a given label
+      summary: Returns address and entity tags associated with a given label
       tags:
       - tags
       x-openapi-router-controller: openapi_server.controllers.tags_controller
@@ -1314,7 +1314,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/tags_by_entity'
+                $ref: '#/components/schemas/tags'
           description: OK
       summary: Get tags for a given entity
       tags:
@@ -2330,7 +2330,7 @@ components:
           address_tags:
           - null
           - null
-          tag_coherence: 7.0614014
+          tag_coherence: 0.8008282
       properties:
         entity:
           description: Entity id
@@ -2369,7 +2369,7 @@ components:
         total_spent:
           $ref: '#/components/schemas/values'
         tags:
-          $ref: '#/components/schemas/tags_by_entity'
+          $ref: '#/components/schemas/tags'
       required:
       - balance
       - entity
@@ -2384,7 +2384,7 @@ components:
       - total_spent
       title: entity
       type: object
-    tags_by_entity:
+    tags:
       example:
         entity_tags:
         - null
@@ -2392,12 +2392,12 @@ components:
         address_tags:
         - null
         - null
-        tag_coherence: 7.0614014
+        tag_coherence: 0.8008282
       properties:
         address_tags:
           description: Aggregated tags of contained addresses
           items:
-            $ref: '#/components/schemas/entity_tag'
+            $ref: '#/components/schemas/address_tag'
           title: address_tags
           type: array
         entity_tags:
@@ -2414,7 +2414,7 @@ components:
       required:
       - address_tags
       - entity_tags
-      title: tags_by_entity
+      title: tags
       type: object
     entities:
       example:
@@ -2453,7 +2453,7 @@ components:
             address_tags:
             - null
             - null
-            tag_coherence: 7.0614014
+            tag_coherence: 0.8008282
         - total_spent:
             eur: 0.8008282
             usd: 6.0274563
@@ -2487,7 +2487,7 @@ components:
             address_tags:
             - null
             - null
-            tag_coherence: 7.0614014
+            tag_coherence: 0.8008282
       properties:
         next_page:
           format: string

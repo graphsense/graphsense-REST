@@ -8,7 +8,7 @@ from openapi_server.models.entity import Entity
 from openapi_server.models.values import Values
 from openapi_server.models.search_result_level1 import SearchResultLevel1
 from openapi_server.models.entity_tag import EntityTag
-from openapi_server.models.tags_by_entity import TagsByEntity
+from openapi_server.models.tags import Tags
 import json
 import gsrest.service.entities_service as service
 from gsrest.test.addresses_service import eth_address, \
@@ -69,7 +69,7 @@ entityWithTags = Entity(
             value=115422577,
             usd=2.31,
             eur=1.15),
-   tags=TagsByEntity(
+   tags=Tags(
        entity_tags=[tag2, tag],
        address_tags=[atag1, atag2],
        tag_coherence=0.5)
@@ -90,7 +90,7 @@ eth_entity = Entity(
 )
 
 eth_entityWithTags = Entity(**eth_entity.to_dict())
-eth_entityWithTags.tags = TagsByEntity(address_tags=[], entity_tags=[])
+eth_entityWithTags.tags = Tags(address_tags=[], entity_tags=[])
 
 eth_neighbors = []
 for n in eth_addressWithTagsOutNeighbors.neighbors:

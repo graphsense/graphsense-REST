@@ -1,5 +1,6 @@
 from gsrest.test.assertion import assertEqual
 from openapi_server.models.address_tag import AddressTag
+from openapi_server.models.tags import Tags
 from openapi_server.models.taxonomy import Taxonomy
 from openapi_server.models.concept import Concept
 import gsrest.service.tags_service as service
@@ -41,13 +42,15 @@ tag3 = AddressTag(
         )
 
 
-def list_address_tags(test_case):
-    result = service.list_address_tags(currency='btc', label='isolinks')
-    assertEqual([tag1], result)
-    result = service.list_address_tags(currency='btc', label='cimedy')
-    assertEqual([tag2], result)
-    result = service.list_address_tags(label='cimedy')
-    assertEqual([tag2, tag3], sorted(result, key=lambda x: x.currency))
+def list_tags(test_case):
+    result = service.list_tags(currency='btc', label='isolinks')
+    assertEqual(Tags(address_tags=[tag1], entity_tags=[]), result)
+    result = service.list_tags(currency='btc', label='cimedy')
+    assertEqual(Tags([tag2], entity_tags=[]), result)
+    result = service.list_tags(label='cimedy')
+    result.address_tags.sort(key=lambda x: x.currency)
+    assertEqual(Tags([tag2, tag3], entity_tags=[]),
+                result)
 
 
 conceptA = Concept(

@@ -510,6 +510,19 @@ class Cassandra():
             return []
         return rows
 
+    @eth
+    def list_entity_tags(self, currency, label):
+        label_norm_prefix = label[:LABEL_PREFIX_LENGTH]
+
+        session = self.get_session(currency=currency,
+                                   keyspace_type='transformed')
+        query = ("SELECT * FROM cluster_tag_by_label WHERE "
+                 "label_norm_prefix = %s and label_norm = %s")
+        rows = session.execute(query, [label_norm_prefix, label])
+        if rows is None:
+            return []
+        return rows
+
     def list_labels(self, currency, expression_norm):
         expression_norm_prefix = expression_norm[:LABEL_PREFIX_LENGTH]
 
@@ -818,6 +831,9 @@ class Cassandra():
         address['address'] = \
             self.get_addresses_by_ids(currency, [address['address_id']])[0]
         return [address], None
+
+    def list_entity_tags_eth(self, currency, label):
+        return []
 
 ##################################
 # VARIANTS USING NEW DATA SCHEME #

@@ -6,12 +6,12 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from openapi_server.models.base_model_ import Model
-from openapi_server.models.tags_by_entity import TagsByEntity
+from openapi_server.models.tags import Tags
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.values import Values
 from openapi_server import util
 
-from openapi_server.models.tags_by_entity import TagsByEntity  # noqa: E501
+from openapi_server.models.tags import Tags  # noqa: E501
 from openapi_server.models.tx_summary import TxSummary  # noqa: E501
 from openapi_server.models.values import Values  # noqa: E501
 
@@ -47,7 +47,7 @@ class Entity(Model):
         :param total_spent: The total_spent of this Entity.  # noqa: E501
         :type total_spent: Values
         :param tags: The tags of this Entity.  # noqa: E501
-        :type tags: TagsByEntity
+        :type tags: Tags
         """
         self.openapi_types = {
             'entity': int,
@@ -61,7 +61,7 @@ class Entity(Model):
             'no_outgoing_txs': int,
             'total_received': Values,
             'total_spent': Values,
-            'tags': TagsByEntity
+            'tags': Tags
         }
 
         self.attribute_map = {
@@ -408,7 +408,7 @@ class Entity(Model):
 
 
         :return: The tags of this Entity.
-        :rtype: TagsByEntity
+        :rtype: Tags
         """
         return self._tags
 
@@ -418,7 +418,7 @@ class Entity(Model):
 
 
         :param tags: The tags of this Entity.
-        :type tags: TagsByEntity
+        :type tags: Tags
         """
 
         self._tags = tags
