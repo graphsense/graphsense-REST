@@ -31,7 +31,7 @@ class TestEntitiesController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/entities/{entity}'.format(currency='btc', entity='67065'),
+            '/{currency}/entities/{entity}'.format(currency='btc', entity=67065),
             method='GET',
             headers=headers,
             query_string=query_string)
@@ -91,7 +91,7 @@ class TestEntitiesController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/entities/{entity}/addresses'.format(currency='btc', entity='67065'),
+            '/{currency}/entities/{entity}/addresses'.format(currency='btc', entity=67065),
             method='GET',
             headers=headers,
             query_string=query_string)
@@ -109,7 +109,7 @@ class TestEntitiesController(BaseTestCase):
             'Accept': 'text/csv',
         }
         response = self.client.open(
-            '/{currency}/entities/{entity}/addresses.csv'.format(currency='btc', entity='67065'),
+            '/{currency}/entities/{entity}/addresses.csv'.format(currency='btc', entity=67065),
             method='GET',
             headers=headers)
         self.assert200(response,
@@ -130,7 +130,7 @@ class TestEntitiesController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/entities/{entity}/neighbors'.format(currency='btc', entity='67065'),
+            '/{currency}/entities/{entity}/neighbors'.format(currency='btc', entity=67065),
             method='GET',
             headers=headers,
             query_string=query_string)
@@ -149,7 +149,7 @@ class TestEntitiesController(BaseTestCase):
             'Accept': 'text/csv',
         }
         response = self.client.open(
-            '/{currency}/entities/{entity}/neighbors.csv'.format(currency='btc', entity='67065'),
+            '/{currency}/entities/{entity}/neighbors.csv'.format(currency='btc', entity=67065),
             method='GET',
             headers=headers,
             query_string=query_string)
@@ -167,7 +167,7 @@ class TestEntitiesController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/entities/{entity}/tags'.format(currency='btc', entity='67065'),
+            '/{currency}/entities/{entity}/tags'.format(currency='btc', entity=67065),
             method='GET',
             headers=headers)
         self.assert200(response,
@@ -185,7 +185,7 @@ class TestEntitiesController(BaseTestCase):
             'Accept': 'application/csv',
         }
         response = self.client.open(
-            '/{currency}/entities/{entity}/tags.csv'.format(currency='btc', entity='67065'),
+            '/{currency}/entities/{entity}/tags.csv'.format(currency='btc', entity=67065),
             method='GET',
             headers=headers,
             query_string=query_string)
@@ -209,7 +209,7 @@ class TestEntitiesController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/entities/{entity}/search'.format(currency='btc', entity='67065'),
+            '/{currency}/entities/{entity}/search'.format(currency='btc', entity=67065),
             method='GET',
             headers=headers,
             query_string=query_string)

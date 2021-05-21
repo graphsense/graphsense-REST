@@ -122,8 +122,9 @@ def list_entities(currency, ids=None, page=None, pagesize=None):
     db = get_connection()
     result, next_page = db.list_entities(currency, ids, page, pagesize)
     rates = get_rates(currency)['rates']
-    return Entities(entities=[from_row(row, rates) for row in result],
+    result = Entities(entities=[from_row(row, rates) for row in result],
                     next_page=next_page)
+    return result
 
 
 def list_entities_csv(currency, ids):

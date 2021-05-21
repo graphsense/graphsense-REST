@@ -933,13 +933,14 @@ paths:
           type: string
         style: simple
       - description: The entity ID
-        example: "67065"
+        example: 67065
         explode: false
         in: path
         name: entity
         required: true
         schema:
-          type: string
+          format: int64
+          type: integer
         style: simple
       - description: Whether tags should be included
         explode: true
@@ -975,13 +976,14 @@ paths:
           type: string
         style: simple
       - description: The entity ID
-        example: "67065"
+        example: 67065
         explode: false
         in: path
         name: entity
         required: true
         schema:
-          type: string
+          format: int64
+          type: integer
         style: simple
       - description: Resumption token for retrieving the next page
         example: 0400030bff00f07fffff9b00
@@ -1029,13 +1031,14 @@ paths:
           type: string
         style: simple
       - description: The entity ID
-        example: "67065"
+        example: 67065
         explode: false
         in: path
         name: entity
         required: true
         schema:
-          type: string
+          format: int64
+          type: integer
         style: simple
       responses:
         "200":
@@ -1063,13 +1066,14 @@ paths:
           type: string
         style: simple
       - description: The entity ID
-        example: "67065"
+        example: 67065
         explode: false
         in: path
         name: entity
         required: true
         schema:
-          type: string
+          format: int64
+          type: integer
         style: simple
       - description: Incoming or outgoing neighbors
         example: out
@@ -1139,13 +1143,14 @@ paths:
           type: string
         style: simple
       - description: The entity ID
-        example: "67065"
+        example: 67065
         explode: false
         in: path
         name: entity
         required: true
         schema:
-          type: string
+          format: int64
+          type: integer
         style: simple
       - description: Incoming or outgoing neighbors
         example: out
@@ -1185,13 +1190,14 @@ paths:
           type: string
         style: simple
       - description: The entity ID
-        example: "67065"
+        example: 67065
         explode: false
         in: path
         name: entity
         required: true
         schema:
-          type: string
+          format: int64
+          type: integer
         style: simple
       - description: Incoming or outgoing neighbors
         example: out
@@ -1294,13 +1300,14 @@ paths:
           type: string
         style: simple
       - description: The entity ID
-        example: "67065"
+        example: 67065
         explode: false
         in: path
         name: entity
         required: true
         schema:
-          type: string
+          format: int64
+          type: integer
         style: simple
       responses:
         "200":
@@ -1328,13 +1335,14 @@ paths:
           type: string
         style: simple
       - description: The entity ID
-        example: "67065"
+        example: 67065
         explode: false
         in: path
         name: entity
         required: true
         schema:
-          type: string
+          format: int64
+          type: integer
         style: simple
       - description: Whether tags on the address or entity level are requested
         example: address
@@ -1576,13 +1584,14 @@ components:
       style: form
     entity:
       description: The entity ID
-      example: "67065"
+      example: 67065
       explode: false
       in: path
       name: entity
       required: true
       schema:
-        type: string
+        format: int64
+        type: integer
       style: simple
     tx_hash:
       description: The transaction hash

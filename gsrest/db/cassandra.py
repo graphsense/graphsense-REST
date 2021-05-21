@@ -459,18 +459,6 @@ class Cassandra():
             sec_in = self.sec_in(secondary_id_group)
             sec_condition = \
                 f' AND {this}_address_id_secondary_group in {sec_in}'
-            if has_targets:
-                prefix = self.get_prefix_lengths('eth')
-                params = []
-                for target in targets:
-                    address = self.entity_to_address_id(target)
-                    params.append((address[:prefix['address']].upper(),
-                                   bytes.fromhex(address)))
-                targets = self.concurrent_with_args(
-                    session,
-                    "SELECT address_id FROM address_ids_by_address_prefix "
-                    "WHERE address_prefix = %s AND address = %s", params)
-                targets = [target.address_id for target in targets]
 
         basequery = (f"SELECT * FROM {node_type}_{direction}_relations WHERE "
                      f"{this}_{node_type}{id_suffix}_group = %s AND "
@@ -663,31 +651,50 @@ class Cassandra():
 
         return results, to_hex(results.paging_state)
 
-    def address_to_entity_id(self, address):
-        return address + '_'
-
-    def entity_to_address_id(self, entity):
-        return entity[:-1]
-
+    # entity = address_id
     def get_entity_eth(self, currency, entity):
+        session = self.get_session(currency, 'transformed')
         # mockup entity by address
-        address = self.entity_to_address_id(entity)
-        address = self.get_address_new(currency, address)
-        entity = address
-        entity['cluster'] = self.address_to_entity_id(entity['address'])
+        id_group = self.get_id_group(currency, entity)
+        session.row_factory = dict_factory
+        query = (
+            "SELECT * FROM address WHERE "
+            "address_id_group = %s AND address_id = %s")
+        result = session.execute(
+            query, [id_group, entity])
+        if not result:
+            return None
+
+        result = result.one()
+        entity = self.finish_addresses(currency, [result])[0]
+        entity['cluster'] = entity['address_id']
         entity['no_addresses'] = 1
         return entity
 
     def list_entities_eth(self, currency, ids, page=None, pagesize=None):
-        if isinstance(ids, list):
-            ids = [self.entity_to_address_id(id) for id in ids]
-        result, paging_state = \
-            self.list_addresses(currency, ids, page, pagesize)
+        session = self.get_session(currency, 'transformed')
+        session.row_factory = dict_factory
+        query = "SELECT * FROM address"
+        has_ids = isinstance(ids, list)
+        if has_ids:
+            query += " WHERE address_id_group = %s AND address_id = %s"
+            params = [[self.get_id_group(currency, id),
+                       id] for id in ids]
+            result = self.concurrent_with_args(session, query, params)
+            paging_state = None
+        else:
+            fetch_size = min(pagesize or PAGE_SIZE, PAGE_SIZE)
+            statement = SimpleStatement(query, fetch_size=fetch_size)
+            result = session.execute(statement, paging_state=from_hex(page))
+            paging_state = result.paging_state
+            result = result.current_rows
+
+        result = self.finish_addresses(currency, result)
 
         for address in result:
-            address['cluster'] = self.address_to_entity_id(address['address'])
+            address['cluster'] = address['address_id']
             address['no_addresses'] = 1
-        return result, paging_state
+        return result, to_hex(paging_state)
 
     def list_entity_tags_by_entity_eth(self, currency, entity):
         return []
@@ -696,7 +703,7 @@ class Cassandra():
         return []
 
     def get_address_entity_id_eth(self, currency, address):
-        return self.address_to_entity_id(address)
+        return self.get_address_id(currency, address)
 
     def list_block_txs_eth(self, currency, height):
         session = self.get_session(currency, 'transformed')
@@ -805,10 +812,11 @@ class Cassandra():
 
     def list_entity_addresses_eth(self, currency, entity, page=None,
                                   pagesize=None):
-        address = self.entity_to_address_id(entity)
-        address = self.get_address_new(currency, address)
+        address = self.get_entity_eth(currency, entity)
         if address is None:
             return None
+        address['address'] = \
+            self.get_addresses_by_ids(currency, [address['address_id']])[0]
         return [address], None
 
 ##################################
@@ -944,8 +952,6 @@ class Cassandra():
         if node_type == 'address':
             id = self.get_address_id(currency, id)
         elif node_type == 'entity' and currency == 'eth':
-            id = self.entity_to_address_id(id)
-            id = self.get_address_id(currency, id)
             node_type = 'address'
 
         neighbors, page = self.list_neighbors_(currency,
@@ -971,8 +977,7 @@ class Cassandra():
             neighbor[dr + '_labels'] = []
 
             if orig_node_type == 'entity' and currency == 'eth':
-                neighbor[dr + '_cluster'] = \
-                    self.address_to_entity_id(neighbor[dr + '_address'])
+                neighbor[dr + '_cluster'] = neighbor[dr + '_address_id']
         return neighbors, page
 
     def list_tags_new(self, currency, label):

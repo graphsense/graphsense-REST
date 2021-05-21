@@ -83,7 +83,7 @@ eth_entity = Entity(
    no_addresses=1,
    total_received=eth_address.total_received,
    no_incoming_txs=eth_address.no_incoming_txs,
-   entity=eth_address.address + '_',
+   entity=107925000,
    out_degree=eth_address.out_degree,
    first_tx=eth_address.first_tx,
    balance=eth_address.balance
@@ -95,9 +95,11 @@ eth_entityWithTags.tags = TagsByEntity(address_tags=[], entity_tags=[])
 eth_neighbors = []
 for n in eth_addressWithTagsOutNeighbors.neighbors:
     nn = Neighbor(**n.to_dict())
-    nn.id += '_'
     nn.node_type = 'entity'
     eth_neighbors.append(nn)
+
+eth_neighbors[0].id = 107925000
+eth_neighbors[1].id = 107925001
 
 eth_entityWithTagsOutNeighbors = Neighbors(
         next_page=None,
@@ -304,10 +306,10 @@ def list_entities(test_case):
                           sorted([row.entity for row in result.entities]))
 
     result = service.list_entities(currency='eth')
-    test_case.assertEqual(['123456_', 'abcdef_'],
+    test_case.assertEqual([107925000, 107925001],
                           sorted([row.entity for row in result.entities]))
 
-    result = service.list_entities(currency='eth', ids=['abcdef_'])
+    result = service.list_entities(currency='eth', ids=[107925000])
     test_case.assertEqual([eth_entity],
                           result.entities)
 
