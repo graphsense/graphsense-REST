@@ -57,7 +57,7 @@ def from_row(row, rates, tags=None):
 def list_tags_by_entity(currency, entity):
     entity_tags = list_entity_tags_by_entity(currency, entity)
     address_tags = list_address_tags_by_entity(currency, entity)
-    tag_coherence = compute_tag_coherence(tag.label for tag in entity_tags)
+    tag_coherence = compute_tag_coherence(tag.label for tag in address_tags)
     return TagsByEntity(entity_tags=entity_tags,
                         address_tags=address_tags,
                         tag_coherence=tag_coherence)
