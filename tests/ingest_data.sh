@@ -7,21 +7,17 @@ MOCK_CMD="docker exec $CASSANDRA_MOCK cqlsh"
 
 TAG=develop
 
+UTXO_SCHEMA="https://raw.githubusercontent.com/graphsense/graphsense-transformation/$TAG/scripts/"
+ETH_SCHEMA="https://raw.githubusercontent.com/graphsense/graphsense-ethereum-transformation/$TAG/scripts/"
+
 function schema() {
   temp=`mktemp`
   echo "Fetching $1 ..."
-  curl -Ls https://raw.githubusercontent.com/graphsense/graphsense-transformation/$TAG/scripts/$1 > $temp
+  curl -Ls $1 > $temp
 
-  create $temp btc btc
-  create $temp btc ltc
-
-}
-
-function eth_schema() {
-  temp=`mktemp`
-  echo "Fetching $1 ..."
-  cp /tmp/$1 $temp
-  create $temp eth eth
+  for c in $3; do
+    create $temp $2 $c
+  done
   rm $temp
 }
 
@@ -60,10 +56,10 @@ function insert_data () {
     done <"$1"
 }
 
-schema "schema_raw.cql"
-schema "schema_transformed.cql"
-eth_schema "schema_raw.cql"
-eth_schema "schema_transformed.cql"
+schema "$UTXO_SCHEMA/schema_raw.cql" btc "btc ltc"
+schema "$UTXO_SCHEMA/schema_transformed.cql" btc "btc ltc"
+schema "$ETH_SCHEMA/schema_raw.cql" eth eth
+schema "$ETH_SCHEMA/schema_transformed.cql" eth eth
 tagpacks
 
 for filename in $data; do
