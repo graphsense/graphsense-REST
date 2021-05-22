@@ -46,7 +46,8 @@ class TestAddressesController(BaseTestCase):
         """
         test_service.get_address_entity(self)
 
-        query_string = [('','')]
+        query_string = [('',''),
+                        ('','')]
         headers = { 
             'Accept': 'application/json',
         }

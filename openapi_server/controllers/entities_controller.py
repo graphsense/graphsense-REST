@@ -11,7 +11,7 @@ import gsrest.service.entities_service as service
 from gsrest.service.problems import notfound, badrequest, internalerror
 
 
-def get_entity(currency, entity, include_tags=None):  # noqa: E501
+def get_entity(currency, entity, include_tags=None, tag_coherence=None):  # noqa: E501
     """Get an entity, optionally with tags
 
      # noqa: E501
@@ -22,6 +22,8 @@ def get_entity(currency, entity, include_tags=None):  # noqa: E501
     :type entity: int
     :param include_tags: Whether tags should be included
     :type include_tags: bool
+    :param tag_coherence: Whether to calculate coherence of address tags
+    :type tag_coherence: bool
 
     :rtype: Entity
     """
@@ -29,7 +31,8 @@ def get_entity(currency, entity, include_tags=None):  # noqa: E501
         return service.get_entity(
             currency=currency,
             entity=entity,
-            include_tags=include_tags)
+            include_tags=include_tags,
+            tag_coherence=tag_coherence)
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
@@ -209,7 +212,7 @@ def list_entity_neighbors_csv(currency, entity, direction):  # noqa: E501
         return internalerror(str(e))
 
 
-def list_tags_by_entity(currency, entity):  # noqa: E501
+def list_tags_by_entity(currency, entity, tag_coherence=None):  # noqa: E501
     """Get tags for a given entity
 
      # noqa: E501
@@ -218,13 +221,16 @@ def list_tags_by_entity(currency, entity):  # noqa: E501
     :type currency: str
     :param entity: The entity ID
     :type entity: int
+    :param tag_coherence: Whether to calculate coherence of address tags
+    :type tag_coherence: bool
 
     :rtype: Tags
     """
     try:
         return service.list_tags_by_entity(
             currency=currency,
-            entity=entity)
+            entity=entity,
+            tag_coherence=tag_coherence)
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:

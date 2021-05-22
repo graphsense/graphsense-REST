@@ -54,10 +54,11 @@ def from_row(row, rates, tags=None):
         )
 
 
-def list_tags_by_entity(currency, entity):
+def list_tags_by_entity(currency, entity, tag_coherence):
     entity_tags = list_entity_tags_by_entity(currency, entity)
     address_tags = list_address_tags_by_entity(currency, entity)
-    tag_coherence = compute_tag_coherence(tag.label for tag in address_tags)
+    tag_coherence = compute_tag_coherence(tag.label for tag in address_tags) \
+        if tag_coherence else None
     return Tags(entity_tags=entity_tags,
                 address_tags=address_tags,
                 tag_coherence=tag_coherence)
@@ -106,14 +107,14 @@ def list_address_tags_by_entity(currency, entity):
             for row in address_tags]
 
 
-def get_entity(currency, entity, include_tags=False):
+def get_entity(currency, entity, include_tags, tag_coherence):
     db = get_connection()
     result = db.get_entity(currency, entity)
 
     if result is None:
         raise RuntimeError("Entity {} not found".format(entity))
 
-    tags = list_tags_by_entity(currency, result['cluster']) \
+    tags = list_tags_by_entity(currency, result['cluster'], tag_coherence) \
         if include_tags else None
     return from_row(result, get_rates(currency)['rates'], tags)
 
@@ -274,7 +275,7 @@ def recursive_search(currency, entity, params, breadth, depth, level,
     for neighbor in neighbors:
         match = True
         props = cached(neighbor.id, 'props',
-                       lambda: get_entity(currency, neighbor.id, True))
+                       lambda: get_entity(currency, neighbor.id, True, False))
         if props is None:
             continue
 

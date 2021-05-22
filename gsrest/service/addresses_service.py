@@ -128,7 +128,7 @@ def list_address_links_csv(currency, address, neighbor):
                             .format(address, neighbor, currency.upper())))
 
 
-def get_address_entity(currency, address, include_tags=False):
+def get_address_entity(currency, address, include_tags, tag_coherence):
     # from address to complete entity stats
     e = RuntimeError('Entity for address {} not found'.format(address))
     db = get_connection()
@@ -137,7 +137,7 @@ def get_address_entity(currency, address, include_tags=False):
     if entity_id is None:
         raise e
 
-    result = get_entity(currency, entity_id, include_tags)
+    result = get_entity(currency, entity_id, include_tags, tag_coherence)
     if result is None:
         raise e
 

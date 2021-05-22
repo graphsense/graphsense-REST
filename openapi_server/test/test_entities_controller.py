@@ -26,7 +26,8 @@ class TestEntitiesController(BaseTestCase):
         """
         test_service.get_entity(self)
 
-        query_string = [('','')]
+        query_string = [('',''),
+                        ('','')]
         headers = { 
             'Accept': 'application/json',
         }
@@ -163,13 +164,15 @@ class TestEntitiesController(BaseTestCase):
         """
         test_service.list_tags_by_entity(self)
 
+        query_string = [('','')]
         headers = { 
             'Accept': 'application/json',
         }
         response = self.client.open(
             '/{currency}/entities/{entity}/tags'.format(currency='btc', entity=67065),
             method='GET',
-            headers=headers)
+            headers=headers,
+            query_string=query_string)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 

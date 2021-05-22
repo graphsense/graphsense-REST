@@ -264,6 +264,7 @@ paths:
         name: include_tags
         required: false
         schema:
+          default: false
           type: boolean
         style: form
       responses:
@@ -307,6 +308,16 @@ paths:
         name: include_tags
         required: false
         schema:
+          default: false
+          type: boolean
+        style: form
+      - description: Whether to calculate coherence of address tags
+        explode: true
+        in: query
+        name: tag_coherence
+        required: false
+        schema:
+          default: false
           type: boolean
         style: form
       responses:
@@ -948,6 +959,16 @@ paths:
         name: include_tags
         required: false
         schema:
+          default: false
+          type: boolean
+        style: form
+      - description: Whether to calculate coherence of address tags
+        explode: true
+        in: query
+        name: tag_coherence
+        required: false
+        schema:
+          default: false
           type: boolean
         style: form
       responses:
@@ -1309,6 +1330,15 @@ paths:
           format: int64
           type: integer
         style: simple
+      - description: Whether to calculate coherence of address tags
+        explode: true
+        in: query
+        name: tag_coherence
+        required: false
+        schema:
+          default: false
+          type: boolean
+        style: form
       responses:
         "200":
           content:
@@ -1633,6 +1663,17 @@ components:
       name: include_tags
       required: false
       schema:
+        default: false
+        type: boolean
+      style: form
+    tag_coherence:
+      description: Whether to calculate coherence of address tags
+      explode: true
+      in: query
+      name: tag_coherence
+      required: false
+      schema:
+        default: false
         type: boolean
       style: form
     tag_level:

@@ -39,7 +39,7 @@ def get_address(currency, address, include_tags=None):  # noqa: E501
         return internalerror(str(e))
 
 
-def get_address_entity(currency, address, include_tags=None):  # noqa: E501
+def get_address_entity(currency, address, include_tags=None, tag_coherence=None):  # noqa: E501
     """Get the entity of an address
 
      # noqa: E501
@@ -50,6 +50,8 @@ def get_address_entity(currency, address, include_tags=None):  # noqa: E501
     :type address: str
     :param include_tags: Whether tags should be included
     :type include_tags: bool
+    :param tag_coherence: Whether to calculate coherence of address tags
+    :type tag_coherence: bool
 
     :rtype: Entity
     """
@@ -57,7 +59,8 @@ def get_address_entity(currency, address, include_tags=None):  # noqa: E501
         return service.get_address_entity(
             currency=currency,
             address=address,
-            include_tags=include_tags)
+            include_tags=include_tags,
+            tag_coherence=tag_coherence)
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:

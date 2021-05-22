@@ -649,14 +649,16 @@ def get_address_entity(test_case):
     result = service.get_address_entity(
                 currency='btc',
                 address=address.address,
-                include_tags=True)
+                include_tags=True,
+                tag_coherence=False)
     result.tags.tag_coherence = None
     test_case.assertEqual(entityWithTagsOfAddressWithTags, result)
 
     result = service.get_address_entity(
                 currency='eth',
                 address=eth_address.address,
-                include_tags=True)
+                include_tags=True,
+                tag_coherence=False)
     result.tags.tag_coherence = None
     test_case.assertEqual(eth_entityWithTags, result)
 

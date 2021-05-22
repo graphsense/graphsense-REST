@@ -276,19 +276,18 @@ entityWithTagsAddresses = EntityAddresses(
 def get_entity(test_case):
     result = service.get_entity(currency='btc',
                                 entity=entityWithTags.entity,
-                                include_tags=True)
+                                include_tags=True,
+                                tag_coherence=True)
 
     # tag_coherence tested by tests/util/test_tag_coherence.py so hardcode here
+    test_case.assertIsNot(result.tags.tag_coherence, None)
     result.tags.tag_coherence = 0.5
     test_case.assertEqual(entityWithTags, result)
 
     result = service.get_entity(currency='eth',
-                                entity=eth_entityWithTags.entity,
-                                include_tags=True)
-
-    result = service.get_entity(currency='eth',
                                 entity=eth_entity.entity,
-                                include_tags=False)
+                                include_tags=False,
+                                tag_coherence=False)
 
     test_case.assertEqual(eth_entity, result)
 
@@ -325,11 +324,13 @@ def list_entities_csv(test_case):
 
 def list_tags_by_entity(test_case):
     result = service.list_tags_by_entity(currency='btc',
-                                         entity=entityWithTags.entity)
+                                         entity=entityWithTags.entity,
+                                         tag_coherence=False)
     result.tag_coherence = 0.5
     test_case.assertEqual(entityWithTags.tags, result)
     result = service.list_tags_by_entity(currency='eth',
-                                         entity=eth_entityWithTags.entity)
+                                         entity=eth_entityWithTags.entity,
+                                         tag_coherence=False)
     test_case.assertEqual(eth_entityWithTags.tags, result)
 
 
