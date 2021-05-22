@@ -1,5 +1,6 @@
 from gsrest.test.assertion import assertEqual
 from openapi_server.models.address_tag import AddressTag
+from openapi_server.models.entity_tag import EntityTag
 from openapi_server.models.tags import Tags
 from openapi_server.models.taxonomy import Taxonomy
 from openapi_server.models.concept import Concept
@@ -41,10 +42,22 @@ tag3 = AddressTag(
    active=True
         )
 
+ctag = EntityTag(
+   tagpack_uri="https://tagpack_uri",
+   lastmod=1,
+   label="isolinks",
+   source="Unspecified",
+   category=None,
+   active=True,
+   currency="BTC",
+   entity=123,
+   abuse=None
+        )
+
 
 def list_tags(test_case):
     result = service.list_tags(currency='btc', label='isolinks')
-    assertEqual(Tags(address_tags=[tag1], entity_tags=[]), result)
+    assertEqual(Tags(address_tags=[tag1], entity_tags=[ctag]), result)
     result = service.list_tags(currency='btc', label='cimedy')
     assertEqual(Tags([tag2], entity_tags=[]), result)
     result = service.list_tags(label='cimedy')
