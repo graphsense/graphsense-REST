@@ -586,6 +586,21 @@ def search_entity_neighbors(test_case):
     assertEqual(addresses, [a.address for a
                             in result.paths[0].paths[0].matching_addresses])
 
+    addresses = ['234567']
+    result = service.search_entity_neighbors(
+                    currency='eth',
+                    entity=eth_entityWithTags.entity,
+                    direction='out',
+                    depth=2,
+                    breadth=10,
+                    key='addresses',
+                    value=addresses
+                    )
+    assertEqual(107925001, result.paths[0].node.entity)
+    assertEqual(107925002, result.paths[0].paths[0].node.entity)
+    assertEqual(addresses, [a.address for a
+                            in result.paths[0].paths[0].matching_addresses])
+
     # Test value matching
 
     result = service.search_entity_neighbors(
