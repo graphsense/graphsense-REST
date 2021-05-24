@@ -713,7 +713,23 @@ class Cassandra():
         return []
 
     def list_address_tags_by_entity_eth(self, currency, entity):
-        return []
+        session = self.get_session(currency, 'transformed')
+        query = ("SELECT address FROM address_ids_by_address_id_group "
+                 "WHERE address_id_group=%s and address_id=%s")
+        result = session.execute(query, [self.get_id_group(currency, entity),
+                                         entity])
+        if result is None or result.one() is None:
+            return None
+        address = result.one().address
+        query = "SELECT * FROM address_tags WHERE address_id = %s"
+        session.row_factory = dict_factory
+        results = session.execute(query, [entity])
+        if results is None:
+            return []
+        tags = []
+        for tag in results.current_rows:
+            tag['address'] = address
+        return tags
 
     def get_address_entity_id_eth(self, currency, address):
         return self.get_address_id(currency, address)

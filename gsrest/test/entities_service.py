@@ -286,10 +286,10 @@ def get_entity(test_case):
 
     result = service.get_entity(currency='eth',
                                 entity=eth_entity.entity,
-                                include_tags=False,
+                                include_tags=True,
                                 tag_coherence=False)
 
-    test_case.assertEqual(eth_entity, result)
+    test_case.assertEqual(eth_entityWithTags, result)
 
 
 def list_entities(test_case):
