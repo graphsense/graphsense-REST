@@ -726,10 +726,9 @@ class Cassandra():
         results = session.execute(query, [entity])
         if results is None:
             return []
-        tags = []
         for tag in results.current_rows:
-            tag['address'] = address
-        return tags
+            tag['address'] = address.hex()
+        return results.current_rows
 
     def get_address_entity_id_eth(self, currency, address):
         return self.get_address_id(currency, address)

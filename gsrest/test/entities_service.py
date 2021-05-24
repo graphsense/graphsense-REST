@@ -12,7 +12,7 @@ from openapi_server.models.tags import Tags
 import json
 import gsrest.service.entities_service as service
 from gsrest.test.addresses_service import eth_address, \
-        eth_addressWithTagsOutNeighbors, atag1, atag2
+        eth_addressWithTagsOutNeighbors, atag1, atag2, eth_tag, eth_tag2
 
 tag = EntityTag(
            category="organization",
@@ -90,7 +90,8 @@ eth_entity = Entity(
 )
 
 eth_entityWithTags = Entity(**eth_entity.to_dict())
-eth_entityWithTags.tags = Tags(address_tags=[], entity_tags=[])
+eth_entityWithTags.tags = Tags(address_tags=[eth_tag, eth_tag2],
+                               entity_tags=[])
 
 eth_neighbors = []
 for n in eth_addressWithTagsOutNeighbors.neighbors:
@@ -305,7 +306,7 @@ def list_entities(test_case):
                           sorted([row.entity for row in result.entities]))
 
     result = service.list_entities(currency='eth')
-    test_case.assertEqual([107925000, 107925001],
+    test_case.assertEqual([107925000, 107925001, 107925002],
                           sorted([row.entity for row in result.entities]))
 
     result = service.list_entities(currency='eth', ids=[107925000])

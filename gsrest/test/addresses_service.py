@@ -463,6 +463,11 @@ eth_address2 = Address(
    address="123456"
 )
 
+eth_address3 = Address(
+    **eth_address2.to_dict(),
+)
+eth_address3.address = "234567"
+
 eth_addressWithTagsOutNeighbors = Neighbors(
         next_page=None,
         neighbors=[
@@ -515,7 +520,8 @@ eth_entityWithTags = Entity(
    out_degree=eth_address.out_degree,
    first_tx=eth_address.first_tx,
    balance=eth_address.balance,
-   tags=Tags(address_tags=[], entity_tags=[], tag_coherence=None)
+   tags=Tags(address_tags=[eth_tag, eth_tag2], entity_tags=[],
+             tag_coherence=None)
 )
 
 
@@ -727,7 +733,7 @@ def list_addresses(test_case):
                           result)
 
     result = service.list_addresses('eth')
-    assertEqual([eth_address, eth_address2], result.addresses)
+    assertEqual([eth_address, eth_address2, eth_address3], result.addresses)
     test_case.assertIs(result.next_page, None)
 
     ids = [eth_address2.address, 'aaaa']
