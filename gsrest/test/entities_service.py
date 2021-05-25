@@ -507,7 +507,6 @@ def search_entity_neighbors(test_case):
                     key='category',
                     value=[category]
                     )
-    print(f'result {result}')
     assertEqual(2818641, result.paths[0].node.entity)
     assertEqual(123, result.paths[0].paths[0].node.entity)
     assertEqual(category,

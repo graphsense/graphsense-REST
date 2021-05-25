@@ -497,7 +497,6 @@ class Cassandra():
                 row['estimated_value'] = row['value']
 
         if include_labels:
-            print('include label')
             self.include_labels(currency, node_type, that, results)
         return results, to_hex(paging_state)
 
@@ -510,7 +509,6 @@ class Cassandra():
             key = f'{that}_cluster'
             params = [(self.get_id_group(currency, row[key]), row[key])
                       for row in nodes if row[f'has_{that}_labels']]
-            print(f'params {params}')
             query = ('select cluster, label from cluster_tags where '
                      'cluster_group=%s and cluster=%s')
             results = execute_concurrent_with_args(
@@ -518,7 +516,6 @@ class Cassandra():
                 results_generator=True)
             i = 0
             for (success, result) in results:
-                print(f'result {success} {result}')
                 if not success or not result:
                     continue
                 while nodes[i][key] != result.one().cluster:
@@ -527,7 +524,6 @@ class Cassandra():
         else:
             key = f'{that}_address'
             params = [[row[key]] for row in nodes if row[f'has_{that}_labels']]
-            print(f'params {params}')
             query = ('select address, label from address_tags where '
                      'address=%s')
             results = execute_concurrent_with_args(
@@ -535,7 +531,6 @@ class Cassandra():
                 results_generator=True)
             i = 0
             for (success, result) in results:
-                print(f'result {success} {result}')
                 if not success or not result:
                     continue
                 while nodes[i][key] != result.one().address:
@@ -905,7 +900,6 @@ class Cassandra():
         else:
             key = f'{that}_address_id'
             params = [[row[key]] for row in nodes if row[f'has_{that}_labels']]
-            print(f'params {params}')
             query = ('select address_id, label from address_tags where '
                      'address_id=%s')
             results = execute_concurrent_with_args(
@@ -913,7 +907,6 @@ class Cassandra():
                 results_generator=True)
             i = 0
             for (success, result) in results:
-                print(f'rseult {result}')
                 if not success or not result:
                     continue
                 while nodes[i][key] != result.one().address_id:

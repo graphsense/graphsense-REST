@@ -267,13 +267,10 @@ def recursive_search(currency, entity, params, breadth, depth, level,
     def cached(cl, key, get):
         return get_cached(cl, key) or set_cached(cl, key, get())
 
-    print(f'entity {entity}')
-
     neighbors = cached(entity, 'neighbors',
                        lambda: list_entity_neighbors(
                         currency, entity, direction,
                         pagesize=breadth).neighbors)
-    print(f'neighbors {neighbors}')
 
     paths = []
 
