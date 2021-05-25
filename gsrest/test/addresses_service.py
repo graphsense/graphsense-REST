@@ -286,7 +286,7 @@ addressWithTagsOutNeighbors = Neighbors(
             Neighbor(
                 id="17DfZja1713S3JRWA9jaebCKFM5anUh7GG",
                 node_type='address',
-                has_labels=False,
+                labels=['labelX', 'labelY'],
                 received=Values(
                         value=87789282,
                         usd=142.18,
@@ -304,7 +304,7 @@ addressWithTagsOutNeighbors = Neighbors(
             Neighbor(
                 id="1LpXFVskUaE2cs5xkQE5bDDaX8hff4L2Ej",
                 node_type='address',
-                has_labels=False,
+                labels=[],
                 received=Values(
                         value=67789282,
                         usd=121.46,
@@ -326,7 +326,7 @@ addressWithTagsInNeighbors = Neighbors(
             Neighbor(
                 id="1BLCmwzV5KXdd4zuonoxaBC9YobJfrkxFg",
                 node_type='address',
-                has_labels=False,
+                labels=[],
                 received=Values(
                         value=59308362491,
                         usd=17221.5,
@@ -344,7 +344,7 @@ addressWithTagsInNeighbors = Neighbors(
             Neighbor(
                 id="1KzsFAeH9rL6nVXDEt9mnFHR3sekBjpNSt",
                 node_type='address',
-                has_labels=False,
+                labels=[],
                 received=Values(
                         value=5000000000,
                         usd=13.41,
@@ -474,7 +474,7 @@ eth_addressWithTagsOutNeighbors = Neighbors(
             Neighbor(
                 id="abcdef",
                 node_type='address',
-                has_labels=False,
+                labels=[],
                 received=Values(
                         value=12300000000,
                         eur=22.22,
@@ -492,7 +492,7 @@ eth_addressWithTagsOutNeighbors = Neighbors(
             Neighbor(
                 id="123456",
                 node_type='address',
-                has_labels=False,
+                labels=['LabelX', 'LabelY'],
                 received=Values(
                         value=12300000000,
                         eur=22.22,
@@ -620,34 +620,40 @@ def list_address_neighbors(test_case):
     result = service.list_address_neighbors(
         currency='btc',
         address=address.address,
+        include_labels=True,
         direction='out')
     test_case.assertEqual(addressWithTagsOutNeighbors, result)
 
     result = service.list_address_neighbors(
         currency='btc',
         address=address.address,
+        include_labels=True,
         direction='in')
     test_case.assertEqual(addressWithTagsInNeighbors, result)
 
     result = service.list_address_neighbors(
         currency='eth',
         address=eth_address.address,
+        include_labels=True,
         direction='out')
     test_case.assertEqual(eth_addressWithTagsOutNeighbors, result)
 
 
 def list_address_neighbors_csv(test_case):
     csv = ("balance_eur,balance_usd,balance_value,estimated_value_eur,"
-           "estimated_value_usd,estimated_value_value,has_labels,id,no_txs,"
+           "estimated_value_usd,estimated_value_value,id,labels,no_txs,"
            "node_type,received_eur,received_usd,received_value\r\n0.0,0.0,"
-           "0,72.08,87.24,27789282,False,17DfZja1713S3JRWA9jaebCKFM5anUh7GG"
+           "0,72.08,87.24,27789282,17DfZja1713S3JRWA9jaebCKFM5anUh7GG,"
+           "\"['labelX', 'labelY']\""
            ",1,address,114.86,142.18,87789282\r\n0.0,0.0,0,72.08,87.24,"
-           "27789282,False,1LpXFVskUaE2cs5xkQE5bDDaX8hff4L2Ej,1,address,98.72,"
+           "27789282,1LpXFVskUaE2cs5xkQE5bDDaX8hff4L2Ej,[],1,address,98.72,"
            "121.46,67789282\r\n")
     result = service.list_address_neighbors_csv(
         currency='btc',
         address=address.address,
-        direction='out')
+        direction='out',
+        include_labels=True
+        )
     assertEqual(csv, result.data.decode('utf-8'))
 
 

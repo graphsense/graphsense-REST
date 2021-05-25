@@ -72,16 +72,18 @@ def list_address_txs_csv(currency, address):
                             .format(address, currency.upper())))
 
 
-def list_address_neighbors(currency, address, direction, page=None,
-                           pagesize=None):
+def list_address_neighbors(currency, address, direction, include_labels,
+                           page=None, pagesize=None):
     return common.list_neighbors(currency, address, direction, 'address',
-                                 page=page, pagesize=pagesize)
+                                 include_labels=include_labels,
+                                 page=page, pagesize=pagesize, ids=None)
 
 
-def list_address_neighbors_csv(currency, address, direction):
+def list_address_neighbors_csv(currency, address, direction,
+                               include_labels=False):
     def query_function(page_state):
         result = list_address_neighbors(currency, address, direction,
-                                        page_state)
+                                        include_labels, page_state)
         return (result.next_page, result.neighbors)
     return Response(stream_with_context(to_csv(query_function)),
                     mimetype="text/csv",

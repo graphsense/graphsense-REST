@@ -457,6 +457,15 @@ paths:
           - out
           type: string
         style: form
+      - description: Whether labels of tags should be included
+        explode: true
+        in: query
+        name: include_labels
+        required: false
+        schema:
+          default: false
+          type: boolean
+        style: form
       - description: Resumption token for retrieving the next page
         example: 0400030bff00f07fffff9b00
         explode: true
@@ -1118,6 +1127,15 @@ paths:
             type: string
           type: array
         style: form
+      - description: Whether labels of tags should be included
+        explode: true
+        in: query
+        name: include_labels
+        required: false
+        schema:
+          default: false
+          type: boolean
+        style: form
       - description: Resumption token for retrieving the next page
         example: 0400030bff00f07fffff9b00
         explode: true
@@ -1661,6 +1679,16 @@ components:
       explode: true
       in: query
       name: include_tags
+      required: false
+      schema:
+        default: false
+        type: boolean
+      style: form
+    include_labels:
+      description: Whether labels of tags should be included
+      explode: true
+      in: query
+      name: include_labels
       required: false
       schema:
         default: false
@@ -2742,7 +2770,9 @@ components:
             eur: 0.8008282
             usd: 6.0274563
             value: 1
-          has_labels: true
+          labels:
+          - labels
+          - labels
           no_txs: 0
         - node_type: address
           balance:
@@ -2758,7 +2788,9 @@ components:
             eur: 0.8008282
             usd: 6.0274563
             value: 1
-          has_labels: true
+          labels:
+          - labels
+          - labels
           no_txs: 0
       properties:
         next_page:
@@ -2788,7 +2820,9 @@ components:
           eur: 0.8008282
           usd: 6.0274563
           value: 1
-        has_labels: true
+        labels:
+        - labels
+        - labels
         no_txs: 0
       properties:
         id:
@@ -2802,10 +2836,12 @@ components:
           - entity
           title: node_type
           type: string
-        has_labels:
-          description: has labels
-          title: has_labels
-          type: boolean
+        labels:
+          description: labels
+          items:
+            type: string
+          title: labels
+          type: array
         balance:
           $ref: '#/components/schemas/values'
         received:
@@ -2820,7 +2856,6 @@ components:
       required:
       - balance
       - estimated_value
-      - has_labels
       - id
       - no_txs
       - node_type

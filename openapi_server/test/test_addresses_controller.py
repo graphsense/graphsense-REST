@@ -106,6 +106,7 @@ class TestAddressesController(BaseTestCase):
 
         query_string = [('direction', 'out'),
                         ('',''),
+                        ('',''),
                         ('','')]
         headers = { 
             'Accept': 'application/json',

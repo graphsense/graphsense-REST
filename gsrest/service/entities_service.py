@@ -139,14 +139,16 @@ def list_entities_csv(currency, ids):
 
 
 def list_entity_neighbors(currency, entity, direction, ids=None,
-                          page=None, pagesize=None):
+                          include_labels=False, page=None, pagesize=None):
     return common.list_neighbors(currency, entity, direction, 'entity',
-                                 ids=ids, page=page, pagesize=pagesize)
+                                 ids, include_labels, page, pagesize)
 
 
-def list_entity_neighbors_csv(currency, entity, direction):
+def list_entity_neighbors_csv(currency, entity, direction,
+                              include_labels=False):
     def query_function(page_state):
         result = list_entity_neighbors(currency, entity, direction,
+                                       include_labels=include_labels,
                                        page=page_state)
         return (result.next_page, result.neighbors)
     return Response(stream_with_context(to_csv(query_function)),
@@ -265,16 +267,19 @@ def recursive_search(currency, entity, params, breadth, depth, level,
     def cached(cl, key, get):
         return get_cached(cl, key) or set_cached(cl, key, get())
 
+    print(f'entity {entity}')
+
     neighbors = cached(entity, 'neighbors',
                        lambda: list_entity_neighbors(
                         currency, entity, direction,
                         pagesize=breadth).neighbors)
+    print(f'neighbors {neighbors}')
 
     paths = []
 
     for neighbor in neighbors:
         match = True
-        props = cached(neighbor.id, 'props',
+        props = cached(int(neighbor.id), 'props',
                        lambda: get_entity(currency, int(neighbor.id),
                                           True, False))
         if props is None:

@@ -425,18 +425,17 @@ class Cassandra():
 
     @new
     def list_neighbors(self, currency, id, is_outgoing, node_type,
-                       targets=None, page=None, pagesize=None):
+                       targets, include_labels, page, pagesize):
         if node_type == 'address':
             id = self.get_address_id(currency, id)
         else:
             id = int(id)
 
         return self.list_neighbors_(currency, id, is_outgoing, node_type,
-                                    targets=targets, page=page,
-                                    pagesize=pagesize)
+                                    targets, include_labels, page, pagesize)
 
     def list_neighbors_(self, currency, id, is_outgoing, node_type,
-                        targets=None, page=None, pagesize=None):
+                        targets, include_labels, page, pagesize):
         if node_type == 'entity':
             node_type = 'cluster'
         if is_outgoing:
@@ -496,7 +495,54 @@ class Cassandra():
         if node_type == 'cluster':
             for row in results:
                 row['estimated_value'] = row['value']
+
+        if include_labels:
+            print('include label')
+            self.include_labels(currency, node_type, that, results)
         return results, to_hex(paging_state)
+
+    @eth
+    def include_labels(self, currency, node_type, that, nodes):
+        session = self.get_session(currency, 'transformed')
+        for node in nodes:
+            node['labels'] = []
+        if node_type == 'cluster':
+            key = f'{that}_cluster'
+            params = [(self.get_id_group(currency, row[key]), row[key])
+                      for row in nodes if row[f'has_{that}_labels']]
+            print(f'params {params}')
+            query = ('select cluster, label from cluster_tags where '
+                     'cluster_group=%s and cluster=%s')
+            results = execute_concurrent_with_args(
+                session, query, params, raise_on_first_error=False,
+                results_generator=True)
+            i = 0
+            for (success, result) in results:
+                print(f'result {success} {result}')
+                if not success or not result:
+                    continue
+                while nodes[i][key] != result.one().cluster:
+                    i += 1
+                nodes[i]['labels'] = [row.label for row in result]
+        else:
+            key = f'{that}_address'
+            params = [[row[key]] for row in nodes if row[f'has_{that}_labels']]
+            print(f'params {params}')
+            query = ('select address, label from address_tags where '
+                     'address=%s')
+            results = execute_concurrent_with_args(
+                session, query, params, raise_on_first_error=False,
+                results_generator=True)
+            i = 0
+            for (success, result) in results:
+                print(f'result {success} {result}')
+                if not success or not result:
+                    continue
+                while nodes[i][key] != result.one().address:
+                    i += 1
+                nodes[i]['labels'] = [row.label for row in result]
+
+        return nodes
 
     def list_address_tags(self, currency, label):
         label_norm_prefix = label[:LABEL_PREFIX_LENGTH]
@@ -850,6 +896,32 @@ class Cassandra():
     def list_entity_tags_eth(self, currency, label):
         return []
 
+    def include_labels_eth(self, currency, node_type, that, nodes):
+        session = self.get_session(currency, 'transformed')
+        for node in nodes:
+            node['labels'] = []
+        if node_type == 'cluster':
+            pass
+        else:
+            key = f'{that}_address_id'
+            params = [[row[key]] for row in nodes if row[f'has_{that}_labels']]
+            print(f'params {params}')
+            query = ('select address_id, label from address_tags where '
+                     'address_id=%s')
+            results = execute_concurrent_with_args(
+                session, query, params, raise_on_first_error=False,
+                results_generator=True)
+            i = 0
+            for (success, result) in results:
+                print(f'rseult {result}')
+                if not success or not result:
+                    continue
+                while nodes[i][key] != result.one().address_id:
+                    i += 1
+                nodes[i]['labels'] = [row.label for row in result]
+
+        return nodes
+
 ##################################
 # VARIANTS USING NEW DATA SCHEME #
 ##################################
@@ -978,7 +1050,7 @@ class Cassandra():
                 self.concurrent_with_args(session, query, params)]
 
     def list_neighbors_new(self, currency, id, is_outgoing, node_type,
-                           targets=None, page=None, pagesize=None):
+                           targets, include_labels, page, pagesize):
         orig_node_type = node_type
         if node_type == 'address':
             id = self.get_address_id(currency, id)
@@ -990,6 +1062,7 @@ class Cassandra():
                                                is_outgoing,
                                                node_type,
                                                targets,
+                                               include_labels,
                                                page,
                                                pagesize)
         dr = 'dst' if is_outgoing else 'src'
@@ -1005,7 +1078,6 @@ class Cassandra():
 
             neighbor['estimated_value'] = \
                 self.backport_currencies(currency, neighbor['value'])
-            neighbor[dr + '_labels'] = []
 
             if orig_node_type == 'entity' and currency == 'eth':
                 neighbor[dr + '_cluster'] = neighbor[dr + '_address_id']

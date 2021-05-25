@@ -89,7 +89,7 @@ def get_address_entity_id(currency, address):
 
 
 def list_neighbors(currency, id, direction, node_type,
-                   ids=None, page=None, pagesize=None):
+                   ids=None, include_labels=False, page=None, pagesize=None):
     if node_type not in ['address', 'entity']:
         raise RuntimeError(f'Unknown node type {node_type}')
     is_outgoing = "out" in direction
@@ -100,6 +100,7 @@ def list_neighbors(currency, id, direction, node_type,
                                     is_outgoing,
                                     node_type,
                                     targets=ids,
+                                    include_labels=include_labels,
                                     page=page,
                                     pagesize=pagesize)
     dst = 'dst' if is_outgoing else 'src'
@@ -114,8 +115,7 @@ def list_neighbors(currency, id, direction, node_type,
         relations.append(Neighbor(
             id=str(row[f'{dst}_{ntype}']),
             node_type=node_type,
-            has_labels=row[f'has_{dst}_labels']
-            if row[f'has_{dst}_labels'] is not None else False,
+            labels=row['labels'] if 'labels' in row else None,
             received=make_values(
                 value=row[dst+'_properties'].total_received.value,
                 eur=row[dst+'_properties'].total_received.eur,

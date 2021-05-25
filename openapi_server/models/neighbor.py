@@ -17,15 +17,15 @@ class Neighbor(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id=None, node_type=None, has_labels=None, balance=None, received=None, estimated_value=None, no_txs=None):  # noqa: E501
+    def __init__(self, id=None, node_type=None, labels=None, balance=None, received=None, estimated_value=None, no_txs=None):  # noqa: E501
         """Neighbor - a model defined in OpenAPI
 
         :param id: The id of this Neighbor.  # noqa: E501
         :type id: str
         :param node_type: The node_type of this Neighbor.  # noqa: E501
         :type node_type: str
-        :param has_labels: The has_labels of this Neighbor.  # noqa: E501
-        :type has_labels: bool
+        :param labels: The labels of this Neighbor.  # noqa: E501
+        :type labels: List[str]
         :param balance: The balance of this Neighbor.  # noqa: E501
         :type balance: Values
         :param received: The received of this Neighbor.  # noqa: E501
@@ -38,7 +38,7 @@ class Neighbor(Model):
         self.openapi_types = {
             'id': str,
             'node_type': str,
-            'has_labels': bool,
+            'labels': List[str],
             'balance': Values,
             'received': Values,
             'estimated_value': Values,
@@ -48,7 +48,7 @@ class Neighbor(Model):
         self.attribute_map = {
             'id': 'id',
             'node_type': 'node_type',
-            'has_labels': 'has_labels',
+            'labels': 'labels',
             'balance': 'balance',
             'received': 'received',
             'estimated_value': 'estimated_value',
@@ -61,9 +61,7 @@ class Neighbor(Model):
         if node_type is None:
             raise ValueError("Invalid value for `node_type`, must not be `None`")  # noqa: E501
         self._node_type = node_type
-        if has_labels is None:
-            raise ValueError("Invalid value for `has_labels`, must not be `None`")  # noqa: E501
-        self._has_labels = has_labels
+        self._labels = labels
         if balance is None:
             raise ValueError("Invalid value for `balance`, must not be `None`")  # noqa: E501
         self._balance = balance
@@ -96,7 +94,7 @@ class Neighbor(Model):
         """
         return { 'id': self._id,
             'node_type': self._node_type,
-            'has_labels': self._has_labels,
+            'labels': self._labels,
             'balance': self._balance,
             'received': self._received,
             'estimated_value': self._estimated_value,
@@ -158,29 +156,27 @@ class Neighbor(Model):
         self._node_type = node_type
 
     @property
-    def has_labels(self):
-        """Gets the has_labels of this Neighbor.
+    def labels(self):
+        """Gets the labels of this Neighbor.
 
-        has labels  # noqa: E501
+        labels  # noqa: E501
 
-        :return: The has_labels of this Neighbor.
-        :rtype: bool
+        :return: The labels of this Neighbor.
+        :rtype: List[str]
         """
-        return self._has_labels
+        return self._labels
 
-    @has_labels.setter
-    def has_labels(self, has_labels):
-        """Sets the has_labels of this Neighbor.
+    @labels.setter
+    def labels(self, labels):
+        """Sets the labels of this Neighbor.
 
-        has labels  # noqa: E501
+        labels  # noqa: E501
 
-        :param has_labels: The has_labels of this Neighbor.
-        :type has_labels: bool
+        :param labels: The labels of this Neighbor.
+        :type labels: List[str]
         """
-        if has_labels is None:
-            raise ValueError("Invalid value for `has_labels`, must not be `None`")  # noqa: E501
 
-        self._has_labels = has_labels
+        self._labels = labels
 
     @property
     def balance(self):

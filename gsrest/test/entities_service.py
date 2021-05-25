@@ -99,8 +99,8 @@ for n in eth_addressWithTagsOutNeighbors.neighbors:
     nn.node_type = 'entity'
     eth_neighbors.append(nn)
 
-eth_neighbors[0].id = 107925000
-eth_neighbors[1].id = 107925001
+eth_neighbors[0].id = '107925000'
+eth_neighbors[1].id = '107925001'
 
 eth_entityWithTagsOutNeighbors = Neighbors(
         next_page=None,
@@ -120,9 +120,9 @@ entityWithTagsOutNeighbors = Neighbors(
              usd=3074.92,
              value=48610000000
           ),
-          id=2818641,
+          id='2818641',
           node_type='entity',
-          has_labels=False,
+          labels=['labelX', 'labelY'],
           no_txs=1,
           balance=Values(
              eur=0.0,
@@ -141,9 +141,9 @@ entityWithTagsOutNeighbors = Neighbors(
              usd=1397.54,
              value=3375700000
           ),
-          id=8361735,
+          id='8361735',
           node_type='entity',
-          has_labels=False,
+          labels=[],
           no_txs=3,
           balance=Values(
              eur=0.0,
@@ -166,9 +166,9 @@ entityWithTagsInNeighbors = Neighbors(
              eur=0.72,
              value=190000
           ),
-          id=67065,
+          id='67065',
           node_type='entity',
-          has_labels=False,
+          labels=[],
           no_txs=10,
           balance=Values(
              eur=0.0,
@@ -187,9 +187,9 @@ entityWithTagsInNeighbors = Neighbors(
              usd=404.02,
              value=50000000
           ),
-          id=144534,
+          id='144534',
           node_type='entity',
-          has_labels=False,
+          labels=[],
           no_txs=1,
           balance=Values(
              eur=0.0,
@@ -356,18 +356,21 @@ def list_entity_neighbors(test_case):
     result = service.list_entity_neighbors(
         currency='btc',
         entity=entityWithTags.entity,
+        include_labels=True,
         direction='out')
     test_case.assertEqual(entityWithTagsOutNeighbors, result)
 
     result = service.list_entity_neighbors(
         currency='btc',
         entity=entityWithTags.entity,
+        include_labels=True,
         direction='in')
     test_case.assertEqual(entityWithTagsInNeighbors, result)
 
     result = service.list_entity_neighbors(
         currency='eth',
         entity=eth_entityWithTags.entity,
+        include_labels=True,
         direction='out')
     test_case.assertEqual(eth_entityWithTagsOutNeighbors, result)
 
@@ -389,7 +392,7 @@ def list_entity_neighbors(test_case):
 
     assertEqual(
         [n.id for n in entityWithTagsInNeighbors.neighbors],
-        [int(n['id']) for n in result['neighbors']]
+        [n['id'] for n in result['neighbors']]
     )
 
     query_string = [('direction', 'in'), ('ids', '144534')]
@@ -410,7 +413,7 @@ def list_entity_neighbors(test_case):
 
     test_case.assertEqual(
         [entityWithTagsInNeighbors.neighbors[1].id],
-        [int(n['id']) for n in result['neighbors']]
+        [n['id'] for n in result['neighbors']]
     )
 
     query_string = [('direction', 'out'),
@@ -439,15 +442,17 @@ def list_entity_neighbors(test_case):
 
 def list_entity_neighbors_csv(test_case):
     csv = ("balance_eur,balance_usd,balance_value,estimated_value_eur,"
-           "estimated_value_usd,estimated_value_value,has_labels,id,no_txs,"
+           "estimated_value_usd,estimated_value_value,id,labels,no_txs,"
            "node_type,received_eur,received_usd,received_value\r\n0.0,0.0,0"
-           ",2411.06,3074.92,48610000000,False,2818641,1,entity,2411.06,"
+           ",2411.06,3074.92,48610000000,2818641,\"['labelX', 'labelY']\","
+           "1,entity,2411.06,"
            "3074.92,48610000000\r\n0.0,0.0,0,1078.04,1397.54,3375700000,"
-           "False,8361735,3,entity,7064.18,8517.93,7858798000\r\n")
+           "8361735,[],3,entity,7064.18,8517.93,7858798000\r\n")
     result = service.list_entity_neighbors_csv(
         currency='btc',
         entity=entityWithTags.entity,
-        direction='out')
+        direction='out',
+        include_labels=True)
     assertEqual(csv, result.data.decode('utf-8'))
 
 
@@ -502,6 +507,7 @@ def search_entity_neighbors(test_case):
                     key='category',
                     value=[category]
                     )
+    print(f'result {result}')
     assertEqual(2818641, result.paths[0].node.entity)
     assertEqual(123, result.paths[0].paths[0].node.entity)
     assertEqual(category,

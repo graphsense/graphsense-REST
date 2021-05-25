@@ -149,7 +149,7 @@ def list_entity_addresses_csv(currency, entity):  # noqa: E501
         return internalerror(str(e))
 
 
-def list_entity_neighbors(currency, entity, direction, ids=None, page=None, pagesize=None):  # noqa: E501
+def list_entity_neighbors(currency, entity, direction, ids=None, include_labels=None, page=None, pagesize=None):  # noqa: E501
     """Get an entity&#39;s neighbors in the entity graph
 
      # noqa: E501
@@ -162,6 +162,8 @@ def list_entity_neighbors(currency, entity, direction, ids=None, page=None, page
     :type direction: str
     :param ids: Restrict result to given set of comma separated IDs
     :type ids: List[str]
+    :param include_labels: Whether labels of tags should be included
+    :type include_labels: bool
     :param page: Resumption token for retrieving the next page
     :type page: str
     :param pagesize: Number of items returned in a single page
@@ -175,6 +177,7 @@ def list_entity_neighbors(currency, entity, direction, ids=None, page=None, page
             entity=entity,
             direction=direction,
             ids=ids,
+            include_labels=include_labels,
             page=page,
             pagesize=pagesize)
     except RuntimeError as e:
