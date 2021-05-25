@@ -1,5 +1,6 @@
 import connexion
 import six
+import traceback
 
 from openapi_server.models.block import Block  # noqa: E501
 from openapi_server.models.block_tx import BlockTx  # noqa: E501
@@ -29,6 +30,7 @@ def get_block(currency, height):  # noqa: E501
     except ValueError as e:
         return badrequest(str(e))
     except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
         return internalerror(str(e))
 
 
@@ -53,6 +55,7 @@ def list_block_txs(currency, height):  # noqa: E501
     except ValueError as e:
         return badrequest(str(e))
     except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
         return internalerror(str(e))
 
 
@@ -77,6 +80,7 @@ def list_block_txs_csv(currency, height):  # noqa: E501
     except ValueError as e:
         return badrequest(str(e))
     except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
         return internalerror(str(e))
 
 
@@ -101,4 +105,5 @@ def list_blocks(currency, page=None):  # noqa: E501
     except ValueError as e:
         return badrequest(str(e))
     except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
         return internalerror(str(e))

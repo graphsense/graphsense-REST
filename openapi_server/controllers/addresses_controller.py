@@ -1,5 +1,6 @@
 import connexion
 import six
+import traceback
 
 from openapi_server.models.address import Address  # noqa: E501
 from openapi_server.models.address_tag import AddressTag  # noqa: E501
@@ -36,6 +37,7 @@ def get_address(currency, address, include_tags=None):  # noqa: E501
     except ValueError as e:
         return badrequest(str(e))
     except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
         return internalerror(str(e))
 
 
@@ -66,6 +68,7 @@ def get_address_entity(currency, address, include_tags=None, tag_coherence=None)
     except ValueError as e:
         return badrequest(str(e))
     except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
         return internalerror(str(e))
 
 
@@ -93,6 +96,7 @@ def list_address_links(currency, address, neighbor):  # noqa: E501
     except ValueError as e:
         return badrequest(str(e))
     except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
         return internalerror(str(e))
 
 
@@ -120,6 +124,7 @@ def list_address_links_csv(currency, address, neighbor):  # noqa: E501
     except ValueError as e:
         return badrequest(str(e))
     except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
         return internalerror(str(e))
 
 
@@ -156,6 +161,7 @@ def list_address_neighbors(currency, address, direction, include_labels=None, pa
     except ValueError as e:
         return badrequest(str(e))
     except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
         return internalerror(str(e))
 
 
@@ -183,6 +189,7 @@ def list_address_neighbors_csv(currency, address, direction):  # noqa: E501
     except ValueError as e:
         return badrequest(str(e))
     except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
         return internalerror(str(e))
 
 
@@ -213,6 +220,7 @@ def list_address_txs(currency, address, page=None, pagesize=None):  # noqa: E501
     except ValueError as e:
         return badrequest(str(e))
     except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
         return internalerror(str(e))
 
 
@@ -237,6 +245,7 @@ def list_address_txs_csv(currency, address):  # noqa: E501
     except ValueError as e:
         return badrequest(str(e))
     except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
         return internalerror(str(e))
 
 
@@ -267,6 +276,7 @@ def list_addresses(currency, ids=None, page=None, pagesize=None):  # noqa: E501
     except ValueError as e:
         return badrequest(str(e))
     except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
         return internalerror(str(e))
 
 
@@ -291,6 +301,7 @@ def list_addresses_csv(currency, ids):  # noqa: E501
     except ValueError as e:
         return badrequest(str(e))
     except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
         return internalerror(str(e))
 
 
@@ -315,6 +326,7 @@ def list_tags_by_address(currency, address):  # noqa: E501
     except ValueError as e:
         return badrequest(str(e))
     except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
         return internalerror(str(e))
 
 
@@ -339,4 +351,5 @@ def list_tags_by_address_csv(currency, address):  # noqa: E501
     except ValueError as e:
         return badrequest(str(e))
     except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
         return internalerror(str(e))

@@ -1,5 +1,6 @@
 import connexion
 import six
+import traceback
 
 {{#imports}}{{import}}  # noqa: E501
 {{/imports}}
@@ -117,6 +118,7 @@ def {{operationId}}({{#allParams}}{{paramName}}{{^required}}=None{{/required}}{{
     except ValueError as e:
         return badrequest(str(e))
     except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
         return internalerror(str(e))
 {{/operation}}
 {{/operations}}

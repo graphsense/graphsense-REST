@@ -129,7 +129,8 @@ class Cassandra():
     def concurrent(self, session, statements_and_params):
         result = execute_concurrent(session, statements_and_params,
                                     raise_on_first_error=False)
-        return [row.one() for (success, row) in result if success]
+        return [row.one() for (success, row) in result
+                if success and row.one()]
 
     def concurrent_with_args(self, session, statement, params):
         result = execute_concurrent_with_args(

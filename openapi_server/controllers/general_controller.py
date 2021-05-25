@@ -1,5 +1,6 @@
 import connexion
 import six
+import traceback
 
 from openapi_server.models.search_result import SearchResult  # noqa: E501
 from openapi_server.models.stats import Stats  # noqa: E501
@@ -23,6 +24,7 @@ def get_statistics():  # noqa: E501
     except ValueError as e:
         return badrequest(str(e))
     except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
         return internalerror(str(e))
 
 
@@ -50,4 +52,5 @@ def search(q, currency=None, limit=None):  # noqa: E501
     except ValueError as e:
         return badrequest(str(e))
     except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
         return internalerror(str(e))
