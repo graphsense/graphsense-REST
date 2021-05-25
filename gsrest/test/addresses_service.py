@@ -406,7 +406,7 @@ eth_address = Address(
    ),
    total_spent=Values(
       eur=30.33,
-      value=12300000000,
+      value=123000000000000000000,
       usd=40.44
    ),
    out_degree=6,
@@ -414,7 +414,7 @@ eth_address = Address(
    no_outgoing_txs=10,
    total_received=Values(
       eur=10.11,
-      value=23400000000,
+      value=234000000000000000000,
       usd=20.22
    ),
    last_tx=TxSummary(
@@ -424,7 +424,7 @@ eth_address = Address(
    ),
    address="abcdef",
    in_degree=5,
-   balance=Values(eur=111.0, usd=222.0, value=11100000000))
+   balance=Values(eur=111.0, usd=222.0, value=111000000000000000000))
 
 
 eth_addressWithTags = Address(
@@ -443,16 +443,16 @@ eth_address2 = Address(
    no_incoming_txs=1,
    out_degree=2,
    total_received=Values(
-            value=45600000000,
+            value=456000000000000000000,
             eur=40.44,
             usd=50.56),
    balance=Values(
-            value=11100000000,
+            value=111000000000000000000,
             usd=222.0,
             eur=111.0),
    no_outgoing_txs=2,
    total_spent=Values(
-            value=34500000000,
+            value=345000000000000000000,
             eur=50.56,
             usd=60.67),
    first_tx=TxSummary(
@@ -476,16 +476,16 @@ eth_addressWithTagsOutNeighbors = Neighbors(
                 node_type='address',
                 labels=[],
                 received=Values(
-                        value=12300000000,
+                        value=123000000000000000000,
                         eur=22.22,
                         usd=33.33),
                 balance=Values(
-                        value=2300000000,
+                        value=23000000000000000000,
                         usd=46.0,
                         eur=23.0),
                 no_txs=4,
                 estimated_value=Values(
-                    value=1000000000,
+                    value=10000000000000000000,
                     usd=20.0,
                     eur=10.0)
                 ),
@@ -494,16 +494,16 @@ eth_addressWithTagsOutNeighbors = Neighbors(
                 node_type='address',
                 labels=['LabelX', 'LabelY'],
                 received=Values(
-                        value=12300000000,
+                        value=123000000000000000000,
                         eur=22.22,
                         usd=33.33),
                 balance=Values(
-                        value=2300000000,
+                        value=23000000000000000000,
                         usd=46.0,
                         eur=23.0),
                 no_txs=4,
                 estimated_value=Values(
-                    value=1000000000,
+                    value=10000000000000000000,
                     usd=20.0,
                     eur=10.0)
                 )])
@@ -558,12 +558,12 @@ def list_address_txs(test_case):
                     address_txs=[
                         AddressTxUtxo(
                             tx_hash="123456",
-                            value=convert_value(1260000, rates[2]),
+                            value=convert_value('btc', 1260000, rates[2]),
                             height=2,
                             timestamp=1510347493),
                         AddressTxUtxo(
                             tx_hash="abcdef",
-                            value=convert_value(-1260000, rates[2]),
+                            value=convert_value('btc', -1260000, rates[2]),
                             height=2,
                             timestamp=1511153263)
                         ]
@@ -590,8 +590,8 @@ def list_address_txs_csv(test_case):
     test_case.assertEqual(
         'currency_type,height,timestamp,tx_hash,values_eur,values_usd,'
         'values_value\r\n'
-        'account,1,15,af6e0000,123.0,246.0,12300000000\r\n'
-        'account,1,16,af6e0003,234.0,468.0,23400000000\r\n',
+        'account,1,15,af6e0000,123.0,246.0,123000000000000000000\r\n'
+        'account,1,16,af6e0003,234.0,468.0,234000000000000000000\r\n',
         result.data.decode('utf-8'))
 
 
@@ -717,8 +717,8 @@ def list_address_links_csv(test_case):
 
     csv = ('currency_type,height,timestamp,tx_hash,values_eur,'
            'values_usd,values_value\r\n'
-           'account,1,15,af6e0000,123.0,246.0,12300000000\r\n'
-           'account,1,16,af6e0003,234.0,468.0,23400000000\r\n')
+           'account,1,15,af6e0000,123.0,246.0,123000000000000000000\r\n'
+           'account,1,16,af6e0003,234.0,468.0,234000000000000000000\r\n')
     test_case.assertEqual(csv, result.data.decode('utf-8'))
 
 

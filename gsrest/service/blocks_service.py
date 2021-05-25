@@ -15,12 +15,12 @@ def from_row(currency, row, rates):
             tx_hash=row.hash.hex(),
             timestamp=row.block_timestamp,
             height=row.block_number,
-            values=convert_value(row.value, rates))
+            values=convert_value(currency, row.value, rates))
     return BlockTxUtxo(
          no_inputs=row.no_inputs,
          no_outputs=row.no_outputs,
-         total_input=convert_value(row.total_input, rates),
-         total_output=convert_value(row.total_output, rates),
+         total_input=convert_value(currency, row.total_input, rates),
+         total_output=convert_value(currency, row.total_output, rates),
          tx_hash=row.tx_hash.hex())
 
 

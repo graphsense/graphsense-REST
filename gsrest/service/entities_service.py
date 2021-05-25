@@ -20,7 +20,7 @@ import importlib
 MAX_DEPTH = 3
 
 
-def from_row(row, rates, tags=None):
+def from_row(currency, row, rates, tags=None):
     return Entity(
         entity=row['cluster'],
         first_tx=TxSummary(
@@ -45,6 +45,7 @@ def from_row(row, rates, tags=None):
         in_degree=row['in_degree'],
         out_degree=row['out_degree'],
         balance=convert_value(
+                currency,
                 compute_balance(
                     row['total_received'].value,
                     row['total_spent'].value,
@@ -116,14 +117,15 @@ def get_entity(currency, entity, include_tags, tag_coherence):
 
     tags = list_tags_by_entity(currency, result['cluster'], tag_coherence) \
         if include_tags else None
-    return from_row(result, get_rates(currency)['rates'], tags)
+    return from_row(currency, result, get_rates(currency)['rates'], tags)
 
 
 def list_entities(currency, ids=None, page=None, pagesize=None):
     db = get_connection()
     result, next_page = db.list_entities(currency, ids, page, pagesize)
     rates = get_rates(currency)['rates']
-    return Entities(entities=[from_row(row, rates) for row in result],
+    return Entities(entities=[from_row(currency, row, rates)
+                              for row in result],
                     next_page=next_page)
 
 
@@ -187,6 +189,7 @@ def list_entity_addresses(currency, entity, page=None, pagesize=None):
             in_degree=row['in_degree'],
             out_degree=row['out_degree'],
             balance=convert_value(
+                    currency,
                     compute_balance(
                         row['total_received'].value,
                         row['total_spent'].value,

@@ -86,8 +86,8 @@ def list_block_txs_csv(test_case):
 
     csv = ("currency_type,height,timestamp,tx_hash,values_eur,"
            "values_usd,values_value\r\n"
-           "account,1,15,af6e0000,123.0,246.0,12300000000\r\n"
-           "account,1,16,af6e0003,234.0,468.0,23400000000\r\n")
+           "account,1,15,af6e0000,123.0,246.0,123000000000000000000\r\n"
+           "account,1,16,af6e0003,234.0,468.0,234000000000000000000\r\n")
     test_case.assertEqual(csv,
                           service.list_block_txs_csv("eth", 1)
                           .data.decode('utf-8'))

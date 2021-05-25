@@ -64,19 +64,19 @@ tx1_eth = TxAccount(
    tx_hash='af6e0000',
    height=1,
    timestamp=15,
-   values=Values(eur=123.0, usd=246.0, value=12300000000))
+   values=Values(eur=123.0, usd=246.0, value=123000000000000000000))
 
 tx2_eth = TxAccount(
    tx_hash='af6e0003',
    height=1,
    timestamp=16,
-   values=Values(eur=234.0, usd=468.0, value=23400000000))
+   values=Values(eur=234.0, usd=468.0, value=234000000000000000000))
 
 tx3_eth = TxAccount(
    tx_hash='ab188013',
    height=1,
    timestamp=17,
-   values=Values(eur=234.0, usd=468.0, value=23400000000))
+   values=Values(eur=234.0, usd=468.0, value=234000000000000000000))
 
 
 def get_tx(test_case):

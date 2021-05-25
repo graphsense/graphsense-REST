@@ -21,7 +21,9 @@ def from_rows(currency, rows):
                     tx_hash=row.hash.hex(),
                     timestamp=row.block_timestamp,
                     height=row.block_number,
-                    values=convert_value(row.value, rates[row.block_number]))
+                    values=convert_value(currency,
+                                         row.value,
+                                         rates[row.block_number]))
                 for row in rows]
     heights = [row.height for row in rows]
     rates = list_rates(currency, heights)
@@ -29,7 +31,7 @@ def from_rows(currency, rows):
             height=row.height,
             timestamp=row.timestamp,
             tx_hash=row.tx_hash.hex(),
-            value=convert_value(row.value, rates[row.height]))
+            value=convert_value(currency, row.value, rates[row.height]))
             for row in rows]
 
 
@@ -103,7 +105,9 @@ def list_address_links(currency, address, neighbor):
                     tx_hash=row.hash.hex(),
                     timestamp=row.block_timestamp,
                     height=row.block_number,
-                    values=convert_value(row.value, rates[row.block_number]))
+                    values=convert_value(currency,
+                                         row.value,
+                                         rates[row.block_number]))
                 for row in links]
 
     heights = [row['height'] for row in links]
@@ -112,9 +116,9 @@ def list_address_links(currency, address, neighbor):
     return [LinkUtxo(tx_hash=e['tx_hash'],
                      height=e['height'],
                      timestamp=e['timestamp'],
-                     input_value=convert_value(
+                     input_value=convert_value(currency,
                          e['input_value'], rates[e['height']]),
-                     output_value=convert_value(
+                     output_value=convert_value(currency,
                          e['output_value'], rates[e['height']]),
                      ) for e in links]
 
@@ -157,7 +161,7 @@ def list_addresses(currency, ids=None, page=None, pagesize=None):
     rates = get_rates(currency)['rates']
     return Addresses(
             paging_state,
-            [common.address_from_row(row, rates)
+            [common.address_from_row(currency, row, rates)
              for row in result])
 
 

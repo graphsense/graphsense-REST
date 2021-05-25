@@ -8,7 +8,7 @@ from gsrest.util.values import compute_balance, convert_value, make_values
 from gsrest.service.rates_service import get_rates
 
 
-def address_from_row(row, rates, tags=None):
+def address_from_row(currency, row, rates, tags=None):
     return Address(
         address=row['address'],
         first_tx=TxSummary(
@@ -32,6 +32,7 @@ def address_from_row(row, rates, tags=None):
         in_degree=row['in_degree'],
         out_degree=row['out_degree'],
         balance=convert_value(
+                currency,
                 compute_balance(
                     row['total_received'].value,
                     row['total_spent'].value,
@@ -52,7 +53,8 @@ def get_address(currency, address, include_tags=False):
     if not result:
         raise RuntimeError("Address {} not found in currency {}".format(
             address, currency))
-    return address_from_row(result, get_rates(currency)['rates'], tags)
+    return address_from_row(currency, result,
+                            get_rates(currency)['rates'], tags)
 
 
 def list_tags_by_address(currency, address):
@@ -124,7 +126,7 @@ def list_neighbors(currency, id, direction, node_type,
                 value=row['estimated_value'].value,
                 eur=row['estimated_value'].eur,
                 usd=row['estimated_value'].usd),
-            balance=convert_value(balance, rates),
+            balance=convert_value(currency, balance, rates),
             no_txs=row['no_transactions']))
     return Neighbors(next_page=paging_state,
                      neighbors=relations)
