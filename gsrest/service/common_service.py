@@ -112,7 +112,7 @@ def list_neighbors(currency, id, direction, node_type,
         balance = compute_balance(row[dst+'_properties'].total_received.value,
                                   row[dst+'_properties'].total_spent.value)
         relations.append(Neighbor(
-            id=row[f'{dst}_{ntype}'],
+            id=str(row[f'{dst}_{ntype}']),
             node_type=node_type,
             has_labels=row[f'has_{dst}_labels']
             if row[f'has_{dst}_labels'] is not None else False,

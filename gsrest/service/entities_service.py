@@ -275,7 +275,8 @@ def recursive_search(currency, entity, params, breadth, depth, level,
     for neighbor in neighbors:
         match = True
         props = cached(neighbor.id, 'props',
-                       lambda: get_entity(currency, neighbor.id, True, False))
+                       lambda: get_entity(currency, int(neighbor.id),
+                                          True, False))
         if props is None:
             continue
 
@@ -289,11 +290,11 @@ def recursive_search(currency, entity, params, breadth, depth, level,
         matching_addresses = []
         if 'addresses' in params:
             matching_addresses = [id["address"] for id in params['addresses']
-                                  if str(id["entity"]) == str(neighbor.id)]
+                                  if str(id["entity"]) == neighbor.id]
             match = len(matching_addresses) > 0
 
         if 'entities' in params:
-            match = str(neighbor.id) in params['entities']
+            match = neighbor.id in params['entities']
 
         if 'field' in params:
             (field, fieldcurrency, min_value, max_value) = params['field']
@@ -307,7 +308,7 @@ def recursive_search(currency, entity, params, breadth, depth, level,
                 level < MAX_DEPTH and \
                 (skip_num_addresses is None or
                  props.no_addresses <= skip_num_addresses):
-            subpaths = recursive_search(currency, neighbor.id,
+            subpaths = recursive_search(currency, int(neighbor.id),
                                         params, breadth,
                                         depth - 1,
                                         level + 1,
