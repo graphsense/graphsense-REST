@@ -218,8 +218,9 @@ def search_entity_neighbors(currency, entity, direction, key, value, depth, brea
 
     elif 'total_received' in key or 'balance' in key:
         [curr, min_value, *max_value] = value
-        max_value = max_value[0] if len(max_value) > 0 else None
-        if min_value > max_value:
+        min_value = float(min_value)
+        max_value = float(max_value[0]) if len(max_value) > 0 else None
+        if max_value is not None and min_value > max_value:
             raise ValueError('Min must not be greater than max')
         elif curr not in ['value', 'eur', 'usd']:
             raise ValueError('Currency must be one of "value", "eur" or '
