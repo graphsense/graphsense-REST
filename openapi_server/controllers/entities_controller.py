@@ -290,7 +290,7 @@ def search_entity_neighbors(currency, entity, direction, key, value, depth, brea
     :type entity: int
     :param direction: Incoming or outgoing neighbors
     :type direction: str
-    :param key: Match neighbors against one and only one of these properties: - the category the entity belongs to - addresses the entity contains - total_received: amount the entity received in total - balance: amount the entity holds finally
+    :param key: Match neighbors against one and only one of these properties: - the category the entity belongs to - addresses the entity contains - entity ids - total_received: amount the entity received in total - balance: amount the entity holds finally
     :type key: str
     :param value: If key is - category: comma separated list of category names - addresses: comma separated list of address IDs - entities: comma separated list of entity IDs - total_received/balance: comma separated tuple of (currency, min, max)
     :type value: List[str]

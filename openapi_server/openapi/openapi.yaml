@@ -168,7 +168,6 @@ paths:
           type: array
         style: form
       - description: Resumption token for retrieving the next page
-        example: 0400030bff00f07fffff9b00
         explode: true
         in: query
         name: page
@@ -183,7 +182,6 @@ paths:
         name: pagesize
         required: false
         schema:
-          maximum: 1000
           minimum: 1
           type: integer
         style: form
@@ -467,7 +465,6 @@ paths:
           type: boolean
         style: form
       - description: Resumption token for retrieving the next page
-        example: 0400030bff00f07fffff9b00
         explode: true
         in: query
         name: page
@@ -482,7 +479,6 @@ paths:
         name: pagesize
         required: false
         schema:
-          maximum: 1000
           minimum: 1
           type: integer
         style: form
@@ -641,7 +637,6 @@ paths:
           type: string
         style: simple
       - description: Resumption token for retrieving the next page
-        example: 0400030bff00f07fffff9b00
         explode: true
         in: query
         name: page
@@ -656,7 +651,6 @@ paths:
         name: pagesize
         required: false
         schema:
-          maximum: 1000
           minimum: 1
           type: integer
         style: form
@@ -721,7 +715,6 @@ paths:
           type: string
         style: simple
       - description: Resumption token for retrieving the next page
-        example: 0400030bff00f07fffff9b00
         explode: true
         in: query
         name: page
@@ -872,7 +865,6 @@ paths:
           type: array
         style: form
       - description: Resumption token for retrieving the next page
-        example: 0400030bff00f07fffff9b00
         explode: true
         in: query
         name: page
@@ -887,7 +879,6 @@ paths:
         name: pagesize
         required: false
         schema:
-          maximum: 1000
           minimum: 1
           type: integer
         style: form
@@ -1016,7 +1007,6 @@ paths:
           type: integer
         style: simple
       - description: Resumption token for retrieving the next page
-        example: 0400030bff00f07fffff9b00
         explode: true
         in: query
         name: page
@@ -1031,7 +1021,6 @@ paths:
         name: pagesize
         required: false
         schema:
-          maximum: 1000
           minimum: 1
           type: integer
         style: form
@@ -1137,7 +1126,6 @@ paths:
           type: boolean
         style: form
       - description: Resumption token for retrieving the next page
-        example: 0400030bff00f07fffff9b00
         explode: true
         in: query
         name: page
@@ -1152,7 +1140,6 @@ paths:
         name: pagesize
         required: false
         schema:
-          maximum: 1000
           minimum: 1
           type: integer
         style: form
@@ -1251,8 +1238,9 @@ paths:
           type: string
         style: form
       - description: 'Match neighbors against one and only one of these properties:
-          - the category the entity belongs to - addresses the entity contains - total_received:
-          amount the entity received in total - balance: amount the entity holds finally'
+          - the category the entity belongs to - addresses the entity contains - entity
+          ids - total_received: amount the entity received in total - balance: amount
+          the entity holds finally'
         example: category
         explode: true
         in: query
@@ -1465,7 +1453,6 @@ paths:
           type: string
         style: simple
       - description: Resumption token for retrieving the next page
-        example: 0400030bff00f07fffff9b00
         explode: true
         in: query
         name: page
@@ -1555,7 +1542,6 @@ components:
       style: simple
     page:
       description: Resumption token for retrieving the next page
-      example: 0400030bff00f07fffff9b00
       explode: true
       in: query
       name: page
@@ -1571,7 +1557,6 @@ components:
       name: pagesize
       required: false
       schema:
-        maximum: 1000
         minimum: 1
         type: integer
       style: form
@@ -1719,8 +1704,9 @@ components:
       style: form
     search_key:
       description: 'Match neighbors against one and only one of these properties:
-        - the category the entity belongs to - addresses the entity contains - total_received:
-        amount the entity received in total - balance: amount the entity holds finally'
+        - the category the entity belongs to - addresses the entity contains - entity
+        ids - total_received: amount the entity received in total - balance: amount
+        the entity holds finally'
       example: category
       explode: true
       in: query

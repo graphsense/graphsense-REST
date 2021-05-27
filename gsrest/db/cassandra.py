@@ -8,7 +8,8 @@ from math import floor
 
 from gsrest.util.exceptions import BadConfigError
 
-PAGE_SIZE = 1000
+SMALL_PAGE_SIZE = 1000
+BIG_PAGE_SIZE = 10000
 SEARCH_PAGE_SIZE = 100
 
 ADDRESS_PREFIX_LENGTH = 5
@@ -116,7 +117,7 @@ class Cassandra():
     def get_session(self, currency, keyspace_type):
         # enforce standard row factory (can be overridden on service-level)
         self.session.row_factory = named_tuple_factory
-        self.session.default_fetch_size = PAGE_SIZE
+        self.session.default_fetch_size = BIG_PAGE_SIZE
 
         keyspace = self.get_keyspace_mapping(currency, keyspace_type)
         self.session.set_keyspace(keyspace)
@@ -199,7 +200,7 @@ class Cassandra():
         session = self.get_session(currency, 'transformed')
         query = "SELECT * FROM address_transactions WHERE address_id = %s " \
                 "AND address_id_group = %s"
-        fetch_size = min(pagesize or PAGE_SIZE, PAGE_SIZE)
+        fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
         statement = SimpleStatement(query, fetch_size=fetch_size)
         results = session.execute(statement, [address_id, address_id_group],
                                   paging_state=paging_state)
@@ -385,7 +386,7 @@ class Cassandra():
     @eth
     def list_entities(self, currency, ids, page=None, pagesize=None):
         session = self.get_session(currency, 'transformed')
-        fetch_size = min(pagesize or PAGE_SIZE, PAGE_SIZE)
+        fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
         paging_state = from_hex(page)
         session.row_factory = dict_factory
         query = \
@@ -410,7 +411,7 @@ class Cassandra():
         entity = int(entity)
         query = ("SELECT * FROM cluster_addresses "
                  "WHERE cluster_group = %s AND cluster = %s")
-        fetch_size = min(pagesize or PAGE_SIZE, PAGE_SIZE)
+        fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
         statement = SimpleStatement(query, fetch_size=fetch_size)
         session.row_factory = dict_factory
         results = session.execute(statement, [entity_id_group, entity],
@@ -473,7 +474,7 @@ class Cassandra():
         else:
             query = basequery
         session.row_factory = dict_factory
-        fetch_size = min(pagesize or PAGE_SIZE, PAGE_SIZE)
+        fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
         statement = SimpleStatement(query, fetch_size=fetch_size)
         paging_state = from_hex(page)
         results = session.execute(statement, parameters,
@@ -654,7 +655,7 @@ class Cassandra():
     @new
     def list_addresses(self, currency, ids=None, page=None, pagesize=None):
         session = self.get_session(currency, 'transformed')
-        fetch_size = min(pagesize or PAGE_SIZE, PAGE_SIZE)
+        fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
         paging_state = from_hex(page)
         session.row_factory = dict_factory
         query = \
@@ -738,7 +739,7 @@ class Cassandra():
             result = self.concurrent_with_args(session, query, params)
             paging_state = None
         else:
-            fetch_size = min(pagesize or PAGE_SIZE, PAGE_SIZE)
+            fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
             statement = SimpleStatement(query, fetch_size=fetch_size)
             result = session.execute(statement, paging_state=from_hex(page))
             paging_state = result.paging_state
@@ -812,7 +813,7 @@ class Cassandra():
                  "address_id_group = %s and "
                  f"address_id_secondary_group in {sec_in}"
                  " and address_id = %s")
-        fetch_size = min(pagesize or PAGE_SIZE, PAGE_SIZE)
+        fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
         statement = SimpleStatement(query, fetch_size=fetch_size)
         result = session.execute(statement,
                                  [id_group,
@@ -1104,7 +1105,7 @@ class Cassandra():
             ids = self.concurrent_with_args(session, query, params)
             paging_state = None
         else:
-            fetch_size = min(pagesize or PAGE_SIZE, PAGE_SIZE)
+            fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
             statement = SimpleStatement(query, fetch_size=fetch_size)
             result = session.execute(statement, paging_state=from_hex(page))
             ids = result.current_rows
