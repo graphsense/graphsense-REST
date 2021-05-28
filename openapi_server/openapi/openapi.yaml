@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   description: GraphSense API
   title: GraphSense API
-  version: 0.4.5
+  version: "0.5"
 servers:
 - url: https://api.graphsense.info
 paths:
