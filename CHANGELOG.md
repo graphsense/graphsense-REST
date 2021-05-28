@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## Unreleased
+
+### Added
+- Ethereum support
+- Bulk retrieval enpoints for addresses and entities
+- Entity can have tags on the entity and the address level. Latter are the aggregated tags from contained addresses.
+
+### Changed
+- Fetch entity/address with tags optionally
+- Calculate tag coherence optionally
+
 ## [0.4.5] 2020-11-18
 
 Complete rewrite on top of a [Connexion](https://github.com/zalando/connexion)
