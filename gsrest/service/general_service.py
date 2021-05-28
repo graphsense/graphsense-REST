@@ -76,7 +76,6 @@ def search(q, currency=None, limit=None):
     result = SearchResult(currencies=[], labels=[])
 
     for curr in currencies:
-        prefix_lengths = db.get_prefix_lengths(curr)
         if currency is not None and currency.lower() != curr.lower():
             continue
         element = SearchResultByCurrency(
@@ -86,19 +85,16 @@ def search(q, currency=None, limit=None):
                     )
 
         # Look for addresses and transactions
-        if len(q) >= prefix_lengths['tx']:
-            txs = list_matching_txs(curr, q)
-            element.txs = txs[:limit]
+        txs = list_matching_txs(curr, q)
+        element.txs = txs[:limit]
 
-        if len(q) >= prefix_lengths['address']:
-            addresses = list_matching_addresses(curr, q)
-            element.addresses = addresses[:limit]
+        addresses = list_matching_addresses(curr, q)
+        element.addresses = addresses[:limit]
 
         result.currencies.append(element)
 
-        if len(q) >= prefix_lengths['label']:
-            labels = list_labels(curr, q)[:limit]
-            if labels:
-                result.labels += labels
+        labels = list_labels(curr, q)[:limit]
+        if labels:
+            result.labels += labels
 
     return result

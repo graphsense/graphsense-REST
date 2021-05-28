@@ -49,7 +49,7 @@ eth_tag = AddressTag(
            abuse=None,
            lastmod=1,
            source="sourceX",
-           address="abcdef",
+           address="0xabcdef",
            tagpack_uri="uriX",
            active=True,
            currency='eth'
@@ -61,7 +61,7 @@ eth_tag2 = AddressTag(
            abuse=None,
            lastmod=1,
            source="sourceY",
-           address="abcdef",
+           address="0xabcdef",
            tagpack_uri="uriY",
            active=True,
            currency='eth'
@@ -422,7 +422,7 @@ eth_address = Address(
       height=1,
       timestamp=12
    ),
-   address="abcdef",
+   address="0xabcdef",
    in_degree=5,
    balance=Values(eur=111.0, usd=222.0, value=111000000000000000000))
 
@@ -460,19 +460,19 @@ eth_address2 = Address(
       tx_hash="af6e0000",
       height=1
    ),
-   address="123456"
+   address="0x123456"
 )
 
 eth_address3 = Address(
     **eth_address2.to_dict(),
 )
-eth_address3.address = "234567"
+eth_address3.address = "0x234567"
 
 eth_addressWithTagsOutNeighbors = Neighbors(
         next_page=None,
         neighbors=[
             Neighbor(
-                id="abcdef",
+                id="0xabcdef",
                 node_type='address',
                 labels=[],
                 received=Values(
@@ -490,7 +490,7 @@ eth_addressWithTagsOutNeighbors = Neighbors(
                     eur=10.0)
                 ),
             Neighbor(
-                id="123456",
+                id="0x123456",
                 node_type='address',
                 labels=['LabelX', 'LabelY'],
                 received=Values(
@@ -691,7 +691,7 @@ def list_address_links(test_case):
     result = service.list_address_links(
                 currency='eth',
                 address=eth_address.address,
-                neighbor='123456')
+                neighbor='0x123456')
     txs = [tx1_eth, tx2_eth]
     test_case.assertEqual(txs, result)
 
@@ -713,7 +713,7 @@ def list_address_links_csv(test_case):
     result = service.list_address_links_csv(
                 currency='eth',
                 address=eth_address.address,
-                neighbor='123456')
+                neighbor='0x123456')
 
     csv = ('currency_type,height,timestamp,tx_hash,values_eur,'
            'values_usd,values_value\r\n'

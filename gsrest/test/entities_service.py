@@ -592,7 +592,7 @@ def search_entity_neighbors(test_case):
     assertEqual(addresses, [a.address for a
                             in result.paths[0].paths[0].matching_addresses])
 
-    addresses = ['234567']
+    addresses = ['0x234567']
     result = service.search_entity_neighbors(
                     currency='eth',
                     entity=eth_entityWithTags.entity,

@@ -155,18 +155,12 @@ def search(test_case):
     result = service.search(q='af6e')
     test_case.assertEqual(expected, result)
 
-    # test results from multiple currences
     expected = base_search_results()
-    expected.currencies[0] = \
-        SearchResultByCurrency(
-            currency='btc',
-            txs=[],
-            addresses=['abcdefg'])
     expected.currencies[2] = \
         SearchResultByCurrency(
             currency='eth',
             txs=[],
-            addresses=['abcdef'])
+            addresses=['0xabcdef'])
 
-    result = service.search(q='abcde')
+    result = service.search(q='0xabcde')
     test_case.assertEqual(expected, result)
