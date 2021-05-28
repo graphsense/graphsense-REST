@@ -1128,6 +1128,8 @@ class Cassandra():
         return self.finish_addresses(currency, result), to_hex(paging_state)
 
     def finish_addresses(self, currency, rows):
+        TxSummary = namedtuple('TxSummary', ['height', 'timestamp',
+                                             'tx_hash', 'transaction_id'])
         ids = []
         for row in rows:
             ids.append(row['first_tx'].transaction_id)
@@ -1136,23 +1138,25 @@ class Cassandra():
                 self.backport_currencies(currency, row['total_received'])
             row['total_spent'] = \
                 self.backport_currencies(currency, row['total_spent'])
+            row['first_tx'] = TxSummary(
+                        height=row['first_tx'].height,
+                        timestamp=row['first_tx'].block_timestamp,
+                        transaction_id=row['first_tx'].transaction_id,
+                        tx_hash=None)
+            row['last_tx'] = TxSummary(
+                        height=row['last_tx'].height,
+                        timestamp=row['last_tx'].block_timestamp,
+                        transaction_id=row['last_tx'].transaction_id,
+                        tx_hash=None)
 
         txs = self.get_transactions_by_ids(currency, ids)
-        TxSummary = namedtuple('TxSummary', ['height', 'timestamp',
-                                             'tx_hash', 'transaction_id'])
 
         for i, (transaction_id, transaction) in enumerate(txs):
             row = rows[i//2]
             if row['first_tx'].transaction_id == transaction_id:
-                row['first_tx'] = TxSummary(
-                            height=row['first_tx'].height,
-                            timestamp=row['first_tx'].block_timestamp,
-                            transaction_id=transaction_id,
-                            tx_hash=transaction)
+                row['first_tx'] = row['first_tx']._replace(
+                    tx_hash=transaction)
             if row['last_tx'].transaction_id == transaction_id:
-                row['last_tx'] = TxSummary(
-                            height=row['last_tx'].height,
-                            timestamp=row['last_tx'].block_timestamp,
-                            transaction_id=transaction_id,
-                            tx_hash=transaction)
+                row['last_tx'] = row['last_tx']._replace(
+                    tx_hash=transaction)
         return rows
