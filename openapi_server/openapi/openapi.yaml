@@ -2982,6 +2982,16 @@ components:
       - $ref: '#/components/schemas/search_result_leaf'
       - $ref: '#/components/schemas/search_result_level4_allOf'
       title: search_result_level4
+    search_result_level5:
+      allOf:
+      - $ref: '#/components/schemas/search_result_leaf'
+      - $ref: '#/components/schemas/search_result_level5_allOf'
+      title: search_result_level5
+    search_result_level6:
+      allOf:
+      - $ref: '#/components/schemas/search_result_leaf'
+      - $ref: '#/components/schemas/search_result_level6_allOf'
+      title: search_result_level6
     search_result_leaf:
       properties:
         node:
@@ -3314,6 +3324,22 @@ components:
           type: array
       type: object
     search_result_level4_allOf:
+      properties:
+        paths:
+          description: Branches to matching entities
+          items:
+            $ref: '#/components/schemas/search_result_level5'
+          type: array
+      type: object
+    search_result_level5_allOf:
+      properties:
+        paths:
+          description: Branches to matching entities
+          items:
+            $ref: '#/components/schemas/search_result_level6'
+          type: array
+      type: object
+    search_result_level6_allOf:
       properties:
         paths:
           description: Branches to matching entities

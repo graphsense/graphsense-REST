@@ -17,7 +17,7 @@ from openapi_server.models.entity_addresses import EntityAddresses
 import gsrest.service.common_service as common
 import importlib
 
-MAX_DEPTH = 3
+MAX_DEPTH = 6
 
 
 def from_row(currency, row, rates, tags=None):
@@ -288,8 +288,8 @@ def recursive_search(currency, entity, params, breadth, depth, level,
 
         if 'category' in params:
             # find first occurrence of category in tags
-            match = next((True for t in props.tags.entity_tags
-                          if t.category and
+            tags = props.tags.entity_tags + props.tags.address_tags
+            match = next((True for t in tags if t.category and
                           t.category.lower() == params['category'].lower()),
                          False)
 

@@ -38,6 +38,10 @@ from openapi_server.models.search_result_level3 import SearchResultLevel3
 from openapi_server.models.search_result_level3_all_of import SearchResultLevel3AllOf
 from openapi_server.models.search_result_level4 import SearchResultLevel4
 from openapi_server.models.search_result_level4_all_of import SearchResultLevel4AllOf
+from openapi_server.models.search_result_level5 import SearchResultLevel5
+from openapi_server.models.search_result_level5_all_of import SearchResultLevel5AllOf
+from openapi_server.models.search_result_level6 import SearchResultLevel6
+from openapi_server.models.search_result_level6_all_of import SearchResultLevel6AllOf
 from openapi_server.models.stats import Stats
 from openapi_server.models.stats_ledger import StatsLedger
 from openapi_server.models.stats_ledger_version import StatsLedgerVersion
