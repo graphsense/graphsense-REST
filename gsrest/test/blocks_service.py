@@ -52,6 +52,20 @@ def get_block(test_case):
     test_case.assert400(response,
                         'Response body is : ' + response.data.decode('utf-8'))
 
+    result = service.get_block("eth", 1)
+    test_case.assertEqual(eth_block, result)
+    result = service.get_block("eth", 2300001)
+    test_case.assertEqual(eth_block2, result)
+    headers = {
+        'Accept': 'application/json',
+    }
+    response = test_case.client.open(
+        '/eth/blocks/{height}'.format(height="0"),
+        method='GET',
+        headers=headers)
+    test_case.assert400(response,
+                        'Response body is : ' + response.data.decode('utf-8'))
+
 
 def list_block_txs(test_case):
     """Test case for list_block_txs
@@ -104,64 +118,10 @@ def list_blocks(test_case):
                           key=lambda block: block.height))
     test_case.assertEqual(blocks, result)
 
-
-def get_block_eth(test_case):
-    """Test case for get_block_eth
-    """
-
-    result = service.get_block_eth(1)
-    test_case.assertEqual(eth_block, result)
-    result = service.get_block_eth(2300001)
-    test_case.assertEqual(eth_block2, result)
-    headers = {
-        'Accept': 'application/json',
-    }
-    response = test_case.client.open(
-        '/eth/blocks/{height}'.format(height="0"),
-        method='GET',
-        headers=headers)
-    test_case.assert400(response,
-                        'Response body is : ' + response.data.decode('utf-8'))
-
-
-def list_blocks_eth(test_case):
-    """Test case for list_blocks_eth
-    """
     blocks = Blocks(next_page=None, blocks=[eth_block, eth_block2])
-    result = service.list_blocks_eth()
+    result = service.list_blocks("eth")
     result = Blocks(
             next_page=None,
             blocks=sorted(result.blocks,
                           key=lambda block: block.height))
     test_case.assertEqual(blocks, result)
-
-
-def list_block_txs_eth(test_case):
-    """Test case for list_block_txs_eth
-    """
-
-    block_txs = Txs(txs=[
-            TxAccount(
-                tx_hash='af6e0000',
-                height=1,
-                timestamp=15,
-                values=Values(eur=123.0, usd=246.0, value=12300000000)),
-            TxAccount(
-                tx_hash='af6e0003',
-                height=1,
-                timestamp=16,
-                values=Values(eur=234.0, usd=468.0, value=23400000000))
-            ])
-    result = service.list_block_txs_eth(1)
-    test_case.assertEqual(block_txs, result)
-
-
-def list_block_txs_csv_eth(test_case):
-    """Test case for list_block_txs_csv_eth
-    """
-    csv = ("height,timestamp,tx_hash,values_eur,values_usd,values_value\r\n"
-           "1,15,af6e0000,123.0,246.0,12300000000\r\n"
-           "1,16,af6e0003,234.0,468.0,23400000000\r\n")
-    test_case.assertEqual(csv,
-                          service.list_block_txs_csv_eth(1)
-                          .data.decode('utf-8'))

@@ -155,6 +155,7 @@ class Cassandra():
         query = "SELECT * FROM summary_statistics LIMIT 1"
         return session.execute(query).one()
 
+    @eth
     def get_block(self, currency, height):
         session = self.get_session(currency, 'raw')
         query = "SELECT * FROM block WHERE height = %s"
@@ -713,20 +714,11 @@ class Cassandra():
         # remove 0x prefix
         return expression[2:]
 
-    def get_block_eth(self, height):
+    def get_block_eth(self, currency, height):
         session = self.get_session('eth', 'raw')
         block_group = self.get_block_group_eth(height)
         query = "SELECT * FROM block WHERE block_group = %s and number = %s"
         return session.execute(query, [block_group, height]).one()
-
-    def list_blocks_eth(self, page=None):
-        session = self.get_session('eth', 'raw')
-        paging_state = from_hex(page)
-
-        query = "SELECT * FROM block"
-        results = session.execute(query, paging_state=paging_state)
-
-        return results, to_hex(results.paging_state)
 
     # entity = address_id
     def get_entity_eth(self, currency, entity):
