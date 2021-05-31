@@ -12,15 +12,15 @@ def list_tags(label, currency=None):
     label = alphanumeric_lower(label)
     if(currency is None):
         address_tags = []
-        for currency in db.get_supported_currencies():
-            address_tags += db.list_address_tags(currency, label)
+        for curr in db.get_supported_currencies():
+            address_tags += db.list_address_tags(curr, label)
     else:
         address_tags = db.list_address_tags(currency, label)
 
     if(currency is None):
         entity_tags = []
-        for currency in db.get_supported_currencies():
-            entity_tags += db.list_entity_tags(currency, label)
+        for curr in db.get_supported_currencies():
+            entity_tags += db.list_entity_tags(curr, label)
     else:
         entity_tags = db.list_entity_tags(currency, label)
 

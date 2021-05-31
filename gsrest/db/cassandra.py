@@ -554,7 +554,8 @@ class Cassandra():
         return nodes
 
     def list_address_tags(self, currency, label):
-        label_norm_prefix = label[:LABEL_PREFIX_LENGTH]
+        prefix_length = self.get_prefix_lengths(currency)['label']
+        label_norm_prefix = label[:prefix_length]
 
         session = self.get_session(currency=currency,
                                    keyspace_type='transformed')
@@ -567,7 +568,8 @@ class Cassandra():
 
     @eth
     def list_entity_tags(self, currency, label):
-        label_norm_prefix = label[:LABEL_PREFIX_LENGTH]
+        prefix_length = self.get_prefix_lengths(currency)['label']
+        label_norm_prefix = label[:prefix_length]
 
         session = self.get_session(currency=currency,
                                    keyspace_type='transformed')
@@ -1108,7 +1110,8 @@ class Cassandra():
         return neighbors, page
 
     def list_tags_new(self, currency, label):
-        label_norm_prefix = label[:LABEL_PREFIX_LENGTH]
+        prefix_length = self.get_prefix_lengths(currency)['label']
+        label_norm_prefix = label[:prefix_length]
 
         session = self.get_session(currency=currency,
                                    keyspace_type='transformed')
