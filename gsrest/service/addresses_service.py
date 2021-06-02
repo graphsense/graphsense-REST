@@ -116,10 +116,10 @@ def list_address_links(currency, address, neighbor):
     return [LinkUtxo(tx_hash=e['tx_hash'],
                      height=e['height'],
                      timestamp=e['timestamp'],
-                     input_value=convert_value(currency,
-                         e['input_value'], rates[e['height']]),
-                     output_value=convert_value(currency,
-                         e['output_value'], rates[e['height']]),
+                     input_value=convert_value(
+                         currency, e['input_value'], rates[e['height']]),
+                     output_value=convert_value(
+                         currency, e['output_value'], rates[e['height']]),
                      ) for e in links]
 
 

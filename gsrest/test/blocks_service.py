@@ -1,7 +1,5 @@
 from openapi_server.models.block import Block
 from openapi_server.models.blocks import Blocks
-from openapi_server.models.txs import Txs
-from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.block_tx_utxo import BlockTxUtxo
 from openapi_server.models.values import Values
 import gsrest.service.blocks_service as service
