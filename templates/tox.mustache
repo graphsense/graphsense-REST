@@ -1,12 +1,19 @@
 [tox]
-envlist = {{#supportPython2}}py27, {{/supportPython2}}py3
 skipsdist=True
 requires=tox-venv
 
+[gh-actions]
+python =
+    3.6: py36
+    3.7: py37
+    3.8: py38
+    3.9: py39
+
 [testenv]
-deps=-rrequirements.txt
-     -rtest-requirements.txt
+deps=-r{toxinidir}/requirements.txt
+     -r{toxinidir}/test-requirements.txt
+	 {toxinidir}
 
 commands=
-  bash -c "cd {toxinidir}/tests/ && make test"
+  bash -c "cd {toxinidir}/tests/ && make .runtest"
   {{^useNose}}pytest --cov={{{pythonSrcRoot}}}{{{packageName}}}{{/useNose}}{{#useNose}}nosetests{{/useNose}}

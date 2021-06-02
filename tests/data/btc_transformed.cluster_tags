@@ -1,3 +1,6 @@
- {"cluster_group": 705, "cluster": 17642138, "address": "1Archive1n2C579dMsAu3iC6tWzuQJz8dN", "label": "Internet, Archive", "source": "https://archive.org/donate/cryptocurrency", "tagpack_uri": "http://tagpack_uri", "abuse": null, "address_id": 17642138, "category": "organization", "lastmod": 1560290400}
- {"cluster_group": 705, "cluster": 17642138, "address": "1Archive1n2C579dMsAu3iC6tWzuQJz8dN", "label": "Internet Archive 2", "source": "https://archive.org/donate/cryptocurrency", "tagpack_uri": "http://tagpack_uri", "abuse": null, "address_id": 17642138, "category": "organization", "lastmod": 1560290400}
- {"cluster_group": 0, "cluster": 123, "address": "a123456", "label": "labelABC", "source": "https://source", "tagpack_uri": "http://tagpack_uri", "abuse": null, "address_id": 123, "category": "MyCategory", "lastmod": 1560290400}
+ {"cluster_group": 705, "cluster": 17642138, "label": "Internet, Archive", "source": "https://archive.org/donate/cryptocurrency", "tagpack_uri": "http://tagpack_uri", "abuse": null, "category": "organization", "lastmod": 1560290400}
+ {"cluster_group": 705, "cluster": 17642138, "label": "Internet Archive 2", "source": "https://archive.org/donate/cryptocurrency", "tagpack_uri": "http://tagpack_uri", "abuse": null, "category": "organization", "lastmod": 1560290400}
+ {"cluster_group": 0, "cluster": 123, "label": "labelABC", "source": "https://source", "tagpack_uri": "http://tagpack_uri", "abuse": null, "category": "MyCategory", "lastmod": 1560290400}
+ {"cluster_group": 112, "cluster": 2818641, "label": "labelX", "source": "https://source", "tagpack_uri": "http://tagpack_uri", "abuse": null, "category": null, "lastmod": 1560290400}
+ {"cluster_group": 112, "cluster": 2818641, "label": "labelY", "source": "https://source", "tagpack_uri": "http://tagpack_uri", "abuse": null, "category": null, "lastmod": 1560290400}
+

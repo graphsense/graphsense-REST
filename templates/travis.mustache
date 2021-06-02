@@ -1,17 +1,9 @@
+# ref: https://docs.travis-ci.com/user/languages/python
 language: python
 python:
   - "3.6"
   - "3.7"
   - "3.8"
-# command to install dependencies
-install:
-  - pip install -r requirements.txt
-  #- pip install pytest-cov
-  #- pip install coveralls
-  - pip install tox
+install: pip install tox-travis
 # command to run tests
-script:
-  - tox
-  #- pytest --cov=gsrest
-#after_success:
-  #- coveralls
+script: tox

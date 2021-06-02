@@ -1,9 +1,23 @@
+import os
+import multiprocessing
+
 timeout = 300
 capture_output = True
 accesslog = '-'
 errorlog = '-'
 loglevel = 'debug'
 bind = "0.0.0.0:9000"
+
+num = multiprocessing.cpu_count() * 2
+try:
+    workers = int(os.getenv('NUM_WORKERS', num))
+except ValueError:
+    workers = num
+
+try:
+    threads = int(os.getenv('NUM_THREADS', num))
+except ValueError:
+    threads = num
 
 
 def post_fork(server, worker):

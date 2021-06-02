@@ -13,9 +13,14 @@ def compute_balance(total_received_value, total_spent_value):
     return total_received_value - total_spent_value
 
 
-def convert_value(value, rates):
+def convert_value(currency, value, rates):
+    if currency == 'eth':
+        factor = 1e-18
+    else:
+        factor = 1e-8
+
     values = v.Values(
             value=value,
-            eur=round(value * rates['eur'] * 1e-8, 2),
-            usd=round(value * rates['usd'] * 1e-8, 2))
+            eur=round(value * rates['eur'] * factor, 2),
+            usd=round(value * rates['usd'] * factor, 2))
     return values

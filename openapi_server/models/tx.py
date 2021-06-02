@@ -6,10 +6,14 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from openapi_server.models.base_model_ import Model
+from openapi_server.models.tx_account import TxAccount
+from openapi_server.models.tx_utxo import TxUtxo
 from openapi_server.models.tx_value import TxValue
 from openapi_server.models.values import Values
 from openapi_server import util
 
+from openapi_server.models.tx_account import TxAccount  # noqa: E501
+from openapi_server.models.tx_utxo import TxUtxo  # noqa: E501
 from openapi_server.models.tx_value import TxValue  # noqa: E501
 from openapi_server.models.values import Values  # noqa: E501
 
@@ -19,9 +23,11 @@ class Tx(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, tx_hash=None, coinbase=None, height=None, inputs=None, outputs=None, timestamp=None, total_input=None, total_output=None):  # noqa: E501
+    def __init__(self, currency_type='account', tx_hash=None, coinbase=None, height=None, inputs=None, outputs=None, timestamp=None, total_input=None, total_output=None, values=None):  # noqa: E501
         """Tx - a model defined in OpenAPI
 
+        :param currency_type: The currency_type of this Tx.  # noqa: E501
+        :type currency_type: str
         :param tx_hash: The tx_hash of this Tx.  # noqa: E501
         :type tx_hash: str
         :param coinbase: The coinbase of this Tx.  # noqa: E501
@@ -38,8 +44,11 @@ class Tx(Model):
         :type total_input: Values
         :param total_output: The total_output of this Tx.  # noqa: E501
         :type total_output: Values
+        :param values: The values of this Tx.  # noqa: E501
+        :type values: Values
         """
         self.openapi_types = {
+            'currency_type': str,
             'tx_hash': str,
             'coinbase': bool,
             'height': int,
@@ -47,10 +56,12 @@ class Tx(Model):
             'outputs': List[TxValue],
             'timestamp': int,
             'total_input': Values,
-            'total_output': Values
+            'total_output': Values,
+            'values': Values
         }
 
         self.attribute_map = {
+            'currency_type': 'currency_type',
             'tx_hash': 'tx_hash',
             'coinbase': 'coinbase',
             'height': 'height',
@@ -58,9 +69,13 @@ class Tx(Model):
             'outputs': 'outputs',
             'timestamp': 'timestamp',
             'total_input': 'total_input',
-            'total_output': 'total_output'
+            'total_output': 'total_output',
+            'values': 'values'
         }
 
+        if currency_type is None:
+            raise ValueError("Invalid value for `currency_type`, must not be `None`")  # noqa: E501
+        self._currency_type = currency_type
         if tx_hash is None:
             raise ValueError("Invalid value for `tx_hash`, must not be `None`")  # noqa: E501
         self._tx_hash = tx_hash
@@ -85,6 +100,9 @@ class Tx(Model):
         if total_output is None:
             raise ValueError("Invalid value for `total_output`, must not be `None`")  # noqa: E501
         self._total_output = total_output
+        if values is None:
+            raise ValueError("Invalid value for `values`, must not be `None`")  # noqa: E501
+        self._values = values
 
     @classmethod
     def from_dict(cls, dikt) -> 'Tx':
@@ -103,15 +121,40 @@ class Tx(Model):
         :return: The Tx as a dict
         :rtype: dict
         """
-        return { 'tx_hash': self._tx_hash,
+        return { 'currency_type': self._currency_type,
+            'tx_hash': self._tx_hash,
             'coinbase': self._coinbase,
             'height': self._height,
             'inputs': self._inputs,
             'outputs': self._outputs,
             'timestamp': self._timestamp,
             'total_input': self._total_input,
-            'total_output': self._total_output }
+            'total_output': self._total_output,
+            'values': self._values }
 
+
+    @property
+    def currency_type(self):
+        """Gets the currency_type of this Tx.
+
+
+        :return: The currency_type of this Tx.
+        :rtype: str
+        """
+        return self._currency_type
+
+    @currency_type.setter
+    def currency_type(self, currency_type):
+        """Sets the currency_type of this Tx.
+
+
+        :param currency_type: The currency_type of this Tx.
+        :type currency_type: str
+        """
+        if currency_type is None:
+            raise ValueError("Invalid value for `currency_type`, must not be `None`")  # noqa: E501
+
+        self._currency_type = currency_type
 
     @property
     def tx_hash(self):
@@ -310,3 +353,26 @@ class Tx(Model):
             raise ValueError("Invalid value for `total_output`, must not be `None`")  # noqa: E501
 
         self._total_output = total_output
+
+    @property
+    def values(self):
+        """Gets the values of this Tx.
+
+
+        :return: The values of this Tx.
+        :rtype: Values
+        """
+        return self._values
+
+    @values.setter
+    def values(self, values):
+        """Sets the values of this Tx.
+
+
+        :param values: The values of this Tx.
+        :type values: Values
+        """
+        if values is None:
+            raise ValueError("Invalid value for `values`, must not be `None`")  # noqa: E501
+
+        self._values = values

@@ -1,10 +1,11 @@
-from gsrest.test.assertion import assertEqual
-from openapi_server.models.tag import Tag
+from openapi_server.models.address_tag import AddressTag
+from openapi_server.models.entity_tag import EntityTag
+from openapi_server.models.tags import Tags
 from openapi_server.models.taxonomy import Taxonomy
 from openapi_server.models.concept import Concept
 import gsrest.service.tags_service as service
 
-tag1 = Tag(
+tag1 = AddressTag(
    tagpack_uri="https://tagpack_uri",
    lastmod=1,
    label="isolinks",
@@ -16,7 +17,7 @@ tag1 = Tag(
    abuse=None
         )
 
-tag2 = Tag(
+tag2 = AddressTag(
    lastmod=2,
    source="Unspecified",
    abuse=None,
@@ -28,7 +29,7 @@ tag2 = Tag(
    active=True
         )
 
-tag3 = Tag(
+tag3 = AddressTag(
    lastmod=3,
    source="source",
    abuse=None,
@@ -40,19 +41,35 @@ tag3 = Tag(
    active=True
         )
 
+ctag = EntityTag(
+   tagpack_uri="https://tagpack_uri",
+   lastmod=1,
+   label="isolinks",
+   source="Unspecified",
+   category=None,
+   active=True,
+   currency="BTC",
+   entity=123,
+   abuse=None
+        )
+
 
 def list_tags(test_case):
     result = service.list_tags(currency='btc', label='isolinks')
-    assertEqual([tag1], result)
+    test_case.assertEqual(Tags(address_tags=[tag1], entity_tags=[ctag]),
+                          result)
     result = service.list_tags(currency='btc', label='cimedy')
-    assertEqual([tag2], result)
+    test_case.assertEqual(Tags([tag2], entity_tags=[]), result)
     result = service.list_tags(label='cimedy')
-    assertEqual([tag2, tag3], sorted(result, key=lambda x: x.currency))
+    result.address_tags.sort(key=lambda x: x.currency)
+    test_case.assertEqual(Tags([tag2, tag3], entity_tags=[]),
+                          result)
+
 
 conceptA = Concept(
    uri="https://conceptA",
    id="conceptA",
-   taxonomy="taxo1",
+   taxonomy="entity",
    label="Concept A",
    description="A concept A."
 )
@@ -60,24 +77,24 @@ conceptA = Concept(
 conceptB = Concept(
    uri="https://conceptB",
    id="conceptB",
-   taxonomy="taxo2",
+   taxonomy="abuse",
    label="Concept B",
    description="A concept B."
 )
 
 taxonomies = [
-        Taxonomy(taxonomy="taxo1", uri="https://taxo1"),
-        Taxonomy(taxonomy="taxo2", uri="https://taxo2"),
+        Taxonomy(taxonomy="abuse", uri="https://abuse"),
+        Taxonomy(taxonomy="entity", uri="https://entity"),
         ]
 
 
 def list_concepts(test_case):
-    result = service.list_concepts('taxo1')
-    assertEqual([conceptA], result)
-    result = service.list_concepts('taxo2')
-    assertEqual([conceptB], result)
+    result = service.list_concepts('entity')
+    test_case.assertEqual([conceptA], result)
+    result = service.list_concepts('abuse')
+    test_case.assertEqual([conceptB], result)
 
 
 def list_taxonomies(test_case):
     result = service.list_taxonomies()
-    assertEqual(taxonomies, result)
+    test_case.assertEqual(taxonomies, result)

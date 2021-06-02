@@ -71,39 +71,30 @@ def get_statistics():
 def search(q, currency=None, limit=None):
     db = get_connection()
     currencies = db.get_supported_currencies()
-    leading_zeros = 0
-    pos = 0
-    # leading zeros will be lost when casting to int
-    while q[pos] == "0":
-        pos += 1
-        leading_zeros += 1
 
     q = q.strip()
     result = SearchResult(currencies=[], labels=[])
 
-    prefix_lengths = db.get_prefix_lengths()
-
-    for currency in currencies:
+    for curr in currencies:
+        if currency is not None and currency.lower() != curr.lower():
+            continue
         element = SearchResultByCurrency(
-                    currency=currency,
+                    currency=curr,
                     addresses=[],
                     txs=[]
                     )
 
         # Look for addresses and transactions
-        if len(q) >= prefix_lengths['tx']:
-            txs = list_matching_txs(currency, q, leading_zeros)
-            element.txs = txs[:limit]
+        txs = list_matching_txs(curr, q)
+        element.txs = txs[:limit]
 
-        if len(q) >= prefix_lengths['address']:
-            addresses = list_matching_addresses(currency, q)
-            element.addresses = addresses[:limit]
+        addresses = list_matching_addresses(curr, q)
+        element.addresses = addresses[:limit]
 
         result.currencies.append(element)
 
-        if len(q) >= prefix_lengths['label']:
-            labels = list_labels(currency, q)[:limit]
-            if labels:
-                result.labels += labels
+        labels = list_labels(curr, q)[:limit]
+        if labels:
+            result.labels += labels
 
     return result

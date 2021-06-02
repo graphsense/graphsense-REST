@@ -4,38 +4,41 @@ from openapi_server.models.neighbors import Neighbors
 from openapi_server.models.neighbor import Neighbor
 from openapi_server.models.address import Address
 from openapi_server.models.entity_addresses import EntityAddresses
-from openapi_server.models.entity_with_tags import EntityWithTags
+from openapi_server.models.entity import Entity
 from openapi_server.models.values import Values
-from openapi_server.models.search_paths import SearchPaths
-from openapi_server.models.tag import Tag
+from openapi_server.models.search_result_level1 import SearchResultLevel1
+from openapi_server.models.entity_tag import EntityTag
+from openapi_server.models.tags import Tags
 import json
 import gsrest.service.entities_service as service
+from gsrest.test.addresses_service import eth_address, \
+        eth_addressWithTagsOutNeighbors, atag1, atag2, eth_tag, eth_tag2
 
-tag = Tag(
+tag = EntityTag(
            category="organization",
            label="Internet, Archive",
            abuse=None,
            lastmod=1560290400,
            source="https://archive.org/donate/cryptocurrency",
-           address="1Archive1n2C579dMsAu3iC6tWzuQJz8dN",
+           entity=17642138,
            tagpack_uri="http://tagpack_uri",
            active=True,
            currency='btc'
         )
 
-tag2 = Tag(
+tag2 = EntityTag(
            category="organization",
            label="Internet Archive 2",
            abuse=None,
            lastmod=1560290400,
            source="https://archive.org/donate/cryptocurrency",
-           address="1Archive1n2C579dMsAu3iC6tWzuQJz8dN",
+           entity=17642138,
            tagpack_uri="http://tagpack_uri",
            active=True,
            currency='btc'
         )
 
-entityWithTags = EntityWithTags(
+entityWithTags = Entity(
    no_outgoing_txs=280,
    last_tx=TxSummary(
       height=651545,
@@ -66,9 +69,42 @@ entityWithTags = EntityWithTags(
             value=115422577,
             usd=2.31,
             eur=1.15),
-   tags=[tag2, tag],
-   tag_coherence=0.5
+   tags=Tags(
+       entity_tags=[tag2, tag],
+       address_tags=[atag1, atag2],
+       tag_coherence=0.5)
 )
+
+eth_entity = Entity(
+   no_outgoing_txs=eth_address.no_outgoing_txs,
+   last_tx=eth_address.last_tx,
+   total_spent=eth_address.total_spent,
+   in_degree=eth_address.in_degree,
+   no_addresses=1,
+   total_received=eth_address.total_received,
+   no_incoming_txs=eth_address.no_incoming_txs,
+   entity=107925000,
+   out_degree=eth_address.out_degree,
+   first_tx=eth_address.first_tx,
+   balance=eth_address.balance
+)
+
+eth_entityWithTags = Entity(**eth_entity.to_dict())
+eth_entityWithTags.tags = Tags(address_tags=[eth_tag, eth_tag2],
+                               entity_tags=[])
+
+eth_neighbors = []
+for n in eth_addressWithTagsOutNeighbors.neighbors:
+    nn = Neighbor(**n.to_dict())
+    nn.node_type = 'entity'
+    eth_neighbors.append(nn)
+
+eth_neighbors[0].id = '107925000'
+eth_neighbors[1].id = '107925001'
+
+eth_entityWithTagsOutNeighbors = Neighbors(
+        next_page=None,
+        neighbors=eth_neighbors)
 
 entityWithTagsOutNeighbors = Neighbors(
     next_page=None,
@@ -84,9 +120,9 @@ entityWithTagsOutNeighbors = Neighbors(
              usd=3074.92,
              value=48610000000
           ),
-          id=2818641,
+          id='2818641',
           node_type='entity',
-          labels=[],
+          labels=['labelX', 'labelY'],
           no_txs=1,
           balance=Values(
              eur=0.0,
@@ -105,7 +141,7 @@ entityWithTagsOutNeighbors = Neighbors(
              usd=1397.54,
              value=3375700000
           ),
-          id=8361735,
+          id='8361735',
           node_type='entity',
           labels=[],
           no_txs=3,
@@ -130,7 +166,7 @@ entityWithTagsInNeighbors = Neighbors(
              eur=0.72,
              value=190000
           ),
-          id=67065,
+          id='67065',
           node_type='entity',
           labels=[],
           no_txs=10,
@@ -151,7 +187,7 @@ entityWithTagsInNeighbors = Neighbors(
              usd=404.02,
              value=50000000
           ),
-          id=144534,
+          id='144534',
           node_type='entity',
           labels=[],
           no_txs=1,
@@ -238,47 +274,107 @@ entityWithTagsAddresses = EntityAddresses(
         )
 
 
-def get_entity_with_tags(test_case):
-    result = service.get_entity_with_tags(currency='btc', entity=17642138)
-    result.tags = sorted(result.tags, key=lambda t: t.label)
+def get_entity(test_case):
+    result = service.get_entity(currency='btc',
+                                entity=entityWithTags.entity,
+                                include_tags=True,
+                                tag_coherence=True)
+
+    # tag_coherence tested by tests/util/test_tag_coherence.py so hardcode here
+    test_case.assertIsNot(result.tags.tag_coherence, None)
+    result.tags.tag_coherence = 0.5
+    test_case.assertEqual(entityWithTags, result)
+
+    result = service.get_entity(currency='eth',
+                                entity=eth_entity.entity,
+                                include_tags=True,
+                                tag_coherence=False)
+
+    test_case.assertEqual(eth_entityWithTags, result)
+
+
+def list_entities(test_case):
+    result = service.list_entities(currency='btc')
+    ids = [67065, 144534, 10102718, 10164852, 17642138, 2818641,
+           8361735, 123, 456, 789]
+    test_case.assertEqual(ids.sort(),
+                          [row.entity for row in result.entities].sort())
+
+    result = service.list_entities(currency='btc', ids=[67065, 456, 42])
+    ids = [67065, 456]
+    test_case.assertEqual(sorted(ids),
+                          sorted([row.entity for row in result.entities]))
+
+    result = service.list_entities(currency='eth')
+    test_case.assertEqual([107925000, 107925001, 107925002],
+                          sorted([row.entity for row in result.entities]))
+
+    result = service.list_entities(currency='eth', ids=[107925000])
+    test_case.assertEqual([eth_entity],
+                          result.entities)
+
+
+def list_entities_csv(test_case):
+    result = service.list_entities_csv(
+                "btc", [456, 67065]).data.decode('utf-8')
+    assertEqual(4, len(result.split("\r\n")))
+    result = service.list_entities_csv(
+                "eth", [eth_entity.entity]).data.decode('utf-8')
+    assertEqual(3, len(result.split("\r\n")))
+
+
+def list_tags_by_entity(test_case):
+    result = service.list_tags_by_entity(currency='btc',
+                                         entity=entityWithTags.entity,
+                                         tag_coherence=False)
     result.tag_coherence = 0.5
-    assertEqual(entityWithTags, result)
+    test_case.assertEqual(entityWithTags.tags, result)
+    result = service.list_tags_by_entity(currency='eth',
+                                         entity=eth_entityWithTags.entity,
+                                         tag_coherence=False)
+    test_case.assertEqual(eth_entityWithTags.tags, result)
 
 
-def list_entity_tags(test_case):
-    result = service.list_entity_tags(currency='btc', entity=17642138)
-    assertEqual([tag2, tag], sorted(result, key=lambda t: t.label))
-
-
-def list_entity_tags_csv(test_case):
-    csv = ("abuse,active,address,category,currency,label,lastmod,source,"
+def list_tags_by_entity_by_level_csv(test_case):
+    csv = ("abuse,active,category,currency,entity,label,lastmod,source,"
            "tagpack_uri\r\n"
-           ",True,1Archive1n2C579dMsAu3iC6tWzuQJz8dN,organization,btc,"
+           ",True,organization,btc,17642138,"
            "Internet Archive 2,1560290400,https://archive.org/donate/crypto"
            "currency,http://tagpack_uri\r\n"
-           ",True,1Archive1n2C579dMsAu3iC6tWzuQJz8dN,"
-           "organization,btc,\"Internet, Archive\",1560290400,"
+           ",True,"
+           "organization,btc,17642138,\"Internet, Archive\",1560290400,"
            "https://archive.org/donate/cryptocurrency,http://tagpack_uri\r\n"
            )
-    assertEqual(csv, service.list_entity_tags_csv(
-                        "btc",
-                        entityWithTags.entity).data.decode('utf-8'))
+    assertEqual(
+        csv,
+        service.list_tags_by_entity_by_level_csv(
+            "btc", entityWithTags.entity, 'entity')
+        .data.decode('utf-8'))
 
 
 def list_entity_neighbors(test_case):
     result = service.list_entity_neighbors(
         currency='btc',
         entity=entityWithTags.entity,
+        include_labels=True,
         direction='out')
-    assertEqual(entityWithTagsOutNeighbors, result)
+    test_case.assertEqual(entityWithTagsOutNeighbors, result)
 
     result = service.list_entity_neighbors(
         currency='btc',
         entity=entityWithTags.entity,
+        include_labels=True,
         direction='in')
-    assertEqual(entityWithTagsInNeighbors, result)
+    test_case.assertEqual(entityWithTagsInNeighbors, result)
 
-    query_string = [('direction', 'in'), ('targets', '67065,144534')]
+    result = service.list_entity_neighbors(
+        currency='eth',
+        entity=eth_entityWithTags.entity,
+        include_labels=True,
+        direction='out')
+    test_case.assertEqual(eth_entityWithTagsOutNeighbors, result)
+
+    query_string = [('direction', 'in'), ('ids', '67065,144534')]
     headers = {
         'Accept': 'application/json',
     }
@@ -296,10 +392,10 @@ def list_entity_neighbors(test_case):
 
     assertEqual(
         [n.id for n in entityWithTagsInNeighbors.neighbors],
-        [int(n['id']) for n in result['neighbors']]
+        [n['id'] for n in result['neighbors']]
     )
 
-    query_string = [('direction', 'in'), ('targets', '144534')]
+    query_string = [('direction', 'in'), ('ids', '144534')]
     headers = {
         'Accept': 'application/json',
     }
@@ -315,9 +411,32 @@ def list_entity_neighbors(test_case):
 
     result = json.loads(response.data.decode('utf-8'))
 
-    assertEqual(
+    test_case.assertEqual(
         [entityWithTagsInNeighbors.neighbors[1].id],
-        [int(n['id']) for n in result['neighbors']]
+        [n['id'] for n in result['neighbors']]
+    )
+
+    query_string = [('direction', 'out'),
+                    ('ids',
+                     eth_entityWithTagsOutNeighbors.neighbors[0].id)]
+    headers = {
+        'Accept': 'application/json',
+    }
+    response = test_case.client.open(
+        '/{currency}/entities/{entity}/neighbors'.format(
+            currency="eth",
+            entity=eth_entityWithTags.entity),
+        method='GET',
+        headers=headers,
+        query_string=query_string)
+    test_case.assert200(response,
+                        'Response body is : ' + response.data.decode('utf-8'))
+
+    result = json.loads(response.data.decode('utf-8'))
+
+    test_case.assertEqual(
+        [eth_entityWithTagsOutNeighbors.neighbors[0].id],
+        [n['id'] for n in result['neighbors']]
     )
 
 
@@ -325,13 +444,15 @@ def list_entity_neighbors_csv(test_case):
     csv = ("balance_eur,balance_usd,balance_value,estimated_value_eur,"
            "estimated_value_usd,estimated_value_value,id,labels,no_txs,"
            "node_type,received_eur,received_usd,received_value\r\n0.0,0.0,0"
-           ",2411.06,3074.92,48610000000,2818641,[],1,entity,2411.06,3074.92,"
-           "48610000000\r\n0.0,0.0,0,1078.04,1397.54,3375700000,8361735,[],3,"
-           "entity,7064.18,8517.93,7858798000\r\n")
+           ",2411.06,3074.92,48610000000,2818641,\"['labelX', 'labelY']\","
+           "1,entity,2411.06,"
+           "3074.92,48610000000\r\n0.0,0.0,0,1078.04,1397.54,3375700000,"
+           "8361735,[],3,entity,7064.18,8517.93,7858798000\r\n")
     result = service.list_entity_neighbors_csv(
         currency='btc',
         entity=entityWithTags.entity,
-        direction='out')
+        direction='out',
+        include_labels=True)
     assertEqual(csv, result.data.decode('utf-8'))
 
 
@@ -339,7 +460,27 @@ def list_entity_addresses(test_case):
     result = service.list_entity_addresses(
                     currency='btc',
                     entity=entityWithTags.entity)
-    assertEqual(entityWithTagsAddresses, result)
+    test_case.assertEqual(entityWithTagsAddresses, result)
+
+    result = service.list_entity_addresses(
+                    currency='eth',
+                    entity=eth_entityWithTags.entity)
+    expected = Address(
+            address=eth_address.address,
+            first_tx=eth_address.first_tx,
+            last_tx=eth_address.last_tx,
+            no_incoming_txs=eth_address.no_incoming_txs,
+            no_outgoing_txs=eth_address.no_outgoing_txs,
+            total_received=eth_address.total_received,
+            total_spent=eth_address.total_spent,
+            in_degree=eth_address.in_degree,
+            out_degree=eth_address.out_degree,
+            balance=eth_address.balance
+            )
+
+    assertEqual(EntityAddresses(
+        next_page=None,
+        addresses=[expected]), result)
 
 
 def list_entity_addresses_csv(test_case):
@@ -368,7 +509,8 @@ def search_entity_neighbors(test_case):
                     )
     assertEqual(2818641, result.paths[0].node.entity)
     assertEqual(123, result.paths[0].paths[0].node.entity)
-    assertEqual(category, result.paths[0].paths[0].node.tags[0].category)
+    assertEqual(category,
+                result.paths[0].paths[0].node.tags.entity_tags[0].category)
 
     category = 'MyCategory'
     result = service.search_entity_neighbors(
@@ -382,7 +524,8 @@ def search_entity_neighbors(test_case):
                     )
     assertEqual(67065, result.paths[0].node.entity)
     assertEqual(123, result.paths[0].paths[0].node.entity)
-    assertEqual(category, result.paths[0].paths[0].node.tags[0].category)
+    assertEqual(category,
+                result.paths[0].paths[0].node.tags.entity_tags[0].category)
 
     # Test addresses matching
 
@@ -400,6 +543,18 @@ def search_entity_neighbors(test_case):
     assertEqual(456, result.paths[0].paths[0].node.entity)
     assertEqual(addresses, [a.address for a
                             in result.paths[0].paths[0].matching_addresses])
+
+    result = service.search_entity_neighbors(
+                    currency='btc',
+                    entity=entityWithTags.entity,
+                    direction='out',
+                    depth=2,
+                    breadth=10,
+                    key='entities',
+                    value=['123']
+                    )
+    assertEqual(2818641, result.paths[0].node.entity)
+    assertEqual(123, result.paths[0].paths[0].node.entity)
 
     query_string = [('direction', 'out'),
                     ('key', 'addresses'),
@@ -437,6 +592,21 @@ def search_entity_neighbors(test_case):
     assertEqual(addresses, [a.address for a
                             in result.paths[0].paths[0].matching_addresses])
 
+    addresses = ['0x234567']
+    result = service.search_entity_neighbors(
+                    currency='eth',
+                    entity=eth_entityWithTags.entity,
+                    direction='out',
+                    depth=2,
+                    breadth=10,
+                    key='addresses',
+                    value=addresses
+                    )
+    assertEqual(107925001, result.paths[0].node.entity)
+    assertEqual(107925002, result.paths[0].paths[0].node.entity)
+    assertEqual(addresses, [a.address for a
+                            in result.paths[0].paths[0].matching_addresses])
+
     # Test value matching
 
     result = service.search_entity_neighbors(
@@ -463,7 +633,7 @@ def search_entity_neighbors(test_case):
                     key='total_received',
                     value=['value', 5, 8]
                     )
-    assertEqual(SearchPaths(paths=[]), result)
+    assertEqual(SearchResultLevel1(paths=[]), result)
     #
     # Test value matching
 

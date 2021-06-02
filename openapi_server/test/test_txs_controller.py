@@ -26,12 +26,11 @@ class TestTxsController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/txs/{tx_hash}'.format(currency="btc", tx_hash="ab188013"),
+            '/{currency}/txs/{tx_hash}'.format(currency='btc', tx_hash='ab188013'),
             method='GET',
             headers=headers)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
     def test_list_txs(self):
         """Test case for list_txs
@@ -45,13 +44,12 @@ class TestTxsController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/txs'.format(currency="btc"),
+            '/{currency}/txs'.format(currency='btc'),
             method='GET',
             headers=headers,
             query_string=query_string)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
 
 if __name__ == '__main__':

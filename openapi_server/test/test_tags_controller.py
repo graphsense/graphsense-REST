@@ -7,7 +7,7 @@ from flask import json
 from six import BytesIO
 
 from openapi_server.models.concept import Concept  # noqa: E501
-from openapi_server.models.tag import Tag  # noqa: E501
+from openapi_server.models.tags import Tags  # noqa: E501
 from openapi_server.models.taxonomy import Taxonomy  # noqa: E501
 from openapi_server.test import BaseTestCase
 import gsrest.test.tags_service as test_service
@@ -27,17 +27,16 @@ class TestTagsController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/tags/taxonomies/{taxonomy}/concepts'.format(taxonomy="foo"),
+            '/tags/taxonomies/{taxonomy}/concepts'.format(taxonomy='foo'),
             method='GET',
             headers=headers)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
-
     def test_list_tags(self):
         """Test case for list_tags
 
-        Returns the tags associated with a given label
+        Returns address and entity tags associated with a given label
         """
         test_service.list_tags(self)
 
@@ -53,7 +52,6 @@ class TestTagsController(BaseTestCase):
             query_string=query_string)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
     def test_list_taxonomies(self):
         """Test case for list_taxonomies
@@ -71,7 +69,6 @@ class TestTagsController(BaseTestCase):
             headers=headers)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-
 
 
 if __name__ == '__main__':

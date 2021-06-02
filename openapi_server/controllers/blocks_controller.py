@@ -1,8 +1,12 @@
+import connexion
+import six
+import traceback
+
 from openapi_server.models.block import Block  # noqa: E501
-from openapi_server.models.block_txs import BlockTxs  # noqa: E501
+from openapi_server.models.block_tx import BlockTx  # noqa: E501
 from openapi_server.models.blocks import Blocks  # noqa: E501
 import gsrest.service.blocks_service as service
-from gsrest.service.problems import notfound
+from gsrest.service.problems import notfound, badrequest, internalerror
 
 
 def get_block(currency, height):  # noqa: E501
@@ -23,10 +27,15 @@ def get_block(currency, height):  # noqa: E501
             height=height)
     except RuntimeError as e:
         return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        return internalerror(str(e))
 
 
 def list_block_txs(currency, height):  # noqa: E501
-    """Get all blocks (100 per page)
+    """Get block transactions (100 per page)
 
      # noqa: E501
 
@@ -35,7 +44,7 @@ def list_block_txs(currency, height):  # noqa: E501
     :param height: The block height
     :type height: int
 
-    :rtype: BlockTxs
+    :rtype: List[BlockTx]
     """
     try:
         return service.list_block_txs(
@@ -43,10 +52,15 @@ def list_block_txs(currency, height):  # noqa: E501
             height=height)
     except RuntimeError as e:
         return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        return internalerror(str(e))
 
 
 def list_block_txs_csv(currency, height):  # noqa: E501
-    """Get all blocks as CSV
+    """Get block transactions as CSV
 
      # noqa: E501
 
@@ -63,6 +77,11 @@ def list_block_txs_csv(currency, height):  # noqa: E501
             height=height)
     except RuntimeError as e:
         return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        return internalerror(str(e))
 
 
 def list_blocks(currency, page=None):  # noqa: E501
@@ -83,3 +102,8 @@ def list_blocks(currency, page=None):  # noqa: E501
             page=page)
     except RuntimeError as e:
         return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        return internalerror(str(e))

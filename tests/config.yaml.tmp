@@ -9,3 +9,6 @@ database:
         ltc: 
             raw: ltc_raw
             transformed: ltc_transformed
+        eth: 
+            raw: eth_raw
+            transformed: eth_transformed

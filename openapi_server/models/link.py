@@ -6,9 +6,13 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from openapi_server.models.base_model_ import Model
+from openapi_server.models.link_utxo import LinkUtxo
+from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.values import Values
 from openapi_server import util
 
+from openapi_server.models.link_utxo import LinkUtxo  # noqa: E501
+from openapi_server.models.tx_account import TxAccount  # noqa: E501
 from openapi_server.models.values import Values  # noqa: E501
 
 class Link(Model):
@@ -17,9 +21,11 @@ class Link(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, tx_hash=None, height=None, timestamp=None, input_value=None, output_value=None):  # noqa: E501
+    def __init__(self, currency_type='account', tx_hash=None, height=None, timestamp=None, input_value=None, output_value=None, values=None):  # noqa: E501
         """Link - a model defined in OpenAPI
 
+        :param currency_type: The currency_type of this Link.  # noqa: E501
+        :type currency_type: str
         :param tx_hash: The tx_hash of this Link.  # noqa: E501
         :type tx_hash: str
         :param height: The height of this Link.  # noqa: E501
@@ -30,23 +36,32 @@ class Link(Model):
         :type input_value: Values
         :param output_value: The output_value of this Link.  # noqa: E501
         :type output_value: Values
+        :param values: The values of this Link.  # noqa: E501
+        :type values: Values
         """
         self.openapi_types = {
+            'currency_type': str,
             'tx_hash': str,
             'height': int,
             'timestamp': int,
             'input_value': Values,
-            'output_value': Values
+            'output_value': Values,
+            'values': Values
         }
 
         self.attribute_map = {
+            'currency_type': 'currency_type',
             'tx_hash': 'tx_hash',
             'height': 'height',
             'timestamp': 'timestamp',
             'input_value': 'input_value',
-            'output_value': 'output_value'
+            'output_value': 'output_value',
+            'values': 'values'
         }
 
+        if currency_type is None:
+            raise ValueError("Invalid value for `currency_type`, must not be `None`")  # noqa: E501
+        self._currency_type = currency_type
         if tx_hash is None:
             raise ValueError("Invalid value for `tx_hash`, must not be `None`")  # noqa: E501
         self._tx_hash = tx_hash
@@ -62,6 +77,9 @@ class Link(Model):
         if output_value is None:
             raise ValueError("Invalid value for `output_value`, must not be `None`")  # noqa: E501
         self._output_value = output_value
+        if values is None:
+            raise ValueError("Invalid value for `values`, must not be `None`")  # noqa: E501
+        self._values = values
 
     @classmethod
     def from_dict(cls, dikt) -> 'Link':
@@ -80,12 +98,37 @@ class Link(Model):
         :return: The Link as a dict
         :rtype: dict
         """
-        return { 'tx_hash': self._tx_hash,
+        return { 'currency_type': self._currency_type,
+            'tx_hash': self._tx_hash,
             'height': self._height,
             'timestamp': self._timestamp,
             'input_value': self._input_value,
-            'output_value': self._output_value }
+            'output_value': self._output_value,
+            'values': self._values }
 
+
+    @property
+    def currency_type(self):
+        """Gets the currency_type of this Link.
+
+
+        :return: The currency_type of this Link.
+        :rtype: str
+        """
+        return self._currency_type
+
+    @currency_type.setter
+    def currency_type(self, currency_type):
+        """Sets the currency_type of this Link.
+
+
+        :param currency_type: The currency_type of this Link.
+        :type currency_type: str
+        """
+        if currency_type is None:
+            raise ValueError("Invalid value for `currency_type`, must not be `None`")  # noqa: E501
+
+        self._currency_type = currency_type
 
     @property
     def tx_hash(self):
@@ -209,3 +252,26 @@ class Link(Model):
             raise ValueError("Invalid value for `output_value`, must not be `None`")  # noqa: E501
 
         self._output_value = output_value
+
+    @property
+    def values(self):
+        """Gets the values of this Link.
+
+
+        :return: The values of this Link.
+        :rtype: Values
+        """
+        return self._values
+
+    @values.setter
+    def values(self, values):
+        """Sets the values of this Link.
+
+
+        :param values: The values of this Link.
+        :type values: Values
+        """
+        if values is None:
+            raise ValueError("Invalid value for `values`, must not be `None`")  # noqa: E501
+
+        self._values = values

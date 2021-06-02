@@ -15,11 +15,9 @@ class Tag(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, address=None, label=None, category=None, abuse=None, tagpack_uri=None, source=None, lastmod=None, active=None, currency=None):  # noqa: E501
+    def __init__(self, label=None, category=None, abuse=None, tagpack_uri=None, source=None, lastmod=None, active=None, currency=None):  # noqa: E501
         """Tag - a model defined in OpenAPI
 
-        :param address: The address of this Tag.  # noqa: E501
-        :type address: str
         :param label: The label of this Tag.  # noqa: E501
         :type label: str
         :param category: The category of this Tag.  # noqa: E501
@@ -38,7 +36,6 @@ class Tag(Model):
         :type currency: str
         """
         self.openapi_types = {
-            'address': str,
             'label': str,
             'category': str,
             'abuse': str,
@@ -50,7 +47,6 @@ class Tag(Model):
         }
 
         self.attribute_map = {
-            'address': 'address',
             'label': 'label',
             'category': 'category',
             'abuse': 'abuse',
@@ -61,9 +57,6 @@ class Tag(Model):
             'currency': 'currency'
         }
 
-        if address is None:
-            raise ValueError("Invalid value for `address`, must not be `None`")  # noqa: E501
-        self._address = address
         if label is None:
             raise ValueError("Invalid value for `label`, must not be `None`")  # noqa: E501
         self._label = label
@@ -96,8 +89,7 @@ class Tag(Model):
         :return: The Tag as a dict
         :rtype: dict
         """
-        return { 'address': self._address,
-            'label': self._label,
+        return { 'label': self._label,
             'category': self._category,
             'abuse': self._abuse,
             'tagpack_uri': self._tagpack_uri,
@@ -106,31 +98,6 @@ class Tag(Model):
             'active': self._active,
             'currency': self._currency }
 
-
-    @property
-    def address(self):
-        """Gets the address of this Tag.
-
-        Address  # noqa: E501
-
-        :return: The address of this Tag.
-        :rtype: str
-        """
-        return self._address
-
-    @address.setter
-    def address(self, address):
-        """Sets the address of this Tag.
-
-        Address  # noqa: E501
-
-        :param address: The address of this Tag.
-        :type address: str
-        """
-        if address is None:
-            raise ValueError("Invalid value for `address`, must not be `None`")  # noqa: E501
-
-        self._address = address
 
     @property
     def label(self):

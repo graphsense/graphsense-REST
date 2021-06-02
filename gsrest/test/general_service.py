@@ -30,6 +30,25 @@ stats = Stats(
                 )]
             ),
         CurrencyStats(
+            name='eth',
+            no_entities=0,
+            no_addresses=1,
+            no_blocks=3,
+            timestamp=16,
+            no_txs=10,
+            no_labels=7,
+            no_address_relations=2,
+            notes=[],
+            tools=[],
+            data_sources=[StatsLedger(
+                id='eth_ledger',
+                report_uuid='eth_ledger',
+                visible_name='ETH Blockchain',
+                version=StatsLedgerVersion(
+                    nr='3', timestamp='1970-01-01 00:00:16'),
+                )]
+            ),
+        CurrencyStats(
             name='ltc',
             no_entities=789,
             no_addresses=456,
@@ -57,94 +76,91 @@ def get_statistics(test_case):
 
 
 def search(test_case):
-    expected = SearchResult(
-                    currencies=[
-                        SearchResultByCurrency(
-                            currency='btc',
-                            addresses=['xyz1234', 'xyz1278'],
-                            txs=[]),
-                        SearchResultByCurrency(
-                            currency='ltc',
-                            addresses=[],
-                            txs=[])],
-                    labels=[])
+    def base_search_results():
+        return SearchResult(
+                currencies=[
+                    SearchResultByCurrency(
+                        currency='btc',
+                        addresses=[],
+                        txs=[]),
+                    SearchResultByCurrency(
+                        currency='ltc',
+                        addresses=[],
+                        txs=[]),
+                    SearchResultByCurrency(
+                        currency='eth',
+                        addresses=[],
+                        txs=[])],
+                labels=[])
+
+    expected = base_search_results()
+    expected.currencies[0] = \
+        SearchResultByCurrency(
+            currency='btc',
+            addresses=['xyz1234', 'xyz1278'],
+            txs=[])
 
     result = service.search(q='xyz12')
-    result.currencies = sorted(result.currencies, key=lambda c: c.currency)
-    assertEqual(expected, result)
+    test_case.assertEqual(expected, result)
 
-    expected = SearchResult(
-                    currencies=[
-                        SearchResultByCurrency(
-                            currency='btc',
-                            addresses=['xyz1278'],
-                            txs=[]),
-                        SearchResultByCurrency(
-                            currency='ltc',
-                            addresses=[],
-                            txs=[])],
-                    labels=[])
+    expected.currencies[0] = \
+        SearchResultByCurrency(
+            currency='btc',
+            addresses=['xyz1278'],
+            txs=[])
 
     result = service.search(q='xyz127')
-    result.currencies = sorted(result.currencies, key=lambda c: c.currency)
-    assertEqual(expected, result)
+    test_case.assertEqual(expected, result)
 
-    expected = SearchResult(
-                    currencies=[
-                        SearchResultByCurrency(
-                            currency='ltc',
-                            addresses=[],
-                            txs=[]),
-                        SearchResultByCurrency(
-                            currency='btc',
-                            txs=['ab1880', 'ab188013'],
-                            addresses=[])],
-                    labels=[])
+    expected.currencies[0] = \
+        SearchResultByCurrency(
+            currency='btc',
+            txs=['ab1880', 'ab188013'],
+            addresses=[])
 
     result = service.search(q='ab188')
-    result.currencies = sorted(result.currencies, key=lambda c: c.currency)
+    test_case.assertEqual(expected, result)
 
-    expected = SearchResult(
-                    currencies=[
-                        SearchResultByCurrency(
-                            currency='ltc',
-                            addresses=[],
-                            txs=[]),
-                        SearchResultByCurrency(
-                            currency='btc',
-                            txs=['ab188013'],
-                            addresses=[])],
-                    labels=[])
+    expected.currencies[0] = \
+        SearchResultByCurrency(
+            currency='btc',
+            txs=['ab188013'],
+            addresses=[])
 
     result = service.search(q='ab18801')
-    result.currencies = sorted(result.currencies, key=lambda c: c.currency)
+    test_case.assertEqual(expected, result)
 
-    expected = SearchResult(
-                    currencies=[
-                        SearchResultByCurrency(
-                            currency='ltc',
-                            addresses=[],
-                            txs=[]),
-                        SearchResultByCurrency(
-                            currency='btc',
-                            txs=['00ab1880'],
-                            addresses=[])],
-                    labels=[])
+    expected.currencies[0] = \
+        SearchResultByCurrency(
+            currency='btc',
+            txs=['00ab188013'],
+            addresses=[])
 
     result = service.search(q='00ab1')
-    result.currencies = sorted(result.currencies, key=lambda c: c.currency)
+    test_case.assertEqual(expected, result)
 
-    expected = SearchResult(
-                    currencies=[
-                        SearchResultByCurrency(
-                            currency='ltc',
-                            addresses=[],
-                            txs=[]),
-                        SearchResultByCurrency(
-                            currency='btc',
-                            txs=[],
-                            addresses=[])],
-                    labels=['isolinks'])
+    expected = base_search_results()
+    expected.labels = ['isolinks']
 
     result = service.search(q='iso')
-    result.currencies = sorted(result.currencies, key=lambda c: c.currency)
+    test_case.assertEqual(expected, result)
+
+    expected = base_search_results()
+    expected.currencies[2] = \
+        SearchResultByCurrency(
+            currency='eth',
+            txs=['af6e0000', 'af6e0003'],
+            addresses=[])
+
+    result = service.search(q='af6e')
+    test_case.assertEqual(expected, result)
+
+    expected = base_search_results()
+    expected.currencies[2] = \
+        SearchResultByCurrency(
+            currency='eth',
+            txs=[],
+            addresses=['0xabcdef'])
+
+    result = service.search(q='0xabcde')
+    test_case.assertEqual(expected, result)

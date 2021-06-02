@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/graphsense/graphsense-REST.svg?branch=develop)](https://travis-ci.org/graphsense/graphsense-REST)
+[![Test REST Interface](https://github.com/graphsense/graphsense-REST/actions/workflows/test.yml/badge.svg)](https://github.com/graphsense/graphsense-REST/actions/workflows/test.yml)
 [![Coverage Status](https://coveralls.io/repos/github/graphsense/graphsense-REST/badge.svg?branch=develop)](https://coveralls.io/github/graphsense/graphsense-REST?branch=develop)
 
 # GraphSense REST Interface
@@ -25,7 +25,7 @@ Open `instance/config.yaml` and configure the database connection.
 
 ## Requirements
 
-Make sure you are running Python 3.5+
+Make sure you are running Python 3.6+
 
     python3 --version
 
@@ -69,9 +69,11 @@ Install gunicorn
 
     pip install gunicorn
 
-Run production server with 3 workers
+If unspecified gunicorn is run with a number of workers and threads both equal to the number of CPUs x 2. 
 
-    gunicorn -w 3 "openapi_server:main()"
+Run production server, overriding number of workers and threads through command line options (4 workers, 4 threads):
+
+    gunicorn -w 4 --threads 4 "openapi_server:main()"
 
 ### Deployment with docker
 
@@ -82,9 +84,11 @@ Build the image
 
     docker build -t {{packageName}} .
 
-Start up a container with 3 workers
+You may specifiy the number of workers and threads through the environments variables `NUM_WORKERS` and `NUM_THREADS` respectively.
 
-    docker run -e NUM_WORKERS=3 -p 9000:9000 {{packageName}}
+Start up a container with 4 workers and 4 threads:
+
+    docker run -e NUM_WORKERS=4 -e NUM_THREADS=4 -p 9000:9000 openapi_server
 
 ## Customize REST interface configuration
 

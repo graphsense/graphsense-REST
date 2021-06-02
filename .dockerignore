@@ -51,6 +51,8 @@ coverage.xml
 *,cover
 .hypothesis/
 venv/
+.venv/
+tests/.venv/
 .python-version
 
 # Translations

@@ -3,8 +3,8 @@ LABEL maintainer="contact@graphsense.info"
 
 ENV FLASK_APP=gsrest
 ENV FLASK_ENV=production
-ARG NUM_WORKERS=3
-ENV NUM_WORKERS=${NUM_WORKERS}
+ENV NUM_WORKERS=
+ENV NUM_THREADS=
 
 RUN mkdir -p /srv/graphsense-rest/
 
@@ -40,4 +40,7 @@ USER dockeruser
 
 WORKDIR /srv/graphsense-rest
 
-CMD /usr/bin/gunicorn -c /home/dockeruser/gunicorn-conf.py -w $NUM_WORKERS "openapi_server:main()"
+CMD /usr/bin/gunicorn \
+    --limit-request-line 0 \
+    -c /home/dockeruser/gunicorn-conf.py \
+    "openapi_server:main()"

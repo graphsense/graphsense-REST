@@ -1,12 +1,13 @@
 #!/bin/bash
 
 outdir=`dirname $0`/data/
-raw_src=_prod
+#raw_src=_prod
+raw_src=  # empty for eth_raw
 tagpacks_src=_prod
 
 bucket_size=25000
 
-transformed_src=_20201007
+transformed_src=_20210326_balanced_partitioning
 
 CASSANDRA_HOST=192.168.243.101
 
@@ -112,3 +113,23 @@ fetch btc transformed tag_by_label "limit 2"
 fetch ltc transformed tag_by_label "limit 2"
 fetch "" tagpacks taxonomy_by_key ""
 fetch "" tagpacks concept_by_taxonomy_id ""
+fetch btc transformed configuration ""
+fetch ltc transformed configuration ""
+fetch eth transformed configuration ""
+fetch eth transformed summary_statistics ""
+fetch eth raw block "limit 3"
+fetch eth raw transaction "limit 3"
+fetch eth transformed address "limit 2"
+fetch eth transformed address_ids_by_address_prefix "limit 2"
+fetch eth transformed address_ids_by_address_id_group "limit 2"
+fetch eth transformed exchange_rates "limit 2"
+fetch eth transformed address_tags "limit 2"
+fetch eth transformed transaction_ids_by_transaction_id_group "limit 2"
+fetch eth transformed transaction_ids_by_transaction_prefix "limit 2"
+fetch eth transformed address_outgoing_relations "limit 2"
+fetch eth transformed block_transactions "limit 2"
+fetch eth transformed address_transactions "limit 2"
+fetch eth transformed address_transactions_secondary_ids "limit 2"
+fetch eth transformed address_incoming_relations_secondary_ids "limit 2"
+fetch eth transformed address_outgoing_relations_secondary_ids "limit 2"
+

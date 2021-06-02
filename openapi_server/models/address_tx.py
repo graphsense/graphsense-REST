@@ -6,9 +6,13 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from openapi_server.models.base_model_ import Model
+from openapi_server.models.address_tx_utxo import AddressTxUtxo
+from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.values import Values
 from openapi_server import util
 
+from openapi_server.models.address_tx_utxo import AddressTxUtxo  # noqa: E501
+from openapi_server.models.tx_account import TxAccount  # noqa: E501
 from openapi_server.models.values import Values  # noqa: E501
 
 class AddressTx(Model):
@@ -17,11 +21,11 @@ class AddressTx(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, address=None, height=None, timestamp=None, tx_hash=None, value=None):  # noqa: E501
+    def __init__(self, currency_type='account', height=None, timestamp=None, tx_hash=None, value=None, values=None):  # noqa: E501
         """AddressTx - a model defined in OpenAPI
 
-        :param address: The address of this AddressTx.  # noqa: E501
-        :type address: str
+        :param currency_type: The currency_type of this AddressTx.  # noqa: E501
+        :type currency_type: str
         :param height: The height of this AddressTx.  # noqa: E501
         :type height: int
         :param timestamp: The timestamp of this AddressTx.  # noqa: E501
@@ -30,28 +34,45 @@ class AddressTx(Model):
         :type tx_hash: str
         :param value: The value of this AddressTx.  # noqa: E501
         :type value: Values
+        :param values: The values of this AddressTx.  # noqa: E501
+        :type values: Values
         """
         self.openapi_types = {
-            'address': str,
+            'currency_type': str,
             'height': int,
             'timestamp': int,
             'tx_hash': str,
-            'value': Values
+            'value': Values,
+            'values': Values
         }
 
         self.attribute_map = {
-            'address': 'address',
+            'currency_type': 'currency_type',
             'height': 'height',
             'timestamp': 'timestamp',
             'tx_hash': 'tx_hash',
-            'value': 'value'
+            'value': 'value',
+            'values': 'values'
         }
 
-        self._address = address
+        if currency_type is None:
+            raise ValueError("Invalid value for `currency_type`, must not be `None`")  # noqa: E501
+        self._currency_type = currency_type
+        if height is None:
+            raise ValueError("Invalid value for `height`, must not be `None`")  # noqa: E501
         self._height = height
+        if timestamp is None:
+            raise ValueError("Invalid value for `timestamp`, must not be `None`")  # noqa: E501
         self._timestamp = timestamp
+        if tx_hash is None:
+            raise ValueError("Invalid value for `tx_hash`, must not be `None`")  # noqa: E501
         self._tx_hash = tx_hash
+        if value is None:
+            raise ValueError("Invalid value for `value`, must not be `None`")  # noqa: E501
         self._value = value
+        if values is None:
+            raise ValueError("Invalid value for `values`, must not be `None`")  # noqa: E501
+        self._values = values
 
     @classmethod
     def from_dict(cls, dikt) -> 'AddressTx':
@@ -70,35 +91,36 @@ class AddressTx(Model):
         :return: The AddressTx as a dict
         :rtype: dict
         """
-        return { 'address': self._address,
+        return { 'currency_type': self._currency_type,
             'height': self._height,
             'timestamp': self._timestamp,
             'tx_hash': self._tx_hash,
-            'value': self._value }
+            'value': self._value,
+            'values': self._values }
 
 
     @property
-    def address(self):
-        """Gets the address of this AddressTx.
+    def currency_type(self):
+        """Gets the currency_type of this AddressTx.
 
-        Address  # noqa: E501
 
-        :return: The address of this AddressTx.
+        :return: The currency_type of this AddressTx.
         :rtype: str
         """
-        return self._address
+        return self._currency_type
 
-    @address.setter
-    def address(self, address):
-        """Sets the address of this AddressTx.
+    @currency_type.setter
+    def currency_type(self, currency_type):
+        """Sets the currency_type of this AddressTx.
 
-        Address  # noqa: E501
 
-        :param address: The address of this AddressTx.
-        :type address: str
+        :param currency_type: The currency_type of this AddressTx.
+        :type currency_type: str
         """
+        if currency_type is None:
+            raise ValueError("Invalid value for `currency_type`, must not be `None`")  # noqa: E501
 
-        self._address = address
+        self._currency_type = currency_type
 
     @property
     def height(self):
@@ -120,6 +142,8 @@ class AddressTx(Model):
         :param height: The height of this AddressTx.
         :type height: int
         """
+        if height is None:
+            raise ValueError("Invalid value for `height`, must not be `None`")  # noqa: E501
         if height is not None and height < 1:  # noqa: E501
             raise ValueError("Invalid value for `height`, must be a value greater than or equal to `1`")  # noqa: E501
 
@@ -145,6 +169,8 @@ class AddressTx(Model):
         :param timestamp: The timestamp of this AddressTx.
         :type timestamp: int
         """
+        if timestamp is None:
+            raise ValueError("Invalid value for `timestamp`, must not be `None`")  # noqa: E501
 
         self._timestamp = timestamp
 
@@ -168,6 +194,8 @@ class AddressTx(Model):
         :param tx_hash: The tx_hash of this AddressTx.
         :type tx_hash: str
         """
+        if tx_hash is None:
+            raise ValueError("Invalid value for `tx_hash`, must not be `None`")  # noqa: E501
 
         self._tx_hash = tx_hash
 
@@ -189,5 +217,30 @@ class AddressTx(Model):
         :param value: The value of this AddressTx.
         :type value: Values
         """
+        if value is None:
+            raise ValueError("Invalid value for `value`, must not be `None`")  # noqa: E501
 
         self._value = value
+
+    @property
+    def values(self):
+        """Gets the values of this AddressTx.
+
+
+        :return: The values of this AddressTx.
+        :rtype: Values
+        """
+        return self._values
+
+    @values.setter
+    def values(self, values):
+        """Sets the values of this AddressTx.
+
+
+        :param values: The values of this AddressTx.
+        :type values: Values
+        """
+        if values is None:
+            raise ValueError("Invalid value for `values`, must not be `None`")  # noqa: E501
+
+        self._values = values

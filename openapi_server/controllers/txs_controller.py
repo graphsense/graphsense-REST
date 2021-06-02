@@ -1,7 +1,11 @@
+import connexion
+import six
+import traceback
+
 from openapi_server.models.tx import Tx  # noqa: E501
 from openapi_server.models.txs import Txs  # noqa: E501
 import gsrest.service.txs_service as service
-from gsrest.service.problems import notfound
+from gsrest.service.problems import notfound, badrequest, internalerror
 
 
 def get_tx(currency, tx_hash):  # noqa: E501
@@ -22,6 +26,11 @@ def get_tx(currency, tx_hash):  # noqa: E501
             tx_hash=tx_hash)
     except RuntimeError as e:
         return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        return internalerror(str(e))
 
 
 def list_txs(currency, page=None):  # noqa: E501
@@ -42,3 +51,8 @@ def list_txs(currency, page=None):  # noqa: E501
             page=page)
     except RuntimeError as e:
         return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        return internalerror(str(e))

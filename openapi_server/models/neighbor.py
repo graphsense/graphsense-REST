@@ -61,8 +61,6 @@ class Neighbor(Model):
         if node_type is None:
             raise ValueError("Invalid value for `node_type`, must not be `None`")  # noqa: E501
         self._node_type = node_type
-        if labels is None:
-            raise ValueError("Invalid value for `labels`, must not be `None`")  # noqa: E501
         self._labels = labels
         if balance is None:
             raise ValueError("Invalid value for `balance`, must not be `None`")  # noqa: E501
@@ -177,8 +175,6 @@ class Neighbor(Model):
         :param labels: The labels of this Neighbor.
         :type labels: List[str]
         """
-        if labels is None:
-            raise ValueError("Invalid value for `labels`, must not be `None`")  # noqa: E501
 
         self._labels = labels
 

@@ -19,15 +19,15 @@ class Values(Model):
         """Values - a model defined in OpenAPI
 
         :param eur: The eur of this Values.  # noqa: E501
-        :type eur: int
+        :type eur: float
         :param usd: The usd of this Values.  # noqa: E501
-        :type usd: int
+        :type usd: float
         :param value: The value of this Values.  # noqa: E501
         :type value: int
         """
         self.openapi_types = {
-            'eur': int,
-            'usd': int,
+            'eur': float,
+            'usd': float,
             'value': int
         }
 
@@ -69,7 +69,7 @@ class Values(Model):
 
 
         :return: The eur of this Values.
-        :rtype: int
+        :rtype: float
         """
         return self._eur
 
@@ -79,7 +79,7 @@ class Values(Model):
 
 
         :param eur: The eur of this Values.
-        :type eur: int
+        :type eur: float
         """
 
         self._eur = eur
@@ -90,7 +90,7 @@ class Values(Model):
 
 
         :return: The usd of this Values.
-        :rtype: int
+        :rtype: float
         """
         return self._usd
 
@@ -100,7 +100,7 @@ class Values(Model):
 
 
         :param usd: The usd of this Values.
-        :type usd: int
+        :type usd: float
         """
 
         self._usd = usd

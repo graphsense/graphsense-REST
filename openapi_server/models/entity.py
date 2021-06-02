@@ -6,10 +6,12 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from openapi_server.models.base_model_ import Model
+from openapi_server.models.tags import Tags
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.values import Values
 from openapi_server import util
 
+from openapi_server.models.tags import Tags  # noqa: E501
 from openapi_server.models.tx_summary import TxSummary  # noqa: E501
 from openapi_server.models.values import Values  # noqa: E501
 
@@ -19,11 +21,11 @@ class Entity(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, entity=None, balance=None, first_tx=None, last_tx=None, in_degree=None, out_degree=None, no_addresses=None, no_incoming_txs=None, no_outgoing_txs=None, total_received=None, total_spent=None):  # noqa: E501
+    def __init__(self, entity=None, balance=None, first_tx=None, last_tx=None, in_degree=None, out_degree=None, no_addresses=None, no_incoming_txs=None, no_outgoing_txs=None, total_received=None, total_spent=None, tags=None):  # noqa: E501
         """Entity - a model defined in OpenAPI
 
         :param entity: The entity of this Entity.  # noqa: E501
-        :type entity: str
+        :type entity: int
         :param balance: The balance of this Entity.  # noqa: E501
         :type balance: Values
         :param first_tx: The first_tx of this Entity.  # noqa: E501
@@ -44,9 +46,11 @@ class Entity(Model):
         :type total_received: Values
         :param total_spent: The total_spent of this Entity.  # noqa: E501
         :type total_spent: Values
+        :param tags: The tags of this Entity.  # noqa: E501
+        :type tags: Tags
         """
         self.openapi_types = {
-            'entity': str,
+            'entity': int,
             'balance': Values,
             'first_tx': TxSummary,
             'last_tx': TxSummary,
@@ -56,7 +60,8 @@ class Entity(Model):
             'no_incoming_txs': int,
             'no_outgoing_txs': int,
             'total_received': Values,
-            'total_spent': Values
+            'total_spent': Values,
+            'tags': Tags
         }
 
         self.attribute_map = {
@@ -70,7 +75,8 @@ class Entity(Model):
             'no_incoming_txs': 'no_incoming_txs',
             'no_outgoing_txs': 'no_outgoing_txs',
             'total_received': 'total_received',
-            'total_spent': 'total_spent'
+            'total_spent': 'total_spent',
+            'tags': 'tags'
         }
 
         if entity is None:
@@ -106,6 +112,7 @@ class Entity(Model):
         if total_spent is None:
             raise ValueError("Invalid value for `total_spent`, must not be `None`")  # noqa: E501
         self._total_spent = total_spent
+        self._tags = tags
 
     @classmethod
     def from_dict(cls, dikt) -> 'Entity':
@@ -134,7 +141,8 @@ class Entity(Model):
             'no_incoming_txs': self._no_incoming_txs,
             'no_outgoing_txs': self._no_outgoing_txs,
             'total_received': self._total_received,
-            'total_spent': self._total_spent }
+            'total_spent': self._total_spent,
+            'tags': self._tags }
 
 
     @property
@@ -144,7 +152,7 @@ class Entity(Model):
         Entity id  # noqa: E501
 
         :return: The entity of this Entity.
-        :rtype: str
+        :rtype: int
         """
         return self._entity
 
@@ -155,7 +163,7 @@ class Entity(Model):
         Entity id  # noqa: E501
 
         :param entity: The entity of this Entity.
-        :type entity: str
+        :type entity: int
         """
         if entity is None:
             raise ValueError("Invalid value for `entity`, must not be `None`")  # noqa: E501
@@ -393,3 +401,24 @@ class Entity(Model):
             raise ValueError("Invalid value for `total_spent`, must not be `None`")  # noqa: E501
 
         self._total_spent = total_spent
+
+    @property
+    def tags(self):
+        """Gets the tags of this Entity.
+
+
+        :return: The tags of this Entity.
+        :rtype: Tags
+        """
+        return self._tags
+
+    @tags.setter
+    def tags(self, tags):
+        """Sets the tags of this Entity.
+
+
+        :param tags: The tags of this Entity.
+        :type tags: Tags
+        """
+
+        self._tags = tags
