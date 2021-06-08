@@ -126,7 +126,8 @@ class TestAddressesController(BaseTestCase):
         """
         test_service.list_address_neighbors_csv(self)
 
-        query_string = [('direction', 'out')]
+        query_string = [('direction', 'out'),
+                        ('','')]
         headers = { 
             'Accept': 'text/csv',
         }

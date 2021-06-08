@@ -529,6 +529,15 @@ paths:
           - out
           type: string
         style: form
+      - description: Whether labels of tags should be included
+        explode: true
+        in: query
+        name: include_labels
+        required: false
+        schema:
+          default: false
+          type: boolean
+        style: form
       responses:
         "200":
           content:
@@ -1189,6 +1198,15 @@ paths:
           - in
           - out
           type: string
+        style: form
+      - description: Whether labels of tags should be included
+        explode: true
+        in: query
+        name: include_labels
+        required: false
+        schema:
+          default: false
+          type: boolean
         style: form
       responses:
         "200":

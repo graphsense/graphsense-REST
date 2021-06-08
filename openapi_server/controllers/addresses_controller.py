@@ -165,7 +165,7 @@ def list_address_neighbors(currency, address, direction, include_labels=None, pa
         return internalerror(str(e))
 
 
-def list_address_neighbors_csv(currency, address, direction):  # noqa: E501
+def list_address_neighbors_csv(currency, address, direction, include_labels=None):  # noqa: E501
     """Get an addresses&#39; neighbors in the address graph as CSV
 
      # noqa: E501
@@ -176,6 +176,8 @@ def list_address_neighbors_csv(currency, address, direction):  # noqa: E501
     :type address: str
     :param direction: Incoming or outgoing neighbors
     :type direction: str
+    :param include_labels: Whether labels of tags should be included
+    :type include_labels: bool
 
     :rtype: str
     """
@@ -183,7 +185,8 @@ def list_address_neighbors_csv(currency, address, direction):  # noqa: E501
         return service.list_address_neighbors_csv(
             currency=currency,
             address=address,
-            direction=direction)
+            direction=direction,
+            include_labels=include_labels)
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:

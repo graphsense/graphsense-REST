@@ -146,7 +146,8 @@ class TestEntitiesController(BaseTestCase):
         """
         test_service.list_entity_neighbors_csv(self)
 
-        query_string = [('direction', 'out')]
+        query_string = [('direction', 'out'),
+                        ('','')]
         headers = { 
             'Accept': 'text/csv',
         }

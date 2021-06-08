@@ -195,7 +195,7 @@ def list_entity_neighbors(currency, entity, direction, ids=None, include_labels=
         return internalerror(str(e))
 
 
-def list_entity_neighbors_csv(currency, entity, direction):  # noqa: E501
+def list_entity_neighbors_csv(currency, entity, direction, include_labels=None):  # noqa: E501
     """Get an entity&#39;s neighbors in the entity graph as CSV
 
      # noqa: E501
@@ -206,6 +206,8 @@ def list_entity_neighbors_csv(currency, entity, direction):  # noqa: E501
     :type entity: int
     :param direction: Incoming or outgoing neighbors
     :type direction: str
+    :param include_labels: Whether labels of tags should be included
+    :type include_labels: bool
 
     :rtype: str
     """
@@ -213,7 +215,8 @@ def list_entity_neighbors_csv(currency, entity, direction):  # noqa: E501
         return service.list_entity_neighbors_csv(
             currency=currency,
             entity=entity,
-            direction=direction)
+            direction=direction,
+            include_labels=include_labels)
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
