@@ -8,11 +8,11 @@ from six import BytesIO
 
 from openapi_server.models.address import Address  # noqa: E501
 from openapi_server.models.address_tag import AddressTag  # noqa: E501
-from openapi_server.models.address_txs import AddressTxs  # noqa: E501
 from openapi_server.models.addresses import Addresses  # noqa: E501
 from openapi_server.models.entity import Entity  # noqa: E501
 from openapi_server.models.link import Link  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
+from openapi_server.models.txs_account import TxsAccount  # noqa: E501
 from openapi_server.test import BaseTestCase
 import gsrest.test.addresses_service as test_service
 
@@ -32,7 +32,7 @@ class TestAddressesController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/addresses/{address}'.format(currency='btc', address='1Archive1n2C579dMsAu3iC6tWzuQJz8dN'),
+            '/{currency}/addresses/{address}'.format(currency='btc', address='addressA'),
             method='GET',
             headers=headers,
             query_string=query_string)
@@ -52,7 +52,7 @@ class TestAddressesController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/addresses/{address}/entity'.format(currency='btc', address='1Archive1n2C579dMsAu3iC6tWzuQJz8dN'),
+            '/{currency}/addresses/{address}/entity'.format(currency='btc', address='addressA'),
             method='GET',
             headers=headers,
             query_string=query_string)
@@ -66,12 +66,12 @@ class TestAddressesController(BaseTestCase):
         """
         test_service.list_address_links(self)
 
-        query_string = [('neighbor', '17DfZja1713S3JRWA9jaebCKFM5anUh7GG')]
+        query_string = [('neighbor', 'addressE')]
         headers = { 
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/addresses/{address}/links'.format(currency='btc', address='1Archive1n2C579dMsAu3iC6tWzuQJz8dN'),
+            '/{currency}/addresses/{address}/links'.format(currency='btc', address='addressA'),
             method='GET',
             headers=headers,
             query_string=query_string)
@@ -85,12 +85,12 @@ class TestAddressesController(BaseTestCase):
         """
         test_service.list_address_links_csv(self)
 
-        query_string = [('neighbor', '17DfZja1713S3JRWA9jaebCKFM5anUh7GG')]
+        query_string = [('neighbor', 'addressE')]
         headers = { 
             'Accept': 'text/csv',
         }
         response = self.client.open(
-            '/{currency}/addresses/{address}/links.csv'.format(currency='btc', address='1Archive1n2C579dMsAu3iC6tWzuQJz8dN'),
+            '/{currency}/addresses/{address}/links.csv'.format(currency='btc', address='addressA'),
             method='GET',
             headers=headers,
             query_string=query_string)
@@ -112,7 +112,7 @@ class TestAddressesController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/addresses/{address}/neighbors'.format(currency='btc', address='1Archive1n2C579dMsAu3iC6tWzuQJz8dN'),
+            '/{currency}/addresses/{address}/neighbors'.format(currency='btc', address='addressA'),
             method='GET',
             headers=headers,
             query_string=query_string)
@@ -132,7 +132,7 @@ class TestAddressesController(BaseTestCase):
             'Accept': 'text/csv',
         }
         response = self.client.open(
-            '/{currency}/addresses/{address}/neighbors.csv'.format(currency='btc', address='1Archive1n2C579dMsAu3iC6tWzuQJz8dN'),
+            '/{currency}/addresses/{address}/neighbors.csv'.format(currency='btc', address='addressA'),
             method='GET',
             headers=headers,
             query_string=query_string)
@@ -152,7 +152,7 @@ class TestAddressesController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/addresses/{address}/txs'.format(currency='btc', address='1Archive1n2C579dMsAu3iC6tWzuQJz8dN'),
+            '/{currency}/addresses/{address}/txs'.format(currency='btc', address='addressA'),
             method='GET',
             headers=headers,
             query_string=query_string)
@@ -170,7 +170,7 @@ class TestAddressesController(BaseTestCase):
             'Accept': 'text/csv',
         }
         response = self.client.open(
-            '/{currency}/addresses/{address}/txs.csv'.format(currency='btc', address='1Archive1n2C579dMsAu3iC6tWzuQJz8dN'),
+            '/{currency}/addresses/{address}/txs.csv'.format(currency='btc', address='addressA'),
             method='GET',
             headers=headers)
         self.assert200(response,
@@ -227,7 +227,7 @@ class TestAddressesController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/addresses/{address}/tags'.format(currency='btc', address='1Archive1n2C579dMsAu3iC6tWzuQJz8dN'),
+            '/{currency}/addresses/{address}/tags'.format(currency='btc', address='addressA'),
             method='GET',
             headers=headers)
         self.assert200(response,
@@ -244,7 +244,7 @@ class TestAddressesController(BaseTestCase):
             'Accept': 'application/csv',
         }
         response = self.client.open(
-            '/{currency}/addresses/{address}/tags.csv'.format(currency='btc', address='1Archive1n2C579dMsAu3iC6tWzuQJz8dN'),
+            '/{currency}/addresses/{address}/tags.csv'.format(currency='btc', address='addressA'),
             method='GET',
             headers=headers)
         self.assert200(response,

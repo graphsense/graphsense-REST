@@ -1,5 +1,6 @@
 from werkzeug.datastructures import Headers
 from csv import DictWriter
+from openapi_server.models.values import Values
 
 
 def create_download_header(filename):
@@ -27,6 +28,11 @@ def to_csv(query_function):
             raise ValueError('nothing found')
 
         def flatten(item, name=""):
+            if type(item) == Values:
+                flat_dict[name + 'value'] = item.value
+                for rate in item.fiat_values:
+                    flat_dict[name + rate.code] = rate.value
+                return
             if 'to_dict' in dir(item):
                 item = item.to_dict()
             if isinstance(item, dict):

@@ -3,8 +3,8 @@ import six
 import traceback
 
 from openapi_server.models.block import Block  # noqa: E501
-from openapi_server.models.block_tx import BlockTx  # noqa: E501
 from openapi_server.models.blocks import Blocks  # noqa: E501
+from openapi_server.models.tx import Tx  # noqa: E501
 import gsrest.service.blocks_service as service
 from gsrest.service.problems import notfound, badrequest, internalerror
 
@@ -35,7 +35,7 @@ def get_block(currency, height):  # noqa: E501
 
 
 def list_block_txs(currency, height):  # noqa: E501
-    """Get block transactions (100 per page)
+    """Get block transactions
 
      # noqa: E501
 
@@ -44,7 +44,7 @@ def list_block_txs(currency, height):  # noqa: E501
     :param height: The block height
     :type height: int
 
-    :rtype: List[BlockTx]
+    :rtype: List[Tx]
     """
     try:
         return service.list_block_txs(

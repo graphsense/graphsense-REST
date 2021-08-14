@@ -4,13 +4,14 @@ from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.neighbors import Neighbors
 from openapi_server.models.neighbor import Neighbor
-from gsrest.util.values import compute_balance, convert_value, make_values
+from gsrest.util.values import compute_balance, convert_value, to_values
 from gsrest.service.rates_service import get_rates
 
 
 def address_from_row(currency, row, rates, tags=None):
     return Address(
         address=row['address'],
+        entity=row['cluster_id'],
         first_tx=TxSummary(
             row['first_tx'].height,
             row['first_tx'].timestamp,
@@ -21,14 +22,8 @@ def address_from_row(currency, row, rates, tags=None):
             row['last_tx'].tx_hash.hex()),
         no_incoming_txs=row['no_incoming_txs'],
         no_outgoing_txs=row['no_outgoing_txs'],
-        total_received=make_values(
-            value=row['total_received'].value,
-            eur=row['total_received'].eur,
-            usd=row['total_received'].usd),
-        total_spent=make_values(
-            eur=row['total_spent'].eur,
-            usd=row['total_spent'].usd,
-            value=row['total_spent'].value),
+        total_received=to_values(row['total_received']),
+        total_spent=to_values(row['total_spent']),
         in_degree=row['in_degree'],
         out_degree=row['out_degree'],
         balance=convert_value(
@@ -106,27 +101,17 @@ def list_neighbors(currency, id, direction, node_type,
                                     page=page,
                                     pagesize=pagesize)
     dst = 'dst' if is_outgoing else 'src'
-    rates = get_rates(currency)['rates']
     relations = []
     if results is None:
         return Neighbors()
-    ntype = node_type if node_type == 'address' else 'cluster'
+    ntype, suffix = (node_type, '') \
+        if node_type == 'address' else ('cluster', '_id')
     for row in results:
-        balance = compute_balance(row[dst+'_properties'].total_received.value,
-                                  row[dst+'_properties'].total_spent.value)
         relations.append(Neighbor(
-            id=str(row[f'{dst}_{ntype}']),
+            id=str(row[f'{dst}_{ntype}{suffix}']),
             node_type=node_type,
             labels=row['labels'] if 'labels' in row else None,
-            received=make_values(
-                value=row[dst+'_properties'].total_received.value,
-                eur=row[dst+'_properties'].total_received.eur,
-                usd=row[dst+'_properties'].total_received.usd),
-            estimated_value=make_values(
-                value=row['estimated_value'].value,
-                eur=row['estimated_value'].eur,
-                usd=row['estimated_value'].usd),
-            balance=convert_value(currency, balance, rates),
+            value=to_values(row['value']),
             no_txs=row['no_transactions']))
     return Neighbors(next_page=paging_state,
                      neighbors=relations)

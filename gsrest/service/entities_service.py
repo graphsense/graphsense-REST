@@ -4,7 +4,7 @@ from gsrest.service.rates_service import get_rates
 from openapi_server.models.entity import Entity
 from openapi_server.models.entities import Entities
 from openapi_server.models.tx_summary import TxSummary
-from gsrest.util.values import compute_balance, convert_value, make_values
+from gsrest.util.values import compute_balance, convert_value, to_values
 from openapi_server.models.entity_tag import EntityTag
 from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.tags import Tags
@@ -22,7 +22,7 @@ MAX_DEPTH = 6
 
 def from_row(currency, row, rates, tags=None):
     return Entity(
-        entity=row['cluster'],
+        entity=row['cluster_id'],
         first_tx=TxSummary(
             row['first_tx'].height,
             row['first_tx'].timestamp,
@@ -34,14 +34,8 @@ def from_row(currency, row, rates, tags=None):
         no_addresses=row['no_addresses'],
         no_incoming_txs=row['no_incoming_txs'],
         no_outgoing_txs=row['no_outgoing_txs'],
-        total_received=make_values(
-            value=row['total_received'].value,
-            eur=row['total_received'].eur,
-            usd=row['total_received'].usd),
-        total_spent=make_values(
-            eur=row['total_spent'].eur,
-            usd=row['total_spent'].usd,
-            value=row['total_spent'].value),
+        total_received=to_values(row['total_received']),
+        total_spent=to_values(row['total_spent']),
         in_degree=row['in_degree'],
         out_degree=row['out_degree'],
         balance=convert_value(
@@ -82,7 +76,7 @@ def list_entity_tags_by_entity(currency, entity):
     db = get_connection()
     entity_tags = db.list_entity_tags_by_entity(currency, entity)
     return [EntityTag(label=row.label,
-                      entity=row.cluster,
+                      entity=row.cluster_id,
                       category=row.category,
                       abuse=row.abuse,
                       tagpack_uri=row.tagpack_uri,
@@ -115,7 +109,7 @@ def get_entity(currency, entity, include_tags, tag_coherence):
     if result is None:
         raise RuntimeError("Entity {} not found".format(entity))
 
-    tags = list_tags_by_entity(currency, result['cluster'], tag_coherence) \
+    tags = list_tags_by_entity(currency, result['cluster_id'], tag_coherence) \
         if include_tags else None
     return from_row(currency, result, get_rates(currency)['rates'], tags)
 
@@ -168,6 +162,7 @@ def list_entity_addresses(currency, entity, page=None, pagesize=None):
     rates = get_rates(currency)['rates']
     addresses = [Address(
             address=row['address'],
+            entity=row['cluster_id'],
             first_tx=TxSummary(
                 row['first_tx'].height,
                 row['first_tx'].timestamp,
@@ -178,14 +173,8 @@ def list_entity_addresses(currency, entity, page=None, pagesize=None):
                 row['last_tx'].tx_hash.hex()),
             no_incoming_txs=row['no_incoming_txs'],
             no_outgoing_txs=row['no_outgoing_txs'],
-            total_received=make_values(
-                value=row['total_received'].value,
-                eur=row['total_received'].eur,
-                usd=row['total_received'].usd),
-            total_spent=make_values(
-                eur=row['total_spent'].eur,
-                usd=row['total_spent'].usd,
-                value=row['total_spent'].value),
+            total_received=to_values(row['total_received']),
+            total_spent=to_values(row['total_spent']),
             in_degree=row['in_degree'],
             out_degree=row['out_degree'],
             balance=convert_value(
@@ -222,9 +211,6 @@ def search_entity_neighbors(currency, entity, direction, key, value, depth, brea
         max_value = float(max_value[0]) if len(max_value) > 0 else None
         if max_value is not None and min_value > max_value:
             raise ValueError('Min must not be greater than max')
-        elif curr not in ['value', 'eur', 'usd']:
-            raise ValueError('Currency must be one of "value", "eur" or '
-                             '"usd"')
         params['field'] = (key, curr, min_value, max_value)
 
     elif 'addresses' in key:
@@ -304,8 +290,18 @@ def recursive_search(currency, entity, params, breadth, depth, level,
 
         if 'field' in params:
             (field, fieldcurrency, min_value, max_value) = params['field']
-            v = getattr(getattr(props, field), fieldcurrency)
-            match = v >= min_value and (max_value is None or max_value >= v)
+            values = getattr(props, field)
+            v = None
+            if fieldcurrency == 'value':
+                v = values.value
+            else:
+                for f in values.fiat_values:
+                    if f.code == fieldcurrency:
+                        v = f.value
+                        break
+            match = v is not None and \
+                v >= min_value and \
+                (max_value is None or max_value >= v)
 
         subpaths = False
         if match:

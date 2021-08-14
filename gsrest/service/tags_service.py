@@ -36,7 +36,7 @@ def list_tags(label, currency=None):
                                 currency=row.currency)
                               for row in address_tags],
                 entity_tags=[EntityTag(
-                                entity=row.cluster,
+                                entity=row.cluster_id,
                                 label=row.label,
                                 category=row.category,
                                 abuse=row.abuse,

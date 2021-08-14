@@ -1,2 +1,2 @@
-  {"address_id_group": 4317, "address_id_secondary_group": 3, "address_id": 107925000, "transaction_id": 25000, "block_timestamp": 10, "height": 1, "value": 123000000000000000000}
- {"address_id_group": 4317, "address_id_secondary_group": 3, "address_id": 107925000, "transaction_id": 50000, "block_timestamp": 11, "height": 2, "value": -123000000000000000000}
+  {"address_id_group": 4317, "address_id_secondary_group": 3, "address_id": 107925000, "transaction_id": 25000, "value": 123000000000000000000}
+ {"address_id_group": 4317, "address_id_secondary_group": 3, "address_id": 107925000, "transaction_id": 50000, "value": -123000000000000000000}

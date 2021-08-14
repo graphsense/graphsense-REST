@@ -1,2 +1,2 @@
-{"height": 1, "eur": 0.0, "usd": 0.0}
-{"height": 2, "eur": 1.0, "usd": 2.0}
+{"block_id": 1, "fiat_values": [0.0, 0.0]}
+{"block_id": 2, "fiat_values": [1.0, 2.0]}

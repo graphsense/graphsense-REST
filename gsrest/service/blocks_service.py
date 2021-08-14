@@ -1,38 +1,21 @@
 from gsrest.db import get_connection
 from openapi_server.models.block import Block
 from openapi_server.models.blocks import Blocks
-from openapi_server.models.tx import TxAccount
-from openapi_server.models.block_tx_utxo import BlockTxUtxo
-from gsrest.util.values import convert_value
 from gsrest.service.rates_service import get_rates
 from flask import Response, stream_with_context
 from gsrest.util.csvify import create_download_header, to_csv
-
-
-def from_row(currency, row, rates):
-    if currency == 'eth':
-        return TxAccount(
-            tx_hash=row.hash.hex(),
-            timestamp=row.block_timestamp,
-            height=row.block_number,
-            values=convert_value(currency, row.value, rates))
-    return BlockTxUtxo(
-         no_inputs=row.no_inputs,
-         no_outputs=row.no_outputs,
-         total_input=convert_value(currency, row.total_input, rates),
-         total_output=convert_value(currency, row.total_output, rates),
-         tx_hash=row.tx_hash.hex())
+from gsrest.service.txs_service import from_row
 
 
 def block_from_row(currency, row):
     if currency == 'eth':
         return Block(
-                height=row.number,
-                block_hash=row.hash.hex(),
+                height=row.block_number,
+                block_hash=row.block_hash.hex(),
                 no_txs=row.transaction_count,
                 timestamp=row.timestamp)
     return Block(
-            height=row.height,
+            height=row.block_id,
             block_hash=row.block_hash.hex(),
             no_txs=row.no_transactions,
             timestamp=row.timestamp)
@@ -52,7 +35,7 @@ def list_blocks(currency, page=None):
     block_list = [block_from_row(currency, row)
                   for row in results.current_rows]
 
-    return Blocks(paging_state, block_list)
+    return Blocks(blocks=block_list, next_page=paging_state)
 
 
 def list_block_txs(currency, height):

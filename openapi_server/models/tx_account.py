@@ -17,51 +17,51 @@ class TxAccount(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, currency_type='account', tx_hash=None, height=None, timestamp=None, values=None):  # noqa: E501
+    def __init__(self, height=None, timestamp=None, tx_hash=None, tx_type='account', value=None):  # noqa: E501
         """TxAccount - a model defined in OpenAPI
 
-        :param currency_type: The currency_type of this TxAccount.  # noqa: E501
-        :type currency_type: str
-        :param tx_hash: The tx_hash of this TxAccount.  # noqa: E501
-        :type tx_hash: str
         :param height: The height of this TxAccount.  # noqa: E501
         :type height: int
         :param timestamp: The timestamp of this TxAccount.  # noqa: E501
         :type timestamp: int
-        :param values: The values of this TxAccount.  # noqa: E501
-        :type values: Values
+        :param tx_hash: The tx_hash of this TxAccount.  # noqa: E501
+        :type tx_hash: str
+        :param tx_type: The tx_type of this TxAccount.  # noqa: E501
+        :type tx_type: str
+        :param value: The value of this TxAccount.  # noqa: E501
+        :type value: Values
         """
         self.openapi_types = {
-            'currency_type': str,
-            'tx_hash': str,
             'height': int,
             'timestamp': int,
-            'values': Values
+            'tx_hash': str,
+            'tx_type': str,
+            'value': Values
         }
 
         self.attribute_map = {
-            'currency_type': 'currency_type',
-            'tx_hash': 'tx_hash',
             'height': 'height',
             'timestamp': 'timestamp',
-            'values': 'values'
+            'tx_hash': 'tx_hash',
+            'tx_type': 'tx_type',
+            'value': 'value'
         }
 
-        if currency_type is None:
-            raise ValueError("Invalid value for `currency_type`, must not be `None`")  # noqa: E501
-        self._currency_type = currency_type
-        if tx_hash is None:
-            raise ValueError("Invalid value for `tx_hash`, must not be `None`")  # noqa: E501
-        self._tx_hash = tx_hash
         if height is None:
             raise ValueError("Invalid value for `height`, must not be `None`")  # noqa: E501
         self._height = height
         if timestamp is None:
             raise ValueError("Invalid value for `timestamp`, must not be `None`")  # noqa: E501
         self._timestamp = timestamp
-        if values is None:
-            raise ValueError("Invalid value for `values`, must not be `None`")  # noqa: E501
-        self._values = values
+        if tx_hash is None:
+            raise ValueError("Invalid value for `tx_hash`, must not be `None`")  # noqa: E501
+        self._tx_hash = tx_hash
+        if tx_type is None:
+            raise ValueError("Invalid value for `tx_type`, must not be `None`")  # noqa: E501
+        self._tx_type = tx_type
+        if value is None:
+            raise ValueError("Invalid value for `value`, must not be `None`")  # noqa: E501
+        self._value = value
 
     @classmethod
     def from_dict(cls, dikt) -> 'TxAccount':
@@ -80,60 +80,12 @@ class TxAccount(Model):
         :return: The TxAccount as a dict
         :rtype: dict
         """
-        return { 'currency_type': self._currency_type,
-            'tx_hash': self._tx_hash,
-            'height': self._height,
+        return { 'height': self._height,
             'timestamp': self._timestamp,
-            'values': self._values }
+            'tx_hash': self._tx_hash,
+            'tx_type': self._tx_type,
+            'value': self._value }
 
-
-    @property
-    def currency_type(self):
-        """Gets the currency_type of this TxAccount.
-
-
-        :return: The currency_type of this TxAccount.
-        :rtype: str
-        """
-        return self._currency_type
-
-    @currency_type.setter
-    def currency_type(self, currency_type):
-        """Sets the currency_type of this TxAccount.
-
-
-        :param currency_type: The currency_type of this TxAccount.
-        :type currency_type: str
-        """
-        if currency_type is None:
-            raise ValueError("Invalid value for `currency_type`, must not be `None`")  # noqa: E501
-
-        self._currency_type = currency_type
-
-    @property
-    def tx_hash(self):
-        """Gets the tx_hash of this TxAccount.
-
-        Transaction hash  # noqa: E501
-
-        :return: The tx_hash of this TxAccount.
-        :rtype: str
-        """
-        return self._tx_hash
-
-    @tx_hash.setter
-    def tx_hash(self, tx_hash):
-        """Sets the tx_hash of this TxAccount.
-
-        Transaction hash  # noqa: E501
-
-        :param tx_hash: The tx_hash of this TxAccount.
-        :type tx_hash: str
-        """
-        if tx_hash is None:
-            raise ValueError("Invalid value for `tx_hash`, must not be `None`")  # noqa: E501
-
-        self._tx_hash = tx_hash
 
     @property
     def height(self):
@@ -188,24 +140,72 @@ class TxAccount(Model):
         self._timestamp = timestamp
 
     @property
-    def values(self):
-        """Gets the values of this TxAccount.
+    def tx_hash(self):
+        """Gets the tx_hash of this TxAccount.
+
+        Transaction hash  # noqa: E501
+
+        :return: The tx_hash of this TxAccount.
+        :rtype: str
+        """
+        return self._tx_hash
+
+    @tx_hash.setter
+    def tx_hash(self, tx_hash):
+        """Sets the tx_hash of this TxAccount.
+
+        Transaction hash  # noqa: E501
+
+        :param tx_hash: The tx_hash of this TxAccount.
+        :type tx_hash: str
+        """
+        if tx_hash is None:
+            raise ValueError("Invalid value for `tx_hash`, must not be `None`")  # noqa: E501
+
+        self._tx_hash = tx_hash
+
+    @property
+    def tx_type(self):
+        """Gets the tx_type of this TxAccount.
 
 
-        :return: The values of this TxAccount.
+        :return: The tx_type of this TxAccount.
+        :rtype: str
+        """
+        return self._tx_type
+
+    @tx_type.setter
+    def tx_type(self, tx_type):
+        """Sets the tx_type of this TxAccount.
+
+
+        :param tx_type: The tx_type of this TxAccount.
+        :type tx_type: str
+        """
+        if tx_type is None:
+            raise ValueError("Invalid value for `tx_type`, must not be `None`")  # noqa: E501
+
+        self._tx_type = tx_type
+
+    @property
+    def value(self):
+        """Gets the value of this TxAccount.
+
+
+        :return: The value of this TxAccount.
         :rtype: Values
         """
-        return self._values
+        return self._value
 
-    @values.setter
-    def values(self, values):
-        """Sets the values of this TxAccount.
+    @value.setter
+    def value(self, value):
+        """Sets the value of this TxAccount.
 
 
-        :param values: The values of this TxAccount.
-        :type values: Values
+        :param value: The value of this TxAccount.
+        :type value: Values
         """
-        if values is None:
-            raise ValueError("Invalid value for `values`, must not be `None`")  # noqa: E501
+        if value is None:
+            raise ValueError("Invalid value for `value`, must not be `None`")  # noqa: E501
 
-        self._values = values
+        self._value = value

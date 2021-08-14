@@ -5,13 +5,13 @@ from openapi_server.models.neighbor import Neighbor
 from openapi_server.models.address import Address
 from openapi_server.models.entity_addresses import EntityAddresses
 from openapi_server.models.entity import Entity
-from openapi_server.models.values import Values
 from openapi_server.models.search_result_level1 import SearchResultLevel1
 from openapi_server.models.entity_tag import EntityTag
 from openapi_server.models.tags import Tags
 import json
+from gsrest.util.values import make_values
 import gsrest.service.entities_service as service
-from gsrest.test.addresses_service import eth_address, \
+from gsrest.test.addresses_service import addressD, addressE, eth_address, \
         eth_addressWithTagsOutNeighbors, atag1, atag2, eth_tag, eth_tag2
 
 tag = EntityTag(
@@ -41,18 +41,18 @@ tag2 = EntityTag(
 entityWithTags = Entity(
    no_outgoing_txs=280,
    last_tx=TxSummary(
-      height=651545,
+      height=1,
       tx_hash="5678",
-      timestamp=1602006938
+      timestamp=1434554207
    ),
-   total_spent=Values(
+   total_spent=make_values(
       eur=2291256.5,
       value=138942266867,
       usd=2762256.25
    ),
    in_degree=4358,
    no_addresses=110,
-   total_received=Values(
+   total_received=make_values(
       usd=2583655.0,
       eur=2162085.5,
       value=139057689444
@@ -61,17 +61,17 @@ entityWithTags = Entity(
    entity=17642138,
    out_degree=176,
    first_tx=TxSummary(
-      timestamp=1323298692,
-      height=156529,
+      timestamp=1434554207,
+      height=1,
       tx_hash="4567"
    ),
-   balance=Values(
+   balance=make_values(
             value=115422577,
             usd=2.31,
             eur=1.15),
    tags=Tags(
        entity_tags=[tag2, tag],
-       address_tags=[atag1, atag2],
+       address_tags=[atag2, atag1],
        tag_coherence=0.5)
 )
 
@@ -110,12 +110,7 @@ entityWithTagsOutNeighbors = Neighbors(
     next_page=None,
     neighbors=[
         Neighbor(
-          received=Values(
-             usd=3074.92,
-             eur=2411.06,
-             value=48610000000
-          ),
-          estimated_value=Values(
+          value=make_values(
              eur=2411.06,
              usd=3074.92,
              value=48610000000
@@ -123,20 +118,10 @@ entityWithTagsOutNeighbors = Neighbors(
           id='2818641',
           node_type='entity',
           labels=['labelX', 'labelY'],
-          no_txs=1,
-          balance=Values(
-             eur=0.0,
-             usd=0.0,
-             value=0
-          )
+          no_txs=1
         ),
         Neighbor(
-          received=Values(
-             usd=8517.93,
-             eur=7064.18,
-             value=7858798000
-          ),
-          estimated_value=Values(
+          value=make_values(
              eur=1078.04,
              usd=1397.54,
              value=3375700000
@@ -144,24 +129,14 @@ entityWithTagsOutNeighbors = Neighbors(
           id='8361735',
           node_type='entity',
           labels=[],
-          no_txs=3,
-          balance=Values(
-             eur=0.0,
-             usd=0.0,
-             value=0
-          )
+          no_txs=3
         )])
 
 entityWithTagsInNeighbors = Neighbors(
     next_page=None,
     neighbors=[
         Neighbor(
-          received=Values(
-             usd=43253.96,
-             eur=33809.55,
-             value=71089119639
-          ),
-          estimated_value=Values(
+          value=make_values(
              usd=0.96,
              eur=0.72,
              value=190000
@@ -169,20 +144,10 @@ entityWithTagsInNeighbors = Neighbors(
           id='67065',
           node_type='entity',
           labels=[],
-          no_txs=10,
-          balance=Values(
-             eur=0.0,
-             usd=0.0,
-             value=606
-          )
+          no_txs=10
         ),
         Neighbor(
-          received=Values(
-             usd=13.41,
-             eur=9.87,
-             value=5000000000
-          ),
-          estimated_value=Values(
+          value=make_values(
              eur=295.7,
              usd=404.02,
              value=50000000
@@ -190,87 +155,13 @@ entityWithTagsInNeighbors = Neighbors(
           id='144534',
           node_type='entity',
           labels=[],
-          no_txs=1,
-          balance=Values(
-             eur=0.0,
-             usd=0.0,
-             value=0
-          )
+          no_txs=1
         )])
 
 
 entityWithTagsAddresses = EntityAddresses(
         next_page=None,
-        addresses=[
-            Address(
-               address="17gN64BPHtxi4mEM3qWrxdwhieUvRq8R2r",
-               last_tx=TxSummary(
-                  tx_hash="d325b684f4e6252d6bfdc83b75dc"
-                  "7ea650c9463ce286b023cf4ecaf305cf44a6",
-                  height=572187,
-                  timestamp=1555605191
-               ),
-               no_outgoing_txs=35,
-               balance=Values(
-                  value=0,
-                  eur=0.0,
-                  usd=0.0
-               ),
-               out_degree=27,
-               first_tx=TxSummary(
-                  timestamp=1323298692,
-                  height=156529,
-                  tx_hash="dc035c562acc3230cec8c870293c1"
-                  "119d62e60b13932565231dbe5c407ff7508"
-               ),
-               total_received=Values(
-                  value=95010277876,
-                  eur=16105.63,
-                  usd=21341.98
-               ),
-               total_spent=Values(
-                  value=95010277876,
-                  eur=70943.62,
-                  usd=95316.24
-               ),
-               no_incoming_txs=859,
-               in_degree=1200
-            ),
-            Address(
-               in_degree=1,
-               first_tx=TxSummary(
-                  timestamp=1326139563,
-                  tx_hash="f73df637a912ac5f536d1e3b33695823a18a"
-                  "9e89ae7f3def89d9b06d6a475a52",
-                  height=161451
-               ),
-               total_spent=Values(
-                  eur=0.2,
-                  value=763736,
-                  usd=0.26
-               ),
-               no_outgoing_txs=1,
-               total_received=Values(
-                  usd=0.05,
-                  eur=0.04,
-                  value=763736
-               ),
-               balance=Values(
-                  usd=0.0,
-                  eur=0.0,
-                  value=0
-               ),
-               no_incoming_txs=1,
-               out_degree=1,
-               last_tx=TxSummary(
-                  timestamp=1362160247,
-                  tx_hash="c4f3c81d946d189265929212fdc76b18eabade"
-                  "7ab1fb0a86a2389c18b5851878",
-                  height=223777
-               ),
-               address="1KeDrQdATuXaZFW4CL9tfe2zpQ5SrmBFWc"
-            )
-            ]
+        addresses=[addressD, addressE]
         )
 
 
@@ -441,19 +332,18 @@ def list_entity_neighbors(test_case):
 
 
 def list_entity_neighbors_csv(test_case):
-    csv = ("balance_eur,balance_usd,balance_value,estimated_value_eur,"
-           "estimated_value_usd,estimated_value_value,id,labels,no_txs,"
-           "node_type,received_eur,received_usd,received_value\r\n0.0,0.0,0"
-           ",2411.06,3074.92,48610000000,2818641,\"['labelX', 'labelY']\","
+    csv = ("id,labels,no_txs,"
+           "node_type,value_eur,value_usd,value_value\r\n"
+           "2818641,\"['labelX', 'labelY']\","
            "1,entity,2411.06,"
-           "3074.92,48610000000\r\n0.0,0.0,0,1078.04,1397.54,3375700000,"
-           "8361735,[],3,entity,7064.18,8517.93,7858798000\r\n")
+           "3074.92,48610000000\r\n"
+           "8361735,[],3,entity,1078.04,1397.54,3375700000\r\n")
     result = service.list_entity_neighbors_csv(
         currency='btc',
         entity=entityWithTags.entity,
         direction='out',
         include_labels=True)
-    assertEqual(csv, result.data.decode('utf-8'))
+    test_case.assertEqual(csv, result.data.decode('utf-8'))
 
 
 def list_entity_addresses(test_case):
@@ -467,6 +357,7 @@ def list_entity_addresses(test_case):
                     entity=eth_entityWithTags.entity)
     expected = Address(
             address=eth_address.address,
+            entity=eth_entityWithTags.entity,
             first_tx=eth_address.first_tx,
             last_tx=eth_address.last_tx,
             no_incoming_txs=eth_address.no_incoming_txs,
@@ -529,7 +420,7 @@ def search_entity_neighbors(test_case):
 
     # Test addresses matching
 
-    addresses = ['abcdefg', 'xyz1234']
+    addresses = ['abcdefg', 'xyz1278']
     result = service.search_entity_neighbors(
                     currency='btc',
                     entity=entityWithTags.entity,
@@ -648,4 +539,6 @@ def search_entity_neighbors(test_case):
                     )
     assertEqual(2818641, result.paths[0].node.entity)
     assertEqual(789, result.paths[0].paths[0].node.entity)
-    assertEqual(100.0, result.paths[0].paths[0].node.total_received.eur)
+    assertEqual(100.0,
+                result.paths[0].paths[0].node.total_received.
+                fiat_values[0].value)

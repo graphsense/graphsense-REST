@@ -1,6 +1,5 @@
 from openapi_server.models.address import Address
 from openapi_server.models.addresses import Addresses
-from openapi_server.models.values import Values
 from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.entity_tag import EntityTag
 from openapi_server.models.tags import Tags
@@ -11,12 +10,13 @@ from openapi_server.models.entity import Entity
 from openapi_server.models.link_utxo import LinkUtxo
 import gsrest.service.addresses_service as service
 from gsrest.test.assertion import assertEqual
-from openapi_server.models.address_tx_utxo import AddressTxUtxo
-from openapi_server.models.address_txs import AddressTxs
+from openapi_server.models.tx_account import TxAccount
+from openapi_server.models.txs import Txs
 from gsrest.util.values import convert_value
 from gsrest.service.rates_service import list_rates
 from gsrest.test.txs_service import tx1_eth, tx2_eth
-import base64
+from gsrest.util.values import make_values
+import copy
 
 
 tag = AddressTag(
@@ -25,7 +25,7 @@ tag = AddressTag(
            abuse=None,
            lastmod=1560290400,
            source="https://archive.org/donate/cryptocurrency",
-           address="1Archive1n2C579dMsAu3iC6tWzuQJz8dN",
+           address="addressA",
            tagpack_uri="http://tagpack_uri",
            active=True,
            currency='btc'
@@ -37,7 +37,7 @@ tag2 = AddressTag(
            abuse=None,
            lastmod=1560290400,
            source="https://archive.org/donate/cryptocurrency",
-           address="1Archive1n2C579dMsAu3iC6tWzuQJz8dN",
+           address="addressA",
            tagpack_uri="http://tagpack_uri",
            active=True,
            currency='btc'
@@ -94,7 +94,7 @@ etag2 = EntityTag(
 atag1 = AddressTag(
     abuse=None,
     active=True,
-    address='17gN64BPHtxi4mEM3qWrxdwhieUvRq8R2r',
+    address='addressA',
     category='organization',
     currency='btc',
     label='addressTag1',
@@ -106,7 +106,7 @@ atag1 = AddressTag(
 atag2 = AddressTag(
     abuse=None,
     active=True,
-    address='1KeDrQdATuXaZFW4CL9tfe2zpQ5SrmBFWc',
+    address='addressH',
     category='organization',
     currency='btc',
     label='addressTag2',
@@ -115,15 +115,14 @@ atag2 = AddressTag(
     tagpack_uri='http://tagpack_uri'
 )
 
-
 address = Address(
    first_tx=TxSummary(
       tx_hash="04d92601677d62a985310b61a301e74870fa942c"
       "8be0648e16b1db23b996a8cd",
       height=1,
-      timestamp=1378415426
+      timestamp=1361497172
    ),
-   total_spent=Values(
+   total_spent=make_values(
       usd=2541183.0,
       value=40296873552,
       eur=2118309.0
@@ -131,7 +130,7 @@ address = Address(
    out_degree=284,
    no_incoming_txs=3981,
    no_outgoing_txs=267,
-   total_received=Values(
+   total_received=make_values(
       usd=2543214.5,
       value=40412296129,
       eur=2130676.5
@@ -139,12 +138,13 @@ address = Address(
    last_tx=TxSummary(
       tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea"
       "5b94b304d438a8225850f05b45ae5",
-      height=2,
-      timestamp=1602006938
+      height=1,
+      timestamp=1361497172
    ),
-   address="1Archive1n2C579dMsAu3iC6tWzuQJz8dN",
+   address="addressA",
+   entity=17642138,
    in_degree=5013,
-   balance=Values(eur=1.15, usd=2.31, value=115422577),
+   balance=make_values(eur=1.15, usd=2.31, value=115422577),
         )
 
 addressWithTags = Address(
@@ -156,32 +156,33 @@ addressWithTags.tags = [tag]
 address2 = Address(
    out_degree=1,
    no_incoming_txs=1,
-   total_spent=Values(
+   total_spent=make_values(
       value=1260000,
       usd=103.8,
       eur=88.46
    ),
-   last_tx=TxSummary(
-      timestamp=1511153263,
-      tx_hash="a8826f8b164ddf6d173b335051896570cee818e62d793423620fd"
-      "16b836ba52e",
-      height=2
+   first_tx=TxSummary(
+      timestamp=1361497172,
+      tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea5b94b304d438a822585"
+      "0f05b45ae5",
+      height=1
    ),
-   total_received=Values(
+   total_received=make_values(
       eur=70.96,
       usd=82.79,
       value=1260000
    ),
    in_degree=1,
-   first_tx=TxSummary(
+   last_tx=TxSummary(
       tx_hash="6e7456a7a0e4cc2c4ade617e4e950ece015c00add338be345ce2b"
       "544e5a86322",
       timestamp=1510347493,
-      height=1
+      height=2
    ),
-   address="3Hrnn1UN78uXgLNvtqVXMjHwB41PmX66X4",
+   address="bc1xyz123456789",
+   entity=325790641,
    no_outgoing_txs=1,
-   balance=Values(eur=0.0, usd=0.0, value=0)
+   balance=make_values(eur=0.0, usd=0.0, value=0)
    )
 
 addressWithoutTags = Address(
@@ -191,62 +192,34 @@ addressWithoutTags.tags = []
 
 address3 = Address(
    first_tx=TxSummary(
-      timestamp=1540073277,
-      tx_hash="8b3f09b110628cf596fa67d470db46d1f65"
-              "2fe6ae01b6fb95ebf4b5b7d767df5",
+      timestamp=1361497172,
+      tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea"
+      "5b94b304d438a8225850f05b45ae5",
       height=1
    ),
    out_degree=1,
-   total_received=Values(
+   total_received=make_values(
       usd=0.45,
       eur=0.39,
       value=6896
    ),
-   address="3Hrnn2xbNUBDfqgLQh6CwfutAm9dfVq67u",
+   address="addressJ",
+   entity=442606576,
    no_incoming_txs=1,
    in_degree=1,
    no_outgoing_txs=1,
-   total_spent=Values(
+   total_spent=make_values(
       value=6896,
       usd=0.45,
       eur=0.39
    ),
    last_tx=TxSummary(
-      tx_hash="e87135937ff07e6cf35ecae8224345d1cf"
-              "07363d62a0316b9add6137010b022c",
-      timestamp=1540074500,
-      height=2
+      tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea"
+      "5b94b304d438a8225850f05b45ae5",
+      timestamp=1361497172,
+      height=1
    ),
-   balance=Values(eur=0.0, usd=0.0, value=0)
-)
-
-addressBech32 = Address(
-   out_degree=0,
-   no_incoming_txs=0,
-   total_spent=Values(
-      value=0,
-      usd=0,
-      eur=0
-   ),
-   last_tx=TxSummary(
-      timestamp=0,
-      tx_hash="abcd",
-      height=0
-   ),
-   total_received=Values(
-      eur=0,
-      usd=0,
-      value=0
-   ),
-   in_degree=0,
-   first_tx=TxSummary(
-      tx_hash="abcd",
-      timestamp=0,
-      height=0
-   ),
-   address="bc1xyz123456789",
-   no_outgoing_txs=0,
-   balance=Values(eur=0.0, usd=0.0, value=0)
+   balance=make_values(eur=0.0, usd=0.0, value=0)
 )
 
 addressWithTotalSpent0 = Address(
@@ -254,9 +227,9 @@ addressWithTotalSpent0 = Address(
       tx_hash="04d92601677d62a985310b61a301e74870fa942c"
       "8be0648e16b1db23b996a8cd",
       height=1,
-      timestamp=1378415426
+      timestamp=1361497172
    ),
-   total_spent=Values(
+   total_spent=make_values(
       usd=0.0,
       value=0,
       eur=0.0
@@ -264,7 +237,7 @@ addressWithTotalSpent0 = Address(
    out_degree=284,
    no_incoming_txs=3981,
    no_outgoing_txs=267,
-   total_received=Values(
+   total_received=make_values(
       usd=0.11,
       value=18099,
       eur=0.1
@@ -272,49 +245,34 @@ addressWithTotalSpent0 = Address(
    last_tx=TxSummary(
       tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea"
       "5b94b304d438a8225850f05b45ae5",
-      height=2,
-      timestamp=1602006938
+      height=1,
+      timestamp=1361497172
    ),
-   address="13k8QzZMyce7hF4rT18CHVozE3ooNiFgfF",
+   address="addressC",
+   entity=17642139,
    in_degree=5013,
-   balance=Values(eur=0.0, usd=0.0, value=18099)
+   balance=make_values(eur=0.0, usd=0.0, value=18099)
    )
 
 addressWithTagsOutNeighbors = Neighbors(
         next_page=None,
         neighbors=[
             Neighbor(
-                id="17DfZja1713S3JRWA9jaebCKFM5anUh7GG",
+                id="addressE",
                 node_type='address',
                 labels=['labelX', 'labelY'],
-                received=Values(
-                        value=87789282,
-                        usd=142.18,
-                        eur=114.86),
-                balance=Values(
-                        value=0,
-                        usd=0.0,
-                        eur=0.0),
                 no_txs=1,
-                estimated_value=Values(
+                value=make_values(
                     value=27789282,
                     usd=87.24,
                     eur=72.08)
                 ),
             Neighbor(
-                id="1LpXFVskUaE2cs5xkQE5bDDaX8hff4L2Ej",
+                id="addressF",
                 node_type='address',
                 labels=[],
-                received=Values(
-                        value=67789282,
-                        usd=121.46,
-                        eur=98.72),
-                balance=Values(
-                        value=0,
-                        usd=0.0,
-                        eur=0.0),
                 no_txs=1,
-                estimated_value=Values(
+                value=make_values(
                     value=27789282,
                     usd=87.24,
                     eur=72.08)
@@ -324,58 +282,109 @@ addressWithTagsInNeighbors = Neighbors(
         next_page=None,
         neighbors=[
             Neighbor(
-                id="1BLCmwzV5KXdd4zuonoxaBC9YobJfrkxFg",
+                id="addressB",
                 node_type='address',
                 labels=[],
-                received=Values(
-                        value=59308362491,
-                        usd=17221.5,
-                        eur=12887.89),
-                balance=Values(
-                        value=606,
-                        usd=0.0,
-                        eur=0.0),
                 no_txs=1,
-                estimated_value=Values(
+                value=make_values(
                     value=1091,
                     usd=0.01,
                     eur=0.0)
                 ),
             Neighbor(
-                id="1KzsFAeH9rL6nVXDEt9mnFHR3sekBjpNSt",
+                id="addressD",
                 node_type='address',
                 labels=[],
-                received=Values(
-                        value=5000000000,
-                        usd=13.41,
-                        eur=9.87),
-                balance=Values(
-                        value=0,
-                        usd=0.0,
-                        eur=0.0),
                 no_txs=1,
-                estimated_value=Values(
+                value=make_values(
                     value=50000000,
                     usd=404.02,
                     eur=295.7)
                 )])
 
+addressD = Address(
+   first_tx=TxSummary(
+      tx_hash="04d92601677d62a985310b61a301e74870fa942c"
+      "8be0648e16b1db23b996a8cd",
+      height=1,
+      timestamp=1361497172
+   ),
+   total_spent=make_values(
+      usd=2541183.0,
+      value=40296873552,
+      eur=2118309.0
+   ),
+   out_degree=284,
+   no_incoming_txs=3981,
+   no_outgoing_txs=267,
+   total_received=make_values(
+      usd=2543214.5,
+      value=40412296129,
+      eur=2130676.5
+   ),
+   last_tx=TxSummary(
+      tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea"
+      "5b94b304d438a8225850f05b45ae5",
+      height=1,
+      timestamp=1361497172
+   ),
+   address="addressD",
+   entity=17642138,
+   in_degree=5013,
+   balance=make_values(eur=1.15, usd=2.31, value=115422577),
+        )
+
+addressE = Address(
+   address="addressE",
+   entity=17642138,
+   last_tx=TxSummary(
+      tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea"
+      "5b94b304d438a8225850f05b45ae5",
+      height=1,
+      timestamp=1361497172,
+   ),
+   no_outgoing_txs=3,
+   balance=make_values(
+      value=0,
+      eur=0.0,
+      usd=0.0
+   ),
+   out_degree=7,
+   first_tx=TxSummary(
+      timestamp=1361497172,
+      height=1,
+      tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea"
+      "5b94b304d438a8225850f05b45ae5"
+   ),
+   total_received=make_values(
+      value=87789282,
+      eur=114.86,
+      usd=142.18
+   ),
+   total_spent=make_values(
+      value=87789282,
+      eur=114.86,
+      usd=142.18
+   ),
+   no_incoming_txs=3,
+   in_degree=3
+)
 
 entityWithTagsOfAddressWithTags = Entity(
    no_outgoing_txs=280,
    last_tx=TxSummary(
-      height=651545,
+      height=1,
       tx_hash="5678",
-      timestamp=1602006938
+      timestamp=1434554207
    ),
-   total_spent=Values(
+   total_spent=make_values(
       eur=2291256.5,
       value=138942266867,
       usd=2762256.25
    ),
    in_degree=4358,
    no_addresses=110,
-   total_received=Values(
+   total_received=make_values(
       usd=2583655.0,
       eur=2162085.5,
       value=139057689444
@@ -384,17 +393,17 @@ entityWithTagsOfAddressWithTags = Entity(
    entity=17642138,
    out_degree=176,
    first_tx=TxSummary(
-      timestamp=1323298692,
-      height=156529,
+      timestamp=1434554207,
+      height=1,
       tx_hash="4567"
    ),
-   balance=Values(
+   balance=make_values(
             value=115422577,
             usd=2.31,
             eur=1.15),
    tags=Tags(
        entity_tags=[etag2, etag],
-       address_tags=[atag1, atag2],
+       address_tags=[atag2, atag1],
        tag_coherence=None)
 )
 
@@ -404,7 +413,7 @@ eth_address = Address(
       height=1,
       timestamp=11
    ),
-   total_spent=Values(
+   total_spent=make_values(
       eur=30.33,
       value=123000000000000000000,
       usd=40.44
@@ -412,7 +421,7 @@ eth_address = Address(
    out_degree=6,
    no_incoming_txs=5,
    no_outgoing_txs=10,
-   total_received=Values(
+   total_received=make_values(
       eur=10.11,
       value=234000000000000000000,
       usd=20.22
@@ -423,8 +432,9 @@ eth_address = Address(
       timestamp=12
    ),
    address="0xabcdef",
+   entity=107925000,
    in_degree=5,
-   balance=Values(eur=111.0, usd=222.0, value=111000000000000000000))
+   balance=make_values(eur=111.0, usd=222.0, value=111000000000000000000))
 
 
 eth_addressWithTags = Address(
@@ -442,16 +452,16 @@ eth_address2 = Address(
    in_degree=1,
    no_incoming_txs=1,
    out_degree=2,
-   total_received=Values(
+   total_received=make_values(
             value=456000000000000000000,
             eur=40.44,
             usd=50.56),
-   balance=Values(
+   balance=make_values(
             value=111000000000000000000,
             usd=222.0,
             eur=111.0),
    no_outgoing_txs=2,
-   total_spent=Values(
+   total_spent=make_values(
             value=345000000000000000000,
             eur=50.56,
             usd=60.67),
@@ -460,13 +470,15 @@ eth_address2 = Address(
       tx_hash="af6e0000",
       height=1
    ),
-   address="0x123456"
+   address="0x123456",
+   entity=107925001
 )
 
 eth_address3 = Address(
     **eth_address2.to_dict(),
 )
 eth_address3.address = "0x234567"
+eth_address3.entity = 107925002
 
 eth_addressWithTagsOutNeighbors = Neighbors(
         next_page=None,
@@ -475,16 +487,8 @@ eth_addressWithTagsOutNeighbors = Neighbors(
                 id="0xabcdef",
                 node_type='address',
                 labels=[],
-                received=Values(
-                        value=123000000000000000000,
-                        eur=22.22,
-                        usd=33.33),
-                balance=Values(
-                        value=23000000000000000000,
-                        usd=46.0,
-                        eur=23.0),
                 no_txs=4,
-                estimated_value=Values(
+                value=make_values(
                     value=10000000000000000000,
                     usd=20.0,
                     eur=10.0)
@@ -493,16 +497,8 @@ eth_addressWithTagsOutNeighbors = Neighbors(
                 id="0x123456",
                 node_type='address',
                 labels=['LabelX', 'LabelY'],
-                received=Values(
-                        value=123000000000000000000,
-                        eur=22.22,
-                        usd=33.33),
-                balance=Values(
-                        value=23000000000000000000,
-                        usd=46.0,
-                        eur=23.0),
                 no_txs=4,
-                estimated_value=Values(
+                value=make_values(
                     value=10000000000000000000,
                     usd=20.0,
                     eur=10.0)
@@ -533,10 +529,7 @@ def get_address(test_case):
     test_case.assertEqual(addressWithoutTags, result)
     result = service.get_address(
             'btc', addressWithTags.address, True)
-    assertEqual(addressWithTags, result)
-    result = service.get_address(
-                'btc', addressBech32.address, False)
-    test_case.assertEqual(addressBech32, result)
+    test_case.assertEqual(addressWithTags, result)
     result = service.get_address(
                 currency='btc', address=addressWithTotalSpent0.address)
     test_case.assertEqual(addressWithTotalSpent0, result)
@@ -553,15 +546,15 @@ def list_address_txs(test_case):
     Get all transactions an address has been involved in
     """
     rates = list_rates(currency='btc', heights=[2])
-    address_txs = AddressTxs(
+    address_txs = Txs(
                     next_page=None,
-                    address_txs=[
-                        AddressTxUtxo(
+                    txs=[
+                        TxAccount(
                             tx_hash="123456",
                             value=convert_value('btc', 1260000, rates[2]),
                             height=2,
                             timestamp=1510347493),
-                        AddressTxUtxo(
+                        TxAccount(
                             tx_hash="abcdef",
                             value=convert_value('btc', -1260000, rates[2]),
                             height=2,
@@ -571,7 +564,11 @@ def list_address_txs(test_case):
     result = service.list_address_txs('btc', address2.address)
     test_case.assertEqual(address_txs, result)
 
-    txs = AddressTxs(address_txs=[tx1_eth, tx2_eth])
+    tx2_eth_reverse = TxAccount(**copy.deepcopy(tx2_eth.to_dict()))
+    tx2_eth_reverse.value.value = -tx2_eth_reverse.value.value
+    for v in tx2_eth_reverse.value.fiat_values:
+        v.value = -v.value
+    txs = Txs(txs=[tx1_eth, tx2_eth_reverse])
     result = service.list_address_txs('eth', eth_address.address)
     test_case.assertEqual(txs, result)
 
@@ -579,19 +576,19 @@ def list_address_txs(test_case):
 def list_address_txs_csv(test_case):
     result = service.list_address_txs_csv('btc', address2.address)
     test_case.assertEqual(
-        'currency_type,height,timestamp,tx_hash,value_eur,value_usd,'
+        'height,timestamp,tx_hash,tx_type,value_eur,value_usd,'
         'value_value\r\n'
-        'utxo,2,1510347493,123456,0.01,0.03,'
+        '2,1510347493,123456,account,0.01,0.03,'
         '1260000\r\n'
-        'utxo,2,1511153263,abcdef,-0.01,-0.03,'
+        '2,1511153263,abcdef,account,-0.01,-0.03,'
         '-1260000\r\n', result.data.decode('utf-8'))
 
     result = service.list_address_txs_csv('eth', eth_address.address)
     test_case.assertEqual(
-        'currency_type,height,timestamp,tx_hash,values_eur,values_usd,'
-        'values_value\r\n'
-        'account,1,15,af6e0000,123.0,246.0,123000000000000000000\r\n'
-        'account,1,16,af6e0003,234.0,468.0,234000000000000000000\r\n',
+        'height,timestamp,tx_hash,tx_type,value_eur,value_usd,'
+        'value_value\r\n'
+        '1,15,af6e0000,account,123.0,246.0,123000000000000000000\r\n'
+        '1,16,af6e0003,account,-123.0,-246.0,-123000000000000000000\r\n',
         result.data.decode('utf-8'))
 
 
@@ -605,15 +602,15 @@ def list_tags_by_address(test_case):
 
 def list_tags_by_address_csv(test_case):
     csv = ("abuse,active,address,category,currency,label,lastmod,"
-           "source,tagpack_uri\r\n,True,1Archive1n2C579dMsAu3iC6"
-           "tWzuQJz8dN,organization,btc,\"Internet, Archive\",1560290400"
+           "source,tagpack_uri\r\n,True,addressA"
+           ",organization,btc,\"Internet, Archive\",1560290400"
            ",https://archive.org/donate/cryptocurrency,http://tagpack_uri\r\n")
-    csv = base64.b64encode(csv.encode("utf-8"))
+    csv = csv.encode("utf-8")
     result = service.list_tags_by_address_csv(
                         "btc",
                         address.address).data.decode('utf-8')
-    result = base64.b64encode(result.encode("utf-8"))
-    assertEqual(csv, result)
+    result = result.encode("utf-8")
+    test_case.assertEqual(csv, result)
 
 
 def list_address_neighbors(test_case):
@@ -640,21 +637,19 @@ def list_address_neighbors(test_case):
 
 
 def list_address_neighbors_csv(test_case):
-    csv = ("balance_eur,balance_usd,balance_value,estimated_value_eur,"
-           "estimated_value_usd,estimated_value_value,id,labels,no_txs,"
-           "node_type,received_eur,received_usd,received_value\r\n0.0,0.0,"
-           "0,72.08,87.24,27789282,17DfZja1713S3JRWA9jaebCKFM5anUh7GG,"
+    csv = ("id,labels,no_txs,"
+           "node_type,value_eur,value_usd,value_value\r\n"
+           "addressE,"
            "\"['labelX', 'labelY']\""
-           ",1,address,114.86,142.18,87789282\r\n0.0,0.0,0,72.08,87.24,"
-           "27789282,1LpXFVskUaE2cs5xkQE5bDDaX8hff4L2Ej,[],1,address,98.72,"
-           "121.46,67789282\r\n")
+           ",1,address,72.08,87.24,27789282\r\n"
+           "addressF,[],1,address,72.08,87.24,27789282\r\n")
     result = service.list_address_neighbors_csv(
         currency='btc',
         address=address.address,
         direction='out',
         include_labels=True
         )
-    assertEqual(csv, result.data.decode('utf-8'))
+    test_case.assertEqual(csv, result.data.decode('utf-8'))
 
 
 def get_address_entity(test_case):
@@ -679,10 +674,12 @@ def list_address_links(test_case):
     result = service.list_address_links(
                 currency='btc',
                 address=address.address,
-                neighbor='17DfZja1713S3JRWA9jaebCKFM5anUh7GG')
+                neighbor='addressE')
     link = [LinkUtxo(tx_hash='123456',
-                     input_value=Values(eur=-0.1, usd=-0.2, value=-10000000),
-                     output_value=Values(eur=-0.1, usd=-0.2, value=-10000000),
+                     input_value=make_values(
+                         eur=-0.1, usd=-0.2, value=-10000000),
+                     output_value=make_values(
+                         eur=0.1, usd=0.2, value=10000000),
                      timestamp=1361497172,
                      height=2)]
 
@@ -700,13 +697,13 @@ def list_address_links_csv(test_case):
     result = service.list_address_links_csv(
                 currency='btc',
                 address=address.address,
-                neighbor='17DfZja1713S3JRWA9jaebCKFM5anUh7GG')
+                neighbor='addressE')
 
-    csv = ('currency_type,height,input_value_eur,input_value_usd,'
+    csv = ('height,input_value_eur,input_value_usd,'
            'input_value_value,output_value_eur,output_value_usd,'
-           'output_value_value,timestamp,tx_hash\r\n'
-           'utxo,2,-0.1,-0.2,-10000000,-0.1,-0.2,-10000000,'
-           '1361497172,123456\r\n')
+           'output_value_value,timestamp,tx_hash,tx_type\r\n'
+           '2,-0.1,-0.2,-10000000,0.1,0.2,10000000,'
+           '1361497172,123456,utxo\r\n')
 
     test_case.assertEqual(csv, result.data.decode('utf-8'))
 
@@ -715,16 +712,16 @@ def list_address_links_csv(test_case):
                 address=eth_address.address,
                 neighbor='0x123456')
 
-    csv = ('currency_type,height,timestamp,tx_hash,values_eur,'
-           'values_usd,values_value\r\n'
-           'account,1,15,af6e0000,123.0,246.0,123000000000000000000\r\n'
-           'account,1,16,af6e0003,234.0,468.0,234000000000000000000\r\n')
+    csv = ('height,timestamp,tx_hash,tx_type,value_eur,'
+           'value_usd,value_value\r\n'
+           '1,15,af6e0000,account,123.0,246.0,123000000000000000000\r\n'
+           '1,16,af6e0003,account,123.0,246.0,123000000000000000000\r\n')
     test_case.assertEqual(csv, result.data.decode('utf-8'))
 
 
 def list_addresses(test_case):
     result = service.list_addresses('btc', pagesize=2)
-    test_case.assertEqual([address2, address3],
+    test_case.assertEqual([addressD, address],
                           result.addresses)
     test_case.assertIsNot(result.next_page, None)
 

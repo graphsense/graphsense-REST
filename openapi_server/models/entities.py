@@ -17,26 +17,26 @@ class Entities(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, next_page=None, entities=None):  # noqa: E501
+    def __init__(self, entities=None, next_page=None):  # noqa: E501
         """Entities - a model defined in OpenAPI
 
-        :param next_page: The next_page of this Entities.  # noqa: E501
-        :type next_page: str
         :param entities: The entities of this Entities.  # noqa: E501
         :type entities: List[Entity]
+        :param next_page: The next_page of this Entities.  # noqa: E501
+        :type next_page: str
         """
         self.openapi_types = {
-            'next_page': str,
-            'entities': List[Entity]
+            'entities': List[Entity],
+            'next_page': str
         }
 
         self.attribute_map = {
-            'next_page': 'next_page',
-            'entities': 'entities'
+            'entities': 'entities',
+            'next_page': 'next_page'
         }
 
-        self._next_page = next_page
         self._entities = entities
+        self._next_page = next_page
 
     @classmethod
     def from_dict(cls, dikt) -> 'Entities':
@@ -55,30 +55,9 @@ class Entities(Model):
         :return: The Entities as a dict
         :rtype: dict
         """
-        return { 'next_page': self._next_page,
-            'entities': self._entities }
+        return { 'entities': self._entities,
+            'next_page': self._next_page }
 
-
-    @property
-    def next_page(self):
-        """Gets the next_page of this Entities.
-
-
-        :return: The next_page of this Entities.
-        :rtype: str
-        """
-        return self._next_page
-
-    @next_page.setter
-    def next_page(self, next_page):
-        """Sets the next_page of this Entities.
-
-
-        :param next_page: The next_page of this Entities.
-        :type next_page: str
-        """
-
-        self._next_page = next_page
 
     @property
     def entities(self):
@@ -100,3 +79,24 @@ class Entities(Model):
         """
 
         self._entities = entities
+
+    @property
+    def next_page(self):
+        """Gets the next_page of this Entities.
+
+
+        :return: The next_page of this Entities.
+        :rtype: str
+        """
+        return self._next_page
+
+    @next_page.setter
+    def next_page(self, next_page):
+        """Sets the next_page of this Entities.
+
+
+        :param next_page: The next_page of this Entities.
+        :type next_page: str
+        """
+
+        self._next_page = next_page

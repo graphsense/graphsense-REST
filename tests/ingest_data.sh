@@ -7,8 +7,10 @@ MOCK_CMD="docker exec $CASSANDRA_MOCK cqlsh"
 
 TAG=develop
 
-UTXO_SCHEMA="https://raw.githubusercontent.com/graphsense/graphsense-transformation/$TAG/scripts/"
-ETH_SCHEMA="https://raw.githubusercontent.com/graphsense/graphsense-ethereum-transformation/$TAG/scripts/"
+UTXO_RAW_SCHEMA="https://raw.githubusercontent.com/graphsense/graphsense-blocksci/$TAG/scripts/"
+UTXO_TRANSFORMED_SCHEMA="https://raw.githubusercontent.com/graphsense/graphsense-transformation/$TAG/scripts/"
+ETH_RAW_SCHEMA="https://raw.githubusercontent.com/graphsense/graphsense-ethereum-etl/$TAG/scripts/"
+ETH_TRANSFORMED_SCHEMA="https://raw.githubusercontent.com/graphsense/graphsense-ethereum-transformation/$TAG/scripts/"
 
 function schema() {
   temp=`mktemp`
@@ -34,14 +36,16 @@ function create() {
   temp=$1
   search=$2
   replace=$3
+  replaced=`mktemp`
   echo "Replace $search by $replace ..."
-  sed -i "s/$search/$replace/g" $temp
+  sed "s/$search/$replace/g" $temp > $replaced
   echo "Remove DROP ..."
-  sed -i -r "s/^DROP KEYSPACE.+//" $temp
+  sed -i -r "s/^DROP KEYSPACE.+//" $replaced
   echo "Copy to mockup database ..."
-  docker cp $temp $CASSANDRA_MOCK:/
+  docker cp $replaced $CASSANDRA_MOCK:/
   echo "Creating schema ..."
-  $MOCK_CMD -f /`basename $temp`
+  $MOCK_CMD -f /`basename $replaced`
+  rm $replaced
 }
 
 function insert_data () {
@@ -56,10 +60,10 @@ function insert_data () {
     done <"$1"
 }
 
-schema "$UTXO_SCHEMA/schema_raw.cql" btc "btc ltc"
-schema "$UTXO_SCHEMA/schema_transformed.cql" btc "btc ltc"
-schema "$ETH_SCHEMA/schema_raw.cql" eth eth
-schema "$ETH_SCHEMA/schema_transformed.cql" eth eth
+schema "$UTXO_RAW_SCHEMA/schema.cql" graphsense "btc_raw ltc_raw"
+schema "$UTXO_TRANSFORMED_SCHEMA/schema_transformed.cql" btc "btc ltc"
+schema "$ETH_RAW_SCHEMA/schema.cql" eth eth
+schema "$ETH_TRANSFORMED_SCHEMA/schema_transformed.cql" eth eth
 tagpacks
 
 for filename in $data; do

@@ -4,11 +4,11 @@ import traceback
 
 from openapi_server.models.address import Address  # noqa: E501
 from openapi_server.models.address_tag import AddressTag  # noqa: E501
-from openapi_server.models.address_txs import AddressTxs  # noqa: E501
 from openapi_server.models.addresses import Addresses  # noqa: E501
 from openapi_server.models.entity import Entity  # noqa: E501
 from openapi_server.models.link import Link  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
+from openapi_server.models.txs_account import TxsAccount  # noqa: E501
 import gsrest.service.addresses_service as service
 from gsrest.service.problems import notfound, badrequest, internalerror
 
@@ -210,7 +210,7 @@ def list_address_txs(currency, address, page=None, pagesize=None):  # noqa: E501
     :param pagesize: Number of items returned in a single page
     :type pagesize: int
 
-    :rtype: AddressTxs
+    :rtype: TxsAccount
     """
     try:
         return service.list_address_txs(

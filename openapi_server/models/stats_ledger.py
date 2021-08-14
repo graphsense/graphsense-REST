@@ -17,36 +17,36 @@ class StatsLedger(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, visible_name=None, id=None, version=None, report_uuid=None):  # noqa: E501
+    def __init__(self, id=None, report_uuid=None, version=None, visible_name=None):  # noqa: E501
         """StatsLedger - a model defined in OpenAPI
 
-        :param visible_name: The visible_name of this StatsLedger.  # noqa: E501
-        :type visible_name: str
         :param id: The id of this StatsLedger.  # noqa: E501
         :type id: str
-        :param version: The version of this StatsLedger.  # noqa: E501
-        :type version: StatsLedgerVersion
         :param report_uuid: The report_uuid of this StatsLedger.  # noqa: E501
         :type report_uuid: str
+        :param version: The version of this StatsLedger.  # noqa: E501
+        :type version: StatsLedgerVersion
+        :param visible_name: The visible_name of this StatsLedger.  # noqa: E501
+        :type visible_name: str
         """
         self.openapi_types = {
-            'visible_name': str,
             'id': str,
+            'report_uuid': str,
             'version': StatsLedgerVersion,
-            'report_uuid': str
+            'visible_name': str
         }
 
         self.attribute_map = {
-            'visible_name': 'visible_name',
             'id': 'id',
+            'report_uuid': 'report_uuid',
             'version': 'version',
-            'report_uuid': 'report_uuid'
+            'visible_name': 'visible_name'
         }
 
-        self._visible_name = visible_name
         self._id = id
-        self._version = version
         self._report_uuid = report_uuid
+        self._version = version
+        self._visible_name = visible_name
 
     @classmethod
     def from_dict(cls, dikt) -> 'StatsLedger':
@@ -65,32 +65,11 @@ class StatsLedger(Model):
         :return: The StatsLedger as a dict
         :rtype: dict
         """
-        return { 'visible_name': self._visible_name,
-            'id': self._id,
+        return { 'id': self._id,
+            'report_uuid': self._report_uuid,
             'version': self._version,
-            'report_uuid': self._report_uuid }
+            'visible_name': self._visible_name }
 
-
-    @property
-    def visible_name(self):
-        """Gets the visible_name of this StatsLedger.
-
-
-        :return: The visible_name of this StatsLedger.
-        :rtype: str
-        """
-        return self._visible_name
-
-    @visible_name.setter
-    def visible_name(self, visible_name):
-        """Sets the visible_name of this StatsLedger.
-
-
-        :param visible_name: The visible_name of this StatsLedger.
-        :type visible_name: str
-        """
-
-        self._visible_name = visible_name
 
     @property
     def id(self):
@@ -114,6 +93,27 @@ class StatsLedger(Model):
         self._id = id
 
     @property
+    def report_uuid(self):
+        """Gets the report_uuid of this StatsLedger.
+
+
+        :return: The report_uuid of this StatsLedger.
+        :rtype: str
+        """
+        return self._report_uuid
+
+    @report_uuid.setter
+    def report_uuid(self, report_uuid):
+        """Sets the report_uuid of this StatsLedger.
+
+
+        :param report_uuid: The report_uuid of this StatsLedger.
+        :type report_uuid: str
+        """
+
+        self._report_uuid = report_uuid
+
+    @property
     def version(self):
         """Gets the version of this StatsLedger.
 
@@ -135,22 +135,22 @@ class StatsLedger(Model):
         self._version = version
 
     @property
-    def report_uuid(self):
-        """Gets the report_uuid of this StatsLedger.
+    def visible_name(self):
+        """Gets the visible_name of this StatsLedger.
 
 
-        :return: The report_uuid of this StatsLedger.
+        :return: The visible_name of this StatsLedger.
         :rtype: str
         """
-        return self._report_uuid
+        return self._visible_name
 
-    @report_uuid.setter
-    def report_uuid(self, report_uuid):
-        """Sets the report_uuid of this StatsLedger.
+    @visible_name.setter
+    def visible_name(self, visible_name):
+        """Sets the visible_name of this StatsLedger.
 
 
-        :param report_uuid: The report_uuid of this StatsLedger.
-        :type report_uuid: str
+        :param visible_name: The visible_name of this StatsLedger.
+        :type visible_name: str
         """
 
-        self._report_uuid = report_uuid
+        self._visible_name = visible_name

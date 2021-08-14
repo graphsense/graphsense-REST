@@ -1,9 +1,7 @@
 from openapi_server.models.block import Block
 from openapi_server.models.blocks import Blocks
-from openapi_server.models.block_tx_utxo import BlockTxUtxo
-from openapi_server.models.values import Values
 import gsrest.service.blocks_service as service
-from gsrest.test.txs_service import tx1_eth, tx2_eth
+from gsrest.test.txs_service import tx1, tx1_eth, tx2_eth
 
 block = Block(
         height=1,
@@ -47,7 +45,7 @@ def get_block(test_case):
         '/{currency}/blocks/{height}'.format(currency="btc", height="0"),
         method='GET',
         headers=headers)
-    test_case.assert400(response,
+    test_case.assert404(response,
                         'Response body is : ' + response.data.decode('utf-8'))
 
     result = service.get_block("eth", 1)
@@ -61,7 +59,7 @@ def get_block(test_case):
         '/eth/blocks/{height}'.format(height="0"),
         method='GET',
         headers=headers)
-    test_case.assert400(response,
+    test_case.assert404(response,
                         'Response body is : ' + response.data.decode('utf-8'))
 
 
@@ -69,40 +67,33 @@ def list_block_txs(test_case):
     """Test case for list_block_txs
     """
 
-    block_txs = [
-            BlockTxUtxo(
-                no_inputs=0,
-                no_outputs=1,
-                total_input=Values(eur=0.0, usd=0.0, value=0),
-                total_output=Values(eur=0.0, usd=0.0, value=5000000000),
-                tx_hash="ab1880"
-                )
-            ]
+    block_txs = [tx1]
     result = service.list_block_txs("btc", 1)
     test_case.assertEqual(block_txs, result)
 
     result = service.list_block_txs("eth", 1)
-    test_case.assertEqual([tx1_eth, tx2_eth], result)
+
+    def s(tx):
+        return tx.tx_hash
+
+    result = sorted(result, key=s)
+    test_case.assertEqual(
+        sorted([tx1_eth, tx2_eth], key=s),
+        result)
 
 
 def list_block_txs_csv(test_case):
     """Test case for list_block_txs_csv
     """
-    csv = ("currency_type,no_inputs,no_outputs,total_input_eur,"
-           "total_input_usd,total_input_value,total_output_eur,"
-           "total_output_usd,total_output_value,tx_hash\r\nutxo,0,1,0.0"
-           ",0.0,0,0.0,0.0,5000000000,ab1880\r\n")
-    test_case.assertEqual(csv,
-                          service.list_block_txs_csv("btc", 1)
-                          .data.decode('utf-8'))
+    result = service.list_block_txs_csv("btc", 2).data.decode('utf-8')
+    splitted = result.split("\r\n")
+    test_case.assertEqual(3, len(splitted))
+    test_case.assertEqual(13, len(splitted[0].split(',')))
 
-    csv = ("currency_type,height,timestamp,tx_hash,values_eur,"
-           "values_usd,values_value\r\n"
-           "account,1,15,af6e0000,123.0,246.0,123000000000000000000\r\n"
-           "account,1,16,af6e0003,234.0,468.0,234000000000000000000\r\n")
-    test_case.assertEqual(csv,
-                          service.list_block_txs_csv("eth", 1)
-                          .data.decode('utf-8'))
+    result = service.list_block_txs_csv("eth", 1).data.decode('utf-8')
+    splitted = result.split("\r\n")
+    test_case.assertEqual(4, len(splitted))
+    test_case.assertEqual(7, len(splitted[0].split(',')))
 
 
 def list_blocks(test_case):

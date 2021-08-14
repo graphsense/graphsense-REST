@@ -1,2 +1,2 @@
- {"height": 1, "txs": [{"tx_hash": "0xab1880", "no_inputs": 0, "no_outputs": 1, "total_input": 0, "total_output": 5000000000}]}
- {"height": 2, "txs": [{"tx_hash": "0xab188013", "no_inputs": 0, "no_outputs": 1, "total_input": 0, "total_output": 5000000000}]}
+ {"block_id_group": 0, "block_id": 1, "txs": [{"tx_id": 25001, "no_inputs": 0, "no_outputs": 1, "total_input": 0, "total_output": 5000000000}]}
+ {"block_id_group": 0, "block_id": 2, "txs": [{"tx_id": 25002, "no_inputs": 0, "no_outputs": 1, "total_input": 0, "total_output": 5000000000}]}

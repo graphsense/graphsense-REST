@@ -7,8 +7,8 @@ from flask import json
 from six import BytesIO
 
 from openapi_server.models.block import Block  # noqa: E501
-from openapi_server.models.block_tx import BlockTx  # noqa: E501
 from openapi_server.models.blocks import Blocks  # noqa: E501
+from openapi_server.models.tx import Tx  # noqa: E501
 from openapi_server.test import BaseTestCase
 import gsrest.test.blocks_service as test_service
 
@@ -36,7 +36,7 @@ class TestBlocksController(BaseTestCase):
     def test_list_block_txs(self):
         """Test case for list_block_txs
 
-        Get block transactions (100 per page)
+        Get block transactions
         """
         test_service.list_block_txs(self)
 

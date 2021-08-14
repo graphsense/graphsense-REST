@@ -1,6 +1,5 @@
 from gsrest.db import get_connection
-from openapi_server.models.address_tx_utxo import AddressTxUtxo
-from openapi_server.models.address_txs import AddressTxs
+from openapi_server.models.txs import Txs
 from openapi_server.models.addresses import Addresses
 from openapi_server.models.link_utxo import LinkUtxo
 from openapi_server.models.tx_account import TxAccount
@@ -15,23 +14,23 @@ from gsrest.service.rates_service import get_rates
 
 def from_rows(currency, rows):
     if currency == 'eth':
-        heights = [row.block_number for row in rows]
+        heights = [row['height'] for row in rows]
         rates = list_rates(currency, heights)
         return [TxAccount(
-                    tx_hash=row.hash.hex(),
-                    timestamp=row.block_timestamp,
-                    height=row.block_number,
-                    values=convert_value(currency,
-                                         row.value,
-                                         rates[row.block_number]))
+                    tx_hash=row['tx_hash'].hex(),
+                    timestamp=row['block_timestamp'],
+                    height=row['height'],
+                    value=convert_value(currency,
+                                        row['value'],
+                                        rates[row['height']]))
                 for row in rows]
-    heights = [row.height for row in rows]
+    heights = [row['height'] for row in rows]
     rates = list_rates(currency, heights)
-    return [AddressTxUtxo(
-            height=row.height,
-            timestamp=row.timestamp,
-            tx_hash=row.tx_hash.hex(),
-            value=convert_value(currency, row.value, rates[row.height]))
+    return [TxAccount(
+            height=row['height'],
+            timestamp=row['timestamp'],
+            tx_hash=row['tx_hash'].hex(),
+            value=convert_value(currency, row['value'], rates[row['height']]))
             for row in rows]
 
 
@@ -60,13 +59,13 @@ def list_address_txs(currency, address, page=None, pagesize=None):
     results, paging_state = \
         db.list_address_txs(currency, address, page, pagesize)
     address_txs = from_rows(currency, results)
-    return AddressTxs(next_page=paging_state, address_txs=address_txs)
+    return Txs(next_page=paging_state, txs=address_txs)
 
 
 def list_address_txs_csv(currency, address):
     def query_function(page_state):
         result = list_address_txs(currency, address, page_state)
-        return (result.next_page, result.address_txs)
+        return (result.next_page, result.txs)
     return Response(stream_with_context(to_csv(query_function)),
                     mimetype="text/csv",
                     headers=create_download_header(
@@ -105,15 +104,15 @@ def list_address_links(currency, address, neighbor):
                     tx_hash=row.hash.hex(),
                     timestamp=row.block_timestamp,
                     height=row.block_number,
-                    values=convert_value(currency,
-                                         row.value,
-                                         rates[row.block_number]))
+                    value=convert_value(currency,
+                                        row.value,
+                                        rates[row.block_number]))
                 for row in links]
 
     heights = [row['height'] for row in links]
     rates = list_rates(currency, heights)
 
-    return [LinkUtxo(tx_hash=e['tx_hash'],
+    return [LinkUtxo(tx_hash=e['tx_hash'].hex(),
                      height=e['height'],
                      timestamp=e['timestamp'],
                      input_value=convert_value(
@@ -160,9 +159,9 @@ def list_addresses(currency, ids=None, page=None, pagesize=None):
     result, paging_state = db.list_addresses(currency, ids, page, pagesize)
     rates = get_rates(currency)['rates']
     return Addresses(
-            paging_state,
-            [common.address_from_row(currency, row, rates)
-             for row in result])
+            next_page=paging_state,
+            addresses=[common.address_from_row(currency, row, rates)
+                       for row in result])
 
 
 def list_addresses_csv(currency, ids=None):

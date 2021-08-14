@@ -12,14 +12,6 @@ SMALL_PAGE_SIZE = 1000
 BIG_PAGE_SIZE = 10000
 SEARCH_PAGE_SIZE = 100
 
-ADDRESS_PREFIX_LENGTH = 5
-LABEL_PREFIX_LENGTH = 3
-TX_PREFIX_LENGTH = 5
-
-ETH_BLOCK_BUCKET_SIZE = 100000
-ETH_ADDRESS_PREFIX_LENGTH = 4
-ETH_TX_PREFIX_LENGTH = 4
-
 
 def to_hex(paging_state):
     return paging_state.hex() if paging_state is not None else None
@@ -30,12 +22,18 @@ def from_hex(page):
 
 
 def eth_address_to_hex(address):
+    if type(address) != bytes:
+        return address
     return '0x' + address.hex()
 
 
 def eth_address_from_hex(address):
     # eth addresses are case insensitive
     return bytes.fromhex(address[2:].lower())
+
+
+def identity(x):
+    return x
 
 
 class Cassandra():
@@ -91,22 +89,25 @@ class Cassandra():
             raise BadConfigError("Keyspace {} does not exist".format(keyspace))
 
     def load_parameters(self, keyspace):
-        session = self.get_session(keyspace, 'transformed')
-        query = "SELECT * FROM configuration"
-        session.row_factory = dict_factory
-        result = session.execute(query)
-        if result is None or result.one() is None:
-            raise BadConfigError(
-                "No configuration table found for keyspace {}"
-                .format(keyspace))
-        self.parameters[keyspace] = result.one()
+        self.parameters[keyspace] = {}
+        for kind in ['raw', 'transformed']:
+            session = self.get_session(keyspace, kind)
+            query = "SELECT * FROM configuration"
+            session.row_factory = dict_factory
+            result = session.execute(query)
+            if result is None or result.one() is None:
+                raise BadConfigError(
+                    "No configuration table found for keyspace {}"
+                    .format(keyspace))
+            for key, value in result.one().items():
+                self.parameters[keyspace][key] = value
 
     def get_prefix_lengths(self, currency):
-        return {'address': ADDRESS_PREFIX_LENGTH
-                if currency != 'eth' else ETH_ADDRESS_PREFIX_LENGTH,
-                'tx': TX_PREFIX_LENGTH
-                if currency != 'eth' else ETH_TX_PREFIX_LENGTH,
-                'label': LABEL_PREFIX_LENGTH}
+        p = self.parameters[currency]
+        return \
+            {'address': p['address_prefix_length'],
+             'tx': p['tx_prefix_length'],
+             'label': p['label_prefix_length']}
 
     def get_supported_currencies(self):
         return self.config['currencies'].keys()
@@ -124,7 +125,6 @@ class Cassandra():
         return self.config['currencies'][currency][keyspace_type]
 
     def get_session(self, currency, keyspace_type):
-        # enforce standard row factory (can be overridden on service-level)
         self.session.row_factory = named_tuple_factory
         self.session.default_fetch_size = BIG_PAGE_SIZE
 
@@ -158,8 +158,11 @@ class Cassandra():
     @eth
     def get_block(self, currency, height):
         session = self.get_session(currency, 'raw')
-        query = "SELECT * FROM block WHERE height = %s"
-        return session.execute(query, [height]).one()
+        query = ("SELECT * FROM block WHERE block_id_group = %s "
+                 "AND block_id = %s")
+        return session.execute(
+                    query, [self.get_block_id_group(currency, height), height]
+                ).one()
 
     def list_blocks(self, currency, page=None):
         session = self.get_session(currency, 'raw')
@@ -173,33 +176,60 @@ class Cassandra():
     @eth
     def list_block_txs(self, currency, height):
         session = self.get_session(currency, 'raw')
-
-        query = "SELECT * FROM block_transactions WHERE height = %s"
-        result = session.execute(query, [height])
+        height_group = self.get_block_id_group(currency, height)
+        query = ("SELECT txs FROM block_transactions WHERE "
+                 "block_id_group = %s and block_id = %s")
+        result = session.execute(query, [height_group, height])
         if result is None or result.one() is None:
             return None
-        return result.one().txs
+        txs = [tx.tx_id for tx in result.one().txs]
+        return self.list_txs_by_ids(currency, txs)
 
-    @new
+    @eth
     def get_rates(self, currency, height):
+        session = self.get_session(currency, 'transformed')
+        session.row_factory = dict_factory
+        query = "SELECT * FROM exchange_rates WHERE block_id = %s"
+        result = session.execute(query, [height])
+        if result is None:
+            return None
+        result = result.one()
+        result['height'] = result['block_id']
+        return self.markup_rates(currency, result)
+
+    def get_rates_eth(self, currency, height):
         session = self.get_session(currency, 'transformed')
         session.row_factory = dict_factory
         query = "SELECT * FROM exchange_rates WHERE height = %s"
         result = session.execute(query, [height])
         if result is None:
             return None
-        return result.one()
+        result = result.one()
+        return self.markup_rates(currency, result)
 
-    @new
+    @eth
     def list_rates(self, currency, heights):
         session = self.get_session(currency, 'transformed')
         session.row_factory = dict_factory
+        result = self.concurrent_with_args(
+            session,
+            "SELECT * FROM exchange_rates WHERE block_id = %s",
+            [[h] for h in heights])
+        for row in result:
+            row['height'] = row['block_id']
+            self.markup_rates(currency, row)
+        return result
 
-        concurrent_query = "SELECT * FROM exchange_rates WHERE height = %s"
-        statements_and_params = []
-        for h in heights:
-            statements_and_params.append((concurrent_query, [h]))
-        return self.concurrent(session, statements_and_params)
+    def list_rates_eth(self, currency, heights):
+        session = self.get_session(currency, 'transformed')
+        session.row_factory = dict_factory
+        result = self.concurrent_with_args(
+            session,
+            "SELECT * FROM exchange_rates WHERE height = %s",
+            [[h] for h in heights])
+        for row in result:
+            self.markup_rates(currency, row)
+        return result
 
     @eth
     def list_address_txs(self, currency, address, page=None,
@@ -208,8 +238,9 @@ class Cassandra():
         address_id, address_id_group = \
             self.get_address_id_id_group(currency, address)
         session = self.get_session(currency, 'transformed')
-        query = "SELECT * FROM address_transactions WHERE address_id = %s " \
-                "AND address_id_group = %s"
+        session.row_factory = dict_factory
+        query = "SELECT * FROM address_transactions " \
+                "WHERE address_id = %s AND address_id_group = %s"
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
         statement = SimpleStatement(query, fetch_size=fetch_size)
         results = session.execute(statement, [address_id, address_id_group],
@@ -217,28 +248,49 @@ class Cassandra():
         if results is None:
             raise RuntimeError(
                 f'address {address} not found in currency {currency}')
+
+        session = self.get_session(currency, 'raw')
+        txs = self.list_txs_by_ids(
+                currency,
+                [row['tx_id'] for row in results.current_rows])
+        for (row, tx) in zip(results.current_rows, txs):
+            row['tx_hash'] = tx.tx_hash
+            row['height'] = row['block_id']
+
         return results.current_rows, to_hex(results.paging_state)
 
-    @new
-    def get_addresses_by_ids(self, currency, address_ids):
+    def get_addresses_by_ids(self, currency, address_ids, address_only=False):
         params = [(self.get_id_group(currency, address_id),
                    address_id) for address_id in address_ids]
         session = self.get_session(currency, 'transformed')
-        query = "SELECT address FROM address_by_id_group WHERE " \
-                "address_id_group = %s and address_id = %s"
-        return [row.address for row in
-                self.concurrent_with_args(session, query, params)]
+        session.row_factory = dict_factory
+        fields = 'address' if address_only else '*'
+        query = (f"SELECT {fields} FROM address WHERE "
+                 "address_id_group = %s and address_id = %s")
+        result = self.concurrent_with_args(session, query, params)
+        if currency != 'eth':
+            return result
 
-    @new
+        for row in result:
+            row['address'] = eth_address_to_hex(row['address'])
+
+        return result
+
     def get_address_id(self, currency, address):
         session = self.get_session(currency, 'transformed')
         prefix = self.scrub_prefix(currency, address)
-        query = "SELECT * FROM address WHERE address_prefix = %s " \
-                "AND address = %s"
-        result = session.execute(query,
-                                 [prefix[:ADDRESS_PREFIX_LENGTH], address])
-        if result:
-            return result.one().address_id
+        table = "address_by_address_prefix"
+        if currency == 'eth':
+            address = eth_address_from_hex(address)
+            table = "address_ids_by_address_prefix"
+            prefix = prefix.upper()
+        query = (
+            f"SELECT address_id FROM {table} "
+            "WHERE address_prefix = %s AND address = %s")
+        prefix_length = self.get_prefix_lengths(currency)['address']
+        result = session.execute(
+            query, [prefix[:prefix_length], address])
+        return result.one().address_id if result else None
 
     def get_address_id_id_group(self, currency, address):
         address_id = self.get_address_id(currency, address)
@@ -251,17 +303,26 @@ class Cassandra():
     def get_id_group(self, keyspace, id_):
         return floor(int(id_) / self.parameters[keyspace]['bucket_size'])
 
-    @new
+    def get_block_id_group(self, keyspace, id_):
+        return floor(int(id_) / self.parameters[keyspace]['block_bucket_size'])
+
+    def get_tx_id_group(self, keyspace, id_):
+        return floor(int(id_) / self.parameters[keyspace]['tx_bucket_size'])
+
     def get_address(self, currency, address):
         session = self.get_session(currency, 'transformed')
-        prefix = self.scrub_prefix(currency, address)
-        query = \
-            "SELECT * FROM address WHERE address_prefix = %s AND address = %s"
+        address_id, address_id_group = \
+            self.get_address_id_id_group(currency, address)
+        query = ("SELECT * FROM address WHERE address_id = %s"
+                 " AND address_id_group = %s")
         session.row_factory = dict_factory
-        result = session.execute(
-            query, [prefix[:ADDRESS_PREFIX_LENGTH], address])
-        if result:
-            return result.one()
+        result = session.execute(query, [address_id, address_id_group])
+        if not result:
+            return None
+
+        result = result.one()
+
+        return self.finish_addresses(currency, [result])[0]
 
     @new
     def list_tags_by_address(self, currency, address):
@@ -279,11 +340,12 @@ class Cassandra():
         address_id, address_id_group = \
             self.get_address_id_id_group(currency, address)
 
-        query = "SELECT cluster FROM address_cluster WHERE " \
+        query = "SELECT cluster_id FROM address WHERE " \
                 "address_id_group = %s AND address_id = %s "
         result = session.execute(query, [address_id_group, address_id])
-        if result:
-            return result.one().cluster
+        if not result:
+            return None
+        return result.one().cluster_id
 
     @eth
     def list_address_links(self, currency, address, neighbor):
@@ -305,11 +367,10 @@ class Cassandra():
         if not results.current_rows:
             return []
 
-        txs = [tx_hash for tx_hash in
-               results.current_rows[0].tx_list]
+        txs = results.current_rows[0].tx_list
         query = "SELECT * FROM address_transactions WHERE " \
                 "address_id_group = %s AND address_id = %s AND " \
-                "tx_hash IN %s"
+                "tx_id IN %s"
         results1 = session.execute(query, [address_id_group, address_id,
                                            ValueSequence(txs)])
         results2 = session.execute(query, [neighbor_id_group, neighbor_id,
@@ -320,25 +381,44 @@ class Cassandra():
 
         links = dict()
         for row in results1.current_rows:
-            hsh = row.tx_hash.hex()
-            links[hsh] = dict()
-            links[hsh]['tx_hash'] = hsh
-            links[hsh]['height'] = row.height
-            links[hsh]['timestamp'] = row.timestamp
-            links[hsh]['input_value'] = row.value
+            index = row.tx_id
+            links[index] = dict()
+            links[index]['height'] = row.block_id
+            links[index]['timestamp'] = row.timestamp
+            links[index]['input_value'] = row.value
         for row in results2.current_rows:
-            hsh = row.tx_hash.hex()
-            links[hsh]['output_value'] = row.value
+            index = row.tx_id
+            links[index]['output_value'] = row.value
+
+        for row in self.get_transactions_by_ids(currency, txs):
+            links[row.tx_id]['tx_hash'] = row.tx_hash
+
         return links.values()
 
-    @new
+    @eth
+    def get_transactions_by_ids(self, currency, ids):
+        session = self.get_session(currency, 'raw')
+        query = ("SELECT * FROM transaction "
+                 "WHERE tx_id_group = %s AND tx_id = %s")
+        params = [[self.get_tx_id_group(currency, id), id] for id in ids]
+        return self.concurrent_with_args(session, query, params)
+
     def list_matching_addresses(self, currency, expression):
         prefix_lengths = self.get_prefix_lengths(currency)
         if len(expression) < prefix_lengths['address']:
             return []
-        session = self.get_session(currency, 'transformed')
+        table = "address_by_address_prefix"
+        norm = identity
         prefix = self.scrub_prefix(currency, expression)
-        query = "SELECT address FROM address WHERE address_prefix = %s"
+        prefix = prefix[:prefix_lengths['address']]
+        if currency == 'eth':
+            # eth addresses are case insensitive
+            expression = expression.lower()
+            table = "address_ids_by_address_prefix"
+            norm = eth_address_to_hex
+            prefix = prefix.upper()
+        session = self.get_session(currency, 'transformed')
+        query = f"SELECT address FROM {table} WHERE address_prefix = %s"
         result = None
         paging_state = None
         statement = SimpleStatement(query, fetch_size=SEARCH_PAGE_SIZE)
@@ -346,11 +426,10 @@ class Cassandra():
         while result is None or paging_state is not None:
             result = session.execute(
                         statement,
-                        [prefix[:ADDRESS_PREFIX_LENGTH]],
+                        [prefix],
                         paging_state=paging_state)
-            rows += [row.address for row in result.current_rows
-                     if row.address.startswith(expression)]
-            paging_state = result.paging_state
+            rows += [norm(row.address) for row in result
+                     if norm(row.address).startswith(expression)]
         return rows
 
     @eth
@@ -359,7 +438,7 @@ class Cassandra():
         entity = int(entity)
         group = self.get_id_group(currency, entity)
         query = ("SELECT * FROM cluster_tags "
-                 "WHERE cluster_group = %s and cluster = %s")
+                 "WHERE cluster_id_group = %s and cluster_id = %s")
         results = session.execute(query, [group, entity])
 
         if results is None:
@@ -372,16 +451,16 @@ class Cassandra():
         entity = int(entity)
         group = self.get_id_group(currency, entity)
         query = ("SELECT * FROM cluster_address_tags "
-                 "WHERE cluster_group = %s and cluster = %s")
+                 "WHERE cluster_id_group = %s and cluster_id = %s")
         session.row_factory = dict_factory
         results = session.execute(query, [group, entity])
 
         if results is None:
             return []
         ids = [row['address_id'] for row in results.current_rows]
-        addresses = self.get_addresses_by_ids(currency, ids)
+        addresses = self.get_addresses_by_ids(currency, ids, True)
         for (row, address) in zip(results.current_rows, addresses):
-            row['address'] = address
+            row['address'] = address['address']
         return results.current_rows
 
     @eth
@@ -391,29 +470,38 @@ class Cassandra():
         entity = int(entity)
         session.row_factory = dict_factory
         query = ("SELECT * FROM cluster "
-                 "WHERE cluster_group = %s AND cluster = %s ")
+                 "WHERE cluster_id_group = %s AND cluster_id = %s ")
         result = session.execute(query, [entity_id_group, entity])
-        if result:
-            return result.one()
+        if not result:
+            return None
+        result = result.one()
+        return self.finish_entities(currency, [result])[0]
 
     @eth
-    def list_entities(self, currency, ids, page=None, pagesize=None):
+    def list_entities(self, currency, ids, page=None, pagesize=None,
+                      fields=['*']):
         session = self.get_session(currency, 'transformed')
         fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
         paging_state = from_hex(page)
         session.row_factory = dict_factory
-        query = \
-            "SELECT * FROM cluster"
+        flds = ','.join(fields)
+        query = f"SELECT {flds} FROM cluster"
         has_ids = isinstance(ids, list)
         if has_ids:
-            query += " WHERE cluster_group = %s AND cluster = %s"
+            query += " WHERE cluster_id_group = %s AND cluster_id = %s"
             params = [[self.get_id_group(currency, id),
                        id] for id in ids]
-            return self.concurrent_with_args(session, query, params), None
+            result = self.concurrent_with_args(session, query, params)
+            paging_state = None
+        else:
+            statement = SimpleStatement(query, fetch_size=fetch_size)
+            result = session.execute(statement, paging_state=paging_state)
+            paging_state = result.paging_state
+            result = result.current_rows
 
-        statement = SimpleStatement(query, fetch_size=fetch_size)
-        result = session.execute(statement, paging_state=paging_state)
-        return result.current_rows, to_hex(result.paging_state)
+        with_txs = '*' in fields or 'first_tx' in fields or 'last_tx' in fields
+        return self.finish_entities(currency, result, with_txs),\
+            to_hex(paging_state)
 
     @eth
     def list_entity_addresses(self, currency, entity, page=None,
@@ -422,8 +510,8 @@ class Cassandra():
         session = self.get_session(currency, 'transformed')
         entity_id_group = self.get_id_group(currency, entity)
         entity = int(entity)
-        query = ("SELECT * FROM cluster_addresses "
-                 "WHERE cluster_group = %s AND cluster = %s")
+        query = ("SELECT address_id FROM cluster_addresses "
+                 "WHERE cluster_id_group = %s AND cluster_id = %s")
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
         statement = SimpleStatement(query, fetch_size=fetch_size)
         session.row_factory = dict_factory
@@ -432,33 +520,30 @@ class Cassandra():
         if results is None:
             return []
 
-        ids = [row['address_id'] for row in results.current_rows]
-        addresses = self.get_addresses_by_ids(currency, ids)
-        for (row, address) in zip(results.current_rows, addresses):
-            row['address'] = address
-        return results.current_rows, to_hex(results.paging_state)
+        params = [(self.get_id_group(currency, row['address_id']),
+                   row['address_id']) for row in results.current_rows]
+        query = "SELECT * FROM address WHERE " \
+                "address_id_group = %s and address_id = %s"
+        result = self.concurrent_with_args(session, query, params)
 
-    @new
+        return self.finish_addresses(currency, result), \
+            to_hex(results.paging_state)
+
     def list_neighbors(self, currency, id, is_outgoing, node_type,
                        targets, include_labels, page, pagesize):
+        orig_node_type = node_type
         if node_type == 'address':
             id = self.get_address_id(currency, id)
-        else:
+        elif node_type == 'entity':
             id = int(id)
-
-        return self.list_neighbors_(currency, id, is_outgoing, node_type,
-                                    targets, include_labels, page, pagesize)
-
-    def list_neighbors_(self, currency, id, is_outgoing, node_type,
-                        targets, include_labels, page, pagesize):
-        if node_type == 'entity':
             node_type = 'cluster'
+            if currency == 'eth':
+                node_type = 'address'
+
         if is_outgoing:
             direction, this, that = ('outgoing', 'src', 'dst')
         else:
             direction, this, that = ('incoming', 'dst', 'src')
-
-        id_suffix = '_id' if node_type == 'address' else ''
 
         session = self.get_session(currency, 'transformed')
         id_group = self.get_id_group(currency, id)
@@ -475,15 +560,15 @@ class Cassandra():
                 f' AND {this}_address_id_secondary_group in {sec_in}'
 
         basequery = (f"SELECT * FROM {node_type}_{direction}_relations WHERE "
-                     f"{this}_{node_type}{id_suffix}_group = %s AND "
-                     f"{this}_{node_type}{id_suffix} = %s {sec_condition}")
+                     f"{this}_{node_type}_id_group = %s AND "
+                     f"{this}_{node_type}_id = %s {sec_condition}")
         if has_targets:
             if len(targets) == 0:
                 return None
 
-            query = basequery.replace('*', f'{that}_{node_type}{id_suffix}')
+            query = basequery.replace('*', f'{that}_{node_type}_id')
             targets = ','.join(map(str, targets))
-            query += f' AND {that}_{node_type}{id_suffix} in ({targets})'
+            query += f' AND {that}_{node_type}_id in ({targets})'
         else:
             query = basequery
         session.row_factory = dict_factory
@@ -496,23 +581,43 @@ class Cassandra():
         results = results.current_rows
         if has_targets:
             statements_and_params = []
-            query = basequery + f" AND {that}_{node_type}{id_suffix} = %s"
+            query = basequery + f" AND {that}_{node_type}_id = %s"
             for row in results:
                 params = parameters.copy()
-                params.append(row[f'{that}_{node_type}{id_suffix}'])
+                params.append(row[f'{that}_{node_type}_id'])
                 statements_and_params.append((query, params))
             results = self.concurrent(session, statements_and_params)
-        if node_type == 'address':
+
+        if orig_node_type == 'entity' and currency == 'eth':
+            for neighbor in results:
+                neighbor[that + '_cluster_id'] = neighbor[that + '_address_id']
+
+        if orig_node_type == 'address':
             ids = [row[that+'_address_id'] for row in results]
-            addresses = self.get_addresses_by_ids(currency, ids)
+            addresses = self.get_addresses_by_ids(currency, ids, False)
             for (row, address) in zip(results, addresses):
-                row[f'{that}_address'] = address
-        if node_type == 'cluster':
-            for row in results:
-                row['estimated_value'] = row['value']
+                row[f'{that}_address'] = address['address']
+                row['total_received'] = address['total_received']
+                row['total_spent'] = address['total_spent']
+        else:
+            ids = [row[that+'_cluster_id'] for row in results]
+            entities, _ = self.list_entities(currency, ids, fields=[
+                                            'cluster_id',
+                                            'total_received',
+                                            'total_spent'])
+            for (row, entity) in zip(results, entities):
+                row[f'{that}_entity'] = entity['cluster_id']
+                row['total_received'] = entity['total_received']
+                row['total_spent'] = entity['total_spent']
+
+        field = 'value' if currency == 'eth' else 'estimated_value'
+        for neighbor in results:
+            neighbor['value'] = \
+                self.markup_currency(currency, neighbor[field])
 
         if include_labels:
             self.include_labels(currency, node_type, that, results)
+
         return results, to_hex(paging_state)
 
     @eth
@@ -521,11 +626,11 @@ class Cassandra():
         for node in nodes:
             node['labels'] = []
         if node_type == 'cluster':
-            key = f'{that}_cluster'
+            key = f'{that}_cluster_id'
             params = [(self.get_id_group(currency, row[key]), row[key])
                       for row in nodes if row[f'has_{that}_labels']]
-            query = ('select cluster, label from cluster_tags where '
-                     'cluster_group=%s and cluster=%s')
+            query = ('select cluster_id, label from cluster_tags where '
+                     'cluster_id_group = %s and cluster_id = %s')
             results = execute_concurrent_with_args(
                 session, query, params, raise_on_first_error=False,
                 results_generator=True)
@@ -533,7 +638,7 @@ class Cassandra():
             for (success, result) in results:
                 if not success or not result:
                     continue
-                while nodes[i][key] != result.one().cluster:
+                while nodes[i][key] != result.one().cluster_id:
                     i += 1
                 nodes[i]['labels'] = [row.label for row in result]
         else:
@@ -621,7 +726,7 @@ class Cassandra():
         if result:
             return result[0]
 
-    def get_transactions_by_ids(self, currency, ids):
+    def get_transactions_by_ids_eth(self, currency, ids):
         session = self.get_session(currency, 'transformed')
 
         params = [[self.get_id_group(currency, id),
@@ -649,7 +754,8 @@ class Cassandra():
         if len(expression) < prefix_lengths['tx']:
             return []
         session = self.get_session(currency, 'raw')
-        query = 'SELECT tx_hash from transaction where tx_prefix = %s'
+        query = ('SELECT tx_hash from transaction_by_tx_prefix where '
+                 'tx_prefix=%s')
         results = session.execute(query, [expression[:prefix_lengths['tx']]])
         if results is None:
             return []
@@ -665,40 +771,115 @@ class Cassandra():
     @eth
     def list_txs_by_hashes(self, currency, hashes):
         prefix = self.get_prefix_lengths(currency)
+        session = self.get_session(currency, 'raw')
         params = [[hash[:prefix['tx']],
                    bytearray.fromhex(hash)]
                   for hash in hashes]
-        session = self.get_session(currency, 'raw')
-        statement = ('SELECT * from transaction where '
+        statement = ('SELECT tx_id from transaction_by_tx_prefix where '
                      'tx_prefix=%s and tx_hash=%s')
+        result = self.concurrent_with_args(session, statement, params)
+        ids = [tx.tx_id for tx in result]
+        return self.list_txs_by_ids(currency, ids)
+
+    @eth
+    def list_txs_by_ids(self, currency, ids):
+        session = self.get_session(currency, 'raw')
+        params = [[self.get_tx_id_group(currency, id), id] for id in ids]
+        statement = ('SELECT * FROM transaction WHERE '
+                     'tx_id_group = %s and tx_id = %s')
         return self.concurrent_with_args(session, statement, params)
 
-    @new
     def list_addresses(self, currency, ids=None, page=None, pagesize=None):
         session = self.get_session(currency, 'transformed')
-        fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
-        paging_state = from_hex(page)
-        session.row_factory = dict_factory
-        query = \
-            "SELECT * FROM address"
+
         has_ids = isinstance(ids, list)
         if has_ids:
             prefix_length = self.get_prefix_lengths(currency)['address']
-            query += " WHERE address_prefix = %s AND address = %s"
             params = [[self.scrub_prefix(currency, id)[:prefix_length],
                        id] for id in ids]
-            return self.concurrent_with_args(session, query, params), None
+            table = 'address_by_address_prefix'
+            if currency == 'eth':
+                table = 'address_ids_by_address_prefix'
+                params = [[param[0].upper(),
+                           eth_address_from_hex(param[1])] for param in params]
+            query = (f"SELECT address_id FROM {table}"
+                     " WHERE address_prefix = %s AND address = %s")
+            ids = self.concurrent_with_args(session, query, params)
+            query = ("SELECT * FROM address WHERE "
+                     "address_id_group = %s AND address_id = %s")
+            params = [[self.get_id_group(currency, row.address_id),
+                       row.address_id] for row in ids]
+            session.row_factory = dict_factory
+            result = self.concurrent_with_args(session, query, params)
+            paging_state = None
+        else:
+            query = "SELECT * FROM address"
+            fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
+            session.row_factory = dict_factory
+            statement = SimpleStatement(query, fetch_size=fetch_size)
+            result = session.execute(statement, paging_state=from_hex(page))
+            paging_state = result.paging_state
+            result = result.current_rows
 
-        statement = SimpleStatement(query, fetch_size=fetch_size)
-        result = session.execute(statement, paging_state=paging_state)
-        return result.current_rows, to_hex(result.paging_state)
+        result = self.finish_addresses(currency, result)
+        if currency != 'eth':
+            return result, to_hex(paging_state)
+
+        return result, to_hex(paging_state)
+
+    def finish_entities(self, currency, rows, with_txs=True):
+        return self.finish_addresses(currency, rows, with_txs)
+
+    @eth
+    def finish_addresses(self, currency, rows, with_txs=True):
+        TxSummary = namedtuple('TxSummary', ['height', 'timestamp',
+                                             'tx_hash', 'transaction_id'])
+        ids = []
+        for row in rows:
+            row['total_received'] = \
+                self.markup_currency(currency, row['total_received'])
+            row['total_spent'] = \
+                self.markup_currency(currency, row['total_spent'])
+
+            if not with_txs:
+                continue
+
+            ids.append(row['first_tx'].tx_id)
+            ids.append(row['last_tx'].tx_id)
+            row['first_tx'] = TxSummary(
+                        height=None,
+                        timestamp=None,
+                        transaction_id=row['first_tx'].tx_id,
+                        tx_hash=None)
+            row['last_tx'] = TxSummary(
+                        height=None,
+                        timestamp=None,
+                        transaction_id=row['last_tx'].tx_id,
+                        tx_hash=None)
+
+        if not with_txs:
+            return rows
+
+        txs = self.get_transactions_by_ids(currency, ids)
+
+        for i, tx in enumerate(txs):
+            row = rows[i//2]
+            if row['first_tx'].transaction_id == tx.tx_id:
+                row['first_tx'] = row['first_tx']._replace(
+                    tx_hash=tx.tx_hash,
+                    timestamp=tx.timestamp,
+                    height=tx.block_id)
+            if row['last_tx'].transaction_id == tx.tx_id:
+                row['last_tx'] = row['last_tx']._replace(
+                    tx_hash=tx.tx_hash,
+                    timestamp=tx.timestamp,
+                    height=tx.block_id)
+
+        return rows
 
 #####################
 # ETHEREUM VARIANTS #
 #####################
-
-    def get_block_group_eth(self, id_):
-        return floor(id_ / 100000)
 
     def get_currency_statistics_eth(self, currency):
         session = self.get_session(currency, 'transformed')
@@ -716,8 +897,9 @@ class Cassandra():
 
     def get_block_eth(self, currency, height):
         session = self.get_session('eth', 'raw')
-        block_group = self.get_block_group_eth(height)
-        query = "SELECT * FROM block WHERE block_group = %s and number = %s"
+        block_group = self.get_block_id_group(currency, height)
+        query = ("SELECT * FROM block WHERE block_group = %s and"
+                 " block_number = %s")
         return session.execute(query, [block_group, height]).one()
 
     # entity = address_id
@@ -736,14 +918,17 @@ class Cassandra():
 
         result = result.one()
         entity = self.finish_addresses(currency, [result])[0]
-        entity['cluster'] = entity['address_id']
+        entity['cluster_id'] = entity['address_id']
         entity['no_addresses'] = 1
+        entity.pop('address', None)
         return entity
 
-    def list_entities_eth(self, currency, ids, page=None, pagesize=None):
+    def list_entities_eth(self, currency, ids, page=None, pagesize=None,
+                          fields=['*']):
         session = self.get_session(currency, 'transformed')
         session.row_factory = dict_factory
-        query = "SELECT * FROM address"
+        flds = ','.join(fields)
+        query = f"SELECT {flds} FROM address"
         has_ids = isinstance(ids, list)
         if has_ids:
             query += " WHERE address_id_group = %s AND address_id = %s"
@@ -758,10 +943,11 @@ class Cassandra():
             paging_state = result.paging_state
             result = result.current_rows
 
-        result = self.finish_addresses(currency, result)
+        with_txs = '*' in fields or 'first_tx' in fields or 'last_tx' in fields
+        result = self.finish_addresses(currency, result, with_txs)
 
         for address in result:
-            address['cluster'] = address['address_id']
+            address['cluster_id'] = address['address_id']
             address['no_addresses'] = 1
         return result, to_hex(paging_state)
 
@@ -770,7 +956,7 @@ class Cassandra():
 
     def list_address_tags_by_entity_eth(self, currency, entity):
         session = self.get_session(currency, 'transformed')
-        query = ("SELECT address FROM address_ids_by_address_id_group "
+        query = ("SELECT address FROM address "
                  "WHERE address_id_group=%s and address_id=%s")
         result = session.execute(query, [self.get_id_group(currency, entity),
                                          entity])
@@ -791,7 +977,7 @@ class Cassandra():
 
     def list_block_txs_eth(self, currency, height):
         session = self.get_session(currency, 'transformed')
-        height_group = self.get_block_group_eth(height)
+        height_group = self.get_block_id_group(currency, height)
         query = ("SELECT txs FROM block_transactions WHERE "
                  "height_group = %s and height = %s")
         result = session.execute(query, [height_group, height])
@@ -822,12 +1008,13 @@ class Cassandra():
         secondary_id_group = \
             self.get_secondary_id_group_eth('address_transactions', id_group)
         sec_in = self.sec_in(secondary_id_group)
-        query = ("SELECT transaction_id FROM address_transactions WHERE "
-                 "address_id_group = %s and "
+        query = ("SELECT transaction_id, value FROM address_transactions "
+                 "WHERE address_id_group = %s and "
                  f"address_id_secondary_group in {sec_in}"
                  " and address_id = %s")
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
         statement = SimpleStatement(query, fetch_size=fetch_size)
+        session.row_factory = dict_factory
         result = session.execute(statement,
                                  [id_group,
                                   address_id],
@@ -835,10 +1022,15 @@ class Cassandra():
         if result is None:
             raise RuntimeError(
                     f'address {address} not found in currency {currency}')
-        txs = [row.transaction_id for row in result.current_rows]
+        txs = [row['transaction_id'] for row in result.current_rows]
         paging_state = result.paging_state
-        result = self.list_txs_by_ids_eth(txs)
-        return result, to_hex(paging_state)
+        for (row1, row2) in zip(
+                result.current_rows,
+                self.list_txs_by_ids_eth(txs)):
+            row1['tx_hash'] = row2.hash
+            row1['height'] = row2.block_number
+            row1['block_timestamp'] = row2.block_timestamp
+        return result.current_rows, to_hex(paging_state)
 
     def list_txs_by_ids_eth(self, ids):
         currency = 'eth'
@@ -896,12 +1088,10 @@ class Cassandra():
 
     def list_entity_addresses_eth(self, currency, entity, page=None,
                                   pagesize=None):
-        address = self.get_entity_eth(currency, entity)
+        address = self.get_addresses_by_ids(currency, [entity])[0]
         if address is None:
             return None
-        address['address'] = \
-            self.get_addresses_by_ids(currency, [address['address_id']])[0]
-        return [address], None
+        return self.finish_addresses(currency, [address]), None
 
     def list_entity_tags_eth(self, currency, label):
         return []
@@ -934,45 +1124,20 @@ class Cassandra():
 # VARIANTS USING NEW DATA SCHEME #
 ##################################
 
-    def backport_currencies(self, currency, values):
-        currencies = list(map(lambda x: x.lower(),
-                              self.parameters[currency]['fiat_currencies']))
-        Values = namedtuple('Values', values._fields + (* currencies,))
+    def markup_values(self, currency, fiat_values):
+        values = []
+        for (fiat, curr) in zip(
+                fiat_values,
+                self.parameters[currency]['fiat_currencies']):
+            values.append({'code': curr.lower(), 'value': fiat})
+        return values
+
+    def markup_currency(self, currency, values):
+        Values = namedtuple('Values', values._fields)
         values = values._asdict()
-        for (fiat, curr) in zip(values['fiat_values'], currencies):
-            values[curr.lower()] = fiat
+        values['fiat_values'] = \
+            self.markup_values(currency, values['fiat_values'])
         return Values(**values)
-
-    def get_address_id_new(self, currency, address):
-        session = self.get_session(currency, 'transformed')
-        prefix = self.scrub_prefix(currency, address)
-        if currency == 'eth':
-            address = eth_address_from_hex(address)
-        query = (
-            "SELECT address_id FROM address_ids_by_address_prefix "
-            "WHERE address_prefix = %s AND address = %s")
-        prefix_length = self.get_prefix_lengths(currency)['address']
-        result = session.execute(
-            query, [prefix[:prefix_length].upper(), address])
-        return result.one().address_id if result else None
-
-    def get_address_new(self, currency, address):
-        session = self.get_session(currency, 'transformed')
-        address_id, address_id_group = \
-            self.get_address_id_id_group(currency, address)
-
-        session.row_factory = dict_factory
-        query = (
-            "SELECT * FROM address WHERE "
-            "address_id_group = %s AND address_id = %s")
-        result = session.execute(
-            query, [address_id_group, address_id])
-        if not result:
-            return None
-
-        result = result.one()
-        result['address'] = address
-        return self.finish_addresses(currency, [result])[0]
 
     def list_tags_by_address_new(self, currency, address):
         session = self.get_session(currency, 'transformed')
@@ -991,33 +1156,9 @@ class Cassandra():
             tags.append(Tag(**tag))
         return tags
 
-    def get_rates_new(self, currency, height):
-        session = self.get_session(currency, 'transformed')
-        session.row_factory = dict_factory
-        query = "SELECT * FROM exchange_rates WHERE height = %s"
-        result = session.execute(query, [height])
-        if result is None:
-            return None
-        row = result.one()
-        self.backport_values(currency, row)
+    def markup_rates(self, currency, row):
+        row['rates'] = self.markup_values(currency, row['fiat_values'])
         return row
-
-    def backport_values(self, currency, row):
-        for (fiat, curr) in zip(
-                row['fiat_values'],
-                self.parameters[currency]['fiat_currencies']):
-            row[curr.lower()] = fiat
-
-    def list_rates_new(self, currency, heights):
-        session = self.get_session(currency, 'transformed')
-        session.row_factory = dict_factory
-        result = self.concurrent_with_args(
-            session,
-            "SELECT * FROM exchange_rates WHERE height = %s",
-            [[h] for h in heights])
-        for row in result:
-            self.backport_values(currency, row)
-        return result
 
     def list_matching_txs_new(self, currency, expression):
         prefix_lengths = self.get_prefix_lengths(currency)
@@ -1032,74 +1173,6 @@ class Cassandra():
             return []
         Tx = namedtuple('Tx', ('tx_hash',))
         return [Tx(tx_hash=row.transaction) for row in results.current_rows]
-
-    def list_matching_addresses_new(self, currency, expression):
-        prefix_lengths = self.get_prefix_lengths(currency)
-        x = 2 if currency == 'eth' else 0
-        if len(expression) < prefix_lengths['address'] + x:
-            return []
-        if currency == 'eth':
-            # eth addresses are case insensitive
-            expression = expression.lower()
-        session = self.get_session(currency, 'transformed')
-        prefix = self.scrub_prefix(currency, expression)
-        query = ("SELECT address FROM address_ids_by_address_prefix "
-                 "WHERE address_prefix = %s")
-        result = None
-        paging_state = None
-        statement = SimpleStatement(query, fetch_size=SEARCH_PAGE_SIZE)
-        rows = []
-        while result is None or paging_state is not None:
-            result = session.execute(
-                        statement,
-                        [prefix[:prefix_lengths['address']].upper()],
-                        paging_state=paging_state)
-            rows += [eth_address_to_hex(row.address) for row in result
-                     if eth_address_to_hex(row.address).startswith(expression)]
-        return rows
-
-    def get_addresses_by_ids_new(self, currency, address_ids):
-        params = [(self.get_id_group(currency, address_id),
-                   address_id) for address_id in address_ids]
-        session = self.get_session(currency, 'transformed')
-        query = "SELECT address FROM address_ids_by_address_id_group WHERE " \
-                "address_id_group = %s and address_id = %s"
-        return [eth_address_to_hex(row.address) for row in
-                self.concurrent_with_args(session, query, params)]
-
-    def list_neighbors_new(self, currency, id, is_outgoing, node_type,
-                           targets, include_labels, page, pagesize):
-        orig_node_type = node_type
-        if node_type == 'address':
-            id = self.get_address_id(currency, id)
-        elif node_type == 'entity' and currency == 'eth':
-            node_type = 'address'
-
-        neighbors, page = self.list_neighbors_(currency,
-                                               id,
-                                               is_outgoing,
-                                               node_type,
-                                               targets,
-                                               include_labels,
-                                               page,
-                                               pagesize)
-        dr = 'dst' if is_outgoing else 'src'
-        props = dr + '_properties'
-        for neighbor in neighbors:
-            neighbor[props] = neighbor[props]._replace(
-                total_received=self.backport_currencies(
-                    currency,
-                    neighbor[props].total_received),
-                total_spent=self.backport_currencies(
-                    currency,
-                    neighbor[props].total_spent))
-
-            neighbor['estimated_value'] = \
-                self.backport_currencies(currency, neighbor['value'])
-
-            if orig_node_type == 'entity' and currency == 'eth':
-                neighbor[dr + '_cluster'] = neighbor[dr + '_address_id']
-        return neighbors, page
 
     def list_tags_new(self, currency, label):
         prefix_length = self.get_prefix_lengths(currency)['label']
@@ -1117,51 +1190,22 @@ class Cassandra():
     def sec_in(self, id):
         return "(" + ','.join(map(str, range(0, id+1))) + ")"
 
-    def list_addresses_new(self, currency, ids=None, page=None, pagesize=None):
-        session = self.get_session(currency, 'transformed')
-        query = "SELECT address_id, address FROM address_ids_by_address_prefix"
-        has_ids = isinstance(ids, list)
-        if has_ids:
-            prefix_length = self.get_prefix_lengths(currency)['address']
-            query += " WHERE address_prefix = %s AND address = %s"
-            params = [[self.scrub_prefix(currency, id)[:prefix_length].upper(),
-                       eth_address_from_hex(id)] for id in ids]
-            ids = self.concurrent_with_args(session, query, params)
-            paging_state = None
-        else:
-            fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
-            statement = SimpleStatement(query, fetch_size=fetch_size)
-            result = session.execute(statement, paging_state=from_hex(page))
-            ids = result.current_rows
-            paging_state = result.paging_state
-
-        query = (
-            "SELECT * FROM address WHERE "
-            "address_id_group = %s AND address_id = %s")
-
-        ids = [((self.get_id_group(currency, row.address_id),
-                 row.address_id),
-                row.address)
-               for row in ids]
-        ids.sort()
-        params = [param[0] for param in ids]
-        session.row_factory = dict_factory
-        result = self.concurrent_with_args(session, query, params)
-        for (row, param) in zip(result, ids):
-            row['address'] = eth_address_to_hex(param[1])
-        return self.finish_addresses(currency, result), to_hex(paging_state)
-
-    def finish_addresses(self, currency, rows):
+    def finish_addresses_eth(self, currency, rows, with_txs=True):
         TxSummary = namedtuple('TxSummary', ['height', 'timestamp',
                                              'tx_hash', 'transaction_id'])
         ids = []
         for row in rows:
+            row['address'] = eth_address_to_hex(row['address'])
+            row['cluster_id'] = row['address_id']
+            row['total_received'] = \
+                self.markup_currency(currency, row['total_received'])
+            row['total_spent'] = \
+                self.markup_currency(currency, row['total_spent'])
+            if not with_txs:
+                continue
+
             ids.append(row['first_tx'].transaction_id)
             ids.append(row['last_tx'].transaction_id)
-            row['total_received'] = \
-                self.backport_currencies(currency, row['total_received'])
-            row['total_spent'] = \
-                self.backport_currencies(currency, row['total_spent'])
             row['first_tx'] = TxSummary(
                         height=row['first_tx'].height,
                         timestamp=row['first_tx'].block_timestamp,
@@ -1172,6 +1216,9 @@ class Cassandra():
                         timestamp=row['last_tx'].block_timestamp,
                         transaction_id=row['last_tx'].transaction_id,
                         tx_hash=None)
+
+        if not with_txs:
+            return rows
 
         txs = self.get_transactions_by_ids(currency, ids)
 

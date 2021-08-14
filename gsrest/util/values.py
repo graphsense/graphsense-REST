@@ -1,11 +1,13 @@
-import openapi_server.models.values as v
+from openapi_server.models.values import Values
+from openapi_server.models.rate import Rate
 
 
 def make_values(value, eur, usd):
-    return v.Values(
+    return Values(
             value=value,
-            eur=round(eur, 2),
-            usd=round(usd, 2)
+            fiat_values=[
+                Rate('eur', round(eur, 2)),
+                Rate('usd', round(usd, 2))]
             )
 
 
@@ -19,8 +21,14 @@ def convert_value(currency, value, rates):
     else:
         factor = 1e-8
 
-    values = v.Values(
+    return Values(
             value=value,
-            eur=round(value * rates['eur'] * factor, 2),
-            usd=round(value * rates['usd'] * factor, 2))
-    return values
+            fiat_values=[
+                Rate(r['code'], round(value * r['value'] * factor, 2))
+                for r in rates])
+
+
+def to_values(value):
+    return Values(value=value.value,
+                  fiat_values=[Rate(r['code'], round(r['value'], 2))
+                               for r in value.fiat_values])

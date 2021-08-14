@@ -6,13 +6,8 @@ from __future__ import absolute_import
 from openapi_server.models.address import Address
 from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.address_tag_all_of import AddressTagAllOf
-from openapi_server.models.address_tx import AddressTx
-from openapi_server.models.address_tx_utxo import AddressTxUtxo
-from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.addresses import Addresses
 from openapi_server.models.block import Block
-from openapi_server.models.block_tx import BlockTx
-from openapi_server.models.block_tx_utxo import BlockTxUtxo
 from openapi_server.models.blocks import Blocks
 from openapi_server.models.concept import Concept
 from openapi_server.models.currency_stats import CurrencyStats
@@ -25,8 +20,8 @@ from openapi_server.models.link import Link
 from openapi_server.models.link_utxo import LinkUtxo
 from openapi_server.models.neighbor import Neighbor
 from openapi_server.models.neighbors import Neighbors
+from openapi_server.models.rate import Rate
 from openapi_server.models.rates import Rates
-from openapi_server.models.rates_rates import RatesRates
 from openapi_server.models.search_result import SearchResult
 from openapi_server.models.search_result_by_currency import SearchResultByCurrency
 from openapi_server.models.search_result_leaf import SearchResultLeaf
@@ -58,4 +53,5 @@ from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.tx_utxo import TxUtxo
 from openapi_server.models.tx_value import TxValue
 from openapi_server.models.txs import Txs
+from openapi_server.models.txs_account import TxsAccount
 from openapi_server.models.values import Values
