@@ -10,7 +10,7 @@ from gsrest.service.txs_service import from_row
 def block_from_row(currency, row):
     if currency == 'eth':
         return Block(
-                height=row.block_number,
+                height=row.block_id,
                 block_hash=row.block_hash.hex(),
                 no_txs=row.transaction_count,
                 timestamp=row.timestamp)

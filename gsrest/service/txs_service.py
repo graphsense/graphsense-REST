@@ -12,7 +12,7 @@ def from_row(currency, row, rates):
         return TxAccount(
             tx_hash=row.hash.hex(),
             timestamp=row.block_timestamp,
-            height=row.block_number,
+            height=row.block_id,
             value=convert_value(currency, row.value, rates))
     return TxUtxo(
             tx_hash=row.tx_hash.hex(),
@@ -39,7 +39,7 @@ def get_tx(currency, tx_hash):
         raise RuntimeError('Transaction {} in keyspace {} not found'
                            .format(tx_hash, currency))
 
-    height = result.block_number if currency == 'eth' else result.block_id
+    height = result.block_id if currency == 'eth' else result.block_id
     rates = get_rates(currency, height)['rates']
     return from_row(currency, result, rates)
 
@@ -49,7 +49,7 @@ def list_txs(currency, page=None):
     results, paging_state = db.list_txs(currency, page)
 
     def acc(row):
-        return row.block_number if currency == 'eth' else row.block_id
+        return row.block_id if currency == 'eth' else row.block_id
 
     heights = [acc(row) for row in results]
     rates = list_rates(currency, heights)

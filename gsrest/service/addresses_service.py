@@ -13,17 +13,6 @@ from gsrest.service.rates_service import get_rates
 
 
 def from_rows(currency, rows):
-    if currency == 'eth':
-        heights = [row['height'] for row in rows]
-        rates = list_rates(currency, heights)
-        return [TxAccount(
-                    tx_hash=row['tx_hash'].hex(),
-                    timestamp=row['block_timestamp'],
-                    height=row['height'],
-                    value=convert_value(currency,
-                                        row['value'],
-                                        rates[row['height']]))
-                for row in rows]
     heights = [row['height'] for row in rows]
     rates = list_rates(currency, heights)
     return [TxAccount(
@@ -98,15 +87,15 @@ def list_address_links(currency, address, neighbor):
     links = db.list_address_links(currency, address, neighbor)
 
     if currency == 'eth':
-        heights = [row.block_number for row in links]
+        heights = [row.block_id for row in links]
         rates = list_rates(currency, heights)
         return [TxAccount(
                     tx_hash=row.hash.hex(),
                     timestamp=row.block_timestamp,
-                    height=row.block_number,
+                    height=row.block_id,
                     value=convert_value(currency,
                                         row.value,
-                                        rates[row.block_number]))
+                                        rates[row.block_id]))
                 for row in links]
 
     heights = [row['height'] for row in links]

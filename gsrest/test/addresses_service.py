@@ -411,7 +411,7 @@ eth_address = Address(
    first_tx=TxSummary(
       tx_hash="af6e0000",
       height=1,
-      timestamp=11
+      timestamp=15
    ),
    total_spent=make_values(
       eur=30.33,
@@ -429,7 +429,7 @@ eth_address = Address(
    last_tx=TxSummary(
       tx_hash="af6e0003",
       height=1,
-      timestamp=12
+      timestamp=16
    ),
    address="0xabcdef",
    entity=107925000,
@@ -446,8 +446,8 @@ eth_addressWithTags.tags = [eth_tag, eth_tag2]
 eth_address2 = Address(
    last_tx=TxSummary(
       tx_hash="af6e0003",
-      height=2,
-      timestamp=22
+      height=1,
+      timestamp=16
    ),
    in_degree=1,
    no_incoming_txs=1,
@@ -466,7 +466,7 @@ eth_address2 = Address(
             eur=50.56,
             usd=60.67),
    first_tx=TxSummary(
-      timestamp=21,
+      timestamp=15,
       tx_hash="af6e0000",
       height=1
    ),
@@ -736,13 +736,14 @@ def list_addresses(test_case):
                           result)
 
     result = service.list_addresses('eth')
-    assertEqual([eth_address, eth_address2, eth_address3], result.addresses)
+    test_case.assertEqual([eth_address, eth_address2, eth_address3],
+                          result.addresses)
     test_case.assertIs(result.next_page, None)
 
     ids = [eth_address2.address, 'aaaa']
 
     result = service.list_addresses('eth', ids=ids)
-    assertEqual([eth_address2], result.addresses)
+    test_case.assertEqual([eth_address2], result.addresses)
     test_case.assertIs(result.next_page, None)
 
 

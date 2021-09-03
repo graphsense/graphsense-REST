@@ -369,19 +369,23 @@ def list_entity_addresses(test_case):
             balance=eth_address.balance
             )
 
-    assertEqual(EntityAddresses(
+    test_case.assertEqual(EntityAddresses(
         next_page=None,
         addresses=[expected]), result)
 
 
 def list_entity_addresses_csv(test_case):
-    '''
     result = service.list_entity_addresses_csv(
                     currency='btc',
-                    entity=entityWithTags.entity)
-    assertEqual("", result.data.decode('utf-8'))
-    '''
-    pass
+                    entity=entityWithTags.entity
+                    ).data.decode('utf-8')
+    test_case.assertEqual(4, len(result.split("\r\n")))
+
+    result = service.list_entity_addresses_csv(
+                    currency='eth',
+                    entity=eth_address.entity
+                    ).data.decode('utf-8')
+    test_case.assertEqual(3, len(result.split("\r\n")))
 
 
 def search_entity_neighbors(test_case):

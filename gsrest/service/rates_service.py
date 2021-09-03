@@ -31,5 +31,5 @@ def list_rates(currency, heights):
 
     height_rates = dict()  # key: height, value: {'eur': 0, 'usd':0}
     for rate in rates:
-        height_rates[rate['height']] = rate['rates']
+        height_rates[rate['block_id']] = rate['rates']
     return height_rates
