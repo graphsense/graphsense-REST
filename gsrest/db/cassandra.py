@@ -237,7 +237,6 @@ class Cassandra():
             row['tx_hash'] = tx.tx_hash
             row['height'] = tx.block_id
             row['timestamp'] = tx.timestamp
-            print(f'address tx row {row}')
 
         return results.current_rows, to_hex(results.paging_state)
 
@@ -814,11 +813,9 @@ class Cassandra():
             return rows
 
         TxSummary = namedtuple('TxSummary', ['height', 'timestamp', 'tx_hash'])
-        print(f'txs ids {ids}')
         txs = self.list_txs_by_ids(currency, ids)
 
         for i, tx in enumerate(txs):
-            print(f'i {i}, tx {tx.tx_hash}')
             row = rows[i//2]
             if i % 2 == 0:
                 row['first_tx'] = TxSummary(
@@ -942,7 +939,6 @@ class Cassandra():
         if result is None:
             raise RuntimeError(
                     f'block {height} not found in currency {currency}')
-        print(f'txs {result.one()}')
         return self.list_txs_by_ids(currency, result.one().txs)
 
     def get_secondary_id_group_eth(self, table, id_group):
@@ -998,7 +994,6 @@ class Cassandra():
             'SELECT transaction from transaction_ids_by_transaction_id_group'
             ' where transaction_id_group = %s and transaction_id = %s')
         result = self.concurrent_with_args(session, statement, params)
-        print(f'txs result {result}')
         return self.list_txs_by_hashes(currency,
                                        [row.transaction for row in result])
 
