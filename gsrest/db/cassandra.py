@@ -5,6 +5,7 @@ from cassandra.query import named_tuple_factory, SimpleStatement,\
 from cassandra.concurrent import execute_concurrent, \
     execute_concurrent_with_args
 from math import floor
+# from codetiming import Timer
 
 from gsrest.util.exceptions import BadConfigError
 
@@ -155,12 +156,14 @@ class Cassandra():
                     for (success, row) in result]
 
     @eth
+    # @Timer(text="Timer: stats {:.2f}")
     def get_currency_statistics(self, currency):
         session = self.get_session(currency, 'transformed')
         query = "SELECT * FROM summary_statistics LIMIT 1"
         return session.execute(query).one()
 
     @eth
+    # @Timer(text="Timer: get_block {:.2f}")
     def get_block(self, currency, height):
         session = self.get_session(currency, 'raw')
         query = ("SELECT * FROM block WHERE block_id_group = %s "
@@ -169,6 +172,7 @@ class Cassandra():
                     query, [self.get_block_id_group(currency, height), height]
                 ).one()
 
+    # @Timer(text="Timer: list_blocks {:.2f}")
     def list_blocks(self, currency, page=None):
         session = self.get_session(currency, 'raw')
         paging_state = from_hex(page)
@@ -179,6 +183,7 @@ class Cassandra():
         return results, to_hex(results.paging_state)
 
     @eth
+    # @Timer(text="Timer: list_block_txs {:.2f}")
     def list_block_txs(self, currency, height):
         session = self.get_session(currency, 'raw')
         height_group = self.get_block_id_group(currency, height)
@@ -190,6 +195,7 @@ class Cassandra():
         txs = [tx.tx_id for tx in result.one().txs]
         return self.list_txs_by_ids(currency, txs)
 
+    # @Timer(text="Timer: get_rates {:.2f}")
     def get_rates(self, currency, height):
         session = self.get_session(currency, 'transformed')
         session.row_factory = dict_factory
@@ -200,6 +206,7 @@ class Cassandra():
         result = result.one()
         return self.markup_rates(currency, result)
 
+    # @Timer(text="Timer: list_rates {:.2f}")
     def list_rates(self, currency, heights):
         session = self.get_session(currency, 'transformed')
         session.row_factory = dict_factory
@@ -212,6 +219,7 @@ class Cassandra():
         return result
 
     @eth
+    # @Timer(text="Timer: list_address_txs {:.2f}")
     def list_address_txs(self, currency, address, page=None,
                          pagesize=None):
         paging_state = from_hex(page)
@@ -240,6 +248,7 @@ class Cassandra():
 
         return results.current_rows, to_hex(results.paging_state)
 
+    # @Timer(text="Timer: get_addresses_by_ids {:.2f}")
     def get_addresses_by_ids(self, currency, address_ids, address_only=False):
         params = [(self.get_id_group(currency, address_id),
                    address_id) for address_id in address_ids]
@@ -257,6 +266,7 @@ class Cassandra():
 
         return result
 
+    # @Timer(text="Timer: get_address_id {:.2f}")
     def get_address_id(self, currency, address):
         session = self.get_session(currency, 'transformed')
         prefix = self.scrub_prefix(currency, address)
@@ -273,6 +283,7 @@ class Cassandra():
             query, [prefix[:prefix_length], address])
         return result.one().address_id if result else None
 
+    # @Timer(text="Timer: get_address_id_id_group {:.2f}")
     def get_address_id_id_group(self, currency, address):
         address_id = self.get_address_id(currency, address)
         if not address_id:
@@ -290,6 +301,7 @@ class Cassandra():
     def get_tx_id_group(self, keyspace, id_):
         return floor(int(id_) / self.parameters[keyspace]['tx_bucket_size'])
 
+    # @Timer(text="Timer: get_address {:.2f}")
     def get_address(self, currency, address):
         session = self.get_session(currency, 'transformed')
         address_id, address_id_group = \
@@ -306,6 +318,7 @@ class Cassandra():
         return self.finish_addresses(currency, [result])[0]
 
     @new
+    # @Timer(text="Timer: list_tags_by_address {:.2f}")
     def list_tags_by_address(self, currency, address):
         session = self.get_session(currency, 'transformed')
 
@@ -316,6 +329,7 @@ class Cassandra():
         return results.current_rows
 
     @eth
+    # @Timer(text="Timer: get_address_entity_id {:.2f}")
     def get_address_entity_id(self, currency, address):
         session = self.get_session(currency, 'transformed')
         address_id, address_id_group = \
@@ -329,6 +343,7 @@ class Cassandra():
         return result.one().cluster_id
 
     @eth
+    # @Timer(text="Timer: list_address_links {:.2f}")
     def list_address_links(self, currency, address, neighbor):
         session = self.get_session(currency, 'transformed')
 
@@ -376,6 +391,7 @@ class Cassandra():
 
         return links.values()
 
+    # @Timer(text="Timer: list_matching_addresses {:.2f}")
     def list_matching_addresses(self, currency, expression):
         prefix_lengths = self.get_prefix_lengths(currency)
         if len(expression) < prefix_lengths['address']:
@@ -406,6 +422,7 @@ class Cassandra():
         return rows
 
     @eth
+    # @Timer(text="Timer: list_entity_tags_by_entity {:.2f}")
     def list_entity_tags_by_entity(self, currency, entity):
         session = self.get_session(currency, 'transformed')
         entity = int(entity)
@@ -419,6 +436,7 @@ class Cassandra():
         return results.current_rows
 
     @eth
+    # @Timer(text="Timer: list_address_tags_by_entity {:.2f}")
     def list_address_tags_by_entity(self, currency, entity):
         session = self.get_session(currency, 'transformed')
         entity = int(entity)
@@ -437,6 +455,7 @@ class Cassandra():
         return results.current_rows
 
     @eth
+    # @Timer(text="Timer: get_entity {:.2f}")
     def get_entity(self, currency, entity):
         session = self.get_session(currency, 'transformed')
         entity_id_group = self.get_id_group(currency, entity)
@@ -451,6 +470,7 @@ class Cassandra():
         return self.finish_entities(currency, [result])[0]
 
     @eth
+    # @Timer(text="Timer: list_entities {:.2f}")
     def list_entities(self, currency, ids, page=None, pagesize=None,
                       fields=['*']):
         session = self.get_session(currency, 'transformed')
@@ -479,6 +499,7 @@ class Cassandra():
             to_hex(paging_state)
 
     @eth
+    # @Timer(text="Timer: list_entity_addresses {:.2f}")
     def list_entity_addresses(self, currency, entity, page=None,
                               pagesize=None):
         paging_state = from_hex(page)
@@ -504,6 +525,7 @@ class Cassandra():
         return self.finish_addresses(currency, result), \
             to_hex(results.paging_state)
 
+    # @Timer(text="Timer: list_neighbors {:.2f}")
     def list_neighbors(self, currency, id, is_outgoing, node_type,
                        targets, include_labels, page, pagesize):
         orig_node_type = node_type
@@ -596,6 +618,7 @@ class Cassandra():
         return results, to_hex(paging_state)
 
     @eth
+    # @Timer(text="Timer: include_labels {:.2f}")
     def include_labels(self, currency, node_type, that, nodes):
         session = self.get_session(currency, 'transformed')
         for node in nodes:
@@ -634,6 +657,7 @@ class Cassandra():
 
         return nodes
 
+    # @Timer(text="Timer: list_address_tags {:.2f}")
     def list_address_tags(self, currency, label):
         prefix_length = self.get_prefix_lengths(currency)['label']
         label_norm_prefix = label[:prefix_length]
@@ -648,6 +672,7 @@ class Cassandra():
         return rows
 
     @eth
+    # @Timer(text="Timer: list_entity_tags {:.2f}")
     def list_entity_tags(self, currency, label):
         prefix_length = self.get_prefix_lengths(currency)['label']
         label_norm_prefix = label[:prefix_length]
@@ -661,6 +686,7 @@ class Cassandra():
             return []
         return rows
 
+    # @Timer(text="Timer: list_labels {:.2f}")
     def list_labels(self, currency, expression_norm):
         prefix_lengths = self.get_prefix_lengths(currency)
         if len(expression_norm) < prefix_lengths['label']:
@@ -677,6 +703,7 @@ class Cassandra():
             return []
         return result
 
+    # @Timer(text="Timer: list_concepts {:.2f}")
     def list_concepts(self, taxonomy):
         session = self.get_session(currency=None, keyspace_type='tagpacks')
 
@@ -686,6 +713,7 @@ class Cassandra():
             return []
         return rows
 
+    # @Timer(text="Timer: list_taxonomies {:.2f}")
     def list_taxonomies(self, ):
         session = self.get_session(currency=None, keyspace_type='tagpacks')
 
@@ -696,11 +724,13 @@ class Cassandra():
         return rows
 
     @eth
+    # @Timer(text="Timer: get_tx {:.2f}")
     def get_tx(self, currency, tx_hash):
         result = self.list_txs_by_hashes(currency, [tx_hash])
         if result:
             return result[0]
 
+    # @Timer(text="Timer: list_txs {:.2f}")
     def list_txs(self, currency, page=None):
         session = self.get_session(currency, 'raw')
 
@@ -713,6 +743,7 @@ class Cassandra():
         return results.current_rows, to_hex(results.paging_state)
 
     @new
+    # @Timer(text="Timer: list_matching_txs {:.2f}")
     def list_matching_txs(self, currency, expression):
         prefix_lengths = self.get_prefix_lengths(currency)
         if len(expression) < prefix_lengths['tx']:
@@ -733,6 +764,7 @@ class Cassandra():
             else expression
 
     @eth
+    # @Timer(text="Timer: list_txs_by_hashes {:.2f}")
     def list_txs_by_hashes(self, currency, hashes):
         prefix = self.get_prefix_lengths(currency)
         session = self.get_session(currency, 'raw')
@@ -746,6 +778,7 @@ class Cassandra():
         return self.list_txs_by_ids(currency, ids)
 
     @eth
+    # @Timer(text="Timer: list_txs_by_ids {:.2f}")
     def list_txs_by_ids(self, currency, ids):
         session = self.get_session(currency, 'raw')
         params = [[self.get_tx_id_group(currency, id), id] for id in ids]
@@ -753,6 +786,7 @@ class Cassandra():
                      'tx_id_group = %s and tx_id = %s')
         return self.concurrent_with_args(session, statement, params)
 
+    # @Timer(text="Timer: list_addresses {:.2f}")
     def list_addresses(self, currency, ids=None, page=None, pagesize=None):
         session = self.get_session(currency, 'transformed')
 
@@ -834,6 +868,7 @@ class Cassandra():
 # ETHEREUM VARIANTS #
 #####################
 
+    # @Timer(text="Timer: get_currency_statistics_eth {:.2f}")
     def get_currency_statistics_eth(self, currency):
         session = self.get_session(currency, 'transformed')
         query = "SELECT * FROM summary_statistics LIMIT 1"
@@ -848,6 +883,7 @@ class Cassandra():
         # remove 0x prefix
         return expression[2:]
 
+    # @Timer(text="Timer: get_block_eth {:.2f}")
     def get_block_eth(self, currency, height):
         session = self.get_session('eth', 'raw')
         block_group = self.get_block_id_group(currency, height)
@@ -856,6 +892,7 @@ class Cassandra():
         return session.execute(query, [block_group, height]).one()
 
     # entity = address_id
+    # @Timer(text="Timer: get_entity_eth {:.2f}")
     def get_entity_eth(self, currency, entity):
         session = self.get_session(currency, 'transformed')
         # mockup entity by address
@@ -876,6 +913,7 @@ class Cassandra():
         entity.pop('address', None)
         return entity
 
+    # @Timer(text="Timer: list_entities_eth {:.2f}")
     def list_entities_eth(self, currency, ids, page=None, pagesize=None,
                           fields=['*']):
         session = self.get_session(currency, 'transformed')
@@ -909,6 +947,7 @@ class Cassandra():
     def list_entity_tags_by_entity_eth(self, currency, entity):
         return []
 
+    # @Timer(text="Timer: list_address_tags_by_entity_eth {:.2f}")
     def list_address_tags_by_entity_eth(self, currency, entity):
         session = self.get_session(currency, 'transformed')
         query = ("SELECT address FROM address "
@@ -927,9 +966,11 @@ class Cassandra():
             tag['address'] = eth_address_to_hex(address)
         return results.current_rows
 
+    # @Timer(text="Timer: get_address_entity_id_eth {:.2f}")
     def get_address_entity_id_eth(self, currency, address):
         return self.get_address_id(currency, address)
 
+    # @Timer(text="Timer: list_block_txs_eth {:.2f}")
     def list_block_txs_eth(self, currency, height):
         session = self.get_session(currency, 'transformed')
         height_group = self.get_block_id_group(currency, height)
@@ -941,6 +982,7 @@ class Cassandra():
                     f'block {height} not found in currency {currency}')
         return self.list_txs_by_ids(currency, result.one().txs)
 
+    # @Timer(text="Timer: get_secondary_id_group_eth {:.2f}")
     def get_secondary_id_group_eth(self, table, id_group):
         column_prefix = ''
         if table == 'address_incoming_relations':
@@ -955,6 +997,7 @@ class Cassandra():
         return 0 if result.one() is None else \
             result.one().max_secondary_id
 
+    # @Timer(text="Timer: list_address_txs_eth {:.2f}")
     def list_address_txs_eth(self, currency, address,
                              page=None, pagesize=None):
         paging_state = from_hex(page)
@@ -987,6 +1030,7 @@ class Cassandra():
             row1['timestamp'] = row2.block_timestamp
         return result.current_rows, to_hex(paging_state)
 
+    # @Timer(text="Timer: list_txs_by_ids_eth {:.2f}")
     def list_txs_by_ids_eth(self, currency, ids):
         session = self.get_session(currency, 'transformed')
         params = [[self.get_id_group(currency, id), id] for id in ids]
@@ -997,6 +1041,7 @@ class Cassandra():
         return self.list_txs_by_hashes(currency,
                                        [row.transaction for row in result])
 
+    # @Timer(text="Timer: list_txs_by_hashes_eth {:.2f}")
     def list_txs_by_hashes_eth(self, currency, hashes):
         prefix = self.get_prefix_lengths(currency)
         params = [[hash.hex()[:prefix['tx']], hash]
@@ -1007,6 +1052,7 @@ class Cassandra():
             'transaction where hash_prefix=%s and hash=%s')
         return self.concurrent_with_args(session, statement, params)
 
+    # @Timer(text="Timer: list_address_links_eth {:.2f}")
     def list_address_links_eth(self, currency, address, neighbor):
         session = self.get_session(currency, 'transformed')
         address_id, id_group = self.get_address_id_id_group(currency, address)
@@ -1028,6 +1074,7 @@ class Cassandra():
         txs = result.one().transaction_ids
         return self.list_txs_by_ids(currency, txs)
 
+    # @Timer(text="Timer: get_tx_eth {:.2f}")
     def get_tx_eth(self, currency, tx_hash):
         session = self.get_session(currency, 'raw')
         query = (
@@ -1040,6 +1087,7 @@ class Cassandra():
             return None
         return result.one()
 
+    # @Timer(text="Timer: list_entity_addresses_eth {:.2f}")
     def list_entity_addresses_eth(self, currency, entity, page=None,
                                   pagesize=None):
         address = self.get_addresses_by_ids(currency, [entity])[0]
@@ -1050,6 +1098,7 @@ class Cassandra():
     def list_entity_tags_eth(self, currency, label):
         return []
 
+    # @Timer(text="Timer: include_labels_eth {:.2f}")
     def include_labels_eth(self, currency, node_type, that, nodes):
         session = self.get_session(currency, 'transformed')
         for node in nodes:
@@ -1093,6 +1142,7 @@ class Cassandra():
             self.markup_values(currency, values['fiat_values'])
         return Values(**values)
 
+    # @Timer(text="Timer: list_tags_by_address_new {:.2f}")
     def list_tags_by_address_new(self, currency, address):
         session = self.get_session(currency, 'transformed')
         address_id, _ = \
@@ -1114,6 +1164,7 @@ class Cassandra():
         row['rates'] = self.markup_values(currency, row['fiat_values'])
         return row
 
+    # @Timer(text="Timer: list_matching_txs_new {:.2f}")
     def list_matching_txs_new(self, currency, expression):
         prefix_lengths = self.get_prefix_lengths(currency)
         if len(expression) < prefix_lengths['tx']:
@@ -1128,6 +1179,7 @@ class Cassandra():
         Tx = namedtuple('Tx', ('tx_hash',))
         return [Tx(tx_hash=row.transaction) for row in results.current_rows]
 
+    # @Timer(text="Timer: list_tags_new {:.2f}")
     def list_tags_new(self, currency, label):
         prefix_length = self.get_prefix_lengths(currency)['label']
         label_norm_prefix = label[:prefix_length]
