@@ -317,16 +317,24 @@ class Cassandra():
 
         return self.finish_addresses(currency, [result])[0]
 
-    @new
     # @Timer(text="Timer: list_tags_by_address {:.2f}")
     def list_tags_by_address(self, currency, address):
         session = self.get_session(currency, 'transformed')
+        address_id, address_id_group = \
+            self.get_address_id_id_group(currency, address)
 
-        query = "SELECT * FROM address_tags WHERE address = %s"
-        results = session.execute(query, [address])
+        query = ("SELECT * FROM address_tags WHERE address_id = %s "
+                 "and address_id_group = %s")
+        results = session.execute(query, [address_id, address_id_group])
         if results is None:
             return []
-        return results.current_rows
+        tags = []
+        for tag in results.current_rows:
+            Tag = namedtuple('Tag', tag._fields + ('address',))
+            tag = tag._asdict()
+            tag['address'] = address
+            tags.append(Tag(**tag))
+        return tags
 
     @eth
     # @Timer(text="Timer: get_address_entity_id {:.2f}")
@@ -640,10 +648,11 @@ class Cassandra():
                     i += 1
                 nodes[i]['labels'] = [row.label for row in result]
         else:
-            key = f'{that}_address'
-            params = [[row[key]] for row in nodes if row[f'has_{that}_labels']]
-            query = ('select address, label from address_tags where '
-                     'address=%s')
+            key = f'{that}_address_id'
+            params = [[row[key], self.get_id_group(currency, row[key])]
+                      for row in nodes if row[f'has_{that}_labels']]
+            query = ('select address_id, label from address_tags where '
+                     'address_id = %s and address_id_group = %s')
             results = execute_concurrent_with_args(
                 session, query, params, raise_on_first_error=False,
                 results_generator=True)
@@ -651,7 +660,7 @@ class Cassandra():
             for (success, result) in results:
                 if not success or not result:
                     continue
-                while nodes[i][key] != result.one().address:
+                while nodes[i][key] != result.one().address_id:
                     i += 1
                 nodes[i]['labels'] = [row.label for row in result]
 
@@ -952,14 +961,15 @@ class Cassandra():
         session = self.get_session(currency, 'transformed')
         query = ("SELECT address FROM address "
                  "WHERE address_id_group=%s and address_id=%s")
-        result = session.execute(query, [self.get_id_group(currency, entity),
-                                         entity])
+        id_id_group = [self.get_id_group(currency, entity), entity]
+        result = session.execute(query, id_id_group)
         if result is None or result.one() is None:
             return None
         address = result.one().address
-        query = "SELECT * FROM address_tags WHERE address_id = %s"
+        query = ("SELECT * FROM address_tags WHERE address_id_group = %s "
+                 "and address_id = %s")
         session.row_factory = dict_factory
-        results = session.execute(query, [entity])
+        results = session.execute(query, id_id_group)
         if results is None:
             return []
         for tag in results.current_rows:
@@ -1107,9 +1117,11 @@ class Cassandra():
             pass
         else:
             key = f'{that}_address_id'
-            params = [[row[key]] for row in nodes if row[f'has_{that}_labels']]
+            params = [[row[key],
+                       self.get_id_group(currency, row[key])]
+                      for row in nodes if row[f'has_{that}_labels']]
             query = ('select address_id, label from address_tags where '
-                     'address_id=%s')
+                     'address_id=%s and address_id_group=%s')
             results = execute_concurrent_with_args(
                 session, query, params, raise_on_first_error=False,
                 results_generator=True)
@@ -1141,24 +1153,6 @@ class Cassandra():
         values['fiat_values'] = \
             self.markup_values(currency, values['fiat_values'])
         return Values(**values)
-
-    # @Timer(text="Timer: list_tags_by_address_new {:.2f}")
-    def list_tags_by_address_new(self, currency, address):
-        session = self.get_session(currency, 'transformed')
-        address_id, _ = \
-            self.get_address_id_id_group(currency, address)
-
-        query = "SELECT * FROM address_tags WHERE address_id = %s"
-        results = session.execute(query, [address_id])
-        if results is None:
-            return []
-        tags = []
-        for tag in results.current_rows:
-            Tag = namedtuple('Tag', tag._fields + ('address',))
-            tag = tag._asdict()
-            tag['address'] = address
-            tags.append(Tag(**tag))
-        return tags
 
     def markup_rates(self, currency, row):
         row['rates'] = self.markup_values(currency, row['fiat_values'])
