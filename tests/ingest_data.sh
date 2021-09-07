@@ -60,6 +60,12 @@ function insert_data () {
     done <"$1"
 }
 
+for filename in $data; do
+    table=`basename $filename`
+    echo "Drop table $table ...";
+    $MOCK_CMD -e "DROP TABLE $table;"
+done
+
 schema "$UTXO_RAW_SCHEMA/schema.cql" graphsense "btc_raw ltc_raw"
 schema "$UTXO_TRANSFORMED_SCHEMA/schema_transformed.cql" btc "btc ltc"
 schema "$ETH_RAW_SCHEMA/schema.cql" eth eth
