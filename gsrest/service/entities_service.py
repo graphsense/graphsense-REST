@@ -75,13 +75,13 @@ def list_tags_by_entity_by_level_csv(currency, entity, level):
 def list_entity_tags_by_entity(currency, entity):
     db = get_connection()
     entity_tags = db.list_entity_tags_by_entity(currency, entity)
-    return [EntityTag(label=row.label,
-                      entity=row.cluster_id,
-                      category=row.category,
-                      abuse=row.abuse,
-                      tagpack_uri=row.tagpack_uri,
-                      source=row.source,
-                      lastmod=row.lastmod,
+    return [EntityTag(label=row['label'],
+                      entity=row['cluster_id'],
+                      category=row['category'],
+                      abuse=row['abuse'],
+                      tagpack_uri=row['tagpack_uri'],
+                      source=row['source'],
+                      lastmod=row['lastmod'],
                       active=True,
                       currency=currency)
             for row in entity_tags]

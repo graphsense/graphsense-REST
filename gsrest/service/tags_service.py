@@ -25,26 +25,26 @@ def list_tags(label, currency=None):
         entity_tags = db.list_entity_tags(currency, label)
 
     return Tags(address_tags=[AddressTag(
-                                address=row.address,
-                                label=row.label,
-                                category=row.category,
-                                abuse=row.abuse,
-                                tagpack_uri=row.tagpack_uri,
-                                source=row.source,
-                                lastmod=row.lastmod,
-                                active=row.active,
-                                currency=row.currency)
+                                address=row['address'],
+                                label=row['label'],
+                                category=row['category'],
+                                abuse=row['abuse'],
+                                tagpack_uri=row['tagpack_uri'],
+                                source=row['source'],
+                                lastmod=row['lastmod'],
+                                active=row['active'],
+                                currency=row['currency'])
                               for row in address_tags],
                 entity_tags=[EntityTag(
-                                entity=row.cluster_id,
-                                label=row.label,
-                                category=row.category,
-                                abuse=row.abuse,
-                                tagpack_uri=row.tagpack_uri,
-                                source=row.source,
-                                lastmod=row.lastmod,
-                                active=row.active,
-                                currency=row.currency)
+                                entity=row['cluster_id'],
+                                label=row['label'],
+                                category=row['category'],
+                                abuse=row['abuse'],
+                                tagpack_uri=row['tagpack_uri'],
+                                source=row['source'],
+                                lastmod=row['lastmod'],
+                                active=row['active'],
+                                currency=row['currency'])
                              for row in entity_tags])
 
 
@@ -56,12 +56,12 @@ def list_labels(currency, expression):
 
     if currency:
         return list(dict.fromkeys([
-            row.label for row in result
-            if row.label_norm.startswith(expression_norm) and
-            row.currency.lower() == currency]))
+            row['label'] for row in result
+            if row['label_norm'].startswith(expression_norm) and
+            row['currency'].lower() == currency]))
     return list(dict.fromkeys([
-        row.label for row in result
-        if row.label_norm.startswith(expression_norm)]))
+        row['label'] for row in result
+        if row['label_norm'].startswith(expression_norm)]))
 
 
 def list_concepts(taxonomy):
@@ -69,15 +69,15 @@ def list_concepts(taxonomy):
     rows = db.list_concepts(taxonomy)
 
     return [Concept(
-            id=row.id,
-            label=row.label,
-            description=row.description,
-            taxonomy=row.taxonomy,
-            uri=row.uri) for row in rows]
+            id=row['id'],
+            label=row['label'],
+            description=row['description'],
+            taxonomy=row['taxonomy'],
+            uri=row['uri']) for row in rows]
 
 
 def list_taxonomies():
     db = get_connection()
     rows = db.list_taxonomies()
 
-    return [Taxonomy(taxonomy=row.key, uri=row.uri) for row in rows]
+    return [Taxonomy(taxonomy=row['key'], uri=row['uri']) for row in rows]

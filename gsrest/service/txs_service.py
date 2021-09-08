@@ -10,25 +10,25 @@ from gsrest.util.values import convert_value
 def from_row(currency, row, rates):
     if currency == 'eth':
         return TxAccount(
-            tx_hash=row.hash.hex(),
-            timestamp=row.block_timestamp,
-            height=row.block_id,
-            value=convert_value(currency, row.value, rates))
+            tx_hash=row['hash'].hex(),
+            timestamp=row['block_timestamp'],
+            height=row['block_id'],
+            value=convert_value(currency, row['value'], rates))
     return TxUtxo(
-            tx_hash=row.tx_hash.hex(),
-            coinbase=row.coinbase,
-            height=row.block_id,
+            tx_hash=row['tx_hash'].hex(),
+            coinbase=row['coinbase'],
+            height=row['block_id'],
             inputs=[TxValue(address=i.address,
                             value=convert_value(currency, i.value, rates))
-                    for i in row.inputs if i.address is not None]
-            if row.inputs else [],
+                    for i in row['inputs'] if i.address is not None]
+            if row['inputs'] else [],
             outputs=[TxValue(address=i.address,
                              value=convert_value(currency, i.value, rates))
-                     for i in row.outputs if i.address is not None]
-            if row.outputs else [],
-            timestamp=row.timestamp,
-            total_input=convert_value(currency, row.total_input, rates),
-            total_output=convert_value(currency, row.total_output, rates))
+                     for i in row['outputs'] if i.address is not None]
+            if row['outputs'] else [],
+            timestamp=row['timestamp'],
+            total_input=convert_value(currency, row['total_input'], rates),
+            total_output=convert_value(currency, row['total_output'], rates))
 
 
 def get_tx(currency, tx_hash):
@@ -39,7 +39,7 @@ def get_tx(currency, tx_hash):
         raise RuntimeError('Transaction {} in keyspace {} not found'
                            .format(tx_hash, currency))
 
-    height = result.block_id if currency == 'eth' else result.block_id
+    height = result['block_id'] if currency == 'eth' else result['block_id']
     rates = get_rates(currency, height)['rates']
     return from_row(currency, result, rates)
 
@@ -49,7 +49,7 @@ def list_txs(currency, page=None):
     results, paging_state = db.list_txs(currency, page)
 
     def acc(row):
-        return row.block_id if currency == 'eth' else row.block_id
+        return row['block_id'] if currency == 'eth' else row['block_id']
 
     heights = [acc(row) for row in results]
     rates = list_rates(currency, heights)
@@ -70,7 +70,7 @@ def list_matching_txs(currency, expression):
         pos += 1
         leading_zeros += 1
 
-    txs = ["0" * leading_zeros + str(hex(int.from_bytes(row.tx_hash,
+    txs = ["0" * leading_zeros + str(hex(int.from_bytes(row['tx_hash'],
                                                         byteorder="big")))[2:]
            for row in results]
     return [tx for tx in txs if tx.startswith(expression)]

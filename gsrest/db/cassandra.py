@@ -1,7 +1,7 @@
 import re
 from collections import namedtuple
 from cassandra.cluster import Cluster
-from cassandra.query import named_tuple_factory, SimpleStatement,\
+from cassandra.query import SimpleStatement,\
     dict_factory, ValueSequence
 from cassandra.concurrent import execute_concurrent, \
     execute_concurrent_with_args
@@ -81,6 +81,7 @@ class Cassandra():
         self.config = config
         self.cluster = Cluster(config['nodes'])
         self.session = self.cluster.connect()
+        self.session.row_factory = dict_factory
         self.check_keyspace(config['tagpacks'])
         self.parameters = {}
         for currency in config['currencies']:
@@ -135,13 +136,8 @@ class Cassandra():
     def execute(self, currency, keyspace_type, query, params=None,
                 use_dict_factory=False, paging_state=None, fetch_size=None):
         keyspace = self.get_keyspace_mapping(currency, keyspace_type)
-
         query = replaceFrom(keyspace, query)
-        print(f'query {query} use_dict_factory {use_dict_factory}')
-
         query = SimpleStatement(query, fetch_size=fetch_size)
-        self.session.row_factory = dict_factory \
-            if use_dict_factory else named_tuple_factory
         result = self.session.execute(query, params, paging_state=paging_state)
         return result
 
@@ -149,9 +145,6 @@ class Cassandra():
                              filter_empty=True, use_dict_factory=False, one=True):
         keyspace = self.get_keyspace_mapping(currency, keyspace_type)
         query = replaceFrom(keyspace, query)
-        self.session.row_factory = dict_factory \
-            if use_dict_factory else named_tuple_factory
-        print(f'query {query}, use_dict_factory {use_dict_factory}')
         result = execute_concurrent_with_args(
             self.session, query, params, raise_on_first_error=False,
             results_generator=True)
@@ -195,7 +188,7 @@ class Cassandra():
         result = self.execute(currency, 'raw', query, [height_group, height])
         if result is None or result.one() is None:
             return None
-        txs = [tx.tx_id for tx in result.one().txs]
+        txs = [tx.tx_id for tx in result.one()['txs']]
         return self.list_txs_by_ids(currency, txs)
 
     # @Timer(text="Timer: get_rates {:.2f}")
@@ -238,9 +231,9 @@ class Cassandra():
                 currency,
                 [row['tx_id'] for row in results.current_rows])
         for (row, tx) in zip(results.current_rows, txs):
-            row['tx_hash'] = tx.tx_hash
-            row['height'] = tx.block_id
-            row['timestamp'] = tx.timestamp
+            row['tx_hash'] = tx['tx_hash']
+            row['height'] = tx['block_id']
+            row['timestamp'] = tx['timestamp']
 
         return results.current_rows, to_hex(results.paging_state)
 
@@ -274,7 +267,7 @@ class Cassandra():
         prefix_length = self.get_prefix_lengths(currency)['address']
         result = self.execute(currency, 'transformed',
             query, [prefix[:prefix_length], address])
-        return result.one().address_id if result else None
+        return result.one()['address_id'] if result else None
 
     # @Timer(text="Timer: get_address_id_id_group {:.2f}")
     def get_address_id_id_group(self, currency, address):
@@ -318,13 +311,9 @@ class Cassandra():
         results = self.execute(currency, 'transformed', query, [address_id, address_id_group])
         if results is None:
             return []
-        tags = []
         for tag in results.current_rows:
-            Tag = namedtuple('Tag', tag._fields + ('address',))
-            tag = tag._asdict()
             tag['address'] = address
-            tags.append(Tag(**tag))
-        return tags
+        return results.current_rows
 
     @eth
     # @Timer(text="Timer: get_address_entity_id {:.2f}")
@@ -337,7 +326,7 @@ class Cassandra():
         result = self.execute(currency, 'transformed', query, [address_id_group, address_id])
         if not result:
             return None
-        return result.one().cluster_id
+        return result.one()['cluster_id']
 
     @eth
     # @Timer(text="Timer: list_address_links {:.2f}")
@@ -359,7 +348,7 @@ class Cassandra():
         if not results.current_rows:
             return []
 
-        txs = results.current_rows[0].tx_list
+        txs = results.current_rows[0]['tx_list']
         query = "SELECT * FROM address_transactions WHERE " \
                 "address_id_group = %s AND address_id = %s AND " \
                 "tx_id IN %s"
@@ -373,17 +362,17 @@ class Cassandra():
 
         links = dict()
         for row in results1.current_rows:
-            index = row.tx_id
+            index = row['tx_id']
             links[index] = dict()
-            links[index]['input_value'] = row.value
+            links[index]['input_value'] = row['value']
         for row in results2.current_rows:
-            index = row.tx_id
-            links[index]['output_value'] = row.value
+            index = row['tx_id']
+            links[index]['output_value'] = row['value']
 
         for row in self.list_txs_by_ids(currency, txs):
-            links[row.tx_id]['tx_hash'] = row.tx_hash
-            links[row.tx_id]['height'] = row.block_id
-            links[row.tx_id]['timestamp'] = row.timestamp
+            links[row['tx_id']]['tx_hash'] = row['tx_hash']
+            links[row['tx_id']]['height'] = row['block_id']
+            links[row['tx_id']]['timestamp'] = row['timestamp']
 
         return links.values()
 
@@ -411,8 +400,8 @@ class Cassandra():
                         query,
                         [prefix],
                         paging_state=paging_state, fetch_size=SEARCH_PAGE_SIZE)
-            rows += [norm(row.address) for row in result
-                     if norm(row.address).startswith(expression)]
+            rows += [norm(row['address']) for row in result
+                     if norm(row['address']).startswith(expression)]
         return rows
 
     @eth
@@ -612,9 +601,9 @@ class Cassandra():
                 currency, 'transformed', query, params, one=False)
             i = 0
             for result in results:
-                while nodes[i][key] != result.one().cluster_id:
+                while nodes[i][key] != result.one()['cluster_id']:
                     i += 1
-                nodes[i]['labels'] = [row.label for row in result]
+                nodes[i]['labels'] = [row['label'] for row in result]
         else:
             key = f'{that}_address_id'
             params = [[row[key], self.get_id_group(currency, row[key])]
@@ -625,9 +614,9 @@ class Cassandra():
                 currency, 'transformed', query, params, one=False)
             i = 0
             for result in results:
-                while nodes[i][key] != result.one().address_id:
+                while nodes[i][key] != result.one()['address_id']:
                     i += 1
-                nodes[i]['labels'] = [row.label for row in result]
+                nodes[i]['labels'] = [row['label'] for row in result]
 
         return nodes
 
@@ -732,7 +721,7 @@ class Cassandra():
         statement = ('SELECT tx_id from transaction_by_tx_prefix where '
                      'tx_prefix=%s and tx_hash=%s')
         result = self.concurrent_with_args(currency, 'raw', statement, params)
-        ids = [tx.tx_id for tx in result]
+        ids = [tx['tx_id'] for tx in result]
         return self.list_txs_by_ids(currency, ids)
 
     @eth
@@ -760,8 +749,8 @@ class Cassandra():
             ids = self.concurrent_with_args(currency, 'transformed', query, params)
             query = ("SELECT * FROM address WHERE "
                      "address_id_group = %s AND address_id = %s")
-            params = [[self.get_id_group(currency, row.address_id),
-                       row.address_id] for row in ids]
+            params = [[self.get_id_group(currency, row['address_id']),
+                       row['address_id']] for row in ids]
             result = self.concurrent_with_args(currency, 'transformed', query, params, use_dict_factory=True)
             paging_state = None
         else:
@@ -800,21 +789,19 @@ class Cassandra():
 
         TxSummary = namedtuple('TxSummary', ['height', 'timestamp', 'tx_hash'])
         txs = self.list_txs_by_ids(currency, ids)
-        if len(txs) > 0 and isinstance(txs[0], dict):
-            print(f'txs[0] {txs[0]}')
 
         for i, tx in enumerate(txs):
             row = rows[i//2]
             if i % 2 == 0:
                 row['first_tx'] = TxSummary(
-                    tx_hash=tx.tx_hash,
-                    timestamp=tx.timestamp,
-                    height=tx.block_id)
+                    tx_hash=tx['tx_hash'],
+                    timestamp=tx['timestamp'],
+                    height=tx['block_id'])
             else:
                 row['last_tx'] = TxSummary(
-                    tx_hash=tx.tx_hash,
-                    timestamp=tx.timestamp,
-                    height=tx.block_id)
+                    tx_hash=tx['tx_hash'],
+                    timestamp=tx['timestamp'],
+                    height=tx['block_id'])
 
         return rows
 
@@ -826,10 +813,7 @@ class Cassandra():
     def get_currency_statistics_eth(self, currency):
         query = "SELECT * FROM summary_statistics LIMIT 1"
         result = self.execute(currency, 'transformed', query).one()
-        Result = namedtuple('Result', result._fields+('no_clusters',))
-        result = result._asdict()
         result['no_clusters'] = 0
-        result = Result(**result)
         return result
 
     def scrub_prefix_eth(self, currency, expression):
@@ -902,7 +886,7 @@ class Cassandra():
         result = self.execute(currency, 'transformed', query, id_id_group)
         if result is None or result.one() is None:
             return None
-        address = result.one().address
+        address = result.one()['address']
         query = ("SELECT * FROM address_tags WHERE address_id_group = %s "
                  "and address_id = %s")
         results = self.execute(currency, 'transformed', query, id_id_group, use_dict_factory=True)
@@ -925,7 +909,7 @@ class Cassandra():
         if result is None:
             raise RuntimeError(
                     f'block {height} not found in currency {currency}')
-        return self.list_txs_by_ids(currency, result.one().txs)
+        return self.list_txs_by_ids(currency, result.one()['txs'])
 
     # @Timer(text="Timer: get_secondary_id_group_eth {:.2f}")
     def get_secondary_id_group_eth(self, table, id_group):
@@ -939,7 +923,7 @@ class Cassandra():
                  f"secondary_ids WHERE {column_prefix}address_id_group = %s")
         result = self.execute('eth', 'transformed', query, [id_group])
         return 0 if result.one() is None else \
-            result.one().max_secondary_id
+            result.one()['max_secondary_id']
 
     # @Timer(text="Timer: list_address_txs_eth {:.2f}")
     def list_address_txs_eth(self, currency, address,
@@ -966,9 +950,9 @@ class Cassandra():
         for (row1, row2) in zip(
                 result.current_rows,
                 self.list_txs_by_ids(currency, txs)):
-            row1['tx_hash'] = row2.hash
-            row1['height'] = row2.block_id
-            row1['timestamp'] = row2.block_timestamp
+            row1['tx_hash'] = row2['hash']
+            row1['height'] = row2['block_id']
+            row1['timestamp'] = row2['block_timestamp']
         return result.current_rows, to_hex(paging_state)
 
     # @Timer(text="Timer: list_txs_by_ids_eth {:.2f}")
@@ -979,7 +963,7 @@ class Cassandra():
             ' where transaction_id_group = %s and transaction_id = %s')
         result = self.concurrent_with_args(currency, 'transformed', statement, params)
         return self.list_txs_by_hashes(currency,
-                                       [row.transaction for row in result])
+                                       [row['transaction'] for row in result])
 
     # @Timer(text="Timer: list_txs_by_hashes_eth {:.2f}")
     def list_txs_by_hashes_eth(self, currency, hashes):
@@ -1008,7 +992,7 @@ class Cassandra():
                                              neighbor_id])
         if result is None or result.one() is None:
             return [], None
-        txs = result.one().transaction_ids
+        txs = result.one()['transaction_ids']
         return self.list_txs_by_ids(currency, txs)
 
     # @Timer(text="Timer: get_tx_eth {:.2f}")
@@ -1051,9 +1035,9 @@ class Cassandra():
                 currency, 'transformed', query, params, one=False)
             i = 0
             for result in results:
-                while nodes[i][key] != result.one().address_id:
+                while nodes[i][key] != result.one()['address_id']:
                     i += 1
-                nodes[i]['labels'] = [row.label for row in result]
+                nodes[i]['labels'] = [row['label'] for row in result]
 
         return nodes
 
@@ -1091,8 +1075,9 @@ class Cassandra():
         results = self.execute(currency, 'transformed', query, [prefix])
         if results is None:
             return []
-        Tx = namedtuple('Tx', ('tx_hash',))
-        return [Tx(tx_hash=row.transaction) for row in results.current_rows]
+        for row in results.current_rows:
+            row['tx_hash'] = row['transaction']
+        return results.current_rows
 
     # @Timer(text="Timer: list_tags_new {:.2f}")
     def list_tags_new(self, currency, label):
@@ -1134,12 +1119,12 @@ class Cassandra():
             row = rows[i//2]
             if i % 2 == 0:
                 row['first_tx'] = TxSummary(
-                    height=tx.block_id,
-                    timestamp=tx.block_timestamp,
-                    tx_hash=tx.hash)
+                    height=tx['block_id'],
+                    timestamp=tx['block_timestamp'],
+                    tx_hash=tx['hash'])
             else:
                 row['last_tx'] = TxSummary(
-                    height=tx.block_id,
-                    timestamp=tx.block_timestamp,
-                    tx_hash=tx.hash)
+                    height=tx['block_id'],
+                    timestamp=tx['block_timestamp'],
+                    tx_hash=tx['hash'])
         return rows

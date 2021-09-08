@@ -47,7 +47,6 @@ def list_address_txs(currency, address, page=None, pagesize=None):
     db = get_connection()
     results, paging_state = \
         db.list_address_txs(currency, address, page, pagesize)
-    print(f'results {results}')
     address_txs = from_rows(currency, results)
     return Txs(next_page=paging_state, txs=address_txs)
 
@@ -88,15 +87,15 @@ def list_address_links(currency, address, neighbor):
     links = db.list_address_links(currency, address, neighbor)
 
     if currency == 'eth':
-        heights = [row.block_id for row in links]
+        heights = [row['block_id'] for row in links]
         rates = list_rates(currency, heights)
         return [TxAccount(
-                    tx_hash=row.hash.hex(),
-                    timestamp=row.block_timestamp,
-                    height=row.block_id,
+                    tx_hash=row['hash'].hex(),
+                    timestamp=row['block_timestamp'],
+                    height=row['block_id'],
                     value=convert_value(currency,
-                                        row.value,
-                                        rates[row.block_id]))
+                                        row['value'],
+                                        rates[row['block_id']]))
                 for row in links]
 
     heights = [row['height'] for row in links]

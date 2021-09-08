@@ -59,13 +59,13 @@ def list_tags_by_address(currency, address):
     if results is None:
         return []
     address_tags = [AddressTag(
-                    label=row.label,
-                    address=row.address,
-                    category=row.category,
-                    abuse=row.abuse,
-                    tagpack_uri=row.tagpack_uri,
-                    source=row.source,
-                    lastmod=row.lastmod,
+                    label=row['label'],
+                    address=row['address'],
+                    category=row['category'],
+                    abuse=row['abuse'],
+                    tagpack_uri=row['tagpack_uri'],
+                    source=row['source'],
+                    lastmod=row['lastmod'],
                     active=True,
                     currency=currency
                     )
