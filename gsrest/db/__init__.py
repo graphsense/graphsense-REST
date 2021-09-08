@@ -1,29 +1,26 @@
-from flask import current_app, g
+from flask import current_app
 import importlib
 
-
-def init_app(app):
-    get_connection()
-    app.teardown_appcontext(close_connection)
+connection = None
 
 
 def get_connection():
-    if hasattr(g, 'connection'):
-        return g.connection
+    global connection
+    if connection is not None:
+        return connection
 
     config = current_app.config['database']
     driver = config['driver'].lower()
     current_app.logger.info("Opening new {} connection.".format(driver))
     mod = importlib.import_module('gsrest.db.'+driver)
     cls = getattr(mod, driver.capitalize())
-    g.connection = cls(config)
-    return g.connection
+    connection = cls(config)
+    return connection
 
 
 def close_connection(e=None):
-    if not hasattr(g, 'connection'):
+    if connection is None:
         return
-    g.connection.close()
-    g.pop('connection', None)
+    connection.close()
     driver = current_app.config['database']['driver']
     current_app.logger.info("Closed {} connection.".format(driver))
