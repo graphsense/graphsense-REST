@@ -11,7 +11,7 @@ def get_connection():
 
     config = current_app.config['database']
     driver = config['driver'].lower()
-    current_app.logger.info("Opening new {} connection.".format(driver))
+    current_app.logger.info(f"Opening {driver} connection ...")
     mod = importlib.import_module('gsrest.db.'+driver)
     cls = getattr(mod, driver.capitalize())
     connection = cls(config)

@@ -1,11 +1,13 @@
 import re
+import time
 from collections import namedtuple
-from cassandra.cluster import Cluster
+from cassandra.cluster import Cluster, NoHostAvailable
 from cassandra.query import SimpleStatement,\
     dict_factory, ValueSequence
 from cassandra.concurrent import execute_concurrent, \
     execute_concurrent_with_args
 from math import floor
+from flask import current_app
 # from codetiming import Timer
 
 from gsrest.util.exceptions import BadConfigError
@@ -79,15 +81,27 @@ class Cassandra():
         if 'tagpacks' not in config:
             raise BadConfigError('Missing config property: tagpacks')
         self.config = config
-        self.cluster = Cluster(config['nodes'])
-        self.session = self.cluster.connect()
-        self.session.row_factory = dict_factory
+        self.connect()
         self.check_keyspace(config['tagpacks'])
         self.parameters = {}
         for currency in config['currencies']:
             self.check_keyspace(config['currencies'][currency]['raw'])
             self.check_keyspace(config['currencies'][currency]['transformed'])
             self.load_parameters(currency)
+
+    def connect(self):
+        try:
+            self.cluster = Cluster(self.config['nodes'])
+            self.session = self.cluster.connect()
+            self.session.row_factory = dict_factory
+            current_app.logger.info('Connection ready.')
+        except NoHostAvailable:
+            retry = self.config['retry_interval']
+            retry = 5 if retry is None else retry
+            current_app.logger.error(
+                f'Could not connect. Retrying in {retry} secs.')
+            time.sleep(retry)
+            self.connect()
 
     def check_keyspace(self, keyspace):
         query = ("SELECT * FROM system_schema.keyspaces "
@@ -136,9 +150,18 @@ class Cassandra():
     def execute(self, currency, keyspace_type, query, params=None,
                 use_dict_factory=False, paging_state=None, fetch_size=None):
         keyspace = self.get_keyspace_mapping(currency, keyspace_type)
-        query = replaceFrom(keyspace, query)
-        query = SimpleStatement(query, fetch_size=fetch_size)
-        result = self.session.execute(query, params, paging_state=paging_state)
+        q = replaceFrom(keyspace, query)
+        q = SimpleStatement(q, fetch_size=fetch_size)
+        try:
+            result = self.session.execute(q, params, paging_state=paging_state)
+        except NoHostAvailable:
+            self.connect()
+            result = self.execute(currency, keyspace_type, query,
+                                  params=params,
+                                  use_dict_factory=use_dict_factory,
+                                  paging_state=paging_state,
+                                  fetch_size=fetch_size)
+
         return result
 
     def concurrent_with_args(self, currency, keyspace_type, query, params,
