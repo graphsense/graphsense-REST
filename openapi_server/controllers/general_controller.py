@@ -25,7 +25,7 @@ def get_statistics():  # noqa: E501
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")
 
 
 def search(q, currency=None, limit=None):  # noqa: E501
@@ -53,4 +53,4 @@ def search(q, currency=None, limit=None):  # noqa: E501
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")

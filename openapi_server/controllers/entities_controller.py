@@ -40,7 +40,7 @@ def get_entity(currency, entity, include_tags=None, tag_coherence=None):  # noqa
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")
 
 
 def list_entities(currency, ids=None, page=None, pagesize=None):  # noqa: E501
@@ -71,7 +71,7 @@ def list_entities(currency, ids=None, page=None, pagesize=None):  # noqa: E501
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")
 
 
 def list_entities_csv(currency, ids):  # noqa: E501
@@ -96,7 +96,7 @@ def list_entities_csv(currency, ids):  # noqa: E501
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")
 
 
 def list_entity_addresses(currency, entity, page=None, pagesize=None):  # noqa: E501
@@ -127,7 +127,7 @@ def list_entity_addresses(currency, entity, page=None, pagesize=None):  # noqa: 
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")
 
 
 def list_entity_addresses_csv(currency, entity):  # noqa: E501
@@ -152,7 +152,7 @@ def list_entity_addresses_csv(currency, entity):  # noqa: E501
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")
 
 
 def list_entity_neighbors(currency, entity, direction, ids=None, include_labels=None, page=None, pagesize=None):  # noqa: E501
@@ -192,7 +192,7 @@ def list_entity_neighbors(currency, entity, direction, ids=None, include_labels=
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")
 
 
 def list_entity_neighbors_csv(currency, entity, direction, include_labels=None):  # noqa: E501
@@ -223,7 +223,7 @@ def list_entity_neighbors_csv(currency, entity, direction, include_labels=None):
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")
 
 
 def list_tags_by_entity(currency, entity, tag_coherence=None):  # noqa: E501
@@ -251,7 +251,7 @@ def list_tags_by_entity(currency, entity, tag_coherence=None):  # noqa: E501
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")
 
 
 def list_tags_by_entity_by_level_csv(currency, entity, level):  # noqa: E501
@@ -279,7 +279,7 @@ def list_tags_by_entity_by_level_csv(currency, entity, level):  # noqa: E501
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")
 
 
 def search_entity_neighbors(currency, entity, direction, key, value, depth, breadth=None, skip_num_addresses=None):  # noqa: E501
@@ -322,4 +322,4 @@ def search_entity_neighbors(currency, entity, direction, key, value, depth, brea
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")

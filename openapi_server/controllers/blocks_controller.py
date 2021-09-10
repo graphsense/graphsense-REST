@@ -31,7 +31,7 @@ def get_block(currency, height):  # noqa: E501
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")
 
 
 def list_block_txs(currency, height):  # noqa: E501
@@ -56,7 +56,7 @@ def list_block_txs(currency, height):  # noqa: E501
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")
 
 
 def list_block_txs_csv(currency, height):  # noqa: E501
@@ -81,7 +81,7 @@ def list_block_txs_csv(currency, height):  # noqa: E501
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")
 
 
 def list_blocks(currency, page=None):  # noqa: E501
@@ -106,4 +106,4 @@ def list_blocks(currency, page=None):  # noqa: E501
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")

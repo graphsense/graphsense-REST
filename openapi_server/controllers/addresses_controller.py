@@ -38,7 +38,7 @@ def get_address(currency, address, include_tags=None):  # noqa: E501
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")
 
 
 def get_address_entity(currency, address, include_tags=None, tag_coherence=None):  # noqa: E501
@@ -69,7 +69,7 @@ def get_address_entity(currency, address, include_tags=None, tag_coherence=None)
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")
 
 
 def list_address_links(currency, address, neighbor):  # noqa: E501
@@ -97,7 +97,7 @@ def list_address_links(currency, address, neighbor):  # noqa: E501
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")
 
 
 def list_address_links_csv(currency, address, neighbor):  # noqa: E501
@@ -125,7 +125,7 @@ def list_address_links_csv(currency, address, neighbor):  # noqa: E501
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")
 
 
 def list_address_neighbors(currency, address, direction, include_labels=None, page=None, pagesize=None):  # noqa: E501
@@ -162,7 +162,7 @@ def list_address_neighbors(currency, address, direction, include_labels=None, pa
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")
 
 
 def list_address_neighbors_csv(currency, address, direction, include_labels=None):  # noqa: E501
@@ -193,7 +193,7 @@ def list_address_neighbors_csv(currency, address, direction, include_labels=None
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")
 
 
 def list_address_txs(currency, address, page=None, pagesize=None):  # noqa: E501
@@ -224,7 +224,7 @@ def list_address_txs(currency, address, page=None, pagesize=None):  # noqa: E501
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")
 
 
 def list_address_txs_csv(currency, address):  # noqa: E501
@@ -249,7 +249,7 @@ def list_address_txs_csv(currency, address):  # noqa: E501
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")
 
 
 def list_addresses(currency, ids=None, page=None, pagesize=None):  # noqa: E501
@@ -280,7 +280,7 @@ def list_addresses(currency, ids=None, page=None, pagesize=None):  # noqa: E501
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")
 
 
 def list_addresses_csv(currency, ids):  # noqa: E501
@@ -305,7 +305,7 @@ def list_addresses_csv(currency, ids):  # noqa: E501
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")
 
 
 def list_tags_by_address(currency, address):  # noqa: E501
@@ -330,7 +330,7 @@ def list_tags_by_address(currency, address):  # noqa: E501
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")
 
 
 def list_tags_by_address_csv(currency, address):  # noqa: E501
@@ -355,4 +355,4 @@ def list_tags_by_address_csv(currency, address):  # noqa: E501
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")

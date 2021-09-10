@@ -28,7 +28,7 @@ def list_concepts(taxonomy):  # noqa: E501
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")
 
 
 def list_tags(label, currency=None):  # noqa: E501
@@ -53,7 +53,7 @@ def list_tags(label, currency=None):  # noqa: E501
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")
 
 
 def list_taxonomies():  # noqa: E501
@@ -73,4 +73,4 @@ def list_taxonomies():  # noqa: E501
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")

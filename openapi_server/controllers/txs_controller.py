@@ -30,7 +30,7 @@ def get_tx(currency, tx_hash):  # noqa: E501
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")
 
 
 def list_txs(currency, page=None):  # noqa: E501
@@ -55,4 +55,4 @@ def list_txs(currency, page=None):  # noqa: E501
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        return internalerror("")
