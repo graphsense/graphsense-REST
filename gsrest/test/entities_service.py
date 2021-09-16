@@ -204,6 +204,27 @@ def list_entities(test_case):
     test_case.assertEqual([eth_entity],
                           result.entities)
 
+    ids = [144534, 10102718]
+    query_string = [('ids', ','.join([str(id) for id in ids]))]
+    headers = {
+        'Accept': 'application/json',
+    }
+    response = test_case.client.open(
+        '/{currency}/entities'.format(
+            currency="btc"),
+        method='GET',
+        headers=headers,
+        query_string=query_string)
+    test_case.assert200(response,
+                        'Response body is : ' + response.data.decode('utf-8'))
+
+    result = json.loads(response.data.decode('utf-8'))
+
+    assertEqual(
+        ids,
+        [n['entity'] for n in result['entities']]
+    )
+
 
 def list_entities_csv(test_case):
     result = service.list_entities_csv(

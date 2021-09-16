@@ -164,7 +164,8 @@ paths:
         required: false
         schema:
           items:
-            type: string
+            format: int32
+            type: integer
           type: array
         style: form
       - description: Resumption token for retrieving the next page
@@ -870,7 +871,8 @@ paths:
         required: false
         schema:
           items:
-            type: string
+            format: int32
+            type: integer
           type: array
         style: form
       - description: Resumption token for retrieving the next page
@@ -1122,7 +1124,8 @@ paths:
         required: false
         schema:
           items:
-            type: string
+            format: int32
+            type: integer
           type: array
         style: form
       - description: Whether labels of tags should be included
@@ -1646,7 +1649,8 @@ components:
       required: false
       schema:
         items:
-          type: string
+          format: int32
+          type: integer
         type: array
       style: form
     ids_required:

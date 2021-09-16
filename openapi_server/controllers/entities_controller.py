@@ -51,7 +51,7 @@ def list_entities(currency, ids=None, page=None, pagesize=None):  # noqa: E501
     :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
     :param ids: Restrict result to given set of comma separated IDs
-    :type ids: List[str]
+    :type ids: List[int]
     :param page: Resumption token for retrieving the next page
     :type page: str
     :param pagesize: Number of items returned in a single page
@@ -167,7 +167,7 @@ def list_entity_neighbors(currency, entity, direction, ids=None, include_labels=
     :param direction: Incoming or outgoing neighbors
     :type direction: str
     :param ids: Restrict result to given set of comma separated IDs
-    :type ids: List[str]
+    :type ids: List[int]
     :param include_labels: Whether labels of tags should be included
     :type include_labels: bool
     :param page: Resumption token for retrieving the next page
