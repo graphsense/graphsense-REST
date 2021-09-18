@@ -15,30 +15,30 @@ class SearchResultByCurrency(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, addresses=None, currency=None, txs=None):  # noqa: E501
+    def __init__(self, currency=None, addresses=None, txs=None):  # noqa: E501
         """SearchResultByCurrency - a model defined in OpenAPI
 
-        :param addresses: The addresses of this SearchResultByCurrency.  # noqa: E501
-        :type addresses: List[str]
         :param currency: The currency of this SearchResultByCurrency.  # noqa: E501
         :type currency: str
+        :param addresses: The addresses of this SearchResultByCurrency.  # noqa: E501
+        :type addresses: List[str]
         :param txs: The txs of this SearchResultByCurrency.  # noqa: E501
         :type txs: List[str]
         """
         self.openapi_types = {
-            'addresses': List[str],
             'currency': str,
+            'addresses': List[str],
             'txs': List[str]
         }
 
         self.attribute_map = {
-            'addresses': 'addresses',
             'currency': 'currency',
+            'addresses': 'addresses',
             'txs': 'txs'
         }
 
-        self._addresses = addresses
         self._currency = currency
+        self._addresses = addresses
         self._txs = txs
 
     @classmethod
@@ -58,33 +58,10 @@ class SearchResultByCurrency(Model):
         :return: The SearchResultByCurrency as a dict
         :rtype: dict
         """
-        return { 'addresses': self._addresses,
-            'currency': self._currency,
+        return { 'currency': self._currency,
+            'addresses': self._addresses,
             'txs': self._txs }
 
-
-    @property
-    def addresses(self):
-        """Gets the addresses of this SearchResultByCurrency.
-
-        The list of found addresses  # noqa: E501
-
-        :return: The addresses of this SearchResultByCurrency.
-        :rtype: List[str]
-        """
-        return self._addresses
-
-    @addresses.setter
-    def addresses(self, addresses):
-        """Sets the addresses of this SearchResultByCurrency.
-
-        The list of found addresses  # noqa: E501
-
-        :param addresses: The addresses of this SearchResultByCurrency.
-        :type addresses: List[str]
-        """
-
-        self._addresses = addresses
 
     @property
     def currency(self):
@@ -108,6 +85,29 @@ class SearchResultByCurrency(Model):
         """
 
         self._currency = currency
+
+    @property
+    def addresses(self):
+        """Gets the addresses of this SearchResultByCurrency.
+
+        The list of found addresses  # noqa: E501
+
+        :return: The addresses of this SearchResultByCurrency.
+        :rtype: List[str]
+        """
+        return self._addresses
+
+    @addresses.setter
+    def addresses(self, addresses):
+        """Sets the addresses of this SearchResultByCurrency.
+
+        The list of found addresses  # noqa: E501
+
+        :param addresses: The addresses of this SearchResultByCurrency.
+        :type addresses: List[str]
+        """
+
+        self._addresses = addresses
 
     @property
     def txs(self):

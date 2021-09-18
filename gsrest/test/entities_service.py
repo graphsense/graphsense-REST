@@ -13,6 +13,7 @@ from gsrest.util.values import make_values
 import gsrest.service.entities_service as service
 from gsrest.test.addresses_service import addressD, addressE, eth_address, \
         eth_addressWithTagsOutNeighbors, atag1, atag2, eth_tag, eth_tag2
+from tests.util.util import yamldump
 
 tag = EntityTag(
            category="organization",
@@ -110,6 +111,11 @@ entityWithTagsOutNeighbors = Neighbors(
     next_page=None,
     neighbors=[
         Neighbor(
+          received=make_values(
+             usd=2583655.0,
+             eur=2162085.5,
+             value=139057689444
+          ),
           value=make_values(
              eur=2411.06,
              usd=3074.92,
@@ -118,9 +124,19 @@ entityWithTagsOutNeighbors = Neighbors(
           id='2818641',
           node_type='entity',
           labels=['labelX', 'labelY'],
-          no_txs=1
+          no_txs=1,
+          balance=make_values(
+             value=115422577,
+             usd=2.31,
+             eur=1.15,
+          )
         ),
         Neighbor(
+          received=make_values(
+             usd=2583655.0,
+             eur=2162085.5,
+             value=139057689444
+          ),
           value=make_values(
              eur=1078.04,
              usd=1397.54,
@@ -129,13 +145,23 @@ entityWithTagsOutNeighbors = Neighbors(
           id='8361735',
           node_type='entity',
           labels=[],
-          no_txs=3
+          no_txs=3,
+          balance=make_values(
+             value=115422577,
+             usd=2.31,
+             eur=1.15,
+          )
         )])
 
 entityWithTagsInNeighbors = Neighbors(
     next_page=None,
     neighbors=[
         Neighbor(
+          received=make_values(
+             usd=200.0,
+             eur=100.0,
+             value=10
+          ),
           value=make_values(
              usd=0.96,
              eur=0.72,
@@ -144,9 +170,19 @@ entityWithTagsInNeighbors = Neighbors(
           id='67065',
           node_type='entity',
           labels=[],
-          no_txs=10
+          no_txs=10,
+          balance=make_values(
+             eur=0.0,
+             usd=0.0,
+             value=5
+          )
         ),
         Neighbor(
+          received=make_values(
+             usd=13.41,
+             eur=9.87,
+             value=5000000000
+          ),
           value=make_values(
              eur=295.7,
              usd=404.02,
@@ -155,7 +191,12 @@ entityWithTagsInNeighbors = Neighbors(
           id='144534',
           node_type='entity',
           labels=[],
-          no_txs=1
+          no_txs=1,
+          balance=make_values(
+             eur=0.0,
+             usd=0.0,
+             value=0
+          )
         )])
 
 
@@ -277,6 +318,7 @@ def list_entity_neighbors(test_case):
         entity=entityWithTags.entity,
         include_labels=True,
         direction='in')
+    yamldump(result)
     test_case.assertEqual(entityWithTagsInNeighbors, result)
 
     result = service.list_entity_neighbors(
@@ -353,12 +395,14 @@ def list_entity_neighbors(test_case):
 
 
 def list_entity_neighbors_csv(test_case):
-    csv = ("id,labels,no_txs,"
-           "node_type,value_eur,value_usd,value_value\r\n"
-           "2818641,\"['labelX', 'labelY']\","
-           "1,entity,2411.06,"
+    csv = ("balance_eur,balance_usd,balance_value,id,labels,no_txs,"
+           "node_type,received_eur,received_usd,received_value,"
+           "value_eur,value_usd,value_value\r\n"
+           "1.15,2.31,115422577,2818641,\"['labelX', 'labelY']\","
+           "1,entity,2162085.5,2583655.0,139057689444,2411.06,"
            "3074.92,48610000000\r\n"
-           "8361735,[],3,entity,1078.04,1397.54,3375700000\r\n")
+           "1.15,2.31,115422577,8361735,[],3,entity,2162085.5,2583655.0,"
+           "139057689444,1078.04,1397.54,3375700000\r\n")
     result = service.list_entity_neighbors_csv(
         currency='btc',
         entity=entityWithTags.entity,

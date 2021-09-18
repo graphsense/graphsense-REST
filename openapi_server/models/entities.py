@@ -17,26 +17,26 @@ class Entities(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, entities=None, next_page=None):  # noqa: E501
+    def __init__(self, next_page=None, entities=None):  # noqa: E501
         """Entities - a model defined in OpenAPI
 
-        :param entities: The entities of this Entities.  # noqa: E501
-        :type entities: List[Entity]
         :param next_page: The next_page of this Entities.  # noqa: E501
         :type next_page: str
+        :param entities: The entities of this Entities.  # noqa: E501
+        :type entities: List[Entity]
         """
         self.openapi_types = {
-            'entities': List[Entity],
-            'next_page': str
+            'next_page': str,
+            'entities': List[Entity]
         }
 
         self.attribute_map = {
-            'entities': 'entities',
-            'next_page': 'next_page'
+            'next_page': 'next_page',
+            'entities': 'entities'
         }
 
-        self._entities = entities
         self._next_page = next_page
+        self._entities = entities
 
     @classmethod
     def from_dict(cls, dikt) -> 'Entities':
@@ -55,30 +55,9 @@ class Entities(Model):
         :return: The Entities as a dict
         :rtype: dict
         """
-        return { 'entities': self._entities,
-            'next_page': self._next_page }
+        return { 'next_page': self._next_page,
+            'entities': self._entities }
 
-
-    @property
-    def entities(self):
-        """Gets the entities of this Entities.
-
-
-        :return: The entities of this Entities.
-        :rtype: List[Entity]
-        """
-        return self._entities
-
-    @entities.setter
-    def entities(self, entities):
-        """Sets the entities of this Entities.
-
-
-        :param entities: The entities of this Entities.
-        :type entities: List[Entity]
-        """
-
-        self._entities = entities
 
     @property
     def next_page(self):
@@ -100,3 +79,24 @@ class Entities(Model):
         """
 
         self._next_page = next_page
+
+    @property
+    def entities(self):
+        """Gets the entities of this Entities.
+
+
+        :return: The entities of this Entities.
+        :rtype: List[Entity]
+        """
+        return self._entities
+
+    @entities.setter
+    def entities(self, entities):
+        """Sets the entities of this Entities.
+
+
+        :param entities: The entities of this Entities.
+        :type entities: List[Entity]
+        """
+
+        self._entities = entities

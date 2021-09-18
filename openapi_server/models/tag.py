@@ -15,62 +15,62 @@ class Tag(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, abuse=None, active=None, category=None, currency=None, label=None, lastmod=None, source=None, tagpack_uri=None):  # noqa: E501
+    def __init__(self, label=None, category=None, abuse=None, tagpack_uri=None, source=None, lastmod=None, active=None, currency=None):  # noqa: E501
         """Tag - a model defined in OpenAPI
 
-        :param abuse: The abuse of this Tag.  # noqa: E501
-        :type abuse: str
-        :param active: The active of this Tag.  # noqa: E501
-        :type active: bool
-        :param category: The category of this Tag.  # noqa: E501
-        :type category: str
-        :param currency: The currency of this Tag.  # noqa: E501
-        :type currency: str
         :param label: The label of this Tag.  # noqa: E501
         :type label: str
-        :param lastmod: The lastmod of this Tag.  # noqa: E501
-        :type lastmod: int
-        :param source: The source of this Tag.  # noqa: E501
-        :type source: str
+        :param category: The category of this Tag.  # noqa: E501
+        :type category: str
+        :param abuse: The abuse of this Tag.  # noqa: E501
+        :type abuse: str
         :param tagpack_uri: The tagpack_uri of this Tag.  # noqa: E501
         :type tagpack_uri: str
+        :param source: The source of this Tag.  # noqa: E501
+        :type source: str
+        :param lastmod: The lastmod of this Tag.  # noqa: E501
+        :type lastmod: int
+        :param active: The active of this Tag.  # noqa: E501
+        :type active: bool
+        :param currency: The currency of this Tag.  # noqa: E501
+        :type currency: str
         """
         self.openapi_types = {
-            'abuse': str,
-            'active': bool,
-            'category': str,
-            'currency': str,
             'label': str,
-            'lastmod': int,
+            'category': str,
+            'abuse': str,
+            'tagpack_uri': str,
             'source': str,
-            'tagpack_uri': str
+            'lastmod': int,
+            'active': bool,
+            'currency': str
         }
 
         self.attribute_map = {
-            'abuse': 'abuse',
-            'active': 'active',
-            'category': 'category',
-            'currency': 'currency',
             'label': 'label',
-            'lastmod': 'lastmod',
+            'category': 'category',
+            'abuse': 'abuse',
+            'tagpack_uri': 'tagpack_uri',
             'source': 'source',
-            'tagpack_uri': 'tagpack_uri'
+            'lastmod': 'lastmod',
+            'active': 'active',
+            'currency': 'currency'
         }
 
-        self._abuse = abuse
-        if active is None:
-            raise ValueError("Invalid value for `active`, must not be `None`")  # noqa: E501
-        self._active = active
-        self._category = category
-        if currency is None:
-            raise ValueError("Invalid value for `currency`, must not be `None`")  # noqa: E501
-        self._currency = currency
         if label is None:
             raise ValueError("Invalid value for `label`, must not be `None`")  # noqa: E501
         self._label = label
-        self._lastmod = lastmod
-        self._source = source
+        self._category = category
+        self._abuse = abuse
         self._tagpack_uri = tagpack_uri
+        self._source = source
+        self._lastmod = lastmod
+        if active is None:
+            raise ValueError("Invalid value for `active`, must not be `None`")  # noqa: E501
+        self._active = active
+        if currency is None:
+            raise ValueError("Invalid value for `currency`, must not be `None`")  # noqa: E501
+        self._currency = currency
 
     @classmethod
     def from_dict(cls, dikt) -> 'Tag':
@@ -89,111 +89,15 @@ class Tag(Model):
         :return: The Tag as a dict
         :rtype: dict
         """
-        return { 'abuse': self._abuse,
-            'active': self._active,
+        return { 'label': self._label,
             'category': self._category,
-            'currency': self._currency,
-            'label': self._label,
-            'lastmod': self._lastmod,
+            'abuse': self._abuse,
+            'tagpack_uri': self._tagpack_uri,
             'source': self._source,
-            'tagpack_uri': self._tagpack_uri }
+            'lastmod': self._lastmod,
+            'active': self._active,
+            'currency': self._currency }
 
-
-    @property
-    def abuse(self):
-        """Gets the abuse of this Tag.
-
-        Abuses  # noqa: E501
-
-        :return: The abuse of this Tag.
-        :rtype: str
-        """
-        return self._abuse
-
-    @abuse.setter
-    def abuse(self, abuse):
-        """Sets the abuse of this Tag.
-
-        Abuses  # noqa: E501
-
-        :param abuse: The abuse of this Tag.
-        :type abuse: str
-        """
-
-        self._abuse = abuse
-
-    @property
-    def active(self):
-        """Gets the active of this Tag.
-
-        whether the address has been ever used  # noqa: E501
-
-        :return: The active of this Tag.
-        :rtype: bool
-        """
-        return self._active
-
-    @active.setter
-    def active(self, active):
-        """Sets the active of this Tag.
-
-        whether the address has been ever used  # noqa: E501
-
-        :param active: The active of this Tag.
-        :type active: bool
-        """
-        if active is None:
-            raise ValueError("Invalid value for `active`, must not be `None`")  # noqa: E501
-
-        self._active = active
-
-    @property
-    def category(self):
-        """Gets the category of this Tag.
-
-        Category  # noqa: E501
-
-        :return: The category of this Tag.
-        :rtype: str
-        """
-        return self._category
-
-    @category.setter
-    def category(self, category):
-        """Sets the category of this Tag.
-
-        Category  # noqa: E501
-
-        :param category: The category of this Tag.
-        :type category: str
-        """
-
-        self._category = category
-
-    @property
-    def currency(self):
-        """Gets the currency of this Tag.
-
-        Currency  # noqa: E501
-
-        :return: The currency of this Tag.
-        :rtype: str
-        """
-        return self._currency
-
-    @currency.setter
-    def currency(self, currency):
-        """Sets the currency of this Tag.
-
-        Currency  # noqa: E501
-
-        :param currency: The currency of this Tag.
-        :type currency: str
-        """
-        if currency is None:
-            raise ValueError("Invalid value for `currency`, must not be `None`")  # noqa: E501
-
-        self._currency = currency
 
     @property
     def label(self):
@@ -221,27 +125,73 @@ class Tag(Model):
         self._label = label
 
     @property
-    def lastmod(self):
-        """Gets the lastmod of this Tag.
+    def category(self):
+        """Gets the category of this Tag.
 
-        Last modified  # noqa: E501
+        Category  # noqa: E501
 
-        :return: The lastmod of this Tag.
-        :rtype: int
+        :return: The category of this Tag.
+        :rtype: str
         """
-        return self._lastmod
+        return self._category
 
-    @lastmod.setter
-    def lastmod(self, lastmod):
-        """Sets the lastmod of this Tag.
+    @category.setter
+    def category(self, category):
+        """Sets the category of this Tag.
 
-        Last modified  # noqa: E501
+        Category  # noqa: E501
 
-        :param lastmod: The lastmod of this Tag.
-        :type lastmod: int
+        :param category: The category of this Tag.
+        :type category: str
         """
 
-        self._lastmod = lastmod
+        self._category = category
+
+    @property
+    def abuse(self):
+        """Gets the abuse of this Tag.
+
+        Abuses  # noqa: E501
+
+        :return: The abuse of this Tag.
+        :rtype: str
+        """
+        return self._abuse
+
+    @abuse.setter
+    def abuse(self, abuse):
+        """Sets the abuse of this Tag.
+
+        Abuses  # noqa: E501
+
+        :param abuse: The abuse of this Tag.
+        :type abuse: str
+        """
+
+        self._abuse = abuse
+
+    @property
+    def tagpack_uri(self):
+        """Gets the tagpack_uri of this Tag.
+
+        Tagpack URI  # noqa: E501
+
+        :return: The tagpack_uri of this Tag.
+        :rtype: str
+        """
+        return self._tagpack_uri
+
+    @tagpack_uri.setter
+    def tagpack_uri(self, tagpack_uri):
+        """Sets the tagpack_uri of this Tag.
+
+        Tagpack URI  # noqa: E501
+
+        :param tagpack_uri: The tagpack_uri of this Tag.
+        :type tagpack_uri: str
+        """
+
+        self._tagpack_uri = tagpack_uri
 
     @property
     def source(self):
@@ -267,24 +217,74 @@ class Tag(Model):
         self._source = source
 
     @property
-    def tagpack_uri(self):
-        """Gets the tagpack_uri of this Tag.
+    def lastmod(self):
+        """Gets the lastmod of this Tag.
 
-        Tagpack URI  # noqa: E501
+        Last modified  # noqa: E501
 
-        :return: The tagpack_uri of this Tag.
+        :return: The lastmod of this Tag.
+        :rtype: int
+        """
+        return self._lastmod
+
+    @lastmod.setter
+    def lastmod(self, lastmod):
+        """Sets the lastmod of this Tag.
+
+        Last modified  # noqa: E501
+
+        :param lastmod: The lastmod of this Tag.
+        :type lastmod: int
+        """
+
+        self._lastmod = lastmod
+
+    @property
+    def active(self):
+        """Gets the active of this Tag.
+
+        whether the address has been ever used  # noqa: E501
+
+        :return: The active of this Tag.
+        :rtype: bool
+        """
+        return self._active
+
+    @active.setter
+    def active(self, active):
+        """Sets the active of this Tag.
+
+        whether the address has been ever used  # noqa: E501
+
+        :param active: The active of this Tag.
+        :type active: bool
+        """
+        if active is None:
+            raise ValueError("Invalid value for `active`, must not be `None`")  # noqa: E501
+
+        self._active = active
+
+    @property
+    def currency(self):
+        """Gets the currency of this Tag.
+
+        Currency  # noqa: E501
+
+        :return: The currency of this Tag.
         :rtype: str
         """
-        return self._tagpack_uri
+        return self._currency
 
-    @tagpack_uri.setter
-    def tagpack_uri(self, tagpack_uri):
-        """Sets the tagpack_uri of this Tag.
+    @currency.setter
+    def currency(self, currency):
+        """Sets the currency of this Tag.
 
-        Tagpack URI  # noqa: E501
+        Currency  # noqa: E501
 
-        :param tagpack_uri: The tagpack_uri of this Tag.
-        :type tagpack_uri: str
+        :param currency: The currency of this Tag.
+        :type currency: str
         """
+        if currency is None:
+            raise ValueError("Invalid value for `currency`, must not be `None`")  # noqa: E501
 
-        self._tagpack_uri = tagpack_uri
+        self._currency = currency

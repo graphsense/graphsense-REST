@@ -15,42 +15,36 @@ class Concept(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, description=None, id=None, label=None, taxonomy=None, uri=None):  # noqa: E501
+    def __init__(self, label=None, taxonomy=None, uri=None, description=None, id=None):  # noqa: E501
         """Concept - a model defined in OpenAPI
 
-        :param description: The description of this Concept.  # noqa: E501
-        :type description: str
-        :param id: The id of this Concept.  # noqa: E501
-        :type id: str
         :param label: The label of this Concept.  # noqa: E501
         :type label: str
         :param taxonomy: The taxonomy of this Concept.  # noqa: E501
         :type taxonomy: str
         :param uri: The uri of this Concept.  # noqa: E501
         :type uri: str
+        :param description: The description of this Concept.  # noqa: E501
+        :type description: str
+        :param id: The id of this Concept.  # noqa: E501
+        :type id: str
         """
         self.openapi_types = {
-            'description': str,
-            'id': str,
             'label': str,
             'taxonomy': str,
-            'uri': str
+            'uri': str,
+            'description': str,
+            'id': str
         }
 
         self.attribute_map = {
-            'description': 'description',
-            'id': 'id',
             'label': 'label',
             'taxonomy': 'taxonomy',
-            'uri': 'uri'
+            'uri': 'uri',
+            'description': 'description',
+            'id': 'id'
         }
 
-        if description is None:
-            raise ValueError("Invalid value for `description`, must not be `None`")  # noqa: E501
-        self._description = description
-        if id is None:
-            raise ValueError("Invalid value for `id`, must not be `None`")  # noqa: E501
-        self._id = id
         if label is None:
             raise ValueError("Invalid value for `label`, must not be `None`")  # noqa: E501
         self._label = label
@@ -60,6 +54,12 @@ class Concept(Model):
         if uri is None:
             raise ValueError("Invalid value for `uri`, must not be `None`")  # noqa: E501
         self._uri = uri
+        if description is None:
+            raise ValueError("Invalid value for `description`, must not be `None`")  # noqa: E501
+        self._description = description
+        if id is None:
+            raise ValueError("Invalid value for `id`, must not be `None`")  # noqa: E501
+        self._id = id
 
     @classmethod
     def from_dict(cls, dikt) -> 'Concept':
@@ -78,62 +78,12 @@ class Concept(Model):
         :return: The Concept as a dict
         :rtype: dict
         """
-        return { 'description': self._description,
-            'id': self._id,
-            'label': self._label,
+        return { 'label': self._label,
             'taxonomy': self._taxonomy,
-            'uri': self._uri }
+            'uri': self._uri,
+            'description': self._description,
+            'id': self._id }
 
-
-    @property
-    def description(self):
-        """Gets the description of this Concept.
-
-        Description  # noqa: E501
-
-        :return: The description of this Concept.
-        :rtype: str
-        """
-        return self._description
-
-    @description.setter
-    def description(self, description):
-        """Sets the description of this Concept.
-
-        Description  # noqa: E501
-
-        :param description: The description of this Concept.
-        :type description: str
-        """
-        if description is None:
-            raise ValueError("Invalid value for `description`, must not be `None`")  # noqa: E501
-
-        self._description = description
-
-    @property
-    def id(self):
-        """Gets the id of this Concept.
-
-        ID  # noqa: E501
-
-        :return: The id of this Concept.
-        :rtype: str
-        """
-        return self._id
-
-    @id.setter
-    def id(self, id):
-        """Sets the id of this Concept.
-
-        ID  # noqa: E501
-
-        :param id: The id of this Concept.
-        :type id: str
-        """
-        if id is None:
-            raise ValueError("Invalid value for `id`, must not be `None`")  # noqa: E501
-
-        self._id = id
 
     @property
     def label(self):
@@ -209,3 +159,53 @@ class Concept(Model):
             raise ValueError("Invalid value for `uri`, must not be `None`")  # noqa: E501
 
         self._uri = uri
+
+    @property
+    def description(self):
+        """Gets the description of this Concept.
+
+        Description  # noqa: E501
+
+        :return: The description of this Concept.
+        :rtype: str
+        """
+        return self._description
+
+    @description.setter
+    def description(self, description):
+        """Sets the description of this Concept.
+
+        Description  # noqa: E501
+
+        :param description: The description of this Concept.
+        :type description: str
+        """
+        if description is None:
+            raise ValueError("Invalid value for `description`, must not be `None`")  # noqa: E501
+
+        self._description = description
+
+    @property
+    def id(self):
+        """Gets the id of this Concept.
+
+        ID  # noqa: E501
+
+        :return: The id of this Concept.
+        :rtype: str
+        """
+        return self._id
+
+    @id.setter
+    def id(self, id):
+        """Sets the id of this Concept.
+
+        ID  # noqa: E501
+
+        :param id: The id of this Concept.
+        :type id: str
+        """
+        if id is None:
+            raise ValueError("Invalid value for `id`, must not be `None`")  # noqa: E501
+
+        self._id = id

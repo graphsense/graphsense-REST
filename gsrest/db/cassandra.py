@@ -604,14 +604,19 @@ class Cassandra():
             addresses = self.get_addresses_by_ids(currency, ids, False)
             for (row, address) in zip(results, addresses):
                 row[f'{that}_address'] = address['address']
-                row['total_received'] = address['total_received']
-                row['total_spent'] = address['total_spent']
+                row['total_received'] = \
+                    self.markup_currency(currency, address['total_received'])
+                row['total_spent'] = \
+                    self.markup_currency(currency, address['total_spent'])
         else:
             ids = [row[that+'_cluster_id'] for row in results]
             entities, _ = self.list_entities(currency, ids, fields=[
                                             'cluster_id',
                                             'total_received',
                                             'total_spent'])
+            if currency == 'eth':
+                print(f'ids {ids}')
+                print(f'entities {entities}')
             for (row, entity) in zip(results, entities):
                 row[f'{that}_entity'] = entity['cluster_id']
                 row['total_received'] = entity['total_received']
@@ -901,6 +906,7 @@ class Cassandra():
     # @Timer(text="Timer: list_entities_eth {:.2f}")
     def list_entities_eth(self, currency, ids, page=None, pagesize=None,
                           fields=['*']):
+        fields = ['address_id' if i == 'cluster_id' else i for i in fields]
         flds = ','.join(fields)
         query = f"SELECT {flds} FROM address"
         has_ids = isinstance(ids, list)
@@ -908,8 +914,11 @@ class Cassandra():
             query += " WHERE address_id_group = %s AND address_id = %s"
             params = [[self.get_id_group(currency, id),
                        id] for id in ids]
+            print(query)
+            print(params)
             result = self.concurrent_with_args(currency, 'transformed', query,
                                                params)
+            print(f'result {result}')
             paging_state = None
         else:
             fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
@@ -1154,7 +1163,8 @@ class Cassandra():
     def finish_addresses_eth(self, currency, rows, with_txs=True):
         ids = []
         for row in rows:
-            row['address'] = eth_address_to_hex(row['address'])
+            if 'address' in row:
+                row['address'] = eth_address_to_hex(row['address'])
             row['cluster_id'] = row['address_id']
             row['total_received'] = \
                 self.markup_currency(currency, row['total_received'])

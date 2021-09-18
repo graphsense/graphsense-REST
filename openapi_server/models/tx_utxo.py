@@ -19,9 +19,13 @@ class TxUtxo(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, coinbase=None, height=None, inputs=None, outputs=None, timestamp=None, total_input=None, total_output=None, tx_hash=None, tx_type='utxo'):  # noqa: E501
+    def __init__(self, tx_type='utxo', tx_hash=None, coinbase=None, height=None, inputs=None, outputs=None, timestamp=None, total_input=None, total_output=None):  # noqa: E501
         """TxUtxo - a model defined in OpenAPI
 
+        :param tx_type: The tx_type of this TxUtxo.  # noqa: E501
+        :type tx_type: str
+        :param tx_hash: The tx_hash of this TxUtxo.  # noqa: E501
+        :type tx_hash: str
         :param coinbase: The coinbase of this TxUtxo.  # noqa: E501
         :type coinbase: bool
         :param height: The height of this TxUtxo.  # noqa: E501
@@ -36,35 +40,37 @@ class TxUtxo(Model):
         :type total_input: Values
         :param total_output: The total_output of this TxUtxo.  # noqa: E501
         :type total_output: Values
-        :param tx_hash: The tx_hash of this TxUtxo.  # noqa: E501
-        :type tx_hash: str
-        :param tx_type: The tx_type of this TxUtxo.  # noqa: E501
-        :type tx_type: str
         """
         self.openapi_types = {
+            'tx_type': str,
+            'tx_hash': str,
             'coinbase': bool,
             'height': int,
             'inputs': List[TxValue],
             'outputs': List[TxValue],
             'timestamp': int,
             'total_input': Values,
-            'total_output': Values,
-            'tx_hash': str,
-            'tx_type': str
+            'total_output': Values
         }
 
         self.attribute_map = {
+            'tx_type': 'tx_type',
+            'tx_hash': 'tx_hash',
             'coinbase': 'coinbase',
             'height': 'height',
             'inputs': 'inputs',
             'outputs': 'outputs',
             'timestamp': 'timestamp',
             'total_input': 'total_input',
-            'total_output': 'total_output',
-            'tx_hash': 'tx_hash',
-            'tx_type': 'tx_type'
+            'total_output': 'total_output'
         }
 
+        if tx_type is None:
+            raise ValueError("Invalid value for `tx_type`, must not be `None`")  # noqa: E501
+        self._tx_type = tx_type
+        if tx_hash is None:
+            raise ValueError("Invalid value for `tx_hash`, must not be `None`")  # noqa: E501
+        self._tx_hash = tx_hash
         if coinbase is None:
             raise ValueError("Invalid value for `coinbase`, must not be `None`")  # noqa: E501
         self._coinbase = coinbase
@@ -86,12 +92,6 @@ class TxUtxo(Model):
         if total_output is None:
             raise ValueError("Invalid value for `total_output`, must not be `None`")  # noqa: E501
         self._total_output = total_output
-        if tx_hash is None:
-            raise ValueError("Invalid value for `tx_hash`, must not be `None`")  # noqa: E501
-        self._tx_hash = tx_hash
-        if tx_type is None:
-            raise ValueError("Invalid value for `tx_type`, must not be `None`")  # noqa: E501
-        self._tx_type = tx_type
 
     @classmethod
     def from_dict(cls, dikt) -> 'TxUtxo':
@@ -110,16 +110,64 @@ class TxUtxo(Model):
         :return: The TxUtxo as a dict
         :rtype: dict
         """
-        return { 'coinbase': self._coinbase,
+        return { 'tx_type': self._tx_type,
+            'tx_hash': self._tx_hash,
+            'coinbase': self._coinbase,
             'height': self._height,
             'inputs': self._inputs,
             'outputs': self._outputs,
             'timestamp': self._timestamp,
             'total_input': self._total_input,
-            'total_output': self._total_output,
-            'tx_hash': self._tx_hash,
-            'tx_type': self._tx_type }
+            'total_output': self._total_output }
 
+
+    @property
+    def tx_type(self):
+        """Gets the tx_type of this TxUtxo.
+
+
+        :return: The tx_type of this TxUtxo.
+        :rtype: str
+        """
+        return self._tx_type
+
+    @tx_type.setter
+    def tx_type(self, tx_type):
+        """Sets the tx_type of this TxUtxo.
+
+
+        :param tx_type: The tx_type of this TxUtxo.
+        :type tx_type: str
+        """
+        if tx_type is None:
+            raise ValueError("Invalid value for `tx_type`, must not be `None`")  # noqa: E501
+
+        self._tx_type = tx_type
+
+    @property
+    def tx_hash(self):
+        """Gets the tx_hash of this TxUtxo.
+
+        Transaction hash  # noqa: E501
+
+        :return: The tx_hash of this TxUtxo.
+        :rtype: str
+        """
+        return self._tx_hash
+
+    @tx_hash.setter
+    def tx_hash(self, tx_hash):
+        """Sets the tx_hash of this TxUtxo.
+
+        Transaction hash  # noqa: E501
+
+        :param tx_hash: The tx_hash of this TxUtxo.
+        :type tx_hash: str
+        """
+        if tx_hash is None:
+            raise ValueError("Invalid value for `tx_hash`, must not be `None`")  # noqa: E501
+
+        self._tx_hash = tx_hash
 
     @property
     def coinbase(self):
@@ -293,51 +341,3 @@ class TxUtxo(Model):
             raise ValueError("Invalid value for `total_output`, must not be `None`")  # noqa: E501
 
         self._total_output = total_output
-
-    @property
-    def tx_hash(self):
-        """Gets the tx_hash of this TxUtxo.
-
-        Transaction hash  # noqa: E501
-
-        :return: The tx_hash of this TxUtxo.
-        :rtype: str
-        """
-        return self._tx_hash
-
-    @tx_hash.setter
-    def tx_hash(self, tx_hash):
-        """Sets the tx_hash of this TxUtxo.
-
-        Transaction hash  # noqa: E501
-
-        :param tx_hash: The tx_hash of this TxUtxo.
-        :type tx_hash: str
-        """
-        if tx_hash is None:
-            raise ValueError("Invalid value for `tx_hash`, must not be `None`")  # noqa: E501
-
-        self._tx_hash = tx_hash
-
-    @property
-    def tx_type(self):
-        """Gets the tx_type of this TxUtxo.
-
-
-        :return: The tx_type of this TxUtxo.
-        :rtype: str
-        """
-        return self._tx_type
-
-    @tx_type.setter
-    def tx_type(self, tx_type):
-        """Sets the tx_type of this TxUtxo.
-
-
-        :param tx_type: The tx_type of this TxUtxo.
-        :type tx_type: str
-        """
-        if tx_type is None:
-            raise ValueError("Invalid value for `tx_type`, must not be `None`")  # noqa: E501
-
-        self._tx_type = tx_type

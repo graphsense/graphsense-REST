@@ -15,36 +15,36 @@ class StatsTagsSource(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id=None, report_uuid=None, version=None, visible_name=None):  # noqa: E501
+    def __init__(self, visible_name=None, id=None, version=None, report_uuid=None):  # noqa: E501
         """StatsTagsSource - a model defined in OpenAPI
 
-        :param id: The id of this StatsTagsSource.  # noqa: E501
-        :type id: str
-        :param report_uuid: The report_uuid of this StatsTagsSource.  # noqa: E501
-        :type report_uuid: str
-        :param version: The version of this StatsTagsSource.  # noqa: E501
-        :type version: str
         :param visible_name: The visible_name of this StatsTagsSource.  # noqa: E501
         :type visible_name: str
+        :param id: The id of this StatsTagsSource.  # noqa: E501
+        :type id: str
+        :param version: The version of this StatsTagsSource.  # noqa: E501
+        :type version: str
+        :param report_uuid: The report_uuid of this StatsTagsSource.  # noqa: E501
+        :type report_uuid: str
         """
         self.openapi_types = {
+            'visible_name': str,
             'id': str,
-            'report_uuid': str,
             'version': str,
-            'visible_name': str
+            'report_uuid': str
         }
 
         self.attribute_map = {
+            'visible_name': 'visible_name',
             'id': 'id',
-            'report_uuid': 'report_uuid',
             'version': 'version',
-            'visible_name': 'visible_name'
+            'report_uuid': 'report_uuid'
         }
 
-        self._id = id
-        self._report_uuid = report_uuid
-        self._version = version
         self._visible_name = visible_name
+        self._id = id
+        self._version = version
+        self._report_uuid = report_uuid
 
     @classmethod
     def from_dict(cls, dikt) -> 'StatsTagsSource':
@@ -63,11 +63,32 @@ class StatsTagsSource(Model):
         :return: The StatsTagsSource as a dict
         :rtype: dict
         """
-        return { 'id': self._id,
-            'report_uuid': self._report_uuid,
+        return { 'visible_name': self._visible_name,
+            'id': self._id,
             'version': self._version,
-            'visible_name': self._visible_name }
+            'report_uuid': self._report_uuid }
 
+
+    @property
+    def visible_name(self):
+        """Gets the visible_name of this StatsTagsSource.
+
+
+        :return: The visible_name of this StatsTagsSource.
+        :rtype: str
+        """
+        return self._visible_name
+
+    @visible_name.setter
+    def visible_name(self, visible_name):
+        """Sets the visible_name of this StatsTagsSource.
+
+
+        :param visible_name: The visible_name of this StatsTagsSource.
+        :type visible_name: str
+        """
+
+        self._visible_name = visible_name
 
     @property
     def id(self):
@@ -91,27 +112,6 @@ class StatsTagsSource(Model):
         self._id = id
 
     @property
-    def report_uuid(self):
-        """Gets the report_uuid of this StatsTagsSource.
-
-
-        :return: The report_uuid of this StatsTagsSource.
-        :rtype: str
-        """
-        return self._report_uuid
-
-    @report_uuid.setter
-    def report_uuid(self, report_uuid):
-        """Sets the report_uuid of this StatsTagsSource.
-
-
-        :param report_uuid: The report_uuid of this StatsTagsSource.
-        :type report_uuid: str
-        """
-
-        self._report_uuid = report_uuid
-
-    @property
     def version(self):
         """Gets the version of this StatsTagsSource.
 
@@ -133,22 +133,22 @@ class StatsTagsSource(Model):
         self._version = version
 
     @property
-    def visible_name(self):
-        """Gets the visible_name of this StatsTagsSource.
+    def report_uuid(self):
+        """Gets the report_uuid of this StatsTagsSource.
 
 
-        :return: The visible_name of this StatsTagsSource.
+        :return: The report_uuid of this StatsTagsSource.
         :rtype: str
         """
-        return self._visible_name
+        return self._report_uuid
 
-    @visible_name.setter
-    def visible_name(self, visible_name):
-        """Sets the visible_name of this StatsTagsSource.
+    @report_uuid.setter
+    def report_uuid(self, report_uuid):
+        """Sets the report_uuid of this StatsTagsSource.
 
 
-        :param visible_name: The visible_name of this StatsTagsSource.
-        :type visible_name: str
+        :param report_uuid: The report_uuid of this StatsTagsSource.
+        :type report_uuid: str
         """
 
-        self._visible_name = visible_name
+        self._report_uuid = report_uuid

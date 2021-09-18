@@ -15,41 +15,41 @@ class StatsTool(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id=None, responsible_for=None, titanium_replayable=None, version=None, visible_name=None):  # noqa: E501
+    def __init__(self, visible_name=None, id=None, version=None, titanium_replayable=None, responsible_for=None):  # noqa: E501
         """StatsTool - a model defined in OpenAPI
 
-        :param id: The id of this StatsTool.  # noqa: E501
-        :type id: str
-        :param responsible_for: The responsible_for of this StatsTool.  # noqa: E501
-        :type responsible_for: List[str]
-        :param titanium_replayable: The titanium_replayable of this StatsTool.  # noqa: E501
-        :type titanium_replayable: bool
-        :param version: The version of this StatsTool.  # noqa: E501
-        :type version: str
         :param visible_name: The visible_name of this StatsTool.  # noqa: E501
         :type visible_name: str
+        :param id: The id of this StatsTool.  # noqa: E501
+        :type id: str
+        :param version: The version of this StatsTool.  # noqa: E501
+        :type version: str
+        :param titanium_replayable: The titanium_replayable of this StatsTool.  # noqa: E501
+        :type titanium_replayable: bool
+        :param responsible_for: The responsible_for of this StatsTool.  # noqa: E501
+        :type responsible_for: List[str]
         """
         self.openapi_types = {
+            'visible_name': str,
             'id': str,
-            'responsible_for': List[str],
-            'titanium_replayable': bool,
             'version': str,
-            'visible_name': str
+            'titanium_replayable': bool,
+            'responsible_for': List[str]
         }
 
         self.attribute_map = {
+            'visible_name': 'visible_name',
             'id': 'id',
-            'responsible_for': 'responsible_for',
-            'titanium_replayable': 'titanium_replayable',
             'version': 'version',
-            'visible_name': 'visible_name'
+            'titanium_replayable': 'titanium_replayable',
+            'responsible_for': 'responsible_for'
         }
 
-        self._id = id
-        self._responsible_for = responsible_for
-        self._titanium_replayable = titanium_replayable
-        self._version = version
         self._visible_name = visible_name
+        self._id = id
+        self._version = version
+        self._titanium_replayable = titanium_replayable
+        self._responsible_for = responsible_for
 
     @classmethod
     def from_dict(cls, dikt) -> 'StatsTool':
@@ -68,12 +68,33 @@ class StatsTool(Model):
         :return: The StatsTool as a dict
         :rtype: dict
         """
-        return { 'id': self._id,
-            'responsible_for': self._responsible_for,
-            'titanium_replayable': self._titanium_replayable,
+        return { 'visible_name': self._visible_name,
+            'id': self._id,
             'version': self._version,
-            'visible_name': self._visible_name }
+            'titanium_replayable': self._titanium_replayable,
+            'responsible_for': self._responsible_for }
 
+
+    @property
+    def visible_name(self):
+        """Gets the visible_name of this StatsTool.
+
+
+        :return: The visible_name of this StatsTool.
+        :rtype: str
+        """
+        return self._visible_name
+
+    @visible_name.setter
+    def visible_name(self, visible_name):
+        """Sets the visible_name of this StatsTool.
+
+
+        :param visible_name: The visible_name of this StatsTool.
+        :type visible_name: str
+        """
+
+        self._visible_name = visible_name
 
     @property
     def id(self):
@@ -97,25 +118,25 @@ class StatsTool(Model):
         self._id = id
 
     @property
-    def responsible_for(self):
-        """Gets the responsible_for of this StatsTool.
+    def version(self):
+        """Gets the version of this StatsTool.
 
 
-        :return: The responsible_for of this StatsTool.
-        :rtype: List[str]
+        :return: The version of this StatsTool.
+        :rtype: str
         """
-        return self._responsible_for
+        return self._version
 
-    @responsible_for.setter
-    def responsible_for(self, responsible_for):
-        """Sets the responsible_for of this StatsTool.
+    @version.setter
+    def version(self, version):
+        """Sets the version of this StatsTool.
 
 
-        :param responsible_for: The responsible_for of this StatsTool.
-        :type responsible_for: List[str]
+        :param version: The version of this StatsTool.
+        :type version: str
         """
 
-        self._responsible_for = responsible_for
+        self._version = version
 
     @property
     def titanium_replayable(self):
@@ -139,43 +160,22 @@ class StatsTool(Model):
         self._titanium_replayable = titanium_replayable
 
     @property
-    def version(self):
-        """Gets the version of this StatsTool.
+    def responsible_for(self):
+        """Gets the responsible_for of this StatsTool.
 
 
-        :return: The version of this StatsTool.
-        :rtype: str
+        :return: The responsible_for of this StatsTool.
+        :rtype: List[str]
         """
-        return self._version
+        return self._responsible_for
 
-    @version.setter
-    def version(self, version):
-        """Sets the version of this StatsTool.
-
-
-        :param version: The version of this StatsTool.
-        :type version: str
-        """
-
-        self._version = version
-
-    @property
-    def visible_name(self):
-        """Gets the visible_name of this StatsTool.
+    @responsible_for.setter
+    def responsible_for(self, responsible_for):
+        """Sets the responsible_for of this StatsTool.
 
 
-        :return: The visible_name of this StatsTool.
-        :rtype: str
-        """
-        return self._visible_name
-
-    @visible_name.setter
-    def visible_name(self, visible_name):
-        """Sets the visible_name of this StatsTool.
-
-
-        :param visible_name: The visible_name of this StatsTool.
-        :type visible_name: str
+        :param responsible_for: The responsible_for of this StatsTool.
+        :type responsible_for: List[str]
         """
 
-        self._visible_name = visible_name
+        self._responsible_for = responsible_for

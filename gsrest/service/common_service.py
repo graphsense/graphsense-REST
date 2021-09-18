@@ -101,6 +101,7 @@ def list_neighbors(currency, id, direction, node_type,
                                     page=page,
                                     pagesize=pagesize)
     dst = 'dst' if is_outgoing else 'src'
+    rates = get_rates(currency)['rates']
     relations = []
     if results is None:
         return Neighbors()
@@ -111,7 +112,15 @@ def list_neighbors(currency, id, direction, node_type,
             id=str(row[f'{dst}_{ntype}{suffix}']),
             node_type=node_type,
             labels=row['labels'] if 'labels' in row else None,
+            received=to_values(row['total_received']),
             value=to_values(row['value']),
+            balance=convert_value(
+                currency,
+                compute_balance(
+                    row['total_received'].value,
+                    row['total_spent'].value,
+                ),
+                rates),
             no_txs=row['no_transactions']))
     return Neighbors(next_page=paging_state,
                      neighbors=relations)

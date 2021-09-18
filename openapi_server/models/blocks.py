@@ -17,26 +17,26 @@ class Blocks(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, blocks=None, next_page=None):  # noqa: E501
+    def __init__(self, next_page=None, blocks=None):  # noqa: E501
         """Blocks - a model defined in OpenAPI
 
-        :param blocks: The blocks of this Blocks.  # noqa: E501
-        :type blocks: List[Block]
         :param next_page: The next_page of this Blocks.  # noqa: E501
         :type next_page: str
+        :param blocks: The blocks of this Blocks.  # noqa: E501
+        :type blocks: List[Block]
         """
         self.openapi_types = {
-            'blocks': List[Block],
-            'next_page': str
+            'next_page': str,
+            'blocks': List[Block]
         }
 
         self.attribute_map = {
-            'blocks': 'blocks',
-            'next_page': 'next_page'
+            'next_page': 'next_page',
+            'blocks': 'blocks'
         }
 
-        self._blocks = blocks
         self._next_page = next_page
+        self._blocks = blocks
 
     @classmethod
     def from_dict(cls, dikt) -> 'Blocks':
@@ -55,30 +55,9 @@ class Blocks(Model):
         :return: The Blocks as a dict
         :rtype: dict
         """
-        return { 'blocks': self._blocks,
-            'next_page': self._next_page }
+        return { 'next_page': self._next_page,
+            'blocks': self._blocks }
 
-
-    @property
-    def blocks(self):
-        """Gets the blocks of this Blocks.
-
-
-        :return: The blocks of this Blocks.
-        :rtype: List[Block]
-        """
-        return self._blocks
-
-    @blocks.setter
-    def blocks(self, blocks):
-        """Sets the blocks of this Blocks.
-
-
-        :param blocks: The blocks of this Blocks.
-        :type blocks: List[Block]
-        """
-
-        self._blocks = blocks
 
     @property
     def next_page(self):
@@ -100,3 +79,24 @@ class Blocks(Model):
         """
 
         self._next_page = next_page
+
+    @property
+    def blocks(self):
+        """Gets the blocks of this Blocks.
+
+
+        :return: The blocks of this Blocks.
+        :rtype: List[Block]
+        """
+        return self._blocks
+
+    @blocks.setter
+    def blocks(self, blocks):
+        """Sets the blocks of this Blocks.
+
+
+        :param blocks: The blocks of this Blocks.
+        :type blocks: List[Block]
+        """
+
+        self._blocks = blocks

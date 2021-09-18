@@ -17,26 +17,26 @@ class EntityAddresses(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, addresses=None, next_page=None):  # noqa: E501
+    def __init__(self, next_page=None, addresses=None):  # noqa: E501
         """EntityAddresses - a model defined in OpenAPI
 
-        :param addresses: The addresses of this EntityAddresses.  # noqa: E501
-        :type addresses: List[Address]
         :param next_page: The next_page of this EntityAddresses.  # noqa: E501
         :type next_page: str
+        :param addresses: The addresses of this EntityAddresses.  # noqa: E501
+        :type addresses: List[Address]
         """
         self.openapi_types = {
-            'addresses': List[Address],
-            'next_page': str
+            'next_page': str,
+            'addresses': List[Address]
         }
 
         self.attribute_map = {
-            'addresses': 'addresses',
-            'next_page': 'next_page'
+            'next_page': 'next_page',
+            'addresses': 'addresses'
         }
 
-        self._addresses = addresses
         self._next_page = next_page
+        self._addresses = addresses
 
     @classmethod
     def from_dict(cls, dikt) -> 'EntityAddresses':
@@ -55,30 +55,9 @@ class EntityAddresses(Model):
         :return: The EntityAddresses as a dict
         :rtype: dict
         """
-        return { 'addresses': self._addresses,
-            'next_page': self._next_page }
+        return { 'next_page': self._next_page,
+            'addresses': self._addresses }
 
-
-    @property
-    def addresses(self):
-        """Gets the addresses of this EntityAddresses.
-
-
-        :return: The addresses of this EntityAddresses.
-        :rtype: List[Address]
-        """
-        return self._addresses
-
-    @addresses.setter
-    def addresses(self, addresses):
-        """Sets the addresses of this EntityAddresses.
-
-
-        :param addresses: The addresses of this EntityAddresses.
-        :type addresses: List[Address]
-        """
-
-        self._addresses = addresses
 
     @property
     def next_page(self):
@@ -100,3 +79,24 @@ class EntityAddresses(Model):
         """
 
         self._next_page = next_page
+
+    @property
+    def addresses(self):
+        """Gets the addresses of this EntityAddresses.
+
+
+        :return: The addresses of this EntityAddresses.
+        :rtype: List[Address]
+        """
+        return self._addresses
+
+    @addresses.setter
+    def addresses(self, addresses):
+        """Sets the addresses of this EntityAddresses.
+
+
+        :param addresses: The addresses of this EntityAddresses.
+        :type addresses: List[Address]
+        """
+
+        self._addresses = addresses

@@ -17,71 +17,71 @@ class CurrencyStats(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, data_sources=None, name=None, no_address_relations=None, no_addresses=None, no_blocks=None, no_entities=None, no_labels=None, no_txs=None, notes=None, timestamp=None, tools=None):  # noqa: E501
+    def __init__(self, name=None, no_blocks=None, no_address_relations=None, no_addresses=None, no_entities=None, no_txs=None, no_labels=None, timestamp=None, tools=None, notes=None, data_sources=None):  # noqa: E501
         """CurrencyStats - a model defined in OpenAPI
 
-        :param data_sources: The data_sources of this CurrencyStats.  # noqa: E501
-        :type data_sources: List[StatsLedger]
         :param name: The name of this CurrencyStats.  # noqa: E501
         :type name: str
+        :param no_blocks: The no_blocks of this CurrencyStats.  # noqa: E501
+        :type no_blocks: int
         :param no_address_relations: The no_address_relations of this CurrencyStats.  # noqa: E501
         :type no_address_relations: int
         :param no_addresses: The no_addresses of this CurrencyStats.  # noqa: E501
         :type no_addresses: int
-        :param no_blocks: The no_blocks of this CurrencyStats.  # noqa: E501
-        :type no_blocks: int
         :param no_entities: The no_entities of this CurrencyStats.  # noqa: E501
         :type no_entities: int
-        :param no_labels: The no_labels of this CurrencyStats.  # noqa: E501
-        :type no_labels: int
         :param no_txs: The no_txs of this CurrencyStats.  # noqa: E501
         :type no_txs: int
-        :param notes: The notes of this CurrencyStats.  # noqa: E501
-        :type notes: List[str]
+        :param no_labels: The no_labels of this CurrencyStats.  # noqa: E501
+        :type no_labels: int
         :param timestamp: The timestamp of this CurrencyStats.  # noqa: E501
         :type timestamp: int
         :param tools: The tools of this CurrencyStats.  # noqa: E501
         :type tools: List[str]
+        :param notes: The notes of this CurrencyStats.  # noqa: E501
+        :type notes: List[str]
+        :param data_sources: The data_sources of this CurrencyStats.  # noqa: E501
+        :type data_sources: List[StatsLedger]
         """
         self.openapi_types = {
-            'data_sources': List[StatsLedger],
             'name': str,
+            'no_blocks': int,
             'no_address_relations': int,
             'no_addresses': int,
-            'no_blocks': int,
             'no_entities': int,
-            'no_labels': int,
             'no_txs': int,
-            'notes': List[str],
+            'no_labels': int,
             'timestamp': int,
-            'tools': List[str]
+            'tools': List[str],
+            'notes': List[str],
+            'data_sources': List[StatsLedger]
         }
 
         self.attribute_map = {
-            'data_sources': 'data_sources',
             'name': 'name',
+            'no_blocks': 'no_blocks',
             'no_address_relations': 'no_address_relations',
             'no_addresses': 'no_addresses',
-            'no_blocks': 'no_blocks',
             'no_entities': 'no_entities',
-            'no_labels': 'no_labels',
             'no_txs': 'no_txs',
-            'notes': 'notes',
+            'no_labels': 'no_labels',
             'timestamp': 'timestamp',
-            'tools': 'tools'
+            'tools': 'tools',
+            'notes': 'notes',
+            'data_sources': 'data_sources'
         }
 
-        self._data_sources = data_sources
         self._name = name
+        self._no_blocks = no_blocks
         self._no_address_relations = no_address_relations
         self._no_addresses = no_addresses
-        self._no_blocks = no_blocks
         self._no_entities = no_entities
-        self._no_labels = no_labels
         self._no_txs = no_txs
-        self._notes = notes
+        self._no_labels = no_labels
         self._timestamp = timestamp
         self._tools = tools
+        self._notes = notes
+        self._data_sources = data_sources
 
     @classmethod
     def from_dict(cls, dikt) -> 'CurrencyStats':
@@ -100,39 +100,18 @@ class CurrencyStats(Model):
         :return: The CurrencyStats as a dict
         :rtype: dict
         """
-        return { 'data_sources': self._data_sources,
-            'name': self._name,
+        return { 'name': self._name,
+            'no_blocks': self._no_blocks,
             'no_address_relations': self._no_address_relations,
             'no_addresses': self._no_addresses,
-            'no_blocks': self._no_blocks,
             'no_entities': self._no_entities,
-            'no_labels': self._no_labels,
             'no_txs': self._no_txs,
-            'notes': self._notes,
+            'no_labels': self._no_labels,
             'timestamp': self._timestamp,
-            'tools': self._tools }
+            'tools': self._tools,
+            'notes': self._notes,
+            'data_sources': self._data_sources }
 
-
-    @property
-    def data_sources(self):
-        """Gets the data_sources of this CurrencyStats.
-
-
-        :return: The data_sources of this CurrencyStats.
-        :rtype: List[StatsLedger]
-        """
-        return self._data_sources
-
-    @data_sources.setter
-    def data_sources(self, data_sources):
-        """Sets the data_sources of this CurrencyStats.
-
-
-        :param data_sources: The data_sources of this CurrencyStats.
-        :type data_sources: List[StatsLedger]
-        """
-
-        self._data_sources = data_sources
 
     @property
     def name(self):
@@ -154,6 +133,27 @@ class CurrencyStats(Model):
         """
 
         self._name = name
+
+    @property
+    def no_blocks(self):
+        """Gets the no_blocks of this CurrencyStats.
+
+
+        :return: The no_blocks of this CurrencyStats.
+        :rtype: int
+        """
+        return self._no_blocks
+
+    @no_blocks.setter
+    def no_blocks(self, no_blocks):
+        """Sets the no_blocks of this CurrencyStats.
+
+
+        :param no_blocks: The no_blocks of this CurrencyStats.
+        :type no_blocks: int
+        """
+
+        self._no_blocks = no_blocks
 
     @property
     def no_address_relations(self):
@@ -198,27 +198,6 @@ class CurrencyStats(Model):
         self._no_addresses = no_addresses
 
     @property
-    def no_blocks(self):
-        """Gets the no_blocks of this CurrencyStats.
-
-
-        :return: The no_blocks of this CurrencyStats.
-        :rtype: int
-        """
-        return self._no_blocks
-
-    @no_blocks.setter
-    def no_blocks(self, no_blocks):
-        """Sets the no_blocks of this CurrencyStats.
-
-
-        :param no_blocks: The no_blocks of this CurrencyStats.
-        :type no_blocks: int
-        """
-
-        self._no_blocks = no_blocks
-
-    @property
     def no_entities(self):
         """Gets the no_entities of this CurrencyStats.
 
@@ -238,27 +217,6 @@ class CurrencyStats(Model):
         """
 
         self._no_entities = no_entities
-
-    @property
-    def no_labels(self):
-        """Gets the no_labels of this CurrencyStats.
-
-
-        :return: The no_labels of this CurrencyStats.
-        :rtype: int
-        """
-        return self._no_labels
-
-    @no_labels.setter
-    def no_labels(self, no_labels):
-        """Sets the no_labels of this CurrencyStats.
-
-
-        :param no_labels: The no_labels of this CurrencyStats.
-        :type no_labels: int
-        """
-
-        self._no_labels = no_labels
 
     @property
     def no_txs(self):
@@ -282,25 +240,25 @@ class CurrencyStats(Model):
         self._no_txs = no_txs
 
     @property
-    def notes(self):
-        """Gets the notes of this CurrencyStats.
+    def no_labels(self):
+        """Gets the no_labels of this CurrencyStats.
 
 
-        :return: The notes of this CurrencyStats.
-        :rtype: List[str]
+        :return: The no_labels of this CurrencyStats.
+        :rtype: int
         """
-        return self._notes
+        return self._no_labels
 
-    @notes.setter
-    def notes(self, notes):
-        """Sets the notes of this CurrencyStats.
+    @no_labels.setter
+    def no_labels(self, no_labels):
+        """Sets the no_labels of this CurrencyStats.
 
 
-        :param notes: The notes of this CurrencyStats.
-        :type notes: List[str]
+        :param no_labels: The no_labels of this CurrencyStats.
+        :type no_labels: int
         """
 
-        self._notes = notes
+        self._no_labels = no_labels
 
     @property
     def timestamp(self):
@@ -343,3 +301,45 @@ class CurrencyStats(Model):
         """
 
         self._tools = tools
+
+    @property
+    def notes(self):
+        """Gets the notes of this CurrencyStats.
+
+
+        :return: The notes of this CurrencyStats.
+        :rtype: List[str]
+        """
+        return self._notes
+
+    @notes.setter
+    def notes(self, notes):
+        """Sets the notes of this CurrencyStats.
+
+
+        :param notes: The notes of this CurrencyStats.
+        :type notes: List[str]
+        """
+
+        self._notes = notes
+
+    @property
+    def data_sources(self):
+        """Gets the data_sources of this CurrencyStats.
+
+
+        :return: The data_sources of this CurrencyStats.
+        :rtype: List[StatsLedger]
+        """
+        return self._data_sources
+
+    @data_sources.setter
+    def data_sources(self, data_sources):
+        """Sets the data_sources of this CurrencyStats.
+
+
+        :param data_sources: The data_sources of this CurrencyStats.
+        :type data_sources: List[StatsLedger]
+        """
+
+        self._data_sources = data_sources

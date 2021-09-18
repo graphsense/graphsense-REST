@@ -27,35 +27,35 @@ class SearchResultLevel5(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, matching_addresses=None, node=None, relation=None, paths=None):  # noqa: E501
+    def __init__(self, node=None, relation=None, matching_addresses=None, paths=None):  # noqa: E501
         """SearchResultLevel5 - a model defined in OpenAPI
 
-        :param matching_addresses: The matching_addresses of this SearchResultLevel5.  # noqa: E501
-        :type matching_addresses: List[Address]
         :param node: The node of this SearchResultLevel5.  # noqa: E501
         :type node: Entity
         :param relation: The relation of this SearchResultLevel5.  # noqa: E501
         :type relation: Neighbor
+        :param matching_addresses: The matching_addresses of this SearchResultLevel5.  # noqa: E501
+        :type matching_addresses: List[Address]
         :param paths: The paths of this SearchResultLevel5.  # noqa: E501
         :type paths: List[SearchResultLevel6]
         """
         self.openapi_types = {
-            'matching_addresses': List[Address],
             'node': Entity,
             'relation': Neighbor,
+            'matching_addresses': List[Address],
             'paths': List[SearchResultLevel6]
         }
 
         self.attribute_map = {
-            'matching_addresses': 'matching_addresses',
             'node': 'node',
             'relation': 'relation',
+            'matching_addresses': 'matching_addresses',
             'paths': 'paths'
         }
 
-        self._matching_addresses = matching_addresses
         self._node = node
         self._relation = relation
+        self._matching_addresses = matching_addresses
         self._paths = paths
 
     @classmethod
@@ -75,32 +75,11 @@ class SearchResultLevel5(Model):
         :return: The SearchResultLevel5 as a dict
         :rtype: dict
         """
-        return { 'matching_addresses': self._matching_addresses,
-            'node': self._node,
+        return { 'node': self._node,
             'relation': self._relation,
+            'matching_addresses': self._matching_addresses,
             'paths': self._paths }
 
-
-    @property
-    def matching_addresses(self):
-        """Gets the matching_addresses of this SearchResultLevel5.
-
-
-        :return: The matching_addresses of this SearchResultLevel5.
-        :rtype: List[Address]
-        """
-        return self._matching_addresses
-
-    @matching_addresses.setter
-    def matching_addresses(self, matching_addresses):
-        """Sets the matching_addresses of this SearchResultLevel5.
-
-
-        :param matching_addresses: The matching_addresses of this SearchResultLevel5.
-        :type matching_addresses: List[Address]
-        """
-
-        self._matching_addresses = matching_addresses
 
     @property
     def node(self):
@@ -143,6 +122,27 @@ class SearchResultLevel5(Model):
         """
 
         self._relation = relation
+
+    @property
+    def matching_addresses(self):
+        """Gets the matching_addresses of this SearchResultLevel5.
+
+
+        :return: The matching_addresses of this SearchResultLevel5.
+        :rtype: List[Address]
+        """
+        return self._matching_addresses
+
+    @matching_addresses.setter
+    def matching_addresses(self, matching_addresses):
+        """Sets the matching_addresses of this SearchResultLevel5.
+
+
+        :param matching_addresses: The matching_addresses of this SearchResultLevel5.
+        :type matching_addresses: List[Address]
+        """
+
+        self._matching_addresses = matching_addresses
 
     @property
     def paths(self):

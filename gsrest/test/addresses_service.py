@@ -261,6 +261,14 @@ addressWithTagsOutNeighbors = Neighbors(
                 id="addressE",
                 node_type='address',
                 labels=['labelX', 'labelY'],
+                received=make_values(
+                        value=87789282,
+                        usd=142.18,
+                        eur=114.86),
+                balance=make_values(
+                        value=0,
+                        usd=0.0,
+                        eur=0.0),
                 no_txs=1,
                 value=make_values(
                     value=27789282,
@@ -271,6 +279,14 @@ addressWithTagsOutNeighbors = Neighbors(
                 id="addressF",
                 node_type='address',
                 labels=[],
+                received=make_values(
+                        value=40412296129,
+                        usd=2543214.5,
+                        eur=2130676.5),
+                balance=make_values(
+                        value=115422577,
+                        usd=2.31,
+                        eur=1.15),
                 no_txs=1,
                 value=make_values(
                     value=27789282,
@@ -285,6 +301,14 @@ addressWithTagsInNeighbors = Neighbors(
                 id="addressB",
                 node_type='address',
                 labels=[],
+                received=make_values(
+                        value=40412296129,
+                        usd=2543214.5,
+                        eur=2130676.5),
+                balance=make_values(
+                        value=115422577,
+                        usd=2.31,
+                        eur=1.15),
                 no_txs=1,
                 value=make_values(
                     value=1091,
@@ -295,6 +319,14 @@ addressWithTagsInNeighbors = Neighbors(
                 id="addressD",
                 node_type='address',
                 labels=[],
+                received=make_values(
+                        value=40412296129,
+                        usd=2543214.5,
+                        eur=2130676.5),
+                balance=make_values(
+                        value=115422577,
+                        usd=2.31,
+                        eur=1.15),
                 no_txs=1,
                 value=make_values(
                     value=50000000,
@@ -487,6 +519,14 @@ eth_addressWithTagsOutNeighbors = Neighbors(
                 id="0xabcdef",
                 node_type='address',
                 labels=[],
+                received=make_values(
+                        value=234000000000000000000,
+                        eur=10.11,
+                        usd=20.22),
+                balance=make_values(
+                        value=111000000000000000000,
+                        usd=222.0,
+                        eur=111.0),
                 no_txs=4,
                 value=make_values(
                     value=10000000000000000000,
@@ -497,6 +537,14 @@ eth_addressWithTagsOutNeighbors = Neighbors(
                 id="0x123456",
                 node_type='address',
                 labels=['LabelX', 'LabelY'],
+                received=make_values(
+                        value=456000000000000000000,
+                        eur=40.44,
+                        usd=50.56),
+                balance=make_values(
+                        value=111000000000000000000,
+                        usd=222.0,
+                        eur=111.0),
                 no_txs=4,
                 value=make_values(
                     value=10000000000000000000,
@@ -637,12 +685,14 @@ def list_address_neighbors(test_case):
 
 
 def list_address_neighbors_csv(test_case):
-    csv = ("id,labels,no_txs,"
-           "node_type,value_eur,value_usd,value_value\r\n"
-           "addressE,"
+    csv = ("balance_eur,balance_usd,balance_value,id,labels,no_txs,"
+           "node_type,received_eur,received_usd,received_value,"
+           "value_eur,value_usd,value_value\r\n"
+           "0.0,0.0,0,addressE,"
            "\"['labelX', 'labelY']\""
-           ",1,address,72.08,87.24,27789282\r\n"
-           "addressF,[],1,address,72.08,87.24,27789282\r\n")
+           ",1,address,114.86,142.18,87789282,72.08,87.24,27789282\r\n"
+           "1.15,2.31,115422577,addressF,[],1,address,2130676.5,2543214.5,40412296129,"
+           "72.08,87.24,27789282\r\n")
     result = service.list_address_neighbors_csv(
         currency='btc',
         address=address.address,
