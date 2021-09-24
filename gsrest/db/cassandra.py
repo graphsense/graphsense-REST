@@ -252,7 +252,6 @@ class Cassandra():
             raise RuntimeError(
                 f'address {address} not found in currency {currency}')
 
-        print(f'txs {results.current_rows}')
 
         txs = self.list_txs_by_ids(
                 currency,
@@ -267,7 +266,6 @@ class Cassandra():
             row['timestamp'] = tx['timestamp']
             rows.append(row)
 
-        print(f'txs {rows}')
 
         return rows, to_hex(results.paging_state)
 
@@ -444,7 +442,6 @@ class Cassandra():
                                     paging_state=paging_state,
                                     fetch_size=fetch_size)
 
-            print(f'results1 {results1.current_rows}')
             if not results1.current_rows:
                 return [], None
 
@@ -461,7 +458,6 @@ class Cassandra():
 
             for row in results2:
                 index = row['tx_id']
-                print(index)
                 tx_ids.append(index)
                 count += 1
                 links[index] = dict()
@@ -910,7 +906,6 @@ class Cassandra():
         if not with_txs:
             return rows
 
-        print(f'ids {ids}')
         TxSummary = namedtuple('TxSummary', ['height', 'timestamp', 'tx_hash'])
         txs = self.list_txs_by_ids(currency, ids)
 
@@ -966,7 +961,6 @@ class Cassandra():
             return None
 
         result = result.one()
-        print(f'result {result}')
         entity = self.finish_addresses(currency, [result])[0]
         entity['cluster_id'] = entity['address_id']
         entity['no_addresses'] = 1
@@ -1083,7 +1077,6 @@ class Cassandra():
             row1['tx_hash'] = row2['tx_hash']
             row1['height'] = row2['block_id']
             row1['timestamp'] = row2['block_timestamp']
-        print(f'txs eth {result.current_rows}')
         return result.current_rows, to_hex(paging_state)
 
     # @Timer(text="Timer: list_txs_by_ids_eth {:.2f}")
@@ -1094,7 +1087,6 @@ class Cassandra():
             ' where transaction_id_group = %s and transaction_id = %s')
         result = self.concurrent_with_args(currency, 'transformed', statement,
                                            params)
-        print(f'list_txs_by_ids_eth {result}')
         return self.list_txs_by_hashes(currency,
                                        [row['transaction'] for row in result])
 
@@ -1168,8 +1160,6 @@ class Cassandra():
                                     [first_id_group, first_id],
                                     paging_state=paging_state,
                                     fetch_size=fetch_size)
-            print(first_query)
-            print(f'params {first_id_group} {first_id}')
 
             if not results1.current_rows:
                 return [], None
@@ -1306,13 +1296,11 @@ class Cassandra():
             ids.append(row['first_tx_id'])
             ids.append(row['last_tx_id'])
 
-        print(f'eth ids {ids}')
         if not with_txs:
             return rows
 
         TxSummary = namedtuple('TxSummary', ['height', 'timestamp', 'tx_hash'])
         txs = self.list_txs_by_ids(currency, ids)
-        print(f'eth txs {txs}')
 
         for i, tx in enumerate(txs):
             row = rows[i//2]

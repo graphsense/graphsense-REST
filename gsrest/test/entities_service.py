@@ -651,8 +651,6 @@ def list_entity_links_csv(test_case):
                 entity=144534,
                 neighbor=10102718)
 
-    print(result.data.decode('utf-8'))
-
     csv = ('height,input_value_eur,input_value_usd,'
            'input_value_value,output_value_eur,output_value_usd,'
            'output_value_value,timestamp,tx_hash,tx_type\r\n'

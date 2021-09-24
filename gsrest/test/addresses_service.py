@@ -780,8 +780,6 @@ def list_address_links_csv(test_case):
                 address=address.address,
                 neighbor='addressE')
 
-    print(result.data.decode('utf-8'))
-
     csv = ('height,input_value_eur,input_value_usd,'
            'input_value_value,output_value_eur,output_value_usd,'
            'output_value_value,timestamp,tx_hash,tx_type\r\n'
