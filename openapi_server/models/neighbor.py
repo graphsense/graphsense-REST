@@ -17,63 +17,63 @@ class Neighbor(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id=None, node_type=None, labels=None, balance=None, received=None, value=None, no_txs=None):  # noqa: E501
+    def __init__(self, balance=None, id=None, labels=None, no_txs=None, node_type=None, received=None, value=None):  # noqa: E501
         """Neighbor - a model defined in OpenAPI
 
-        :param id: The id of this Neighbor.  # noqa: E501
-        :type id: str
-        :param node_type: The node_type of this Neighbor.  # noqa: E501
-        :type node_type: str
-        :param labels: The labels of this Neighbor.  # noqa: E501
-        :type labels: List[str]
         :param balance: The balance of this Neighbor.  # noqa: E501
         :type balance: Values
+        :param id: The id of this Neighbor.  # noqa: E501
+        :type id: str
+        :param labels: The labels of this Neighbor.  # noqa: E501
+        :type labels: List[str]
+        :param no_txs: The no_txs of this Neighbor.  # noqa: E501
+        :type no_txs: int
+        :param node_type: The node_type of this Neighbor.  # noqa: E501
+        :type node_type: str
         :param received: The received of this Neighbor.  # noqa: E501
         :type received: Values
         :param value: The value of this Neighbor.  # noqa: E501
         :type value: Values
-        :param no_txs: The no_txs of this Neighbor.  # noqa: E501
-        :type no_txs: int
         """
         self.openapi_types = {
-            'id': str,
-            'node_type': str,
-            'labels': List[str],
             'balance': Values,
+            'id': str,
+            'labels': List[str],
+            'no_txs': int,
+            'node_type': str,
             'received': Values,
-            'value': Values,
-            'no_txs': int
+            'value': Values
         }
 
         self.attribute_map = {
-            'id': 'id',
-            'node_type': 'node_type',
-            'labels': 'labels',
             'balance': 'balance',
+            'id': 'id',
+            'labels': 'labels',
+            'no_txs': 'no_txs',
+            'node_type': 'node_type',
             'received': 'received',
-            'value': 'value',
-            'no_txs': 'no_txs'
+            'value': 'value'
         }
 
-        if id is None:
-            raise ValueError("Invalid value for `id`, must not be `None`")  # noqa: E501
-        self._id = id
-        if node_type is None:
-            raise ValueError("Invalid value for `node_type`, must not be `None`")  # noqa: E501
-        self._node_type = node_type
-        self._labels = labels
         if balance is None:
             raise ValueError("Invalid value for `balance`, must not be `None`")  # noqa: E501
         self._balance = balance
+        if id is None:
+            raise ValueError("Invalid value for `id`, must not be `None`")  # noqa: E501
+        self._id = id
+        self._labels = labels
+        if no_txs is None:
+            raise ValueError("Invalid value for `no_txs`, must not be `None`")  # noqa: E501
+        self._no_txs = no_txs
+        if node_type is None:
+            raise ValueError("Invalid value for `node_type`, must not be `None`")  # noqa: E501
+        self._node_type = node_type
         if received is None:
             raise ValueError("Invalid value for `received`, must not be `None`")  # noqa: E501
         self._received = received
         if value is None:
             raise ValueError("Invalid value for `value`, must not be `None`")  # noqa: E501
         self._value = value
-        if no_txs is None:
-            raise ValueError("Invalid value for `no_txs`, must not be `None`")  # noqa: E501
-        self._no_txs = no_txs
 
     @classmethod
     def from_dict(cls, dikt) -> 'Neighbor':
@@ -92,14 +92,37 @@ class Neighbor(Model):
         :return: The Neighbor as a dict
         :rtype: dict
         """
-        return { 'id': self._id,
-            'node_type': self._node_type,
+        return { 'balance': self._balance,
+            'id': self._id,
             'labels': self._labels,
-            'balance': self._balance,
+            'no_txs': self._no_txs,
+            'node_type': self._node_type,
             'received': self._received,
-            'value': self._value,
-            'no_txs': self._no_txs }
+            'value': self._value }
 
+
+    @property
+    def balance(self):
+        """Gets the balance of this Neighbor.
+
+
+        :return: The balance of this Neighbor.
+        :rtype: Values
+        """
+        return self._balance
+
+    @balance.setter
+    def balance(self, balance):
+        """Sets the balance of this Neighbor.
+
+
+        :param balance: The balance of this Neighbor.
+        :type balance: Values
+        """
+        if balance is None:
+            raise ValueError("Invalid value for `balance`, must not be `None`")  # noqa: E501
+
+        self._balance = balance
 
     @property
     def id(self):
@@ -125,6 +148,54 @@ class Neighbor(Model):
             raise ValueError("Invalid value for `id`, must not be `None`")  # noqa: E501
 
         self._id = id
+
+    @property
+    def labels(self):
+        """Gets the labels of this Neighbor.
+
+        labels  # noqa: E501
+
+        :return: The labels of this Neighbor.
+        :rtype: List[str]
+        """
+        return self._labels
+
+    @labels.setter
+    def labels(self, labels):
+        """Sets the labels of this Neighbor.
+
+        labels  # noqa: E501
+
+        :param labels: The labels of this Neighbor.
+        :type labels: List[str]
+        """
+
+        self._labels = labels
+
+    @property
+    def no_txs(self):
+        """Gets the no_txs of this Neighbor.
+
+        number of transactions  # noqa: E501
+
+        :return: The no_txs of this Neighbor.
+        :rtype: int
+        """
+        return self._no_txs
+
+    @no_txs.setter
+    def no_txs(self, no_txs):
+        """Sets the no_txs of this Neighbor.
+
+        number of transactions  # noqa: E501
+
+        :param no_txs: The no_txs of this Neighbor.
+        :type no_txs: int
+        """
+        if no_txs is None:
+            raise ValueError("Invalid value for `no_txs`, must not be `None`")  # noqa: E501
+
+        self._no_txs = no_txs
 
     @property
     def node_type(self):
@@ -154,52 +225,6 @@ class Neighbor(Model):
             )
 
         self._node_type = node_type
-
-    @property
-    def labels(self):
-        """Gets the labels of this Neighbor.
-
-        labels  # noqa: E501
-
-        :return: The labels of this Neighbor.
-        :rtype: List[str]
-        """
-        return self._labels
-
-    @labels.setter
-    def labels(self, labels):
-        """Sets the labels of this Neighbor.
-
-        labels  # noqa: E501
-
-        :param labels: The labels of this Neighbor.
-        :type labels: List[str]
-        """
-
-        self._labels = labels
-
-    @property
-    def balance(self):
-        """Gets the balance of this Neighbor.
-
-
-        :return: The balance of this Neighbor.
-        :rtype: Values
-        """
-        return self._balance
-
-    @balance.setter
-    def balance(self, balance):
-        """Sets the balance of this Neighbor.
-
-
-        :param balance: The balance of this Neighbor.
-        :type balance: Values
-        """
-        if balance is None:
-            raise ValueError("Invalid value for `balance`, must not be `None`")  # noqa: E501
-
-        self._balance = balance
 
     @property
     def received(self):
@@ -246,28 +271,3 @@ class Neighbor(Model):
             raise ValueError("Invalid value for `value`, must not be `None`")  # noqa: E501
 
         self._value = value
-
-    @property
-    def no_txs(self):
-        """Gets the no_txs of this Neighbor.
-
-        number of transactions  # noqa: E501
-
-        :return: The no_txs of this Neighbor.
-        :rtype: int
-        """
-        return self._no_txs
-
-    @no_txs.setter
-    def no_txs(self, no_txs):
-        """Sets the no_txs of this Neighbor.
-
-        number of transactions  # noqa: E501
-
-        :param no_txs: The no_txs of this Neighbor.
-        :type no_txs: int
-        """
-        if no_txs is None:
-            raise ValueError("Invalid value for `no_txs`, must not be `None`")  # noqa: E501
-
-        self._no_txs = no_txs

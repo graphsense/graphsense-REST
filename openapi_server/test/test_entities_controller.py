@@ -9,6 +9,7 @@ from six import BytesIO
 from openapi_server.models.entities import Entities  # noqa: E501
 from openapi_server.models.entity import Entity  # noqa: E501
 from openapi_server.models.entity_addresses import EntityAddresses  # noqa: E501
+from openapi_server.models.links import Links  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
 from openapi_server.models.search_result_level1 import SearchResultLevel1  # noqa: E501
 from openapi_server.models.tags import Tags  # noqa: E501
@@ -113,6 +114,44 @@ class TestEntitiesController(BaseTestCase):
             '/{currency}/entities/{entity}/addresses.csv'.format(currency='btc', entity=67065),
             method='GET',
             headers=headers)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+    def test_list_entity_links(self):
+        """Test case for list_entity_links
+
+        Get transactions between two entities
+        """
+        test_service.list_entity_links(self)
+
+        query_string = [('neighbor', 123456)]
+        headers = { 
+            'Accept': 'application/json',
+        }
+        response = self.client.open(
+            '/{currency}/entities/{entity}/links'.format(currency='btc', entity=67065),
+            method='GET',
+            headers=headers,
+            query_string=query_string)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+    def test_list_entity_links_csv(self):
+        """Test case for list_entity_links_csv
+
+        Get transactions between two entities as CSV
+        """
+        test_service.list_entity_links_csv(self)
+
+        query_string = [('neighbor', 123456)]
+        headers = { 
+            'Accept': 'text/csv',
+        }
+        response = self.client.open(
+            '/{currency}/entities/{entity}/links.csv'.format(currency='btc', entity=67065),
+            method='GET',
+            headers=headers,
+            query_string=query_string)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 

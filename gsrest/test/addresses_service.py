@@ -8,15 +8,17 @@ from openapi_server.models.neighbors import Neighbors
 from openapi_server.models.neighbor import Neighbor
 from openapi_server.models.entity import Entity
 from openapi_server.models.link_utxo import LinkUtxo
+from openapi_server.models.links import Links
 import gsrest.service.addresses_service as service
 from gsrest.test.assertion import assertEqual
 from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.txs import Txs
 from gsrest.util.values import convert_value
 from gsrest.service.rates_service import list_rates
-from gsrest.test.txs_service import tx1_eth, tx2_eth
+from gsrest.test.txs_service import tx1_eth, tx2_eth, tx4_eth
 from gsrest.util.values import make_values
 import copy
+from tests.util.util import yamldump
 
 
 tag = AddressTag(
@@ -616,8 +618,9 @@ def list_address_txs(test_case):
     tx2_eth_reverse.value.value = -tx2_eth_reverse.value.value
     for v in tx2_eth_reverse.value.fiat_values:
         v.value = -v.value
-    txs = Txs(txs=[tx1_eth, tx2_eth_reverse])
+    txs = Txs(txs=[tx1_eth, tx2_eth_reverse, tx4_eth])
     result = service.list_address_txs('eth', eth_address.address)
+    yamldump(result)
     test_case.assertEqual(txs, result)
 
 
@@ -636,7 +639,8 @@ def list_address_txs_csv(test_case):
         'height,timestamp,tx_hash,tx_type,value_eur,value_usd,'
         'value_value\r\n'
         '1,15,af6e0000,account,123.0,246.0,123000000000000000000\r\n'
-        '1,16,af6e0003,account,-123.0,-246.0,-123000000000000000000\r\n',
+        '1,16,af6e0003,account,-123.0,-246.0,-123000000000000000000\r\n'
+        '1,17,123456,account,234.0,468.0,234000000000000000000\r\n',
         result.data.decode('utf-8'))
 
 
@@ -691,8 +695,8 @@ def list_address_neighbors_csv(test_case):
            "0.0,0.0,0,addressE,"
            "\"['labelX', 'labelY']\""
            ",1,address,114.86,142.18,87789282,72.08,87.24,27789282\r\n"
-           "1.15,2.31,115422577,addressF,[],1,address,2130676.5,2543214.5,40412296129,"
-           "72.08,87.24,27789282\r\n")
+           "1.15,2.31,115422577,addressF,[],1,address,2130676.5,2543214.5,"
+           "40412296129,72.08,87.24,27789282\r\n")
     result = service.list_address_neighbors_csv(
         currency='btc',
         address=address.address,
@@ -725,13 +729,13 @@ def list_address_links(test_case):
                 currency='btc',
                 address=address.address,
                 neighbor='addressE')
-    link = [LinkUtxo(tx_hash='123456',
-                     input_value=make_values(
-                         eur=-0.1, usd=-0.2, value=-10000000),
-                     output_value=make_values(
-                         eur=0.1, usd=0.2, value=10000000),
-                     timestamp=1361497172,
-                     height=2)]
+    link = Links(links=[LinkUtxo(tx_hash='123456',
+                                 input_value=make_values(
+                                     eur=-0.1, usd=-0.2, value=-10000000),
+                                 output_value=make_values(
+                                     eur=0.1, usd=0.2, value=10000000),
+                                 timestamp=1361497172,
+                                 height=2)])
 
     test_case.assertEqual(link, result)
 
@@ -739,8 +743,35 @@ def list_address_links(test_case):
                 currency='eth',
                 address=eth_address.address,
                 neighbor='0x123456')
-    txs = [tx1_eth, tx2_eth]
+    txs = Links(links=[tx1_eth, tx2_eth])
     test_case.assertEqual(txs, result)
+
+    result = service.list_address_links(
+                currency='eth',
+                address=eth_address.address,
+                neighbor='0x123456',
+                pagesize=1)
+    txs = Links(links=[tx1_eth])
+    test_case.assertEqual(txs.links, result.links)
+    test_case.assertNotEqual(None, result.next_page)
+
+    result = service.list_address_links(
+                currency='eth',
+                address=eth_address.address,
+                neighbor='0x123456',
+                page=result.next_page,
+                pagesize=1)
+    txs = Links(links=[tx2_eth])
+    test_case.assertEqual(txs.links, result.links)
+    test_case.assertNotEqual(None, result.next_page)
+
+    result = service.list_address_links(
+                currency='eth',
+                address=eth_address.address,
+                neighbor='0x123456',
+                page=result.next_page,
+                pagesize=1)
+    test_case.assertEqual(Links(links=[]), result)
 
 
 def list_address_links_csv(test_case):
@@ -748,6 +779,8 @@ def list_address_links_csv(test_case):
                 currency='btc',
                 address=address.address,
                 neighbor='addressE')
+
+    print(result.data.decode('utf-8'))
 
     csv = ('height,input_value_eur,input_value_usd,'
            'input_value_value,output_value_eur,output_value_usd,'

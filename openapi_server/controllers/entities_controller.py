@@ -5,6 +5,7 @@ import traceback
 from openapi_server.models.entities import Entities  # noqa: E501
 from openapi_server.models.entity import Entity  # noqa: E501
 from openapi_server.models.entity_addresses import EntityAddresses  # noqa: E501
+from openapi_server.models.links import Links  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
 from openapi_server.models.search_result_level1 import SearchResultLevel1  # noqa: E501
 from openapi_server.models.tags import Tags  # noqa: E501
@@ -146,6 +147,62 @@ def list_entity_addresses_csv(currency, entity):  # noqa: E501
         return service.list_entity_addresses_csv(
             currency=currency,
             entity=entity)
+    except RuntimeError as e:
+        return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        return internalerror("")
+
+
+def list_entity_links(currency, entity, neighbor):  # noqa: E501
+    """Get transactions between two entities
+
+     # noqa: E501
+
+    :param currency: The cryptocurrency (e.g., btc)
+    :type currency: str
+    :param entity: The entity ID
+    :type entity: int
+    :param neighbor: Neighbor entity
+    :type neighbor: int
+
+    :rtype: Links
+    """
+    try:
+        return service.list_entity_links(
+            currency=currency,
+            entity=entity,
+            neighbor=neighbor)
+    except RuntimeError as e:
+        return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        return internalerror("")
+
+
+def list_entity_links_csv(currency, entity, neighbor):  # noqa: E501
+    """Get transactions between two entities as CSV
+
+     # noqa: E501
+
+    :param currency: The cryptocurrency (e.g., btc)
+    :type currency: str
+    :param entity: The entity ID
+    :type entity: int
+    :param neighbor: Neighbor entity
+    :type neighbor: int
+
+    :rtype: str
+    """
+    try:
+        return service.list_entity_links_csv(
+            currency=currency,
+            entity=entity,
+            neighbor=neighbor)
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:

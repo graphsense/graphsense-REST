@@ -340,3 +340,23 @@ def recursive_search(currency, entity, params, breadth, depth, level,
         obj.paths = subpaths
         paths.append(obj)
     return paths
+
+
+def list_entity_links(currency, entity, neighbor,
+                      page=None, pagesize=None):
+    db = get_connection()
+    result = db.list_entity_links(currency, entity, neighbor,
+                                  page=page, pagesize=pagesize)
+
+    return common.links_response(currency, result)
+
+
+def list_entity_links_csv(currency, entity, neighbor):
+    def query_function(_):
+        result = list_entity_links(currency, entity, neighbor)
+        return (result.next_page, result.links)
+    return Response(stream_with_context(to_csv(query_function)),
+                    mimetype="text/csv",
+                    headers=create_download_header(
+                            'transactions between {} and {} ({}).csv'
+                            .format(entity, neighbor, currency.upper())))

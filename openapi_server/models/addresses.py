@@ -17,26 +17,26 @@ class Addresses(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, next_page=None, addresses=None):  # noqa: E501
+    def __init__(self, addresses=None, next_page=None):  # noqa: E501
         """Addresses - a model defined in OpenAPI
 
-        :param next_page: The next_page of this Addresses.  # noqa: E501
-        :type next_page: str
         :param addresses: The addresses of this Addresses.  # noqa: E501
         :type addresses: List[Address]
+        :param next_page: The next_page of this Addresses.  # noqa: E501
+        :type next_page: str
         """
         self.openapi_types = {
-            'next_page': str,
-            'addresses': List[Address]
+            'addresses': List[Address],
+            'next_page': str
         }
 
         self.attribute_map = {
-            'next_page': 'next_page',
-            'addresses': 'addresses'
+            'addresses': 'addresses',
+            'next_page': 'next_page'
         }
 
-        self._next_page = next_page
         self._addresses = addresses
+        self._next_page = next_page
 
     @classmethod
     def from_dict(cls, dikt) -> 'Addresses':
@@ -55,30 +55,9 @@ class Addresses(Model):
         :return: The Addresses as a dict
         :rtype: dict
         """
-        return { 'next_page': self._next_page,
-            'addresses': self._addresses }
+        return { 'addresses': self._addresses,
+            'next_page': self._next_page }
 
-
-    @property
-    def next_page(self):
-        """Gets the next_page of this Addresses.
-
-
-        :return: The next_page of this Addresses.
-        :rtype: str
-        """
-        return self._next_page
-
-    @next_page.setter
-    def next_page(self, next_page):
-        """Sets the next_page of this Addresses.
-
-
-        :param next_page: The next_page of this Addresses.
-        :type next_page: str
-        """
-
-        self._next_page = next_page
 
     @property
     def addresses(self):
@@ -100,3 +79,24 @@ class Addresses(Model):
         """
 
         self._addresses = addresses
+
+    @property
+    def next_page(self):
+        """Gets the next_page of this Addresses.
+
+
+        :return: The next_page of this Addresses.
+        :rtype: str
+        """
+        return self._next_page
+
+    @next_page.setter
+    def next_page(self, next_page):
+        """Sets the next_page of this Addresses.
+
+
+        :param next_page: The next_page of this Addresses.
+        :type next_page: str
+        """
+
+        self._next_page = next_page

@@ -7,6 +7,8 @@ from openapi_server.models.entity_addresses import EntityAddresses
 from openapi_server.models.entity import Entity
 from openapi_server.models.search_result_level1 import SearchResultLevel1
 from openapi_server.models.entity_tag import EntityTag
+from openapi_server.models.links import Links
+from openapi_server.models.link_utxo import LinkUtxo
 from openapi_server.models.tags import Tags
 import json
 from gsrest.util.values import make_values
@@ -611,3 +613,51 @@ def search_entity_neighbors(test_case):
     assertEqual(100.0,
                 result.paths[0].paths[0].node.total_received.
                 fiat_values[0].value)
+
+
+def list_entity_links(test_case):
+    result = service.list_entity_links(
+                currency='btc',
+                entity=144534,
+                neighbor=10102718)
+    link = Links(links=[LinkUtxo(tx_hash='abcdef',
+                                 input_value=make_values(
+                                     eur=-0.01, usd=-0.03, value=-1260000),
+                                 output_value=make_values(
+                                     eur=0.01, usd=0.03, value=1260000),
+                                 timestamp=1511153263,
+                                 height=2)])
+
+    test_case.assertEqual(link, result)
+
+    result = service.list_entity_links(
+                currency='btc',
+                entity=10102718,
+                neighbor=144534)
+    link = Links(links=[LinkUtxo(tx_hash='123456',
+                                 input_value=make_values(
+                                     eur=-0.01, usd=-0.03, value=-1260000),
+                                 output_value=make_values(
+                                     eur=0.01, usd=0.03, value=1260000),
+                                 timestamp=1510347493,
+                                 height=2)])
+
+    test_case.assertEqual(link, result)
+
+
+def list_entity_links_csv(test_case):
+    result = service.list_entity_links_csv(
+                currency='btc',
+                entity=144534,
+                neighbor=10102718)
+
+    print(result.data.decode('utf-8'))
+
+    csv = ('height,input_value_eur,input_value_usd,'
+           'input_value_value,output_value_eur,output_value_usd,'
+           'output_value_value,timestamp,tx_hash,tx_type\r\n'
+           '2,-0.01,-0.03,-1260000,0.01,0.03,1260000,'
+           '1511153263,abcdef,utxo\r\n')
+
+    test_case.assertEqual(csv, result.data.decode('utf-8'))
+

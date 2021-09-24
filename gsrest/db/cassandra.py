@@ -252,15 +252,24 @@ class Cassandra():
             raise RuntimeError(
                 f'address {address} not found in currency {currency}')
 
+        print(f'txs {results.current_rows}')
+
         txs = self.list_txs_by_ids(
                 currency,
-                [row['tx_id'] for row in results.current_rows])
+                [row['tx_id'] for row in results.current_rows],
+                filter_empty=False)
+        rows = []
         for (row, tx) in zip(results.current_rows, txs):
+            if tx is None:
+                continue
             row['tx_hash'] = tx['tx_hash']
             row['height'] = tx['block_id']
             row['timestamp'] = tx['timestamp']
+            rows.append(row)
 
-        return results.current_rows, to_hex(results.paging_state)
+        print(f'txs {rows}')
+
+        return rows, to_hex(results.paging_state)
 
     # @Timer(text="Timer: get_addresses_by_ids {:.2f}")
     def get_addresses_by_ids(self, currency, address_ids, address_only=False):
@@ -358,56 +367,117 @@ class Cassandra():
         return result.one()['cluster_id']
 
     @eth
-    # @Timer(text="Timer: list_address_links {:.2f}")
-    def list_address_links(self, currency, address, neighbor):
+    def list_address_links(self, currency, address, neighbor,
+                           page=None, pagesize=None):
+        return self.list_links(currency, 'address', address, neighbor,
+                               page=page, pagesize=pagesize)
 
-        address_id, address_id_group = \
-            self.get_address_id_id_group(currency, address)
-        neighbor_id, neighbor_id_group = \
-            self.get_address_id_id_group(currency, neighbor)
-        if address_id is None or neighbor_id is None:
+    @eth
+    def list_entity_links(self, currency, address, neighbor,
+                          page=None, pagesize=None):
+        return self.list_links(currency, 'cluster', address, neighbor,
+                               page=page, pagesize=pagesize)
+
+    def list_links(self, currency, node_type, id, neighbor,
+                   page=None, pagesize=None):
+        if node_type == 'address':
+            id, id_group = \
+                self.get_address_id_id_group(currency, id)
+            neighbor_id, neighbor_id_group = \
+                self.get_address_id_id_group(currency, neighbor)
+        else:
+            id_group = self.get_id_group(currency, id)
+            neighbor_id = neighbor
+            neighbor_id_group = self.get_id_group(currency, neighbor_id)
+
+        if id is None or neighbor_id is None:
             raise RuntimeError("Links between {} and {} not found"
-                               .format(address, neighbor))
+                               .format(id, neighbor))
 
-        query = "SELECT tx_list FROM address_outgoing_relations WHERE " \
-                "src_address_id_group = %s AND src_address_id = %s AND " \
-                "dst_address_id = %s"
-        results = self.execute(currency, 'transformed', query,
-                               [address_id_group, address_id, neighbor_id])
-        if not results.current_rows:
-            return []
+        query = f"SELECT no_{{direction}}_txs FROM {node_type} " \
+                f"WHERE {node_type}_id_group = %s AND {node_type}_id = %s"
 
-        txs = results.current_rows[0]['tx_list']
-        query = "SELECT * FROM address_transactions WHERE " \
-                "address_id_group = %s AND address_id = %s AND " \
-                "tx_id IN %s"
-        results1 = self.execute(currency, 'transformed', query,
-                                [address_id_group,
-                                 address_id,
-                                 ValueSequence(txs)])
-        results2 = self.execute(currency, 'transformed', query,
-                                [neighbor_id_group,
-                                 neighbor_id,
-                                 ValueSequence(txs)])
+        no_outgoing_txs = self.execute(
+            currency, 'transformed', query.format(direction='outgoing'),
+            [id_group, id]
+            ).one()
 
-        if not results1.current_rows or not results2.current_rows:
-            return []
+        if no_outgoing_txs is None:
+            return [], None
 
+        no_outgoing_txs = no_outgoing_txs['no_outgoing_txs']
+
+        no_incoming_txs = self.execute(
+            currency, 'transformed', query.format(direction='incoming'),
+            [neighbor_id_group, neighbor_id]
+            ).one()
+
+        if no_incoming_txs is None:
+            return [], None
+
+        no_incoming_txs = no_incoming_txs['no_incoming_txs']
+
+        isOutgoing = no_outgoing_txs < no_incoming_txs
+
+        first_id_group, first_id, second_id_group, second_id, \
+            first_value, second_value = \
+            (id_group, id, neighbor_id_group, neighbor_id,
+             'input_value', 'output_value') \
+            if isOutgoing \
+            else (neighbor_id_group, neighbor_id, id_group, id,
+                  'output_value', 'input_value')
+
+        first_query = f"SELECT * FROM {node_type}_transactions WHERE " \
+                      f"{node_type}_id_group = %s AND {node_type}_id = %s"
+
+        second_query = first_query + " AND tx_id = %s"
+
+        fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
+        paging_state = from_hex(page)
+        has_more_pages = True
+        count = 0
         links = dict()
-        for row in results1.current_rows:
-            index = row['tx_id']
-            links[index] = dict()
-            links[index]['input_value'] = row['value']
-        for row in results2.current_rows:
-            index = row['tx_id']
-            links[index]['output_value'] = row['value']
+        tx_ids = []
+        while count < fetch_size and has_more_pages:
+            results1 = self.execute(currency, 'transformed', first_query,
+                                    [first_id_group, first_id],
+                                    paging_state=paging_state,
+                                    fetch_size=fetch_size)
 
-        for row in self.list_txs_by_ids(currency, txs):
+            print(f'results1 {results1.current_rows}')
+            if not results1.current_rows:
+                return [], None
+
+            has_more_pages = results1.has_more_pages
+            paging_state = results1.paging_state
+
+            params = [[second_id_group, second_id, row['tx_id']]
+                      for row in results1.current_rows
+                      if row['value'] < 0 and isOutgoing or
+                      not isOutgoing and row['value'] > 0]
+
+            results2 = self.concurrent_with_args(
+                currency, 'transformed', second_query, params)
+
+            for row in results2:
+                index = row['tx_id']
+                print(index)
+                tx_ids.append(index)
+                count += 1
+                links[index] = dict()
+                links[index][second_value] = row['value']
+            for row in results1.current_rows:
+                index = row['tx_id']
+                if index not in links:
+                    continue
+                links[index][first_value] = row['value']
+
+        for row in self.list_txs_by_ids(currency, tx_ids):
             links[row['tx_id']]['tx_hash'] = row['tx_hash']
             links[row['tx_id']]['height'] = row['block_id']
             links[row['tx_id']]['timestamp'] = row['timestamp']
 
-        return links.values()
+        return list(links.values()), paging_state
 
     # @Timer(text="Timer: list_matching_addresses {:.2f}")
     def list_matching_addresses(self, currency, expression):
@@ -559,7 +629,7 @@ class Cassandra():
         sec_condition = ''
         if currency == 'eth':
             secondary_id_group = \
-                self.get_secondary_id_group_eth(
+                self.get_id_secondary_group_eth(
                     f'address_{direction}_relations',
                     id_group)
             sec_in = self.sec_in(secondary_id_group)
@@ -614,9 +684,6 @@ class Cassandra():
                                             'cluster_id',
                                             'total_received',
                                             'total_spent'])
-            if currency == 'eth':
-                print(f'ids {ids}')
-                print(f'entities {entities}')
             for (row, entity) in zip(results, entities):
                 row[f'{that}_entity'] = entity['cluster_id']
                 row['total_received'] = entity['total_received']
@@ -777,11 +844,12 @@ class Cassandra():
 
     @eth
     # @Timer(text="Timer: list_txs_by_ids {:.2f}")
-    def list_txs_by_ids(self, currency, ids):
+    def list_txs_by_ids(self, currency, ids, filter_empty=True):
         params = [[self.get_tx_id_group(currency, id), id] for id in ids]
         statement = ('SELECT * FROM transaction WHERE '
                      'tx_id_group = %s and tx_id = %s')
-        return self.concurrent_with_args(currency, 'raw', statement, params)
+        return self.concurrent_with_args(currency, 'raw', statement, params,
+                                         filter_empty=filter_empty)
 
     # @Timer(text="Timer: list_addresses {:.2f}")
     def list_addresses(self, currency, ids=None, page=None, pagesize=None):
@@ -842,6 +910,7 @@ class Cassandra():
         if not with_txs:
             return rows
 
+        print(f'ids {ids}')
         TxSummary = namedtuple('TxSummary', ['height', 'timestamp', 'tx_hash'])
         txs = self.list_txs_by_ids(currency, ids)
 
@@ -897,6 +966,7 @@ class Cassandra():
             return None
 
         result = result.one()
+        print(f'result {result}')
         entity = self.finish_addresses(currency, [result])[0]
         entity['cluster_id'] = entity['address_id']
         entity['no_addresses'] = 1
@@ -914,11 +984,8 @@ class Cassandra():
             query += " WHERE address_id_group = %s AND address_id = %s"
             params = [[self.get_id_group(currency, id),
                        id] for id in ids]
-            print(query)
-            print(params)
             result = self.concurrent_with_args(currency, 'transformed', query,
                                                params)
-            print(f'result {result}')
             paging_state = None
         else:
             fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
@@ -975,8 +1042,8 @@ class Cassandra():
                     f'block {height} not found in currency {currency}')
         return self.list_txs_by_ids(currency, result.one()['txs'])
 
-    # @Timer(text="Timer: get_secondary_id_group_eth {:.2f}")
-    def get_secondary_id_group_eth(self, table, id_group):
+    # @Timer(text="Timer: get_id_secondary_group_eth {:.2f}")
+    def get_id_secondary_group_eth(self, table, id_group):
         column_prefix = ''
         if table == 'address_incoming_relations':
             column_prefix = 'dst_'
@@ -995,7 +1062,7 @@ class Cassandra():
         paging_state = from_hex(page)
         address_id, id_group = self.get_address_id_id_group(currency, address)
         secondary_id_group = \
-            self.get_secondary_id_group_eth('address_transactions', id_group)
+            self.get_id_secondary_group_eth('address_transactions', id_group)
         sec_in = self.sec_in(secondary_id_group)
         query = ("SELECT transaction_id, value FROM address_transactions "
                  "WHERE address_id_group = %s and "
@@ -1013,9 +1080,10 @@ class Cassandra():
         for (row1, row2) in zip(
                 result.current_rows,
                 self.list_txs_by_ids(currency, txs)):
-            row1['tx_hash'] = row2['hash']
+            row1['tx_hash'] = row2['tx_hash']
             row1['height'] = row2['block_id']
             row1['timestamp'] = row2['block_timestamp']
+        print(f'txs eth {result.current_rows}')
         return result.current_rows, to_hex(paging_state)
 
     # @Timer(text="Timer: list_txs_by_ids_eth {:.2f}")
@@ -1026,6 +1094,7 @@ class Cassandra():
             ' where transaction_id_group = %s and transaction_id = %s')
         result = self.concurrent_with_args(currency, 'transformed', statement,
                                            params)
+        print(f'list_txs_by_ids_eth {result}')
         return self.list_txs_by_hashes(currency,
                                        [row['transaction'] for row in result])
 
@@ -1035,35 +1104,96 @@ class Cassandra():
         params = [[hash.hex()[:prefix['tx']], hash]
                   for hash in hashes]
         statement = (
-            'SELECT hash, block_id, block_timestamp, value from '
-            'transaction where hash_prefix=%s and hash=%s')
+            'SELECT tx_hash, block_id, block_timestamp, value from '
+            'transaction where tx_hash_prefix=%s and tx_hash=%s')
         return self.concurrent_with_args(currency, 'raw', statement, params)
 
     # @Timer(text="Timer: list_address_links_eth {:.2f}")
-    def list_address_links_eth(self, currency, address, neighbor):
-        address_id, id_group = self.get_address_id_id_group(currency, address)
-        neighbor_id, n_id_group = \
+    def list_address_links_eth(self, currency, address, neighbor,
+                               page=None, pagesize=None):
+        address_id, address_id_group = \
+            self.get_address_id_id_group(currency, address)
+        neighbor_id, neighbor_id_group = \
             self.get_address_id_id_group(currency, neighbor)
-        secondary_id_group = \
-            self.get_secondary_id_group_eth('address_outgoing_relations',
-                                            id_group)
-        sec_in = self.sec_in(secondary_id_group)
-        query = ("SELECT transaction_ids FROM address_outgoing_relations "
-                 "WHERE src_address_id_group = %s and "
-                 f"src_address_id_secondary_group in {sec_in}"
-                 " and src_address_id = %s and dst_address_id = %s")
-        result = self.execute(currency, 'transformed', query,
-                              [id_group, address_id, neighbor_id])
-        if result is None or result.one() is None:
-            return [], None
-        txs = result.one()['transaction_ids']
-        return self.list_txs_by_ids(currency, txs)
+        address_id_secondary_group = \
+            self.get_id_secondary_group_eth('address_transactions',
+                                            address_id_group)
+        address_id_secondary_group = self.sec_in(address_id_secondary_group)
+        neighbor_id_secondary_group = \
+            self.get_id_secondary_group_eth('address_transactions',
+                                            neighbor_id_group)
+        neighbor_id_secondary_group = self.sec_in(neighbor_id_secondary_group)
+
+        if address_id is None or neighbor_id is None:
+            raise RuntimeError("Links between {} and {} not found"
+                               .format(address, neighbor))
+
+        query = "SELECT no_{direction}_txs FROM address " \
+                "WHERE address_id_group = %s AND address_id = %s"
+
+        no_outgoing_txs = self.execute(
+            currency, 'transformed', query.format(direction='outgoing'),
+            [address_id_group, address_id]
+            ).one()['no_outgoing_txs']
+
+        no_incoming_txs = self.execute(
+            currency, 'transformed', query.format(direction='incoming'),
+            [neighbor_id_group, neighbor_id]
+            ).one()['no_incoming_txs']
+
+        first_id_group, first_id, second_id_group, second_id, \
+            first_id_secondary_group, second_id_secondary_group = \
+            (address_id_group, address_id, neighbor_id_group, neighbor_id,
+             address_id_secondary_group, neighbor_id_secondary_group) \
+            if no_outgoing_txs < no_incoming_txs \
+            else (neighbor_id_group, neighbor_id, address_id_group, address_id,
+                  neighbor_id_secondary_group, address_id_secondary_group)
+
+        basequery = "SELECT transaction_id FROM address_transactions WHERE " \
+                    "address_id_group = %s AND address_id = %s "
+        first_query = basequery + \
+            f"AND address_id_secondary_group IN {address_id_secondary_group}"
+        second_query = basequery + \
+            f"AND address_id_secondary_group IN {neighbor_id_secondary_group}"\
+            " AND transaction_id = %s"
+
+        fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
+        paging_state = from_hex(page)
+        has_more_pages = True
+        count = 0
+        tx_ids = []
+
+        while count < fetch_size and has_more_pages:
+            results1 = self.execute(currency, 'transformed', first_query,
+                                    [first_id_group, first_id],
+                                    paging_state=paging_state,
+                                    fetch_size=fetch_size)
+            print(first_query)
+            print(f'params {first_id_group} {first_id}')
+
+            if not results1.current_rows:
+                return [], None
+
+            has_more_pages = results1.has_more_pages
+            paging_state = results1.paging_state
+
+            params = [[second_id_group, second_id, row['transaction_id']]
+                      for row in results1.current_rows]
+
+            results2 = self.concurrent_with_args(
+                currency, 'transformed', second_query, params)
+
+            for row in results2:
+                tx_ids.append(row['transaction_id'])
+                count += 1
+
+        return self.list_txs_by_ids(currency, tx_ids), to_hex(paging_state)
 
     # @Timer(text="Timer: get_tx_eth {:.2f}")
     def get_tx_eth(self, currency, tx_hash):
         query = (
-            'SELECT hash, block_id, block_timestamp, value from '
-            'transaction where hash_prefix=%s and hash=%s')
+            'SELECT tx_hash, block_id, block_timestamp, value from '
+            'transaction where tx_hash_prefix=%s and tx_hash=%s')
         prefix_length = self.get_prefix_lengths(currency)
         prefix = tx_hash[:prefix_length['tx']]
         result = self.execute(currency, 'raw', query,
@@ -1176,11 +1306,13 @@ class Cassandra():
             ids.append(row['first_tx_id'])
             ids.append(row['last_tx_id'])
 
+        print(f'eth ids {ids}')
         if not with_txs:
             return rows
 
         TxSummary = namedtuple('TxSummary', ['height', 'timestamp', 'tx_hash'])
         txs = self.list_txs_by_ids(currency, ids)
+        print(f'eth txs {txs}')
 
         for i, tx in enumerate(txs):
             row = rows[i//2]
@@ -1188,10 +1320,10 @@ class Cassandra():
                 row['first_tx'] = TxSummary(
                     height=tx['block_id'],
                     timestamp=tx['block_timestamp'],
-                    tx_hash=tx['hash'])
+                    tx_hash=tx['tx_hash'])
             else:
                 row['last_tx'] = TxSummary(
                     height=tx['block_id'],
                     timestamp=tx['block_timestamp'],
-                    tx_hash=tx['hash'])
+                    tx_hash=tx['tx_hash'])
         return rows

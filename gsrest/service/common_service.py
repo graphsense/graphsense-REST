@@ -6,6 +6,10 @@ from openapi_server.models.neighbors import Neighbors
 from openapi_server.models.neighbor import Neighbor
 from gsrest.util.values import compute_balance, convert_value, to_values
 from gsrest.service.rates_service import get_rates
+from openapi_server.models.link_utxo import LinkUtxo
+from openapi_server.models.links import Links
+from openapi_server.models.tx_account import TxAccount
+from gsrest.service.rates_service import list_rates
 
 
 def address_from_row(currency, row, rates, tags=None):
@@ -124,3 +128,32 @@ def list_neighbors(currency, id, direction, node_type,
             no_txs=row['no_transactions']))
     return Neighbors(next_page=paging_state,
                      neighbors=relations)
+
+
+def links_response(currency, result):
+    links, next_page = result
+    if currency == 'eth':
+        heights = [row['block_id'] for row in links]
+        rates = list_rates(currency, heights)
+        return Links(links=[TxAccount(
+                            tx_hash=row['tx_hash'].hex(),
+                            timestamp=row['block_timestamp'],
+                            height=row['block_id'],
+                            value=convert_value(currency,
+                                                row['value'],
+                                                rates[row['block_id']]))
+                            for row in links],
+                     next_page=next_page)
+
+    heights = [row['height'] for row in links]
+    rates = list_rates(currency, heights)
+
+    return Links(links=[LinkUtxo(tx_hash=e['tx_hash'].hex(),
+                        height=e['height'],
+                        timestamp=e['timestamp'],
+                        input_value=convert_value(
+                            currency, e['input_value'], rates[e['height']]),
+                        output_value=convert_value(
+                            currency, e['output_value'], rates[e['height']]),
+                        ) for e in links],
+                 next_page=next_page)

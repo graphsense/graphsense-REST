@@ -2,6 +2,7 @@ from gsrest.db import get_connection
 from openapi_server.models.txs import Txs
 from openapi_server.models.addresses import Addresses
 from openapi_server.models.link_utxo import LinkUtxo
+from openapi_server.models.links import Links
 from openapi_server.models.tx_account import TxAccount
 from gsrest.service.entities_service import get_entity
 from gsrest.service.rates_service import list_rates
@@ -82,39 +83,19 @@ def list_address_neighbors_csv(currency, address, direction,
                             .format(direction, address, currency.upper())))
 
 
-def list_address_links(currency, address, neighbor):
+def list_address_links(currency, address, neighbor,
+                       page=None, pagesize=None):
     db = get_connection()
-    links = db.list_address_links(currency, address, neighbor)
+    result = db.list_address_links(currency, address, neighbor,
+                                   page=page, pagesize=pagesize)
 
-    if currency == 'eth':
-        heights = [row['block_id'] for row in links]
-        rates = list_rates(currency, heights)
-        return [TxAccount(
-                    tx_hash=row['hash'].hex(),
-                    timestamp=row['block_timestamp'],
-                    height=row['block_id'],
-                    value=convert_value(currency,
-                                        row['value'],
-                                        rates[row['block_id']]))
-                for row in links]
-
-    heights = [row['height'] for row in links]
-    rates = list_rates(currency, heights)
-
-    return [LinkUtxo(tx_hash=e['tx_hash'].hex(),
-                     height=e['height'],
-                     timestamp=e['timestamp'],
-                     input_value=convert_value(
-                         currency, e['input_value'], rates[e['height']]),
-                     output_value=convert_value(
-                         currency, e['output_value'], rates[e['height']]),
-                     ) for e in links]
+    return common.links_response(currency, result)
 
 
 def list_address_links_csv(currency, address, neighbor):
     def query_function(_):
         result = list_address_links(currency, address, neighbor)
-        return (None, result)
+        return (result.next_page, result.links)
     return Response(stream_with_context(to_csv(query_function)),
                     mimetype="text/csv",
                     headers=create_download_header(

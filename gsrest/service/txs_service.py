@@ -10,7 +10,7 @@ from gsrest.util.values import convert_value
 def from_row(currency, row, rates):
     if currency == 'eth':
         return TxAccount(
-            tx_hash=row['hash'].hex(),
+            tx_hash=row['tx_hash'].hex(),
             timestamp=row['block_timestamp'],
             height=row['block_id'],
             value=convert_value(currency, row['value'], rates))

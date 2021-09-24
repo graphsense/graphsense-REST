@@ -15,30 +15,30 @@ class SearchResultByCurrency(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, currency=None, addresses=None, txs=None):  # noqa: E501
+    def __init__(self, addresses=None, currency=None, txs=None):  # noqa: E501
         """SearchResultByCurrency - a model defined in OpenAPI
 
-        :param currency: The currency of this SearchResultByCurrency.  # noqa: E501
-        :type currency: str
         :param addresses: The addresses of this SearchResultByCurrency.  # noqa: E501
         :type addresses: List[str]
+        :param currency: The currency of this SearchResultByCurrency.  # noqa: E501
+        :type currency: str
         :param txs: The txs of this SearchResultByCurrency.  # noqa: E501
         :type txs: List[str]
         """
         self.openapi_types = {
-            'currency': str,
             'addresses': List[str],
+            'currency': str,
             'txs': List[str]
         }
 
         self.attribute_map = {
-            'currency': 'currency',
             'addresses': 'addresses',
+            'currency': 'currency',
             'txs': 'txs'
         }
 
-        self._currency = currency
         self._addresses = addresses
+        self._currency = currency
         self._txs = txs
 
     @classmethod
@@ -58,33 +58,10 @@ class SearchResultByCurrency(Model):
         :return: The SearchResultByCurrency as a dict
         :rtype: dict
         """
-        return { 'currency': self._currency,
-            'addresses': self._addresses,
+        return { 'addresses': self._addresses,
+            'currency': self._currency,
             'txs': self._txs }
 
-
-    @property
-    def currency(self):
-        """Gets the currency of this SearchResultByCurrency.
-
-        Currency  # noqa: E501
-
-        :return: The currency of this SearchResultByCurrency.
-        :rtype: str
-        """
-        return self._currency
-
-    @currency.setter
-    def currency(self, currency):
-        """Sets the currency of this SearchResultByCurrency.
-
-        Currency  # noqa: E501
-
-        :param currency: The currency of this SearchResultByCurrency.
-        :type currency: str
-        """
-
-        self._currency = currency
 
     @property
     def addresses(self):
@@ -108,6 +85,29 @@ class SearchResultByCurrency(Model):
         """
 
         self._addresses = addresses
+
+    @property
+    def currency(self):
+        """Gets the currency of this SearchResultByCurrency.
+
+        Currency  # noqa: E501
+
+        :return: The currency of this SearchResultByCurrency.
+        :rtype: str
+        """
+        return self._currency
+
+    @currency.setter
+    def currency(self, currency):
+        """Sets the currency of this SearchResultByCurrency.
+
+        Currency  # noqa: E501
+
+        :param currency: The currency of this SearchResultByCurrency.
+        :type currency: str
+        """
+
+        self._currency = currency
 
     @property
     def txs(self):

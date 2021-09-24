@@ -4,7 +4,7 @@ info:
   title: GraphSense API
   version: "0.5"
 servers:
-- url: https://api.graphsense.info
+- url: http://graphsense-rest:9000
 paths:
   /search:
     get:
@@ -368,9 +368,7 @@ paths:
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/link'
-                type: array
+                $ref: '#/components/schemas/links'
           description: OK
       summary: Get transactions between two addresses
       tags:
@@ -1081,6 +1079,96 @@ paths:
       tags:
       - entities
       x-openapi-router-controller: openapi_server.controllers.entities_controller
+  /{currency}/entities/{entity}/links:
+    get:
+      operationId: list_entity_links
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The entity ID
+        example: 67065
+        explode: false
+        in: path
+        name: entity
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      - description: Neighbor entity
+        example: 123456
+        explode: true
+        in: query
+        name: neighbor
+        required: true
+        schema:
+          format: int32
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/links'
+          description: OK
+      summary: Get transactions between two entities
+      tags:
+      - entities
+      x-openapi-router-controller: openapi_server.controllers.entities_controller
+  /{currency}/entities/{entity}/links.csv:
+    get:
+      operationId: list_entity_links_csv
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The entity ID
+        example: 67065
+        explode: false
+        in: path
+        name: entity
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      - description: Neighbor entity
+        example: 123456
+        explode: true
+        in: query
+        name: neighbor
+        required: true
+        schema:
+          format: int32
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            text/csv:
+              schema:
+                type: string
+          description: OK
+      summary: Get transactions between two entities as CSV
+      tags:
+      - entities
+      x-openapi-router-controller: openapi_server.controllers.entities_controller
   /{currency}/entities/{entity}/neighbors:
     get:
       operationId: list_entity_neighbors
@@ -1529,6 +1617,28 @@ paths:
       x-openapi-router-controller: openapi_server.controllers.txs_controller
 components:
   parameters:
+    address:
+      description: The cryptocurrency address
+      example: addressA
+      explode: false
+      in: path
+      name: address
+      required: true
+      schema:
+        format: string
+        type: string
+      style: simple
+    breadth:
+      description: How many siblings of each neighbor should be tried
+      explode: true
+      in: query
+      name: breadth
+      required: false
+      schema:
+        default: 16
+        format: int32
+        type: integer
+      style: form
     currency:
       description: The cryptocurrency (e.g., btc)
       example: btc
@@ -1551,35 +1661,16 @@ components:
         format: string
         type: string
       style: form
-    height:
-      description: The block height
-      example: 1
-      explode: false
-      in: path
-      name: height
+    depth:
+      description: How many hops should the transaction graph be searched
+      example: 2
+      explode: true
+      in: query
+      name: depth
       required: true
       schema:
-        minimum: 0
-        type: integer
-      style: simple
-    page:
-      description: Resumption token for retrieving the next page
-      explode: true
-      in: query
-      name: page
-      required: false
-      schema:
-        type: string
-      style: form
-    pagesize:
-      description: Number of items returned in a single page
-      example: 10
-      explode: true
-      in: query
-      name: pagesize
-      required: false
-      schema:
-        minimum: 1
+        format: int32
+        maximum: 7
         type: integer
       style: form
     direction:
@@ -1595,16 +1686,38 @@ components:
         - out
         type: string
       style: form
-    address:
-      description: The cryptocurrency address
-      example: addressA
+    entity:
+      description: The entity ID
+      example: 67065
       explode: false
       in: path
-      name: address
+      name: entity
       required: true
       schema:
-        format: string
-        type: string
+        format: int64
+        type: integer
+      style: simple
+    entity_neighbor:
+      description: Neighbor entity
+      example: 123456
+      explode: true
+      in: query
+      name: neighbor
+      required: true
+      schema:
+        format: int32
+        type: integer
+      style: form
+    height:
+      description: The block height
+      example: 1
+      explode: false
+      in: path
+      name: height
+      required: true
+      schema:
+        minimum: 0
+        type: integer
       style: simple
     hex_address:
       description: The cryptocurrency address in hexadecimal representation
@@ -1617,16 +1730,6 @@ components:
         format: string
         type: string
       style: simple
-    neighbor:
-      description: Neighbor address
-      example: addressE
-      explode: true
-      in: query
-      name: neighbor
-      required: true
-      schema:
-        type: string
-      style: form
     hex_neighbor:
       description: Neighbor address in hexadecimal representation
       example: "123456"
@@ -1637,27 +1740,6 @@ components:
       schema:
         type: string
       style: form
-    entity:
-      description: The entity ID
-      example: 67065
-      explode: false
-      in: path
-      name: entity
-      required: true
-      schema:
-        format: int64
-        type: integer
-      style: simple
-    tx_hash:
-      description: The transaction hash
-      example: ab188013
-      explode: false
-      in: path
-      name: tx_hash
-      required: true
-      schema:
-        type: string
-      style: simple
     ids:
       description: Restrict result to given set of comma separated IDs
       explode: true
@@ -1682,6 +1764,16 @@ components:
         type: array
       style: form
       x-graphsense-rest-test-example: '"1,2"'
+    include_labels:
+      description: Whether labels of tags should be included
+      explode: true
+      in: query
+      name: include_labels
+      required: false
+      schema:
+        default: false
+        type: boolean
+      style: form
     include_tags:
       description: Whether tags should be included
       explode: true
@@ -1692,15 +1784,112 @@ components:
         default: false
         type: boolean
       style: form
-    include_labels:
-      description: Whether labels of tags should be included
+    label:
+      description: The label of an entity
+      example: cimedy
       explode: true
       in: query
-      name: include_labels
+      name: label
+      required: true
+      schema:
+        type: string
+      style: form
+    limit:
+      description: Maximum number of search results
+      example: 10
+      explode: true
+      in: query
+      name: limit
       required: false
       schema:
-        default: false
-        type: boolean
+        type: integer
+      style: form
+    neighbor:
+      description: Neighbor address
+      example: addressE
+      explode: true
+      in: query
+      name: neighbor
+      required: true
+      schema:
+        type: string
+      style: form
+    page:
+      description: Resumption token for retrieving the next page
+      explode: true
+      in: query
+      name: page
+      required: false
+      schema:
+        type: string
+      style: form
+    pagesize:
+      description: Number of items returned in a single page
+      example: 10
+      explode: true
+      in: query
+      name: pagesize
+      required: false
+      schema:
+        minimum: 1
+        type: integer
+      style: form
+    search_key:
+      description: 'Match neighbors against one and only one of these properties:
+        - the category the entity belongs to - addresses the entity contains - entity
+        ids - total_received: amount the entity received in total - balance: amount
+        the entity holds finally'
+      example: category
+      explode: true
+      in: query
+      name: key
+      required: true
+      schema:
+        enum:
+        - category
+        - addresses
+        - entities
+        - total_received
+        - balance
+        type: string
+      style: form
+    search_query:
+      description: It can be (the beginning of) an address, a transaction or a label
+      example: foo
+      explode: true
+      in: query
+      name: q
+      required: true
+      schema:
+        minLength: 3
+        pattern: ^[\w ]+$
+        type: string
+      style: form
+    search_value:
+      description: 'If key is - category: comma separated list of category names -
+        addresses: comma separated list of address IDs - entities: comma separated
+        list of entity IDs - total_received/balance: comma separated tuple of (currency,
+        min, max) where currency is ''value'' for the cryptocurrency value or an ISO
+        currency code'
+      example: Miner
+      explode: true
+      in: query
+      name: value
+      required: true
+      schema:
+        items:
+          type: string
+        type: array
+      style: form
+    skip_num_addresses:
+      description: Skip entities containing more addresses
+      explode: true
+      in: query
+      name: skip_num_addresses
+      required: false
+      schema:
+        format: int32
+        type: integer
       style: form
     tag_coherence:
       description: Whether to calculate coherence of address tags
@@ -1725,84 +1914,6 @@ components:
         - entity
         type: string
       style: form
-    search_key:
-      description: 'Match neighbors against one and only one of these properties:
-        - the category the entity belongs to - addresses the entity contains - entity
-        ids - total_received: amount the entity received in total - balance: amount
-        the entity holds finally'
-      example: category
-      explode: true
-      in: query
-      name: key
-      required: true
-      schema:
-        enum:
-        - category
-        - addresses
-        - entities
-        - total_received
-        - balance
-        type: string
-      style: form
-    search_value:
-      description: 'If key is - category: comma separated list of category names -
-        addresses: comma separated list of address IDs - entities: comma separated
-        list of entity IDs - total_received/balance: comma separated tuple of (currency,
-        min, max) where currency is ''value'' for the cryptocurrency value or an ISO
-        currency code'
-      example: Miner
-      explode: true
-      in: query
-      name: value
-      required: true
-      schema:
-        items:
-          type: string
-        type: array
-      style: form
-    depth:
-      description: How many hops should the transaction graph be searched
-      example: 2
-      explode: true
-      in: query
-      name: depth
-      required: true
-      schema:
-        format: int32
-        maximum: 7
-        type: integer
-      style: form
-    breadth:
-      description: How many siblings of each neighbor should be tried
-      explode: true
-      in: query
-      name: breadth
-      required: false
-      schema:
-        default: 16
-        format: int32
-        type: integer
-      style: form
-    skip_num_addresses:
-      description: Skip entities containing more addresses
-      explode: true
-      in: query
-      name: skip_num_addresses
-      required: false
-      schema:
-        format: int32
-        type: integer
-      style: form
-    label:
-      description: The label of an entity
-      example: cimedy
-      explode: true
-      in: query
-      name: label
-      required: true
-      schema:
-        type: string
-      style: form
     taxonomy:
       description: The taxonomy
       example: foo
@@ -1813,328 +1924,213 @@ components:
       schema:
         type: string
       style: simple
-    search_query:
-      description: It can be (the beginning of) an address, a transaction or a label
-      example: foo
-      explode: true
-      in: query
-      name: q
+    tx_hash:
+      description: The transaction hash
+      example: ab188013
+      explode: false
+      in: path
+      name: tx_hash
       required: true
       schema:
-        minLength: 3
-        pattern: ^[\w ]+$
         type: string
-      style: form
-    limit:
-      description: Maximum number of search results
-      example: 10
-      explode: true
-      in: query
-      name: limit
-      required: false
-      schema:
-        type: integer
-      style: form
+      style: simple
   schemas:
-    stats:
+    address:
       example:
-        notes:
-        - note: note
-        - note: note
-        tags_source:
-          visible_name: visible_name
-          report_uuid: report_uuid
-          id: id
-          version: version
-        version:
-          file: file
-          nr: nr
-          hash: hash
-          timestamp: timestamp
-        tools:
-        - visible_name: visible_name
-          responsible_for:
-          - responsible_for
-          - responsible_for
-          id: id
-          titanium_replayable: true
-          version: version
-        - visible_name: visible_name
-          responsible_for:
-          - responsible_for
-          - responsible_for
-          id: id
-          titanium_replayable: true
-          version: version
-        currencies:
-        - notes:
-          - notes
-          - notes
-          no_addresses: 1
-          no_labels: 2
-          name: name
-          no_entities: 5
-          no_address_relations: 6
-          tools:
-          - tools
-          - tools
-          no_blocks: 0
-          data_sources:
-          - visible_name: visible_name
-            report_uuid: report_uuid
-            id: id
-            version:
-              nr: nr
-              timestamp: timestamp
-          - visible_name: visible_name
-            report_uuid: report_uuid
-            id: id
-            version:
-              nr: nr
-              timestamp: timestamp
-          no_txs: 5
-          timestamp: 7
-        - notes:
-          - notes
-          - notes
-          no_addresses: 1
-          no_labels: 2
-          name: name
-          no_entities: 5
-          no_address_relations: 6
-          tools:
-          - tools
-          - tools
-          no_blocks: 0
-          data_sources:
-          - visible_name: visible_name
-            report_uuid: report_uuid
-            id: id
-            version:
-              nr: nr
-              timestamp: timestamp
-          - visible_name: visible_name
-            report_uuid: report_uuid
-            id: id
-            version:
-              nr: nr
-              timestamp: timestamp
-          no_txs: 5
-          timestamp: 7
+        total_spent:
+          fiat_values:
+          - code: code
+            value: 0.8008282
+          - code: code
+            value: 0.8008282
+          value: 6
+        in_degree: 2
+        address: address
+        balance:
+          fiat_values:
+          - code: code
+            value: 0.8008282
+          - code: code
+            value: 0.8008282
+          value: 6
+        no_incoming_txs: 7
+        no_outgoing_txs: 9
+        out_degree: 3
+        first_tx:
+          tx_hash: tx_hash
+          height: 1
+          timestamp: 5
+        last_tx:
+          tx_hash: tx_hash
+          height: 1
+          timestamp: 5
+        entity: 1
+        total_received:
+          fiat_values:
+          - code: code
+            value: 0.8008282
+          - code: code
+            value: 0.8008282
+          value: 6
+        tags:
+        - null
+        - null
       properties:
-        currencies:
-          items:
-            $ref: '#/components/schemas/currency_stats'
-          title: currencies
-          type: array
-        version:
-          $ref: '#/components/schemas/stats_version'
-        tools:
-          items:
-            $ref: '#/components/schemas/stats_tool'
-          title: tools
-          type: array
-        tags_source:
-          $ref: '#/components/schemas/stats_tags_source'
-        notes:
-          items:
-            $ref: '#/components/schemas/stats_note'
-          title: notes
-          type: array
-      title: stats
-      type: object
-    stats_version:
-      example:
-        file: file
-        nr: nr
-        hash: hash
-        timestamp: timestamp
-      properties:
-        nr:
-          title: nr
+        address:
+          description: Address
+          title: address
           type: string
-        hash:
-          title: hash
-          type: string
-        timestamp:
-          title: timestamp
-          type: string
-        file:
-          title: file
-          type: string
-      title: stats_version
-      type: object
-    stats_tool:
-      example:
-        visible_name: visible_name
-        responsible_for:
-        - responsible_for
-        - responsible_for
-        id: id
-        titanium_replayable: true
-        version: version
-      properties:
-        visible_name:
-          title: visible_name
-          type: string
-        id:
-          title: id
-          type: string
-        version:
-          title: version
-          type: string
-        titanium_replayable:
-          title: titanium_replayable
-          type: boolean
-        responsible_for:
-          items:
-            type: string
-          title: responsible_for
-          type: array
-      title: stats_tool
-      type: object
-    stats_tags_source:
-      example:
-        visible_name: visible_name
-        report_uuid: report_uuid
-        id: id
-        version: version
-      properties:
-        visible_name:
-          title: visible_name
-          type: string
-        id:
-          title: id
-          type: string
-        version:
-          title: version
-          type: string
-        report_uuid:
-          title: report_uuid
-          type: string
-      title: stats_tags_source
-      type: object
-    stats_note:
-      example:
-        note: note
-      properties:
-        note:
-          title: note
-          type: string
-      title: stats_note
-      type: object
-    currency_stats:
-      example:
-        notes:
-        - notes
-        - notes
-        no_addresses: 1
-        no_labels: 2
-        name: name
-        no_entities: 5
-        no_address_relations: 6
-        tools:
-        - tools
-        - tools
-        no_blocks: 0
-        data_sources:
-        - visible_name: visible_name
-          report_uuid: report_uuid
-          id: id
-          version:
-            nr: nr
-            timestamp: timestamp
-        - visible_name: visible_name
-          report_uuid: report_uuid
-          id: id
-          version:
-            nr: nr
-            timestamp: timestamp
-        no_txs: 5
-        timestamp: 7
-      properties:
-        name:
-          title: name
-          type: string
-        no_blocks:
+        balance:
+          $ref: '#/components/schemas/values'
+        entity:
+          description: Entity id
           format: int64
-          title: no_blocks
+          title: entity
           type: integer
-        no_address_relations:
+        first_tx:
+          $ref: '#/components/schemas/tx_summary'
+        in_degree:
           format: int64
-          title: no_address_relations
+          title: in_degree
           type: integer
-        no_addresses:
+        last_tx:
+          $ref: '#/components/schemas/tx_summary'
+        no_incoming_txs:
           format: int64
-          title: no_addresses
+          title: no_incoming_txs
           type: integer
-        no_entities:
+        no_outgoing_txs:
           format: int64
-          title: no_entities
+          title: no_outgoing_txs
           type: integer
-        no_txs:
+        out_degree:
           format: int64
-          title: no_txs
+          title: out_degree
           type: integer
-        no_labels:
-          format: int64
-          title: no_labels
-          type: integer
-        timestamp:
-          format: int64
-          title: timestamp
-          type: integer
-        tools:
+        tags:
+          description: Tags
           items:
-            type: string
-          title: tools
+            $ref: '#/components/schemas/address_tag'
+          title: tags
           type: array
-        notes:
-          items:
-            type: string
-          title: notes
-          type: array
-        data_sources:
-          items:
-            $ref: '#/components/schemas/stats_ledger'
-          title: data_sources
-          type: array
-      title: statistics of a cryptocurrency
+        total_received:
+          $ref: '#/components/schemas/values'
+        total_spent:
+          $ref: '#/components/schemas/values'
+      required:
+      - address
+      - balance
+      - entity
+      - first_tx
+      - in_degree
+      - last_tx
+      - no_incoming_txs
+      - no_outgoing_txs
+      - out_degree
+      - total_received
+      - total_spent
+      title: address
       type: object
-    stats_ledger:
+    address_id:
+      description: Address
+      title: address
+      type: string
+    address_tag:
+      allOf:
+      - $ref: '#/components/schemas/tag'
+      - $ref: '#/components/schemas/address_tag_allOf'
+      title: address_tag
+    addresses:
       example:
-        visible_name: visible_name
-        report_uuid: report_uuid
-        id: id
-        version:
-          nr: nr
-          timestamp: timestamp
+        next_page: next_page
+        addresses:
+        - total_spent:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          in_degree: 2
+          address: address
+          balance:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          no_incoming_txs: 7
+          no_outgoing_txs: 9
+          out_degree: 3
+          first_tx:
+            tx_hash: tx_hash
+            height: 1
+            timestamp: 5
+          last_tx:
+            tx_hash: tx_hash
+            height: 1
+            timestamp: 5
+          entity: 1
+          total_received:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          tags:
+          - null
+          - null
+        - total_spent:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          in_degree: 2
+          address: address
+          balance:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          no_incoming_txs: 7
+          no_outgoing_txs: 9
+          out_degree: 3
+          first_tx:
+            tx_hash: tx_hash
+            height: 1
+            timestamp: 5
+          last_tx:
+            tx_hash: tx_hash
+            height: 1
+            timestamp: 5
+          entity: 1
+          total_received:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          tags:
+          - null
+          - null
       properties:
-        visible_name:
-          title: visible_name
+        addresses:
+          items:
+            $ref: '#/components/schemas/address'
+          title: addresses
+          type: array
+        next_page:
+          format: string
+          title: next_page
           type: string
-        id:
-          title: id
-          type: string
-        version:
-          $ref: '#/components/schemas/stats_ledger_version'
-        report_uuid:
-          title: report_uuid
-          type: string
-      title: stats_ledger
-      type: object
-    stats_ledger_version:
-      example:
-        nr: nr
-        timestamp: timestamp
-      properties:
-        nr:
-          title: nr
-          type: string
-        timestamp:
-          title: timestamp
-          type: string
-      title: stats_ledger_version
+      title: addresses
       type: object
     block:
       example:
@@ -2176,226 +2172,254 @@ components:
           no_txs: 6
           timestamp: 1
       properties:
-        next_page:
-          format: string
-          title: next_page
-          type: string
         blocks:
           items:
             $ref: '#/components/schemas/block'
           title: blocks
           type: array
-      title: blocks
-      type: object
-    address:
-      example:
-        total_spent:
-          fiat_values:
-          - code: code
-            value: 6.0274563
-          - code: code
-            value: 6.0274563
-          value: 1
-        in_degree: 2
-        address: address
-        balance:
-          fiat_values:
-          - code: code
-            value: 6.0274563
-          - code: code
-            value: 6.0274563
-          value: 1
-        no_incoming_txs: 9
-        out_degree: 7
-        no_outgoing_txs: 3
-        first_tx:
-          tx_hash: tx_hash
-          height: 1
-          timestamp: 5
-        last_tx:
-          tx_hash: tx_hash
-          height: 1
-          timestamp: 5
-        entity: 0
-        total_received:
-          fiat_values:
-          - code: code
-            value: 6.0274563
-          - code: code
-            value: 6.0274563
-          value: 1
-        tags:
-        - null
-        - null
-      properties:
-        address:
-          description: Address
-          title: address
-          type: string
-        entity:
-          description: Entity id
-          format: int64
-          title: entity
-          type: integer
-        balance:
-          $ref: '#/components/schemas/values'
-        first_tx:
-          $ref: '#/components/schemas/tx_summary'
-        last_tx:
-          $ref: '#/components/schemas/tx_summary'
-        in_degree:
-          format: int64
-          title: in_degree
-          type: integer
-        out_degree:
-          format: int64
-          title: out_degree
-          type: integer
-        no_incoming_txs:
-          format: int64
-          title: no_incoming_txs
-          type: integer
-        no_outgoing_txs:
-          format: int64
-          title: no_outgoing_txs
-          type: integer
-        total_received:
-          $ref: '#/components/schemas/values'
-        total_spent:
-          $ref: '#/components/schemas/values'
-        tags:
-          description: Tags
-          items:
-            $ref: '#/components/schemas/address_tag'
-          title: tags
-          type: array
-      required:
-      - address
-      - balance
-      - entity
-      - first_tx
-      - in_degree
-      - last_tx
-      - no_incoming_txs
-      - no_outgoing_txs
-      - out_degree
-      - total_received
-      - total_spent
-      title: address
-      type: object
-    addresses:
-      example:
-        next_page: next_page
-        addresses:
-        - total_spent:
-            fiat_values:
-            - code: code
-              value: 6.0274563
-            - code: code
-              value: 6.0274563
-            value: 1
-          in_degree: 2
-          address: address
-          balance:
-            fiat_values:
-            - code: code
-              value: 6.0274563
-            - code: code
-              value: 6.0274563
-            value: 1
-          no_incoming_txs: 9
-          out_degree: 7
-          no_outgoing_txs: 3
-          first_tx:
-            tx_hash: tx_hash
-            height: 1
-            timestamp: 5
-          last_tx:
-            tx_hash: tx_hash
-            height: 1
-            timestamp: 5
-          entity: 0
-          total_received:
-            fiat_values:
-            - code: code
-              value: 6.0274563
-            - code: code
-              value: 6.0274563
-            value: 1
-          tags:
-          - null
-          - null
-        - total_spent:
-            fiat_values:
-            - code: code
-              value: 6.0274563
-            - code: code
-              value: 6.0274563
-            value: 1
-          in_degree: 2
-          address: address
-          balance:
-            fiat_values:
-            - code: code
-              value: 6.0274563
-            - code: code
-              value: 6.0274563
-            value: 1
-          no_incoming_txs: 9
-          out_degree: 7
-          no_outgoing_txs: 3
-          first_tx:
-            tx_hash: tx_hash
-            height: 1
-            timestamp: 5
-          last_tx:
-            tx_hash: tx_hash
-            height: 1
-            timestamp: 5
-          entity: 0
-          total_received:
-            fiat_values:
-            - code: code
-              value: 6.0274563
-            - code: code
-              value: 6.0274563
-            value: 1
-          tags:
-          - null
-          - null
-      properties:
         next_page:
           format: string
           title: next_page
           type: string
-        addresses:
+      title: blocks
+      type: object
+    concept:
+      example:
+        description: description
+        id: id
+        label: label
+        taxonomy: taxonomy
+        uri: uri
+      properties:
+        description:
+          description: Description
+          title: description
+          type: string
+        id:
+          description: ID
+          title: id
+          type: string
+        label:
+          description: Label
+          title: label
+          type: string
+        taxonomy:
+          description: Taxonomy
+          title: taxonomy
+          type: string
+        uri:
+          description: URI
+          title: uri
+          type: string
+      required:
+      - description
+      - id
+      - label
+      - taxonomy
+      - uri
+      title: concept
+      type: object
+    currency_stats:
+      example:
+        notes:
+        - notes
+        - notes
+        no_addresses: 6
+        no_labels: 5
+        name: name
+        no_entities: 5
+        no_address_relations: 0
+        tools:
+        - tools
+        - tools
+        data_sources:
+        - visible_name: visible_name
+          report_uuid: report_uuid
+          id: id
+          version:
+            nr: nr
+            timestamp: timestamp
+        - visible_name: visible_name
+          report_uuid: report_uuid
+          id: id
+          version:
+            nr: nr
+            timestamp: timestamp
+        no_blocks: 1
+        no_txs: 2
+        timestamp: 7
+      properties:
+        data_sources:
           items:
-            $ref: '#/components/schemas/address'
-          title: addresses
+            $ref: '#/components/schemas/stats_ledger'
+          title: data_sources
           type: array
-      title: addresses
+        name:
+          title: name
+          type: string
+        no_address_relations:
+          format: int64
+          title: no_address_relations
+          type: integer
+        no_addresses:
+          format: int64
+          title: no_addresses
+          type: integer
+        no_blocks:
+          format: int64
+          title: no_blocks
+          type: integer
+        no_entities:
+          format: int64
+          title: no_entities
+          type: integer
+        no_labels:
+          format: int64
+          title: no_labels
+          type: integer
+        no_txs:
+          format: int64
+          title: no_txs
+          type: integer
+        notes:
+          items:
+            type: string
+          title: notes
+          type: array
+        timestamp:
+          format: int64
+          title: timestamp
+          type: integer
+        tools:
+          items:
+            type: string
+          title: tools
+          type: array
+      title: statistics of a cryptocurrency
+      type: object
+    entities:
+      example:
+        next_page: next_page
+        entities:
+        - total_spent:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          in_degree: 6
+          balance:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          no_addresses: 1
+          no_incoming_txs: 5
+          no_outgoing_txs: 5
+          out_degree: 2
+          first_tx:
+            tx_hash: tx_hash
+            height: 1
+            timestamp: 5
+          last_tx:
+            tx_hash: tx_hash
+            height: 1
+            timestamp: 5
+          entity: 0
+          total_received:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          tags:
+            entity_tags:
+            - null
+            - null
+            address_tags:
+            - null
+            - null
+            tag_coherence: 0.8008282
+        - total_spent:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          in_degree: 6
+          balance:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          no_addresses: 1
+          no_incoming_txs: 5
+          no_outgoing_txs: 5
+          out_degree: 2
+          first_tx:
+            tx_hash: tx_hash
+            height: 1
+            timestamp: 5
+          last_tx:
+            tx_hash: tx_hash
+            height: 1
+            timestamp: 5
+          entity: 0
+          total_received:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          tags:
+            entity_tags:
+            - null
+            - null
+            address_tags:
+            - null
+            - null
+            tag_coherence: 0.8008282
+      properties:
+        entities:
+          items:
+            $ref: '#/components/schemas/entity'
+          title: entities
+          type: array
+        next_page:
+          format: string
+          title: next_page
+          type: string
+      title: entities
       type: object
     entity:
       example:
         total_spent:
           fiat_values:
           - code: code
-            value: 6.0274563
+            value: 0.8008282
           - code: code
-            value: 6.0274563
-          value: 1
+            value: 0.8008282
+          value: 6
         in_degree: 6
         balance:
           fiat_values:
           - code: code
-            value: 6.0274563
+            value: 0.8008282
           - code: code
-            value: 6.0274563
-          value: 1
-        no_addresses: 5
+            value: 0.8008282
+          value: 6
+        no_addresses: 1
         no_incoming_txs: 5
-        out_degree: 1
-        no_outgoing_txs: 2
+        no_outgoing_txs: 5
+        out_degree: 2
         first_tx:
           tx_hash: tx_hash
           height: 1
@@ -2408,10 +2432,10 @@ components:
         total_received:
           fiat_values:
           - code: code
-            value: 6.0274563
+            value: 0.8008282
           - code: code
-            value: 6.0274563
-          value: 1
+            value: 0.8008282
+          value: 6
         tags:
           entity_tags:
           - null
@@ -2421,25 +2445,21 @@ components:
           - null
           tag_coherence: 0.8008282
       properties:
+        balance:
+          $ref: '#/components/schemas/values'
         entity:
           description: Entity id
           format: int64
           title: entity
           type: integer
-        balance:
-          $ref: '#/components/schemas/values'
         first_tx:
-          $ref: '#/components/schemas/tx_summary'
-        last_tx:
           $ref: '#/components/schemas/tx_summary'
         in_degree:
           format: int64
           title: in_degree
           type: integer
-        out_degree:
-          format: int64
-          title: out_degree
-          type: integer
+        last_tx:
+          $ref: '#/components/schemas/tx_summary'
         no_addresses:
           description: number of contained addresses
           format: int64
@@ -2453,12 +2473,16 @@ components:
           format: int64
           title: no_outgoing_txs
           type: integer
+        out_degree:
+          format: int64
+          title: out_degree
+          type: integer
+        tags:
+          $ref: '#/components/schemas/tags'
         total_received:
           $ref: '#/components/schemas/values'
         total_spent:
           $ref: '#/components/schemas/values'
-        tags:
-          $ref: '#/components/schemas/tags'
       required:
       - balance
       - entity
@@ -2473,61 +2497,29 @@ components:
       - total_spent
       title: entity
       type: object
-    tags:
-      example:
-        entity_tags:
-        - null
-        - null
-        address_tags:
-        - null
-        - null
-        tag_coherence: 0.8008282
-      properties:
-        address_tags:
-          description: Aggregated tags of contained addresses
-          items:
-            $ref: '#/components/schemas/address_tag'
-          title: address_tags
-          type: array
-        entity_tags:
-          description: Tags of this entity
-          items:
-            $ref: '#/components/schemas/entity_tag'
-          title: entity_tags
-          type: array
-        tag_coherence:
-          description: Tag coherence
-          format: float
-          title: tag_coherence
-          type: number
-      required:
-      - address_tags
-      - entity_tags
-      title: tags
-      type: object
-    entities:
+    entity_addresses:
       example:
         next_page: next_page
-        entities:
+        addresses:
         - total_spent:
             fiat_values:
             - code: code
-              value: 6.0274563
+              value: 0.8008282
             - code: code
-              value: 6.0274563
-            value: 1
-          in_degree: 6
+              value: 0.8008282
+            value: 6
+          in_degree: 2
+          address: address
           balance:
             fiat_values:
             - code: code
-              value: 6.0274563
+              value: 0.8008282
             - code: code
-              value: 6.0274563
-            value: 1
-          no_addresses: 5
-          no_incoming_txs: 5
-          out_degree: 1
-          no_outgoing_txs: 2
+              value: 0.8008282
+            value: 6
+          no_incoming_txs: 7
+          no_outgoing_txs: 9
+          out_degree: 3
           first_tx:
             tx_hash: tx_hash
             height: 1
@@ -2536,41 +2528,36 @@ components:
             tx_hash: tx_hash
             height: 1
             timestamp: 5
-          entity: 0
+          entity: 1
           total_received:
             fiat_values:
             - code: code
-              value: 6.0274563
+              value: 0.8008282
             - code: code
-              value: 6.0274563
-            value: 1
+              value: 0.8008282
+            value: 6
           tags:
-            entity_tags:
-            - null
-            - null
-            address_tags:
-            - null
-            - null
-            tag_coherence: 0.8008282
+          - null
+          - null
         - total_spent:
             fiat_values:
             - code: code
-              value: 6.0274563
+              value: 0.8008282
             - code: code
-              value: 6.0274563
-            value: 1
-          in_degree: 6
+              value: 0.8008282
+            value: 6
+          in_degree: 2
+          address: address
           balance:
             fiat_values:
             - code: code
-              value: 6.0274563
+              value: 0.8008282
             - code: code
-              value: 6.0274563
-            value: 1
-          no_addresses: 5
-          no_incoming_txs: 5
-          out_degree: 1
-          no_outgoing_txs: 2
+              value: 0.8008282
+            value: 6
+          no_incoming_txs: 7
+          no_outgoing_txs: 9
+          out_degree: 3
           first_tx:
             tx_hash: tx_hash
             height: 1
@@ -2579,39 +2566,60 @@ components:
             tx_hash: tx_hash
             height: 1
             timestamp: 5
-          entity: 0
+          entity: 1
           total_received:
             fiat_values:
             - code: code
-              value: 6.0274563
+              value: 0.8008282
             - code: code
-              value: 6.0274563
-            value: 1
+              value: 0.8008282
+            value: 6
           tags:
-            entity_tags:
-            - null
-            - null
-            address_tags:
-            - null
-            - null
-            tag_coherence: 0.8008282
+          - null
+          - null
       properties:
+        addresses:
+          items:
+            $ref: '#/components/schemas/address'
+          title: addresses
+          type: array
         next_page:
           format: string
           title: next_page
           type: string
-        entities:
-          items:
-            $ref: '#/components/schemas/entity'
-          title: entities
-          type: array
-      title: entities
+      title: entity_addresses
       type: object
-    tx_summary:
-      example:
-        tx_hash: tx_hash
-        height: 1
-        timestamp: 5
+    entity_id:
+      description: Entity id
+      format: int64
+      title: entity
+      type: integer
+    entity_tag:
+      allOf:
+      - $ref: '#/components/schemas/tag'
+      - $ref: '#/components/schemas/entity_tag_allOf'
+      title: entity_tag
+    height:
+      description: Height
+      format: int64
+      minimum: 1
+      title: height
+      type: integer
+    label:
+      description: Label
+      title: label
+      type: string
+    link:
+      discriminator:
+        mapping:
+          account: '#/components/schemas/tx_account'
+          utxo: '#/components/schemas/link_utxo'
+        propertyName: tx_type
+      oneOf:
+      - $ref: '#/components/schemas/link_utxo'
+      - $ref: '#/components/schemas/tx_account'
+      title: link
+    link_utxo:
       properties:
         height:
           description: Height
@@ -2619,6 +2627,10 @@ components:
           minimum: 1
           title: height
           type: integer
+        input_value:
+          $ref: '#/components/schemas/values'
+        output_value:
+          $ref: '#/components/schemas/values'
         timestamp:
           description: Timestamp
           format: int64
@@ -2628,180 +2640,34 @@ components:
           description: Transaction hash
           title: tx_hash
           type: string
+        tx_type:
+          default: utxo
+          type: string
       required:
       - height
+      - input_value
+      - output_value
       - timestamp
       - tx_hash
-      title: tx_summary
+      - tx_type
       type: object
-    address_tag:
-      allOf:
-      - $ref: '#/components/schemas/tag'
-      - $ref: '#/components/schemas/address_tag_allOf'
-      title: address_tag
-    entity_tag:
-      allOf:
-      - $ref: '#/components/schemas/tag'
-      - $ref: '#/components/schemas/entity_tag_allOf'
-      title: entity_tag
-    tag:
-      properties:
-        label:
-          description: Label
-          title: label
-          type: string
-        category:
-          description: Category
-          type: string
-        abuse:
-          description: Abuses
-          type: string
-        tagpack_uri:
-          description: Tagpack URI
-          type: string
-        source:
-          description: Source
-          type: string
-        lastmod:
-          description: Last modified
-          format: int32
-          type: integer
-        active:
-          description: whether the address has been ever used
-          type: boolean
-        currency:
-          description: Currency
-          type: string
-      required:
-      - active
-      - currency
-      - label
-      type: object
-    values:
-      example:
-        fiat_values:
-        - code: code
-          value: 6.0274563
-        - code: code
-          value: 6.0274563
-        value: 1
-      properties:
-        fiat_values:
-          items:
-            $ref: '#/components/schemas/rate'
-          title: fiat_values
-          type: array
-        value:
-          format: int64
-          title: value
-          type: integer
-      title: values
-      type: object
-    next_page:
-      format: string
-      title: next_page
-      type: string
-    address_id:
-      description: Address
-      title: address
-      type: string
-    entity_id:
-      description: Entity id
-      format: int64
-      title: entity
-      type: integer
-    height:
-      description: Height
-      format: int64
-      minimum: 1
-      title: height
-      type: integer
-    timestamp:
-      description: Timestamp
-      format: int64
-      title: timestamp
-      type: integer
-    tx_type:
-      description: Discriminator for different kinds of transaction types
-      type: string
-    tx_hash:
-      description: Transaction hash
-      title: tx_hash
-      type: string
-    no_addresses:
-      description: number of contained addresses
-      format: int64
-      title: no_addresses
-      type: integer
-    neighbors:
+    links:
       example:
         next_page: next_page
-        neighbors:
-        - node_type: address
-          balance:
-            fiat_values:
-            - code: code
-              value: 6.0274563
-            - code: code
-              value: 6.0274563
-            value: 1
-          received:
-            fiat_values:
-            - code: code
-              value: 6.0274563
-            - code: code
-              value: 6.0274563
-            value: 1
-          id: id
-          value:
-            fiat_values:
-            - code: code
-              value: 6.0274563
-            - code: code
-              value: 6.0274563
-            value: 1
-          labels:
-          - labels
-          - labels
-          no_txs: 0
-        - node_type: address
-          balance:
-            fiat_values:
-            - code: code
-              value: 6.0274563
-            - code: code
-              value: 6.0274563
-            value: 1
-          received:
-            fiat_values:
-            - code: code
-              value: 6.0274563
-            - code: code
-              value: 6.0274563
-            value: 1
-          id: id
-          value:
-            fiat_values:
-            - code: code
-              value: 6.0274563
-            - code: code
-              value: 6.0274563
-            value: 1
-          labels:
-          - labels
-          - labels
-          no_txs: 0
+        links:
+        - null
+        - null
       properties:
+        links:
+          items:
+            $ref: '#/components/schemas/link'
+          title: links
+          type: array
         next_page:
           format: string
           title: next_page
           type: string
-        neighbors:
-          items:
-            $ref: '#/components/schemas/neighbor'
-          title: neighbors
-          type: array
-      title: neighbors
+      title: links
       type: object
     neighbor:
       example:
@@ -2809,40 +2675,35 @@ components:
         balance:
           fiat_values:
           - code: code
-            value: 6.0274563
+            value: 0.8008282
           - code: code
-            value: 6.0274563
-          value: 1
+            value: 0.8008282
+          value: 6
         received:
           fiat_values:
           - code: code
-            value: 6.0274563
+            value: 0.8008282
           - code: code
-            value: 6.0274563
-          value: 1
+            value: 0.8008282
+          value: 6
         id: id
         value:
           fiat_values:
           - code: code
-            value: 6.0274563
+            value: 0.8008282
           - code: code
-            value: 6.0274563
-          value: 1
+            value: 0.8008282
+          value: 6
         labels:
         - labels
         - labels
         no_txs: 0
       properties:
+        balance:
+          $ref: '#/components/schemas/values'
         id:
           description: address or entity id
           title: id
-          type: string
-        node_type:
-          description: address or entity
-          enum:
-          - address
-          - entity
-          title: node_type
           type: string
         labels:
           description: labels
@@ -2850,17 +2711,22 @@ components:
             type: string
           title: labels
           type: array
-        balance:
-          $ref: '#/components/schemas/values'
-        received:
-          $ref: '#/components/schemas/values'
-        value:
-          $ref: '#/components/schemas/values'
         no_txs:
           description: number of transactions
           format: int32
           title: no_txs
           type: integer
+        node_type:
+          description: address or entity
+          enum:
+          - address
+          - entity
+          title: node_type
+          type: string
+        received:
+          $ref: '#/components/schemas/values'
+        value:
+          $ref: '#/components/schemas/values'
       required:
       - balance
       - id
@@ -2870,366 +2736,108 @@ components:
       - value
       title: neighbor
       type: object
-    link:
-      discriminator:
-        mapping:
-          utxo: '#/components/schemas/link_utxo'
-          account: '#/components/schemas/tx_account'
-        propertyName: tx_type
-      oneOf:
-      - $ref: '#/components/schemas/link_utxo'
-      - $ref: '#/components/schemas/tx_account'
-      title: link
-    link_utxo:
-      properties:
-        tx_type:
-          default: utxo
-          type: string
-        tx_hash:
-          description: Transaction hash
-          title: tx_hash
-          type: string
-        height:
-          description: Height
-          format: int64
-          minimum: 1
-          title: height
-          type: integer
-        timestamp:
-          description: Timestamp
-          format: int64
-          title: timestamp
-          type: integer
-        input_value:
-          $ref: '#/components/schemas/values'
-        output_value:
-          $ref: '#/components/schemas/values'
-      required:
-      - height
-      - input_value
-      - output_value
-      - timestamp
-      - tx_hash
-      - tx_type
-      type: object
-    entity_addresses:
+    neighbors:
       example:
         next_page: next_page
-        addresses:
-        - total_spent:
-            fiat_values:
-            - code: code
-              value: 6.0274563
-            - code: code
-              value: 6.0274563
-            value: 1
-          in_degree: 2
-          address: address
+        neighbors:
+        - node_type: address
           balance:
             fiat_values:
             - code: code
-              value: 6.0274563
+              value: 0.8008282
             - code: code
-              value: 6.0274563
-            value: 1
-          no_incoming_txs: 9
-          out_degree: 7
-          no_outgoing_txs: 3
-          first_tx:
-            tx_hash: tx_hash
-            height: 1
-            timestamp: 5
-          last_tx:
-            tx_hash: tx_hash
-            height: 1
-            timestamp: 5
-          entity: 0
-          total_received:
+              value: 0.8008282
+            value: 6
+          received:
             fiat_values:
             - code: code
-              value: 6.0274563
+              value: 0.8008282
             - code: code
-              value: 6.0274563
-            value: 1
-          tags:
-          - null
-          - null
-        - total_spent:
+              value: 0.8008282
+            value: 6
+          id: id
+          value:
             fiat_values:
             - code: code
-              value: 6.0274563
+              value: 0.8008282
             - code: code
-              value: 6.0274563
-            value: 1
-          in_degree: 2
-          address: address
+              value: 0.8008282
+            value: 6
+          labels:
+          - labels
+          - labels
+          no_txs: 0
+        - node_type: address
           balance:
             fiat_values:
             - code: code
-              value: 6.0274563
+              value: 0.8008282
             - code: code
-              value: 6.0274563
-            value: 1
-          no_incoming_txs: 9
-          out_degree: 7
-          no_outgoing_txs: 3
-          first_tx:
-            tx_hash: tx_hash
-            height: 1
-            timestamp: 5
-          last_tx:
-            tx_hash: tx_hash
-            height: 1
-            timestamp: 5
-          entity: 0
-          total_received:
+              value: 0.8008282
+            value: 6
+          received:
             fiat_values:
             - code: code
-              value: 6.0274563
+              value: 0.8008282
             - code: code
-              value: 6.0274563
-            value: 1
-          tags:
-          - null
-          - null
-      properties:
-        next_page:
-          format: string
-          title: next_page
-          type: string
-        addresses:
-          items:
-            $ref: '#/components/schemas/address'
-          title: addresses
-          type: array
-      title: entity_addresses
-      type: object
-    search_result_level1:
-      allOf:
-      - $ref: '#/components/schemas/search_result_leaf'
-      - $ref: '#/components/schemas/search_result_level1_allOf'
-      title: search_result_level1
-    search_result_level2:
-      allOf:
-      - $ref: '#/components/schemas/search_result_leaf'
-      - $ref: '#/components/schemas/search_result_level2_allOf'
-      title: search_result_level2
-    search_result_level3:
-      allOf:
-      - $ref: '#/components/schemas/search_result_leaf'
-      - $ref: '#/components/schemas/search_result_level3_allOf'
-      title: search_result_level3
-    search_result_level4:
-      allOf:
-      - $ref: '#/components/schemas/search_result_leaf'
-      - $ref: '#/components/schemas/search_result_level4_allOf'
-      title: search_result_level4
-    search_result_level5:
-      allOf:
-      - $ref: '#/components/schemas/search_result_leaf'
-      - $ref: '#/components/schemas/search_result_level5_allOf'
-      title: search_result_level5
-    search_result_level6:
-      allOf:
-      - $ref: '#/components/schemas/search_result_leaf'
-      - $ref: '#/components/schemas/search_result_level6_allOf'
-      title: search_result_level6
-    search_result_leaf:
-      properties:
-        node:
-          $ref: '#/components/schemas/entity'
-        relation:
-          $ref: '#/components/schemas/neighbor'
-        matching_addresses:
-          items:
-            $ref: '#/components/schemas/address'
-          title: matching_addresses
-          type: array
-      title: search_result_leaf
-      type: object
-    tx_utxo:
-      properties:
-        tx_type:
-          default: utxo
-          type: string
-        tx_hash:
-          description: Transaction hash
-          title: tx_hash
-          type: string
-        coinbase:
-          description: Coinbase transaction flag
-          type: boolean
-        height:
-          description: Height
-          format: int64
-          minimum: 1
-          title: height
-          type: integer
-        inputs:
-          description: Transaction inputs/outputs
-          items:
-            $ref: '#/components/schemas/tx_value'
-          type: array
-        outputs:
-          description: Transaction inputs/outputs
-          items:
-            $ref: '#/components/schemas/tx_value'
-          type: array
-        timestamp:
-          description: Timestamp
-          format: int64
-          title: timestamp
-          type: integer
-        total_input:
-          $ref: '#/components/schemas/values'
-        total_output:
-          $ref: '#/components/schemas/values'
-      required:
-      - coinbase
-      - height
-      - inputs
-      - outputs
-      - timestamp
-      - total_input
-      - total_output
-      - tx_hash
-      - tx_type
-      type: object
-    tx_values:
-      description: Transaction inputs/outputs
-      items:
-        $ref: '#/components/schemas/tx_value'
-      type: array
-    tx_value:
-      properties:
-        address:
-          items:
-            $ref: '#/components/schemas/address_id'
-          title: address
-          type: array
-        value:
-          $ref: '#/components/schemas/values'
-      required:
-      - address
-      - value
-      title: tx_value
-      type: object
-    txs:
-      example:
-        next_page: next_page
-        txs:
-        - null
-        - null
-      properties:
-        next_page:
-          format: string
-          title: next_page
-          type: string
-        txs:
-          items:
-            $ref: '#/components/schemas/tx'
-          title: txs
-          type: array
-      title: txs
-      type: object
-    txs_account:
-      example:
-        next_page: next_page
-        txs:
-        - tx_hash: tx_hash
-          tx_type: account
+              value: 0.8008282
+            value: 6
+          id: id
           value:
             fiat_values:
             - code: code
-              value: 6.0274563
+              value: 0.8008282
             - code: code
-              value: 6.0274563
-            value: 1
-          height: 1
-          timestamp: 6
-        - tx_hash: tx_hash
-          tx_type: account
-          value:
-            fiat_values:
-            - code: code
-              value: 6.0274563
-            - code: code
-              value: 6.0274563
-            value: 1
-          height: 1
-          timestamp: 6
+              value: 0.8008282
+            value: 6
+          labels:
+          - labels
+          - labels
+          no_txs: 0
       properties:
+        neighbors:
+          items:
+            $ref: '#/components/schemas/neighbor'
+          title: neighbors
+          type: array
         next_page:
           format: string
           title: next_page
           type: string
-        txs:
-          items:
-            $ref: '#/components/schemas/tx_account'
-          title: txs
-          type: array
-      title: txs_account
+      title: neighbors
       type: object
-    tx_account:
+    next_page:
+      format: string
+      title: next_page
+      type: string
+    no_addresses:
+      description: number of contained addresses
+      format: int64
+      title: no_addresses
+      type: integer
+    rate:
       example:
-        tx_hash: tx_hash
-        tx_type: account
-        value:
-          fiat_values:
-          - code: code
-            value: 6.0274563
-          - code: code
-            value: 6.0274563
-          value: 1
-        height: 1
-        timestamp: 6
+        code: code
+        value: 0.8008282
       properties:
-        tx_type:
-          default: account
-          title: tx_type
+        code:
+          description: iso currency code
+          title: code
           type: string
-        tx_hash:
-          description: Transaction hash
-          title: tx_hash
-          type: string
-        height:
-          description: Height
-          format: int64
-          minimum: 1
-          title: height
-          type: integer
-        timestamp:
-          description: Timestamp
-          format: int64
-          title: timestamp
-          type: integer
         value:
-          $ref: '#/components/schemas/values'
-      required:
-      - height
-      - timestamp
-      - tx_hash
-      - tx_type
-      - value
-      title: tx_account
+          description: exchange rate
+          format: float
+          title: value
+          type: number
+      title: rate
       type: object
-    tx:
-      discriminator:
-        mapping:
-          utxo: '#/components/schemas/tx_utxo'
-          account: '#/components/schemas/tx_account'
-        propertyName: tx_type
-      oneOf:
-      - $ref: '#/components/schemas/tx_utxo'
-      - $ref: '#/components/schemas/tx_account'
-      title: tx
     rates:
       example:
         rates:
         - code: code
-          value: 6.0274563
+          value: 0.8008282
         - code: code
-          value: 6.0274563
+          value: 0.8008282
         height: 1
       properties:
         height:
@@ -3245,88 +2853,6 @@ components:
           type: array
       title: rates
       type: object
-    rate:
-      example:
-        code: code
-        value: 6.0274563
-      properties:
-        code:
-          description: iso currency code
-          title: code
-          type: string
-        value:
-          description: exchange rate
-          format: float
-          title: value
-          type: number
-      title: rate
-      type: object
-    taxonomy:
-      example:
-        taxonomy: taxonomy
-        uri: uri
-      properties:
-        taxonomy:
-          description: Taxonomy
-          title: taxonomy
-          type: string
-        uri:
-          description: URI
-          title: uri
-          type: string
-      required:
-      - taxonomy
-      - uri
-      title: taxonomy
-      type: object
-    concept:
-      example:
-        description: description
-        label: label
-        taxonomy: taxonomy
-        id: id
-        uri: uri
-      properties:
-        label:
-          description: Label
-          title: label
-          type: string
-        taxonomy:
-          description: Taxonomy
-          title: taxonomy
-          type: string
-        uri:
-          description: URI
-          title: uri
-          type: string
-        description:
-          description: Description
-          title: description
-          type: string
-        id:
-          description: ID
-          title: id
-          type: string
-      required:
-      - description
-      - id
-      - label
-      - taxonomy
-      - uri
-      title: concept
-      type: object
-    taxonomy_key:
-      description: Taxonomy
-      title: taxonomy
-      type: string
-    label:
-      description: Label
-      title: label
-      type: string
-    uri:
-      description: URI
-      title: uri
-      type: string
     search_result:
       example:
         currencies:
@@ -3371,16 +2897,16 @@ components:
         - txs
         - txs
       properties:
-        currency:
-          description: Currency
-          title: currency
-          type: string
         addresses:
           description: The list of found addresses
           items:
             type: string
           title: addresses
           type: array
+        currency:
+          description: Currency
+          title: currency
+          type: string
         txs:
           description: The list of found transactions
           items:
@@ -3395,6 +2921,597 @@ components:
         type: string
       title: labels
       type: array
+    search_result_leaf:
+      properties:
+        matching_addresses:
+          items:
+            $ref: '#/components/schemas/address'
+          title: matching_addresses
+          type: array
+        node:
+          $ref: '#/components/schemas/entity'
+        relation:
+          $ref: '#/components/schemas/neighbor'
+      title: search_result_leaf
+      type: object
+    search_result_level1:
+      allOf:
+      - $ref: '#/components/schemas/search_result_leaf'
+      - $ref: '#/components/schemas/search_result_level1_allOf'
+      title: search_result_level1
+    search_result_level2:
+      allOf:
+      - $ref: '#/components/schemas/search_result_leaf'
+      - $ref: '#/components/schemas/search_result_level2_allOf'
+      title: search_result_level2
+    search_result_level3:
+      allOf:
+      - $ref: '#/components/schemas/search_result_leaf'
+      - $ref: '#/components/schemas/search_result_level3_allOf'
+      title: search_result_level3
+    search_result_level4:
+      allOf:
+      - $ref: '#/components/schemas/search_result_leaf'
+      - $ref: '#/components/schemas/search_result_level4_allOf'
+      title: search_result_level4
+    search_result_level5:
+      allOf:
+      - $ref: '#/components/schemas/search_result_leaf'
+      - $ref: '#/components/schemas/search_result_level5_allOf'
+      title: search_result_level5
+    search_result_level6:
+      allOf:
+      - $ref: '#/components/schemas/search_result_leaf'
+      - $ref: '#/components/schemas/search_result_level6_allOf'
+      title: search_result_level6
+    stats:
+      example:
+        notes:
+        - note: note
+        - note: note
+        tags_source:
+          visible_name: visible_name
+          report_uuid: report_uuid
+          id: id
+          version: version
+        tools:
+        - visible_name: visible_name
+          responsible_for:
+          - responsible_for
+          - responsible_for
+          id: id
+          titanium_replayable: true
+          version: version
+        - visible_name: visible_name
+          responsible_for:
+          - responsible_for
+          - responsible_for
+          id: id
+          titanium_replayable: true
+          version: version
+        version:
+          file: file
+          nr: nr
+          hash: hash
+          timestamp: timestamp
+        currencies:
+        - notes:
+          - notes
+          - notes
+          no_addresses: 6
+          no_labels: 5
+          name: name
+          no_entities: 5
+          no_address_relations: 0
+          tools:
+          - tools
+          - tools
+          data_sources:
+          - visible_name: visible_name
+            report_uuid: report_uuid
+            id: id
+            version:
+              nr: nr
+              timestamp: timestamp
+          - visible_name: visible_name
+            report_uuid: report_uuid
+            id: id
+            version:
+              nr: nr
+              timestamp: timestamp
+          no_blocks: 1
+          no_txs: 2
+          timestamp: 7
+        - notes:
+          - notes
+          - notes
+          no_addresses: 6
+          no_labels: 5
+          name: name
+          no_entities: 5
+          no_address_relations: 0
+          tools:
+          - tools
+          - tools
+          data_sources:
+          - visible_name: visible_name
+            report_uuid: report_uuid
+            id: id
+            version:
+              nr: nr
+              timestamp: timestamp
+          - visible_name: visible_name
+            report_uuid: report_uuid
+            id: id
+            version:
+              nr: nr
+              timestamp: timestamp
+          no_blocks: 1
+          no_txs: 2
+          timestamp: 7
+      properties:
+        currencies:
+          items:
+            $ref: '#/components/schemas/currency_stats'
+          title: currencies
+          type: array
+        notes:
+          items:
+            $ref: '#/components/schemas/stats_note'
+          title: notes
+          type: array
+        tags_source:
+          $ref: '#/components/schemas/stats_tags_source'
+        tools:
+          items:
+            $ref: '#/components/schemas/stats_tool'
+          title: tools
+          type: array
+        version:
+          $ref: '#/components/schemas/stats_version'
+      title: stats
+      type: object
+    stats_ledger:
+      example:
+        visible_name: visible_name
+        report_uuid: report_uuid
+        id: id
+        version:
+          nr: nr
+          timestamp: timestamp
+      properties:
+        id:
+          title: id
+          type: string
+        report_uuid:
+          title: report_uuid
+          type: string
+        version:
+          $ref: '#/components/schemas/stats_ledger_version'
+        visible_name:
+          title: visible_name
+          type: string
+      title: stats_ledger
+      type: object
+    stats_ledger_version:
+      example:
+        nr: nr
+        timestamp: timestamp
+      properties:
+        nr:
+          title: nr
+          type: string
+        timestamp:
+          title: timestamp
+          type: string
+      title: stats_ledger_version
+      type: object
+    stats_note:
+      example:
+        note: note
+      properties:
+        note:
+          title: note
+          type: string
+      title: stats_note
+      type: object
+    stats_tags_source:
+      example:
+        visible_name: visible_name
+        report_uuid: report_uuid
+        id: id
+        version: version
+      properties:
+        id:
+          title: id
+          type: string
+        report_uuid:
+          title: report_uuid
+          type: string
+        version:
+          title: version
+          type: string
+        visible_name:
+          title: visible_name
+          type: string
+      title: stats_tags_source
+      type: object
+    stats_tool:
+      example:
+        visible_name: visible_name
+        responsible_for:
+        - responsible_for
+        - responsible_for
+        id: id
+        titanium_replayable: true
+        version: version
+      properties:
+        id:
+          title: id
+          type: string
+        responsible_for:
+          items:
+            type: string
+          title: responsible_for
+          type: array
+        titanium_replayable:
+          title: titanium_replayable
+          type: boolean
+        version:
+          title: version
+          type: string
+        visible_name:
+          title: visible_name
+          type: string
+      title: stats_tool
+      type: object
+    stats_version:
+      example:
+        file: file
+        nr: nr
+        hash: hash
+        timestamp: timestamp
+      properties:
+        file:
+          title: file
+          type: string
+        hash:
+          title: hash
+          type: string
+        nr:
+          title: nr
+          type: string
+        timestamp:
+          title: timestamp
+          type: string
+      title: stats_version
+      type: object
+    tag:
+      properties:
+        abuse:
+          description: Abuses
+          type: string
+        active:
+          description: whether the address has been ever used
+          type: boolean
+        category:
+          description: Category
+          type: string
+        currency:
+          description: Currency
+          type: string
+        label:
+          description: Label
+          title: label
+          type: string
+        lastmod:
+          description: Last modified
+          format: int32
+          type: integer
+        source:
+          description: Source
+          type: string
+        tagpack_uri:
+          description: Tagpack URI
+          type: string
+      required:
+      - active
+      - currency
+      - label
+      type: object
+    tags:
+      example:
+        entity_tags:
+        - null
+        - null
+        address_tags:
+        - null
+        - null
+        tag_coherence: 0.8008282
+      properties:
+        address_tags:
+          description: Aggregated tags of contained addresses
+          items:
+            $ref: '#/components/schemas/address_tag'
+          title: address_tags
+          type: array
+        entity_tags:
+          description: Tags of this entity
+          items:
+            $ref: '#/components/schemas/entity_tag'
+          title: entity_tags
+          type: array
+        tag_coherence:
+          description: Tag coherence
+          format: float
+          title: tag_coherence
+          type: number
+      required:
+      - address_tags
+      - entity_tags
+      title: tags
+      type: object
+    taxonomy:
+      example:
+        taxonomy: taxonomy
+        uri: uri
+      properties:
+        taxonomy:
+          description: Taxonomy
+          title: taxonomy
+          type: string
+        uri:
+          description: URI
+          title: uri
+          type: string
+      required:
+      - taxonomy
+      - uri
+      title: taxonomy
+      type: object
+    taxonomy_key:
+      description: Taxonomy
+      title: taxonomy
+      type: string
+    timestamp:
+      description: Timestamp
+      format: int64
+      title: timestamp
+      type: integer
+    tx:
+      discriminator:
+        mapping:
+          account: '#/components/schemas/tx_account'
+          utxo: '#/components/schemas/tx_utxo'
+        propertyName: tx_type
+      oneOf:
+      - $ref: '#/components/schemas/tx_utxo'
+      - $ref: '#/components/schemas/tx_account'
+      title: tx
+    tx_account:
+      example:
+        tx_hash: tx_hash
+        tx_type: account
+        value:
+          fiat_values:
+          - code: code
+            value: 0.8008282
+          - code: code
+            value: 0.8008282
+          value: 6
+        height: 1
+        timestamp: 6
+      properties:
+        height:
+          description: Height
+          format: int64
+          minimum: 1
+          title: height
+          type: integer
+        timestamp:
+          description: Timestamp
+          format: int64
+          title: timestamp
+          type: integer
+        tx_hash:
+          description: Transaction hash
+          title: tx_hash
+          type: string
+        tx_type:
+          default: account
+          title: tx_type
+          type: string
+        value:
+          $ref: '#/components/schemas/values'
+      required:
+      - height
+      - timestamp
+      - tx_hash
+      - tx_type
+      - value
+      title: tx_account
+      type: object
+    tx_hash:
+      description: Transaction hash
+      title: tx_hash
+      type: string
+    tx_summary:
+      example:
+        tx_hash: tx_hash
+        height: 1
+        timestamp: 5
+      properties:
+        height:
+          description: Height
+          format: int64
+          minimum: 1
+          title: height
+          type: integer
+        timestamp:
+          description: Timestamp
+          format: int64
+          title: timestamp
+          type: integer
+        tx_hash:
+          description: Transaction hash
+          title: tx_hash
+          type: string
+      required:
+      - height
+      - timestamp
+      - tx_hash
+      title: tx_summary
+      type: object
+    tx_type:
+      description: Discriminator for different kinds of transaction types
+      type: string
+    tx_utxo:
+      properties:
+        coinbase:
+          description: Coinbase transaction flag
+          type: boolean
+        height:
+          description: Height
+          format: int64
+          minimum: 1
+          title: height
+          type: integer
+        inputs:
+          description: Transaction inputs/outputs
+          items:
+            $ref: '#/components/schemas/tx_value'
+          type: array
+        outputs:
+          description: Transaction inputs/outputs
+          items:
+            $ref: '#/components/schemas/tx_value'
+          type: array
+        timestamp:
+          description: Timestamp
+          format: int64
+          title: timestamp
+          type: integer
+        total_input:
+          $ref: '#/components/schemas/values'
+        total_output:
+          $ref: '#/components/schemas/values'
+        tx_hash:
+          description: Transaction hash
+          title: tx_hash
+          type: string
+        tx_type:
+          default: utxo
+          type: string
+      required:
+      - coinbase
+      - height
+      - inputs
+      - outputs
+      - timestamp
+      - total_input
+      - total_output
+      - tx_hash
+      - tx_type
+      type: object
+    tx_value:
+      properties:
+        address:
+          items:
+            $ref: '#/components/schemas/address_id'
+          title: address
+          type: array
+        value:
+          $ref: '#/components/schemas/values'
+      required:
+      - address
+      - value
+      title: tx_value
+      type: object
+    tx_values:
+      description: Transaction inputs/outputs
+      items:
+        $ref: '#/components/schemas/tx_value'
+      type: array
+    txs:
+      example:
+        next_page: next_page
+        txs:
+        - null
+        - null
+      properties:
+        next_page:
+          format: string
+          title: next_page
+          type: string
+        txs:
+          items:
+            $ref: '#/components/schemas/tx'
+          title: txs
+          type: array
+      title: txs
+      type: object
+    txs_account:
+      example:
+        next_page: next_page
+        txs:
+        - tx_hash: tx_hash
+          tx_type: account
+          value:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          height: 1
+          timestamp: 6
+        - tx_hash: tx_hash
+          tx_type: account
+          value:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          height: 1
+          timestamp: 6
+      properties:
+        next_page:
+          format: string
+          title: next_page
+          type: string
+        txs:
+          items:
+            $ref: '#/components/schemas/tx_account'
+          title: txs
+          type: array
+      title: txs_account
+      type: object
+    uri:
+      description: URI
+      title: uri
+      type: string
+    values:
+      example:
+        fiat_values:
+        - code: code
+          value: 0.8008282
+        - code: code
+          value: 0.8008282
+        value: 6
+      properties:
+        fiat_values:
+          items:
+            $ref: '#/components/schemas/rate'
+          title: fiat_values
+          type: array
+        value:
+          format: int64
+          title: value
+          type: integer
+      title: values
+      type: object
     address_tag_allOf:
       properties:
         address:
