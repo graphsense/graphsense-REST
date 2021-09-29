@@ -157,15 +157,14 @@ paths:
           format: string
           type: string
         style: simple
-      - description: Restrict result to given set of comma separated IDs
+      - description: Restrict result to given set of comma separated addresses
         explode: true
         in: query
         name: ids
         required: false
         schema:
           items:
-            format: int32
-            type: integer
+            type: string
           type: array
         style: form
       - description: Resumption token for retrieving the next page
@@ -923,7 +922,8 @@ paths:
         required: true
         schema:
           items:
-            type: string
+            format: int32
+            type: integer
           type: array
         style: form
         x-graphsense-rest-test-example: '"1,2"'
@@ -1628,6 +1628,29 @@ components:
         format: string
         type: string
       style: simple
+    address_ids:
+      description: Restrict result to given set of comma separated addresses
+      explode: true
+      in: query
+      name: ids
+      required: false
+      schema:
+        items:
+          type: string
+        type: array
+      style: form
+    address_ids_required:
+      description: Set of comma separated IDs
+      explode: true
+      in: query
+      name: ids
+      required: true
+      schema:
+        items:
+          type: string
+        type: array
+      style: form
+      x-graphsense-rest-test-example: '"1,2"'
     breadth:
       description: How many siblings of each neighbor should be tried
       explode: true
@@ -1697,6 +1720,31 @@ components:
         format: int64
         type: integer
       style: simple
+    entity_ids:
+      description: Restrict result to given set of comma separated IDs
+      explode: true
+      in: query
+      name: ids
+      required: false
+      schema:
+        items:
+          format: int32
+          type: integer
+        type: array
+      style: form
+    entity_ids_required:
+      description: Set of comma separated IDs
+      explode: true
+      in: query
+      name: ids
+      required: true
+      schema:
+        items:
+          format: int32
+          type: integer
+        type: array
+      style: form
+      x-graphsense-rest-test-example: '"1,2"'
     entity_neighbor:
       description: Neighbor entity
       example: 123456
@@ -1740,30 +1788,6 @@ components:
       schema:
         type: string
       style: form
-    ids:
-      description: Restrict result to given set of comma separated IDs
-      explode: true
-      in: query
-      name: ids
-      required: false
-      schema:
-        items:
-          format: int32
-          type: integer
-        type: array
-      style: form
-    ids_required:
-      description: Set of comma separated IDs
-      explode: true
-      in: query
-      name: ids
-      required: true
-      schema:
-        items:
-          type: string
-        type: array
-      style: form
-      x-graphsense-rest-test-example: '"1,2"'
     include_labels:
       description: Whether labels of tags should be included
       explode: true

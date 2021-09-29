@@ -259,8 +259,8 @@ def list_addresses(currency, ids=None, page=None, pagesize=None):  # noqa: E501
 
     :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
-    :param ids: Restrict result to given set of comma separated IDs
-    :type ids: List[int]
+    :param ids: Restrict result to given set of comma separated addresses
+    :type ids: List[str]
     :param page: Resumption token for retrieving the next page
     :type page: str
     :param pagesize: Number of items returned in a single page

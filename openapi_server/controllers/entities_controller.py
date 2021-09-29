@@ -83,7 +83,7 @@ def list_entities_csv(currency, ids):  # noqa: E501
     :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
     :param ids: Set of comma separated IDs
-    :type ids: List[str]
+    :type ids: List[int]
 
     :rtype: str
     """
