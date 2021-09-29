@@ -13,17 +13,6 @@ from gsrest.util.csvify import create_download_header, to_csv
 from gsrest.service.rates_service import get_rates
 
 
-def from_rows(currency, rows):
-    heights = [row['height'] for row in rows]
-    rates = list_rates(currency, heights)
-    return [TxAccount(
-            height=row['height'],
-            timestamp=row['timestamp'],
-            tx_hash=row['tx_hash'].hex(),
-            value=convert_value(currency, row['value'], rates[row['height']]))
-            for row in rows]
-
-
 def get_address(currency, address, include_tags=False):
     return common.get_address(currency, address, include_tags)
 
@@ -48,7 +37,7 @@ def list_address_txs(currency, address, page=None, pagesize=None):
     db = get_connection()
     results, paging_state = \
         db.list_address_txs(currency, address, page, pagesize)
-    address_txs = from_rows(currency, results)
+    address_txs = common.txs_from_rows(currency, results)
     return Txs(next_page=paging_state, txs=address_txs)
 
 

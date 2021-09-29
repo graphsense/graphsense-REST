@@ -9,6 +9,7 @@ from openapi_server.models.links import Links  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
 from openapi_server.models.search_result_level1 import SearchResultLevel1  # noqa: E501
 from openapi_server.models.tags import Tags  # noqa: E501
+from openapi_server.models.txs_account import TxsAccount  # noqa: E501
 import gsrest.service.entities_service as service
 from gsrest.service.problems import notfound, badrequest, internalerror
 
@@ -274,6 +275,62 @@ def list_entity_neighbors_csv(currency, entity, direction, include_labels=None):
             entity=entity,
             direction=direction,
             include_labels=include_labels)
+    except RuntimeError as e:
+        return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        return internalerror("")
+
+
+def list_entity_txs(currency, entity, page=None, pagesize=None):  # noqa: E501
+    """Get all transactions an entity has been involved in
+
+     # noqa: E501
+
+    :param currency: The cryptocurrency (e.g., btc)
+    :type currency: str
+    :param entity: The entity ID
+    :type entity: int
+    :param page: Resumption token for retrieving the next page
+    :type page: str
+    :param pagesize: Number of items returned in a single page
+    :type pagesize: int
+
+    :rtype: TxsAccount
+    """
+    try:
+        return service.list_entity_txs(
+            currency=currency,
+            entity=entity,
+            page=page,
+            pagesize=pagesize)
+    except RuntimeError as e:
+        return notfound(str(e))
+    except ValueError as e:
+        return badrequest(str(e))
+    except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        return internalerror("")
+
+
+def list_entity_txs_csv(currency, entity):  # noqa: E501
+    """Get all transactions an entity has been involved in as CSV
+
+     # noqa: E501
+
+    :param currency: The cryptocurrency (e.g., btc)
+    :type currency: str
+    :param entity: The entity ID
+    :type entity: int
+
+    :rtype: str
+    """
+    try:
+        return service.list_entity_txs_csv(
+            currency=currency,
+            entity=entity)
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:

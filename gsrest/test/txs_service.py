@@ -4,7 +4,6 @@ from openapi_server.models.tx_utxo import TxUtxo
 from openapi_server.models.tx_value import TxValue
 from gsrest.util.values import make_values
 import gsrest.service.txs_service as service
-from tests.util.util import yamldump
 
 tx1 = TxUtxo(
    height=1,
@@ -98,6 +97,7 @@ def list_txs(test_case):
     result_hashes = [tx.tx_hash for tx in result.txs]
     tx_hashes = [
             'abcdef',
+            '4567',
             '123456',
             'ab1880',
             'ab188013',
@@ -113,9 +113,7 @@ def list_txs(test_case):
     result = service.list_txs(currency='eth')
     txs = sorted([tx1_eth, tx2_eth, tx3_eth, tx4_eth],
                  key=lambda tx: tx.tx_hash)
-    yamldump(txs)
     result.txs = sorted(result.txs, key=lambda tx: tx.tx_hash)
-    yamldump(result.txs)
     test_case.assertEqual(Txs(next_page=None,
                               txs=txs),
                           result)

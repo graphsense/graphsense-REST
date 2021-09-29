@@ -13,6 +13,7 @@ from openapi_server.models.links import Links  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
 from openapi_server.models.search_result_level1 import SearchResultLevel1  # noqa: E501
 from openapi_server.models.tags import Tags  # noqa: E501
+from openapi_server.models.txs_account import TxsAccount  # noqa: E501
 from openapi_server.test import BaseTestCase
 import gsrest.test.entities_service as test_service
 
@@ -195,6 +196,43 @@ class TestEntitiesController(BaseTestCase):
             method='GET',
             headers=headers,
             query_string=query_string)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+    def test_list_entity_txs(self):
+        """Test case for list_entity_txs
+
+        Get all transactions an entity has been involved in
+        """
+        test_service.list_entity_txs(self)
+
+        query_string = [('',''),
+                        ('','')]
+        headers = { 
+            'Accept': 'application/json',
+        }
+        response = self.client.open(
+            '/{currency}/entities/{entity}/txs'.format(currency='btc', entity=67065),
+            method='GET',
+            headers=headers,
+            query_string=query_string)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+    def test_list_entity_txs_csv(self):
+        """Test case for list_entity_txs_csv
+
+        Get all transactions an entity has been involved in as CSV
+        """
+        test_service.list_entity_txs_csv(self)
+
+        headers = { 
+            'Accept': 'text/csv',
+        }
+        response = self.client.open(
+            '/{currency}/entities/{entity}/txs.csv'.format(currency='btc', entity=67065),
+            method='GET',
+            headers=headers)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 

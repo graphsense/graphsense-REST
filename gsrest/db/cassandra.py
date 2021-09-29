@@ -234,24 +234,39 @@ class Cassandra():
             self.markup_rates(currency, row)
         return result
 
-    @eth
     # @Timer(text="Timer: list_address_txs {:.2f}")
     def list_address_txs(self, currency, address, page=None,
                          pagesize=None):
+        return self.list_txs_by_node_type(
+            currency, 'address', address, page=page, pagesize=pagesize)
+
+    # @Timer(text="Timer: list_address_txs {:.2f}")
+    def list_entity_txs(self, currency, entity, page=None,
+                        pagesize=None):
+        return self.list_txs_by_node_type(
+            currency, 'cluster', entity, page=page, pagesize=pagesize)
+
+    @eth
+    # @Timer(text="Timer: list_address_txs {:.2f}")
+    def list_txs_by_node_type(self, currency, node_type, id, page=None,
+                              pagesize=None):
         paging_state = from_hex(page)
-        address_id, address_id_group = \
-            self.get_address_id_id_group(currency, address)
-        query = "SELECT * FROM address_transactions " \
-                "WHERE address_id = %s AND address_id_group = %s"
+        if node_type == 'address':
+            id, id_group = \
+                self.get_address_id_id_group(currency, id)
+        else:
+            id_group = self.get_id_group(currency, id)
+
+        query = f"SELECT * FROM {node_type}_transactions " \
+                f"WHERE {node_type}_id = %s AND {node_type}_id_group = %s"
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
         results = self.execute(currency, 'transformed', query,
-                               [address_id, address_id_group],
+                               [id, id_group],
                                paging_state=paging_state,
                                fetch_size=fetch_size)
         if results is None:
             raise RuntimeError(
-                f'address {address} not found in currency {currency}')
-
+                f'{node_type} {id} not found in currency {currency}')
 
         txs = self.list_txs_by_ids(
                 currency,
@@ -265,7 +280,6 @@ class Cassandra():
             row['height'] = tx['block_id']
             row['timestamp'] = tx['timestamp']
             rows.append(row)
-
 
         return rows, to_hex(results.paging_state)
 
@@ -364,18 +378,17 @@ class Cassandra():
             return None
         return result.one()['cluster_id']
 
-    @eth
     def list_address_links(self, currency, address, neighbor,
                            page=None, pagesize=None):
         return self.list_links(currency, 'address', address, neighbor,
                                page=page, pagesize=pagesize)
 
-    @eth
     def list_entity_links(self, currency, address, neighbor,
                           page=None, pagesize=None):
         return self.list_links(currency, 'cluster', address, neighbor,
                                page=page, pagesize=pagesize)
 
+    @eth
     def list_links(self, currency, node_type, id, neighbor,
                    page=None, pagesize=None):
         if node_type == 'address':
@@ -426,7 +439,7 @@ class Cassandra():
                   'output_value', 'input_value')
 
         first_query = f"SELECT * FROM {node_type}_transactions WHERE " \
-                      f"{node_type}_id_group = %s AND {node_type}_id = %s"
+                      f"{node_type}_id_group = %s AND {node_type}_id = %s" \
 
         second_query = first_query + " AND tx_id = %s"
 
@@ -1051,12 +1064,19 @@ class Cassandra():
             result.one()['max_secondary_id']
 
     # @Timer(text="Timer: list_address_txs_eth {:.2f}")
-    def list_address_txs_eth(self, currency, address,
-                             page=None, pagesize=None):
+    def list_txs_by_node_type_eth(self, currency, node_type, address,
+                                  page=None, pagesize=None):
         paging_state = from_hex(page)
-        address_id, id_group = self.get_address_id_id_group(currency, address)
+        if node_type == 'address':
+            address_id, id_group = \
+                self.get_address_id_id_group(currency, address)
+        else:
+            node_type = 'address'
+            address_id = address
+            id_group = self.get_id_group(currency, address_id)
         secondary_id_group = \
             self.get_id_secondary_group_eth('address_transactions', id_group)
+
         sec_in = self.sec_in(secondary_id_group)
         query = ("SELECT transaction_id, value FROM address_transactions "
                  "WHERE address_id_group = %s and "
@@ -1101,12 +1121,20 @@ class Cassandra():
         return self.concurrent_with_args(currency, 'raw', statement, params)
 
     # @Timer(text="Timer: list_address_links_eth {:.2f}")
-    def list_address_links_eth(self, currency, address, neighbor,
-                               page=None, pagesize=None):
-        address_id, address_id_group = \
-            self.get_address_id_id_group(currency, address)
-        neighbor_id, neighbor_id_group = \
-            self.get_address_id_id_group(currency, neighbor)
+    def list_links_eth(self, currency, node_type, address, neighbor,
+                       page=None, pagesize=None):
+        if node_type == 'address':
+            address_id, address_id_group = \
+                self.get_address_id_id_group(currency, address)
+            neighbor_id, neighbor_id_group = \
+                self.get_address_id_id_group(currency, neighbor)
+        else:
+            node_type = 'address'
+            address_id = address
+            address_id_group = self.get_id_group(currency, address)
+            neighbor_id = neighbor
+            neighbor_id_group = self.get_id_group(currency, neighbor_id)
+
         address_id_secondary_group = \
             self.get_id_secondary_group_eth('address_transactions',
                                             address_id_group)

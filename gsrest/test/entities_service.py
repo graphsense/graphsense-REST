@@ -1,5 +1,7 @@
 from gsrest.test.assertion import assertEqual
 from openapi_server.models.tx_summary import TxSummary
+from openapi_server.models.txs import Txs
+from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.neighbors import Neighbors
 from openapi_server.models.neighbor import Neighbor
 from openapi_server.models.address import Address
@@ -15,7 +17,10 @@ from gsrest.util.values import make_values
 import gsrest.service.entities_service as service
 from gsrest.test.addresses_service import addressD, addressE, eth_address, \
         eth_addressWithTagsOutNeighbors, atag1, atag2, eth_tag, eth_tag2
-from tests.util.util import yamldump
+from gsrest.test.txs_service import tx1_eth, tx2_eth, tx4_eth
+from gsrest.service.rates_service import list_rates
+from gsrest.util.values import convert_value
+import copy
 
 tag = EntityTag(
            category="organization",
@@ -320,7 +325,6 @@ def list_entity_neighbors(test_case):
         entity=entityWithTags.entity,
         include_labels=True,
         direction='in')
-    yamldump(result)
     test_case.assertEqual(entityWithTagsInNeighbors, result)
 
     result = service.list_entity_neighbors(
@@ -615,6 +619,66 @@ def search_entity_neighbors(test_case):
                 fiat_values[0].value)
 
 
+def list_entity_txs(test_case):
+    """Test case for list_entity_txs
+
+    Get all transactions an entity has been involved in
+    """
+    rates = list_rates(currency='btc', heights=[2])
+    entity_txs = Txs(
+                    next_page=None,
+                    txs=[
+                        TxAccount(
+                            tx_hash="123456",
+                            value=convert_value('btc', 1260000, rates[2]),
+                            height=2,
+                            timestamp=1510347493),
+                        TxAccount(
+                            tx_hash="abcdef",
+                            value=convert_value('btc', -1260000, rates[2]),
+                            height=2,
+                            timestamp=1511153263),
+                        TxAccount(
+                            tx_hash="4567",
+                            value=convert_value('btc', -1, rates[2]),
+                            height=2,
+                            timestamp=1510347492)
+                        ]
+                    )
+    result = service.list_entity_txs('btc', 144534)
+    test_case.assertEqual(entity_txs, result)
+
+    tx2_eth_reverse = TxAccount(**copy.deepcopy(tx2_eth.to_dict()))
+    tx2_eth_reverse.value.value = -tx2_eth_reverse.value.value
+    for v in tx2_eth_reverse.value.fiat_values:
+        v.value = -v.value
+    txs = Txs(txs=[tx1_eth, tx2_eth_reverse, tx4_eth])
+    result = service.list_entity_txs('eth', 107925000)
+    test_case.assertEqual(txs, result)
+
+
+def list_entity_txs_csv(test_case):
+    result = service.list_entity_txs_csv('btc', 144534)
+    test_case.assertEqual(
+        'height,timestamp,tx_hash,tx_type,value_eur,value_usd,'
+        'value_value\r\n'
+        '2,1510347493,123456,account,0.01,0.03,'
+        '1260000\r\n'
+        '2,1511153263,abcdef,account,-0.01,-0.03,'
+        '-1260000\r\n'
+        '2,1510347492,4567,account,-0.0,-0.0,'
+        '-1\r\n', result.data.decode('utf-8'))
+
+    result = service.list_entity_txs_csv('eth', 107925000)
+    test_case.assertEqual(
+        'height,timestamp,tx_hash,tx_type,value_eur,value_usd,'
+        'value_value\r\n'
+        '1,15,af6e0000,account,123.0,246.0,123000000000000000000\r\n'
+        '1,16,af6e0003,account,-123.0,-246.0,-123000000000000000000\r\n'
+        '1,17,123456,account,234.0,468.0,234000000000000000000\r\n',
+        result.data.decode('utf-8'))
+
+
 def list_entity_links(test_case):
     result = service.list_entity_links(
                 currency='btc',
@@ -644,6 +708,13 @@ def list_entity_links(test_case):
 
     test_case.assertEqual(link, result)
 
+    result = service.list_entity_links(
+                currency='eth',
+                entity=107925000,
+                neighbor=107925001)
+    txs = Links(links=[tx1_eth, tx2_eth])
+    test_case.assertEqual(txs, result)
+
 
 def list_entity_links_csv(test_case):
     result = service.list_entity_links_csv(
@@ -659,3 +730,13 @@ def list_entity_links_csv(test_case):
 
     test_case.assertEqual(csv, result.data.decode('utf-8'))
 
+    result = service.list_entity_links_csv(
+                currency='eth',
+                entity=107925000,
+                neighbor=107925001)
+
+    csv = ('height,timestamp,tx_hash,tx_type,value_eur,'
+           'value_usd,value_value\r\n'
+           '1,15,af6e0000,account,123.0,246.0,123000000000000000000\r\n'
+           '1,16,af6e0003,account,123.0,246.0,123000000000000000000\r\n')
+    test_case.assertEqual(csv, result.data.decode('utf-8'))

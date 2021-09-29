@@ -18,7 +18,6 @@ from gsrest.service.rates_service import list_rates
 from gsrest.test.txs_service import tx1_eth, tx2_eth, tx4_eth
 from gsrest.util.values import make_values
 import copy
-from tests.util.util import yamldump
 
 
 tag = AddressTag(
@@ -608,7 +607,12 @@ def list_address_txs(test_case):
                             tx_hash="abcdef",
                             value=convert_value('btc', -1260000, rates[2]),
                             height=2,
-                            timestamp=1511153263)
+                            timestamp=1511153263),
+                        TxAccount(
+                            tx_hash="4567",
+                            value=convert_value('btc', -1, rates[2]),
+                            height=2,
+                            timestamp=1510347492)
                         ]
                     )
     result = service.list_address_txs('btc', address2.address)
@@ -620,7 +624,6 @@ def list_address_txs(test_case):
         v.value = -v.value
     txs = Txs(txs=[tx1_eth, tx2_eth_reverse, tx4_eth])
     result = service.list_address_txs('eth', eth_address.address)
-    yamldump(result)
     test_case.assertEqual(txs, result)
 
 
@@ -632,7 +635,9 @@ def list_address_txs_csv(test_case):
         '2,1510347493,123456,account,0.01,0.03,'
         '1260000\r\n'
         '2,1511153263,abcdef,account,-0.01,-0.03,'
-        '-1260000\r\n', result.data.decode('utf-8'))
+        '-1260000\r\n'
+        '2,1510347492,4567,account,-0.0,-0.0,'
+        '-1\r\n', result.data.decode('utf-8'))
 
     result = service.list_address_txs_csv('eth', eth_address.address)
     test_case.assertEqual(

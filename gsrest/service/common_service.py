@@ -41,6 +41,17 @@ def address_from_row(currency, row, rates, tags=None):
         )
 
 
+def txs_from_rows(currency, rows):
+    heights = [row['height'] for row in rows]
+    rates = list_rates(currency, heights)
+    return [TxAccount(
+            height=row['height'],
+            timestamp=row['timestamp'],
+            tx_hash=row['tx_hash'].hex(),
+            value=convert_value(currency, row['value'], rates[row['height']]))
+            for row in rows]
+
+
 def get_address(currency, address, include_tags=False):
     db = get_connection()
     result = db.get_address(currency, address)
