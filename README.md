@@ -16,10 +16,9 @@ It uses the [Connexion][connexion] library on top of [Flask][flask].
 
 ## Setup
 
-Create an instance folder and copy the configuration file template
+Copy the configuration file template `instance/config.yaml.template`
 
-    mkdir -p instance
-    cp conf/config.yaml.template instance/config.yaml
+    cp instance/config.yaml.template instance/config.yaml
 
 Open `instance/config.yaml` and configure the database connection.
 

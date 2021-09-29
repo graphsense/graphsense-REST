@@ -30,11 +30,12 @@ COPY setup.py /srv/graphsense-rest/
 COPY README.md /srv/graphsense-rest/
 COPY gsrest /srv/graphsense-rest/gsrest
 COPY openapi_server /srv/graphsense-rest/openapi_server
-COPY instance /srv/graphsense-rest/instance
 
 RUN mkdir /var/lib/graphsense-rest && \
     chown dockeruser /var/lib/graphsense-rest && \
     pip3 install /srv/graphsense-rest/
+
+COPY instance /srv/graphsense-rest/instance
 
 USER dockeruser
 

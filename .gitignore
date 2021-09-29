@@ -2,7 +2,6 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
 # C extensions
 *.so
 
@@ -73,7 +72,8 @@ tags
 .openapi-generator*
 
 #Flask
-instance
+instance/config.yaml
+tests/instance/config.yaml
 
 #Flask tests
 .runtest
