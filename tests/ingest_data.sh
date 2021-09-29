@@ -56,6 +56,9 @@ function insert_data () {
         #line=`echo "$line" | sed -e 's/^[ \t\n\s]*//' | sed -e 's/[ \t\s\n]*$//'`
         [ -z "`echo $line | xargs`" ] && continue
         $MOCK_CMD -e "INSERT INTO $2 JSON '$line';"
+        if [ $? -ne 0 ]; then
+            exit 1
+        fi
         echo "Inserted test data record"
     done <"$1"
 }
