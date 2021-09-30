@@ -372,8 +372,9 @@ def list_entity_links(currency, entity, neighbor,
 
 
 def list_entity_links_csv(currency, entity, neighbor):
-    def query_function(_):
-        result = list_entity_links(currency, entity, neighbor)
+    def query_function(page_state):
+        result = list_entity_links(currency, entity, neighbor,
+                                   page=page_state)
         return (result.next_page, result.links)
     return Response(stream_with_context(to_csv(query_function)),
                     mimetype="text/csv",

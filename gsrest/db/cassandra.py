@@ -465,7 +465,6 @@ class Cassandra():
                       for row in results1.current_rows
                       if row['value'] < 0 and isOutgoing or
                       not isOutgoing and row['value'] > 0]
-
             results2 = self.concurrent_with_args(
                 currency, 'transformed', second_query, params)
 
@@ -486,7 +485,7 @@ class Cassandra():
             links[row['tx_id']]['height'] = row['block_id']
             links[row['tx_id']]['timestamp'] = row['timestamp']
 
-        return list(links.values()), paging_state
+        return list(links.values()), to_hex(paging_state)
 
     # @Timer(text="Timer: list_matching_addresses {:.2f}")
     def list_matching_addresses(self, currency, expression):
