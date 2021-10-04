@@ -71,11 +71,7 @@ class TxUtxo(Model):
         if height is None:
             raise ValueError("Invalid value for `height`, must not be `None`")  # noqa: E501
         self._height = height
-        if inputs is None:
-            raise ValueError("Invalid value for `inputs`, must not be `None`")  # noqa: E501
         self._inputs = inputs
-        if outputs is None:
-            raise ValueError("Invalid value for `outputs`, must not be `None`")  # noqa: E501
         self._outputs = outputs
         if timestamp is None:
             raise ValueError("Invalid value for `timestamp`, must not be `None`")  # noqa: E501
@@ -193,8 +189,6 @@ class TxUtxo(Model):
         :param inputs: The inputs of this TxUtxo.
         :type inputs: List[TxValue]
         """
-        if inputs is None:
-            raise ValueError("Invalid value for `inputs`, must not be `None`")  # noqa: E501
 
         self._inputs = inputs
 
@@ -218,8 +212,6 @@ class TxUtxo(Model):
         :param outputs: The outputs of this TxUtxo.
         :type outputs: List[TxValue]
         """
-        if outputs is None:
-            raise ValueError("Invalid value for `outputs`, must not be `None`")  # noqa: E501
 
         self._outputs = outputs
 

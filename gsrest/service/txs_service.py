@@ -18,17 +18,19 @@ def from_row(currency, row, rates):
             tx_hash=row['tx_hash'].hex(),
             coinbase=row['coinbase'],
             height=row['block_id'],
-            inputs=[TxValue(address=i.address,
-                            value=convert_value(currency, i.value, rates))
-                    for i in row['inputs'] if i.address is not None]
+            inputs=io_from_rows(currency, row['inputs'], rates)
             if row['inputs'] else [],
-            outputs=[TxValue(address=i.address,
-                             value=convert_value(currency, i.value, rates))
-                     for i in row['outputs'] if i.address is not None]
+            outputs=io_from_rows(currency, row['outputs'], rates)
             if row['outputs'] else [],
             timestamp=row['timestamp'],
             total_input=convert_value(currency, row['total_input'], rates),
             total_output=convert_value(currency, row['total_output'], rates))
+
+
+def io_from_rows(currency, values, rates):
+    return [TxValue(address=i.address,
+                    value=convert_value(currency, i.value, rates))
+            for i in values if i.address is not None]
 
 
 def get_tx(currency, tx_hash):
@@ -42,6 +44,13 @@ def get_tx(currency, tx_hash):
     height = result['block_id'] if currency == 'eth' else result['block_id']
     rates = get_rates(currency, height)['rates']
     return from_row(currency, result, rates)
+
+
+def get_tx_io(currency, tx_hash, io):
+    result = get_tx(currency, tx_hash)
+    if currency == 'eth':
+        raise RuntimeError('get_tx_io not implemented for ETH')
+    return getattr(result, io)
 
 
 def list_txs(currency, page=None):

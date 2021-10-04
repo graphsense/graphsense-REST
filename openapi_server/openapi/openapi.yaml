@@ -256,7 +256,7 @@ paths:
           format: string
           type: string
         style: simple
-      - description: Whether tags should be included
+      - description: Whether to include tags
         explode: true
         in: query
         name: include_tags
@@ -300,7 +300,7 @@ paths:
           format: string
           type: string
         style: simple
-      - description: Whether tags should be included
+      - description: Whether to include tags
         explode: true
         in: query
         name: include_tags
@@ -453,7 +453,7 @@ paths:
           - out
           type: string
         style: form
-      - description: Whether labels of tags should be included
+      - description: Whether to include labels of tags
         explode: true
         in: query
         name: include_labels
@@ -527,7 +527,7 @@ paths:
           - out
           type: string
         style: form
-      - description: Whether labels of tags should be included
+      - description: Whether to include labels of tags
         explode: true
         in: query
         name: include_labels
@@ -962,7 +962,7 @@ paths:
           format: int64
           type: integer
         style: simple
-      - description: Whether tags should be included
+      - description: Whether to include tags
         explode: true
         in: query
         name: include_tags
@@ -1216,7 +1216,7 @@ paths:
             type: integer
           type: array
         style: form
-      - description: Whether labels of tags should be included
+      - description: Whether to include labels of tags
         explode: true
         in: query
         name: include_labels
@@ -1290,7 +1290,7 @@ paths:
           - out
           type: string
         style: form
-      - description: Whether labels of tags should be included
+      - description: Whether to include labels of tags
         explode: true
         in: query
         name: include_labels
@@ -1703,6 +1703,53 @@ paths:
       tags:
       - txs
       x-openapi-router-controller: openapi_server.controllers.txs_controller
+  /{currency}/txs/{tx_hash}/{io}:
+    get:
+      operationId: get_tx_io
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The transaction hash
+        example: ab188013
+        explode: false
+        in: path
+        name: tx_hash
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: Input or outpus values of a transaction
+        example: outputs
+        explode: false
+        in: path
+        name: io
+        required: true
+        schema:
+          enum:
+          - inputs
+          - outputs
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tx_values'
+          description: OK
+      summary: Returns input/output values of a specific transaction identified by
+        its hash.
+      tags:
+      - txs
+      x-openapi-router-controller: openapi_server.controllers.txs_controller
 components:
   parameters:
     address:
@@ -1877,7 +1924,7 @@ components:
         type: string
       style: form
     include_labels:
-      description: Whether labels of tags should be included
+      description: Whether to include labels of tags
       explode: true
       in: query
       name: include_labels
@@ -1887,7 +1934,7 @@ components:
         type: boolean
       style: form
     include_tags:
-      description: Whether tags should be included
+      description: Whether to include tags
       explode: true
       in: query
       name: include_tags
@@ -1896,6 +1943,19 @@ components:
         default: false
         type: boolean
       style: form
+    io:
+      description: Input or outpus values of a transaction
+      example: outputs
+      explode: false
+      in: path
+      name: io
+      required: true
+      schema:
+        enum:
+        - inputs
+        - outputs
+        type: string
+      style: simple
     label:
       description: The label of an entity
       example: cimedy
@@ -3517,8 +3577,6 @@ components:
       required:
       - coinbase
       - height
-      - inputs
-      - outputs
       - timestamp
       - total_input
       - total_output
@@ -3526,6 +3584,17 @@ components:
       - tx_type
       type: object
     tx_value:
+      example:
+        address:
+        - null
+        - null
+        value:
+          fiat_values:
+          - code: code
+            value: 0.8008282
+          - code: code
+            value: 0.8008282
+          value: 6
       properties:
         address:
           items:

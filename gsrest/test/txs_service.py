@@ -92,6 +92,13 @@ def get_tx(test_case):
     test_case.assertEqual(tx1_eth, result)
 
 
+def get_tx_io(test_case):
+    result = service.get_tx_io(currency='btc', tx_hash='ab1880', io='inputs')
+    test_case.assertEqual(tx1.inputs, result)
+    result = service.get_tx_io(currency='btc', tx_hash='ab1880', io='outputs')
+    test_case.assertEqual(tx1.outputs, result)
+
+
 def list_txs(test_case):
     result = service.list_txs(currency='btc')
     result_hashes = [tx.tx_hash for tx in result.txs]
