@@ -79,39 +79,39 @@ class Entity(Model):
             'total_spent': 'total_spent'
         }
 
-        if balance is None:
-            raise ValueError("Invalid value for `balance`, must not be `None`")  # noqa: E501
+        #if balance is None:
+            #raise ValueError("Invalid value for `balance`, must not be `None`")  # noqa: E501
         self._balance = balance
-        if entity is None:
-            raise ValueError("Invalid value for `entity`, must not be `None`")  # noqa: E501
+        #if entity is None:
+            #raise ValueError("Invalid value for `entity`, must not be `None`")  # noqa: E501
         self._entity = entity
-        if first_tx is None:
-            raise ValueError("Invalid value for `first_tx`, must not be `None`")  # noqa: E501
+        #if first_tx is None:
+            #raise ValueError("Invalid value for `first_tx`, must not be `None`")  # noqa: E501
         self._first_tx = first_tx
-        if in_degree is None:
-            raise ValueError("Invalid value for `in_degree`, must not be `None`")  # noqa: E501
+        #if in_degree is None:
+            #raise ValueError("Invalid value for `in_degree`, must not be `None`")  # noqa: E501
         self._in_degree = in_degree
-        if last_tx is None:
-            raise ValueError("Invalid value for `last_tx`, must not be `None`")  # noqa: E501
+        #if last_tx is None:
+            #raise ValueError("Invalid value for `last_tx`, must not be `None`")  # noqa: E501
         self._last_tx = last_tx
-        if no_addresses is None:
-            raise ValueError("Invalid value for `no_addresses`, must not be `None`")  # noqa: E501
+        #if no_addresses is None:
+            #raise ValueError("Invalid value for `no_addresses`, must not be `None`")  # noqa: E501
         self._no_addresses = no_addresses
-        if no_incoming_txs is None:
-            raise ValueError("Invalid value for `no_incoming_txs`, must not be `None`")  # noqa: E501
+        #if no_incoming_txs is None:
+            #raise ValueError("Invalid value for `no_incoming_txs`, must not be `None`")  # noqa: E501
         self._no_incoming_txs = no_incoming_txs
-        if no_outgoing_txs is None:
-            raise ValueError("Invalid value for `no_outgoing_txs`, must not be `None`")  # noqa: E501
+        #if no_outgoing_txs is None:
+            #raise ValueError("Invalid value for `no_outgoing_txs`, must not be `None`")  # noqa: E501
         self._no_outgoing_txs = no_outgoing_txs
-        if out_degree is None:
-            raise ValueError("Invalid value for `out_degree`, must not be `None`")  # noqa: E501
+        #if out_degree is None:
+            #raise ValueError("Invalid value for `out_degree`, must not be `None`")  # noqa: E501
         self._out_degree = out_degree
         self._tags = tags
-        if total_received is None:
-            raise ValueError("Invalid value for `total_received`, must not be `None`")  # noqa: E501
+        #if total_received is None:
+            #raise ValueError("Invalid value for `total_received`, must not be `None`")  # noqa: E501
         self._total_received = total_received
-        if total_spent is None:
-            raise ValueError("Invalid value for `total_spent`, must not be `None`")  # noqa: E501
+        #if total_spent is None:
+            #raise ValueError("Invalid value for `total_spent`, must not be `None`")  # noqa: E501
         self._total_spent = total_spent
 
     @classmethod

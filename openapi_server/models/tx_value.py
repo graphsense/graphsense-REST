@@ -35,11 +35,11 @@ class TxValue(Model):
             'value': 'value'
         }
 
-        if address is None:
-            raise ValueError("Invalid value for `address`, must not be `None`")  # noqa: E501
+        #if address is None:
+            #raise ValueError("Invalid value for `address`, must not be `None`")  # noqa: E501
         self._address = address
-        if value is None:
-            raise ValueError("Invalid value for `value`, must not be `None`")  # noqa: E501
+        #if value is None:
+            #raise ValueError("Invalid value for `value`, must not be `None`")  # noqa: E501
         self._value = value
 
     @classmethod

@@ -62,25 +62,6 @@ class TestEntitiesController(BaseTestCase):
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
-    def test_list_entities_csv(self):
-        """Test case for list_entities_csv
-
-        Get entities as CSV
-        """
-        test_service.list_entities_csv(self)
-
-        query_string = [('ids', "1,2")]
-        headers = { 
-            'Accept': 'application/csv',
-        }
-        response = self.client.open(
-            '/{currency}/entities.csv'.format(currency='btc'),
-            method='GET',
-            headers=headers,
-            query_string=query_string)
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
-
     def test_list_entity_addresses(self):
         """Test case for list_entity_addresses
 
@@ -101,23 +82,6 @@ class TestEntitiesController(BaseTestCase):
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
-    def test_list_entity_addresses_csv(self):
-        """Test case for list_entity_addresses_csv
-
-        Get an entity's addresses as CSV
-        """
-        test_service.list_entity_addresses_csv(self)
-
-        headers = { 
-            'Accept': 'text/csv',
-        }
-        response = self.client.open(
-            '/{currency}/entities/{entity}/addresses.csv'.format(currency='btc', entity=67065),
-            method='GET',
-            headers=headers)
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
-
     def test_list_entity_links(self):
         """Test case for list_entity_links
 
@@ -131,25 +95,6 @@ class TestEntitiesController(BaseTestCase):
         }
         response = self.client.open(
             '/{currency}/entities/{entity}/links'.format(currency='btc', entity=67065),
-            method='GET',
-            headers=headers,
-            query_string=query_string)
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
-
-    def test_list_entity_links_csv(self):
-        """Test case for list_entity_links_csv
-
-        Get transactions between two entities as CSV
-        """
-        test_service.list_entity_links_csv(self)
-
-        query_string = [('neighbor', 123456)]
-        headers = { 
-            'Accept': 'text/csv',
-        }
-        response = self.client.open(
-            '/{currency}/entities/{entity}/links.csv'.format(currency='btc', entity=67065),
             method='GET',
             headers=headers,
             query_string=query_string)
@@ -179,26 +124,6 @@ class TestEntitiesController(BaseTestCase):
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
-    def test_list_entity_neighbors_csv(self):
-        """Test case for list_entity_neighbors_csv
-
-        Get an entity's neighbors in the entity graph as CSV
-        """
-        test_service.list_entity_neighbors_csv(self)
-
-        query_string = [('direction', 'out'),
-                        ('','')]
-        headers = { 
-            'Accept': 'text/csv',
-        }
-        response = self.client.open(
-            '/{currency}/entities/{entity}/neighbors.csv'.format(currency='btc', entity=67065),
-            method='GET',
-            headers=headers,
-            query_string=query_string)
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
-
     def test_list_entity_txs(self):
         """Test case for list_entity_txs
 
@@ -219,23 +144,6 @@ class TestEntitiesController(BaseTestCase):
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
-    def test_list_entity_txs_csv(self):
-        """Test case for list_entity_txs_csv
-
-        Get all transactions an entity has been involved in as CSV
-        """
-        test_service.list_entity_txs_csv(self)
-
-        headers = { 
-            'Accept': 'text/csv',
-        }
-        response = self.client.open(
-            '/{currency}/entities/{entity}/txs.csv'.format(currency='btc', entity=67065),
-            method='GET',
-            headers=headers)
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
-
     def test_list_tags_by_entity(self):
         """Test case for list_tags_by_entity
 
@@ -249,25 +157,6 @@ class TestEntitiesController(BaseTestCase):
         }
         response = self.client.open(
             '/{currency}/entities/{entity}/tags'.format(currency='btc', entity=67065),
-            method='GET',
-            headers=headers,
-            query_string=query_string)
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
-
-    def test_list_tags_by_entity_by_level_csv(self):
-        """Test case for list_tags_by_entity_by_level_csv
-
-        Get address or entity tags for a given entity as CSV
-        """
-        test_service.list_tags_by_entity_by_level_csv(self)
-
-        query_string = [('level', 'address')]
-        headers = { 
-            'Accept': 'application/csv',
-        }
-        response = self.client.open(
-            '/{currency}/entities/{entity}/tags.csv'.format(currency='btc', entity=67065),
             method='GET',
             headers=headers,
             query_string=query_string)

@@ -22,7 +22,7 @@ def get_address(currency, address, include_tags=None):  # noqa: E501
     :type currency: str
     :param address: The cryptocurrency address
     :type address: str
-    :param include_tags: Whether tags should be included
+    :param include_tags: Whether to include tags
     :type include_tags: bool
 
     :rtype: Address
@@ -50,7 +50,7 @@ def get_address_entity(currency, address, include_tags=None, tag_coherence=None)
     :type currency: str
     :param address: The cryptocurrency address
     :type address: str
-    :param include_tags: Whether tags should be included
+    :param include_tags: Whether to include tags
     :type include_tags: bool
     :param tag_coherence: Whether to calculate coherence of address tags
     :type tag_coherence: bool
@@ -100,34 +100,6 @@ def list_address_links(currency, address, neighbor):  # noqa: E501
         return internalerror("")
 
 
-def list_address_links_csv(currency, address, neighbor):  # noqa: E501
-    """Get transactions between two addresses as CSV
-
-     # noqa: E501
-
-    :param currency: The cryptocurrency (e.g., btc)
-    :type currency: str
-    :param address: The cryptocurrency address
-    :type address: str
-    :param neighbor: Neighbor address
-    :type neighbor: str
-
-    :rtype: str
-    """
-    try:
-        return service.list_address_links_csv(
-            currency=currency,
-            address=address,
-            neighbor=neighbor)
-    except RuntimeError as e:
-        return notfound(str(e))
-    except ValueError as e:
-        return badrequest(str(e))
-    except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
-
-
 def list_address_neighbors(currency, address, direction, include_labels=None, page=None, pagesize=None):  # noqa: E501
     """Get an addresses&#39; neighbors in the address graph
 
@@ -139,7 +111,7 @@ def list_address_neighbors(currency, address, direction, include_labels=None, pa
     :type address: str
     :param direction: Incoming or outgoing neighbors
     :type direction: str
-    :param include_labels: Whether labels of tags should be included
+    :param include_labels: Whether to include labels of tags
     :type include_labels: bool
     :param page: Resumption token for retrieving the next page
     :type page: str
@@ -156,37 +128,6 @@ def list_address_neighbors(currency, address, direction, include_labels=None, pa
             include_labels=include_labels,
             page=page,
             pagesize=pagesize)
-    except RuntimeError as e:
-        return notfound(str(e))
-    except ValueError as e:
-        return badrequest(str(e))
-    except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
-
-
-def list_address_neighbors_csv(currency, address, direction, include_labels=None):  # noqa: E501
-    """Get an addresses&#39; neighbors in the address graph as CSV
-
-     # noqa: E501
-
-    :param currency: The cryptocurrency (e.g., btc)
-    :type currency: str
-    :param address: The cryptocurrency address
-    :type address: str
-    :param direction: Incoming or outgoing neighbors
-    :type direction: str
-    :param include_labels: Whether labels of tags should be included
-    :type include_labels: bool
-
-    :rtype: str
-    """
-    try:
-        return service.list_address_neighbors_csv(
-            currency=currency,
-            address=address,
-            direction=direction,
-            include_labels=include_labels)
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
@@ -227,31 +168,6 @@ def list_address_txs(currency, address, page=None, pagesize=None):  # noqa: E501
         return internalerror("")
 
 
-def list_address_txs_csv(currency, address):  # noqa: E501
-    """Get all transactions an address has been involved in as CSV
-
-     # noqa: E501
-
-    :param currency: The cryptocurrency (e.g., btc)
-    :type currency: str
-    :param address: The cryptocurrency address
-    :type address: str
-
-    :rtype: str
-    """
-    try:
-        return service.list_address_txs_csv(
-            currency=currency,
-            address=address)
-    except RuntimeError as e:
-        return notfound(str(e))
-    except ValueError as e:
-        return badrequest(str(e))
-    except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
-
-
 def list_addresses(currency, ids=None, page=None, pagesize=None):  # noqa: E501
     """Get addresses
 
@@ -283,31 +199,6 @@ def list_addresses(currency, ids=None, page=None, pagesize=None):  # noqa: E501
         return internalerror("")
 
 
-def list_addresses_csv(currency, ids):  # noqa: E501
-    """Get addresses as CSV
-
-     # noqa: E501
-
-    :param currency: The cryptocurrency (e.g., btc)
-    :type currency: str
-    :param ids: Set of comma separated IDs
-    :type ids: List[str]
-
-    :rtype: str
-    """
-    try:
-        return service.list_addresses_csv(
-            currency=currency,
-            ids=ids)
-    except RuntimeError as e:
-        return notfound(str(e))
-    except ValueError as e:
-        return badrequest(str(e))
-    except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
-
-
 def list_tags_by_address(currency, address):  # noqa: E501
     """Get attribution tags for a given address
 
@@ -322,31 +213,6 @@ def list_tags_by_address(currency, address):  # noqa: E501
     """
     try:
         return service.list_tags_by_address(
-            currency=currency,
-            address=address)
-    except RuntimeError as e:
-        return notfound(str(e))
-    except ValueError as e:
-        return badrequest(str(e))
-    except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
-
-
-def list_tags_by_address_csv(currency, address):  # noqa: E501
-    """Get attribution tags for a given address
-
-     # noqa: E501
-
-    :param currency: The cryptocurrency (e.g., btc)
-    :type currency: str
-    :param address: The cryptocurrency address
-    :type address: str
-
-    :rtype: str
-    """
-    try:
-        return service.list_tags_by_address_csv(
             currency=currency,
             address=address)
     except RuntimeError as e:

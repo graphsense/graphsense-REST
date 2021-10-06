@@ -55,24 +55,24 @@ class Neighbor(Model):
             'value': 'value'
         }
 
-        if balance is None:
-            raise ValueError("Invalid value for `balance`, must not be `None`")  # noqa: E501
+        #if balance is None:
+            #raise ValueError("Invalid value for `balance`, must not be `None`")  # noqa: E501
         self._balance = balance
-        if id is None:
-            raise ValueError("Invalid value for `id`, must not be `None`")  # noqa: E501
+        #if id is None:
+            #raise ValueError("Invalid value for `id`, must not be `None`")  # noqa: E501
         self._id = id
         self._labels = labels
-        if no_txs is None:
-            raise ValueError("Invalid value for `no_txs`, must not be `None`")  # noqa: E501
+        #if no_txs is None:
+            #raise ValueError("Invalid value for `no_txs`, must not be `None`")  # noqa: E501
         self._no_txs = no_txs
-        if node_type is None:
-            raise ValueError("Invalid value for `node_type`, must not be `None`")  # noqa: E501
+        #if node_type is None:
+            #raise ValueError("Invalid value for `node_type`, must not be `None`")  # noqa: E501
         self._node_type = node_type
-        if received is None:
-            raise ValueError("Invalid value for `received`, must not be `None`")  # noqa: E501
+        #if received is None:
+            #raise ValueError("Invalid value for `received`, must not be `None`")  # noqa: E501
         self._received = received
-        if value is None:
-            raise ValueError("Invalid value for `value`, must not be `None`")  # noqa: E501
+        #if value is None:
+            #raise ValueError("Invalid value for `value`, must not be `None`")  # noqa: E501
         self._value = value
 
     @classmethod

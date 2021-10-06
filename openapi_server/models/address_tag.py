@@ -66,21 +66,21 @@ class AddressTag(Model):
         }
 
         self._abuse = abuse
-        if active is None:
-            raise ValueError("Invalid value for `active`, must not be `None`")  # noqa: E501
+        #if active is None:
+            #raise ValueError("Invalid value for `active`, must not be `None`")  # noqa: E501
         self._active = active
         self._category = category
-        if currency is None:
-            raise ValueError("Invalid value for `currency`, must not be `None`")  # noqa: E501
+        #if currency is None:
+            #raise ValueError("Invalid value for `currency`, must not be `None`")  # noqa: E501
         self._currency = currency
-        if label is None:
-            raise ValueError("Invalid value for `label`, must not be `None`")  # noqa: E501
+        #if label is None:
+            #raise ValueError("Invalid value for `label`, must not be `None`")  # noqa: E501
         self._label = label
         self._lastmod = lastmod
         self._source = source
         self._tagpack_uri = tagpack_uri
-        if address is None:
-            raise ValueError("Invalid value for `address`, must not be `None`")  # noqa: E501
+        #if address is None:
+            #raise ValueError("Invalid value for `address`, must not be `None`")  # noqa: E501
         self._address = address
 
     @classmethod

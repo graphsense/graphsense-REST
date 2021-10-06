@@ -73,31 +73,31 @@ class Tx(Model):
             'value': 'value'
         }
 
-        if coinbase is None:
-            raise ValueError("Invalid value for `coinbase`, must not be `None`")  # noqa: E501
+        #if coinbase is None:
+            #raise ValueError("Invalid value for `coinbase`, must not be `None`")  # noqa: E501
         self._coinbase = coinbase
-        if height is None:
-            raise ValueError("Invalid value for `height`, must not be `None`")  # noqa: E501
+        #if height is None:
+            #raise ValueError("Invalid value for `height`, must not be `None`")  # noqa: E501
         self._height = height
         self._inputs = inputs
         self._outputs = outputs
-        if timestamp is None:
-            raise ValueError("Invalid value for `timestamp`, must not be `None`")  # noqa: E501
+        #if timestamp is None:
+            #raise ValueError("Invalid value for `timestamp`, must not be `None`")  # noqa: E501
         self._timestamp = timestamp
-        if total_input is None:
-            raise ValueError("Invalid value for `total_input`, must not be `None`")  # noqa: E501
+        #if total_input is None:
+            #raise ValueError("Invalid value for `total_input`, must not be `None`")  # noqa: E501
         self._total_input = total_input
-        if total_output is None:
-            raise ValueError("Invalid value for `total_output`, must not be `None`")  # noqa: E501
+        #if total_output is None:
+            #raise ValueError("Invalid value for `total_output`, must not be `None`")  # noqa: E501
         self._total_output = total_output
-        if tx_hash is None:
-            raise ValueError("Invalid value for `tx_hash`, must not be `None`")  # noqa: E501
+        #if tx_hash is None:
+            #raise ValueError("Invalid value for `tx_hash`, must not be `None`")  # noqa: E501
         self._tx_hash = tx_hash
-        if tx_type is None:
-            raise ValueError("Invalid value for `tx_type`, must not be `None`")  # noqa: E501
+        #if tx_type is None:
+            #raise ValueError("Invalid value for `tx_type`, must not be `None`")  # noqa: E501
         self._tx_type = tx_type
-        if value is None:
-            raise ValueError("Invalid value for `value`, must not be `None`")  # noqa: E501
+        #if value is None:
+            #raise ValueError("Invalid value for `value`, must not be `None`")  # noqa: E501
         self._value = value
 
     @classmethod

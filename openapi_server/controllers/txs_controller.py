@@ -2,6 +2,7 @@ import connexion
 import six
 import traceback
 
+from openapi_server.models.io import Io  # noqa: E501
 from openapi_server.models.tx import Tx  # noqa: E501
 from openapi_server.models.tx_value import TxValue  # noqa: E501
 from openapi_server.models.txs import Txs  # noqa: E501
@@ -44,10 +45,12 @@ def get_tx_io(currency, tx_hash, io):  # noqa: E501
     :param tx_hash: The transaction hash
     :type tx_hash: str
     :param io: Input or outpus values of a transaction
-    :type io: str
+    :type io: dict | bytes
 
     :rtype: List[TxValue]
     """
+    if connexion.request.is_json:
+        io =  Io.from_dict(connexion.request.get_json())  # noqa: E501
     try:
         return service.get_tx_io(
             currency=currency,

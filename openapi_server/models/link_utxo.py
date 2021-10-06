@@ -51,23 +51,23 @@ class LinkUtxo(Model):
             'tx_type': 'tx_type'
         }
 
-        if height is None:
-            raise ValueError("Invalid value for `height`, must not be `None`")  # noqa: E501
+        #if height is None:
+            #raise ValueError("Invalid value for `height`, must not be `None`")  # noqa: E501
         self._height = height
-        if input_value is None:
-            raise ValueError("Invalid value for `input_value`, must not be `None`")  # noqa: E501
+        #if input_value is None:
+            #raise ValueError("Invalid value for `input_value`, must not be `None`")  # noqa: E501
         self._input_value = input_value
-        if output_value is None:
-            raise ValueError("Invalid value for `output_value`, must not be `None`")  # noqa: E501
+        #if output_value is None:
+            #raise ValueError("Invalid value for `output_value`, must not be `None`")  # noqa: E501
         self._output_value = output_value
-        if timestamp is None:
-            raise ValueError("Invalid value for `timestamp`, must not be `None`")  # noqa: E501
+        #if timestamp is None:
+            #raise ValueError("Invalid value for `timestamp`, must not be `None`")  # noqa: E501
         self._timestamp = timestamp
-        if tx_hash is None:
-            raise ValueError("Invalid value for `tx_hash`, must not be `None`")  # noqa: E501
+        #if tx_hash is None:
+            #raise ValueError("Invalid value for `tx_hash`, must not be `None`")  # noqa: E501
         self._tx_hash = tx_hash
-        if tx_type is None:
-            raise ValueError("Invalid value for `tx_type`, must not be `None`")  # noqa: E501
+        #if tx_type is None:
+            #raise ValueError("Invalid value for `tx_type`, must not be `None`")  # noqa: E501
         self._tx_type = tx_type
 
     @classmethod

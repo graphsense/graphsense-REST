@@ -29,8 +29,8 @@ class EntityTagAllOf(Model):
             'entity': 'entity'
         }
 
-        if entity is None:
-            raise ValueError("Invalid value for `entity`, must not be `None`")  # noqa: E501
+        #if entity is None:
+            #raise ValueError("Invalid value for `entity`, must not be `None`")  # noqa: E501
         self._entity = entity
 
     @classmethod

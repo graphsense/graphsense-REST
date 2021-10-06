@@ -6,6 +6,7 @@ import unittest
 from flask import json
 from six import BytesIO
 
+from openapi_server.models.io import Io  # noqa: E501
 from openapi_server.models.tx import Tx  # noqa: E501
 from openapi_server.models.tx_value import TxValue  # noqa: E501
 from openapi_server.models.txs import Txs  # noqa: E501
@@ -44,7 +45,7 @@ class TestTxsController(BaseTestCase):
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/txs/{tx_hash}/{io}'.format(currency='btc', tx_hash='ab188013', io='outputs'),
+            '/{currency}/txs/{tx_hash}/{io}'.format(currency='btc', tx_hash='ab188013', io=openapi_server.Io()),
             method='GET',
             headers=headers)
         self.assert200(response,

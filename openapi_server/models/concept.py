@@ -45,20 +45,20 @@ class Concept(Model):
             'uri': 'uri'
         }
 
-        if description is None:
-            raise ValueError("Invalid value for `description`, must not be `None`")  # noqa: E501
+        #if description is None:
+            #raise ValueError("Invalid value for `description`, must not be `None`")  # noqa: E501
         self._description = description
-        if id is None:
-            raise ValueError("Invalid value for `id`, must not be `None`")  # noqa: E501
+        #if id is None:
+            #raise ValueError("Invalid value for `id`, must not be `None`")  # noqa: E501
         self._id = id
-        if label is None:
-            raise ValueError("Invalid value for `label`, must not be `None`")  # noqa: E501
+        #if label is None:
+            #raise ValueError("Invalid value for `label`, must not be `None`")  # noqa: E501
         self._label = label
-        if taxonomy is None:
-            raise ValueError("Invalid value for `taxonomy`, must not be `None`")  # noqa: E501
+        #if taxonomy is None:
+            #raise ValueError("Invalid value for `taxonomy`, must not be `None`")  # noqa: E501
         self._taxonomy = taxonomy
-        if uri is None:
-            raise ValueError("Invalid value for `uri`, must not be `None`")  # noqa: E501
+        #if uri is None:
+            #raise ValueError("Invalid value for `uri`, must not be `None`")  # noqa: E501
         self._uri = uri
 
     @classmethod

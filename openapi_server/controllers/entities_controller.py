@@ -23,7 +23,7 @@ def get_entity(currency, entity, include_tags=None, tag_coherence=None):  # noqa
     :type currency: str
     :param entity: The entity ID
     :type entity: int
-    :param include_tags: Whether tags should be included
+    :param include_tags: Whether to include tags
     :type include_tags: bool
     :param tag_coherence: Whether to calculate coherence of address tags
     :type tag_coherence: bool
@@ -76,31 +76,6 @@ def list_entities(currency, ids=None, page=None, pagesize=None):  # noqa: E501
         return internalerror("")
 
 
-def list_entities_csv(currency, ids):  # noqa: E501
-    """Get entities as CSV
-
-     # noqa: E501
-
-    :param currency: The cryptocurrency (e.g., btc)
-    :type currency: str
-    :param ids: Set of comma separated IDs
-    :type ids: List[int]
-
-    :rtype: str
-    """
-    try:
-        return service.list_entities_csv(
-            currency=currency,
-            ids=ids)
-    except RuntimeError as e:
-        return notfound(str(e))
-    except ValueError as e:
-        return badrequest(str(e))
-    except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
-
-
 def list_entity_addresses(currency, entity, page=None, pagesize=None):  # noqa: E501
     """Get an entity&#39;s addresses
 
@@ -123,31 +98,6 @@ def list_entity_addresses(currency, entity, page=None, pagesize=None):  # noqa: 
             entity=entity,
             page=page,
             pagesize=pagesize)
-    except RuntimeError as e:
-        return notfound(str(e))
-    except ValueError as e:
-        return badrequest(str(e))
-    except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
-
-
-def list_entity_addresses_csv(currency, entity):  # noqa: E501
-    """Get an entity&#39;s addresses as CSV
-
-     # noqa: E501
-
-    :param currency: The cryptocurrency (e.g., btc)
-    :type currency: str
-    :param entity: The entity ID
-    :type entity: int
-
-    :rtype: str
-    """
-    try:
-        return service.list_entity_addresses_csv(
-            currency=currency,
-            entity=entity)
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
@@ -185,34 +135,6 @@ def list_entity_links(currency, entity, neighbor):  # noqa: E501
         return internalerror("")
 
 
-def list_entity_links_csv(currency, entity, neighbor):  # noqa: E501
-    """Get transactions between two entities as CSV
-
-     # noqa: E501
-
-    :param currency: The cryptocurrency (e.g., btc)
-    :type currency: str
-    :param entity: The entity ID
-    :type entity: int
-    :param neighbor: Neighbor entity
-    :type neighbor: int
-
-    :rtype: str
-    """
-    try:
-        return service.list_entity_links_csv(
-            currency=currency,
-            entity=entity,
-            neighbor=neighbor)
-    except RuntimeError as e:
-        return notfound(str(e))
-    except ValueError as e:
-        return badrequest(str(e))
-    except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
-
-
 def list_entity_neighbors(currency, entity, direction, ids=None, include_labels=None, page=None, pagesize=None):  # noqa: E501
     """Get an entity&#39;s neighbors in the entity graph
 
@@ -226,7 +148,7 @@ def list_entity_neighbors(currency, entity, direction, ids=None, include_labels=
     :type direction: str
     :param ids: Restrict result to given set of comma separated IDs
     :type ids: List[int]
-    :param include_labels: Whether labels of tags should be included
+    :param include_labels: Whether to include labels of tags
     :type include_labels: bool
     :param page: Resumption token for retrieving the next page
     :type page: str
@@ -244,37 +166,6 @@ def list_entity_neighbors(currency, entity, direction, ids=None, include_labels=
             include_labels=include_labels,
             page=page,
             pagesize=pagesize)
-    except RuntimeError as e:
-        return notfound(str(e))
-    except ValueError as e:
-        return badrequest(str(e))
-    except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
-
-
-def list_entity_neighbors_csv(currency, entity, direction, include_labels=None):  # noqa: E501
-    """Get an entity&#39;s neighbors in the entity graph as CSV
-
-     # noqa: E501
-
-    :param currency: The cryptocurrency (e.g., btc)
-    :type currency: str
-    :param entity: The entity ID
-    :type entity: int
-    :param direction: Incoming or outgoing neighbors
-    :type direction: str
-    :param include_labels: Whether labels of tags should be included
-    :type include_labels: bool
-
-    :rtype: str
-    """
-    try:
-        return service.list_entity_neighbors_csv(
-            currency=currency,
-            entity=entity,
-            direction=direction,
-            include_labels=include_labels)
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
@@ -315,31 +206,6 @@ def list_entity_txs(currency, entity, page=None, pagesize=None):  # noqa: E501
         return internalerror("")
 
 
-def list_entity_txs_csv(currency, entity):  # noqa: E501
-    """Get all transactions an entity has been involved in as CSV
-
-     # noqa: E501
-
-    :param currency: The cryptocurrency (e.g., btc)
-    :type currency: str
-    :param entity: The entity ID
-    :type entity: int
-
-    :rtype: str
-    """
-    try:
-        return service.list_entity_txs_csv(
-            currency=currency,
-            entity=entity)
-    except RuntimeError as e:
-        return notfound(str(e))
-    except ValueError as e:
-        return badrequest(str(e))
-    except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
-
-
 def list_tags_by_entity(currency, entity, tag_coherence=None):  # noqa: E501
     """Get tags for a given entity
 
@@ -359,34 +225,6 @@ def list_tags_by_entity(currency, entity, tag_coherence=None):  # noqa: E501
             currency=currency,
             entity=entity,
             tag_coherence=tag_coherence)
-    except RuntimeError as e:
-        return notfound(str(e))
-    except ValueError as e:
-        return badrequest(str(e))
-    except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
-
-
-def list_tags_by_entity_by_level_csv(currency, entity, level):  # noqa: E501
-    """Get address or entity tags for a given entity as CSV
-
-     # noqa: E501
-
-    :param currency: The cryptocurrency (e.g., btc)
-    :type currency: str
-    :param entity: The entity ID
-    :type entity: int
-    :param level: Whether tags on the address or entity level are requested
-    :type level: str
-
-    :rtype: str
-    """
-    try:
-        return service.list_tags_by_entity_by_level_csv(
-            currency=currency,
-            entity=entity,
-            level=level)
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:

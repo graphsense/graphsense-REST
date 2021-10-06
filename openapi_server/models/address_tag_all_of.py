@@ -29,8 +29,8 @@ class AddressTagAllOf(Model):
             'address': 'address'
         }
 
-        if address is None:
-            raise ValueError("Invalid value for `address`, must not be `None`")  # noqa: E501
+        #if address is None:
+            #raise ValueError("Invalid value for `address`, must not be `None`")  # noqa: E501
         self._address = address
 
     @classmethod

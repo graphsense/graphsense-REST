@@ -59,31 +59,6 @@ def list_block_txs(currency, height):  # noqa: E501
         return internalerror("")
 
 
-def list_block_txs_csv(currency, height):  # noqa: E501
-    """Get block transactions as CSV
-
-     # noqa: E501
-
-    :param currency: The cryptocurrency (e.g., btc)
-    :type currency: str
-    :param height: The block height
-    :type height: int
-
-    :rtype: str
-    """
-    try:
-        return service.list_block_txs_csv(
-            currency=currency,
-            height=height)
-    except RuntimeError as e:
-        return notfound(str(e))
-    except ValueError as e:
-        return badrequest(str(e))
-    except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
-
-
 def list_blocks(currency, page=None):  # noqa: E501
     """Get all blocks
 
