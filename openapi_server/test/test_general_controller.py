@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 import unittest
+import asyncio
 
 from flask import json
 from six import BytesIO
@@ -20,7 +21,9 @@ class TestGeneralController(BaseTestCase):
 
         Get statistics of supported currencies
         """
-        test_service.get_statistics(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.get_statistics(self))
+        loop.close()
 
         headers = { 
             'Accept': 'application/json',
@@ -37,7 +40,9 @@ class TestGeneralController(BaseTestCase):
 
         Returns matching addresses, transactions and labels
         """
-        test_service.search(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.search(self))
+        loop.close()
 
         query_string = [('',''),
                         ('q', 'foo'),

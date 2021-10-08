@@ -38,7 +38,7 @@ def list_blocks(currency, page=None):
     return Blocks(blocks=block_list, next_page=paging_state)
 
 
-def list_block_txs(currency, height):
+async def list_block_txs(currency, height):
     db = get_connection()
     txs = db.list_block_txs(currency, height)
 

@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 import unittest
+import asyncio
 
 from flask import json
 from six import BytesIO
@@ -19,7 +20,9 @@ class TestBatchController(BaseTestCase):
 
         Get data as CSV in batch
         """
-        test_service.batch(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.batch(self))
+        loop.close()
 
         batch_operation = openapi_server.BatchOperation()
         headers = { 

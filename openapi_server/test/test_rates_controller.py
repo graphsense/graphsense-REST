@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 import unittest
+import asyncio
 
 from flask import json
 from six import BytesIO
@@ -19,7 +20,9 @@ class TestRatesController(BaseTestCase):
 
         Returns exchange rate for a given height
         """
-        test_service.get_exchange_rates(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.get_exchange_rates(self))
+        loop.close()
 
         headers = { 
             'Accept': 'application/json',

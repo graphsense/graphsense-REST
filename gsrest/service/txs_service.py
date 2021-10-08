@@ -1,3 +1,4 @@
+import asyncio
 from gsrest.db import get_connection
 from openapi_server.models.txs import Txs
 from openapi_server.models.tx_utxo import TxUtxo
@@ -33,17 +34,17 @@ def io_from_rows(currency, values, rates):
             for i in values if i.address is not None]
 
 
-def get_tx(currency, tx_hash):
+async def get_tx(currency, tx_hash):
     db = get_connection()
-    result = db.get_tx(currency, tx_hash)
-
+    result = await db.get_tx(currency, tx_hash)
+    # TODO result is a generator, never None!
     if result is None:
         raise RuntimeError('Transaction {} in keyspace {} not found'
                            .format(tx_hash, currency))
 
-    height = result['block_id'] if currency == 'eth' else result['block_id']
-    rates = get_rates(currency, height)['rates']
-    return from_row(currency, result, rates)
+    rates = get_rates(currency, result['block_id'])['rates']
+    result = from_row(currency, result, rates)
+    return result
 
 
 def get_tx_io(currency, tx_hash, io):
@@ -53,7 +54,7 @@ def get_tx_io(currency, tx_hash, io):
     return getattr(result, io)
 
 
-def list_txs(currency, page=None):
+async def list_txs(currency, page=None):
     db = get_connection()
     results, paging_state = db.list_txs(currency, page)
 

@@ -1835,10 +1835,19 @@ components:
     batch_operation:
       discriminator:
         mapping:
+          get_tx: '#/components/schemas/get_tx'
           get_tx_io: '#/components/schemas/get_tx_io'
         propertyName: operation
       oneOf:
+      - $ref: '#/components/schemas/get_tx'
       - $ref: '#/components/schemas/get_tx_io'
+    batch_response:
+      discriminator:
+        mapping:
+          get_tx_io: '#/components/schemas/get_tx_io_response'
+        propertyName: operation
+      oneOf:
+      - $ref: '#/components/schemas/get_tx_io_response'
     block:
       example:
         block_hash: block_hash
@@ -2306,8 +2315,28 @@ components:
       - $ref: '#/components/schemas/tag'
       - $ref: '#/components/schemas/entity_tag_allOf'
       title: entity_tag
+    get_tx:
+      properties:
+        api:
+          default: txs
+          type: string
+        operation:
+          default: get_tx
+          type: string
+        parameters:
+          items:
+            $ref: '#/components/schemas/get_tx_parameters'
+          type: array
+      required:
+      - api
+      - operation
+      - parameters
+      type: object
     get_tx_io:
       properties:
+        api:
+          default: txs
+          type: string
         operation:
           default: get_tx_io
           type: string
@@ -2316,8 +2345,60 @@ components:
             $ref: '#/components/schemas/get_tx_io_parameters'
           type: array
       required:
+      - api
       - operation
       - parameters
+      type: object
+    get_tx_io_parameters:
+      properties:
+        io:
+          $ref: '#/components/schemas/io'
+        tx_hash:
+          description: Transaction hash
+          title: tx_hash
+          type: string
+      required:
+      - io
+      - tx_hash
+      title: get_tx_io_parameters
+      type: object
+    get_tx_io_response:
+      properties:
+        operation:
+          default: get_tx_io
+          type: string
+        result:
+          items:
+            $ref: '#/components/schemas/get_tx_io_result'
+          type: array
+      required:
+      - operation
+      - result
+      type: object
+    get_tx_io_result:
+      properties:
+        data:
+          description: Transaction inputs/outputs
+          items:
+            $ref: '#/components/schemas/tx_value'
+          title: tx_values
+          type: array
+        parameters:
+          $ref: '#/components/schemas/get_tx_io_parameters'
+      required:
+      - data
+      - parameters
+      title: get_tx_io_result
+      type: object
+    get_tx_parameters:
+      properties:
+        tx_hash:
+          description: Transaction hash
+          title: tx_hash
+          type: string
+      required:
+      - tx_hash
+      title: get_tx_parameters
       type: object
     height:
       description: Height
@@ -3106,11 +3187,13 @@ components:
           description: Transaction inputs/outputs
           items:
             $ref: '#/components/schemas/tx_value'
+          title: tx_values
           type: array
         outputs:
           description: Transaction inputs/outputs
           items:
             $ref: '#/components/schemas/tx_value'
+          title: tx_values
           type: array
         timestamp:
           description: Timestamp
@@ -3166,6 +3249,7 @@ components:
       description: Transaction inputs/outputs
       items:
         $ref: '#/components/schemas/tx_value'
+      title: tx_values
       type: array
     txs:
       example:
@@ -3265,19 +3349,6 @@ components:
           type: integer
       required:
       - entity
-      type: object
-    get_tx_io_parameters:
-      properties:
-        io:
-          $ref: '#/components/schemas/io'
-        tx_hash:
-          description: Transaction hash
-          title: tx_hash
-          type: string
-      required:
-      - io
-      - tx_hash
-      title: get_tx_io_parameters
       type: object
     search_result_level1_allOf:
       properties:

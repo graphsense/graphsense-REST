@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 import unittest
+import asyncio
 
 from flask import json
 from six import BytesIO
@@ -24,7 +25,9 @@ class {{#operations}}Test{{classname}}(BaseTestCase):
 
         {{{summary}}}
         """
-        test_service.{{operationId}}(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.{{operationId}}(self))
+        loop.close()
 
         {{#bodyParam}}
         {{paramName}} = {{{example}}}

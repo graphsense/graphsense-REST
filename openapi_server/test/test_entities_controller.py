@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 import unittest
+import asyncio
 
 from flask import json
 from six import BytesIO
@@ -26,7 +27,9 @@ class TestEntitiesController(BaseTestCase):
 
         Get an entity, optionally with tags
         """
-        test_service.get_entity(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.get_entity(self))
+        loop.close()
 
         query_string = [('',''),
                         ('','')]
@@ -46,7 +49,9 @@ class TestEntitiesController(BaseTestCase):
 
         Get entities
         """
-        test_service.list_entities(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.list_entities(self))
+        loop.close()
 
         query_string = [('',''),
                         ('',''),
@@ -67,7 +72,9 @@ class TestEntitiesController(BaseTestCase):
 
         Get an entity's addresses
         """
-        test_service.list_entity_addresses(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.list_entity_addresses(self))
+        loop.close()
 
         query_string = [('',''),
                         ('','')]
@@ -87,7 +94,9 @@ class TestEntitiesController(BaseTestCase):
 
         Get transactions between two entities
         """
-        test_service.list_entity_links(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.list_entity_links(self))
+        loop.close()
 
         query_string = [('neighbor', 123456)]
         headers = { 
@@ -106,7 +115,9 @@ class TestEntitiesController(BaseTestCase):
 
         Get an entity's neighbors in the entity graph
         """
-        test_service.list_entity_neighbors(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.list_entity_neighbors(self))
+        loop.close()
 
         query_string = [('direction', 'out'),
                         ('',''),
@@ -129,7 +140,9 @@ class TestEntitiesController(BaseTestCase):
 
         Get all transactions an entity has been involved in
         """
-        test_service.list_entity_txs(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.list_entity_txs(self))
+        loop.close()
 
         query_string = [('',''),
                         ('','')]
@@ -149,7 +162,9 @@ class TestEntitiesController(BaseTestCase):
 
         Get tags for a given entity
         """
-        test_service.list_tags_by_entity(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.list_tags_by_entity(self))
+        loop.close()
 
         query_string = [('','')]
         headers = { 
@@ -168,7 +183,9 @@ class TestEntitiesController(BaseTestCase):
 
         Search deeply for matching neighbors
         """
-        test_service.search_entity_neighbors(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.search_entity_neighbors(self))
+        loop.close()
 
         query_string = [('direction', 'out'),
                         ('key', 'category'),

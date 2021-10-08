@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 import unittest
+import asyncio
 
 from flask import json
 from six import BytesIO
@@ -25,7 +26,9 @@ class TestAddressesController(BaseTestCase):
 
         Get an address, optionally with tags
         """
-        test_service.get_address(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.get_address(self))
+        loop.close()
 
         query_string = [('','')]
         headers = { 
@@ -44,7 +47,9 @@ class TestAddressesController(BaseTestCase):
 
         Get the entity of an address
         """
-        test_service.get_address_entity(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.get_address_entity(self))
+        loop.close()
 
         query_string = [('',''),
                         ('','')]
@@ -64,7 +69,9 @@ class TestAddressesController(BaseTestCase):
 
         Get transactions between two addresses
         """
-        test_service.list_address_links(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.list_address_links(self))
+        loop.close()
 
         query_string = [('neighbor', 'addressE')]
         headers = { 
@@ -83,7 +90,9 @@ class TestAddressesController(BaseTestCase):
 
         Get an addresses' neighbors in the address graph
         """
-        test_service.list_address_neighbors(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.list_address_neighbors(self))
+        loop.close()
 
         query_string = [('direction', 'out'),
                         ('',''),
@@ -105,7 +114,9 @@ class TestAddressesController(BaseTestCase):
 
         Get all transactions an address has been involved in
         """
-        test_service.list_address_txs(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.list_address_txs(self))
+        loop.close()
 
         query_string = [('',''),
                         ('','')]
@@ -125,7 +136,9 @@ class TestAddressesController(BaseTestCase):
 
         Get addresses
         """
-        test_service.list_addresses(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.list_addresses(self))
+        loop.close()
 
         query_string = [('',''),
                         ('',''),
@@ -146,7 +159,9 @@ class TestAddressesController(BaseTestCase):
 
         Get attribution tags for a given address
         """
-        test_service.list_tags_by_address(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.list_tags_by_address(self))
+        loop.close()
 
         headers = { 
             'Accept': 'application/json',

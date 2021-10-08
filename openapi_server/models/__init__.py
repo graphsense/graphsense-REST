@@ -8,6 +8,7 @@ from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.address_tag_all_of import AddressTagAllOf
 from openapi_server.models.addresses import Addresses
 from openapi_server.models.batch_operation import BatchOperation
+from openapi_server.models.batch_response import BatchResponse
 from openapi_server.models.block import Block
 from openapi_server.models.blocks import Blocks
 from openapi_server.models.concept import Concept
@@ -17,8 +18,12 @@ from openapi_server.models.entity import Entity
 from openapi_server.models.entity_addresses import EntityAddresses
 from openapi_server.models.entity_tag import EntityTag
 from openapi_server.models.entity_tag_all_of import EntityTagAllOf
+from openapi_server.models.get_tx import GetTx
 from openapi_server.models.get_tx_io import GetTxIo
 from openapi_server.models.get_tx_io_parameters import GetTxIoParameters
+from openapi_server.models.get_tx_io_response import GetTxIoResponse
+from openapi_server.models.get_tx_io_result import GetTxIoResult
+from openapi_server.models.get_tx_parameters import GetTxParameters
 from openapi_server.models.io import Io
 from openapi_server.models.link import Link
 from openapi_server.models.link_utxo import LinkUtxo

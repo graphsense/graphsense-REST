@@ -1,6 +1,7 @@
 import connexion
 import six
 import traceback
+import asyncio
 
 from openapi_server.models.io import Io  # noqa: E501
 from openapi_server.models.tx import Tx  # noqa: E501
@@ -23,9 +24,13 @@ def get_tx(currency, tx_hash):  # noqa: E501
     :rtype: Tx
     """
     try:
-        return service.get_tx(
-            currency=currency,
-            tx_hash=tx_hash)
+        loop = asyncio.new_event_loop()
+        result = loop.run_until_complete(
+            service.get_tx(
+                currency=currency,
+                tx_hash=tx_hash))
+        loop.close()
+        return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
@@ -52,10 +57,14 @@ def get_tx_io(currency, tx_hash, io):  # noqa: E501
     if connexion.request.is_json:
         io =  Io.from_dict(connexion.request.get_json())  # noqa: E501
     try:
-        return service.get_tx_io(
-            currency=currency,
-            tx_hash=tx_hash,
-            io=io)
+        loop = asyncio.new_event_loop()
+        result = loop.run_until_complete(
+            service.get_tx_io(
+                currency=currency,
+                tx_hash=tx_hash,
+                io=io))
+        loop.close()
+        return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
@@ -78,9 +87,13 @@ def list_txs(currency, page=None):  # noqa: E501
     :rtype: Txs
     """
     try:
-        return service.list_txs(
-            currency=currency,
-            page=page)
+        loop = asyncio.new_event_loop()
+        result = loop.run_until_complete(
+            service.list_txs(
+                currency=currency,
+                page=page))
+        loop.close()
+        return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:

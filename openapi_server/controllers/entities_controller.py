@@ -1,6 +1,7 @@
 import connexion
 import six
 import traceback
+import asyncio
 
 from openapi_server.models.entities import Entities  # noqa: E501
 from openapi_server.models.entity import Entity  # noqa: E501
@@ -31,11 +32,15 @@ def get_entity(currency, entity, include_tags=None, tag_coherence=None):  # noqa
     :rtype: Entity
     """
     try:
-        return service.get_entity(
-            currency=currency,
-            entity=entity,
-            include_tags=include_tags,
-            tag_coherence=tag_coherence)
+        loop = asyncio.new_event_loop()
+        result = loop.run_until_complete(
+            service.get_entity(
+                currency=currency,
+                entity=entity,
+                include_tags=include_tags,
+                tag_coherence=tag_coherence))
+        loop.close()
+        return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
@@ -62,11 +67,15 @@ def list_entities(currency, ids=None, page=None, pagesize=None):  # noqa: E501
     :rtype: Entities
     """
     try:
-        return service.list_entities(
-            currency=currency,
-            ids=ids,
-            page=page,
-            pagesize=pagesize)
+        loop = asyncio.new_event_loop()
+        result = loop.run_until_complete(
+            service.list_entities(
+                currency=currency,
+                ids=ids,
+                page=page,
+                pagesize=pagesize))
+        loop.close()
+        return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
@@ -93,11 +102,15 @@ def list_entity_addresses(currency, entity, page=None, pagesize=None):  # noqa: 
     :rtype: EntityAddresses
     """
     try:
-        return service.list_entity_addresses(
-            currency=currency,
-            entity=entity,
-            page=page,
-            pagesize=pagesize)
+        loop = asyncio.new_event_loop()
+        result = loop.run_until_complete(
+            service.list_entity_addresses(
+                currency=currency,
+                entity=entity,
+                page=page,
+                pagesize=pagesize))
+        loop.close()
+        return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
@@ -122,10 +135,14 @@ def list_entity_links(currency, entity, neighbor):  # noqa: E501
     :rtype: Links
     """
     try:
-        return service.list_entity_links(
-            currency=currency,
-            entity=entity,
-            neighbor=neighbor)
+        loop = asyncio.new_event_loop()
+        result = loop.run_until_complete(
+            service.list_entity_links(
+                currency=currency,
+                entity=entity,
+                neighbor=neighbor))
+        loop.close()
+        return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
@@ -158,14 +175,18 @@ def list_entity_neighbors(currency, entity, direction, ids=None, include_labels=
     :rtype: Neighbors
     """
     try:
-        return service.list_entity_neighbors(
-            currency=currency,
-            entity=entity,
-            direction=direction,
-            ids=ids,
-            include_labels=include_labels,
-            page=page,
-            pagesize=pagesize)
+        loop = asyncio.new_event_loop()
+        result = loop.run_until_complete(
+            service.list_entity_neighbors(
+                currency=currency,
+                entity=entity,
+                direction=direction,
+                ids=ids,
+                include_labels=include_labels,
+                page=page,
+                pagesize=pagesize))
+        loop.close()
+        return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
@@ -192,11 +213,15 @@ def list_entity_txs(currency, entity, page=None, pagesize=None):  # noqa: E501
     :rtype: TxsAccount
     """
     try:
-        return service.list_entity_txs(
-            currency=currency,
-            entity=entity,
-            page=page,
-            pagesize=pagesize)
+        loop = asyncio.new_event_loop()
+        result = loop.run_until_complete(
+            service.list_entity_txs(
+                currency=currency,
+                entity=entity,
+                page=page,
+                pagesize=pagesize))
+        loop.close()
+        return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
@@ -221,10 +246,14 @@ def list_tags_by_entity(currency, entity, tag_coherence=None):  # noqa: E501
     :rtype: Tags
     """
     try:
-        return service.list_tags_by_entity(
-            currency=currency,
-            entity=entity,
-            tag_coherence=tag_coherence)
+        loop = asyncio.new_event_loop()
+        result = loop.run_until_complete(
+            service.list_tags_by_entity(
+                currency=currency,
+                entity=entity,
+                tag_coherence=tag_coherence))
+        loop.close()
+        return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
@@ -259,15 +288,19 @@ def search_entity_neighbors(currency, entity, direction, key, value, depth, brea
     :rtype: List[SearchResultLevel1]
     """
     try:
-        return service.search_entity_neighbors(
-            currency=currency,
-            entity=entity,
-            direction=direction,
-            key=key,
-            value=value,
-            depth=depth,
-            breadth=breadth,
-            skip_num_addresses=skip_num_addresses)
+        loop = asyncio.new_event_loop()
+        result = loop.run_until_complete(
+            service.search_entity_neighbors(
+                currency=currency,
+                entity=entity,
+                direction=direction,
+                key=key,
+                value=value,
+                depth=depth,
+                breadth=breadth,
+                skip_num_addresses=skip_num_addresses))
+        loop.close()
+        return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:

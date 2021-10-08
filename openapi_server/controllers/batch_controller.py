@@ -1,6 +1,7 @@
 import connexion
 import six
 import traceback
+import asyncio
 
 from openapi_server.models.batch_operation import BatchOperation  # noqa: E501
 import gsrest.service.batch_service as service
@@ -22,9 +23,13 @@ def batch(currency, batch_operation=None):  # noqa: E501
     if connexion.request.is_json:
         batch_operation = BatchOperation.from_dict(connexion.request.get_json())  # noqa: E501
     try:
-        return service.batch(
-            currency=currency,
-            batch_operation=batch_operation)
+        loop = asyncio.new_event_loop()
+        result = loop.run_until_complete(
+            service.batch(
+                currency=currency,
+                batch_operation=batch_operation))
+        loop.close()
+        return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:

@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 import unittest
+import asyncio
 
 from flask import json
 from six import BytesIO
@@ -21,7 +22,9 @@ class TestBlocksController(BaseTestCase):
 
         Get a block by its height
         """
-        test_service.get_block(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.get_block(self))
+        loop.close()
 
         headers = { 
             'Accept': 'application/json',
@@ -38,7 +41,9 @@ class TestBlocksController(BaseTestCase):
 
         Get block transactions
         """
-        test_service.list_block_txs(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.list_block_txs(self))
+        loop.close()
 
         headers = { 
             'Accept': 'application/json',
@@ -55,7 +60,9 @@ class TestBlocksController(BaseTestCase):
 
         Get all blocks
         """
-        test_service.list_blocks(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.list_blocks(self))
+        loop.close()
 
         query_string = [('','')]
         headers = { 

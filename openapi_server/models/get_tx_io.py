@@ -17,24 +17,31 @@ class GetTxIo(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, operation='get_tx_io', parameters=None):  # noqa: E501
+    def __init__(self, api='txs', operation='get_tx_io', parameters=None):  # noqa: E501
         """GetTxIo - a model defined in OpenAPI
 
+        :param api: The api of this GetTxIo.  # noqa: E501
+        :type api: str
         :param operation: The operation of this GetTxIo.  # noqa: E501
         :type operation: str
         :param parameters: The parameters of this GetTxIo.  # noqa: E501
         :type parameters: List[GetTxIoParameters]
         """
         self.openapi_types = {
+            'api': str,
             'operation': str,
             'parameters': List[GetTxIoParameters]
         }
 
         self.attribute_map = {
+            'api': 'api',
             'operation': 'operation',
             'parameters': 'parameters'
         }
 
+        #if api is None:
+            #raise ValueError("Invalid value for `api`, must not be `None`")  # noqa: E501
+        self._api = api
         #if operation is None:
             #raise ValueError("Invalid value for `operation`, must not be `None`")  # noqa: E501
         self._operation = operation
@@ -59,9 +66,33 @@ class GetTxIo(Model):
         :return: The GetTxIo as a dict
         :rtype: dict
         """
-        return { 'operation': self._operation,
+        return { 'api': self._api,
+            'operation': self._operation,
             'parameters': self._parameters }
 
+
+    @property
+    def api(self):
+        """Gets the api of this GetTxIo.
+
+
+        :return: The api of this GetTxIo.
+        :rtype: str
+        """
+        return self._api
+
+    @api.setter
+    def api(self, api):
+        """Sets the api of this GetTxIo.
+
+
+        :param api: The api of this GetTxIo.
+        :type api: str
+        """
+        if api is None:
+            raise ValueError("Invalid value for `api`, must not be `None`")  # noqa: E501
+
+        self._api = api
 
     @property
     def operation(self):

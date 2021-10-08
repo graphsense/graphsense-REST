@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 import unittest
+import asyncio
 
 from flask import json
 from six import BytesIO
@@ -21,7 +22,9 @@ class TestTagsController(BaseTestCase):
 
         Returns the supported concepts of a taxonomy
         """
-        test_service.list_concepts(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.list_concepts(self))
+        loop.close()
 
         headers = { 
             'Accept': 'application/json',
@@ -38,7 +41,9 @@ class TestTagsController(BaseTestCase):
 
         Returns address and entity tags associated with a given label
         """
-        test_service.list_tags(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.list_tags(self))
+        loop.close()
 
         query_string = [('',''),
                         ('label', 'cimedy')]
@@ -58,7 +63,9 @@ class TestTagsController(BaseTestCase):
 
         Returns the supported taxonomies
         """
-        test_service.list_taxonomies(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.list_taxonomies(self))
+        loop.close()
 
         headers = { 
             'Accept': 'application/json',

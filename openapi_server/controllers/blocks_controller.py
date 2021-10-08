@@ -1,6 +1,7 @@
 import connexion
 import six
 import traceback
+import asyncio
 
 from openapi_server.models.block import Block  # noqa: E501
 from openapi_server.models.blocks import Blocks  # noqa: E501
@@ -22,9 +23,13 @@ def get_block(currency, height):  # noqa: E501
     :rtype: Block
     """
     try:
-        return service.get_block(
-            currency=currency,
-            height=height)
+        loop = asyncio.new_event_loop()
+        result = loop.run_until_complete(
+            service.get_block(
+                currency=currency,
+                height=height))
+        loop.close()
+        return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
@@ -47,9 +52,13 @@ def list_block_txs(currency, height):  # noqa: E501
     :rtype: List[Tx]
     """
     try:
-        return service.list_block_txs(
-            currency=currency,
-            height=height)
+        loop = asyncio.new_event_loop()
+        result = loop.run_until_complete(
+            service.list_block_txs(
+                currency=currency,
+                height=height))
+        loop.close()
+        return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
@@ -72,9 +81,13 @@ def list_blocks(currency, page=None):  # noqa: E501
     :rtype: Blocks
     """
     try:
-        return service.list_blocks(
-            currency=currency,
-            page=page)
+        loop = asyncio.new_event_loop()
+        result = loop.run_until_complete(
+            service.list_blocks(
+                currency=currency,
+                page=page))
+        loop.close()
+        return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:

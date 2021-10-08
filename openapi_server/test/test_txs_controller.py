@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 import unittest
+import asyncio
 
 from flask import json
 from six import BytesIO
@@ -22,7 +23,9 @@ class TestTxsController(BaseTestCase):
 
         Returns details of a specific transaction identified by its hash.
         """
-        test_service.get_tx(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.get_tx(self))
+        loop.close()
 
         headers = { 
             'Accept': 'application/json',
@@ -39,7 +42,9 @@ class TestTxsController(BaseTestCase):
 
         Returns input/output values of a specific transaction identified by its hash.
         """
-        test_service.get_tx_io(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.get_tx_io(self))
+        loop.close()
 
         headers = { 
             'Accept': 'application/json',
@@ -56,7 +61,9 @@ class TestTxsController(BaseTestCase):
 
         Returns transactions
         """
-        test_service.list_txs(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.list_txs(self))
+        loop.close()
 
         query_string = [('','')]
         headers = { 
