@@ -1,5 +1,5 @@
 import importlib
-from flask import Response, stream_with_context
+from flask import Response
 from gsrest.util.csvify import create_download_header
 from csv import DictWriter
 from openapi_server.models.values import Values
@@ -57,14 +57,16 @@ async def wrap(operation, currency, params):
     else:
         result = result.to_dict()
         for k in result:
-            print(f'k {k}')
             if k != 'next_page':
                 rows = result[k]
+                break
         page_state = result['next_page']
     flat = []
     for row in rows:
         fl = flatten(row)
         for (k, v) in params.items():
+            if k == 'page':
+                continue
             fl[k] = v
         flat.append(fl)
     if page_state:
@@ -109,6 +111,3 @@ async def to_csv(currency, batch_operation):
 
             csv.writerow(row)
             yield wr.get()
-
-        #if not page_state:
-            #break

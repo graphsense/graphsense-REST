@@ -11,8 +11,8 @@ from flask import current_app
 
 from gsrest.util.exceptions import BadConfigError
 
-SMALL_PAGE_SIZE = 1000
-BIG_PAGE_SIZE = 10000
+SMALL_PAGE_SIZE = 10
+BIG_PAGE_SIZE = 10
 SEARCH_PAGE_SIZE = 100
 
 
@@ -168,18 +168,23 @@ class Cassandra():
         q = replaceFrom(keyspace, query)
         q = SimpleStatement(q, fetch_size=fetch_size)
         try:
-            response = self.session.execute_async(q, params,
-                                                  paging_state=paging_state)
+            response_future = self.session.execute_async(
+                q, params,
+                paging_state=paging_state)
             loop = asyncio.get_event_loop()
             future = loop.create_future()
 
             def on_done(result):
+                ResultSet = namedtuple('ResultSet', ['current_rows',
+                                                     'paging_state'])
+                result = ResultSet(current_rows=result,
+                                   paging_state=response_future._paging_state)
                 loop.call_soon_threadsafe(future.set_result, result)
 
             def on_err(result):
                 loop.call_soon_threadsafe(future.set_exception, result)
 
-            response.add_callbacks(on_done, on_err)
+            response_future.add_callbacks(on_done, on_err)
             return future
         except NoHostAvailable:
             self.connect()
@@ -188,20 +193,20 @@ class Cassandra():
                                       paging_state=paging_state,
                                       fetch_size=fetch_size)
 
-    def concurrent_with_args(self, currency, keyspace_type, query, params,
-                             filter_empty=True, one=True):
-        keyspace = self.get_keyspace_mapping(currency, keyspace_type)
-        query = replaceFrom(keyspace, query)
-        result = execute_concurrent_with_args(
-            self.session, query, params, raise_on_first_error=False,
-            results_generator=False)
-        if filter_empty:
-            return [row.one() if one else row for (success, row) in result
-                    if success and (not one or row.one())]
-        else:
-            return [row.one() if one else row
-                    if success and (not one or row.one()) else None
-                    for (success, row) in result]
+    async def concurrent_with_args(self, currency, keyspace_type, query,
+                                   params, filter_empty=True, one=True,
+                                   results_generator=False):
+        aws = [self.execute_async(currency, keyspace_type, query, param)
+               for param in params]
+        for aw in asyncio.as_completed(aws):
+            result = await aw
+            if filter_empty and result is None:
+                continue
+            if one:
+                yield result.current_rows[0]
+                continue
+            yield result.current_rows
+
 
     @eth
     # @Timer(text="Timer: stats {:.2f}")
@@ -615,15 +620,16 @@ class Cassandra():
 
     @eth
     # @Timer(text="Timer: list_entity_addresses {:.2f}")
-    def list_entity_addresses(self, currency, entity, page=None,
-                              pagesize=None):
+    async def list_entity_addresses(self, currency, entity, page=None,
+                                    pagesize=None):
         paging_state = from_hex(page)
         entity_id_group = self.get_id_group(currency, entity)
         entity = int(entity)
         query = ("SELECT address_id FROM cluster_addresses "
                  "WHERE cluster_id_group = %s AND cluster_id = %s")
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
-        results = self.execute(currency, 'transformed', query,
+        results = await self.execute_async(
+                               currency, 'transformed', query,
                                [entity_id_group, entity],
                                paging_state=paging_state,
                                fetch_size=fetch_size)
@@ -635,10 +641,13 @@ class Cassandra():
         query = "SELECT * FROM address WHERE " \
                 "address_id_group = %s and address_id = %s"
         result = self.concurrent_with_args(currency, 'transformed', query,
-                                           params)
+                                           params, results_generator=True)
+        addresses = []
+        async for row in result:
+            addresses.append(await self.finish_address(currency, row))
 
-        return self.finish_addresses(currency, result), \
-            to_hex(results.paging_state)
+        return addresses, to_hex(results.paging_state)
+
 
     # @Timer(text="Timer: list_neighbors {:.2f}")
     def list_neighbors(self, currency, id, is_outgoing, node_type,
@@ -832,7 +841,8 @@ class Cassandra():
         params = [tx_hash[:prefix['tx']], bytearray.fromhex(tx_hash)]
         result = await self.execute_async(currency, 'raw', query, params)
         if not result:
-            raise RuntimeError(f'Transaction {tx_hash} not found in {currency}')
+            raise RuntimeError(
+                f'Transaction {tx_hash} not found in {currency}')
         id = result[0]['tx_id']
         params = [self.get_tx_id_group(currency, id), id]
         query = ('SELECT * FROM transaction WHERE '
@@ -939,8 +949,6 @@ class Cassandra():
     @eth
     def finish_addresses(self, currency, rows, with_txs=True):
         ids = []
-        # turn generator in list if needed
-        rows = list(rows)
         for row in rows:
             row['total_received'] = \
                 self.markup_currency(currency, row['total_received'])
@@ -974,6 +982,39 @@ class Cassandra():
 
         return rows
 
+    async def finish_address(self, currency, row, with_txs=True):
+        row['total_received'] = \
+            self.markup_currency(currency, row['total_received'])
+        row['total_spent'] = \
+            self.markup_currency(currency, row['total_spent'])
+
+        if not with_txs:
+            return row
+
+        TxSummary = namedtuple('TxSummary', ['height', 'timestamp', 'tx_hash'])
+
+        statement = ('SELECT * FROM transaction WHERE '
+                     'tx_id_group = %s and tx_id = %s')
+
+        aws = [self.execute_async(currency, 'raw', statement,
+                                [self.get_tx_id_group(currency, id), id])
+             for id in [row['first_tx_id'], row['last_tx_id']]]
+        [tx1, tx2] = await asyncio.gather(*aws)
+
+        tx1 = tx1.current_rows[0]
+        tx2 = tx2.current_rows[0]
+
+        row['first_tx'] = TxSummary(
+            tx_hash=tx1['tx_hash'],
+            timestamp=tx1['timestamp'],
+            height=tx1['block_id'])
+
+        row['last_tx'] = TxSummary(
+            tx_hash=tx2['tx_hash'],
+            timestamp=tx2['timestamp'],
+            height=tx2['block_id'])
+
+        return row
 #####################
 # ETHEREUM VARIANTS #
 #####################
@@ -1347,7 +1388,6 @@ class Cassandra():
 
     def finish_addresses_eth(self, currency, rows, with_txs=True):
         ids = []
-        rows = list(rows)
         for row in rows:
             if 'address' in row:
                 row['address'] = eth_address_to_hex(row['address'])

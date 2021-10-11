@@ -96,11 +96,14 @@ def list_entity_addresses(currency, entity, page=None, pagesize=None):  # noqa: 
     :rtype: EntityAddresses
     """
     try:
-        result = service.list_entity_addresses(
-            currency=currency,
-            entity=entity,
-            page=page,
-            pagesize=pagesize)
+        loop = asyncio.new_event_loop()
+        result = loop.run_until_complete(
+            service.list_entity_addresses(
+                currency=currency,
+                entity=entity,
+                page=page,
+                pagesize=pagesize))
+        loop.close()
         return result
     except RuntimeError as e:
         return notfound(str(e))

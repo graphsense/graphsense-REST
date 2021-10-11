@@ -72,7 +72,9 @@ class TestEntitiesController(BaseTestCase):
 
         Get an entity's addresses
         """
-        test_service.list_entity_addresses(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.list_entity_addresses(self))
+        loop.close()
 
         if "list_entity_addresses" in ["batch", "get_tx_io"]:
             return

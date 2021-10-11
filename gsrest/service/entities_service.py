@@ -155,10 +155,10 @@ def list_entity_neighbors_csv(currency, entity, direction,
                             .format(direction, entity, currency.upper())))
 
 
-def list_entity_addresses(currency, entity, page=None, pagesize=None):
+async def list_entity_addresses(currency, entity, page=None, pagesize=None):
     db = get_connection()
     addresses, paging_state = \
-        db.list_entity_addresses(currency, entity, page, pagesize)
+        await db.list_entity_addresses(currency, entity, page, pagesize)
 
     rates = get_rates(currency)['rates']
     addresses = [Address(

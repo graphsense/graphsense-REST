@@ -794,6 +794,7 @@ paths:
       summary: Get an entity's addresses
       tags:
       - entities
+      x-async: true
       x-openapi-router-controller: openapi_server.controllers.entities_controller
   /{currency}/entities/{entity}/links:
     get:
@@ -1831,9 +1832,11 @@ components:
       discriminator:
         mapping:
           get_tx_io: '#/components/schemas/get_tx_io'
+          list_entity_addresses: '#/components/schemas/list_entity_addresses'
         propertyName: operation
       oneOf:
       - $ref: '#/components/schemas/get_tx_io'
+      - $ref: '#/components/schemas/list_entity_addresses'
     batch_response:
       discriminator:
         mapping:
