@@ -1,6 +1,7 @@
 import connexion
 import six
 import traceback
+import asyncio
 
 from openapi_server.models.block import Block  # noqa: E501
 from openapi_server.models.blocks import Blocks  # noqa: E501
@@ -22,9 +23,10 @@ def get_block(currency, height):  # noqa: E501
     :rtype: Block
     """
     try:
-        return service.get_block(
+        result = service.get_block(
             currency=currency,
             height=height)
+        return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
@@ -47,34 +49,10 @@ def list_block_txs(currency, height):  # noqa: E501
     :rtype: List[Tx]
     """
     try:
-        return service.list_block_txs(
+        result = service.list_block_txs(
             currency=currency,
             height=height)
-    except RuntimeError as e:
-        return notfound(str(e))
-    except ValueError as e:
-        return badrequest(str(e))
-    except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
-
-
-def list_block_txs_csv(currency, height):  # noqa: E501
-    """Get block transactions as CSV
-
-     # noqa: E501
-
-    :param currency: The cryptocurrency (e.g., btc)
-    :type currency: str
-    :param height: The block height
-    :type height: int
-
-    :rtype: str
-    """
-    try:
-        return service.list_block_txs_csv(
-            currency=currency,
-            height=height)
+        return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
@@ -97,9 +75,10 @@ def list_blocks(currency, page=None):  # noqa: E501
     :rtype: Blocks
     """
     try:
-        return service.list_blocks(
+        result = service.list_blocks(
             currency=currency,
             page=page)
+        return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:

@@ -33,11 +33,11 @@ class Taxonomy(Model):
             'uri': 'uri'
         }
 
-        if taxonomy is None:
-            raise ValueError("Invalid value for `taxonomy`, must not be `None`")  # noqa: E501
+        #if taxonomy is None:
+            #raise ValueError("Invalid value for `taxonomy`, must not be `None`")  # noqa: E501
         self._taxonomy = taxonomy
-        if uri is None:
-            raise ValueError("Invalid value for `uri`, must not be `None`")  # noqa: E501
+        #if uri is None:
+            #raise ValueError("Invalid value for `uri`, must not be `None`")  # noqa: E501
         self._uri = uri
 
     @classmethod

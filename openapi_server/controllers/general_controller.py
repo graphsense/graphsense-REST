@@ -1,6 +1,7 @@
 import connexion
 import six
 import traceback
+import asyncio
 
 from openapi_server.models.search_result import SearchResult  # noqa: E501
 from openapi_server.models.stats import Stats  # noqa: E501
@@ -17,8 +18,9 @@ def get_statistics():  # noqa: E501
     :rtype: Stats
     """
     try:
-        return service.get_statistics(
+        result = service.get_statistics(
             )
+        return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
@@ -43,10 +45,11 @@ def search(q, currency=None, limit=None):  # noqa: E501
     :rtype: SearchResult
     """
     try:
-        return service.search(
+        result = service.search(
             q=q,
             currency=currency,
             limit=limit)
+        return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:

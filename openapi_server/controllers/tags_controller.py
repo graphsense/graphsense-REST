@@ -1,6 +1,7 @@
 import connexion
 import six
 import traceback
+import asyncio
 
 from openapi_server.models.concept import Concept  # noqa: E501
 from openapi_server.models.tags import Tags  # noqa: E501
@@ -20,8 +21,9 @@ def list_concepts(taxonomy):  # noqa: E501
     :rtype: List[Concept]
     """
     try:
-        return service.list_concepts(
+        result = service.list_concepts(
             taxonomy=taxonomy)
+        return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
@@ -44,9 +46,10 @@ def list_tags(label, currency=None):  # noqa: E501
     :rtype: List[Tags]
     """
     try:
-        return service.list_tags(
+        result = service.list_tags(
             label=label,
             currency=currency)
+        return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
@@ -65,8 +68,9 @@ def list_taxonomies():  # noqa: E501
     :rtype: List[Taxonomy]
     """
     try:
-        return service.list_taxonomies(
+        result = service.list_taxonomies(
             )
+        return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:

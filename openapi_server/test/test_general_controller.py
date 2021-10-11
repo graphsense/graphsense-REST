@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 import unittest
+import asyncio
 
 from flask import json
 from six import BytesIO
@@ -22,6 +23,8 @@ class TestGeneralController(BaseTestCase):
         """
         test_service.get_statistics(self)
 
+        if "get_statistics" in ["batch", "get_tx_io"]:
+            return
         headers = { 
             'Accept': 'application/json',
         }
@@ -39,6 +42,8 @@ class TestGeneralController(BaseTestCase):
         """
         test_service.search(self)
 
+        if "search" in ["batch", "get_tx_io"]:
+            return
         query_string = [('',''),
                         ('q', 'foo'),
                         ('','')]

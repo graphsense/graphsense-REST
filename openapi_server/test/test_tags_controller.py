@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 import unittest
+import asyncio
 
 from flask import json
 from six import BytesIO
@@ -23,6 +24,8 @@ class TestTagsController(BaseTestCase):
         """
         test_service.list_concepts(self)
 
+        if "list_concepts" in ["batch", "get_tx_io"]:
+            return
         headers = { 
             'Accept': 'application/json',
         }
@@ -40,6 +43,8 @@ class TestTagsController(BaseTestCase):
         """
         test_service.list_tags(self)
 
+        if "list_tags" in ["batch", "get_tx_io"]:
+            return
         query_string = [('',''),
                         ('label', 'cimedy')]
         headers = { 
@@ -60,6 +65,8 @@ class TestTagsController(BaseTestCase):
         """
         test_service.list_taxonomies(self)
 
+        if "list_taxonomies" in ["batch", "get_tx_io"]:
+            return
         headers = { 
             'Accept': 'application/json',
         }

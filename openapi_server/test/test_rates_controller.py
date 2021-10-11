@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 import unittest
+import asyncio
 
 from flask import json
 from six import BytesIO
@@ -21,6 +22,8 @@ class TestRatesController(BaseTestCase):
         """
         test_service.get_exchange_rates(self)
 
+        if "get_exchange_rates" in ["batch", "get_tx_io"]:
+            return
         headers = { 
             'Accept': 'application/json',
         }

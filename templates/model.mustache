@@ -59,8 +59,8 @@ class {{classname}}(Model):
 {{#vars}}{{#-first}}
 {{/-first}}
 {{#required}}
-        if {{name}} is None:
-            raise ValueError("Invalid value for `{{name}}`, must not be `None`")  # noqa: E501
+        #if {{name}} is None:
+            #raise ValueError("Invalid value for `{{name}}`, must not be `None`")  # noqa: E501
 {{/required}}
         self._{{name}} = {{name}}
 {{/vars}}

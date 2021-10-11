@@ -1,9 +1,9 @@
 import re
 import time
+import asyncio
 from collections import namedtuple
 from cassandra.cluster import Cluster, NoHostAvailable
-from cassandra.query import SimpleStatement,\
-    dict_factory, ValueSequence
+from cassandra.query import SimpleStatement, dict_factory
 from cassandra.concurrent import execute_concurrent_with_args
 from math import floor
 from flask import current_app
@@ -162,13 +162,39 @@ class Cassandra():
 
         return result
 
+    def execute_async(self, currency, keyspace_type, query,
+                      params=None, paging_state=None, fetch_size=None):
+        keyspace = self.get_keyspace_mapping(currency, keyspace_type)
+        q = replaceFrom(keyspace, query)
+        q = SimpleStatement(q, fetch_size=fetch_size)
+        try:
+            response = self.session.execute_async(q, params,
+                                                  paging_state=paging_state)
+            loop = asyncio.get_event_loop()
+            future = loop.create_future()
+
+            def on_done(result):
+                loop.call_soon_threadsafe(future.set_result, result)
+
+            def on_err(result):
+                loop.call_soon_threadsafe(future.set_exception, result)
+
+            response.add_callbacks(on_done, on_err)
+            return future
+        except NoHostAvailable:
+            self.connect()
+            return self.execute_async(currency, keyspace_type, query,
+                                      params=params,
+                                      paging_state=paging_state,
+                                      fetch_size=fetch_size)
+
     def concurrent_with_args(self, currency, keyspace_type, query, params,
                              filter_empty=True, one=True):
         keyspace = self.get_keyspace_mapping(currency, keyspace_type)
         query = replaceFrom(keyspace, query)
         result = execute_concurrent_with_args(
             self.session, query, params, raise_on_first_error=False,
-            results_generator=True)
+            results_generator=False)
         if filter_empty:
             return [row.one() if one else row for (success, row) in result
                     if success and (not one or row.one())]
@@ -799,10 +825,20 @@ class Cassandra():
 
     @eth
     # @Timer(text="Timer: get_tx {:.2f}")
-    def get_tx(self, currency, tx_hash):
-        result = self.list_txs_by_hashes(currency, [tx_hash])
-        if result:
-            return result[0]
+    async def get_tx(self, currency, tx_hash):
+        prefix = self.get_prefix_lengths(currency)
+        query = ('SELECT tx_id from transaction_by_tx_prefix where '
+                 'tx_prefix=%s and tx_hash=%s')
+        params = [tx_hash[:prefix['tx']], bytearray.fromhex(tx_hash)]
+        result = await self.execute_async(currency, 'raw', query, params)
+        if not result:
+            raise RuntimeError(f'Transaction {tx_hash} not found in {currency}')
+        id = result[0]['tx_id']
+        params = [self.get_tx_id_group(currency, id), id]
+        query = ('SELECT * FROM transaction WHERE '
+                 'tx_id_group = %s and tx_id = %s')
+        result = await self.execute_async(currency, 'raw', query, params)
+        return result[0]
 
     # @Timer(text="Timer: list_txs {:.2f}")
     def list_txs(self, currency, page=None):
@@ -847,13 +883,13 @@ class Cassandra():
         statement = ('SELECT tx_id from transaction_by_tx_prefix where '
                      'tx_prefix=%s and tx_hash=%s')
         result = self.concurrent_with_args(currency, 'raw', statement, params)
-        ids = [tx['tx_id'] for tx in result]
+        ids = (tx['tx_id'] for tx in result)
         return self.list_txs_by_ids(currency, ids)
 
     @eth
     # @Timer(text="Timer: list_txs_by_ids {:.2f}")
     def list_txs_by_ids(self, currency, ids, filter_empty=True):
-        params = [[self.get_tx_id_group(currency, id), id] for id in ids]
+        params = ([self.get_tx_id_group(currency, id), id] for id in ids)
         statement = ('SELECT * FROM transaction WHERE '
                      'tx_id_group = %s and tx_id = %s')
         return self.concurrent_with_args(currency, 'raw', statement, params,
@@ -903,6 +939,8 @@ class Cassandra():
     @eth
     def finish_addresses(self, currency, rows, with_txs=True):
         ids = []
+        # turn generator in list if needed
+        rows = list(rows)
         for row in rows:
             row['total_received'] = \
                 self.markup_currency(currency, row['total_received'])
@@ -1309,6 +1347,7 @@ class Cassandra():
 
     def finish_addresses_eth(self, currency, rows, with_txs=True):
         ids = []
+        rows = list(rows)
         for row in rows:
             if 'address' in row:
                 row['address'] = eth_address_to_hex(row['address'])

@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 import unittest
+import asyncio
 
 from flask import json
 from six import BytesIO
@@ -23,6 +24,8 @@ class TestBlocksController(BaseTestCase):
         """
         test_service.get_block(self)
 
+        if "get_block" in ["batch", "get_tx_io"]:
+            return
         headers = { 
             'Accept': 'application/json',
         }
@@ -40,28 +43,13 @@ class TestBlocksController(BaseTestCase):
         """
         test_service.list_block_txs(self)
 
+        if "list_block_txs" in ["batch", "get_tx_io"]:
+            return
         headers = { 
             'Accept': 'application/json',
         }
         response = self.client.open(
             '/{currency}/blocks/{height}/txs'.format(currency='btc', height=1),
-            method='GET',
-            headers=headers)
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
-
-    def test_list_block_txs_csv(self):
-        """Test case for list_block_txs_csv
-
-        Get block transactions as CSV
-        """
-        test_service.list_block_txs_csv(self)
-
-        headers = { 
-            'Accept': 'text/csv',
-        }
-        response = self.client.open(
-            '/{currency}/blocks/{height}/txs.csv'.format(currency='btc', height=1),
             method='GET',
             headers=headers)
         self.assert200(response,
@@ -74,6 +62,8 @@ class TestBlocksController(BaseTestCase):
         """
         test_service.list_blocks(self)
 
+        if "list_blocks" in ["batch", "get_tx_io"]:
+            return
         query_string = [('','')]
         headers = { 
             'Accept': 'application/json',

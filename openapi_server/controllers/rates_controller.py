@@ -1,6 +1,7 @@
 import connexion
 import six
 import traceback
+import asyncio
 
 from openapi_server.models.rates import Rates  # noqa: E501
 import gsrest.service.rates_service as service
@@ -20,9 +21,10 @@ def get_exchange_rates(currency, height):  # noqa: E501
     :rtype: Rates
     """
     try:
-        return service.get_exchange_rates(
+        result = service.get_exchange_rates(
             currency=currency,
             height=height)
+        return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:

@@ -41,11 +41,11 @@ class Tags(Model):
             'tag_coherence': 'tag_coherence'
         }
 
-        if address_tags is None:
-            raise ValueError("Invalid value for `address_tags`, must not be `None`")  # noqa: E501
+        #if address_tags is None:
+            #raise ValueError("Invalid value for `address_tags`, must not be `None`")  # noqa: E501
         self._address_tags = address_tags
-        if entity_tags is None:
-            raise ValueError("Invalid value for `entity_tags`, must not be `None`")  # noqa: E501
+        #if entity_tags is None:
+            #raise ValueError("Invalid value for `entity_tags`, must not be `None`")  # noqa: E501
         self._entity_tags = entity_tags
         self._tag_coherence = tag_coherence
 
