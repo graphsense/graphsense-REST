@@ -29,13 +29,10 @@ def get_address(currency, address, include_tags=None):  # noqa: E501
     :rtype: Address
     """
     try:
-        loop = asyncio.new_event_loop()
-        result = loop.run_until_complete(
-            service.get_address(
-                currency=currency,
-                address=address,
-                include_tags=include_tags))
-        loop.close()
+        result = service.get_address(
+            currency=currency,
+            address=address,
+            include_tags=include_tags)
         return result
     except RuntimeError as e:
         return notfound(str(e))
@@ -63,14 +60,11 @@ def get_address_entity(currency, address, include_tags=None, tag_coherence=None)
     :rtype: Entity
     """
     try:
-        loop = asyncio.new_event_loop()
-        result = loop.run_until_complete(
-            service.get_address_entity(
-                currency=currency,
-                address=address,
-                include_tags=include_tags,
-                tag_coherence=tag_coherence))
-        loop.close()
+        result = service.get_address_entity(
+            currency=currency,
+            address=address,
+            include_tags=include_tags,
+            tag_coherence=tag_coherence)
         return result
     except RuntimeError as e:
         return notfound(str(e))
@@ -96,13 +90,10 @@ def list_address_links(currency, address, neighbor):  # noqa: E501
     :rtype: Links
     """
     try:
-        loop = asyncio.new_event_loop()
-        result = loop.run_until_complete(
-            service.list_address_links(
-                currency=currency,
-                address=address,
-                neighbor=neighbor))
-        loop.close()
+        result = service.list_address_links(
+            currency=currency,
+            address=address,
+            neighbor=neighbor)
         return result
     except RuntimeError as e:
         return notfound(str(e))
@@ -134,16 +125,13 @@ def list_address_neighbors(currency, address, direction, include_labels=None, pa
     :rtype: Neighbors
     """
     try:
-        loop = asyncio.new_event_loop()
-        result = loop.run_until_complete(
-            service.list_address_neighbors(
-                currency=currency,
-                address=address,
-                direction=direction,
-                include_labels=include_labels,
-                page=page,
-                pagesize=pagesize))
-        loop.close()
+        result = service.list_address_neighbors(
+            currency=currency,
+            address=address,
+            direction=direction,
+            include_labels=include_labels,
+            page=page,
+            pagesize=pagesize)
         return result
     except RuntimeError as e:
         return notfound(str(e))
@@ -171,14 +159,11 @@ def list_address_txs(currency, address, page=None, pagesize=None):  # noqa: E501
     :rtype: TxsAccount
     """
     try:
-        loop = asyncio.new_event_loop()
-        result = loop.run_until_complete(
-            service.list_address_txs(
-                currency=currency,
-                address=address,
-                page=page,
-                pagesize=pagesize))
-        loop.close()
+        result = service.list_address_txs(
+            currency=currency,
+            address=address,
+            page=page,
+            pagesize=pagesize)
         return result
     except RuntimeError as e:
         return notfound(str(e))
@@ -206,14 +191,11 @@ def list_addresses(currency, ids=None, page=None, pagesize=None):  # noqa: E501
     :rtype: Addresses
     """
     try:
-        loop = asyncio.new_event_loop()
-        result = loop.run_until_complete(
-            service.list_addresses(
-                currency=currency,
-                ids=ids,
-                page=page,
-                pagesize=pagesize))
-        loop.close()
+        result = service.list_addresses(
+            currency=currency,
+            ids=ids,
+            page=page,
+            pagesize=pagesize)
         return result
     except RuntimeError as e:
         return notfound(str(e))
@@ -237,12 +219,9 @@ def list_tags_by_address(currency, address):  # noqa: E501
     :rtype: List[AddressTag]
     """
     try:
-        loop = asyncio.new_event_loop()
-        result = loop.run_until_complete(
-            service.list_tags_by_address(
-                currency=currency,
-                address=address))
-        loop.close()
+        result = service.list_tags_by_address(
+            currency=currency,
+            address=address)
         return result
     except RuntimeError as e:
         return notfound(str(e))

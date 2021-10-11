@@ -24,7 +24,13 @@ class writer:
         return self.str
 
 
-def flatten(flat_dict, item, name=""):
+def flatten(item, name="", flat_dict=None):
+    if flat_dict is None:
+        # going this way instead of a default argument value
+        # like "..., flat_dict = {}):" because
+        # default arguments are mutable in python!
+        # See https://towardsdatascience.com/python-pitfall-mutable-default-arguments-9385e8265422 # noqa
+        flat_dict = {}
     if type(item) == Values:
         flat_dict[name + 'value'] = item.value
         for rate in item.fiat_values:
@@ -34,13 +40,42 @@ def flatten(flat_dict, item, name=""):
         item = item.to_dict()
     if isinstance(item, dict):
         for sub_item in item:
-            flatten(flat_dict, item[sub_item], name + sub_item + "_")
+            flatten(item[sub_item], name + sub_item + "_", flat_dict)
     else:
         flat_dict[name[:-1]] = item
+    return flat_dict
+
+
+async def wrap(operation, currency, params):
+    result = await operation(currency, **params)
+    if isinstance(result, list):
+        rows = result
+        page_state = None
+    elif not hasattr(result, 'next_page'):
+        rows = [result]
+        page_state = None
+    else:
+        result = result.to_dict()
+        for k in result:
+            print(f'k {k}')
+            if k != 'next_page':
+                rows = result[k]
+        page_state = result['next_page']
+    flat = []
+    for row in rows:
+        fl = flatten(row)
+        for (k, v) in params.items():
+            fl[k] = v
+        flat.append(fl)
+    if page_state:
+        params['page'] = page_state
+        more = await wrap(operation, currency, params)
+        for row in more:
+            flat.append(row)
+    return flat
 
 
 async def to_csv(currency, batch_operation):
-    flat_dict = {}
     page_state = None
     wr = writer()
     csv = None
@@ -51,34 +86,29 @@ async def to_csv(currency, batch_operation):
 
     for params in batch_operation.parameters:
         params = params.to_dict()
-        params = {k:v for (k,v) in params.items() if v}
+        params = {k: v for (k, v) in params.items() if v}
         if page_state:
             params['page_state'] = page_state
-        aw = operation(currency, **params)
+        aw = wrap(operation, currency, params)
         aws.append(aw)
 
     for op in asyncio.as_completed(aws):
-        result = await op
-        if not hasattr(result, 'next_page'):
-            rows = [result]
-            page_state = None
-        else:
-            raise RuntimeError('paging not implemented')
-
-        if rows is None:
-            raise ValueError('nothing found')
+        try:
+            rows = await op
+        except RuntimeError:
+            continue
 
         for row in rows:
-            flatten(flat_dict, row)
+            head = ""
             if not csv:
-                fieldnames = sorted(flat_dict.keys())
+                fieldnames = sorted(row.keys())
                 csv = DictWriter(wr, fieldnames)
                 csv.writeheader()
-                yield wr.get()
+                head = wr.get()
+                yield head
 
-            csv.writerow(flat_dict)
+            csv.writerow(row)
             yield wr.get()
-            flat_dict = {}
 
         #if not page_state:
             #break

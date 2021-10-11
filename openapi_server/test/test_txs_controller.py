@@ -27,6 +27,8 @@ class TestTxsController(BaseTestCase):
         loop.run_until_complete(test_service.get_tx(self))
         loop.close()
 
+        if "get_tx" in ["batch", "get_tx_io"]:
+            return
         headers = { 
             'Accept': 'application/json',
         }
@@ -46,6 +48,8 @@ class TestTxsController(BaseTestCase):
         loop.run_until_complete(test_service.get_tx_io(self))
         loop.close()
 
+        if "get_tx_io" in ["batch", "get_tx_io"]:
+            return
         headers = { 
             'Accept': 'application/json',
         }
@@ -61,10 +65,10 @@ class TestTxsController(BaseTestCase):
 
         Returns transactions
         """
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(test_service.list_txs(self))
-        loop.close()
+        test_service.list_txs(self)
 
+        if "list_txs" in ["batch", "get_tx_io"]:
+            return
         query_string = [('','')]
         headers = { 
             'Accept': 'application/json',

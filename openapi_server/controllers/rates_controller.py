@@ -21,12 +21,9 @@ def get_exchange_rates(currency, height):  # noqa: E501
     :rtype: Rates
     """
     try:
-        loop = asyncio.new_event_loop()
-        result = loop.run_until_complete(
-            service.get_exchange_rates(
-                currency=currency,
-                height=height))
-        loop.close()
+        result = service.get_exchange_rates(
+            currency=currency,
+            height=height)
         return result
     except RuntimeError as e:
         return notfound(str(e))

@@ -22,10 +22,10 @@ class TestBlocksController(BaseTestCase):
 
         Get a block by its height
         """
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(test_service.get_block(self))
-        loop.close()
+        test_service.get_block(self)
 
+        if "get_block" in ["batch", "get_tx_io"]:
+            return
         headers = { 
             'Accept': 'application/json',
         }
@@ -41,10 +41,10 @@ class TestBlocksController(BaseTestCase):
 
         Get block transactions
         """
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(test_service.list_block_txs(self))
-        loop.close()
+        test_service.list_block_txs(self)
 
+        if "list_block_txs" in ["batch", "get_tx_io"]:
+            return
         headers = { 
             'Accept': 'application/json',
         }
@@ -60,10 +60,10 @@ class TestBlocksController(BaseTestCase):
 
         Get all blocks
         """
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(test_service.list_blocks(self))
-        loop.close()
+        test_service.list_blocks(self)
 
+        if "list_blocks" in ["batch", "get_tx_io"]:
+            return
         query_string = [('','')]
         headers = { 
             'Accept': 'application/json',

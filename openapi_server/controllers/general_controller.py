@@ -18,11 +18,8 @@ def get_statistics():  # noqa: E501
     :rtype: Stats
     """
     try:
-        loop = asyncio.new_event_loop()
-        result = loop.run_until_complete(
-            service.get_statistics(
-                ))
-        loop.close()
+        result = service.get_statistics(
+            )
         return result
     except RuntimeError as e:
         return notfound(str(e))
@@ -48,13 +45,10 @@ def search(q, currency=None, limit=None):  # noqa: E501
     :rtype: SearchResult
     """
     try:
-        loop = asyncio.new_event_loop()
-        result = loop.run_until_complete(
-            service.search(
-                q=q,
-                currency=currency,
-                limit=limit))
-        loop.close()
+        result = service.search(
+            q=q,
+            currency=currency,
+            limit=limit)
         return result
     except RuntimeError as e:
         return notfound(str(e))

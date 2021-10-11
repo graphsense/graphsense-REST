@@ -20,10 +20,10 @@ class TestRatesController(BaseTestCase):
 
         Returns exchange rate for a given height
         """
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(test_service.get_exchange_rates(self))
-        loop.close()
+        test_service.get_exchange_rates(self)
 
+        if "get_exchange_rates" in ["batch", "get_tx_io"]:
+            return
         headers = { 
             'Accept': 'application/json',
         }

@@ -21,11 +21,8 @@ def list_concepts(taxonomy):  # noqa: E501
     :rtype: List[Concept]
     """
     try:
-        loop = asyncio.new_event_loop()
-        result = loop.run_until_complete(
-            service.list_concepts(
-                taxonomy=taxonomy))
-        loop.close()
+        result = service.list_concepts(
+            taxonomy=taxonomy)
         return result
     except RuntimeError as e:
         return notfound(str(e))
@@ -49,12 +46,9 @@ def list_tags(label, currency=None):  # noqa: E501
     :rtype: List[Tags]
     """
     try:
-        loop = asyncio.new_event_loop()
-        result = loop.run_until_complete(
-            service.list_tags(
-                label=label,
-                currency=currency))
-        loop.close()
+        result = service.list_tags(
+            label=label,
+            currency=currency)
         return result
     except RuntimeError as e:
         return notfound(str(e))
@@ -74,11 +68,8 @@ def list_taxonomies():  # noqa: E501
     :rtype: List[Taxonomy]
     """
     try:
-        loop = asyncio.new_event_loop()
-        result = loop.run_until_complete(
-            service.list_taxonomies(
-                ))
-        loop.close()
+        result = service.list_taxonomies(
+            )
         return result
     except RuntimeError as e:
         return notfound(str(e))

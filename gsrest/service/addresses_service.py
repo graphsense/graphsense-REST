@@ -33,7 +33,7 @@ def list_tags_by_address_csv(currency, address):
                                 currency.upper())))
 
 
-async def list_address_txs(currency, address, page=None, pagesize=None):
+def list_address_txs(currency, address, page=None, pagesize=None):
     db = get_connection()
     results, paging_state = \
         db.list_address_txs(currency, address, page, pagesize)

@@ -23,12 +23,9 @@ def get_block(currency, height):  # noqa: E501
     :rtype: Block
     """
     try:
-        loop = asyncio.new_event_loop()
-        result = loop.run_until_complete(
-            service.get_block(
-                currency=currency,
-                height=height))
-        loop.close()
+        result = service.get_block(
+            currency=currency,
+            height=height)
         return result
     except RuntimeError as e:
         return notfound(str(e))
@@ -52,12 +49,9 @@ def list_block_txs(currency, height):  # noqa: E501
     :rtype: List[Tx]
     """
     try:
-        loop = asyncio.new_event_loop()
-        result = loop.run_until_complete(
-            service.list_block_txs(
-                currency=currency,
-                height=height))
-        loop.close()
+        result = service.list_block_txs(
+            currency=currency,
+            height=height)
         return result
     except RuntimeError as e:
         return notfound(str(e))
@@ -81,12 +75,9 @@ def list_blocks(currency, page=None):  # noqa: E501
     :rtype: Blocks
     """
     try:
-        loop = asyncio.new_event_loop()
-        result = loop.run_until_complete(
-            service.list_blocks(
-                currency=currency,
-                page=page))
-        loop.close()
+        result = service.list_blocks(
+            currency=currency,
+            page=page)
         return result
     except RuntimeError as e:
         return notfound(str(e))

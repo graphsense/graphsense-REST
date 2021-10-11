@@ -530,6 +530,7 @@ paths:
       summary: Get data as CSV in batch
       tags:
       - batch
+      x-async: true
       x-openapi-router-controller: openapi_server.controllers.batch_controller
   /{currency}/blocks:
     get:
@@ -711,8 +712,7 @@ paths:
         name: entity
         required: true
         schema:
-          format: int64
-          type: integer
+          $ref: '#/components/schemas/entity_id'
         style: simple
       - description: Whether to include tags
         explode: true
@@ -764,8 +764,7 @@ paths:
         name: entity
         required: true
         schema:
-          format: int64
-          type: integer
+          $ref: '#/components/schemas/entity_id'
         style: simple
       - description: Resumption token for retrieving the next page
         explode: true
@@ -817,8 +816,7 @@ paths:
         name: entity
         required: true
         schema:
-          format: int64
-          type: integer
+          $ref: '#/components/schemas/entity_id'
         style: simple
       - description: Neighbor entity
         example: 123456
@@ -862,8 +860,7 @@ paths:
         name: entity
         required: true
         schema:
-          format: int64
-          type: integer
+          $ref: '#/components/schemas/entity_id'
         style: simple
       - description: Incoming or outgoing neighbors
         example: out
@@ -947,8 +944,7 @@ paths:
         name: entity
         required: true
         schema:
-          format: int64
-          type: integer
+          $ref: '#/components/schemas/entity_id'
         style: simple
       - description: Incoming or outgoing neighbors
         example: out
@@ -1059,8 +1055,7 @@ paths:
         name: entity
         required: true
         schema:
-          format: int64
-          type: integer
+          $ref: '#/components/schemas/entity_id'
         style: simple
       - description: Whether to calculate coherence of address tags
         explode: true
@@ -1103,8 +1098,7 @@ paths:
         name: entity
         required: true
         schema:
-          format: int64
-          type: integer
+          $ref: '#/components/schemas/entity_id'
         style: simple
       - description: Resumption token for retrieving the next page
         explode: true
@@ -1236,6 +1230,7 @@ paths:
       summary: Returns details of a specific transaction identified by its hash.
       tags:
       - txs
+      x-async: true
       x-openapi-router-controller: openapi_server.controllers.txs_controller
   /{currency}/txs/{tx_hash}/{io}:
     get:
@@ -1280,6 +1275,7 @@ paths:
         its hash.
       tags:
       - txs
+      x-async: true
       x-openapi-router-controller: openapi_server.controllers.txs_controller
 components:
   parameters:
@@ -1383,8 +1379,7 @@ components:
       name: entity
       required: true
       schema:
-        format: int64
-        type: integer
+        $ref: '#/components/schemas/entity_id'
       style: simple
     entity_ids:
       description: Restrict result to given set of comma separated IDs
@@ -1835,11 +1830,9 @@ components:
     batch_operation:
       discriminator:
         mapping:
-          get_tx: '#/components/schemas/get_tx'
           get_tx_io: '#/components/schemas/get_tx_io'
         propertyName: operation
       oneOf:
-      - $ref: '#/components/schemas/get_tx'
       - $ref: '#/components/schemas/get_tx_io'
     batch_response:
       discriminator:
@@ -2475,6 +2468,34 @@ components:
           title: next_page
           type: string
       title: links
+      type: object
+    list_entity_addresses:
+      properties:
+        api:
+          default: entities
+          type: string
+        operation:
+          default: list_entity_addresses
+          type: string
+        parameters:
+          items:
+            $ref: '#/components/schemas/list_entity_addresses_parameters'
+          type: array
+      required:
+      - api
+      - operation
+      - parameters
+      type: object
+    list_entity_addresses_parameters:
+      properties:
+        entity:
+          description: Entity id
+          format: int64
+          title: entity
+          type: integer
+      required:
+      - entity
+      title: list_entity_addresses_parameters
       type: object
     neighbor:
       example:

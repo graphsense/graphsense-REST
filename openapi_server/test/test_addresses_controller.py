@@ -26,10 +26,10 @@ class TestAddressesController(BaseTestCase):
 
         Get an address, optionally with tags
         """
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(test_service.get_address(self))
-        loop.close()
+        test_service.get_address(self)
 
+        if "get_address" in ["batch", "get_tx_io"]:
+            return
         query_string = [('','')]
         headers = { 
             'Accept': 'application/json',
@@ -47,10 +47,10 @@ class TestAddressesController(BaseTestCase):
 
         Get the entity of an address
         """
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(test_service.get_address_entity(self))
-        loop.close()
+        test_service.get_address_entity(self)
 
+        if "get_address_entity" in ["batch", "get_tx_io"]:
+            return
         query_string = [('',''),
                         ('','')]
         headers = { 
@@ -69,10 +69,10 @@ class TestAddressesController(BaseTestCase):
 
         Get transactions between two addresses
         """
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(test_service.list_address_links(self))
-        loop.close()
+        test_service.list_address_links(self)
 
+        if "list_address_links" in ["batch", "get_tx_io"]:
+            return
         query_string = [('neighbor', 'addressE')]
         headers = { 
             'Accept': 'application/json',
@@ -90,10 +90,10 @@ class TestAddressesController(BaseTestCase):
 
         Get an addresses' neighbors in the address graph
         """
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(test_service.list_address_neighbors(self))
-        loop.close()
+        test_service.list_address_neighbors(self)
 
+        if "list_address_neighbors" in ["batch", "get_tx_io"]:
+            return
         query_string = [('direction', 'out'),
                         ('',''),
                         ('',''),
@@ -114,10 +114,10 @@ class TestAddressesController(BaseTestCase):
 
         Get all transactions an address has been involved in
         """
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(test_service.list_address_txs(self))
-        loop.close()
+        test_service.list_address_txs(self)
 
+        if "list_address_txs" in ["batch", "get_tx_io"]:
+            return
         query_string = [('',''),
                         ('','')]
         headers = { 
@@ -136,10 +136,10 @@ class TestAddressesController(BaseTestCase):
 
         Get addresses
         """
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(test_service.list_addresses(self))
-        loop.close()
+        test_service.list_addresses(self)
 
+        if "list_addresses" in ["batch", "get_tx_io"]:
+            return
         query_string = [('',''),
                         ('',''),
                         ('','')]
@@ -159,10 +159,10 @@ class TestAddressesController(BaseTestCase):
 
         Get attribution tags for a given address
         """
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(test_service.list_tags_by_address(self))
-        loop.close()
+        test_service.list_tags_by_address(self)
 
+        if "list_tags_by_address" in ["batch", "get_tx_io"]:
+            return
         headers = { 
             'Accept': 'application/json',
         }

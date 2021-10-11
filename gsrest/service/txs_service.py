@@ -47,14 +47,16 @@ async def get_tx(currency, tx_hash):
     return result
 
 
-def get_tx_io(currency, tx_hash, io):
-    result = get_tx(currency, tx_hash)
+async def get_tx_io(currency, tx_hash, io):
+    print(f'await {tx_hash}')
+    result = await get_tx(currency, tx_hash)
+    print(f'received results for {result.tx_hash}')
     if currency == 'eth':
         raise RuntimeError('get_tx_io not implemented for ETH')
     return getattr(result, io)
 
 
-async def list_txs(currency, page=None):
+def list_txs(currency, page=None):
     db = get_connection()
     results, paging_state = db.list_txs(currency, page)
 

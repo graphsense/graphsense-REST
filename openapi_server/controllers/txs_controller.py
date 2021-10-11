@@ -87,12 +87,9 @@ def list_txs(currency, page=None):  # noqa: E501
     :rtype: Txs
     """
     try:
-        loop = asyncio.new_event_loop()
-        result = loop.run_until_complete(
-            service.list_txs(
-                currency=currency,
-                page=page))
-        loop.close()
+        result = service.list_txs(
+            currency=currency,
+            page=page)
         return result
     except RuntimeError as e:
         return notfound(str(e))

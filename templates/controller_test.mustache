@@ -25,10 +25,17 @@ class {{#operations}}Test{{classname}}(BaseTestCase):
 
         {{{summary}}}
         """
+        {{^vendorExtensions.x-async}}
+        test_service.{{operationId}}(self)
+        {{/vendorExtensions.x-async}}
+        {{#vendorExtensions.x-async}}
         loop = asyncio.new_event_loop()
         loop.run_until_complete(test_service.{{operationId}}(self))
         loop.close()
+        {{/vendorExtensions.x-async}}
 
+        if "{{operationId}}" in ["batch", "get_tx_io"]:
+            return
         {{#bodyParam}}
         {{paramName}} = {{{example}}}
         {{/bodyParam}}

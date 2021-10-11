@@ -194,14 +194,14 @@ class Cassandra():
         query = replaceFrom(keyspace, query)
         result = execute_concurrent_with_args(
             self.session, query, params, raise_on_first_error=False,
-            results_generator=True)
+            results_generator=False)
         if filter_empty:
-            return (row.one() if one else row for (success, row) in result
-                    if success and (not one or row.one()))
+            return [row.one() if one else row for (success, row) in result
+                    if success and (not one or row.one())]
         else:
-            return (row.one() if one else row
+            return [row.one() if one else row
                     if success and (not one or row.one()) else None
-                    for (success, row) in result)
+                    for (success, row) in result]
 
     @eth
     # @Timer(text="Timer: stats {:.2f}")
@@ -825,14 +825,14 @@ class Cassandra():
 
     @eth
     # @Timer(text="Timer: get_tx {:.2f}")
-    async def get_tx(self, currency, hash):
+    async def get_tx(self, currency, tx_hash):
         prefix = self.get_prefix_lengths(currency)
         query = ('SELECT tx_id from transaction_by_tx_prefix where '
                  'tx_prefix=%s and tx_hash=%s')
-        params = [hash[:prefix['tx']], bytearray.fromhex(hash)]
-        print(f'await {hash}')
+        params = [tx_hash[:prefix['tx']], bytearray.fromhex(tx_hash)]
         result = await self.execute_async(currency, 'raw', query, params)
-        print(f'result {result}')
+        if not result:
+            raise RuntimeError(f'Transaction {tx_hash} not found in {currency}')
         id = result[0]['tx_id']
         params = [self.get_tx_id_group(currency, id), id]
         query = ('SELECT * FROM transaction WHERE '
@@ -939,6 +939,8 @@ class Cassandra():
     @eth
     def finish_addresses(self, currency, rows, with_txs=True):
         ids = []
+        # turn generator in list if needed
+        rows = list(rows)
         for row in rows:
             row['total_received'] = \
                 self.markup_currency(currency, row['total_received'])
@@ -1345,6 +1347,7 @@ class Cassandra():
 
     def finish_addresses_eth(self, currency, rows, with_txs=True):
         ids = []
+        rows = list(rows)
         for row in rows:
             if 'address' in row:
                 row['address'] = eth_address_to_hex(row['address'])

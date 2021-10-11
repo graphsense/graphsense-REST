@@ -22,10 +22,10 @@ class TestTagsController(BaseTestCase):
 
         Returns the supported concepts of a taxonomy
         """
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(test_service.list_concepts(self))
-        loop.close()
+        test_service.list_concepts(self)
 
+        if "list_concepts" in ["batch", "get_tx_io"]:
+            return
         headers = { 
             'Accept': 'application/json',
         }
@@ -41,10 +41,10 @@ class TestTagsController(BaseTestCase):
 
         Returns address and entity tags associated with a given label
         """
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(test_service.list_tags(self))
-        loop.close()
+        test_service.list_tags(self)
 
+        if "list_tags" in ["batch", "get_tx_io"]:
+            return
         query_string = [('',''),
                         ('label', 'cimedy')]
         headers = { 
@@ -63,10 +63,10 @@ class TestTagsController(BaseTestCase):
 
         Returns the supported taxonomies
         """
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(test_service.list_taxonomies(self))
-        loop.close()
+        test_service.list_taxonomies(self)
 
+        if "list_taxonomies" in ["batch", "get_tx_io"]:
+            return
         headers = { 
             'Accept': 'application/json',
         }

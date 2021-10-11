@@ -111,12 +111,19 @@ def {{operationId}}({{#allParams}}{{paramName}}{{^required}}=None{{/required}}{{
         {{/isMap}}
     {{/allParams}}
     try:
+        {{^vendorExtensions.x-async}}
+        result = service.{{operationId}}(
+            {{#allParams}}{{paramName}}={{paramName}}{{^-last}},
+            {{/-last}}{{/allParams}})
+        {{/vendorExtensions.x-async}}
+        {{#vendorExtensions.x-async}}
         loop = asyncio.new_event_loop()
         result = loop.run_until_complete(
             service.{{operationId}}(
                 {{#allParams}}{{paramName}}={{paramName}}{{^-last}},
                 {{/-last}}{{/allParams}}))
         loop.close()
+        {{/vendorExtensions.x-async}}
         return result
     except RuntimeError as e:
         return notfound(str(e))
