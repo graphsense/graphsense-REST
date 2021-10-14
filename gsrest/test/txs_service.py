@@ -86,8 +86,16 @@ tx4_eth = TxAccount(
 
 
 async def get_tx(test_case):
-    result = await service.get_tx(currency='btc', tx_hash='ab1880')
+    result = await service.get_tx(currency='btc', tx_hash='ab1880',
+                                  include_io=True)
     test_case.assertEqual(tx1, result)
+    result = await service.get_tx(currency='btc', tx_hash='ab1880',
+                                  include_io=False)
+    tx = tx1.to_dict()
+    tx.pop('inputs')
+    tx.pop('outputs')
+    tx = TxUtxo(**tx)
+    test_case.assertEqual(tx, result)
     #result = await service.get_tx(currency='eth', tx_hash='af6e0000')
     #test_case.assertEqual(tx1_eth, result)
 

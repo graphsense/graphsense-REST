@@ -5,7 +5,6 @@ import asyncio
 
 from openapi_server.models.address import Address  # noqa: E501
 from openapi_server.models.address_tag import AddressTag  # noqa: E501
-from openapi_server.models.addresses import Addresses  # noqa: E501
 from openapi_server.models.entity import Entity  # noqa: E501
 from openapi_server.models.links import Links  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
@@ -162,38 +161,6 @@ def list_address_txs(currency, address, page=None, pagesize=None):  # noqa: E501
         result = service.list_address_txs(
             currency=currency,
             address=address,
-            page=page,
-            pagesize=pagesize)
-        return result
-    except RuntimeError as e:
-        return notfound(str(e))
-    except ValueError as e:
-        return badrequest(str(e))
-    except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
-
-
-def list_addresses(currency, ids=None, page=None, pagesize=None):  # noqa: E501
-    """Get addresses
-
-     # noqa: E501
-
-    :param currency: The cryptocurrency (e.g., btc)
-    :type currency: str
-    :param ids: Restrict result to given set of comma separated addresses
-    :type ids: List[str]
-    :param page: Resumption token for retrieving the next page
-    :type page: str
-    :param pagesize: Number of items returned in a single page
-    :type pagesize: int
-
-    :rtype: Addresses
-    """
-    try:
-        result = service.list_addresses(
-            currency=currency,
-            ids=ids,
             page=page,
             pagesize=pagesize)
         return result

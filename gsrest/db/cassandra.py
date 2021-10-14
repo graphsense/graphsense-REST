@@ -834,7 +834,7 @@ class Cassandra():
 
     @eth
     # @Timer(text="Timer: get_tx {:.2f}")
-    async def get_tx(self, currency, tx_hash):
+    async def get_tx(self, currency, tx_hash, include_io=False):
         prefix = self.get_prefix_lengths(currency)
         query = ('SELECT tx_id from transaction_by_tx_prefix where '
                  'tx_prefix=%s and tx_hash=%s')
@@ -843,12 +843,16 @@ class Cassandra():
         if not result:
             raise RuntimeError(
                 f'Transaction {tx_hash} not found in {currency}')
-        id = result[0]['tx_id']
+        id = result.current_rows[0]['tx_id']
         params = [self.get_tx_id_group(currency, id), id]
-        query = ('SELECT * FROM transaction WHERE '
+        fields = ("tx_hash, coinbase, block_id, timestamp,"
+                  "total_input, total_output")
+        if include_io:
+            fields += ",inputs,outputs"
+        query = (f'SELECT {fields} FROM transaction WHERE '
                  'tx_id_group = %s and tx_id = %s')
         result = await self.execute_async(currency, 'raw', query, params)
-        return result[0]
+        return result.current_rows[0]
 
     # @Timer(text="Timer: list_txs {:.2f}")
     def list_txs(self, currency, page=None):

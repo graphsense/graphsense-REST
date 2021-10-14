@@ -3,7 +3,6 @@ import six
 import traceback
 import asyncio
 
-from openapi_server.models.entities import Entities  # noqa: E501
 from openapi_server.models.entity import Entity  # noqa: E501
 from openapi_server.models.entity_addresses import EntityAddresses  # noqa: E501
 from openapi_server.models.links import Links  # noqa: E501
@@ -37,38 +36,6 @@ def get_entity(currency, entity, include_tags=None, tag_coherence=None):  # noqa
             entity=entity,
             include_tags=include_tags,
             tag_coherence=tag_coherence)
-        return result
-    except RuntimeError as e:
-        return notfound(str(e))
-    except ValueError as e:
-        return badrequest(str(e))
-    except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
-
-
-def list_entities(currency, ids=None, page=None, pagesize=None):  # noqa: E501
-    """Get entities
-
-     # noqa: E501
-
-    :param currency: The cryptocurrency (e.g., btc)
-    :type currency: str
-    :param ids: Restrict result to given set of comma separated IDs
-    :type ids: List[int]
-    :param page: Resumption token for retrieving the next page
-    :type page: str
-    :param pagesize: Number of items returned in a single page
-    :type pagesize: int
-
-    :rtype: Entities
-    """
-    try:
-        result = service.list_entities(
-            currency=currency,
-            ids=ids,
-            page=page,
-            pagesize=pagesize)
         return result
     except RuntimeError as e:
         return notfound(str(e))
@@ -143,7 +110,7 @@ def list_entity_links(currency, entity, neighbor):  # noqa: E501
         return internalerror("")
 
 
-def list_entity_neighbors(currency, entity, direction, ids=None, include_labels=None, page=None, pagesize=None):  # noqa: E501
+def list_entity_neighbors(currency, entity, direction, only_ids=None, include_labels=None, page=None, pagesize=None):  # noqa: E501
     """Get an entity&#39;s neighbors in the entity graph
 
      # noqa: E501
@@ -154,8 +121,8 @@ def list_entity_neighbors(currency, entity, direction, ids=None, include_labels=
     :type entity: int
     :param direction: Incoming or outgoing neighbors
     :type direction: str
-    :param ids: Restrict result to given set of comma separated IDs
-    :type ids: List[int]
+    :param only_ids: Restrict result to given set of comma separated IDs
+    :type only_ids: List[int]
     :param include_labels: Whether to include labels of tags
     :type include_labels: bool
     :param page: Resumption token for retrieving the next page
@@ -170,7 +137,7 @@ def list_entity_neighbors(currency, entity, direction, ids=None, include_labels=
             currency=currency,
             entity=entity,
             direction=direction,
-            ids=ids,
+            only_ids=only_ids,
             include_labels=include_labels,
             page=page,
             pagesize=pagesize)

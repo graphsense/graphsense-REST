@@ -9,7 +9,6 @@ from six import BytesIO
 
 from openapi_server.models.address import Address  # noqa: E501
 from openapi_server.models.address_tag import AddressTag  # noqa: E501
-from openapi_server.models.addresses import Addresses  # noqa: E501
 from openapi_server.models.entity import Entity  # noqa: E501
 from openapi_server.models.links import Links  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
@@ -125,29 +124,6 @@ class TestAddressesController(BaseTestCase):
         }
         response = self.client.open(
             '/{currency}/addresses/{address}/txs'.format(currency='btc', address='addressA'),
-            method='GET',
-            headers=headers,
-            query_string=query_string)
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
-
-    def test_list_addresses(self):
-        """Test case for list_addresses
-
-        Get addresses
-        """
-        test_service.list_addresses(self)
-
-        if "list_addresses" in ["batch", "get_tx_io"]:
-            return
-        query_string = [('',''),
-                        ('',''),
-                        ('','')]
-        headers = { 
-            'Accept': 'application/json',
-        }
-        response = self.client.open(
-            '/{currency}/addresses'.format(currency='btc'),
             method='GET',
             headers=headers,
             query_string=query_string)

@@ -11,7 +11,7 @@ import gsrest.service.txs_service as service
 from gsrest.service.problems import notfound, badrequest, internalerror
 
 
-def get_tx(currency, tx_hash):  # noqa: E501
+def get_tx(currency, tx_hash, include_io=None):  # noqa: E501
     """Returns details of a specific transaction identified by its hash.
 
      # noqa: E501
@@ -20,6 +20,8 @@ def get_tx(currency, tx_hash):  # noqa: E501
     :type currency: str
     :param tx_hash: The transaction hash
     :type tx_hash: str
+    :param include_io: Whether to include inputs/outputs of an transaction
+    :type include_io: bool
 
     :rtype: Tx
     """
@@ -28,7 +30,8 @@ def get_tx(currency, tx_hash):  # noqa: E501
         result = loop.run_until_complete(
             service.get_tx(
                 currency=currency,
-                tx_hash=tx_hash))
+                tx_hash=tx_hash,
+                include_io=include_io))
         loop.close()
         return result
     except RuntimeError as e:

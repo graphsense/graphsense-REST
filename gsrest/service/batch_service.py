@@ -41,12 +41,19 @@ def flatten(item, name="", flat_dict=None):
     if isinstance(item, dict):
         for sub_item in item:
             flatten(item[sub_item], name + sub_item + "_", flat_dict)
+    elif isinstance(item, list):
+        name = name[:-1]
+        flat_dict[name] = ','.join(item)
+        flat_dict[f'{name}_count'] = len(item)
     else:
         flat_dict[name[:-1]] = item
     return flat_dict
 
 
-async def wrap(operation, currency, params):
+async def wrap(operation, currency, params, keys):
+    params = dict(params)
+    for (k, v) in keys.items():
+        params[k] = v
     result = await operation(currency, **params)
     if isinstance(result, list):
         rows = result
@@ -64,9 +71,7 @@ async def wrap(operation, currency, params):
     flat = []
     for row in rows:
         fl = flatten(row)
-        for (k, v) in params.items():
-            if k == 'page':
-                continue
+        for (k, v) in keys.items():
             fl[k] = v
         flat.append(fl)
     if page_state:
@@ -78,7 +83,6 @@ async def wrap(operation, currency, params):
 
 
 async def to_csv(currency, batch_operation):
-    page_state = None
     wr = writer()
     csv = None
     mod = importlib.import_module(
@@ -86,12 +90,31 @@ async def to_csv(currency, batch_operation):
     operation = getattr(mod, batch_operation.operation)
     aws = []
 
-    for params in batch_operation.parameters:
-        params = params.to_dict()
-        params = {k: v for (k, v) in params.items() if v}
-        if page_state:
-            params['page_state'] = page_state
-        aw = wrap(operation, currency, params)
+    params = {}
+    keys = {}
+    ln = 0
+    for (attr, a) in batch_operation.to_dict().items():
+        if attr in ['api', 'operation']:
+            continue
+        if a is None:
+            continue
+        if attr == 'only_ids' or not isinstance(a, list):
+            # filter out this param because it's also a list
+            # and must not be taken as a key
+            params[attr] = a
+        else:
+            keys[attr] = a
+            le = len(a)
+            ln = min(le, ln) if ln > 0 else le
+
+    print(f'ln {ln}')
+    print(f'keys {keys}')
+    print(f'params {params}')
+    for i in range(0, ln):
+        the_keys = {}
+        for (k, v) in keys.items():
+            the_keys[k] = v[i]
+        aw = wrap(operation, currency, params, the_keys)
         aws.append(aw)
 
     for op in asyncio.as_completed(aws):

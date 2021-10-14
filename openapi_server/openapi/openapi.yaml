@@ -143,59 +143,6 @@ paths:
       tags:
       - tags
       x-openapi-router-controller: openapi_server.controllers.tags_controller
-  /{currency}/addresses:
-    get:
-      operationId: list_addresses
-      parameters:
-      - description: The cryptocurrency (e.g., btc)
-        example: btc
-        explode: false
-        in: path
-        name: currency
-        required: true
-        schema:
-          format: string
-          type: string
-        style: simple
-      - description: Restrict result to given set of comma separated addresses
-        explode: true
-        in: query
-        name: ids
-        required: false
-        schema:
-          items:
-            type: string
-          type: array
-        style: form
-      - description: Resumption token for retrieving the next page
-        explode: true
-        in: query
-        name: page
-        required: false
-        schema:
-          type: string
-        style: form
-      - description: Number of items returned in a single page
-        example: 10
-        explode: true
-        in: query
-        name: pagesize
-        required: false
-        schema:
-          minimum: 1
-          type: integer
-        style: form
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/addresses'
-          description: OK
-      summary: Get addresses
-      tags:
-      - addresses
-      x-openapi-router-controller: openapi_server.controllers.addresses_controller
   /{currency}/addresses/{address}:
     get:
       operationId: get_address
@@ -637,60 +584,6 @@ paths:
       tags:
       - blocks
       x-openapi-router-controller: openapi_server.controllers.blocks_controller
-  /{currency}/entities:
-    get:
-      operationId: list_entities
-      parameters:
-      - description: The cryptocurrency (e.g., btc)
-        example: btc
-        explode: false
-        in: path
-        name: currency
-        required: true
-        schema:
-          format: string
-          type: string
-        style: simple
-      - description: Restrict result to given set of comma separated IDs
-        explode: true
-        in: query
-        name: ids
-        required: false
-        schema:
-          items:
-            format: int32
-            type: integer
-          type: array
-        style: form
-      - description: Resumption token for retrieving the next page
-        explode: true
-        in: query
-        name: page
-        required: false
-        schema:
-          type: string
-        style: form
-      - description: Number of items returned in a single page
-        example: 10
-        explode: true
-        in: query
-        name: pagesize
-        required: false
-        schema:
-          minimum: 1
-          type: integer
-        style: form
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/entities'
-          description: OK
-      summary: Get entities
-      tags:
-      - entities
-      x-openapi-router-controller: openapi_server.controllers.entities_controller
   /{currency}/entities/{entity}:
     get:
       operationId: get_entity
@@ -878,7 +771,7 @@ paths:
       - description: Restrict result to given set of comma separated IDs
         explode: true
         in: query
-        name: ids
+        name: only_ids
         required: false
         schema:
           items:
@@ -1221,6 +1114,15 @@ paths:
         schema:
           $ref: '#/components/schemas/tx_hash'
         style: simple
+      - description: Whether to include inputs/outputs of an transaction
+        explode: true
+        in: query
+        name: include_io
+        required: false
+        schema:
+          default: false
+          type: boolean
+        style: form
       responses:
         "200":
           content:
@@ -1302,18 +1204,6 @@ components:
           type: string
         type: array
       style: form
-    address_ids_required:
-      description: Set of comma separated IDs
-      explode: true
-      in: query
-      name: ids
-      required: true
-      schema:
-        items:
-          type: string
-        type: array
-      style: form
-      x-graphsense-rest-test-example: '"1,2"'
     breadth:
       description: How many siblings of each neighbor should be tried
       explode: true
@@ -1382,31 +1272,6 @@ components:
       schema:
         $ref: '#/components/schemas/entity_id'
       style: simple
-    entity_ids:
-      description: Restrict result to given set of comma separated IDs
-      explode: true
-      in: query
-      name: ids
-      required: false
-      schema:
-        items:
-          format: int32
-          type: integer
-        type: array
-      style: form
-    entity_ids_required:
-      description: Set of comma separated IDs
-      explode: true
-      in: query
-      name: ids
-      required: true
-      schema:
-        items:
-          format: int32
-          type: integer
-        type: array
-      style: form
-      x-graphsense-rest-test-example: '"1,2"'
     entity_neighbor:
       description: Neighbor entity
       example: 123456
@@ -1449,6 +1314,16 @@ components:
       required: true
       schema:
         type: string
+      style: form
+    include_io:
+      description: Whether to include inputs/outputs of an transaction
+      explode: true
+      in: query
+      name: include_io
+      required: false
+      schema:
+        default: false
+        type: boolean
       style: form
     include_labels:
       description: Whether to include labels of tags
@@ -1509,6 +1384,18 @@ components:
       required: true
       schema:
         type: string
+      style: form
+    only_entity_ids:
+      description: Restrict result to given set of comma separated IDs
+      explode: true
+      in: query
+      name: only_ids
+      required: false
+      schema:
+        items:
+          format: int32
+          type: integer
+        type: array
       style: form
     page:
       description: Resumption token for retrieving the next page
@@ -1737,113 +1624,27 @@ components:
       - $ref: '#/components/schemas/address_tag_allOf'
       title: address_tag
     addresses:
-      example:
-        next_page: next_page
-        addresses:
-        - total_spent:
-            fiat_values:
-            - code: code
-              value: 0.8008282
-            - code: code
-              value: 0.8008282
-            value: 6
-          in_degree: 2
-          address: address
-          balance:
-            fiat_values:
-            - code: code
-              value: 0.8008282
-            - code: code
-              value: 0.8008282
-            value: 6
-          no_incoming_txs: 7
-          no_outgoing_txs: 9
-          out_degree: 3
-          first_tx:
-            tx_hash: tx_hash
-            height: 1
-            timestamp: 5
-          last_tx:
-            tx_hash: tx_hash
-            height: 1
-            timestamp: 5
-          entity: 1
-          total_received:
-            fiat_values:
-            - code: code
-              value: 0.8008282
-            - code: code
-              value: 0.8008282
-            value: 6
-          tags:
-          - null
-          - null
-        - total_spent:
-            fiat_values:
-            - code: code
-              value: 0.8008282
-            - code: code
-              value: 0.8008282
-            value: 6
-          in_degree: 2
-          address: address
-          balance:
-            fiat_values:
-            - code: code
-              value: 0.8008282
-            - code: code
-              value: 0.8008282
-            value: 6
-          no_incoming_txs: 7
-          no_outgoing_txs: 9
-          out_degree: 3
-          first_tx:
-            tx_hash: tx_hash
-            height: 1
-            timestamp: 5
-          last_tx:
-            tx_hash: tx_hash
-            height: 1
-            timestamp: 5
-          entity: 1
-          total_received:
-            fiat_values:
-            - code: code
-              value: 0.8008282
-            - code: code
-              value: 0.8008282
-            value: 6
-          tags:
-          - null
-          - null
       properties:
         addresses:
           items:
             $ref: '#/components/schemas/address'
-          title: addresses
           type: array
         next_page:
           format: string
           title: next_page
           type: string
-      title: addresses
       type: object
     batch_operation:
       discriminator:
         mapping:
+          get_tx: '#/components/schemas/get_tx'
           get_tx_io: '#/components/schemas/get_tx_io'
           list_entity_addresses: '#/components/schemas/list_entity_addresses'
         propertyName: operation
       oneOf:
+      - $ref: '#/components/schemas/get_tx'
       - $ref: '#/components/schemas/get_tx_io'
       - $ref: '#/components/schemas/list_entity_addresses'
-    batch_response:
-      discriminator:
-        mapping:
-          get_tx_io: '#/components/schemas/get_tx_io_response'
-        propertyName: operation
-      oneOf:
-      - $ref: '#/components/schemas/get_tx_io_response'
     block:
       example:
         block_hash: block_hash
@@ -2010,106 +1811,15 @@ components:
       title: statistics of a cryptocurrency
       type: object
     entities:
-      example:
-        next_page: next_page
-        entities:
-        - total_spent:
-            fiat_values:
-            - code: code
-              value: 0.8008282
-            - code: code
-              value: 0.8008282
-            value: 6
-          in_degree: 6
-          balance:
-            fiat_values:
-            - code: code
-              value: 0.8008282
-            - code: code
-              value: 0.8008282
-            value: 6
-          no_addresses: 1
-          no_incoming_txs: 5
-          no_outgoing_txs: 5
-          out_degree: 2
-          first_tx:
-            tx_hash: tx_hash
-            height: 1
-            timestamp: 5
-          last_tx:
-            tx_hash: tx_hash
-            height: 1
-            timestamp: 5
-          entity: 0
-          total_received:
-            fiat_values:
-            - code: code
-              value: 0.8008282
-            - code: code
-              value: 0.8008282
-            value: 6
-          tags:
-            entity_tags:
-            - null
-            - null
-            address_tags:
-            - null
-            - null
-            tag_coherence: 0.8008282
-        - total_spent:
-            fiat_values:
-            - code: code
-              value: 0.8008282
-            - code: code
-              value: 0.8008282
-            value: 6
-          in_degree: 6
-          balance:
-            fiat_values:
-            - code: code
-              value: 0.8008282
-            - code: code
-              value: 0.8008282
-            value: 6
-          no_addresses: 1
-          no_incoming_txs: 5
-          no_outgoing_txs: 5
-          out_degree: 2
-          first_tx:
-            tx_hash: tx_hash
-            height: 1
-            timestamp: 5
-          last_tx:
-            tx_hash: tx_hash
-            height: 1
-            timestamp: 5
-          entity: 0
-          total_received:
-            fiat_values:
-            - code: code
-              value: 0.8008282
-            - code: code
-              value: 0.8008282
-            value: 6
-          tags:
-            entity_tags:
-            - null
-            - null
-            address_tags:
-            - null
-            - null
-            tag_coherence: 0.8008282
       properties:
         entities:
           items:
             $ref: '#/components/schemas/entity'
-          title: entities
           type: array
         next_page:
           format: string
           title: next_page
           type: string
-      title: entities
       type: object
     entity:
       example:
@@ -2319,82 +2029,34 @@ components:
         operation:
           default: get_tx
           type: string
-        parameters:
+        tx_hash:
           items:
-            $ref: '#/components/schemas/get_tx_parameters'
+            $ref: '#/components/schemas/tx_hash'
           type: array
       required:
       - api
       - operation
-      - parameters
+      - tx_hash
       type: object
     get_tx_io:
       properties:
         api:
           default: txs
           type: string
+        io:
+          $ref: '#/components/schemas/io'
         operation:
           default: get_tx_io
           type: string
-        parameters:
+        tx_hash:
           items:
-            $ref: '#/components/schemas/get_tx_io_parameters'
+            $ref: '#/components/schemas/tx_hash'
           type: array
       required:
       - api
-      - operation
-      - parameters
-      type: object
-    get_tx_io_parameters:
-      properties:
-        io:
-          $ref: '#/components/schemas/io'
-        tx_hash:
-          description: Transaction hash
-          title: tx_hash
-          type: string
-      required:
       - io
-      - tx_hash
-      title: get_tx_io_parameters
-      type: object
-    get_tx_io_response:
-      properties:
-        operation:
-          default: get_tx_io
-          type: string
-        result:
-          items:
-            $ref: '#/components/schemas/get_tx_io_result'
-          type: array
-      required:
       - operation
-      - result
-      type: object
-    get_tx_io_result:
-      properties:
-        data:
-          description: Transaction inputs/outputs
-          items:
-            $ref: '#/components/schemas/tx_value'
-          title: tx_values
-          type: array
-        parameters:
-          $ref: '#/components/schemas/get_tx_io_parameters'
-      required:
-      - data
-      - parameters
-      title: get_tx_io_result
-      type: object
-    get_tx_parameters:
-      properties:
-        tx_hash:
-          description: Transaction hash
-          title: tx_hash
-          type: string
-      required:
       - tx_hash
-      title: get_tx_parameters
       type: object
     height:
       description: Height
@@ -2477,28 +2139,17 @@ components:
         api:
           default: entities
           type: string
+        entity:
+          items:
+            $ref: '#/components/schemas/entity_id'
+          type: array
         operation:
           default: list_entity_addresses
           type: string
-        parameters:
-          items:
-            $ref: '#/components/schemas/list_entity_addresses_parameters'
-          type: array
       required:
       - api
-      - operation
-      - parameters
-      type: object
-    list_entity_addresses_parameters:
-      properties:
-        entity:
-          description: Entity id
-          format: int64
-          title: entity
-          type: integer
-      required:
       - entity
-      title: list_entity_addresses_parameters
+      - operation
       type: object
     neighbor:
       example:
@@ -3211,13 +2862,11 @@ components:
           description: Transaction inputs/outputs
           items:
             $ref: '#/components/schemas/tx_value'
-          title: tx_values
           type: array
         outputs:
           description: Transaction inputs/outputs
           items:
             $ref: '#/components/schemas/tx_value'
-          title: tx_values
           type: array
         timestamp:
           description: Timestamp
@@ -3273,7 +2922,6 @@ components:
       description: Transaction inputs/outputs
       items:
         $ref: '#/components/schemas/tx_value'
-      title: tx_values
       type: array
     txs:
       example:

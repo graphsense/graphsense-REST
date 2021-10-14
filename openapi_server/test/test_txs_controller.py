@@ -29,13 +29,15 @@ class TestTxsController(BaseTestCase):
 
         if "get_tx" in ["batch", "get_tx_io"]:
             return
+        query_string = [('','')]
         headers = { 
             'Accept': 'application/json',
         }
         response = self.client.open(
             '/{currency}/txs/{tx_hash}'.format(currency='btc', tx_hash='ab188013'),
             method='GET',
-            headers=headers)
+            headers=headers,
+            query_string=query_string)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 

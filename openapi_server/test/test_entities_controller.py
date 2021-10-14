@@ -7,7 +7,6 @@ import asyncio
 from flask import json
 from six import BytesIO
 
-from openapi_server.models.entities import Entities  # noqa: E501
 from openapi_server.models.entity import Entity  # noqa: E501
 from openapi_server.models.entity_addresses import EntityAddresses  # noqa: E501
 from openapi_server.models.links import Links  # noqa: E501
@@ -38,29 +37,6 @@ class TestEntitiesController(BaseTestCase):
         }
         response = self.client.open(
             '/{currency}/entities/{entity}'.format(currency='btc', entity=67065),
-            method='GET',
-            headers=headers,
-            query_string=query_string)
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
-
-    def test_list_entities(self):
-        """Test case for list_entities
-
-        Get entities
-        """
-        test_service.list_entities(self)
-
-        if "list_entities" in ["batch", "get_tx_io"]:
-            return
-        query_string = [('',''),
-                        ('',''),
-                        ('','')]
-        headers = { 
-            'Accept': 'application/json',
-        }
-        response = self.client.open(
-            '/{currency}/entities'.format(currency='btc'),
             method='GET',
             headers=headers,
             query_string=query_string)
