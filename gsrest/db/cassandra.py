@@ -179,6 +179,7 @@ class Cassandra():
                                                      'paging_state'])
                 result = ResultSet(current_rows=result,
                                    paging_state=response_future._paging_state)
+                print(f'params {params}, result {result}')
                 loop.call_soon_threadsafe(future.set_result, result)
 
             def on_err(result):
@@ -200,13 +201,17 @@ class Cassandra():
                for param in params]
         for aw in asyncio.as_completed(aws):
             result = await aw
+            print(f'result {result}')
             if filter_empty and result is None:
                 continue
             if one:
-                yield result.current_rows[0]
+                if len(result.current_rows) > 0:
+                    yield result.current_rows[0]
+                else:
+                    if not filter_empty:
+                        yield None
                 continue
             yield result.current_rows
-
 
     @eth
     # @Timer(text="Timer: stats {:.2f}")
@@ -1193,14 +1198,19 @@ class Cassandra():
                                        [row['transaction'] for row in result])
 
     # @Timer(text="Timer: list_txs_by_hashes_eth {:.2f}")
-    def list_txs_by_hashes_eth(self, currency, hashes):
+    async def list_txs_by_hashes_eth(self, currency, hashes):
         prefix = self.get_prefix_lengths(currency)
         params = [[hash.hex()[:prefix['tx']], hash]
                   for hash in hashes]
         statement = (
-            'SELECT tx_hash, block_id, block_timestamp, value from '
+            'SELECT tx_hash, block_id, block_timestamp, value, '
+            'from_address, to_address from '
             'transaction where tx_hash_prefix=%s and tx_hash=%s')
-        return self.concurrent_with_args(currency, 'raw', statement, params)
+        result = self.concurrent_with_args(currency, 'raw', statement, params)
+        async for row in result:
+            row['from_address'] = eth_address_to_hex(row['from_address'])
+            row['to_address'] = eth_address_to_hex(row['to_address'])
+            yield row
 
     # @Timer(text="Timer: list_address_links_eth {:.2f}")
     def list_links_eth(self, currency, node_type, address, neighbor,
@@ -1290,17 +1300,15 @@ class Cassandra():
         return self.list_txs_by_ids(currency, tx_ids), to_hex(paging_state)
 
     # @Timer(text="Timer: get_tx_eth {:.2f}")
-    def get_tx_eth(self, currency, tx_hash):
-        query = (
-            'SELECT tx_hash, block_id, block_timestamp, value from '
-            'transaction where tx_hash_prefix=%s and tx_hash=%s')
-        prefix_length = self.get_prefix_lengths(currency)
-        prefix = tx_hash[:prefix_length['tx']]
-        result = self.execute(currency, 'raw', query,
-                              [prefix, bytearray.fromhex(tx_hash)])
-        if result is None:
+    async def get_tx_eth(self, currency, tx_hash, include_io=False):
+        gen = self.list_txs_by_hashes(currency,
+                                      [bytearray.fromhex(tx_hash)])
+        result = []
+        async for row in gen:
+            result.append(row)
+        if not result:
             return None
-        return result.one()
+        return result[0]
 
     # @Timer(text="Timer: list_entity_addresses_eth {:.2f}")
     def list_entity_addresses_eth(self, currency, entity, page=None,

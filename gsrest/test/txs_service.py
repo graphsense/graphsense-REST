@@ -64,24 +64,32 @@ tx1_eth = TxAccount(
    tx_hash='af6e0000',
    height=1,
    timestamp=15,
+   from_address='0xbe370541310b13922e209515ebffe8d459e050',
+   to_address='0xd6cc43ac66902302074a19e52bacc68d15421551',
    value=make_values(eur=123.0, usd=246.0, value=123000000000000000000))
 
 tx2_eth = TxAccount(
    tx_hash='af6e0003',
    height=1,
    timestamp=16,
+   from_address='0xea674fdde714fd979de3edf0f56aa9716b898ec8',
+   to_address='0xe0ec83c0c2bcffd920d268b20f403652e7137dbe',
    value=make_values(eur=123.0, usd=246.0, value=123000000000000000000))
 
 tx3_eth = TxAccount(
    tx_hash='ab188013',
    height=1,
    timestamp=17,
+   from_address='0xea674fdde714fd979de3edf0f56aa9716b898ec8',
+   to_address='0xe0ec83c0c2bcffd920d268b20f403652e7137dbe',
    value=make_values(eur=234.0, usd=468.0, value=234000000000000000000))
 
 tx4_eth = TxAccount(
    tx_hash='123456',
    height=1,
    timestamp=17,
+   from_address='0xea674fdde714fd979de3edf0f56aa9716b898ec8',
+   to_address='0xe0ec83c0c2bcffd920d268b20f403652e7137dbe',
    value=make_values(eur=234.0, usd=468.0, value=234000000000000000000))
 
 
@@ -96,8 +104,8 @@ async def get_tx(test_case):
     tx.pop('outputs')
     tx = TxUtxo(**tx)
     test_case.assertEqual(tx, result)
-    #result = await service.get_tx(currency='eth', tx_hash='af6e0000')
-    #test_case.assertEqual(tx1_eth, result)
+    result = await service.get_tx(currency='eth', tx_hash='af6e0000')
+    test_case.assertEqual(tx1_eth, result)
 
 
 async def get_tx_io(test_case):

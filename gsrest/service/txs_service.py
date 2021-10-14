@@ -14,6 +14,8 @@ def from_row(currency, row, rates):
             tx_hash=row['tx_hash'].hex(),
             timestamp=row['block_timestamp'],
             height=row['block_id'],
+            from_address=row['from_address'],
+            to_address=row['to_address'],
             value=convert_value(currency, row['value'], rates))
     return TxUtxo(
             tx_hash=row['tx_hash'].hex(),
@@ -39,7 +41,7 @@ def io_from_rows(currency, values, key, rates):
 async def get_tx(currency, tx_hash, include_io=False):
     db = get_connection()
     result = await db.get_tx(currency, tx_hash, include_io)
-    # TODO result is a generator, never None!
+    print(f'result {result}')
     if result is None:
         raise RuntimeError('Transaction {} in keyspace {} not found'
                            .format(tx_hash, currency))

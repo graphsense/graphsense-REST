@@ -21,7 +21,7 @@ class Link(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, height=None, input_value=None, output_value=None, timestamp=None, tx_hash=None, tx_type='account', value=None):  # noqa: E501
+    def __init__(self, height=None, input_value=None, output_value=None, timestamp=None, tx_hash=None, tx_type='account', from_address=None, to_address=None, value=None):  # noqa: E501
         """Link - a model defined in OpenAPI
 
         :param height: The height of this Link.  # noqa: E501
@@ -36,6 +36,10 @@ class Link(Model):
         :type tx_hash: str
         :param tx_type: The tx_type of this Link.  # noqa: E501
         :type tx_type: str
+        :param from_address: The from_address of this Link.  # noqa: E501
+        :type from_address: str
+        :param to_address: The to_address of this Link.  # noqa: E501
+        :type to_address: str
         :param value: The value of this Link.  # noqa: E501
         :type value: Values
         """
@@ -46,6 +50,8 @@ class Link(Model):
             'timestamp': int,
             'tx_hash': str,
             'tx_type': str,
+            'from_address': str,
+            'to_address': str,
             'value': Values
         }
 
@@ -56,6 +62,8 @@ class Link(Model):
             'timestamp': 'timestamp',
             'tx_hash': 'tx_hash',
             'tx_type': 'tx_type',
+            'from_address': 'from_address',
+            'to_address': 'to_address',
             'value': 'value'
         }
 
@@ -77,6 +85,12 @@ class Link(Model):
         #if tx_type is None:
             #raise ValueError("Invalid value for `tx_type`, must not be `None`")  # noqa: E501
         self._tx_type = tx_type
+        #if from_address is None:
+            #raise ValueError("Invalid value for `from_address`, must not be `None`")  # noqa: E501
+        self._from_address = from_address
+        #if to_address is None:
+            #raise ValueError("Invalid value for `to_address`, must not be `None`")  # noqa: E501
+        self._to_address = to_address
         #if value is None:
             #raise ValueError("Invalid value for `value`, must not be `None`")  # noqa: E501
         self._value = value
@@ -104,6 +118,8 @@ class Link(Model):
             'timestamp': self._timestamp,
             'tx_hash': self._tx_hash,
             'tx_type': self._tx_type,
+            'from_address': self._from_address,
+            'to_address': self._to_address,
             'value': self._value }
 
 
@@ -252,6 +268,56 @@ class Link(Model):
             raise ValueError("Invalid value for `tx_type`, must not be `None`")  # noqa: E501
 
         self._tx_type = tx_type
+
+    @property
+    def from_address(self):
+        """Gets the from_address of this Link.
+
+        Address  # noqa: E501
+
+        :return: The from_address of this Link.
+        :rtype: str
+        """
+        return self._from_address
+
+    @from_address.setter
+    def from_address(self, from_address):
+        """Sets the from_address of this Link.
+
+        Address  # noqa: E501
+
+        :param from_address: The from_address of this Link.
+        :type from_address: str
+        """
+        if from_address is None:
+            raise ValueError("Invalid value for `from_address`, must not be `None`")  # noqa: E501
+
+        self._from_address = from_address
+
+    @property
+    def to_address(self):
+        """Gets the to_address of this Link.
+
+        Address  # noqa: E501
+
+        :return: The to_address of this Link.
+        :rtype: str
+        """
+        return self._to_address
+
+    @to_address.setter
+    def to_address(self, to_address):
+        """Sets the to_address of this Link.
+
+        Address  # noqa: E501
+
+        :param to_address: The to_address of this Link.
+        :type to_address: str
+        """
+        if to_address is None:
+            raise ValueError("Invalid value for `to_address`, must not be `None`")  # noqa: E501
+
+        self._to_address = to_address
 
     @property
     def value(self):

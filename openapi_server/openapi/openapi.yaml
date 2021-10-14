@@ -1114,7 +1114,7 @@ paths:
         schema:
           $ref: '#/components/schemas/tx_hash'
         style: simple
-      - description: Whether to include inputs/outputs of an transaction
+      - description: Whether to include inputs/outputs of a transaction (UTXO only)
         explode: true
         in: query
         name: include_io
@@ -1316,7 +1316,7 @@ components:
         type: string
       style: form
     include_io:
-      description: Whether to include inputs/outputs of an transaction
+      description: Whether to include inputs/outputs of a transaction (UTXO only)
       explode: true
       in: query
       name: include_io
@@ -2772,8 +2772,10 @@ components:
       title: tx
     tx_account:
       example:
+        to_address: to_address
         tx_hash: tx_hash
         tx_type: account
+        from_address: from_address
         value:
           fiat_values:
           - code: code
@@ -2784,6 +2786,10 @@ components:
         height: 1
         timestamp: 6
       properties:
+        from_address:
+          description: Address
+          title: address
+          type: string
         height:
           description: Height
           format: int64
@@ -2795,6 +2801,10 @@ components:
           format: int64
           title: timestamp
           type: integer
+        to_address:
+          description: Address
+          title: address
+          type: string
         tx_hash:
           description: Transaction hash
           title: tx_hash
@@ -2806,8 +2816,10 @@ components:
         value:
           $ref: '#/components/schemas/values'
       required:
+      - from_address
       - height
       - timestamp
+      - to_address
       - tx_hash
       - tx_type
       - value
@@ -2945,8 +2957,10 @@ components:
       example:
         next_page: next_page
         txs:
-        - tx_hash: tx_hash
+        - to_address: to_address
+          tx_hash: tx_hash
           tx_type: account
+          from_address: from_address
           value:
             fiat_values:
             - code: code
@@ -2956,8 +2970,10 @@ components:
             value: 6
           height: 1
           timestamp: 6
-        - tx_hash: tx_hash
+        - to_address: to_address
+          tx_hash: tx_hash
           tx_type: account
+          from_address: from_address
           value:
             fiat_values:
             - code: code

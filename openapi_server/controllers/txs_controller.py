@@ -20,7 +20,7 @@ def get_tx(currency, tx_hash, include_io=None):  # noqa: E501
     :type currency: str
     :param tx_hash: The transaction hash
     :type tx_hash: str
-    :param include_io: Whether to include inputs/outputs of an transaction
+    :param include_io: Whether to include inputs/outputs of a transaction (UTXO only)
     :type include_io: bool
 
     :rtype: Tx
