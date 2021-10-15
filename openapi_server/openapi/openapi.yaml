@@ -64,6 +64,7 @@ paths:
       summary: Get statistics of supported currencies
       tags:
       - general
+      x-async: true
       x-openapi-router-controller: openapi_server.controllers.general_controller
   /tags:
     get:

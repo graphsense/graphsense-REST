@@ -69,8 +69,8 @@ stats = Stats(
             )])
 
 
-def get_statistics(test_case):
-    result = service.get_statistics()
+async def get_statistics(test_case):
+    result = await service.get_statistics()
     result.currencies = sorted(result.currencies, key=lambda c: c.name)
     assertEqual(stats.currencies, result.currencies)
 

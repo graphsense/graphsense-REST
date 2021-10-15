@@ -21,7 +21,9 @@ class TestGeneralController(BaseTestCase):
 
         Get statistics of supported currencies
         """
-        test_service.get_statistics(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.get_statistics(self))
+        loop.close()
 
         if "get_statistics" in ["batch", "get_tx_io"]:
             return

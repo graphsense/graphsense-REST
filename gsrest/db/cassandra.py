@@ -44,11 +44,22 @@ def replaceFrom(keyspace, query):
     return r.sub(f' FROM {keyspace}.', query)
 
 
-def result_is_empty(result):
-    return result is None or not result.current_rows
+class Result:
+    def __init__(self, current_rows, params, paging_state):
+        self.current_rows = current_rows
+        self.params = params
+        self.paging_state = paging_state
 
-class Cassandra():
+    def is_empty(self):
+        return self.current_rows is None or not self.current_rows
 
+    def one(self):
+        if self.is_empty():
+            return None
+        return self.current_rows[0]
+
+
+class Cassandra:
     def eth(func):
         def check(*args, **kwargs):
             self = args[0]
@@ -178,12 +189,9 @@ class Cassandra():
             future = loop.create_future()
 
             def on_done(result):
-                ResultSet = namedtuple('ResultSet', ['current_rows',
-                                                     'params',
-                                                     'paging_state'])
-                result = ResultSet(current_rows=result,
-                                   params=params,
-                                   paging_state=response_future._paging_state)
+                result = Result(current_rows=result,
+                                params=params,
+                                paging_state=response_future._paging_state)
                 loop.call_soon_threadsafe(future.set_result, result)
 
             def on_err(result):
@@ -208,8 +216,9 @@ class Cassandra():
             if filter_empty and result is None:
                 continue
             if one:
-                if len(result.current_rows) > 0:
-                    yield result.current_rows[0]
+                result = result.one()
+                if result:
+                    yield result
                 else:
                     if not filter_empty:
                         yield None
@@ -219,9 +228,10 @@ class Cassandra():
 
     @eth
     # @Timer(text="Timer: stats {:.2f}")
-    def get_currency_statistics(self, currency):
+    async def get_currency_statistics(self, currency):
         query = "SELECT * FROM summary_statistics LIMIT 1"
-        return self.execute(currency, 'transformed', query).one()
+        result = await self.execute_async(currency, 'transformed', query)
+        return result.one()
 
     @eth
     # @Timer(text="Timer: get_block {:.2f}")
@@ -849,10 +859,11 @@ class Cassandra():
                  'tx_prefix=%s and tx_hash=%s')
         params = [tx_hash[:prefix['tx']], bytearray.fromhex(tx_hash)]
         result = await self.execute_async(currency, 'raw', query, params)
+        result = result.one()
         if not result:
             raise RuntimeError(
                 f'Transaction {tx_hash} not found in {currency}')
-        id = result.current_rows[0]['tx_id']
+        id = result['tx_id']
         params = [self.get_tx_id_group(currency, id), id]
         fields = ("tx_hash, coinbase, block_id, timestamp,"
                   "total_input, total_output")
@@ -861,7 +872,7 @@ class Cassandra():
         query = (f'SELECT {fields} FROM transaction WHERE '
                  'tx_id_group = %s and tx_id = %s')
         result = await self.execute_async(currency, 'raw', query, params)
-        return result.current_rows[0]
+        return result.one()
 
     # @Timer(text="Timer: list_txs {:.2f}")
     def list_txs(self, currency, page=None):
@@ -916,9 +927,10 @@ class Cassandra():
         statement = ('SELECT tx_id from transaction_by_tx_prefix where '
                      'tx_prefix=%s and tx_hash=%s')
         result = await self.execute_async(currency, 'raw', statement, params)
-        if result_is_empty(result):
+        result = result.one()
+        if not result:
             return None
-        return self.get_tx_by_id(currency, result.current_rows[0]['tx_id'])
+        return self.get_tx_by_id(currency, result['tx_id'])
 
     @eth
     # @Timer(text="Timer: list_txs_by_ids {:.2f}")
@@ -1028,8 +1040,11 @@ class Cassandra():
                for id in [row['first_tx_id'], row['last_tx_id']]]
         [tx1, tx2] = await asyncio.gather(*aws)
 
-        tx1 = tx1.current_rows[0]
-        tx2 = tx2.current_rows[0]
+        tx1 = tx1.one()
+        tx2 = tx2.one()
+
+        if not tx1 or not tx2:
+            raise RuntimeError(f"transactions for {row['address']} not found")
 
         row['first_tx'] = TxSummary(
             tx_hash=tx1['tx_hash'],
@@ -1062,8 +1077,11 @@ class Cassandra():
 
         [tx1, tx2] = await asyncio.gather(*aws)
 
-        tx1 = tx1.current_rows[0]
-        tx2 = tx2.current_rows[0]
+        tx1 = tx1.one()
+        tx2 = tx2.one()
+
+        if not tx1 or not tx2:
+            raise RuntimeError(f"transactions for {row['address']} not found")
 
         row['first_tx'] = TxSummary(
             tx_hash=tx1['tx_hash'],
@@ -1081,9 +1099,12 @@ class Cassandra():
 #####################
 
     # @Timer(text="Timer: get_currency_statistics_eth {:.2f}")
-    def get_currency_statistics_eth(self, currency):
+    async def get_currency_statistics_eth(self, currency):
         query = "SELECT * FROM summary_statistics LIMIT 1"
-        result = self.execute(currency, 'transformed', query).one()
+        result = (await self.execute_async(currency, 'transformed', query)
+                  ).one()
+        if not result:
+            return None
         result['no_clusters'] = 0
         return result
 
@@ -1247,7 +1268,7 @@ class Cassandra():
         result = self.concurrent_with_args(currency, 'transformed', statement,
                                            params)
         gen = self.list_txs_by_hashes(currency,
-                                      [row.current_rows[0]['transaction']
+                                      [row['transaction']
                                        async for row in result])
         async for row in gen:
             yield row
@@ -1259,10 +1280,11 @@ class Cassandra():
             ' where transaction_id_group = %s and transaction_id = %s')
         result = await self.execute_async(currency, 'transformed', statement,
                                           params)
-        if result_is_empty(result):
+        result = result.one()
+        if not result:
             return None
         return await self.get_tx_by_hash(currency,
-                                         result.current_rows[0]['transaction'])
+                                         result['transaction'])
 
     # @Timer(text="Timer: list_txs_by_hashes_eth {:.2f}")
     async def list_txs_by_hashes_eth(self, currency, hashes):
@@ -1275,9 +1297,8 @@ class Cassandra():
             'transaction where tx_hash_prefix=%s and tx_hash=%s')
         result = self.concurrent_with_args(currency, 'raw', statement, params)
         async for row in result:
-            r = row.current_rows[0]
-            r['from_address'] = eth_address_to_hex(r['from_address'])
-            r['to_address'] = eth_address_to_hex(r['to_address'])
+            row['from_address'] = eth_address_to_hex(row['from_address'])
+            row['to_address'] = eth_address_to_hex(row['to_address'])
             yield row
 
     async def get_tx_by_hash_eth(self, currency, hash):
@@ -1288,11 +1309,11 @@ class Cassandra():
             'from_address, to_address from '
             'transaction where tx_hash_prefix=%s and tx_hash=%s')
         result = await self.execute_async(currency, 'raw', statement, params)
-        if result_is_empty(result):
+        result = result.one()
+        if not result:
             return None
-        r = result.current_rows[0]
-        r['from_address'] = eth_address_to_hex(r['from_address'])
-        r['to_address'] = eth_address_to_hex(r['to_address'])
+        result['from_address'] = eth_address_to_hex(result['from_address'])
+        result['to_address'] = eth_address_to_hex(result['to_address'])
         return result
 
     # @Timer(text="Timer: list_address_links_eth {:.2f}")
@@ -1386,9 +1407,7 @@ class Cassandra():
     async def get_tx_eth(self, currency, tx_hash, include_io=False):
         result = await self.get_tx_by_hash(currency,
                                            bytearray.fromhex(tx_hash))
-        if result_is_empty(result):
-            return None
-        return result.current_rows[0]
+        return result.one()
 
     # @Timer(text="Timer: list_entity_addresses_eth {:.2f}")
     async def list_entity_addresses_eth(self, currency, entity, page=None,

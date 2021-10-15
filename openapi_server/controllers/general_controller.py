@@ -18,8 +18,11 @@ def get_statistics():  # noqa: E501
     :rtype: Stats
     """
     try:
-        result = service.get_statistics(
-            )
+        loop = asyncio.new_event_loop()
+        result = loop.run_until_complete(
+            service.get_statistics(
+                ))
+        loop.close()
         return result
     except RuntimeError as e:
         return notfound(str(e))

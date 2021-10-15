@@ -32,7 +32,7 @@ note2 = ('Our tags are all manually crawled or from credible sources,'
          'team (contact@graphsense.info) for more insight.')
 
 
-def get_statistics():
+async def get_statistics():
     """
     Returns summary statistics on all available currencies
     """
@@ -43,7 +43,8 @@ def get_statistics():
         currency_stats = list()
         db = get_connection()
         for currency in db.get_supported_currencies():
-            currency_stats.append(get_currency_statistics(currency, version))
+            currency_stats.append(
+                await get_currency_statistics(currency, version))
         return Stats(
                 currencies=currency_stats,
                 version=StatsVersion(
