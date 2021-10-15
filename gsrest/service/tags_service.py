@@ -48,11 +48,11 @@ def list_tags(label, currency=None):
                              for row in entity_tags])
 
 
-def list_labels(currency, expression):
+async def list_labels(currency, expression):
     # Normalize label
     expression_norm = alphanumeric_lower(expression)
     db = get_connection()
-    result = db.list_labels(currency, expression_norm)
+    result = await db.list_labels(currency, expression_norm)
 
     if currency:
         return list(dict.fromkeys([

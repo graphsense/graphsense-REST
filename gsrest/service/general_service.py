@@ -1,4 +1,5 @@
 import time
+import asyncio
 from openapi_server.models.stats import Stats
 from openapi_server.models.stats_version import StatsVersion
 from openapi_server.models.stats_tool import StatsTool
@@ -69,7 +70,7 @@ async def get_statistics():
                        StatsNote(note=note2)])
 
 
-def search(q, currency=None, limit=None):
+async def search(q, currency=None, limit=None):
     db = get_connection()
     currencies = db.get_supported_currencies()
 
@@ -85,16 +86,18 @@ def search(q, currency=None, limit=None):
                     txs=[]
                     )
 
-        # Look for addresses and transactions
-        txs = list_matching_txs(curr, q)
-        element.txs = txs[:limit]
+        [txs, addresses, labels] = await asyncio.gather(
+            list_matching_txs(curr, q),
+            list_matching_addresses(curr, q),
+            list_labels(curr, q)
+        )
 
-        addresses = list_matching_addresses(curr, q)
+        #TODO improve by letting db limit the result during query
+        element.txs = txs[:limit]
         element.addresses = addresses[:limit]
 
         result.currencies.append(element)
 
-        labels = list_labels(curr, q)[:limit]
         if labels:
             result.labels += labels
 

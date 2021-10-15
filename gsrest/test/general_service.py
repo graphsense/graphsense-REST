@@ -75,7 +75,7 @@ async def get_statistics(test_case):
     assertEqual(stats.currencies, result.currencies)
 
 
-def search(test_case):
+async def search(test_case):
     def base_search_results():
         return SearchResult(
                 currencies=[
@@ -100,7 +100,7 @@ def search(test_case):
             addresses=['xyz1234', 'xyz1278'],
             txs=[])
 
-    result = service.search(q='xyz12')
+    result = await service.search(q='xyz12')
     test_case.assertEqual(expected, result)
 
     expected.currencies[0] = \
@@ -109,7 +109,7 @@ def search(test_case):
             addresses=['xyz1278'],
             txs=[])
 
-    result = service.search(q='xyz127')
+    result = await service.search(q='xyz127')
     test_case.assertEqual(expected, result)
 
     expected.currencies[0] = \
@@ -118,7 +118,7 @@ def search(test_case):
             txs=['ab1880', 'ab188013'],
             addresses=[])
 
-    result = service.search(q='ab188')
+    result = await service.search(q='ab188')
     test_case.assertEqual(expected, result)
 
     expected.currencies[0] = \
@@ -127,7 +127,7 @@ def search(test_case):
             txs=['ab188013'],
             addresses=[])
 
-    result = service.search(q='ab18801')
+    result = await service.search(q='ab18801')
     test_case.assertEqual(expected, result)
 
     expected.currencies[0] = \
@@ -136,13 +136,13 @@ def search(test_case):
             txs=['00ab188013'],
             addresses=[])
 
-    result = service.search(q='00ab1')
+    result = await service.search(q='00ab1')
     test_case.assertEqual(expected, result)
 
     expected = base_search_results()
     expected.labels = ['isolinks']
 
-    result = service.search(q='iso')
+    result = await service.search(q='iso')
     test_case.assertEqual(expected, result)
 
     expected = base_search_results()
@@ -152,7 +152,7 @@ def search(test_case):
             txs=['af6e0000', 'af6e0003'],
             addresses=[])
 
-    result = service.search(q='af6e')
+    result = await service.search(q='af6e')
     test_case.assertEqual(expected, result)
 
     expected = base_search_results()
@@ -162,5 +162,5 @@ def search(test_case):
             txs=[],
             addresses=['0xabcdef'])
 
-    result = service.search(q='0xabcde')
+    result = await service.search(q='0xabcde')
     test_case.assertEqual(expected, result)

@@ -108,9 +108,9 @@ def get_address_entity(currency, address, include_tags, tag_coherence):
     return result
 
 
-def list_matching_addresses(currency, expression):
+async def list_matching_addresses(currency, expression):
     db = get_connection()
-    return db.list_matching_addresses(currency, expression)
+    return await db.list_matching_addresses(currency, expression)
 
 
 def list_addresses(currency, ids=None, page=None, pagesize=None):

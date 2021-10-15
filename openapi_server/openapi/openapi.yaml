@@ -50,6 +50,7 @@ paths:
       summary: Returns matching addresses, transactions and labels
       tags:
       - general
+      x-async: true
       x-openapi-router-controller: openapi_server.controllers.general_controller
   /stats:
     get:

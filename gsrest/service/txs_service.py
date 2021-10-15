@@ -75,9 +75,9 @@ def list_txs(currency, page=None):
     return Txs(next_page=paging_state, txs=tx_list)
 
 
-def list_matching_txs(currency, expression):
+async def list_matching_txs(currency, expression):
     db = get_connection()
-    results = db.list_matching_txs(currency, expression)
+    results = await db.list_matching_txs(currency, expression)
 
     leading_zeros = 0
     pos = 0

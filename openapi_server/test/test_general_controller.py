@@ -42,7 +42,9 @@ class TestGeneralController(BaseTestCase):
 
         Returns matching addresses, transactions and labels
         """
-        test_service.search(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.search(self))
+        loop.close()
 
         if "search" in ["batch", "get_tx_io"]:
             return

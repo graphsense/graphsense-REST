@@ -48,10 +48,13 @@ def search(q, currency=None, limit=None):  # noqa: E501
     :rtype: SearchResult
     """
     try:
-        result = service.search(
-            q=q,
-            currency=currency,
-            limit=limit)
+        loop = asyncio.new_event_loop()
+        result = loop.run_until_complete(
+            service.search(
+                q=q,
+                currency=currency,
+                limit=limit))
+        loop.close()
         return result
     except RuntimeError as e:
         return notfound(str(e))

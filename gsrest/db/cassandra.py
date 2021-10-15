@@ -537,8 +537,7 @@ class Cassandra:
 
         return list(links.values()), to_hex(paging_state)
 
-    # @Timer(text="Timer: list_matching_addresses {:.2f}")
-    def list_matching_addresses(self, currency, expression):
+    async def list_matching_addresses(self, currency, expression):
         prefix_lengths = self.get_prefix_lengths(currency)
         if len(expression) < prefix_lengths['address']:
             return []
@@ -557,11 +556,15 @@ class Cassandra:
         paging_state = None
         rows = []
         while result is None or paging_state is not None:
-            result = self.execute(currency, 'transformed', query, [prefix],
-                                  paging_state=paging_state,
-                                  fetch_size=SEARCH_PAGE_SIZE)
-            rows += [norm(row['address']) for row in result
+            result = await self.execute_async(
+                        currency, 'transformed', query, [prefix],
+                        paging_state=paging_state,
+                        fetch_size=SEARCH_PAGE_SIZE)
+            if result.is_empty():
+                break
+            rows += [norm(row['address']) for row in result.current_rows
                      if norm(row['address']).startswith(expression)]
+            paging_state = result.paging_state
         return rows
 
     @eth
@@ -820,8 +823,7 @@ class Cassandra:
             return []
         return rows
 
-    # @Timer(text="Timer: list_labels {:.2f}")
-    def list_labels(self, currency, expression_norm):
+    async def list_labels(self, currency, expression_norm):
         prefix_lengths = self.get_prefix_lengths(currency)
         if len(expression_norm) < prefix_lengths['label']:
             return []
@@ -829,11 +831,11 @@ class Cassandra:
         query = ("SELECT label, label_norm, currency FROM address_tag_by_label"
                  " WHERE label_norm_prefix = %s GROUP BY label_norm_prefix, "
                  "label_norm")
-        result = self.execute(currency, 'transformed', query,
-                              [expression_norm_prefix])
-        if result is None:
+        result = await self.execute_async(currency, 'transformed', query,
+                                          [expression_norm_prefix])
+        if result.is_empty():
             return []
-        return result
+        return result.current_rows
 
     # @Timer(text="Timer: list_concepts {:.2f}")
     def list_concepts(self, taxonomy):
@@ -888,15 +890,15 @@ class Cassandra:
 
     @new
     # @Timer(text="Timer: list_matching_txs {:.2f}")
-    def list_matching_txs(self, currency, expression):
+    async def list_matching_txs(self, currency, expression):
         prefix_lengths = self.get_prefix_lengths(currency)
         if len(expression) < prefix_lengths['tx']:
             return []
         query = ('SELECT tx_hash from transaction_by_tx_prefix where '
                  'tx_prefix=%s')
-        results = self.execute(currency, 'raw', query,
-                               [expression[:prefix_lengths['tx']]])
-        if results is None:
+        results = await self.execute_async(currency, 'raw', query,
+                                           [expression[:prefix_lengths['tx']]])
+        if results.is_empty():
             return []
         return results.current_rows
 
@@ -1466,16 +1468,16 @@ class Cassandra:
         row['rates'] = self.markup_values(currency, row['fiat_values'])
         return row
 
-    # @Timer(text="Timer: list_matching_txs_new {:.2f}")
-    def list_matching_txs_new(self, currency, expression):
+    async def list_matching_txs_new(self, currency, expression):
         prefix_lengths = self.get_prefix_lengths(currency)
         if len(expression) < prefix_lengths['tx']:
             return []
         query = ('SELECT transaction from transaction_ids_by_transaction_pre'
                  'fix where transaction_prefix = %s')
         prefix = expression[:prefix_lengths['tx']].upper()
-        results = self.execute(currency, 'transformed', query, [prefix])
-        if results is None:
+        results = await self.execute_async(currency, 'transformed', query,
+                                           [prefix])
+        if results.is_empty():
             return []
         for row in results.current_rows:
             row['tx_hash'] = row['transaction']
