@@ -417,13 +417,13 @@ def list_entity_neighbors_csv(test_case):
     test_case.assertEqual(csv, result.data.decode('utf-8'))
 
 
-def list_entity_addresses(test_case):
-    result = service.list_entity_addresses(
+async def list_entity_addresses(test_case):
+    result = await service.list_entity_addresses(
                     currency='btc',
                     entity=entityWithTags.entity)
     test_case.assertEqual(entityWithTagsAddresses, result)
 
-    result = service.list_entity_addresses(
+    result = await service.list_entity_addresses(
                     currency='eth',
                     entity=eth_entityWithTags.entity)
     expected = Address(
