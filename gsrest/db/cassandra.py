@@ -235,12 +235,13 @@ class Cassandra:
 
     @eth
     # @Timer(text="Timer: get_block {:.2f}")
-    def get_block(self, currency, height):
+    async def get_block(self, currency, height):
         query = ("SELECT * FROM block WHERE block_id_group = %s "
                  "AND block_id = %s")
-        return self.execute(currency, 'raw', query,
+        return (await self.execute_async(
+                            currency, 'raw', query,
                             [self.get_block_id_group(currency, height), height]
-                            ).one()
+                            )).one()
 
     # @Timer(text="Timer: list_blocks {:.2f}")
     async def list_blocks(self, currency, page=None):
@@ -1114,13 +1115,12 @@ class Cassandra:
         # remove 0x prefix
         return expression[2:]
 
-    # @Timer(text="Timer: get_block_eth {:.2f}")
-    def get_block_eth(self, currency, height):
+    async def get_block_eth(self, currency, height):
         block_group = self.get_block_id_group(currency, height)
         query = ("SELECT * FROM block WHERE block_id_group = %s and"
                  " block_id = %s")
-        return self.execute(currency, 'raw', query,
-                            [block_group, height]).one()
+        return (await self.execute_async(currency, 'raw', query,
+                                        [block_group, height])).one()
 
     # entity = address_id
     # @Timer(text="Timer: get_entity_eth {:.2f}")

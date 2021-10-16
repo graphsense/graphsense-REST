@@ -22,7 +22,9 @@ class TestBlocksController(BaseTestCase):
 
         Get a block by its height
         """
-        test_service.get_block(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.get_block(self))
+        loop.close()
 
         if "get_block" in ["batch", "get_tx_io"]:
             return

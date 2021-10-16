@@ -536,8 +536,7 @@ paths:
         name: height
         required: true
         schema:
-          minimum: 0
-          type: integer
+          $ref: '#/components/schemas/height'
         style: simple
       responses:
         "200":
@@ -549,6 +548,7 @@ paths:
       summary: Get a block by its height
       tags:
       - blocks
+      x-async: true
       x-openapi-router-controller: openapi_server.controllers.blocks_controller
   /{currency}/blocks/{height}/txs:
     get:
@@ -571,8 +571,7 @@ paths:
         name: height
         required: true
         schema:
-          minimum: 0
-          type: integer
+          $ref: '#/components/schemas/height'
         style: simple
       responses:
         "200":
@@ -1047,8 +1046,7 @@ paths:
         name: height
         required: true
         schema:
-          minimum: 0
-          type: integer
+          $ref: '#/components/schemas/height'
         style: simple
       responses:
         "200":
@@ -1307,8 +1305,7 @@ components:
       name: height
       required: true
       schema:
-        minimum: 0
-        type: integer
+        $ref: '#/components/schemas/height'
       style: simple
     hex_address:
       description: The cryptocurrency address in hexadecimal representation
@@ -1557,11 +1554,11 @@ components:
         out_degree: 3
         first_tx:
           tx_hash: tx_hash
-          height: 1
+          height: 0
           timestamp: 5
         last_tx:
           tx_hash: tx_hash
-          height: 1
+          height: 0
           timestamp: 5
         entity: 1
         total_received:
@@ -1653,6 +1650,7 @@ components:
     batch_operation:
       discriminator:
         mapping:
+          get_block: '#/components/schemas/get_block'
           get_tx: '#/components/schemas/get_tx'
           get_tx_io: '#/components/schemas/get_tx_io'
           list_entity_addresses: '#/components/schemas/list_entity_addresses'
@@ -1661,10 +1659,11 @@ components:
       - $ref: '#/components/schemas/get_tx'
       - $ref: '#/components/schemas/get_tx_io'
       - $ref: '#/components/schemas/list_entity_addresses'
+      - $ref: '#/components/schemas/get_block'
     block:
       example:
         block_hash: block_hash
-        height: 1
+        height: 0
         no_txs: 6
         timestamp: 1
       properties:
@@ -1675,7 +1674,7 @@ components:
         height:
           description: Height
           format: int64
-          minimum: 1
+          minimum: 0
           title: height
           type: integer
         no_txs:
@@ -1693,11 +1692,11 @@ components:
         next_page: next_page
         blocks:
         - block_hash: block_hash
-          height: 1
+          height: 0
           no_txs: 6
           timestamp: 1
         - block_hash: block_hash
-          height: 1
+          height: 0
           no_txs: 6
           timestamp: 1
       properties:
@@ -1860,11 +1859,11 @@ components:
         out_degree: 2
         first_tx:
           tx_hash: tx_hash
-          height: 1
+          height: 0
           timestamp: 5
         last_tx:
           tx_hash: tx_hash
-          height: 1
+          height: 0
           timestamp: 5
         entity: 0
         total_received:
@@ -1960,11 +1959,11 @@ components:
           out_degree: 3
           first_tx:
             tx_hash: tx_hash
-            height: 1
+            height: 0
             timestamp: 5
           last_tx:
             tx_hash: tx_hash
-            height: 1
+            height: 0
             timestamp: 5
           entity: 1
           total_received:
@@ -1998,11 +1997,11 @@ components:
           out_degree: 3
           first_tx:
             tx_hash: tx_hash
-            height: 1
+            height: 0
             timestamp: 5
           last_tx:
             tx_hash: tx_hash
-            height: 1
+            height: 0
             timestamp: 5
           entity: 1
           total_received:
@@ -2037,6 +2036,23 @@ components:
       - $ref: '#/components/schemas/tag'
       - $ref: '#/components/schemas/entity_tag_allOf'
       title: entity_tag
+    get_block:
+      properties:
+        api:
+          default: blocks
+          type: string
+        height:
+          items:
+            $ref: '#/components/schemas/height'
+          type: array
+        operation:
+          default: get_block
+          type: string
+      required:
+      - api
+      - height
+      - operation
+      type: object
     get_tx:
       properties:
         api:
@@ -2077,7 +2093,7 @@ components:
     height:
       description: Height
       format: int64
-      minimum: 1
+      minimum: 0
       title: height
       type: integer
     io:
@@ -2105,7 +2121,7 @@ components:
         height:
           description: Height
           format: int64
-          minimum: 1
+          minimum: 0
           title: height
           type: integer
         input_value:
@@ -2336,12 +2352,12 @@ components:
           value: 0.8008282
         - code: code
           value: 0.8008282
-        height: 1
+        height: 0
       properties:
         height:
           description: Height
           format: int64
-          minimum: 1
+          minimum: 0
           title: height
           type: integer
         rates:
@@ -2799,7 +2815,7 @@ components:
           - code: code
             value: 0.8008282
           value: 6
-        height: 1
+        height: 0
         timestamp: 6
       properties:
         from_address:
@@ -2809,7 +2825,7 @@ components:
         height:
           description: Height
           format: int64
-          minimum: 1
+          minimum: 0
           title: height
           type: integer
         timestamp:
@@ -2848,13 +2864,13 @@ components:
     tx_summary:
       example:
         tx_hash: tx_hash
-        height: 1
+        height: 0
         timestamp: 5
       properties:
         height:
           description: Height
           format: int64
-          minimum: 1
+          minimum: 0
           title: height
           type: integer
         timestamp:
@@ -2883,7 +2899,7 @@ components:
         height:
           description: Height
           format: int64
-          minimum: 1
+          minimum: 0
           title: height
           type: integer
         inputs:
@@ -2984,7 +3000,7 @@ components:
             - code: code
               value: 0.8008282
             value: 6
-          height: 1
+          height: 0
           timestamp: 6
         - to_address: to_address
           tx_hash: tx_hash
@@ -2997,7 +3013,7 @@ components:
             - code: code
               value: 0.8008282
             value: 6
-          height: 1
+          height: 0
           timestamp: 6
       properties:
         next_page:

@@ -21,9 +21,9 @@ def block_from_row(currency, row):
             timestamp=row['timestamp'])
 
 
-def get_block(currency, height):
+async def get_block(currency, height):
     db = get_connection()
-    row = db.get_block(currency, height)
+    row = await db.get_block(currency, height)
     if not row:
         raise RuntimeError("Block {} not found".format(height))
     return block_from_row(currency, row)

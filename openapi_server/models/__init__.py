@@ -17,6 +17,7 @@ from openapi_server.models.entity import Entity
 from openapi_server.models.entity_addresses import EntityAddresses
 from openapi_server.models.entity_tag import EntityTag
 from openapi_server.models.entity_tag_all_of import EntityTagAllOf
+from openapi_server.models.get_block import GetBlock
 from openapi_server.models.get_tx import GetTx
 from openapi_server.models.get_tx_io import GetTxIo
 from openapi_server.models.io import Io

@@ -23,9 +23,12 @@ def get_block(currency, height):  # noqa: E501
     :rtype: Block
     """
     try:
-        result = service.get_block(
-            currency=currency,
-            height=height)
+        loop = asyncio.new_event_loop()
+        result = loop.run_until_complete(
+            service.get_block(
+                currency=currency,
+                height=height))
+        loop.close()
         return result
     except RuntimeError as e:
         return notfound(str(e))

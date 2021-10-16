@@ -30,13 +30,13 @@ eth_block2 = Block(
         timestamp=234)
 
 
-def get_block(test_case):
+async def get_block(test_case):
     """Test case for get_block
     """
 
-    result = service.get_block("btc", 1)
+    result = await service.get_block("btc", 1)
     test_case.assertEqual(block, result)
-    result = service.get_block("btc", 2)
+    result = await service.get_block("btc", 2)
     test_case.assertEqual(block2, result)
     headers = {
         'Accept': 'application/json',
@@ -48,9 +48,9 @@ def get_block(test_case):
     test_case.assert404(response,
                         'Response body is : ' + response.data.decode('utf-8'))
 
-    result = service.get_block("eth", 1)
+    result = await service.get_block("eth", 1)
     test_case.assertEqual(eth_block, result)
-    result = service.get_block("eth", 2300001)
+    result = await service.get_block("eth", 2300001)
     test_case.assertEqual(eth_block2, result)
     headers = {
         'Accept': 'application/json',
