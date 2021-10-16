@@ -63,15 +63,15 @@ async def get_block(test_case):
                         'Response body is : ' + response.data.decode('utf-8'))
 
 
-def list_block_txs(test_case):
+async def list_block_txs(test_case):
     """Test case for list_block_txs
     """
 
     block_txs = [tx1]
-    result = service.list_block_txs("btc", 1)
+    result = await service.list_block_txs("btc", 1)
     test_case.assertEqual(block_txs, result)
 
-    result = service.list_block_txs("eth", 1)
+    result = await service.list_block_txs("eth", 1)
 
     def s(tx):
         return tx.tx_hash

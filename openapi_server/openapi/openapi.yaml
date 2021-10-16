@@ -585,6 +585,7 @@ paths:
       summary: Get block transactions
       tags:
       - blocks
+      x-async: true
       x-openapi-router-controller: openapi_server.controllers.blocks_controller
   /{currency}/entities/{entity}:
     get:

@@ -43,7 +43,9 @@ class TestBlocksController(BaseTestCase):
 
         Get block transactions
         """
-        test_service.list_block_txs(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.list_block_txs(self))
+        loop.close()
 
         if "list_block_txs" in ["batch", "get_tx_io"]:
             return

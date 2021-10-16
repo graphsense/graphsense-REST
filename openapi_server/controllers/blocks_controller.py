@@ -52,9 +52,12 @@ def list_block_txs(currency, height):  # noqa: E501
     :rtype: List[Tx]
     """
     try:
-        result = service.list_block_txs(
-            currency=currency,
-            height=height)
+        loop = asyncio.new_event_loop()
+        result = loop.run_until_complete(
+            service.list_block_txs(
+                currency=currency,
+                height=height))
+        loop.close()
         return result
     except RuntimeError as e:
         return notfound(str(e))

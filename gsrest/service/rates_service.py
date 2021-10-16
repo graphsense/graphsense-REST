@@ -12,12 +12,12 @@ def get_exchange_rates(currency, height):
                  rates=rates['rates'])
 
 
-def get_rates(currency, height=None):
+async def get_rates(currency, height=None):
     if height is None:
-        height = get_currency_statistics(currency).no_blocks - 1
+        height = (await get_currency_statistics(currency)).no_blocks - 1
 
     db = get_connection()
-    r = db.get_rates(currency, height)
+    r = await db.get_rates(currency, height)
 
     if r is None:
         raise ValueError("Cannot find height {} in currency {}"

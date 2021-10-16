@@ -211,19 +211,20 @@ class Cassandra:
                                    results_generator=False):
         aws = [self.execute_async(currency, keyspace_type, query, param)
                for param in params]
-        for aw in asyncio.as_completed(aws):
-            result = await aw
+        results = []
+        for result in await asyncio.gather(*aws):
             if filter_empty and result is None:
                 continue
             if one:
                 result = result.one()
                 if result:
-                    yield result
+                    results.append(result)
                 else:
                     if not filter_empty:
-                        yield None
+                        results.append(result)
                 continue
-            yield result.current_rows
+            results.append(result.current_rows)
+        return results
     #TODO: automatic page iteration missing
 
     @eth
@@ -254,21 +255,22 @@ class Cassandra:
         return results.current_rows, to_hex(results.paging_state)
 
     @eth
-    # @Timer(text="Timer: list_block_txs {:.2f}")
-    def list_block_txs(self, currency, height):
+    async def list_block_txs(self, currency, height):
         height_group = self.get_block_id_group(currency, height)
         query = ("SELECT txs FROM block_transactions WHERE "
                  "block_id_group = %s and block_id = %s")
-        result = self.execute(currency, 'raw', query, [height_group, height])
+        result = await self.execute_async(currency, 'raw', query,
+                                          [height_group, height])
         if result is None or result.one() is None:
             return None
         txs = [tx.tx_id for tx in result.one()['txs']]
-        return self.list_txs_by_ids(currency, txs)
+        return await self.list_txs_by_ids(currency, txs)
 
     # @Timer(text="Timer: get_rates {:.2f}")
-    def get_rates(self, currency, height):
+    async def get_rates(self, currency, height):
         query = "SELECT * FROM exchange_rates WHERE block_id = %s"
-        result = self.execute(currency, 'transformed', query, [height])
+        result = await self.execute_async(currency, 'transformed', query,
+                                          [height])
         if result is None:
             return None
         result = result.one()
@@ -671,7 +673,6 @@ class Cassandra:
 
         return addresses, to_hex(results.paging_state)
 
-
     # @Timer(text="Timer: list_neighbors {:.2f}")
     def list_neighbors(self, currency, id, is_outgoing, node_type,
                        targets, include_labels, page, pagesize):
@@ -912,16 +913,17 @@ class Cassandra:
 
     @eth
     # @Timer(text="Timer: list_txs_by_hashes {:.2f}")
-    def list_txs_by_hashes(self, currency, hashes):
+    async def list_txs_by_hashes(self, currency, hashes):
         prefix = self.get_prefix_lengths(currency)
         params = [[hash[:prefix['tx']],
                    bytearray.fromhex(hash)]
                   for hash in hashes]
         statement = ('SELECT tx_id from transaction_by_tx_prefix where '
                      'tx_prefix=%s and tx_hash=%s')
-        result = self.concurrent_with_args(currency, 'raw', statement, params)
+        result = await self.concurrent_with_args(currency, 'raw', statement,
+                                                 params)
         ids = (tx['tx_id'] for tx in result)
-        return self.list_txs_by_ids(currency, ids)
+        return await self.list_txs_by_ids(currency, ids)
 
     @eth
     async def get_tx_by_hash(self, currency, hash):
@@ -941,8 +943,9 @@ class Cassandra:
         params = ([self.get_tx_id_group(currency, id), id] for id in ids)
         statement = ('SELECT * FROM transaction WHERE '
                      'tx_id_group = %s and tx_id = %s')
-        return self.concurrent_with_args(currency, 'raw', statement, params,
-                                         filter_empty=filter_empty)
+        return await self.concurrent_with_args(currency, 'raw', statement,
+                                               params,
+                                               filter_empty=filter_empty)
 
     @eth
     async def get_tx_by_id(self, currency, id):
@@ -1120,7 +1123,7 @@ class Cassandra:
         query = ("SELECT * FROM block WHERE block_id_group = %s and"
                  " block_id = %s")
         return (await self.execute_async(currency, 'raw', query,
-                                        [block_group, height])).one()
+                                         [block_group, height])).one()
 
     # entity = address_id
     # @Timer(text="Timer: get_entity_eth {:.2f}")
@@ -1200,16 +1203,16 @@ class Cassandra:
         return self.get_address_id(currency, address)
 
     # @Timer(text="Timer: list_block_txs_eth {:.2f}")
-    def list_block_txs_eth(self, currency, height):
+    async def list_block_txs_eth(self, currency, height):
         height_group = self.get_block_id_group(currency, height)
         query = ("SELECT txs FROM block_transactions WHERE "
                  "block_id_group = %s and block_id = %s")
-        result = self.execute(currency, 'transformed', query,
-                              [height_group, height])
+        result = await self.execute_async(currency, 'transformed', query,
+                                          [height_group, height])
         if result is None:
             raise RuntimeError(
                     f'block {height} not found in currency {currency}')
-        return self.list_txs_by_ids(currency, result.one()['txs'])
+        return await self.list_txs_by_ids(currency, result.one()['txs'])
 
     # @Timer(text="Timer: get_id_secondary_group_eth {:.2f}")
     def get_id_secondary_group_eth(self, table, id_group):
@@ -1267,13 +1270,10 @@ class Cassandra:
         statement = (
             'SELECT transaction from transaction_ids_by_transaction_id_group'
             ' where transaction_id_group = %s and transaction_id = %s')
-        result = self.concurrent_with_args(currency, 'transformed', statement,
-                                           params)
-        gen = self.list_txs_by_hashes(currency,
-                                      [row['transaction']
-                                       async for row in result])
-        async for row in gen:
-            yield row
+        result = await self.concurrent_with_args(currency, 'transformed',
+                                                 statement, params)
+        return await self.list_txs_by_hashes(currency, [row['transaction']
+                                                        for row in result])
 
     async def get_tx_by_id_eth(self, currency, id):
         params = [self.get_id_group(currency, id), id]
@@ -1297,11 +1297,12 @@ class Cassandra:
             'SELECT tx_hash, block_id, block_timestamp, value, '
             'from_address, to_address from '
             'transaction where tx_hash_prefix=%s and tx_hash=%s')
-        result = self.concurrent_with_args(currency, 'raw', statement, params)
-        async for row in result:
+        result = await self.concurrent_with_args(currency, 'raw', statement,
+                                                 params)
+        for row in result:
             row['from_address'] = eth_address_to_hex(row['from_address'])
             row['to_address'] = eth_address_to_hex(row['to_address'])
-            yield row
+        return result
 
     async def get_tx_by_hash_eth(self, currency, hash):
         prefix = self.get_prefix_lengths(currency)
