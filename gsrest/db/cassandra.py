@@ -243,14 +243,14 @@ class Cassandra:
                             ).one()
 
     # @Timer(text="Timer: list_blocks {:.2f}")
-    def list_blocks(self, currency, page=None):
+    async def list_blocks(self, currency, page=None):
         paging_state = from_hex(page)
 
         query = "SELECT * FROM block"
-        results = self.execute(currency, 'raw', query,
-                               paging_state=paging_state)
+        results = await self.execute_async(currency, 'raw', query,
+                                           paging_state=paging_state)
 
-        return results, to_hex(results.paging_state)
+        return results.current_rows, to_hex(results.paging_state)
 
     @eth
     # @Timer(text="Timer: list_block_txs {:.2f}")
@@ -1407,9 +1407,8 @@ class Cassandra:
 
     # @Timer(text="Timer: get_tx_eth {:.2f}")
     async def get_tx_eth(self, currency, tx_hash, include_io=False):
-        result = await self.get_tx_by_hash(currency,
-                                           bytearray.fromhex(tx_hash))
-        return result.one()
+        return await self.get_tx_by_hash(currency,
+                                         bytearray.fromhex(tx_hash))
 
     # @Timer(text="Timer: list_entity_addresses_eth {:.2f}")
     async def list_entity_addresses_eth(self, currency, entity, page=None,

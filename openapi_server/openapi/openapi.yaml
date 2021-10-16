@@ -513,6 +513,7 @@ paths:
       summary: Get all blocks
       tags:
       - blocks
+      x-async: true
       x-openapi-router-controller: openapi_server.controllers.blocks_controller
   /{currency}/blocks/{height}:
     get:
@@ -1284,6 +1285,19 @@ components:
       schema:
         format: int32
         type: integer
+      style: form
+    format:
+      description: The response data format
+      explode: true
+      in: query
+      name: format
+      required: false
+      schema:
+        default: csv
+        enum:
+        - csv
+        - json
+        type: string
       style: form
     height:
       description: The block height

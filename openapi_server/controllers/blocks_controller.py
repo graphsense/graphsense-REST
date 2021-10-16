@@ -75,9 +75,12 @@ def list_blocks(currency, page=None):  # noqa: E501
     :rtype: Blocks
     """
     try:
-        result = service.list_blocks(
-            currency=currency,
-            page=page)
+        loop = asyncio.new_event_loop()
+        result = loop.run_until_complete(
+            service.list_blocks(
+                currency=currency,
+                page=page))
+        loop.close()
         return result
     except RuntimeError as e:
         return notfound(str(e))

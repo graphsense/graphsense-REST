@@ -29,11 +29,11 @@ def get_block(currency, height):
     return block_from_row(currency, row)
 
 
-def list_blocks(currency, page=None):
+async def list_blocks(currency, page=None):
     db = get_connection()
-    results, paging_state = db.list_blocks(currency, page)
+    results, paging_state = await db.list_blocks(currency, page)
     block_list = [block_from_row(currency, row)
-                  for row in results.current_rows]
+                  for row in results]
 
     return Blocks(blocks=block_list, next_page=paging_state)
 

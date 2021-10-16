@@ -96,11 +96,11 @@ def list_block_txs_csv(test_case):
     test_case.assertEqual(7, len(splitted[0].split(',')))
 
 
-def list_blocks(test_case):
+async def list_blocks(test_case):
     """Test case for list_blocks
     """
     blocks = Blocks(next_page=None, blocks=[block, block2])
-    result = service.list_blocks("btc")
+    result = await service.list_blocks("btc")
     result = Blocks(
             next_page=None,
             blocks=sorted(result.blocks,
@@ -108,7 +108,7 @@ def list_blocks(test_case):
     test_case.assertEqual(blocks, result)
 
     blocks = Blocks(next_page=None, blocks=[eth_block, eth_block2])
-    result = service.list_blocks("eth")
+    result = await service.list_blocks("eth")
     result = Blocks(
             next_page=None,
             blocks=sorted(result.blocks,

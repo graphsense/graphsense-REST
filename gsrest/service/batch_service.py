@@ -4,16 +4,24 @@ from gsrest.util.csvify import create_download_header
 from csv import DictWriter
 from openapi_server.models.values import Values
 import asyncio
+import json
 
 
-async def batch(currency, batch_operation):
+async def batch(currency, batch_operation, format='csv'):
     result = ""
-    gen = to_csv(currency, batch_operation)
+    the_stack = stack(currency, batch_operation)
+    if format == 'csv':
+        gen = to_csv(the_stack)
+        mimetype = 'text/csv'
+    else:
+        gen = to_json(the_stack)
+        mimetype = 'application/json'
+
     async for row in gen:
         result += row
     return Response(result,
-                    mimetype="text/csv",
-                    headers=create_download_header('batch.csv'))
+                    mimetype=mimetype,
+                    headers=create_download_header(f'batch.{format}'))
 
 
 class writer:
@@ -82,9 +90,7 @@ async def wrap(operation, currency, params, keys):
     return flat
 
 
-async def to_csv(currency, batch_operation):
-    wr = writer()
-    csv = None
+def stack(currency, batch_operation):
     mod = importlib.import_module(
         f'gsrest.service.{batch_operation.api}_service')
     operation = getattr(mod, batch_operation.operation)
@@ -107,17 +113,22 @@ async def to_csv(currency, batch_operation):
             le = len(a)
             ln = min(le, ln) if ln > 0 else le
 
-    print(f'ln {ln}')
-    print(f'keys {keys}')
-    print(f'params {params}')
     for i in range(0, ln):
         the_keys = {}
         for (k, v) in keys.items():
             the_keys[k] = v[i]
         aw = wrap(operation, currency, params, the_keys)
+
         aws.append(aw)
 
-    for op in asyncio.as_completed(aws):
+    return asyncio.as_completed(aws)
+
+
+async def to_csv(stack):
+    wr = writer()
+    csv = None
+
+    for op in stack:
         try:
             rows = await op
         except RuntimeError:
@@ -134,3 +145,26 @@ async def to_csv(currency, batch_operation):
 
             csv.writerow(row)
             yield wr.get()
+
+
+async def to_json(stack):
+    started = False
+    yield "["
+    for op in stack:
+        try:
+            rows = await op
+        except RuntimeError:
+            continue
+        if started:
+            yield ","
+        else:
+            started = True
+
+        s = False
+        for row in rows:
+            if s:
+                yield ","
+            else:
+                s = True
+            yield json.dumps(row)
+    yield "]"

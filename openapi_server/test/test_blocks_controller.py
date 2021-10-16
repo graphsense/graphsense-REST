@@ -60,7 +60,9 @@ class TestBlocksController(BaseTestCase):
 
         Get all blocks
         """
-        test_service.list_blocks(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.list_blocks(self))
+        loop.close()
 
         if "list_blocks" in ["batch", "get_tx_io"]:
             return
