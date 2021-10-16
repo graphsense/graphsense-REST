@@ -24,6 +24,7 @@ from openapi_server.models.io import Io
 from openapi_server.models.link import Link
 from openapi_server.models.link_utxo import LinkUtxo
 from openapi_server.models.links import Links
+from openapi_server.models.list_block_txs import ListBlockTxs
 from openapi_server.models.list_entity_addresses import ListEntityAddresses
 from openapi_server.models.neighbor import Neighbor
 from openapi_server.models.neighbors import Neighbors

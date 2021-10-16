@@ -10,6 +10,7 @@ from openapi_server.models.get_block import GetBlock
 from openapi_server.models.get_tx import GetTx
 from openapi_server.models.get_tx_io import GetTxIo
 from openapi_server.models.io import Io
+from openapi_server.models.list_block_txs import ListBlockTxs
 from openapi_server.models.list_entity_addresses import ListEntityAddresses
 from openapi_server import util
 
@@ -17,6 +18,7 @@ from openapi_server.models.get_block import GetBlock  # noqa: E501
 from openapi_server.models.get_tx import GetTx  # noqa: E501
 from openapi_server.models.get_tx_io import GetTxIo  # noqa: E501
 from openapi_server.models.io import Io  # noqa: E501
+from openapi_server.models.list_block_txs import ListBlockTxs  # noqa: E501
 from openapi_server.models.list_entity_addresses import ListEntityAddresses  # noqa: E501
 
 class BatchOperation(Model):
@@ -25,7 +27,7 @@ class BatchOperation(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, api='blocks', operation='get_block', tx_hash=None, io=None, entity=None, height=None):  # noqa: E501
+    def __init__(self, api='blocks', operation='list_block_txs', tx_hash=None, io=None, entity=None, height=None):  # noqa: E501
         """BatchOperation - a model defined in OpenAPI
 
         :param api: The api of this BatchOperation.  # noqa: E501

@@ -1654,6 +1654,7 @@ components:
           get_block: '#/components/schemas/get_block'
           get_tx: '#/components/schemas/get_tx'
           get_tx_io: '#/components/schemas/get_tx_io'
+          list_block_txs: '#/components/schemas/list_block_txs'
           list_entity_addresses: '#/components/schemas/list_entity_addresses'
         propertyName: operation
       oneOf:
@@ -1661,6 +1662,7 @@ components:
       - $ref: '#/components/schemas/get_tx_io'
       - $ref: '#/components/schemas/list_entity_addresses'
       - $ref: '#/components/schemas/get_block'
+      - $ref: '#/components/schemas/list_block_txs'
     block:
       example:
         block_hash: block_hash
@@ -2166,6 +2168,23 @@ components:
           title: next_page
           type: string
       title: links
+      type: object
+    list_block_txs:
+      properties:
+        api:
+          default: blocks
+          type: string
+        height:
+          items:
+            $ref: '#/components/schemas/height'
+          type: array
+        operation:
+          default: list_block_txs
+          type: string
+      required:
+      - api
+      - height
+      - operation
       type: object
     list_entity_addresses:
       properties:
