@@ -25,7 +25,9 @@ class TestAddressesController(BaseTestCase):
 
         Get an address, optionally with tags
         """
-        test_service.get_address(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.get_address(self))
+        loop.close()
 
         if "get_address" in ["batch", "get_tx_io"]:
             return

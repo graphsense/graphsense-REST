@@ -28,10 +28,13 @@ def get_address(currency, address, include_tags=None):  # noqa: E501
     :rtype: Address
     """
     try:
-        result = service.get_address(
-            currency=currency,
-            address=address,
-            include_tags=include_tags)
+        loop = asyncio.new_event_loop()
+        result = loop.run_until_complete(
+            service.get_address(
+                currency=currency,
+                address=address,
+                include_tags=include_tags))
+        loop.close()
         return result
     except RuntimeError as e:
         return notfound(str(e))

@@ -354,7 +354,7 @@ class Cassandra:
             yield row
 
     # @Timer(text="Timer: get_address_id {:.2f}")
-    def get_address_id(self, currency, address):
+    async def get_address_id(self, currency, address):
         prefix = self.scrub_prefix(currency, address)
         table = "address_by_address_prefix"
         if currency == 'eth':
@@ -365,13 +365,14 @@ class Cassandra:
             f"SELECT address_id FROM {table} "
             "WHERE address_prefix = %s AND address = %s")
         prefix_length = self.get_prefix_lengths(currency)['address']
-        result = self.execute(currency, 'transformed',
+        result = await self.execute_async(
+                              currency, 'transformed',
                               query, [prefix[:prefix_length], address])
         return result.one()['address_id'] if result else None
 
     # @Timer(text="Timer: get_address_id_id_group {:.2f}")
-    def get_address_id_id_group(self, currency, address):
-        address_id = self.get_address_id(currency, address)
+    async def get_address_id_id_group(self, currency, address):
+        address_id = await self.get_address_id(currency, address)
         if not address_id:
             raise RuntimeError("Address {} not found in currency {}"
                                .format(address, currency))
@@ -388,29 +389,29 @@ class Cassandra:
         return floor(int(id_) / self.parameters[keyspace]['tx_bucket_size'])
 
     # @Timer(text="Timer: get_address {:.2f}")
-    def get_address(self, currency, address):
+    async def get_address(self, currency, address):
         address_id, address_id_group = \
-            self.get_address_id_id_group(currency, address)
+            await self.get_address_id_id_group(currency, address)
         query = ("SELECT * FROM address WHERE address_id = %s"
                  " AND address_id_group = %s")
-        result = self.execute(currency, 'transformed', query,
-                              [address_id, address_id_group])
+        result = await self.execute_async(currency, 'transformed', query,
+                                          [address_id, address_id_group])
         if not result:
             return None
 
         result = result.one()
 
-        return self.finish_addresses(currency, [result])[0]
+        return await self.finish_address(currency, result)
 
     # @Timer(text="Timer: list_tags_by_address {:.2f}")
-    def list_tags_by_address(self, currency, address):
+    async def list_tags_by_address(self, currency, address):
         address_id, address_id_group = \
-            self.get_address_id_id_group(currency, address)
+            await self.get_address_id_id_group(currency, address)
 
         query = ("SELECT * FROM address_tags WHERE address_id = %s "
                  "and address_id_group = %s")
-        results = self.execute(currency, 'transformed', query,
-                               [address_id, address_id_group])
+        results = await self.execute_async(currency, 'transformed', query,
+                                           [address_id, address_id_group])
         if results is None:
             return []
         for tag in results.current_rows:
@@ -952,7 +953,8 @@ class Cassandra:
         params = [self.get_tx_id_group(currency, id), id]
         statement = ('SELECT * FROM transaction WHERE '
                      'tx_id_group = %s and tx_id = %s')
-        return await self.execute_async(currency, 'raw', statement, params)
+        return (await self.execute_async(currency, 'raw', statement, params)
+                ).one()
 
     def list_addresses(self, currency, ids=None, page=None, pagesize=None):
         has_ids = isinstance(ids, list)
@@ -994,41 +996,10 @@ class Cassandra:
     def finish_entities(self, currency, rows, with_txs=True):
         return self.finish_addresses(currency, rows, with_txs)
 
-    @eth
-    def finish_addresses(self, currency, rows, with_txs=True):
-        ids = []
-        for row in rows:
-            row['total_received'] = \
-                self.markup_currency(currency, row['total_received'])
-            row['total_spent'] = \
-                self.markup_currency(currency, row['total_spent'])
-
-            if not with_txs:
-                continue
-
-            ids.append(row['first_tx_id'])
-            ids.append(row['last_tx_id'])
-
-        if not with_txs:
-            return rows
-
-        TxSummary = namedtuple('TxSummary', ['height', 'timestamp', 'tx_hash'])
-        txs = self.list_txs_by_ids(currency, ids)
-
-        for i, tx in enumerate(txs):
-            row = rows[i//2]
-            if i % 2 == 0:
-                row['first_tx'] = TxSummary(
-                    tx_hash=tx['tx_hash'],
-                    timestamp=tx['timestamp'],
-                    height=tx['block_id'])
-            else:
-                row['last_tx'] = TxSummary(
-                    tx_hash=tx['tx_hash'],
-                    timestamp=tx['timestamp'],
-                    height=tx['block_id'])
-
-        return rows
+    async def finish_addresses(self, currency, rows, with_txs=True):
+        aws = [self.finish_address(currency, row, with_txs=with_txs)
+               for row in rows]
+        return await asyncio.gather(*aws)
 
     @eth
     async def finish_address(self, currency, row, with_txs=True):
@@ -1045,9 +1016,6 @@ class Cassandra:
         aws = [self.get_tx_by_id(currency, id)
                for id in [row['first_tx_id'], row['last_tx_id']]]
         [tx1, tx2] = await asyncio.gather(*aws)
-
-        tx1 = tx1.one()
-        tx2 = tx2.one()
 
         if not tx1 or not tx2:
             raise RuntimeError(f"transactions for {row['address']} not found")
@@ -1082,9 +1050,6 @@ class Cassandra:
                for id in [row['first_tx_id'], row['last_tx_id']]]
 
         [tx1, tx2] = await asyncio.gather(*aws)
-
-        tx1 = tx1.one()
-        tx2 = tx2.one()
 
         if not tx1 or not tx2:
             raise RuntimeError(f"transactions for {row['address']} not found")
@@ -1499,38 +1464,3 @@ class Cassandra:
     def sec_in(self, id):
         return "(" + ','.join(map(str, range(0, id+1))) + ")"
 
-    def finish_addresses_eth(self, currency, rows, with_txs=True):
-        ids = []
-        for row in rows:
-            if 'address' in row:
-                row['address'] = eth_address_to_hex(row['address'])
-            row['cluster_id'] = row['address_id']
-            row['total_received'] = \
-                self.markup_currency(currency, row['total_received'])
-            row['total_spent'] = \
-                self.markup_currency(currency, row['total_spent'])
-            if not with_txs:
-                continue
-
-            ids.append(row['first_tx_id'])
-            ids.append(row['last_tx_id'])
-
-        if not with_txs:
-            return rows
-
-        TxSummary = namedtuple('TxSummary', ['height', 'timestamp', 'tx_hash'])
-        txs = self.list_txs_by_ids(currency, ids)
-
-        for i, tx in enumerate(txs):
-            row = rows[i//2]
-            if i % 2 == 0:
-                row['first_tx'] = TxSummary(
-                    height=tx['block_id'],
-                    timestamp=tx['block_timestamp'],
-                    tx_hash=tx['tx_hash'])
-            else:
-                row['last_tx'] = TxSummary(
-                    height=tx['block_id'],
-                    timestamp=tx['block_timestamp'],
-                    tx_hash=tx['tx_hash'])
-        return rows

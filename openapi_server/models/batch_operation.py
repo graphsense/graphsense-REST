@@ -6,6 +6,7 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from openapi_server.models.base_model_ import Model
+from openapi_server.models.get_address import GetAddress
 from openapi_server.models.get_block import GetBlock
 from openapi_server.models.get_tx import GetTx
 from openapi_server.models.get_tx_io import GetTxIo
@@ -14,6 +15,7 @@ from openapi_server.models.list_block_txs import ListBlockTxs
 from openapi_server.models.list_entity_addresses import ListEntityAddresses
 from openapi_server import util
 
+from openapi_server.models.get_address import GetAddress  # noqa: E501
 from openapi_server.models.get_block import GetBlock  # noqa: E501
 from openapi_server.models.get_tx import GetTx  # noqa: E501
 from openapi_server.models.get_tx_io import GetTxIo  # noqa: E501
@@ -27,7 +29,7 @@ class BatchOperation(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, api='blocks', operation='list_block_txs', tx_hash=None, io=None, entity=None, height=None):  # noqa: E501
+    def __init__(self, api='addresses', operation='get_address', tx_hash=None, io=None, entity=None, height=None, address=None):  # noqa: E501
         """BatchOperation - a model defined in OpenAPI
 
         :param api: The api of this BatchOperation.  # noqa: E501
@@ -42,6 +44,8 @@ class BatchOperation(Model):
         :type entity: List[int]
         :param height: The height of this BatchOperation.  # noqa: E501
         :type height: List[int]
+        :param address: The address of this BatchOperation.  # noqa: E501
+        :type address: List[str]
         """
         self.openapi_types = {
             'api': str,
@@ -49,7 +53,8 @@ class BatchOperation(Model):
             'tx_hash': List[str],
             'io': Io,
             'entity': List[int],
-            'height': List[int]
+            'height': List[int],
+            'address': List[str]
         }
 
         self.attribute_map = {
@@ -58,7 +63,8 @@ class BatchOperation(Model):
             'tx_hash': 'tx_hash',
             'io': 'io',
             'entity': 'entity',
-            'height': 'height'
+            'height': 'height',
+            'address': 'address'
         }
 
         #if api is None:
@@ -79,6 +85,9 @@ class BatchOperation(Model):
         #if height is None:
             #raise ValueError("Invalid value for `height`, must not be `None`")  # noqa: E501
         self._height = height
+        #if address is None:
+            #raise ValueError("Invalid value for `address`, must not be `None`")  # noqa: E501
+        self._address = address
 
     @classmethod
     def from_dict(cls, dikt) -> 'BatchOperation':
@@ -102,7 +111,8 @@ class BatchOperation(Model):
             'tx_hash': self._tx_hash,
             'io': self._io,
             'entity': self._entity,
-            'height': self._height }
+            'height': self._height,
+            'address': self._address }
 
 
     @property
@@ -242,3 +252,26 @@ class BatchOperation(Model):
             raise ValueError("Invalid value for `height`, must not be `None`")  # noqa: E501
 
         self._height = height
+
+    @property
+    def address(self):
+        """Gets the address of this BatchOperation.
+
+
+        :return: The address of this BatchOperation.
+        :rtype: List[str]
+        """
+        return self._address
+
+    @address.setter
+    def address(self, address):
+        """Sets the address of this BatchOperation.
+
+
+        :param address: The address of this BatchOperation.
+        :type address: List[str]
+        """
+        if address is None:
+            raise ValueError("Invalid value for `address`, must not be `None`")  # noqa: E501
+
+        self._address = address

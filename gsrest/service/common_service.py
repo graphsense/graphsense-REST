@@ -52,24 +52,24 @@ def txs_from_rows(currency, rows):
             for row in rows]
 
 
-def get_address(currency, address, include_tags=False):
+async def get_address(currency, address, include_tags=False):
     db = get_connection()
-    result = db.get_address(currency, address)
+    result = await db.get_address(currency, address)
 
     tags = None
     if include_tags:
-        tags = list_tags_by_address(currency, address)
+        tags = await list_tags_by_address(currency, address)
 
     if not result:
         raise RuntimeError("Address {} not found in currency {}".format(
             address, currency))
     return address_from_row(currency, result,
-                            get_rates(currency)['rates'], tags)
+                            (await get_rates(currency))['rates'], tags)
 
 
-def list_tags_by_address(currency, address):
+async def list_tags_by_address(currency, address):
     db = get_connection()
-    results = db.list_tags_by_address(currency, address)
+    results = await db.list_tags_by_address(currency, address)
 
     if results is None:
         return []

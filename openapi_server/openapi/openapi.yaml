@@ -188,6 +188,7 @@ paths:
       summary: Get an address, optionally with tags
       tags:
       - addresses
+      x-async: true
       x-openapi-router-controller: openapi_server.controllers.addresses_controller
   /{currency}/addresses/{address}/entity:
     get:
@@ -1651,6 +1652,7 @@ components:
     batch_operation:
       discriminator:
         mapping:
+          get_address: '#/components/schemas/get_address'
           get_block: '#/components/schemas/get_block'
           get_tx: '#/components/schemas/get_tx'
           get_tx_io: '#/components/schemas/get_tx_io'
@@ -1663,6 +1665,7 @@ components:
       - $ref: '#/components/schemas/list_entity_addresses'
       - $ref: '#/components/schemas/get_block'
       - $ref: '#/components/schemas/list_block_txs'
+      - $ref: '#/components/schemas/get_address'
     block:
       example:
         block_hash: block_hash
@@ -2039,6 +2042,23 @@ components:
       - $ref: '#/components/schemas/tag'
       - $ref: '#/components/schemas/entity_tag_allOf'
       title: entity_tag
+    get_address:
+      properties:
+        address:
+          items:
+            $ref: '#/components/schemas/address_id'
+          type: array
+        api:
+          default: addresses
+          type: string
+        operation:
+          default: get_address
+          type: string
+      required:
+      - address
+      - api
+      - operation
+      type: object
     get_block:
       properties:
         api:

@@ -570,21 +570,21 @@ eth_entityWithTags = Entity(
 )
 
 
-def get_address(test_case):
+async def get_address(test_case):
     """Test case for get_address
     """
-    result = service.get_address(
+    result = await service.get_address(
             'btc', addressWithoutTags.address, True)
     test_case.assertEqual(addressWithoutTags, result)
-    result = service.get_address(
+    result = await service.get_address(
             'btc', addressWithTags.address, True)
     test_case.assertEqual(addressWithTags, result)
-    result = service.get_address(
+    result = await service.get_address(
                 currency='btc', address=addressWithTotalSpent0.address)
     test_case.assertEqual(addressWithTotalSpent0, result)
 
     # ETH
-    result = service.get_address(
+    result = await service.get_address(
             'eth', eth_addressWithTags.address)
     test_case.assertEqual(eth_address, result)
 

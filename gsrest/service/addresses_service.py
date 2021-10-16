@@ -13,8 +13,8 @@ from gsrest.util.csvify import create_download_header, to_csv
 from gsrest.service.rates_service import get_rates
 
 
-def get_address(currency, address, include_tags=False):
-    return common.get_address(currency, address, include_tags)
+async def get_address(currency, address, include_tags=False):
+    return await common.get_address(currency, address, include_tags)
 
 
 def list_tags_by_address(currency, address):
