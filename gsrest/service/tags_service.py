@@ -69,9 +69,9 @@ async def list_labels(currency, expression):
         if row['label_norm'].startswith(expression_norm)]))
 
 
-def list_concepts(taxonomy):
+async def list_concepts(taxonomy):
     db = get_connection()
-    rows = db.list_concepts(taxonomy)
+    rows = await db.list_concepts(taxonomy)
 
     return [Concept(
             id=row['id'],
@@ -81,8 +81,8 @@ def list_concepts(taxonomy):
             uri=row['uri']) for row in rows]
 
 
-def list_taxonomies():
+async def list_taxonomies():
     db = get_connection()
-    rows = db.list_taxonomies()
+    rows = await db.list_taxonomies()
 
     return [Taxonomy(taxonomy=row['key'], uri=row['uri']) for row in rows]

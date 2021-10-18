@@ -852,20 +852,20 @@ class Cassandra:
         return result.current_rows
 
     # @Timer(text="Timer: list_concepts {:.2f}")
-    def list_concepts(self, taxonomy):
+    async def list_concepts(self, taxonomy):
         query = "SELECT * FROM concept_by_taxonomy_id WHERE taxonomy = %s"
-        rows = self.execute(None, 'tagpacks', query, [taxonomy])
+        rows = await self.execute_async(None, 'tagpacks', query, [taxonomy])
         if rows is None:
             return []
-        return rows
+        return rows.current_rows
 
     # @Timer(text="Timer: list_taxonomies {:.2f}")
-    def list_taxonomies(self, ):
+    async def list_taxonomies(self, ):
         query = "SELECT * FROM taxonomy_by_key LIMIT 100"
-        rows = self.execute(None, 'tagpacks', query)
+        rows = await self.execute_async(None, 'tagpacks', query)
         if rows is None:
             return []
-        return rows
+        return rows.current_rows
 
     @eth
     # @Timer(text="Timer: get_tx {:.2f}")

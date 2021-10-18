@@ -21,8 +21,9 @@ def list_concepts(taxonomy):  # noqa: E501
     :rtype: List[Concept]
     """
     try:
-        result = service.list_concepts(
-            taxonomy=taxonomy)
+        result = asyncio.run(
+            service.list_concepts(
+                taxonomy=taxonomy))
         return result
     except RuntimeError as e:
         return notfound(str(e))
@@ -69,8 +70,9 @@ def list_taxonomies():  # noqa: E501
     :rtype: List[Taxonomy]
     """
     try:
-        result = service.list_taxonomies(
-            )
+        result = asyncio.run(
+            service.list_taxonomies(
+                ))
         return result
     except RuntimeError as e:
         return notfound(str(e))

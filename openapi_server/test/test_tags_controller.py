@@ -22,7 +22,9 @@ class TestTagsController(BaseTestCase):
 
         Returns the supported concepts of a taxonomy
         """
-        test_service.list_concepts(self)
+        asyncio.run(test_service.list_concepts(self))
+        if 'list_concepts_sync' in dir(test_service):
+            test_service.list_concepts_sync(self)
 
         if "list_concepts" in ["batch", "get_tx_io"]:
             return
@@ -65,7 +67,9 @@ class TestTagsController(BaseTestCase):
 
         Returns the supported taxonomies
         """
-        test_service.list_taxonomies(self)
+        asyncio.run(test_service.list_taxonomies(self))
+        if 'list_taxonomies_sync' in dir(test_service):
+            test_service.list_taxonomies_sync(self)
 
         if "list_taxonomies" in ["batch", "get_tx_io"]:
             return

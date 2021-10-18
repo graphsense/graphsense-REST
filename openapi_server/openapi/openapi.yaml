@@ -119,6 +119,7 @@ paths:
       summary: Returns the supported taxonomies
       tags:
       - tags
+      x-async: true
       x-openapi-router-controller: openapi_server.controllers.tags_controller
   /tags/taxonomies/{taxonomy}/concepts:
     get:
@@ -145,6 +146,7 @@ paths:
       summary: Returns the supported concepts of a taxonomy
       tags:
       - tags
+      x-async: true
       x-openapi-router-controller: openapi_server.controllers.tags_controller
   /{currency}/addresses/{address}:
     get:

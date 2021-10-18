@@ -88,13 +88,13 @@ taxonomies = [
         ]
 
 
-def list_concepts(test_case):
-    result = service.list_concepts('entity')
+async def list_concepts(test_case):
+    result = await service.list_concepts('entity')
     test_case.assertEqual([conceptA], result)
-    result = service.list_concepts('abuse')
+    result = await service.list_concepts('abuse')
     test_case.assertEqual([conceptB], result)
 
 
-def list_taxonomies(test_case):
-    result = service.list_taxonomies()
+async def list_taxonomies(test_case):
+    result = await service.list_taxonomies()
     test_case.assertEqual(taxonomies, result)
