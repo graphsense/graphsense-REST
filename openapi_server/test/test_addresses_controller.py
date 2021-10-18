@@ -139,7 +139,9 @@ class TestAddressesController(BaseTestCase):
 
         Get attribution tags for a given address
         """
-        test_service.list_tags_by_address(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.list_tags_by_address(self))
+        loop.close()
 
         if "list_tags_by_address" in ["batch", "get_tx_io"]:
             return

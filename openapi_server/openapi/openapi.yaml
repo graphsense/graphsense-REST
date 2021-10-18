@@ -397,6 +397,7 @@ paths:
       summary: Get attribution tags for a given address
       tags:
       - addresses
+      x-async: true
       x-openapi-router-controller: openapi_server.controllers.addresses_controller
   /{currency}/addresses/{address}/txs:
     get:

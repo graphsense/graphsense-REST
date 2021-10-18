@@ -192,9 +192,12 @@ def list_tags_by_address(currency, address):  # noqa: E501
     :rtype: List[AddressTag]
     """
     try:
-        result = service.list_tags_by_address(
-            currency=currency,
-            address=address)
+        loop = asyncio.new_event_loop()
+        result = loop.run_until_complete(
+            service.list_tags_by_address(
+                currency=currency,
+                address=address))
+        loop.close()
         return result
     except RuntimeError as e:
         return notfound(str(e))

@@ -652,11 +652,11 @@ def list_address_txs_csv(test_case):
         result.data.decode('utf-8'))
 
 
-def list_tags_by_address(test_case):
-    result = service.list_tags_by_address('btc', addressWithTags.address)
+async def list_tags_by_address(test_case):
+    result = await service.list_tags_by_address('btc', addressWithTags.address)
     assertEqual(addressWithTags.tags, result)
 
-    result = service.list_tags_by_address('eth', eth_addressWithTags.address)
+    result = await service.list_tags_by_address('eth', eth_addressWithTags.address)
     assertEqual(eth_addressWithTags.tags, result)
 
 
