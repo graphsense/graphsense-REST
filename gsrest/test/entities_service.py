@@ -1,6 +1,5 @@
 from gsrest.test.assertion import assertEqual
 from openapi_server.models.tx_summary import TxSummary
-from openapi_server.models.txs import Txs
 from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from openapi_server.models.tx_account import TxAccount

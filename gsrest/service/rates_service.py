@@ -6,8 +6,8 @@ from gsrest.service.stats_service import get_currency_statistics
 RATES_TABLE = 'exchange_rates'
 
 
-def get_exchange_rates(currency, height):
-    rates = get_rates(currency, height)
+async def get_exchange_rates(currency, height):
+    rates = await get_rates(currency, height)
     return Rates(height=height,
                  rates=rates['rates'])
 

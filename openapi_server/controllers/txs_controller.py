@@ -6,7 +6,6 @@ import asyncio
 from openapi_server.models.io import Io  # noqa: E501
 from openapi_server.models.tx import Tx  # noqa: E501
 from openapi_server.models.tx_value import TxValue  # noqa: E501
-from openapi_server.models.txs import Txs  # noqa: E501
 import gsrest.service.txs_service as service
 from gsrest.service.problems import notfound, badrequest, internalerror
 
@@ -63,32 +62,6 @@ def get_tx_io(currency, tx_hash, io):  # noqa: E501
                 currency=currency,
                 tx_hash=tx_hash,
                 io=io))
-        return result
-    except RuntimeError as e:
-        return notfound(str(e))
-    except ValueError as e:
-        return badrequest(str(e))
-    except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
-
-
-def list_txs(currency, page=None):  # noqa: E501
-    """Returns transactions
-
-     # noqa: E501
-
-    :param currency: The cryptocurrency (e.g., btc)
-    :type currency: str
-    :param page: Resumption token for retrieving the next page
-    :type page: str
-
-    :rtype: Txs
-    """
-    try:
-        result = service.list_txs(
-            currency=currency,
-            page=page)
         return result
     except RuntimeError as e:
         return notfound(str(e))

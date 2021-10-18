@@ -7,6 +7,6 @@ rate = Rates(
 )
 
 
-def get_exchange_rates(test_case):
-    result = service.get_exchange_rates(currency='btc', height=1)
+async def get_exchange_rates(test_case):
+    result = await service.get_exchange_rates(currency='btc', height=1)
     test_case.assertEqual(rate, result)
