@@ -360,6 +360,7 @@ paths:
       summary: Get an addresses' neighbors in the address graph
       tags:
       - addresses
+      x-async: true
       x-openapi-router-controller: openapi_server.controllers.addresses_controller
   /{currency}/addresses/{address}/tags:
     get:

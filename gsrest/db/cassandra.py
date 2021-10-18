@@ -350,14 +350,14 @@ class Cassandra:
         fields = 'address' if address_only else '*'
         query = (f"SELECT {fields} FROM address WHERE "
                  "address_id_group = %s and address_id = %s")
-        result = self.concurrent_with_args(currency, 'transformed', query,
-                                           params)
+        result = await self.concurrent_with_args(
+                    currency, 'transformed', query, params)
 
-        async for row in result:
+        for row in result:
             if currency == 'eth':
                 row['address'] = \
                     eth_address_to_hex(row['address'])
-            yield row
+        return result
 
     # @Timer(text="Timer: get_address_id {:.2f}")
     async def get_address_id(self, currency, address):
@@ -623,8 +623,8 @@ class Cassandra:
 
     @eth
     # @Timer(text="Timer: list_entities {:.2f}")
-    def list_entities(self, currency, ids, page=None, pagesize=None,
-                      fields=['*']):
+    async def list_entities(self, currency, ids, page=None, pagesize=None,
+                            fields=['*']):
         fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
         paging_state = from_hex(page)
         flds = ','.join(fields)
@@ -634,20 +634,20 @@ class Cassandra:
             query += " WHERE cluster_id_group = %s AND cluster_id = %s"
             params = [[self.get_id_group(currency, id),
                        id] for id in ids]
-            result = self.concurrent_with_args(currency, 'transformed', query,
-                                               params)
+            result = await self.concurrent_with_args(
+                        currency, 'transformed', query, params)
             paging_state = None
         else:
-            result = self.execute(currency, 'transformed', query,
-                                  paging_state=paging_state,
-                                  fetch_size=fetch_size)
+            result = await self.execute_async(currency, 'transformed', query,
+                                              paging_state=paging_state,
+                                              fetch_size=fetch_size)
             paging_state = result.paging_state
             result = result.current_rows
 
         with_txs = '*' in fields \
             or 'first_tx_id' in fields \
             or 'last_tx_id' in fields
-        return self.finish_entities(currency, result, with_txs),\
+        return await self.finish_entities(currency, result, with_txs),\
             to_hex(paging_state)
 
     @eth
@@ -681,11 +681,11 @@ class Cassandra:
         return addresses, to_hex(results.paging_state)
 
     # @Timer(text="Timer: list_neighbors {:.2f}")
-    def list_neighbors(self, currency, id, is_outgoing, node_type,
-                       targets, include_labels, page, pagesize):
+    async def list_neighbors(self, currency, id, is_outgoing, node_type,
+                             targets, include_labels, page, pagesize):
         orig_node_type = node_type
         if node_type == 'address':
-            id = self.get_address_id(currency, id)
+            id = await self.get_address_id(currency, id)
         elif node_type == 'entity':
             id = int(id)
             node_type = 'cluster'
@@ -703,7 +703,7 @@ class Cassandra:
         sec_condition = ''
         if currency == 'eth':
             secondary_id_group = \
-                self.get_id_secondary_group_eth(
+                await self.get_id_secondary_group_eth(
                     f'address_{direction}_relations',
                     id_group)
             sec_in = self.sec_in(secondary_id_group)
@@ -724,9 +724,10 @@ class Cassandra:
             query = basequery
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
         paging_state = from_hex(page)
-        results = self.execute(currency, 'transformed', query, parameters,
-                               paging_state=paging_state,
-                               fetch_size=fetch_size)
+        results = await self.execute_async(currency, 'transformed', query,
+                                           parameters,
+                                           paging_state=paging_state,
+                                           fetch_size=fetch_size)
         paging_state = results.paging_state
         results = results.current_rows
         if has_targets:
@@ -736,8 +737,8 @@ class Cassandra:
                 p = parameters.copy()
                 p.append(row[f'{that}_{node_type}_id'])
                 params.append(p)
-            results = self.concurrent_with_args(currency, 'transformed', query,
-                                                params)
+            results = await self.concurrent_with_args(
+                        currency, 'transformed', query, params)
 
         if orig_node_type == 'entity' and currency == 'eth':
             for neighbor in results:
@@ -745,7 +746,7 @@ class Cassandra:
 
         if orig_node_type == 'address':
             ids = [row[that+'_address_id'] for row in results]
-            addresses = self.get_addresses_by_ids(currency, ids, False)
+            addresses = await self.get_addresses_by_ids(currency, ids, False)
             for (row, address) in zip(results, addresses):
                 row[f'{that}_address'] = address['address']
                 row['total_received'] = \
@@ -754,7 +755,7 @@ class Cassandra:
                     self.markup_currency(currency, address['total_spent'])
         else:
             ids = [row[that+'_cluster_id'] for row in results]
-            entities, _ = self.list_entities(currency, ids, fields=[
+            entities, _ = await self.list_entities(currency, ids, fields=[
                                             'cluster_id',
                                             'total_received',
                                             'total_spent'])
@@ -769,13 +770,13 @@ class Cassandra:
                 self.markup_currency(currency, neighbor[field])
 
         if include_labels:
-            self.include_labels(currency, node_type, that, results)
+            await self.include_labels(currency, node_type, that, results)
 
         return results, to_hex(paging_state)
 
     @eth
     # @Timer(text="Timer: include_labels {:.2f}")
-    def include_labels(self, currency, node_type, that, nodes):
+    async def include_labels(self, currency, node_type, that, nodes):
         for node in nodes:
             node['labels'] = []
         if node_type == 'cluster':
@@ -784,11 +785,11 @@ class Cassandra:
                       for row in nodes if row[f'has_{that}_labels']]
             query = ('select cluster_id, label from cluster_tags where '
                      'cluster_id_group = %s and cluster_id = %s')
-            results = self.concurrent_with_args(
+            results = await self.concurrent_with_args(
                 currency, 'transformed', query, params, one=False)
             i = 0
             for result in results:
-                while nodes[i][key] != result.one()['cluster_id']:
+                while nodes[i][key] != result[0]['cluster_id']:
                     i += 1
                 nodes[i]['labels'] = [row['label'] for row in result]
         else:
@@ -797,11 +798,11 @@ class Cassandra:
                       for row in nodes if row[f'has_{that}_labels']]
             query = ('select address_id, label from address_tags where '
                      'address_id = %s and address_id_group = %s')
-            results = self.concurrent_with_args(
+            results = await self.concurrent_with_args(
                 currency, 'transformed', query, params, one=False)
             i = 0
             for result in results:
-                while nodes[i][key] != result.one()['address_id']:
+                while nodes[i][key] != result[0]['address_id']:
                     i += 1
                 nodes[i]['labels'] = [row['label'] for row in result]
 
@@ -999,8 +1000,8 @@ class Cassandra:
 
         return result, to_hex(paging_state)
 
-    def finish_entities(self, currency, rows, with_txs=True):
-        return self.finish_addresses(currency, rows, with_txs)
+    async def finish_entities(self, currency, rows, with_txs=True):
+        return await self.finish_addresses(currency, rows, with_txs)
 
     async def finish_addresses(self, currency, rows, with_txs=True):
         aws = [self.finish_address(currency, row, with_txs=with_txs)
@@ -1117,8 +1118,8 @@ class Cassandra:
         return entity
 
     # @Timer(text="Timer: list_entities_eth {:.2f}")
-    def list_entities_eth(self, currency, ids, page=None, pagesize=None,
-                          fields=['*']):
+    async def list_entities_eth(self, currency, ids, page=None, pagesize=None,
+                                fields=['*']):
         fields = ['address_id' if i == 'cluster_id' else i for i in fields]
         flds = ','.join(fields)
         query = f"SELECT {flds} FROM address"
@@ -1127,21 +1128,21 @@ class Cassandra:
             query += " WHERE address_id_group = %s AND address_id = %s"
             params = [[self.get_id_group(currency, id),
                        id] for id in ids]
-            result = self.concurrent_with_args(currency, 'transformed', query,
-                                               params)
+            result = await self.concurrent_with_args(
+                        currency, 'transformed', query, params)
             paging_state = None
         else:
             fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
-            result = self.execute(currency, 'transformed', query,
-                                  paging_state=from_hex(page),
-                                  fetch_size=fetch_size)
+            result = await self.execute_async(currency, 'transformed', query,
+                                              paging_state=from_hex(page),
+                                              fetch_size=fetch_size)
             paging_state = result.paging_state
             result = result.current_rows
 
         with_txs = '*' in fields \
             or 'first_tx_id' in fields \
             or 'last_tx_id' in fields
-        result = self.finish_addresses(currency, result, with_txs)
+        result = await self.finish_addresses(currency, result, with_txs)
 
         for address in result:
             address['cluster_id'] = address['address_id']
@@ -1396,8 +1397,7 @@ class Cassandra:
     def list_entity_tags_eth(self, currency, label):
         return []
 
-    # @Timer(text="Timer: include_labels_eth {:.2f}")
-    def include_labels_eth(self, currency, node_type, that, nodes):
+    async def include_labels_eth(self, currency, node_type, that, nodes):
         for node in nodes:
             node['labels'] = []
         if node_type == 'cluster':
@@ -1409,11 +1409,11 @@ class Cassandra:
                       for row in nodes if row[f'has_{that}_labels']]
             query = ('select address_id, label from address_tags where '
                      'address_id=%s and address_id_group=%s')
-            results = self.concurrent_with_args(
+            results = await self.concurrent_with_args(
                 currency, 'transformed', query, params, one=False)
             i = 0
             for result in results:
-                while nodes[i][key] != result.one()['address_id']:
+                while nodes[i][key] != result[0]['address_id']:
                     i += 1
                 nodes[i]['labels'] = [row['label'] for row in result]
 

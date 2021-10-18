@@ -127,13 +127,16 @@ def list_address_neighbors(currency, address, direction, include_labels=None, pa
     :rtype: Neighbors
     """
     try:
-        result = service.list_address_neighbors(
-            currency=currency,
-            address=address,
-            direction=direction,
-            include_labels=include_labels,
-            page=page,
-            pagesize=pagesize)
+        loop = asyncio.new_event_loop()
+        result = loop.run_until_complete(
+            service.list_address_neighbors(
+                currency=currency,
+                address=address,
+                direction=direction,
+                include_labels=include_labels,
+                page=page,
+                pagesize=pagesize))
+        loop.close()
         return result
     except RuntimeError as e:
         return notfound(str(e))

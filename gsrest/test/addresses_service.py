@@ -656,7 +656,8 @@ async def list_tags_by_address(test_case):
     result = await service.list_tags_by_address('btc', addressWithTags.address)
     assertEqual(addressWithTags.tags, result)
 
-    result = await service.list_tags_by_address('eth', eth_addressWithTags.address)
+    result = await service.list_tags_by_address('eth',
+                                                eth_addressWithTags.address)
     assertEqual(eth_addressWithTags.tags, result)
 
 
@@ -673,22 +674,22 @@ def list_tags_by_address_csv(test_case):
     test_case.assertEqual(csv, result)
 
 
-def list_address_neighbors(test_case):
-    result = service.list_address_neighbors(
+async def list_address_neighbors(test_case):
+    result = await service.list_address_neighbors(
         currency='btc',
         address=address.address,
         include_labels=True,
         direction='out')
     test_case.assertEqual(addressWithTagsOutNeighbors, result)
 
-    result = service.list_address_neighbors(
+    result = await service.list_address_neighbors(
         currency='btc',
         address=address.address,
         include_labels=True,
         direction='in')
     test_case.assertEqual(addressWithTagsInNeighbors, result)
 
-    result = service.list_address_neighbors(
+    result = await service.list_address_neighbors(
         currency='eth',
         address=eth_address.address,
         include_labels=True,

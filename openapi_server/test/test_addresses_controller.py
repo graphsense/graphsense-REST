@@ -91,7 +91,9 @@ class TestAddressesController(BaseTestCase):
 
         Get an addresses' neighbors in the address graph
         """
-        test_service.list_address_neighbors(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.list_address_neighbors(self))
+        loop.close()
 
         if "list_address_neighbors" in ["batch", "get_tx_io"]:
             return

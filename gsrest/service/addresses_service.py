@@ -47,11 +47,11 @@ def list_address_txs_csv(currency, address):
                             .format(address, currency.upper())))
 
 
-def list_address_neighbors(currency, address, direction, include_labels,
-                           page=None, pagesize=None):
-    return common.list_neighbors(currency, address, direction, 'address',
-                                 include_labels=include_labels,
-                                 page=page, pagesize=pagesize, ids=None)
+async def list_address_neighbors(currency, address, direction, include_labels,
+                                 page=None, pagesize=None):
+    return await common.list_neighbors(currency, address, direction, 'address',
+                                       include_labels=include_labels,
+                                       page=page, pagesize=pagesize, ids=None)
 
 
 def list_address_neighbors_csv(currency, address, direction,

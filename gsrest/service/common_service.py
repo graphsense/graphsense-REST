@@ -112,13 +112,13 @@ def get_address_entity_id(currency, address):
     return result.cluster
 
 
-def list_neighbors(currency, id, direction, node_type,
-                   ids=None, include_labels=False, page=None, pagesize=None):
+async def list_neighbors(currency, id, direction, node_type, ids=None,
+                         include_labels=False, page=None, pagesize=None):
     if node_type not in ['address', 'entity']:
         raise RuntimeError(f'Unknown node type {node_type}')
     is_outgoing = "out" in direction
     db = get_connection()
-    results, paging_state = db.list_neighbors(
+    results, paging_state = await db.list_neighbors(
                                     currency,
                                     id,
                                     is_outgoing,
@@ -128,7 +128,7 @@ def list_neighbors(currency, id, direction, node_type,
                                     page=page,
                                     pagesize=pagesize)
     dst = 'dst' if is_outgoing else 'src'
-    rates = get_rates(currency)['rates']
+    rates = (await get_rates(currency))['rates']
     relations = []
     if results is None:
         return Neighbors()
