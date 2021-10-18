@@ -21,9 +21,9 @@ class TestGeneralController(BaseTestCase):
 
         Get statistics of supported currencies
         """
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(test_service.get_statistics(self))
-        loop.close()
+        asyncio.run(test_service.get_statistics(self))
+        if 'get_statistics_sync' in dir(test_service):
+            test_service.get_statistics_sync(self)
 
         if "get_statistics" in ["batch", "get_tx_io"]:
             return
@@ -42,9 +42,9 @@ class TestGeneralController(BaseTestCase):
 
         Returns matching addresses, transactions and labels
         """
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(test_service.search(self))
-        loop.close()
+        asyncio.run(test_service.search(self))
+        if 'search_sync' in dir(test_service):
+            test_service.search_sync(self)
 
         if "search" in ["batch", "get_tx_io"]:
             return

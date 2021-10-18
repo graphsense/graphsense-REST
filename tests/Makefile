@@ -5,7 +5,7 @@ testcmd=docker exec $(CASSANDRA_MOCK) cqlsh -e 'describe keyspaces'
 test: $(MARKER)
 	# start container if it's not running
 	docker ps -a | grep $(CASSANDRA_MOCK) || bash -c 'rm $(MARKER) && make .runtest'
-	tox -e py36
+	tox -e py37
 
 $(MARKER): $(wildcard data/*)
 	./start_cassandra_mock.sh $(CASSANDRA_MOCK) "$?"

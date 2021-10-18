@@ -136,10 +136,12 @@ def list_entities_csv(currency, ids):
                             .format(currency.upper())))
 
 
-def list_entity_neighbors(currency, entity, direction, ids=None,
-                          include_labels=False, page=None, pagesize=None):
-    return common.list_neighbors(currency, entity, direction, 'entity',
-                                 ids, include_labels, page, pagesize)
+async def list_entity_neighbors(currency, entity, direction, only_ids=None,
+                                include_labels=False, page=None,
+                                pagesize=None):
+    return await common.list_neighbors(currency, entity, direction, 'entity',
+                                       only_ids, include_labels, page,
+                                       pagesize)
 
 
 def list_entity_neighbors_csv(currency, entity, direction,

@@ -2,6 +2,8 @@ import connexion
 import six
 import traceback
 import asyncio
+import nest_asyncio
+nest_asyncio.apply()
 
 from openapi_server.models.search_result import SearchResult  # noqa: E501
 from openapi_server.models.stats import Stats  # noqa: E501
@@ -18,11 +20,9 @@ def get_statistics():  # noqa: E501
     :rtype: Stats
     """
     try:
-        loop = asyncio.new_event_loop()
-        result = loop.run_until_complete(
+        result = asyncio.run(
             service.get_statistics(
                 ))
-        loop.close()
         return result
     except RuntimeError as e:
         return notfound(str(e))
@@ -48,13 +48,11 @@ def search(q, currency=None, limit=None):  # noqa: E501
     :rtype: SearchResult
     """
     try:
-        loop = asyncio.new_event_loop()
-        result = loop.run_until_complete(
+        result = asyncio.run(
             service.search(
                 q=q,
                 currency=currency,
                 limit=limit))
-        loop.close()
         return result
     except RuntimeError as e:
         return notfound(str(e))

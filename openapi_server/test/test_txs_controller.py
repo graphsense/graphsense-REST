@@ -23,9 +23,9 @@ class TestTxsController(BaseTestCase):
 
         Returns details of a specific transaction identified by its hash.
         """
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(test_service.get_tx(self))
-        loop.close()
+        asyncio.run(test_service.get_tx(self))
+        if 'get_tx_sync' in dir(test_service):
+            test_service.get_tx_sync(self)
 
         if "get_tx" in ["batch", "get_tx_io"]:
             return
@@ -46,9 +46,9 @@ class TestTxsController(BaseTestCase):
 
         Returns input/output values of a specific transaction identified by its hash.
         """
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(test_service.get_tx_io(self))
-        loop.close()
+        asyncio.run(test_service.get_tx_io(self))
+        if 'get_tx_io_sync' in dir(test_service):
+            test_service.get_tx_io_sync(self)
 
         if "get_tx_io" in ["batch", "get_tx_io"]:
             return

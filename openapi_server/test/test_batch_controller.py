@@ -20,9 +20,9 @@ class TestBatchController(BaseTestCase):
 
         Get data as CSV in batch
         """
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(test_service.batch(self))
-        loop.close()
+        asyncio.run(test_service.batch(self))
+        if 'batch_sync' in dir(test_service):
+            test_service.batch_sync(self)
 
         if "batch" in ["batch", "get_tx_io"]:
             return

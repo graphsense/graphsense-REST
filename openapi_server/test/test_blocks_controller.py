@@ -22,9 +22,9 @@ class TestBlocksController(BaseTestCase):
 
         Get a block by its height
         """
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(test_service.get_block(self))
-        loop.close()
+        asyncio.run(test_service.get_block(self))
+        if 'get_block_sync' in dir(test_service):
+            test_service.get_block_sync(self)
 
         if "get_block" in ["batch", "get_tx_io"]:
             return
@@ -43,9 +43,9 @@ class TestBlocksController(BaseTestCase):
 
         Get block transactions
         """
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(test_service.list_block_txs(self))
-        loop.close()
+        asyncio.run(test_service.list_block_txs(self))
+        if 'list_block_txs_sync' in dir(test_service):
+            test_service.list_block_txs_sync(self)
 
         if "list_block_txs" in ["batch", "get_tx_io"]:
             return
@@ -64,9 +64,9 @@ class TestBlocksController(BaseTestCase):
 
         Get all blocks
         """
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(test_service.list_blocks(self))
-        loop.close()
+        asyncio.run(test_service.list_blocks(self))
+        if 'list_blocks_sync' in dir(test_service):
+            test_service.list_blocks_sync(self)
 
         if "list_blocks" in ["batch", "get_tx_io"]:
             return

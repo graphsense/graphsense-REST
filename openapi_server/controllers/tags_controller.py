@@ -2,6 +2,8 @@ import connexion
 import six
 import traceback
 import asyncio
+import nest_asyncio
+nest_asyncio.apply()
 
 from openapi_server.models.concept import Concept  # noqa: E501
 from openapi_server.models.tags import Tags  # noqa: E501

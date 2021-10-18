@@ -29,9 +29,9 @@ class {{#operations}}Test{{classname}}(BaseTestCase):
         test_service.{{operationId}}(self)
         {{/vendorExtensions.x-async}}
         {{#vendorExtensions.x-async}}
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(test_service.{{operationId}}(self))
-        loop.close()
+        asyncio.run(test_service.{{operationId}}(self))
+        if '{{operationId}}_sync' in dir(test_service):
+            test_service.{{operationId}}_sync(self)
         {{/vendorExtensions.x-async}}
 
         if "{{operationId}}" in ["batch", "get_tx_io"]:

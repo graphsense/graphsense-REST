@@ -313,29 +313,31 @@ def list_tags_by_entity_by_level_csv(test_case):
         .data.decode('utf-8'))
 
 
-def list_entity_neighbors(test_case):
-    result = service.list_entity_neighbors(
+async def list_entity_neighbors(test_case):
+    result = await service.list_entity_neighbors(
         currency='btc',
         entity=entityWithTags.entity,
         include_labels=True,
         direction='out')
     test_case.assertEqual(entityWithTagsOutNeighbors, result)
 
-    result = service.list_entity_neighbors(
+    result = await service.list_entity_neighbors(
         currency='btc',
         entity=entityWithTags.entity,
         include_labels=True,
         direction='in')
     test_case.assertEqual(entityWithTagsInNeighbors, result)
 
-    result = service.list_entity_neighbors(
+    result = await service.list_entity_neighbors(
         currency='eth',
         entity=eth_entityWithTags.entity,
         include_labels=True,
         direction='out')
     test_case.assertEqual(eth_entityWithTagsOutNeighbors, result)
 
-    query_string = [('direction', 'in'), ('ids', '67065,144534')]
+
+def list_entity_neighbors_sync(test_case):
+    query_string = [('direction', 'in'), ('only_ids', '67065,144534')]
     headers = {
         'Accept': 'application/json',
     }
@@ -356,7 +358,7 @@ def list_entity_neighbors(test_case):
         [n['id'] for n in result['neighbors']]
     )
 
-    query_string = [('direction', 'in'), ('ids', '144534')]
+    query_string = [('direction', 'in'), ('only_ids', '144534')]
     headers = {
         'Accept': 'application/json',
     }
@@ -396,7 +398,7 @@ def list_entity_neighbors(test_case):
     result = json.loads(response.data.decode('utf-8'))
 
     test_case.assertEqual(
-        [eth_entityWithTagsOutNeighbors.neighbors[0].id],
+        [n.id for n in eth_entityWithTagsOutNeighbors.neighbors],
         [n['id'] for n in result['neighbors']]
     )
 

@@ -26,9 +26,9 @@ class TestEntitiesController(BaseTestCase):
 
         Get an entity, optionally with tags
         """
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(test_service.get_entity(self))
-        loop.close()
+        asyncio.run(test_service.get_entity(self))
+        if 'get_entity_sync' in dir(test_service):
+            test_service.get_entity_sync(self)
 
         if "get_entity" in ["batch", "get_tx_io"]:
             return
@@ -50,9 +50,9 @@ class TestEntitiesController(BaseTestCase):
 
         Get an entity's addresses
         """
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(test_service.list_entity_addresses(self))
-        loop.close()
+        asyncio.run(test_service.list_entity_addresses(self))
+        if 'list_entity_addresses_sync' in dir(test_service):
+            test_service.list_entity_addresses_sync(self)
 
         if "list_entity_addresses" in ["batch", "get_tx_io"]:
             return
@@ -95,7 +95,9 @@ class TestEntitiesController(BaseTestCase):
 
         Get an entity's neighbors in the entity graph
         """
-        test_service.list_entity_neighbors(self)
+        asyncio.run(test_service.list_entity_neighbors(self))
+        if 'list_entity_neighbors_sync' in dir(test_service):
+            test_service.list_entity_neighbors_sync(self)
 
         if "list_entity_neighbors" in ["batch", "get_tx_io"]:
             return
@@ -142,9 +144,9 @@ class TestEntitiesController(BaseTestCase):
 
         Get tags for a given entity
         """
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(test_service.list_tags_by_entity(self))
-        loop.close()
+        asyncio.run(test_service.list_tags_by_entity(self))
+        if 'list_tags_by_entity_sync' in dir(test_service):
+            test_service.list_tags_by_entity_sync(self)
 
         if "list_tags_by_entity" in ["batch", "get_tx_io"]:
             return

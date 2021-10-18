@@ -2,6 +2,8 @@ import connexion
 import six
 import traceback
 import asyncio
+import nest_asyncio
+nest_asyncio.apply()
 
 from openapi_server.models.rates import Rates  # noqa: E501
 import gsrest.service.rates_service as service

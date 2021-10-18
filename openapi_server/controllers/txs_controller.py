@@ -2,6 +2,8 @@ import connexion
 import six
 import traceback
 import asyncio
+import nest_asyncio
+nest_asyncio.apply()
 
 from openapi_server.models.io import Io  # noqa: E501
 from openapi_server.models.tx import Tx  # noqa: E501
@@ -26,13 +28,11 @@ def get_tx(currency, tx_hash, include_io=None):  # noqa: E501
     :rtype: Tx
     """
     try:
-        loop = asyncio.new_event_loop()
-        result = loop.run_until_complete(
+        result = asyncio.run(
             service.get_tx(
                 currency=currency,
                 tx_hash=tx_hash,
                 include_io=include_io))
-        loop.close()
         return result
     except RuntimeError as e:
         return notfound(str(e))
@@ -60,13 +60,11 @@ def get_tx_io(currency, tx_hash, io):  # noqa: E501
     if connexion.request.is_json:
         io =  Io.from_dict(connexion.request.get_json())  # noqa: E501
     try:
-        loop = asyncio.new_event_loop()
-        result = loop.run_until_complete(
+        result = asyncio.run(
             service.get_tx_io(
                 currency=currency,
                 tx_hash=tx_hash,
                 io=io))
-        loop.close()
         return result
     except RuntimeError as e:
         return notfound(str(e))

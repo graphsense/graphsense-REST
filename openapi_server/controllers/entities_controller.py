@@ -2,6 +2,8 @@ import connexion
 import six
 import traceback
 import asyncio
+import nest_asyncio
+nest_asyncio.apply()
 
 from openapi_server.models.address_txs import AddressTxs  # noqa: E501
 from openapi_server.models.entity import Entity  # noqa: E501
@@ -31,14 +33,12 @@ def get_entity(currency, entity, include_tags=None, tag_coherence=None):  # noqa
     :rtype: Entity
     """
     try:
-        loop = asyncio.new_event_loop()
-        result = loop.run_until_complete(
+        result = asyncio.run(
             service.get_entity(
                 currency=currency,
                 entity=entity,
                 include_tags=include_tags,
                 tag_coherence=tag_coherence))
-        loop.close()
         return result
     except RuntimeError as e:
         return notfound(str(e))
@@ -66,14 +66,12 @@ def list_entity_addresses(currency, entity, page=None, pagesize=None):  # noqa: 
     :rtype: EntityAddresses
     """
     try:
-        loop = asyncio.new_event_loop()
-        result = loop.run_until_complete(
+        result = asyncio.run(
             service.list_entity_addresses(
                 currency=currency,
                 entity=entity,
                 page=page,
                 pagesize=pagesize))
-        loop.close()
         return result
     except RuntimeError as e:
         return notfound(str(e))
@@ -136,14 +134,15 @@ def list_entity_neighbors(currency, entity, direction, only_ids=None, include_la
     :rtype: Neighbors
     """
     try:
-        result = service.list_entity_neighbors(
-            currency=currency,
-            entity=entity,
-            direction=direction,
-            only_ids=only_ids,
-            include_labels=include_labels,
-            page=page,
-            pagesize=pagesize)
+        result = asyncio.run(
+            service.list_entity_neighbors(
+                currency=currency,
+                entity=entity,
+                direction=direction,
+                only_ids=only_ids,
+                include_labels=include_labels,
+                page=page,
+                pagesize=pagesize))
         return result
     except RuntimeError as e:
         return notfound(str(e))
@@ -201,13 +200,11 @@ def list_tags_by_entity(currency, entity, tag_coherence=None):  # noqa: E501
     :rtype: Tags
     """
     try:
-        loop = asyncio.new_event_loop()
-        result = loop.run_until_complete(
+        result = asyncio.run(
             service.list_tags_by_entity(
                 currency=currency,
                 entity=entity,
                 tag_coherence=tag_coherence))
-        loop.close()
         return result
     except RuntimeError as e:
         return notfound(str(e))
