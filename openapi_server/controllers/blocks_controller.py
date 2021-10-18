@@ -2,8 +2,6 @@ import connexion
 import six
 import traceback
 import asyncio
-import nest_asyncio
-nest_asyncio.apply()
 
 from openapi_server.models.block import Block  # noqa: E501
 from openapi_server.models.blocks import Blocks  # noqa: E501

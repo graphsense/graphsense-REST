@@ -1,5 +1,5 @@
 from gsrest.db import get_connection
-from openapi_server.models.txs import Txs
+from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.addresses import Addresses
 from gsrest.service.entities_service import get_entity
 import gsrest.service.common_service as common
@@ -33,7 +33,7 @@ async def list_address_txs(currency, address, page=None, pagesize=None):
     results, paging_state = \
         await db.list_address_txs(currency, address, page, pagesize)
     address_txs = await common.txs_from_rows(currency, results)
-    return Txs(next_page=paging_state, txs=address_txs)
+    return AddressTxs(next_page=paging_state, address_txs=address_txs)
 
 
 def list_address_txs_csv(currency, address):

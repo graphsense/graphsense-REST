@@ -122,7 +122,9 @@ class TestEntitiesController(BaseTestCase):
 
         Get all transactions an entity has been involved in
         """
-        test_service.list_entity_txs(self)
+        asyncio.run(test_service.list_entity_txs(self))
+        if 'list_entity_txs_sync' in dir(test_service):
+            test_service.list_entity_txs_sync(self)
 
         if "list_entity_txs" in ["batch", "get_tx_io"]:
             return

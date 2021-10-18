@@ -300,9 +300,9 @@ class Cassandra:
         return await self.list_txs_by_node_type(
             currency, 'address', address, page=page, pagesize=pagesize)
 
-    def list_entity_txs(self, currency, entity, page=None,
-                        pagesize=None):
-        return self.list_txs_by_node_type(
+    async def list_entity_txs(self, currency, entity, page=None,
+                              pagesize=None):
+        return await self.list_txs_by_node_type(
             currency, 'cluster', entity, page=page, pagesize=pagesize)
 
     @eth

@@ -1034,6 +1034,7 @@ paths:
       summary: Get all transactions an entity has been involved in
       tags:
       - entities
+      x-async: true
       x-openapi-router-controller: openapi_server.controllers.entities_controller
   /{currency}/rates/{height}:
     get:

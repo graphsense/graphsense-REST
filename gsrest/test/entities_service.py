@@ -1,6 +1,8 @@
 from gsrest.test.assertion import assertEqual
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.txs import Txs
+from openapi_server.models.address_txs import AddressTxs
+from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.neighbors import Neighbors
 from openapi_server.models.neighbor import Neighbor
@@ -622,41 +624,41 @@ def search_entity_neighbors(test_case):
                 fiat_values[0].value)
 
 
-def list_entity_txs(test_case):
+async def list_entity_txs(test_case):
     """Test case for list_entity_txs
 
     Get all transactions an entity has been involved in
     """
-    rates = list_rates(currency='btc', heights=[2])
-    entity_txs = Txs(
+    rates = await list_rates(currency='btc', heights=[2])
+    entity_txs = AddressTxs(
                     next_page=None,
-                    txs=[
-                        TxAccount(
+                    address_txs=[
+                        AddressTxUtxo(
                             tx_hash="123456",
                             value=convert_value('btc', 1260000, rates[2]),
                             height=2,
                             timestamp=1510347493),
-                        TxAccount(
+                        AddressTxUtxo(
                             tx_hash="abcdef",
                             value=convert_value('btc', -1260000, rates[2]),
                             height=2,
                             timestamp=1511153263),
-                        TxAccount(
+                        AddressTxUtxo(
                             tx_hash="4567",
                             value=convert_value('btc', -1, rates[2]),
                             height=2,
                             timestamp=1510347492)
                         ]
                     )
-    result = service.list_entity_txs('btc', 144534)
+    result = await service.list_entity_txs('btc', 144534)
     test_case.assertEqual(entity_txs, result)
 
     tx2_eth_reverse = TxAccount(**copy.deepcopy(tx2_eth.to_dict()))
     tx2_eth_reverse.value.value = -tx2_eth_reverse.value.value
     for v in tx2_eth_reverse.value.fiat_values:
         v.value = -v.value
-    txs = Txs(txs=[tx1_eth, tx2_eth_reverse, tx4_eth])
-    result = service.list_entity_txs('eth', 107925000)
+    txs = AddressTxs(address_txs=[tx1_eth, tx2_eth_reverse, tx4_eth])
+    result = await service.list_entity_txs('eth', 107925000)
     test_case.assertEqual(txs, result)
 
 

@@ -2,8 +2,6 @@ import connexion
 import six
 import traceback
 import asyncio
-import nest_asyncio
-nest_asyncio.apply()
 
 from openapi_server.models.batch_operation import BatchOperation  # noqa: E501
 import gsrest.service.batch_service as service

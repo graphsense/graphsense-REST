@@ -4,7 +4,7 @@ from gsrest.service.rates_service import get_rates
 from openapi_server.models.entity import Entity
 from openapi_server.models.entities import Entities
 from openapi_server.models.tx_summary import TxSummary
-from openapi_server.models.txs import Txs
+from openapi_server.models.address_txs import AddressTxs
 from gsrest.util.values import compute_balance, convert_value, to_values
 from openapi_server.models.entity_tag import EntityTag
 from openapi_server.models.address_tag import AddressTag
@@ -346,12 +346,12 @@ def recursive_search(currency, entity, params, breadth, depth, level,
     return paths
 
 
-def list_entity_txs(currency, entity, page=None, pagesize=None):
+async def list_entity_txs(currency, entity, page=None, pagesize=None):
     db = get_connection()
     results, paging_state = \
-        db.list_entity_txs(currency, entity, page, pagesize)
-    entity_txs = common.txs_from_rows(currency, results)
-    return Txs(next_page=paging_state, txs=entity_txs)
+        await db.list_entity_txs(currency, entity, page, pagesize)
+    entity_txs = await common.txs_from_rows(currency, results)
+    return AddressTxs(next_page=paging_state, address_txs=entity_txs)
 
 
 def list_entity_txs_csv(currency, entity):

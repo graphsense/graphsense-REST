@@ -2,8 +2,6 @@ import connexion
 import six
 import traceback
 import asyncio
-import nest_asyncio
-nest_asyncio.apply()
 
 from openapi_server.models.address import Address  # noqa: E501
 from openapi_server.models.address_tag import AddressTag  # noqa: E501

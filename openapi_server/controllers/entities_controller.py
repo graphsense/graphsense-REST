@@ -2,8 +2,6 @@ import connexion
 import six
 import traceback
 import asyncio
-import nest_asyncio
-nest_asyncio.apply()
 
 from openapi_server.models.address_txs import AddressTxs  # noqa: E501
 from openapi_server.models.entity import Entity  # noqa: E501
@@ -170,11 +168,12 @@ def list_entity_txs(currency, entity, page=None, pagesize=None):  # noqa: E501
     :rtype: AddressTxs
     """
     try:
-        result = service.list_entity_txs(
-            currency=currency,
-            entity=entity,
-            page=page,
-            pagesize=pagesize)
+        result = asyncio.run(
+            service.list_entity_txs(
+                currency=currency,
+                entity=entity,
+                page=page,
+                pagesize=pagesize))
         return result
     except RuntimeError as e:
         return notfound(str(e))

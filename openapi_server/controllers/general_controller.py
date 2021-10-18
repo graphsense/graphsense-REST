@@ -2,8 +2,6 @@ import connexion
 import six
 import traceback
 import asyncio
-import nest_asyncio
-nest_asyncio.apply()
 
 from openapi_server.models.search_result import SearchResult  # noqa: E501
 from openapi_server.models.stats import Stats  # noqa: E501
