@@ -213,21 +213,21 @@ entityWithTagsAddresses = EntityAddresses(
         )
 
 
-def get_entity(test_case):
-    result = service.get_entity(currency='btc',
-                                entity=entityWithTags.entity,
-                                include_tags=True,
-                                tag_coherence=True)
+async def get_entity(test_case):
+    result = await service.get_entity(currency='btc',
+                                      entity=entityWithTags.entity,
+                                      include_tags=True,
+                                      tag_coherence=True)
 
     # tag_coherence tested by tests/util/test_tag_coherence.py so hardcode here
     test_case.assertIsNot(result.tags.tag_coherence, None)
     result.tags.tag_coherence = 0.5
     test_case.assertEqual(entityWithTags, result)
 
-    result = service.get_entity(currency='eth',
-                                entity=eth_entity.entity,
-                                include_tags=True,
-                                tag_coherence=False)
+    result = await service.get_entity(currency='eth',
+                                      entity=eth_entity.entity,
+                                      include_tags=True,
+                                      tag_coherence=False)
 
     test_case.assertEqual(eth_entityWithTags, result)
 

@@ -644,6 +644,7 @@ paths:
       summary: Get an entity, optionally with tags
       tags:
       - entities
+      x-async: true
       x-openapi-router-controller: openapi_server.controllers.entities_controller
   /{currency}/entities/{entity}/addresses:
     get:

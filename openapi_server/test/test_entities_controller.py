@@ -26,7 +26,9 @@ class TestEntitiesController(BaseTestCase):
 
         Get an entity, optionally with tags
         """
-        test_service.get_entity(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.get_entity(self))
+        loop.close()
 
         if "get_entity" in ["batch", "get_tx_io"]:
             return
