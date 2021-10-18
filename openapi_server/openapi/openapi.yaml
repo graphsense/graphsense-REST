@@ -980,6 +980,7 @@ paths:
       summary: Get tags for a given entity
       tags:
       - entities
+      x-async: true
       x-openapi-router-controller: openapi_server.controllers.entities_controller
   /{currency}/entities/{entity}/txs:
     get:

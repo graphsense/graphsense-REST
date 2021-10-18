@@ -283,15 +283,16 @@ def list_entities_csv(test_case):
     assertEqual(3, len(result.split("\r\n")))
 
 
-def list_tags_by_entity(test_case):
-    result = service.list_tags_by_entity(currency='btc',
-                                         entity=entityWithTags.entity,
-                                         tag_coherence=False)
+async def list_tags_by_entity(test_case):
+    result = await service.list_tags_by_entity(currency='btc',
+                                               entity=entityWithTags.entity,
+                                               tag_coherence=False)
     result.tag_coherence = 0.5
     test_case.assertEqual(entityWithTags.tags, result)
-    result = service.list_tags_by_entity(currency='eth',
-                                         entity=eth_entityWithTags.entity,
-                                         tag_coherence=False)
+    result = await service.list_tags_by_entity(
+        currency='eth',
+        entity=eth_entityWithTags.entity,
+        tag_coherence=False)
     test_case.assertEqual(eth_entityWithTags.tags, result)
 
 

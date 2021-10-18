@@ -142,7 +142,9 @@ class TestEntitiesController(BaseTestCase):
 
         Get tags for a given entity
         """
-        test_service.list_tags_by_entity(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.list_tags_by_entity(self))
+        loop.close()
 
         if "list_tags_by_entity" in ["batch", "get_tx_io"]:
             return

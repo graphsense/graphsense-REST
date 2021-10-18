@@ -201,10 +201,13 @@ def list_tags_by_entity(currency, entity, tag_coherence=None):  # noqa: E501
     :rtype: Tags
     """
     try:
-        result = service.list_tags_by_entity(
-            currency=currency,
-            entity=entity,
-            tag_coherence=tag_coherence)
+        loop = asyncio.new_event_loop()
+        result = loop.run_until_complete(
+            service.list_tags_by_entity(
+                currency=currency,
+                entity=entity,
+                tag_coherence=tag_coherence))
+        loop.close()
         return result
     except RuntimeError as e:
         return notfound(str(e))
