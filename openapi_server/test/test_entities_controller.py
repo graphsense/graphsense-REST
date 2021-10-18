@@ -74,7 +74,9 @@ class TestEntitiesController(BaseTestCase):
 
         Get transactions between two entities
         """
-        test_service.list_entity_links(self)
+        asyncio.run(test_service.list_entity_links(self))
+        if 'list_entity_links_sync' in dir(test_service):
+            test_service.list_entity_links_sync(self)
 
         if "list_entity_links" in ["batch", "get_tx_io"]:
             return
@@ -169,7 +171,9 @@ class TestEntitiesController(BaseTestCase):
 
         Search deeply for matching neighbors
         """
-        test_service.search_entity_neighbors(self)
+        asyncio.run(test_service.search_entity_neighbors(self))
+        if 'search_entity_neighbors_sync' in dir(test_service):
+            test_service.search_entity_neighbors_sync(self)
 
         if "search_entity_neighbors" in ["batch", "get_tx_io"]:
             return

@@ -464,12 +464,12 @@ def list_entity_addresses_csv(test_case):
     test_case.assertEqual(3, len(result.split("\r\n")))
 
 
-def search_entity_neighbors(test_case):
+async def search_entity_neighbors(test_case):
 
     # Test category matching
 
     category = 'MyCategory'
-    result = service.search_entity_neighbors(
+    result = await service.search_entity_neighbors(
                     currency='btc',
                     entity=entityWithTags.entity,
                     direction='out',
@@ -484,7 +484,7 @@ def search_entity_neighbors(test_case):
                 result.paths[0].paths[0].node.tags.entity_tags[0].category)
 
     category = 'MyCategory'
-    result = service.search_entity_neighbors(
+    result = await service.search_entity_neighbors(
                     currency='btc',
                     entity=entityWithTags.entity,
                     direction='in',
@@ -501,7 +501,7 @@ def search_entity_neighbors(test_case):
     # Test addresses matching
 
     addresses = ['abcdefg', 'xyz1278']
-    result = service.search_entity_neighbors(
+    result = await service.search_entity_neighbors(
                     currency='btc',
                     entity=entityWithTags.entity,
                     direction='out',
@@ -515,7 +515,7 @@ def search_entity_neighbors(test_case):
     assertEqual(addresses, [a.address for a
                             in result.paths[0].paths[0].matching_addresses])
 
-    result = service.search_entity_neighbors(
+    result = await service.search_entity_neighbors(
                     currency='btc',
                     entity=entityWithTags.entity,
                     direction='out',
@@ -527,6 +527,84 @@ def search_entity_neighbors(test_case):
     assertEqual(2818641, result.paths[0].node.entity)
     assertEqual(123, result.paths[0].paths[0].node.entity)
 
+    addresses = ['abcdefg']
+    result = await service.search_entity_neighbors(
+                    currency='btc',
+                    entity=entityWithTags.entity,
+                    direction='out',
+                    depth=2,
+                    breadth=10,
+                    key='addresses',
+                    value=addresses
+                    )
+    assertEqual(2818641, result.paths[0].node.entity)
+    assertEqual(456, result.paths[0].paths[0].node.entity)
+    assertEqual(addresses, [a.address for a
+                            in result.paths[0].paths[0].matching_addresses])
+
+    addresses = ['0x234567']
+    result = await service.search_entity_neighbors(
+                    currency='eth',
+                    entity=eth_entityWithTags.entity,
+                    direction='out',
+                    depth=2,
+                    breadth=10,
+                    key='addresses',
+                    value=addresses
+                    )
+    assertEqual(107925001, result.paths[0].node.entity)
+    assertEqual(107925002, result.paths[0].paths[0].node.entity)
+    assertEqual(addresses, [a.address for a
+                            in result.paths[0].paths[0].matching_addresses])
+
+    # Test value matching
+
+    result = await service.search_entity_neighbors(
+                    currency='btc',
+                    entity=entityWithTags.entity,
+                    direction='out',
+                    depth=2,
+                    breadth=10,
+                    key='total_received',
+                    value=['value', 5, 150]
+                    )
+    assertEqual(2818641, result.paths[0].node.entity)
+    assertEqual(789, result.paths[0].paths[0].node.entity)
+    assertEqual(10, result.paths[0].paths[0].node.total_received.value)
+
+    # Test value matching
+
+    result = await service.search_entity_neighbors(
+                    currency='btc',
+                    entity=entityWithTags.entity,
+                    direction='out',
+                    depth=2,
+                    breadth=10,
+                    key='total_received',
+                    value=['value', 5, 8]
+                    )
+    assertEqual(SearchResultLevel1(paths=[]), result)
+    #
+    # Test value matching
+
+    result = await service.search_entity_neighbors(
+                    currency='btc',
+                    entity=entityWithTags.entity,
+                    direction='out',
+                    depth=2,
+                    breadth=10,
+                    key='total_received',
+                    value=['eur', 50, 100]
+                    )
+    assertEqual(2818641, result.paths[0].node.entity)
+    assertEqual(789, result.paths[0].paths[0].node.entity)
+    assertEqual(100.0,
+                result.paths[0].paths[0].node.total_received.
+                fiat_values[0].value)
+
+
+async def search_entity_neighbors_sync(test_case):
+    addresses = ['abcdefg', 'xyz1278']
     query_string = [('direction', 'out'),
                     ('key', 'addresses'),
                     ('value', ','.join(addresses)),
@@ -547,81 +625,6 @@ def search_entity_neighbors(test_case):
     assertEqual(addresses,
                 [a['address'] for a
                  in result['paths'][0]['paths'][0]['matching_addresses']])
-
-    addresses = ['abcdefg']
-    result = service.search_entity_neighbors(
-                    currency='btc',
-                    entity=entityWithTags.entity,
-                    direction='out',
-                    depth=2,
-                    breadth=10,
-                    key='addresses',
-                    value=addresses
-                    )
-    assertEqual(2818641, result.paths[0].node.entity)
-    assertEqual(456, result.paths[0].paths[0].node.entity)
-    assertEqual(addresses, [a.address for a
-                            in result.paths[0].paths[0].matching_addresses])
-
-    addresses = ['0x234567']
-    result = service.search_entity_neighbors(
-                    currency='eth',
-                    entity=eth_entityWithTags.entity,
-                    direction='out',
-                    depth=2,
-                    breadth=10,
-                    key='addresses',
-                    value=addresses
-                    )
-    assertEqual(107925001, result.paths[0].node.entity)
-    assertEqual(107925002, result.paths[0].paths[0].node.entity)
-    assertEqual(addresses, [a.address for a
-                            in result.paths[0].paths[0].matching_addresses])
-
-    # Test value matching
-
-    result = service.search_entity_neighbors(
-                    currency='btc',
-                    entity=entityWithTags.entity,
-                    direction='out',
-                    depth=2,
-                    breadth=10,
-                    key='total_received',
-                    value=['value', 5, 150]
-                    )
-    assertEqual(2818641, result.paths[0].node.entity)
-    assertEqual(789, result.paths[0].paths[0].node.entity)
-    assertEqual(10, result.paths[0].paths[0].node.total_received.value)
-
-    # Test value matching
-
-    result = service.search_entity_neighbors(
-                    currency='btc',
-                    entity=entityWithTags.entity,
-                    direction='out',
-                    depth=2,
-                    breadth=10,
-                    key='total_received',
-                    value=['value', 5, 8]
-                    )
-    assertEqual(SearchResultLevel1(paths=[]), result)
-    #
-    # Test value matching
-
-    result = service.search_entity_neighbors(
-                    currency='btc',
-                    entity=entityWithTags.entity,
-                    direction='out',
-                    depth=2,
-                    breadth=10,
-                    key='total_received',
-                    value=['eur', 50, 100]
-                    )
-    assertEqual(2818641, result.paths[0].node.entity)
-    assertEqual(789, result.paths[0].paths[0].node.entity)
-    assertEqual(100.0,
-                result.paths[0].paths[0].node.total_received.
-                fiat_values[0].value)
 
 
 async def list_entity_txs(test_case):
@@ -684,8 +687,8 @@ def list_entity_txs_csv(test_case):
         result.data.decode('utf-8'))
 
 
-def list_entity_links(test_case):
-    result = service.list_entity_links(
+async def list_entity_links(test_case):
+    result = await service.list_entity_links(
                 currency='btc',
                 entity=144534,
                 neighbor=10102718)
@@ -696,10 +699,9 @@ def list_entity_links(test_case):
                                      eur=0.01, usd=0.03, value=1260000),
                                  timestamp=1511153263,
                                  height=2)])
-
     test_case.assertEqual(link, result)
 
-    result = service.list_entity_links(
+    result = await service.list_entity_links(
                 currency='btc',
                 entity=10102718,
                 neighbor=144534)
@@ -710,10 +712,9 @@ def list_entity_links(test_case):
                                      eur=0.01, usd=0.03, value=1260000),
                                  timestamp=1510347493,
                                  height=2)])
-
     test_case.assertEqual(link, result)
 
-    result = service.list_entity_links(
+    result = await service.list_entity_links(
                 currency='eth',
                 entity=107925000,
                 neighbor=107925001)

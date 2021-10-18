@@ -17,6 +17,7 @@ from openapi_server.models.address import Address
 from openapi_server.models.entity_addresses import EntityAddresses
 import gsrest.service.common_service as common
 import importlib
+import asyncio
 
 MAX_DEPTH = 6
 
@@ -203,7 +204,8 @@ def list_entity_addresses_csv(currency, entity):
                             .format(entity, currency.upper())))
 
 
-def search_entity_neighbors(currency, entity, direction, key, value, depth, breadth, skip_num_addresses=None):  # noqa: E501
+async def search_entity_neighbors(currency, entity, direction, key, value,
+                                  depth, breadth, skip_num_addresses=None):
     params = dict()
     db = get_connection()
     if 'category' in key:
@@ -219,8 +221,9 @@ def search_entity_neighbors(currency, entity, direction, key, value, depth, brea
 
     elif 'addresses' in key:
         addresses_list = []
-        for address in value:
-            e = db.get_address_entity_id(currency, address)
+        aws = [db.get_address_entity_id(currency, address)
+               for address in value]
+        for (address, e) in zip(value, asyncio.gather(*aws)):
             if e:
                 addresses_list.append({"address": address,
                                        "entity": e})
@@ -235,15 +238,15 @@ def search_entity_neighbors(currency, entity, direction, key, value, depth, brea
 
     level = 2
     result = \
-        recursive_search(currency, entity, params,
-                         breadth, depth, level, skip_num_addresses,
-                         direction)
+        await recursive_search(currency, entity, params,
+                               breadth, depth, level, skip_num_addresses,
+                               direction)
 
     return SearchResultLevel1(paths=result)
 
 
-def recursive_search(currency, entity, params, breadth, depth, level,
-                     skip_num_addresses, direction, cache=None):
+async def recursive_search(currency, entity, params, breadth, depth, level,
+                           skip_num_addresses, direction, cache=None):
     if cache is None:
         cache = dict()
     if depth <= 0:
@@ -258,21 +261,21 @@ def recursive_search(currency, entity, params, breadth, depth, level,
         cache[cl][key] = value
         return value
 
-    def cached(cl, key, get):
-        return get_cached(cl, key) or set_cached(cl, key, get())
+    async def cached(cl, key, get):
+        return get_cached(cl, key) or set_cached(cl, key, await get())
 
-    neighbors = cached(entity, 'neighbors',
-                       lambda: list_entity_neighbors(
-                        currency, entity, direction,
-                        pagesize=breadth).neighbors)
+    neighbors = await cached(entity, 'neighbors',
+                             lambda: list_entity_neighbors(
+                              currency, entity, direction,
+                              pagesize=breadth).neighbors)
 
     paths = []
 
     for neighbor in neighbors:
         match = True
-        props = cached(int(neighbor.id), 'props',
-                       lambda: get_entity(currency, int(neighbor.id),
-                                          True, False))
+        props = await cached(int(neighbor.id), 'props',
+                             lambda: get_entity(currency, int(neighbor.id),
+                                                True, False))
         if props is None:
             continue
 
@@ -314,12 +317,12 @@ def recursive_search(currency, entity, params, breadth, depth, level,
                 level < MAX_DEPTH and \
                 (skip_num_addresses is None or
                  props.no_addresses <= skip_num_addresses):
-            subpaths = recursive_search(currency, int(neighbor.id),
-                                        params, breadth,
-                                        depth - 1,
-                                        level + 1,
-                                        skip_num_addresses,
-                                        direction, cache)
+            subpaths = await recursive_search(currency, int(neighbor.id),
+                                              params, breadth,
+                                              depth - 1,
+                                              level + 1,
+                                              skip_num_addresses,
+                                              direction, cache)
 
         if not subpaths:
             continue
@@ -365,13 +368,13 @@ def list_entity_txs_csv(currency, entity):
                             .format(entity, currency.upper())))
 
 
-def list_entity_links(currency, entity, neighbor,
-                      page=None, pagesize=None):
+async def list_entity_links(currency, entity, neighbor,
+                            page=None, pagesize=None):
     db = get_connection()
-    result = db.list_entity_links(currency, entity, neighbor,
-                                  page=page, pagesize=pagesize)
+    result = await db.list_entity_links(currency, entity, neighbor,
+                                        page=page, pagesize=pagesize)
 
-    return common.links_response(currency, result)
+    return await common.links_response(currency, result)
 
 
 def list_entity_links_csv(currency, entity, neighbor):

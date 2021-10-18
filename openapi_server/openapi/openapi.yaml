@@ -742,6 +742,7 @@ paths:
       summary: Get transactions between two entities
       tags:
       - entities
+      x-async: true
       x-openapi-router-controller: openapi_server.controllers.entities_controller
   /{currency}/entities/{entity}/neighbors:
     get:
@@ -938,6 +939,7 @@ paths:
       summary: Search deeply for matching neighbors
       tags:
       - entities
+      x-async: true
       x-openapi-router-controller: openapi_server.controllers.entities_controller
   /{currency}/entities/{entity}/tags:
     get:

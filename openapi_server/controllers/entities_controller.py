@@ -95,10 +95,11 @@ def list_entity_links(currency, entity, neighbor):  # noqa: E501
     :rtype: Links
     """
     try:
-        result = service.list_entity_links(
-            currency=currency,
-            entity=entity,
-            neighbor=neighbor)
+        result = asyncio.run(
+            service.list_entity_links(
+                currency=currency,
+                entity=entity,
+                neighbor=neighbor))
         return result
     except RuntimeError as e:
         return notfound(str(e))
@@ -239,15 +240,16 @@ def search_entity_neighbors(currency, entity, direction, key, value, depth, brea
     :rtype: List[SearchResultLevel1]
     """
     try:
-        result = service.search_entity_neighbors(
-            currency=currency,
-            entity=entity,
-            direction=direction,
-            key=key,
-            value=value,
-            depth=depth,
-            breadth=breadth,
-            skip_num_addresses=skip_num_addresses)
+        result = asyncio.run(
+            service.search_entity_neighbors(
+                currency=currency,
+                entity=entity,
+                direction=direction,
+                key=key,
+                value=value,
+                depth=depth,
+                breadth=breadth,
+                skip_num_addresses=skip_num_addresses))
         return result
     except RuntimeError as e:
         return notfound(str(e))
