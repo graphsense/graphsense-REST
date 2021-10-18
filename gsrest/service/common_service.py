@@ -9,6 +9,7 @@ from gsrest.service.rates_service import get_rates
 from openapi_server.models.link_utxo import LinkUtxo
 from openapi_server.models.links import Links
 from openapi_server.models.tx_account import TxAccount
+from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from gsrest.service.rates_service import list_rates
 
 
@@ -41,10 +42,21 @@ def address_from_row(currency, row, rates, tags=None):
         )
 
 
-def txs_from_rows(currency, rows):
+async def txs_from_rows(currency, rows):
     heights = [row['height'] for row in rows]
-    rates = list_rates(currency, heights)
-    return [TxAccount(
+    rates = await list_rates(currency, heights)
+    if currency == 'eth':
+        print(f'rows {rows}')
+        return [TxAccount(
+                height=row['height'],
+                timestamp=row['timestamp'],
+                tx_hash=row['tx_hash'].hex(),
+                from_address=row['from_address'],
+                to_address=row['to_address'],
+                value=convert_value(currency, row['value'],
+                                    rates[row['height']]))
+                for row in rows]
+    return [AddressTxUtxo(
             height=row['height'],
             timestamp=row['timestamp'],
             tx_hash=row['tx_hash'].hex(),

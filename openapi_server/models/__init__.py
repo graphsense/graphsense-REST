@@ -6,6 +6,9 @@ from __future__ import absolute_import
 from openapi_server.models.address import Address
 from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.address_tag_all_of import AddressTagAllOf
+from openapi_server.models.address_tx import AddressTx
+from openapi_server.models.address_tx_utxo import AddressTxUtxo
+from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.addresses import Addresses
 from openapi_server.models.batch_operation import BatchOperation
 from openapi_server.models.block import Block
@@ -62,5 +65,4 @@ from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.tx_utxo import TxUtxo
 from openapi_server.models.tx_value import TxValue
 from openapi_server.models.txs import Txs
-from openapi_server.models.txs_account import TxsAccount
 from openapi_server.models.values import Values

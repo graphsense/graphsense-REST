@@ -445,11 +445,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/txs_account'
+                $ref: '#/components/schemas/address_txs'
           description: OK
       summary: Get all transactions an address has been involved in
       tags:
       - addresses
+      x-async: true
       x-openapi-router-controller: openapi_server.controllers.addresses_controller
   /{currency}/batch:
     post:
@@ -1021,7 +1022,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/txs_account'
+                $ref: '#/components/schemas/address_txs'
           description: OK
       summary: Get all transactions an entity has been involved in
       tags:
@@ -1638,6 +1639,63 @@ components:
       - $ref: '#/components/schemas/tag'
       - $ref: '#/components/schemas/address_tag_allOf'
       title: address_tag
+    address_tx:
+      discriminator:
+        mapping:
+          account: '#/components/schemas/tx_account'
+          utxo: '#/components/schemas/address_tx_utxo'
+        propertyName: tx_type
+      oneOf:
+      - $ref: '#/components/schemas/address_tx_utxo'
+      - $ref: '#/components/schemas/tx_account'
+      title: address_tx
+    address_tx_utxo:
+      properties:
+        height:
+          description: Height
+          format: int64
+          minimum: 0
+          title: height
+          type: integer
+        timestamp:
+          description: Timestamp
+          format: int64
+          title: timestamp
+          type: integer
+        tx_hash:
+          description: Transaction hash
+          title: tx_hash
+          type: string
+        tx_type:
+          default: utxo
+          type: string
+        value:
+          $ref: '#/components/schemas/values'
+      required:
+      - height
+      - timestamp
+      - tx_hash
+      - tx_type
+      - value
+      type: object
+    address_txs:
+      example:
+        next_page: next_page
+        address_txs:
+        - null
+        - null
+      properties:
+        address_txs:
+          items:
+            $ref: '#/components/schemas/address_tx'
+          title: address_txs
+          type: array
+        next_page:
+          format: string
+          title: next_page
+          type: string
+      title: address_txs
+      type: object
     addresses:
       properties:
         addresses:
@@ -2843,20 +2901,6 @@ components:
       - $ref: '#/components/schemas/tx_account'
       title: tx
     tx_account:
-      example:
-        to_address: to_address
-        tx_hash: tx_hash
-        tx_type: account
-        from_address: from_address
-        value:
-          fiat_values:
-          - code: code
-            value: 0.8008282
-          - code: code
-            value: 0.8008282
-          value: 6
-        height: 0
-        timestamp: 6
       properties:
         from_address:
           description: Address
@@ -2883,7 +2927,6 @@ components:
           type: string
         tx_type:
           default: account
-          title: tx_type
           type: string
         value:
           $ref: '#/components/schemas/values'
@@ -2895,7 +2938,6 @@ components:
       - tx_hash
       - tx_type
       - value
-      title: tx_account
       type: object
     tx_hash:
       description: Transaction hash
@@ -3024,48 +3066,6 @@ components:
           title: txs
           type: array
       title: txs
-      type: object
-    txs_account:
-      example:
-        next_page: next_page
-        txs:
-        - to_address: to_address
-          tx_hash: tx_hash
-          tx_type: account
-          from_address: from_address
-          value:
-            fiat_values:
-            - code: code
-              value: 0.8008282
-            - code: code
-              value: 0.8008282
-            value: 6
-          height: 0
-          timestamp: 6
-        - to_address: to_address
-          tx_hash: tx_hash
-          tx_type: account
-          from_address: from_address
-          value:
-            fiat_values:
-            - code: code
-              value: 0.8008282
-            - code: code
-              value: 0.8008282
-            value: 6
-          height: 0
-          timestamp: 6
-      properties:
-        next_page:
-          format: string
-          title: next_page
-          type: string
-        txs:
-          items:
-            $ref: '#/components/schemas/tx_account'
-          title: txs
-          type: array
-      title: txs_account
       type: object
     uri:
       description: URI

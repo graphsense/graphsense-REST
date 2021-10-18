@@ -12,12 +12,14 @@ from openapi_server.models.links import Links
 import gsrest.service.addresses_service as service
 from gsrest.test.assertion import assertEqual
 from openapi_server.models.tx_account import TxAccount
+from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from openapi_server.models.txs import Txs
 from gsrest.util.values import convert_value
 from gsrest.service.rates_service import list_rates
 from gsrest.test.txs_service import tx1_eth, tx2_eth, tx4_eth
 from gsrest.util.values import make_values
 import copy
+from tests.util.util import yamldump
 
 
 tag = AddressTag(
@@ -589,33 +591,33 @@ async def get_address(test_case):
     test_case.assertEqual(eth_address, result)
 
 
-def list_address_txs(test_case):
+async def list_address_txs(test_case):
     """Test case for list_address_txs
 
     Get all transactions an address has been involved in
     """
-    rates = list_rates(currency='btc', heights=[2])
+    rates = await list_rates(currency='btc', heights=[2])
     address_txs = Txs(
                     next_page=None,
                     txs=[
-                        TxAccount(
+                        AddressTxUtxo(
                             tx_hash="123456",
                             value=convert_value('btc', 1260000, rates[2]),
                             height=2,
                             timestamp=1510347493),
-                        TxAccount(
+                        AddressTxUtxo(
                             tx_hash="abcdef",
                             value=convert_value('btc', -1260000, rates[2]),
                             height=2,
                             timestamp=1511153263),
-                        TxAccount(
+                        AddressTxUtxo(
                             tx_hash="4567",
                             value=convert_value('btc', -1, rates[2]),
                             height=2,
                             timestamp=1510347492)
                         ]
                     )
-    result = service.list_address_txs('btc', address2.address)
+    result = await service.list_address_txs('btc', address2.address)
     test_case.assertEqual(address_txs, result)
 
     tx2_eth_reverse = TxAccount(**copy.deepcopy(tx2_eth.to_dict()))
@@ -623,7 +625,8 @@ def list_address_txs(test_case):
     for v in tx2_eth_reverse.value.fiat_values:
         v.value = -v.value
     txs = Txs(txs=[tx1_eth, tx2_eth_reverse, tx4_eth])
-    result = service.list_address_txs('eth', eth_address.address)
+    result = await service.list_address_txs('eth', eth_address.address)
+    yamldump(result)
     test_case.assertEqual(txs, result)
 
 

@@ -1,13 +1,8 @@
 from gsrest.db import get_connection
 from openapi_server.models.txs import Txs
 from openapi_server.models.addresses import Addresses
-from openapi_server.models.link_utxo import LinkUtxo
-from openapi_server.models.links import Links
-from openapi_server.models.tx_account import TxAccount
 from gsrest.service.entities_service import get_entity
-from gsrest.service.rates_service import list_rates
 import gsrest.service.common_service as common
-from gsrest.util.values import convert_value
 from flask import Response, stream_with_context
 from gsrest.util.csvify import create_download_header, to_csv
 from gsrest.service.rates_service import get_rates
@@ -33,11 +28,11 @@ def list_tags_by_address_csv(currency, address):
                                 currency.upper())))
 
 
-def list_address_txs(currency, address, page=None, pagesize=None):
+async def list_address_txs(currency, address, page=None, pagesize=None):
     db = get_connection()
     results, paging_state = \
-        db.list_address_txs(currency, address, page, pagesize)
-    address_txs = common.txs_from_rows(currency, results)
+        await db.list_address_txs(currency, address, page, pagesize)
+    address_txs = await common.txs_from_rows(currency, results)
     return Txs(next_page=paging_state, txs=address_txs)
 
 

@@ -9,10 +9,10 @@ from six import BytesIO
 
 from openapi_server.models.address import Address  # noqa: E501
 from openapi_server.models.address_tag import AddressTag  # noqa: E501
+from openapi_server.models.address_txs import AddressTxs  # noqa: E501
 from openapi_server.models.entity import Entity  # noqa: E501
 from openapi_server.models.links import Links  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
-from openapi_server.models.txs_account import TxsAccount  # noqa: E501
 from openapi_server.test import BaseTestCase
 import gsrest.test.addresses_service as test_service
 
@@ -115,7 +115,9 @@ class TestAddressesController(BaseTestCase):
 
         Get all transactions an address has been involved in
         """
-        test_service.list_address_txs(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.list_address_txs(self))
+        loop.close()
 
         if "list_address_txs" in ["batch", "get_tx_io"]:
             return

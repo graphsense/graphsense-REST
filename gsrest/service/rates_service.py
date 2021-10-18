@@ -25,9 +25,9 @@ async def get_rates(currency, height=None):
     return r
 
 
-def list_rates(currency, heights):
+async def list_rates(currency, heights):
     db = get_connection()
-    rates = db.list_rates(currency, heights)
+    rates = await db.list_rates(currency, heights)
 
     height_rates = dict()  # key: height, value: {'eur': 0, 'usd':0}
     for rate in rates:
