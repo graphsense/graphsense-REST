@@ -95,10 +95,13 @@ def list_address_links(currency, address, neighbor):  # noqa: E501
     :rtype: Links
     """
     try:
-        result = service.list_address_links(
-            currency=currency,
-            address=address,
-            neighbor=neighbor)
+        loop = asyncio.new_event_loop()
+        result = loop.run_until_complete(
+            service.list_address_links(
+                currency=currency,
+                address=address,
+                neighbor=neighbor))
+        loop.close()
         return result
     except RuntimeError as e:
         return notfound(str(e))

@@ -72,7 +72,9 @@ class TestAddressesController(BaseTestCase):
 
         Get transactions between two addresses
         """
-        test_service.list_address_links(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.list_address_links(self))
+        loop.close()
 
         if "list_address_links" in ["batch", "get_tx_io"]:
             return

@@ -733,8 +733,8 @@ async def get_address_entity(test_case):
     test_case.assertEqual(eth_entityWithTags, result)
 
 
-def list_address_links(test_case):
-    result = service.list_address_links(
+async def list_address_links(test_case):
+    result = await service.list_address_links(
                 currency='btc',
                 address=address.address,
                 neighbor='addressE')
@@ -748,14 +748,14 @@ def list_address_links(test_case):
 
     test_case.assertEqual(link, result)
 
-    result = service.list_address_links(
+    result = await service.list_address_links(
                 currency='eth',
                 address=eth_address.address,
                 neighbor='0x123456')
     txs = Links(links=[tx1_eth, tx2_eth])
     test_case.assertEqual(txs, result)
 
-    result = service.list_address_links(
+    result = await service.list_address_links(
                 currency='eth',
                 address=eth_address.address,
                 neighbor='0x123456',
@@ -764,7 +764,7 @@ def list_address_links(test_case):
     test_case.assertEqual(txs.links, result.links)
     test_case.assertNotEqual(None, result.next_page)
 
-    result = service.list_address_links(
+    result = await service.list_address_links(
                 currency='eth',
                 address=eth_address.address,
                 neighbor='0x123456',
@@ -774,7 +774,7 @@ def list_address_links(test_case):
     test_case.assertEqual(txs.links, result.links)
     test_case.assertNotEqual(None, result.next_page)
 
-    result = service.list_address_links(
+    result = await service.list_address_links(
                 currency='eth',
                 address=eth_address.address,
                 neighbor='0x123456',

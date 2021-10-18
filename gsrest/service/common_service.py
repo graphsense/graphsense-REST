@@ -153,15 +153,17 @@ async def list_neighbors(currency, id, direction, node_type, ids=None,
                      neighbors=relations)
 
 
-def links_response(currency, result):
+async def links_response(currency, result):
     links, next_page = result
     if currency == 'eth':
         heights = [row['block_id'] for row in links]
-        rates = list_rates(currency, heights)
+        rates = await list_rates(currency, heights)
         return Links(links=[TxAccount(
                             tx_hash=row['tx_hash'].hex(),
                             timestamp=row['block_timestamp'],
                             height=row['block_id'],
+                            from_address=row['from_address'],
+                            to_address=row['to_address'],
                             value=convert_value(currency,
                                                 row['value'],
                                                 rates[row['block_id']]))
@@ -169,7 +171,7 @@ def links_response(currency, result):
                      next_page=next_page)
 
     heights = [row['height'] for row in links]
-    rates = list_rates(currency, heights)
+    rates = await list_rates(currency, heights)
 
     return Links(links=[LinkUtxo(tx_hash=e['tx_hash'].hex(),
                         height=e['height'],

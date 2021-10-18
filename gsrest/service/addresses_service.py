@@ -67,13 +67,13 @@ def list_address_neighbors_csv(currency, address, direction,
                             .format(direction, address, currency.upper())))
 
 
-def list_address_links(currency, address, neighbor,
-                       page=None, pagesize=None):
+async def list_address_links(currency, address, neighbor,
+                             page=None, pagesize=None):
     db = get_connection()
-    result = db.list_address_links(currency, address, neighbor,
-                                   page=page, pagesize=pagesize)
+    result = await db.list_address_links(currency, address, neighbor,
+                                         page=page, pagesize=pagesize)
 
-    return common.links_response(currency, result)
+    return await common.links_response(currency, result)
 
 
 def list_address_links_csv(currency, address, neighbor):

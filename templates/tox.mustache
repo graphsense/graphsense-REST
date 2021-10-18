@@ -15,4 +15,4 @@ deps=-r{toxinidir}/requirements.txt
 
 commands=
   bash -c "cd {toxinidir}/tests/ && make .runtest"
-  {{^useNose}}pytest -x -k "get_address_entity" --cov={{{pythonSrcRoot}}}{{{packageName}}}{{/useNose}}{{#useNose}}nosetests{{/useNose}}
+  {{^useNose}}pytest -x -k "list_address_links" --cov={{{pythonSrcRoot}}}{{{packageName}}}{{/useNose}}{{#useNose}}nosetests{{/useNose}}
