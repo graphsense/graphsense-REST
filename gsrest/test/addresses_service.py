@@ -715,8 +715,8 @@ def list_address_neighbors_csv(test_case):
     test_case.assertEqual(csv, result.data.decode('utf-8'))
 
 
-def get_address_entity(test_case):
-    result = service.get_address_entity(
+async def get_address_entity(test_case):
+    result = await service.get_address_entity(
                 currency='btc',
                 address=address.address,
                 include_tags=True,
@@ -724,7 +724,7 @@ def get_address_entity(test_case):
     result.tags.tag_coherence = None
     test_case.assertEqual(entityWithTagsOfAddressWithTags, result)
 
-    result = service.get_address_entity(
+    result = await service.get_address_entity(
                 currency='eth',
                 address=eth_address.address,
                 include_tags=True,

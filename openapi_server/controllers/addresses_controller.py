@@ -62,11 +62,14 @@ def get_address_entity(currency, address, include_tags=None, tag_coherence=None)
     :rtype: Entity
     """
     try:
-        result = service.get_address_entity(
-            currency=currency,
-            address=address,
-            include_tags=include_tags,
-            tag_coherence=tag_coherence)
+        loop = asyncio.new_event_loop()
+        result = loop.run_until_complete(
+            service.get_address_entity(
+                currency=currency,
+                address=address,
+                include_tags=include_tags,
+                tag_coherence=tag_coherence))
+        loop.close()
         return result
     except RuntimeError as e:
         return notfound(str(e))

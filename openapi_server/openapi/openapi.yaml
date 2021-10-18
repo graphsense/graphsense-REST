@@ -242,6 +242,7 @@ paths:
       summary: Get the entity of an address
       tags:
       - addresses
+      x-async: true
       x-openapi-router-controller: openapi_server.controllers.addresses_controller
   /{currency}/addresses/{address}/links:
     get:

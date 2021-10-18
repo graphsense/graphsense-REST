@@ -426,17 +426,18 @@ class Cassandra:
 
     @eth
     # @Timer(text="Timer: get_address_entity_id {:.2f}")
-    def get_address_entity_id(self, currency, address):
+    async def get_address_entity_id(self, currency, address):
         address_id, address_id_group = \
-            self.get_address_id_id_group(currency, address)
+            await self.get_address_id_id_group(currency, address)
 
         query = "SELECT cluster_id FROM address WHERE " \
                 "address_id_group = %s AND address_id = %s "
-        result = self.execute(currency, 'transformed', query,
-                              [address_id_group, address_id])
+        result = await self.execute_async(currency, 'transformed', query,
+                                          [address_id_group, address_id])
+        result = result.one()
         if not result:
             return None
-        return result.one()['cluster_id']
+        return result['cluster_id']
 
     def list_address_links(self, currency, address, neighbor,
                            page=None, pagesize=None):
@@ -579,12 +580,13 @@ class Cassandra:
 
     @eth
     # @Timer(text="Timer: list_entity_tags_by_entity {:.2f}")
-    def list_entity_tags_by_entity(self, currency, entity):
+    async def list_entity_tags_by_entity(self, currency, entity):
         entity = int(entity)
         group = self.get_id_group(currency, entity)
         query = ("SELECT * FROM cluster_tags "
                  "WHERE cluster_id_group = %s and cluster_id = %s")
-        results = self.execute(currency, 'transformed', query, [group, entity])
+        results = await self.execute_async(currency, 'transformed', query,
+                                           [group, entity])
 
         if results is None:
             return []
@@ -592,34 +594,35 @@ class Cassandra:
 
     @eth
     # @Timer(text="Timer: list_address_tags_by_entity {:.2f}")
-    def list_address_tags_by_entity(self, currency, entity):
+    async def list_address_tags_by_entity(self, currency, entity):
         entity = int(entity)
         group = self.get_id_group(currency, entity)
         query = ("SELECT * FROM cluster_address_tags "
                  "WHERE cluster_id_group = %s and cluster_id = %s")
-        results = self.execute(currency, 'transformed', query, [group, entity])
+        results = await self.execute_async(currency, 'transformed', query,
+                                           [group, entity])
 
         if results is None:
             return []
         ids = [row['address_id'] for row in results.current_rows]
-        addresses = self.get_addresses_by_ids(currency, ids, True)
+        addresses = await self.get_addresses_by_ids(currency, ids, True)
         for (row, address) in zip(results.current_rows, addresses):
             row['address'] = address['address']
         return results.current_rows
 
     @eth
     # @Timer(text="Timer: get_entity {:.2f}")
-    def get_entity(self, currency, entity):
+    async def get_entity(self, currency, entity):
         entity_id_group = self.get_id_group(currency, entity)
         entity = int(entity)
         query = ("SELECT * FROM cluster "
                  "WHERE cluster_id_group = %s AND cluster_id = %s ")
-        result = self.execute(currency, 'transformed', query,
-                              [entity_id_group, entity])
+        result = await self.execute_async(currency, 'transformed', query,
+                                          [entity_id_group, entity])
+        result = result.one()
         if not result:
             return None
-        result = result.one()
-        return self.finish_entities(currency, [result])[0]
+        return (await self.finish_entities(currency, [result]))[0]
 
     @eth
     # @Timer(text="Timer: list_entities {:.2f}")
@@ -1099,19 +1102,19 @@ class Cassandra:
 
     # entity = address_id
     # @Timer(text="Timer: get_entity_eth {:.2f}")
-    def get_entity_eth(self, currency, entity):
+    async def get_entity_eth(self, currency, entity):
         # mockup entity by address
         id_group = self.get_id_group(currency, entity)
         query = (
             "SELECT * FROM address WHERE "
             "address_id_group = %s AND address_id = %s")
-        result = self.execute(currency, 'transformed', query,
-                              [id_group, entity])
+        result = await self.execute_async(currency, 'transformed', query,
+                                          [id_group, entity])
+        result = result.one()
         if not result:
             return None
 
-        result = result.one()
-        entity = self.finish_addresses(currency, [result])[0]
+        entity = (await self.finish_addresses(currency, [result]))[0]
         entity['cluster_id'] = entity['address_id']
         entity['no_addresses'] = 1
         entity.pop('address', None)
@@ -1149,21 +1152,24 @@ class Cassandra:
             address['no_addresses'] = 1
         return result, to_hex(paging_state)
 
-    def list_entity_tags_by_entity_eth(self, currency, entity):
+    async def list_entity_tags_by_entity_eth(self, currency, entity):
         return []
 
     # @Timer(text="Timer: list_address_tags_by_entity_eth {:.2f}")
-    def list_address_tags_by_entity_eth(self, currency, entity):
+    async def list_address_tags_by_entity_eth(self, currency, entity):
         query = ("SELECT address FROM address "
                  "WHERE address_id_group=%s and address_id=%s")
         id_id_group = [self.get_id_group(currency, entity), entity]
-        result = self.execute(currency, 'transformed', query, id_id_group)
-        if result is None or result.one() is None:
+        result = await self.execute_async(currency, 'transformed', query,
+                                          id_id_group)
+        result = result.one()
+        if result is None:
             return None
-        address = result.one()['address']
+        address = result['address']
         query = ("SELECT * FROM address_tags WHERE address_id_group = %s "
                  "and address_id = %s")
-        results = self.execute(currency, 'transformed', query, id_id_group)
+        results = await self.execute_async(currency, 'transformed', query,
+                                           id_id_group)
         if results is None:
             return []
         for tag in results.current_rows:

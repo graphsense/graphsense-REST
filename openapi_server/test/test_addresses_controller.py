@@ -48,7 +48,9 @@ class TestAddressesController(BaseTestCase):
 
         Get the entity of an address
         """
-        test_service.get_address_entity(self)
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(test_service.get_address_entity(self))
+        loop.close()
 
         if "get_address_entity" in ["batch", "get_tx_io"]:
             return

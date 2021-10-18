@@ -87,16 +87,16 @@ def list_address_links_csv(currency, address, neighbor):
                             .format(address, neighbor, currency.upper())))
 
 
-def get_address_entity(currency, address, include_tags, tag_coherence):
+async def get_address_entity(currency, address, include_tags, tag_coherence):
     # from address to complete entity stats
     e = RuntimeError('Entity for address {} not found'.format(address))
     db = get_connection()
 
-    entity_id = db.get_address_entity_id(currency, address)
+    entity_id = await db.get_address_entity_id(currency, address)
     if entity_id is None:
         raise e
 
-    result = get_entity(currency, entity_id, include_tags, tag_coherence)
+    result = await get_entity(currency, entity_id, include_tags, tag_coherence)
     if result is None:
         raise e
 

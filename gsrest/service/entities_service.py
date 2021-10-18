@@ -50,9 +50,9 @@ def from_row(currency, row, rates, tags=None):
         )
 
 
-def list_tags_by_entity(currency, entity, tag_coherence):
-    entity_tags = list_entity_tags_by_entity(currency, entity)
-    address_tags = list_address_tags_by_entity(currency, entity)
+async def list_tags_by_entity(currency, entity, tag_coherence):
+    entity_tags = await list_entity_tags_by_entity(currency, entity)
+    address_tags = await list_address_tags_by_entity(currency, entity)
     tag_coherence = compute_tag_coherence(tag.label for tag in address_tags) \
         if tag_coherence else None
     return Tags(entity_tags=entity_tags,
@@ -73,9 +73,9 @@ def list_tags_by_entity_by_level_csv(currency, entity, level):
                         .format(level, entity, currency.upper())))
 
 
-def list_entity_tags_by_entity(currency, entity):
+async def list_entity_tags_by_entity(currency, entity):
     db = get_connection()
-    entity_tags = db.list_entity_tags_by_entity(currency, entity)
+    entity_tags = await db.list_entity_tags_by_entity(currency, entity)
     return [EntityTag(label=row['label'],
                       entity=row['cluster_id'],
                       category=row['category'],
@@ -88,9 +88,9 @@ def list_entity_tags_by_entity(currency, entity):
             for row in entity_tags]
 
 
-def list_address_tags_by_entity(currency, entity):
+async def list_address_tags_by_entity(currency, entity):
     db = get_connection()
-    address_tags = db.list_address_tags_by_entity(currency, entity)
+    address_tags = await db.list_address_tags_by_entity(currency, entity)
     return [AddressTag(label=row['label'],
                        address=row['address'],
                        category=row['category'],
@@ -103,16 +103,17 @@ def list_address_tags_by_entity(currency, entity):
             for row in address_tags]
 
 
-def get_entity(currency, entity, include_tags, tag_coherence):
+async def get_entity(currency, entity, include_tags, tag_coherence):
     db = get_connection()
-    result = db.get_entity(currency, entity)
+    result = await db.get_entity(currency, entity)
 
     if result is None:
         raise RuntimeError("Entity {} not found".format(entity))
 
-    tags = list_tags_by_entity(currency, result['cluster_id'], tag_coherence) \
-        if include_tags else None
-    return from_row(currency, result, get_rates(currency)['rates'], tags)
+    tags = await list_tags_by_entity(currency, result['cluster_id'],
+                                     tag_coherence) if include_tags else None
+    rates = (await get_rates(currency))['rates']
+    return from_row(currency, result, rates, tags)
 
 
 def list_entities(currency, ids=None, page=None, pagesize=None):
