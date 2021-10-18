@@ -223,7 +223,7 @@ async def search_entity_neighbors(currency, entity, direction, key, value,
         addresses_list = []
         aws = [db.get_address_entity_id(currency, address)
                for address in value]
-        for (address, e) in zip(value, asyncio.gather(*aws)):
+        for (address, e) in zip(value, await asyncio.gather(*aws)):
             if e:
                 addresses_list.append({"address": address,
                                        "entity": e})

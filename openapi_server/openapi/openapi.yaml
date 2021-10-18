@@ -102,6 +102,7 @@ paths:
       summary: Returns address and entity tags associated with a given label
       tags:
       - tags
+      x-async: true
       x-openapi-router-controller: openapi_server.controllers.tags_controller
   /tags/taxonomies:
     get:

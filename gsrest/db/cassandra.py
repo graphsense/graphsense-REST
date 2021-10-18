@@ -813,29 +813,29 @@ class Cassandra:
         return nodes
 
     # @Timer(text="Timer: list_address_tags {:.2f}")
-    def list_address_tags(self, currency, label):
+    async def list_address_tags(self, currency, label):
         prefix_length = self.get_prefix_lengths(currency)['label']
         label_norm_prefix = label[:prefix_length]
         query = ("SELECT * FROM address_tag_by_label WHERE "
                  "label_norm_prefix = %s and label_norm = %s")
-        rows = self.execute(currency, 'transformed', query,
-                            [label_norm_prefix, label])
+        rows = await self.execute_async(currency, 'transformed', query,
+                                        [label_norm_prefix, label])
         if rows is None:
             return []
-        return rows
+        return rows.current_rows
 
     @eth
     # @Timer(text="Timer: list_entity_tags {:.2f}")
-    def list_entity_tags(self, currency, label):
+    async def list_entity_tags(self, currency, label):
         prefix_length = self.get_prefix_lengths(currency)['label']
         label_norm_prefix = label[:prefix_length]
         query = ("SELECT * FROM cluster_tag_by_label WHERE "
                  "label_norm_prefix = %s and label_norm = %s")
-        rows = self.execute(currency, 'transformed', query,
-                            [label_norm_prefix, label])
+        rows = await self.execute_async(currency, 'transformed', query,
+                                        [label_norm_prefix, label])
         if rows is None:
             return []
-        return rows
+        return rows.current_rows
 
     async def list_labels(self, currency, expression_norm):
         prefix_lengths = self.get_prefix_lengths(currency)
@@ -1402,7 +1402,7 @@ class Cassandra:
             addresses.append(await self.finish_address(currency, address))
         return addresses, None
 
-    def list_entity_tags_eth(self, currency, label):
+    async def list_entity_tags_eth(self, currency, label):
         return []
 
     async def include_labels_eth(self, currency, node_type, that, nodes):

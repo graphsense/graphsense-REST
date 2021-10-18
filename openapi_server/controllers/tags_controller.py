@@ -46,9 +46,10 @@ def list_tags(label, currency=None):  # noqa: E501
     :rtype: List[Tags]
     """
     try:
-        result = service.list_tags(
-            label=label,
-            currency=currency)
+        result = asyncio.run(
+            service.list_tags(
+                label=label,
+                currency=currency))
         return result
     except RuntimeError as e:
         return notfound(str(e))

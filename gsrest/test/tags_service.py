@@ -54,13 +54,13 @@ ctag = EntityTag(
         )
 
 
-def list_tags(test_case):
-    result = service.list_tags(currency='btc', label='isolinks')
+async def list_tags(test_case):
+    result = await service.list_tags(currency='btc', label='isolinks')
     test_case.assertEqual(Tags(address_tags=[tag1], entity_tags=[ctag]),
                           result)
-    result = service.list_tags(currency='btc', label='cimedy')
+    result = await service.list_tags(currency='btc', label='cimedy')
     test_case.assertEqual(Tags([tag2], entity_tags=[]), result)
-    result = service.list_tags(label='cimedy')
+    result = await service.list_tags(label='cimedy')
     result.address_tags.sort(key=lambda x: x.currency)
     test_case.assertEqual(Tags([tag2, tag3], entity_tags=[]),
                           result)

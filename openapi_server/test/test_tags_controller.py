@@ -41,7 +41,9 @@ class TestTagsController(BaseTestCase):
 
         Returns address and entity tags associated with a given label
         """
-        test_service.list_tags(self)
+        asyncio.run(test_service.list_tags(self))
+        if 'list_tags_sync' in dir(test_service):
+            test_service.list_tags_sync(self)
 
         if "list_tags" in ["batch", "get_tx_io"]:
             return
