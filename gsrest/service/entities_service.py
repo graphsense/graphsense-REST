@@ -164,7 +164,7 @@ async def list_entity_addresses(currency, entity, page=None, pagesize=None):
     addresses, paging_state = \
         await db.list_entity_addresses(currency, entity, page, pagesize)
 
-    rates = get_rates(currency)['rates']
+    rates = (await get_rates(currency))['rates']
     addresses = [Address(
             address=row['address'],
             entity=row['cluster_id'],

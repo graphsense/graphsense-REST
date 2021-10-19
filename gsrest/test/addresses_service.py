@@ -624,7 +624,7 @@ async def list_address_txs(test_case):
     tx2_eth_reverse.value.value = -tx2_eth_reverse.value.value
     for v in tx2_eth_reverse.value.fiat_values:
         v.value = -v.value
-    txs = AddressTxs(txs=[tx1_eth, tx2_eth_reverse, tx4_eth])
+    txs = AddressTxs(address_txs=[tx1_eth, tx2_eth_reverse, tx4_eth])
     result = await service.list_address_txs('eth', eth_address.address)
     yamldump(result)
     test_case.assertEqual(txs, result)

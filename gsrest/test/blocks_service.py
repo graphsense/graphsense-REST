@@ -38,6 +38,14 @@ async def get_block(test_case):
     test_case.assertEqual(block, result)
     result = await service.get_block("btc", 2)
     test_case.assertEqual(block2, result)
+
+    result = await service.get_block("eth", 1)
+    test_case.assertEqual(eth_block, result)
+    result = await service.get_block("eth", 2300001)
+    test_case.assertEqual(eth_block2, result)
+
+
+def get_block_sync(test_case):
     headers = {
         'Accept': 'application/json',
     }
@@ -48,10 +56,6 @@ async def get_block(test_case):
     test_case.assert404(response,
                         'Response body is : ' + response.data.decode('utf-8'))
 
-    result = await service.get_block("eth", 1)
-    test_case.assertEqual(eth_block, result)
-    result = await service.get_block("eth", 2300001)
-    test_case.assertEqual(eth_block2, result)
     headers = {
         'Accept': 'application/json',
     }
@@ -61,7 +65,6 @@ async def get_block(test_case):
         headers=headers)
     test_case.assert404(response,
                         'Response body is : ' + response.data.decode('utf-8'))
-
 
 async def list_block_txs(test_case):
     """Test case for list_block_txs

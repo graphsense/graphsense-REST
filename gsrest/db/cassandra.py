@@ -676,13 +676,11 @@ class Cassandra:
                    row['address_id']) for row in results.current_rows]
         query = "SELECT * FROM address WHERE " \
                 "address_id_group = %s and address_id = %s"
-        result = self.concurrent_with_args(currency, 'transformed', query,
-                                           params, results_generator=True)
-        addresses = []
-        async for row in result:
-            addresses.append(await self.finish_address(currency, row))
+        result = await self.concurrent_with_args(currency, 'transformed',
+                                                 query, params)
 
-        return addresses, to_hex(results.paging_state)
+        return await self.finish_addresses(currency, result),\
+            to_hex(results.paging_state)
 
     # @Timer(text="Timer: list_neighbors {:.2f}")
     async def list_neighbors(self, currency, id, is_outgoing, node_type,
@@ -1397,10 +1395,8 @@ class Cassandra:
     # @Timer(text="Timer: list_entity_addresses_eth {:.2f}")
     async def list_entity_addresses_eth(self, currency, entity, page=None,
                                         pagesize=None):
-        addresses = []
-        async for address in self.get_addresses_by_ids(currency, [entity]):
-            addresses.append(await self.finish_address(currency, address))
-        return addresses, None
+        addresses = await self.get_addresses_by_ids(currency, [entity])
+        return await self.finish_addresses(currency, addresses), None
 
     async def list_entity_tags_eth(self, currency, label):
         return []
