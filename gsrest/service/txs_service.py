@@ -46,7 +46,7 @@ async def get_tx(currency, tx_hash, include_io=False):
         raise RuntimeError('Transaction {} in keyspace {} not found'
                            .format(tx_hash, currency))
 
-    rates = get_rates(currency, result['block_id'])['rates']
+    rates = (await get_rates(currency, result['block_id']))['rates']
     result = from_row(currency, result, rates)
     return result
 

@@ -264,10 +264,12 @@ async def recursive_search(currency, entity, params, breadth, depth, level,
     async def cached(cl, key, get):
         return get_cached(cl, key) or set_cached(cl, key, await get())
 
+    async def list_neighbors(entity):
+        return (await list_entity_neighbors(
+            currency, entity, direction, pagesize=breadth)).neighbors
+
     neighbors = await cached(entity, 'neighbors',
-                             lambda: list_entity_neighbors(
-                              currency, entity, direction,
-                              pagesize=breadth).neighbors)
+                             lambda: list_neighbors(entity))
 
     paths = []
 
@@ -275,7 +277,8 @@ async def recursive_search(currency, entity, params, breadth, depth, level,
         match = True
         props = await cached(int(neighbor.id), 'props',
                              lambda: get_entity(currency, int(neighbor.id),
-                                                True, False))
+                                                include_tags=True,
+                                                tag_coherence=False))
         if props is None:
             continue
 
@@ -338,8 +341,9 @@ async def recursive_search(currency, entity, params, breadth, depth, level,
         obj = levelClass(node=props, relation=neighbor,
                          matching_addresses=[])
         if subpaths is True:
-            addresses_with_tags = [get_address(currency, address, True)
-                                   for address in matching_addresses]
+            aws = [get_address(currency, address, True)
+                   for address in matching_addresses]
+            addresses_with_tags = await asyncio.gather(*aws)
             obj.matching_addresses = [address for address in
                                       addresses_with_tags
                                       if address is not None]

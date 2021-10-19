@@ -602,7 +602,7 @@ async def search_entity_neighbors(test_case):
                 fiat_values[0].value)
 
 
-async def search_entity_neighbors_sync(test_case):
+def search_entity_neighbors_sync(test_case):
     addresses = ['abcdefg', 'xyz1278']
     query_string = [('direction', 'out'),
                     ('key', 'addresses'),
