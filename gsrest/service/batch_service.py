@@ -51,6 +51,8 @@ def flatten(item, name="", flat_dict=None):
             flatten(item[sub_item], name + sub_item + "_", flat_dict)
     elif isinstance(item, list):
         name = name[:-1]
+        item = [i if isinstance(i, str) else str(i)
+                for i in item if i]
         flat_dict[name] = ','.join(item)
         flat_dict[f'{name}_count'] = len(item)
     else:
@@ -91,9 +93,15 @@ async def wrap(operation, currency, params, keys):
 
 
 def stack(currency, batch_operation):
-    mod = importlib.import_module(
-        f'gsrest.service.{batch_operation.api}_service')
-    operation = getattr(mod, batch_operation.operation)
+    try:
+        mod = importlib.import_module(
+            f'gsrest.service.{batch_operation.api}_service')
+        operation = getattr(mod, batch_operation.operation)
+    except ModuleNotFoundError:
+        raise RuntimeError(f'API {batch_operation.api} not found')
+    except AttributeError:
+        raise RuntimeError(f'{batch_operation.api}.{batch_operation.operation}'
+                           ' not found')
     aws = []
 
     params = {}
