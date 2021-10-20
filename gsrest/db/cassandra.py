@@ -374,12 +374,13 @@ class Cassandra:
         result = await self.execute_async(
                               currency, 'transformed',
                               query, [prefix[:prefix_length], address])
-        return result.one()['address_id'] if result else None
+        result = result.one()
+        return result['address_id'] if result else None
 
     # @Timer(text="Timer: get_address_id_id_group {:.2f}")
     async def get_address_id_id_group(self, currency, address):
         address_id = await self.get_address_id(currency, address)
-        if not address_id:
+        if address_id is None:
             raise RuntimeError("Address {} not found in currency {}"
                                .format(address, currency))
         id_group = self.get_id_group(currency, address_id)
@@ -456,7 +457,6 @@ class Cassandra:
     @eth
     async def list_links(self, currency, node_type, id, neighbor,
                          page=None, pagesize=None):
-        print(f'list_links {currency} {node_type} {id} {neighbor}')
         if node_type == 'address':
             id, id_group = \
                 await self.get_address_id_id_group(currency, id)
@@ -470,8 +470,6 @@ class Cassandra:
         if id is None or neighbor_id is None:
             raise RuntimeError("Links between {} and {} not found"
                                .format(id, neighbor))
-        print(f'{id} {id_group} {neighbor} {neighbor_id}, neighbor_group {neighbor_id_group}')
-
 
         query = \
             f"SELECT no_transactions FROM {node_type}_{{direction}}_relations"\
@@ -492,7 +490,6 @@ class Cassandra:
             return [], None
 
         no_outgoing_txs = no_outgoing_txs['no_transactions']
-        print(f'no_outgoing_txs {no_outgoing_txs}')
 
         no_incoming_txs = (
             await self.execute_async(currency,
@@ -507,7 +504,6 @@ class Cassandra:
             return [], None
 
         no_incoming_txs = no_incoming_txs['no_transactions']
-        print(f'no_incoming_txs {no_incoming_txs}')
 
         isOutgoing = no_outgoing_txs < no_incoming_txs
 
@@ -539,8 +535,6 @@ class Cassandra:
                                                 paging_state=paging_state,
                                                 fetch_size=fetch_size)
 
-            print(f'results1.current_rows {results1.current_rows}')
-
             if not results1.current_rows:
                 return [], None
 
@@ -552,8 +546,6 @@ class Cassandra:
                  for row in results1.current_rows]
             results2 = await self.concurrent_with_args(
                 currency, 'transformed', second_query, params)
-
-            print(f'results2 {results2}')
 
             for row in results2:
                 index = row['tx_id']
@@ -572,7 +564,6 @@ class Cassandra:
             links[row['tx_id']]['height'] = row['block_id']
             links[row['tx_id']]['timestamp'] = row['timestamp']
 
-        print(f'links {links}')
         return list(links.values()), to_hex(paging_state)
 
     async def list_matching_addresses(self, currency, expression):
@@ -1470,7 +1461,6 @@ class Cassandra:
             params = [[row[key],
                        self.get_id_group(currency, row[key])]
                       for row in nodes if row[f'has_{that}_labels']]
-            print(f'params {params}')
             query = ('select address_id, label from address_tags where '
                      'address_id=%s and address_id_group=%s')
             results = await self.concurrent_with_args(
