@@ -11,8 +11,8 @@ from flask import current_app
 
 from gsrest.util.exceptions import BadConfigError
 
-SMALL_PAGE_SIZE = 10
-BIG_PAGE_SIZE = 10
+SMALL_PAGE_SIZE = 1000
+BIG_PAGE_SIZE = 10000
 SEARCH_PAGE_SIZE = 100
 
 
@@ -176,8 +176,30 @@ class Cassandra:
 
         return result
 
-    def execute_async(self, currency, keyspace_type, query,
-                      params=None, paging_state=None, fetch_size=None):
+    async def execute_async(self, currency, keyspace_type, query,
+                            params=None, paging_state=None, fetch_size=None,
+                            autopaging=False):
+        result = await self.execute_async_lowlevel(
+                    currency, keyspace_type, query,
+                    params=params, paging_state=paging_state,
+                    fetch_size=fetch_size)
+        if not autopaging:
+            return result
+
+        if result.paging_state is None:
+            return result
+
+        more = await self.execute_async(
+                    currency, keyspace_type, query,
+                    params=params, paging_state=result.paging_state,
+                    fetch_size=fetch_size, autopaging=True)
+        for row in more.current_rows:
+            result.current_rows.append(row)
+        return result
+
+    def execute_async_lowlevel(self, currency, keyspace_type, query,
+                               params=None, paging_state=None,
+                               fetch_size=None):
         keyspace = self.get_keyspace_mapping(currency, keyspace_type)
         q = replaceFrom(keyspace, query)
         q = SimpleStatement(q, fetch_size=fetch_size)
@@ -210,7 +232,8 @@ class Cassandra:
                                    params, filter_empty=True, one=True,
                                    results_generator=False,
                                    keep_meta=False):
-        aws = [self.execute_async(currency, keyspace_type, query, param)
+        aws = [self.execute_async(currency, keyspace_type, query, param,
+                                  autopaging=True)
                for param in params]
         results = []
         for result in await asyncio.gather(*aws):
@@ -233,7 +256,6 @@ class Cassandra:
             else:
                 results.append(result)
         return results
-    #TODO: automatic page iteration missing
 
     @eth
     # @Timer(text="Timer: stats {:.2f}")
