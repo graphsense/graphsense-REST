@@ -391,8 +391,12 @@ class Cassandra:
     def get_block_id_group(self, keyspace, id_):
         return floor(int(id_) / self.parameters[keyspace]['block_bucket_size'])
 
+    @eth
     def get_tx_id_group(self, keyspace, id_):
         return floor(int(id_) / self.parameters[keyspace]['tx_bucket_size'])
+
+    def get_tx_id_group_eth(self, keyspace, id_):
+        return self.get_id_group(keyspace, id_)
 
     # @Timer(text="Timer: get_address {:.2f}")
     async def get_address(self, currency, address):
@@ -452,6 +456,7 @@ class Cassandra:
     @eth
     async def list_links(self, currency, node_type, id, neighbor,
                          page=None, pagesize=None):
+        print(f'list_links {currency} {node_type} {id} {neighbor}')
         if node_type == 'address':
             id, id_group = \
                 await self.get_address_id_id_group(currency, id)
@@ -465,29 +470,44 @@ class Cassandra:
         if id is None or neighbor_id is None:
             raise RuntimeError("Links between {} and {} not found"
                                .format(id, neighbor))
+        print(f'{id} {id_group} {neighbor} {neighbor_id}, neighbor_group {neighbor_id_group}')
 
-        query = f"SELECT no_{{direction}}_txs FROM {node_type} " \
-                f"WHERE {node_type}_id_group = %s AND {node_type}_id = %s"
 
-        no_outgoing_txs = (await self.execute_async(
-            currency, 'transformed', query.format(direction='outgoing'),
-            [id_group, id]
-            )).one()
+        query = \
+            f"SELECT no_transactions FROM {node_type}_{{direction}}_relations"\
+            f" WHERE {{src}}_{node_type}_id_group = %s AND"\
+            f" {{src}}_{node_type}_id = %s AND"\
+            f" {{dst}}_{node_type}_id = %s"
+
+        no_outgoing_txs = (
+            await self.execute_async(currency,
+                                     'transformed',
+                                     query.format(direction='outgoing',
+                                                  src='src',
+                                                  dst='dst'),
+                                     [id_group, id, neighbor_id])
+            ).one()
 
         if no_outgoing_txs is None:
             return [], None
 
-        no_outgoing_txs = no_outgoing_txs['no_outgoing_txs']
+        no_outgoing_txs = no_outgoing_txs['no_transactions']
+        print(f'no_outgoing_txs {no_outgoing_txs}')
 
-        no_incoming_txs = (await self.execute_async(
-            currency, 'transformed', query.format(direction='incoming'),
-            [neighbor_id_group, neighbor_id]
-            )).one()
+        no_incoming_txs = (
+            await self.execute_async(currency,
+                                     'transformed',
+                                     query.format(direction='incoming',
+                                                  src='dst',
+                                                  dst='src'),
+                                     [neighbor_id_group, neighbor_id, id])
+            ).one()
 
         if no_incoming_txs is None:
             return [], None
 
-        no_incoming_txs = no_incoming_txs['no_incoming_txs']
+        no_incoming_txs = no_incoming_txs['no_transactions']
+        print(f'no_incoming_txs {no_incoming_txs}')
 
         isOutgoing = no_outgoing_txs < no_incoming_txs
 
@@ -500,7 +520,8 @@ class Cassandra:
                   'output_value', 'input_value')
 
         first_query = f"SELECT * FROM {node_type}_transactions WHERE " \
-                      f"{node_type}_id_group = %s AND {node_type}_id = %s" \
+                      f"{node_type}_id_group = %s AND {node_type}_id = %s " \
+                      f"AND is_outgoing = %s"
 
         second_query = first_query + " AND tx_id = %s"
 
@@ -513,9 +534,12 @@ class Cassandra:
         while count < fetch_size and has_more_pages:
             results1 = await self.execute_async(currency, 'transformed',
                                                 first_query,
-                                                [first_id_group, first_id],
+                                                [first_id_group, first_id,
+                                                 isOutgoing],
                                                 paging_state=paging_state,
                                                 fetch_size=fetch_size)
+
+            print(f'results1.current_rows {results1.current_rows}')
 
             if not results1.current_rows:
                 return [], None
@@ -523,12 +547,13 @@ class Cassandra:
             paging_state = results1.paging_state
             has_more_pages = paging_state is not None
 
-            params = [[second_id_group, second_id, row['tx_id']]
-                      for row in results1.current_rows
-                      if row['value'] < 0 and isOutgoing or
-                      not isOutgoing and row['value'] > 0]
+            params = \
+                [[second_id_group, second_id, not isOutgoing, row['tx_id']]
+                 for row in results1.current_rows]
             results2 = await self.concurrent_with_args(
                 currency, 'transformed', second_query, params)
+
+            print(f'results2 {results2}')
 
             for row in results2:
                 index = row['tx_id']
@@ -547,6 +572,7 @@ class Cassandra:
             links[row['tx_id']]['height'] = row['block_id']
             links[row['tx_id']]['timestamp'] = row['timestamp']
 
+        print(f'links {links}')
         return list(links.values()), to_hex(paging_state)
 
     async def list_matching_addresses(self, currency, expression):
@@ -1246,7 +1272,7 @@ class Cassandra:
         return result.current_rows, to_hex(paging_state)
 
     async def list_txs_by_ids_eth(self, currency, ids):
-        params = [[self.get_id_group(currency, id), id] for id in ids]
+        params = [[self.get_tx_id_group(currency, id), id] for id in ids]
         statement = (
             'SELECT transaction from transaction_ids_by_transaction_id_group'
             ' where transaction_id_group = %s and transaction_id = %s')
@@ -1256,7 +1282,7 @@ class Cassandra:
                                                         for row in result])
 
     async def get_tx_by_id_eth(self, currency, id):
-        params = [self.get_id_group(currency, id), id]
+        params = [self.get_tx_id_group(currency, id), id]
         statement = (
             'SELECT transaction from transaction_ids_by_transaction_id_group'
             ' where transaction_id_group = %s and transaction_id = %s')
@@ -1326,29 +1352,60 @@ class Cassandra:
             raise RuntimeError("Links between {} and {} not found"
                                .format(address, neighbor))
 
-        query = "SELECT no_{direction}_txs FROM address " \
-                "WHERE address_id_group = %s AND address_id = %s"
+        query = \
+            f"SELECT no_transactions FROM {node_type}_{{direction}}_relations"\
+            f" WHERE {{src}}_{node_type}_id_group = %s AND"\
+            f" {{src}}_{node_type}_id_secondary_group in {{sec}} AND"\
+            f" {{src}}_{node_type}_id = %s AND"\
+            f" {{dst}}_{node_type}_id = %s"
 
-        no_outgoing_txs = (await self.execute_async(
-            currency, 'transformed', query.format(direction='outgoing'),
-            [address_id_group, address_id]
-            )).one()['no_outgoing_txs']
+        no_outgoing_txs = (
+            await self.execute_async(currency,
+                                     'transformed',
+                                     query.format(
+                                         direction='outgoing',
+                                         sec=address_id_secondary_group,
+                                         src='src',
+                                         dst='dst'),
+                                     [address_id_group, address_id,
+                                      neighbor_id])
+            ).one()
 
-        no_incoming_txs = (await self.execute_async(
-            currency, 'transformed', query.format(direction='incoming'),
-            [neighbor_id_group, neighbor_id]
-            )).one()['no_incoming_txs']
+        if no_outgoing_txs is None:
+            return [], None
+
+        no_outgoing_txs = no_outgoing_txs['no_transactions']
+
+        no_incoming_txs = (
+            await self.execute_async(currency,
+                                     'transformed',
+                                     query.format(
+                                         direction='incoming',
+                                         sec=neighbor_id_secondary_group,
+                                         src='dst',
+                                         dst='src'),
+                                     [neighbor_id_group, neighbor_id,
+                                      address_id])
+            ).one()
+
+        if no_incoming_txs is None:
+            return [], None
+
+        no_incoming_txs = no_incoming_txs['no_transactions']
+
+        isOutgoing = no_outgoing_txs < no_incoming_txs
 
         first_id_group, first_id, second_id_group, second_id, \
             first_id_secondary_group, second_id_secondary_group = \
             (address_id_group, address_id, neighbor_id_group, neighbor_id,
              address_id_secondary_group, neighbor_id_secondary_group) \
-            if no_outgoing_txs < no_incoming_txs \
+            if isOutgoing \
             else (neighbor_id_group, neighbor_id, address_id_group, address_id,
                   neighbor_id_secondary_group, address_id_secondary_group)
 
         basequery = "SELECT transaction_id FROM address_transactions WHERE " \
-                    "address_id_group = %s AND address_id = %s "
+                    "address_id_group = %s AND address_id = %s " \
+                    "AND is_outgoing = %s "
         first_query = basequery + \
             f"AND address_id_secondary_group IN {address_id_secondary_group}"
         second_query = basequery + \
@@ -1364,7 +1421,8 @@ class Cassandra:
         while count < fetch_size and has_more_pages:
             results1 = await self.execute_async(currency, 'transformed',
                                                 first_query,
-                                                [first_id_group, first_id],
+                                                [first_id_group, first_id,
+                                                 isOutgoing],
                                                 paging_state=paging_state,
                                                 fetch_size=fetch_size)
 
@@ -1374,7 +1432,8 @@ class Cassandra:
             paging_state = results1.paging_state
             has_more_pages = paging_state is not None
 
-            params = [[second_id_group, second_id, row['transaction_id']]
+            params = [[second_id_group, second_id, not isOutgoing,
+                       row['transaction_id']]
                       for row in results1.current_rows]
 
             results2 = await self.concurrent_with_args(
@@ -1411,6 +1470,7 @@ class Cassandra:
             params = [[row[key],
                        self.get_id_group(currency, row[key])]
                       for row in nodes if row[f'has_{that}_labels']]
+            print(f'params {params}')
             query = ('select address_id, label from address_tags where '
                      'address_id=%s and address_id_group=%s')
             results = await self.concurrent_with_args(

@@ -18,10 +18,11 @@ from gsrest.util.values import make_values
 import gsrest.service.entities_service as service
 from gsrest.test.addresses_service import addressD, addressE, eth_address, \
         eth_addressWithTagsOutNeighbors, atag1, atag2, eth_tag, eth_tag2
-from gsrest.test.txs_service import tx1_eth, tx2_eth, tx4_eth
+from gsrest.test.txs_service import tx1_eth, tx2_eth, tx22_eth, tx4_eth
 from gsrest.service.rates_service import list_rates
 from gsrest.util.values import convert_value
 import copy
+from tests.util.util import yamldump
 
 tag = EntityTag(
            category="organization",
@@ -334,6 +335,7 @@ async def list_entity_neighbors(test_case):
         entity=eth_entityWithTags.entity,
         include_labels=True,
         direction='out')
+    yamldump(result)
     test_case.assertEqual(eth_entityWithTagsOutNeighbors, result)
 
 
@@ -655,11 +657,15 @@ async def list_entity_txs(test_case):
     result = await service.list_entity_txs('btc', 144534)
     test_case.assertEqual(entity_txs, result)
 
-    tx2_eth_reverse = TxAccount(**copy.deepcopy(tx2_eth.to_dict()))
-    tx2_eth_reverse.value.value = -tx2_eth_reverse.value.value
-    for v in tx2_eth_reverse.value.fiat_values:
-        v.value = -v.value
-    txs = AddressTxs(address_txs=[tx1_eth, tx2_eth_reverse, tx4_eth])
+    def reverse(tx):
+        tx_r = TxAccount(**copy.deepcopy(tx.to_dict()))
+        tx_r.value.value = -tx_r.value.value
+        for v in tx_r.value.fiat_values:
+            v.value = -v.value
+        return tx_r
+    tx2_eth_r = reverse(tx2_eth)
+    tx22_eth_r = reverse(tx22_eth)
+    txs = AddressTxs(address_txs=[tx1_eth, tx4_eth, tx2_eth_r, tx22_eth_r])
     result = await service.list_entity_txs('eth', 107925000)
     test_case.assertEqual(txs, result)
 
@@ -717,7 +723,7 @@ async def list_entity_links(test_case):
                 currency='eth',
                 entity=107925000,
                 neighbor=107925001)
-    txs = Links(links=[tx1_eth, tx2_eth])
+    txs = Links(links=[tx2_eth, tx22_eth])
     test_case.assertEqual(txs, result)
 
 

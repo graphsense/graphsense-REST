@@ -76,6 +76,14 @@ tx2_eth = TxAccount(
    to_address='0xe0ec83c0c2bcffd920d268b20f403652e7137dbe',
    value=make_values(eur=123.0, usd=246.0, value=123000000000000000000))
 
+tx22_eth = TxAccount(
+   tx_hash='af6e0004',
+   height=1,
+   timestamp=16,
+   from_address='0xea674fdde714fd979de3edf0f56aa9716b898ec8',
+   to_address='0xe0ec83c0c2bcffd920d268b20f403652e7137dbe',
+   value=make_values(eur=124.0, usd=248.0, value=124000000000000000000))
+
 tx3_eth = TxAccount(
    tx_hash='ab188013',
    height=1,

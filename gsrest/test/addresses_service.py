@@ -16,7 +16,7 @@ from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from openapi_server.models.address_txs import AddressTxs
 from gsrest.util.values import convert_value
 from gsrest.service.rates_service import list_rates
-from gsrest.test.txs_service import tx1_eth, tx2_eth, tx4_eth
+from gsrest.test.txs_service import tx1_eth, tx2_eth, tx22_eth, tx4_eth
 from gsrest.util.values import make_values
 import copy
 from tests.util.util import yamldump
@@ -272,7 +272,7 @@ addressWithTagsOutNeighbors = Neighbors(
                         value=0,
                         usd=0.0,
                         eur=0.0),
-                no_txs=1,
+                no_txs=10,
                 value=make_values(
                     value=27789282,
                     usd=87.24,
@@ -620,11 +620,15 @@ async def list_address_txs(test_case):
     result = await service.list_address_txs('btc', address2.address)
     test_case.assertEqual(address_txs, result)
 
-    tx2_eth_reverse = TxAccount(**copy.deepcopy(tx2_eth.to_dict()))
-    tx2_eth_reverse.value.value = -tx2_eth_reverse.value.value
-    for v in tx2_eth_reverse.value.fiat_values:
-        v.value = -v.value
-    txs = AddressTxs(address_txs=[tx1_eth, tx2_eth_reverse, tx4_eth])
+    def reverse(tx):
+        tx_r = TxAccount(**copy.deepcopy(tx.to_dict()))
+        tx_r.value.value = -tx_r.value.value
+        for v in tx_r.value.fiat_values:
+            v.value = -v.value
+        return tx_r
+    tx2_eth_r = reverse(tx2_eth)
+    tx22_eth_r = reverse(tx22_eth)
+    txs = AddressTxs(address_txs=[tx1_eth, tx4_eth, tx2_eth_r, tx22_eth_r])
     result = await service.list_address_txs('eth', eth_address.address)
     yamldump(result)
     test_case.assertEqual(txs, result)
@@ -748,11 +752,11 @@ async def list_address_links(test_case):
 
     test_case.assertEqual(link, result)
 
+    txs = Links(links=[tx2_eth, tx22_eth])
     result = await service.list_address_links(
                 currency='eth',
                 address=eth_address.address,
                 neighbor='0x123456')
-    txs = Links(links=[tx1_eth, tx2_eth])
     test_case.assertEqual(txs, result)
 
     result = await service.list_address_links(
@@ -760,7 +764,7 @@ async def list_address_links(test_case):
                 address=eth_address.address,
                 neighbor='0x123456',
                 pagesize=1)
-    txs = Links(links=[tx1_eth])
+    txs = Links(links=[tx2_eth])
     test_case.assertEqual(txs.links, result.links)
     test_case.assertNotEqual(None, result.next_page)
 
@@ -770,7 +774,7 @@ async def list_address_links(test_case):
                 neighbor='0x123456',
                 page=result.next_page,
                 pagesize=1)
-    txs = Links(links=[tx2_eth])
+    txs = Links(links=[tx22_eth])
     test_case.assertEqual(txs.links, result.links)
     test_case.assertNotEqual(None, result.next_page)
 
