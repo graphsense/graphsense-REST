@@ -23,7 +23,7 @@ def bulk(currency, api, operation, body, form=None):  # noqa: E501
     :param form: The response data format
     :type form: str
 
-    :rtype: object
+    :rtype: List[Dict[str, object]]
     """
     try:
         result = asyncio.run(

@@ -593,7 +593,10 @@ paths:
           content:
             application/json:
               schema:
-                type: object
+                items:
+                  additionalProperties: true
+                  type: object
+                type: array
             text/csv:
               schema:
                 type: string
