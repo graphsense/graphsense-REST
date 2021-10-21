@@ -10,7 +10,6 @@ from openapi_server.models.address_tx import AddressTx
 from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.addresses import Addresses
-from openapi_server.models.batch_operation import BatchOperation
 from openapi_server.models.block import Block
 from openapi_server.models.blocks import Blocks
 from openapi_server.models.concept import Concept
@@ -20,16 +19,9 @@ from openapi_server.models.entity import Entity
 from openapi_server.models.entity_addresses import EntityAddresses
 from openapi_server.models.entity_tag import EntityTag
 from openapi_server.models.entity_tag_all_of import EntityTagAllOf
-from openapi_server.models.get_address import GetAddress
-from openapi_server.models.get_block import GetBlock
-from openapi_server.models.get_tx import GetTx
-from openapi_server.models.get_tx_io import GetTxIo
-from openapi_server.models.io import Io
 from openapi_server.models.link import Link
 from openapi_server.models.link_utxo import LinkUtxo
 from openapi_server.models.links import Links
-from openapi_server.models.list_block_txs import ListBlockTxs
-from openapi_server.models.list_entity_addresses import ListEntityAddresses
 from openapi_server.models.neighbor import Neighbor
 from openapi_server.models.neighbors import Neighbors
 from openapi_server.models.rate import Rate

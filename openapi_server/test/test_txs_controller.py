@@ -7,7 +7,6 @@ import asyncio
 from flask import json
 from six import BytesIO
 
-from openapi_server.models.io import Io  # noqa: E501
 from openapi_server.models.tx import Tx  # noqa: E501
 from openapi_server.models.tx_value import TxValue  # noqa: E501
 from openapi_server.test import BaseTestCase
@@ -26,7 +25,7 @@ class TestTxsController(BaseTestCase):
         if 'get_tx_sync' in dir(test_service):
             test_service.get_tx_sync(self)
 
-        if "get_tx" in ["batch", "get_tx_io"]:
+        if "get_tx" == "bulk":
             return
         query_string = [('','')]
         headers = { 
@@ -49,13 +48,13 @@ class TestTxsController(BaseTestCase):
         if 'get_tx_io_sync' in dir(test_service):
             test_service.get_tx_io_sync(self)
 
-        if "get_tx_io" in ["batch", "get_tx_io"]:
+        if "get_tx_io" == "bulk":
             return
         headers = { 
             'Accept': 'application/json',
         }
         response = self.client.open(
-            '/{currency}/txs/{tx_hash}/{io}'.format(currency='btc', tx_hash='ab188013', io=openapi_server.Io()),
+            '/{currency}/txs/{tx_hash}/{io}'.format(currency='btc', tx_hash='ab188013', io='outputs'),
             method='GET',
             headers=headers)
         self.assert200(response,

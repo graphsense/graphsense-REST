@@ -25,7 +25,7 @@ class TestGeneralController(BaseTestCase):
         if 'get_statistics_sync' in dir(test_service):
             test_service.get_statistics_sync(self)
 
-        if "get_statistics" in ["batch", "get_tx_io"]:
+        if "get_statistics" == "bulk":
             return
         headers = { 
             'Accept': 'application/json',
@@ -46,7 +46,7 @@ class TestGeneralController(BaseTestCase):
         if 'search_sync' in dir(test_service):
             test_service.search_sync(self)
 
-        if "search" in ["batch", "get_tx_io"]:
+        if "search" == "bulk":
             return
         query_string = [('',''),
                         ('q', 'foo'),

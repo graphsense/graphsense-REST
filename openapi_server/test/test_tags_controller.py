@@ -26,7 +26,7 @@ class TestTagsController(BaseTestCase):
         if 'list_concepts_sync' in dir(test_service):
             test_service.list_concepts_sync(self)
 
-        if "list_concepts" in ["batch", "get_tx_io"]:
+        if "list_concepts" == "bulk":
             return
         headers = { 
             'Accept': 'application/json',
@@ -47,7 +47,7 @@ class TestTagsController(BaseTestCase):
         if 'list_tags_sync' in dir(test_service):
             test_service.list_tags_sync(self)
 
-        if "list_tags" in ["batch", "get_tx_io"]:
+        if "list_tags" == "bulk":
             return
         query_string = [('',''),
                         ('label', 'cimedy')]
@@ -71,7 +71,7 @@ class TestTagsController(BaseTestCase):
         if 'list_taxonomies_sync' in dir(test_service):
             test_service.list_taxonomies_sync(self)
 
-        if "list_taxonomies" in ["batch", "get_tx_io"]:
+        if "list_taxonomies" == "bulk":
             return
         headers = { 
             'Accept': 'application/json',

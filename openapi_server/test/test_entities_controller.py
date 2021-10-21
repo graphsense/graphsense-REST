@@ -30,7 +30,7 @@ class TestEntitiesController(BaseTestCase):
         if 'get_entity_sync' in dir(test_service):
             test_service.get_entity_sync(self)
 
-        if "get_entity" in ["batch", "get_tx_io"]:
+        if "get_entity" == "bulk":
             return
         query_string = [('',''),
                         ('','')]
@@ -54,7 +54,7 @@ class TestEntitiesController(BaseTestCase):
         if 'list_entity_addresses_sync' in dir(test_service):
             test_service.list_entity_addresses_sync(self)
 
-        if "list_entity_addresses" in ["batch", "get_tx_io"]:
+        if "list_entity_addresses" == "bulk":
             return
         query_string = [('',''),
                         ('','')]
@@ -78,7 +78,7 @@ class TestEntitiesController(BaseTestCase):
         if 'list_entity_links_sync' in dir(test_service):
             test_service.list_entity_links_sync(self)
 
-        if "list_entity_links" in ["batch", "get_tx_io"]:
+        if "list_entity_links" == "bulk":
             return
         query_string = [('neighbor', 123456)]
         headers = { 
@@ -101,7 +101,7 @@ class TestEntitiesController(BaseTestCase):
         if 'list_entity_neighbors_sync' in dir(test_service):
             test_service.list_entity_neighbors_sync(self)
 
-        if "list_entity_neighbors" in ["batch", "get_tx_io"]:
+        if "list_entity_neighbors" == "bulk":
             return
         query_string = [('direction', 'out'),
                         ('',''),
@@ -128,7 +128,7 @@ class TestEntitiesController(BaseTestCase):
         if 'list_entity_txs_sync' in dir(test_service):
             test_service.list_entity_txs_sync(self)
 
-        if "list_entity_txs" in ["batch", "get_tx_io"]:
+        if "list_entity_txs" == "bulk":
             return
         query_string = [('',''),
                         ('','')]
@@ -152,7 +152,7 @@ class TestEntitiesController(BaseTestCase):
         if 'list_tags_by_entity_sync' in dir(test_service):
             test_service.list_tags_by_entity_sync(self)
 
-        if "list_tags_by_entity" in ["batch", "get_tx_io"]:
+        if "list_tags_by_entity" == "bulk":
             return
         query_string = [('','')]
         headers = { 
@@ -175,7 +175,7 @@ class TestEntitiesController(BaseTestCase):
         if 'search_entity_neighbors_sync' in dir(test_service):
             test_service.search_entity_neighbors_sync(self)
 
-        if "search_entity_neighbors" in ["batch", "get_tx_io"]:
+        if "search_entity_neighbors" == "bulk":
             return
         query_string = [('direction', 'out'),
                         ('key', 'category'),

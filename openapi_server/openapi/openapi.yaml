@@ -50,7 +50,6 @@ paths:
       summary: Returns matching addresses, transactions and labels
       tags:
       - general
-      x-async: true
       x-openapi-router-controller: openapi_server.controllers.general_controller
   /stats:
     get:
@@ -65,7 +64,6 @@ paths:
       summary: Get statistics of supported currencies
       tags:
       - general
-      x-async: true
       x-openapi-router-controller: openapi_server.controllers.general_controller
   /tags:
     get:
@@ -102,7 +100,6 @@ paths:
       summary: Returns address and entity tags associated with a given label
       tags:
       - tags
-      x-async: true
       x-openapi-router-controller: openapi_server.controllers.tags_controller
   /tags/taxonomies:
     get:
@@ -119,7 +116,6 @@ paths:
       summary: Returns the supported taxonomies
       tags:
       - tags
-      x-async: true
       x-openapi-router-controller: openapi_server.controllers.tags_controller
   /tags/taxonomies/{taxonomy}/concepts:
     get:
@@ -146,7 +142,6 @@ paths:
       summary: Returns the supported concepts of a taxonomy
       tags:
       - tags
-      x-async: true
       x-openapi-router-controller: openapi_server.controllers.tags_controller
   /{currency}/addresses/{address}:
     get:
@@ -169,8 +164,7 @@ paths:
         name: address
         required: true
         schema:
-          format: string
-          type: string
+          $ref: '#/components/schemas/address_id'
         style: simple
       - description: Whether to include tags
         explode: true
@@ -191,7 +185,6 @@ paths:
       summary: Get an address, optionally with tags
       tags:
       - addresses
-      x-async: true
       x-openapi-router-controller: openapi_server.controllers.addresses_controller
   /{currency}/addresses/{address}/entity:
     get:
@@ -214,8 +207,7 @@ paths:
         name: address
         required: true
         schema:
-          format: string
-          type: string
+          $ref: '#/components/schemas/address_id'
         style: simple
       - description: Whether to include tags
         explode: true
@@ -245,7 +237,6 @@ paths:
       summary: Get the entity of an address
       tags:
       - addresses
-      x-async: true
       x-openapi-router-controller: openapi_server.controllers.addresses_controller
   /{currency}/addresses/{address}/links:
     get:
@@ -268,8 +259,7 @@ paths:
         name: address
         required: true
         schema:
-          format: string
-          type: string
+          $ref: '#/components/schemas/address_id'
         style: simple
       - description: Neighbor address
         example: addressE
@@ -278,7 +268,7 @@ paths:
         name: neighbor
         required: true
         schema:
-          type: string
+          $ref: '#/components/schemas/address_id'
         style: form
       responses:
         "200":
@@ -287,10 +277,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/links'
           description: OK
-      summary: Get transactions between two addresses
+      summary: Get outgoing transactions between two addresses
       tags:
       - addresses
-      x-async: true
       x-openapi-router-controller: openapi_server.controllers.addresses_controller
   /{currency}/addresses/{address}/neighbors:
     get:
@@ -313,8 +302,7 @@ paths:
         name: address
         required: true
         schema:
-          format: string
-          type: string
+          $ref: '#/components/schemas/address_id'
         style: simple
       - description: Incoming or outgoing neighbors
         example: out
@@ -365,7 +353,6 @@ paths:
       summary: Get an addresses' neighbors in the address graph
       tags:
       - addresses
-      x-async: true
       x-openapi-router-controller: openapi_server.controllers.addresses_controller
   /{currency}/addresses/{address}/tags:
     get:
@@ -388,8 +375,7 @@ paths:
         name: address
         required: true
         schema:
-          format: string
-          type: string
+          $ref: '#/components/schemas/address_id'
         style: simple
       responses:
         "200":
@@ -403,7 +389,6 @@ paths:
       summary: Get attribution tags for a given address
       tags:
       - addresses
-      x-async: true
       x-openapi-router-controller: openapi_server.controllers.addresses_controller
   /{currency}/addresses/{address}/txs:
     get:
@@ -426,8 +411,7 @@ paths:
         name: address
         required: true
         schema:
-          format: string
-          type: string
+          $ref: '#/components/schemas/address_id'
         style: simple
       - description: Resumption token for retrieving the next page
         explode: true
@@ -457,73 +441,7 @@ paths:
       summary: Get all transactions an address has been involved in
       tags:
       - addresses
-      x-async: true
       x-openapi-router-controller: openapi_server.controllers.addresses_controller
-  /{currency}/batch:
-    post:
-      operationId: batch
-      parameters:
-      - description: The cryptocurrency (e.g., btc)
-        example: btc
-        explode: false
-        in: path
-        name: currency
-        required: true
-        schema:
-          format: string
-          type: string
-        style: simple
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/batch_operation'
-      responses:
-        "200":
-          content:
-            text/csv:
-              schema:
-                type: string
-          description: OK
-      summary: Get data as CSV in batch
-      tags:
-      - batch
-      x-async: true
-      x-openapi-router-controller: openapi_server.controllers.batch_controller
-  /{currency}/blocks:
-    get:
-      operationId: list_blocks
-      parameters:
-      - description: The cryptocurrency (e.g., btc)
-        example: btc
-        explode: false
-        in: path
-        name: currency
-        required: true
-        schema:
-          format: string
-          type: string
-        style: simple
-      - description: Resumption token for retrieving the next page
-        explode: true
-        in: query
-        name: page
-        required: false
-        schema:
-          type: string
-        style: form
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/blocks'
-          description: OK
-      summary: Get all blocks
-      tags:
-      - blocks
-      x-async: true
-      x-openapi-router-controller: openapi_server.controllers.blocks_controller
   /{currency}/blocks/{height}:
     get:
       operationId: get_block
@@ -557,7 +475,6 @@ paths:
       summary: Get a block by its height
       tags:
       - blocks
-      x-async: true
       x-openapi-router-controller: openapi_server.controllers.blocks_controller
   /{currency}/blocks/{height}/txs:
     get:
@@ -594,8 +511,97 @@ paths:
       summary: Get block transactions
       tags:
       - blocks
-      x-async: true
       x-openapi-router-controller: openapi_server.controllers.blocks_controller
+  /{currency}/bulk/{api}/{operation}:
+    post:
+      operationId: bulk
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The api of the operation to execute in bulk
+        example: blocks
+        explode: false
+        in: path
+        name: api
+        required: true
+        schema:
+          enum:
+          - blocks
+          - addresses
+          - entities
+          - txs
+          - rates
+          - tags
+          type: string
+        style: simple
+      - description: The operation to execute in bulk
+        example: get_block
+        explode: false
+        in: path
+        name: operation
+        required: true
+        schema:
+          enum:
+          - get_block
+          - list_block_txs
+          - get_address
+          - list_address_txs
+          - list_tags_by_address
+          - list_address_neighbors
+          - get_address_entity
+          - list_address_links
+          - get_entity
+          - list_tags_by_entity
+          - list_entity_neighbors
+          - list_entity_txs
+          - list_entity_links
+          - list_entity_addresses
+          - get_tx
+          - get_tx_io
+          - get_exchange_rates
+          type: string
+        style: simple
+      - description: The response data format
+        explode: true
+        in: query
+        name: form
+        required: false
+        schema:
+          default: csv
+          enum:
+          - csv
+          - json
+          type: string
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+        description: Map of the operation's parameter names to (arrays of) values
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+            text/csv:
+              schema:
+                type: string
+          description: OK
+      summary: Get data as CSV or JSON in bulk
+      tags:
+      - bulk
+      x-openapi-router-controller: openapi_server.controllers.bulk_controller
   /{currency}/entities/{entity}:
     get:
       operationId: get_entity
@@ -647,7 +653,6 @@ paths:
       summary: Get an entity, optionally with tags
       tags:
       - entities
-      x-async: true
       x-openapi-router-controller: openapi_server.controllers.entities_controller
   /{currency}/entities/{entity}/addresses:
     get:
@@ -700,7 +705,6 @@ paths:
       summary: Get an entity's addresses
       tags:
       - entities
-      x-async: true
       x-openapi-router-controller: openapi_server.controllers.entities_controller
   /{currency}/entities/{entity}/links:
     get:
@@ -732,8 +736,7 @@ paths:
         name: neighbor
         required: true
         schema:
-          format: int32
-          type: integer
+          $ref: '#/components/schemas/entity_id'
         style: form
       responses:
         "200":
@@ -745,7 +748,6 @@ paths:
       summary: Get transactions between two entities
       tags:
       - entities
-      x-async: true
       x-openapi-router-controller: openapi_server.controllers.entities_controller
   /{currency}/entities/{entity}/neighbors:
     get:
@@ -788,10 +790,7 @@ paths:
         name: only_ids
         required: false
         schema:
-          items:
-            format: int32
-            type: integer
-          type: array
+          $ref: '#/components/schemas/only_entity_ids'
         style: form
       - description: Whether to include labels of tags
         explode: true
@@ -830,7 +829,6 @@ paths:
       summary: Get an entity's neighbors in the entity graph
       tags:
       - entities
-      x-async: true
       x-openapi-router-controller: openapi_server.controllers.entities_controller
   /{currency}/entities/{entity}/search:
     get:
@@ -942,7 +940,6 @@ paths:
       summary: Search deeply for matching neighbors
       tags:
       - entities
-      x-async: true
       x-openapi-router-controller: openapi_server.controllers.entities_controller
   /{currency}/entities/{entity}/tags:
     get:
@@ -986,7 +983,6 @@ paths:
       summary: Get tags for a given entity
       tags:
       - entities
-      x-async: true
       x-openapi-router-controller: openapi_server.controllers.entities_controller
   /{currency}/entities/{entity}/txs:
     get:
@@ -1039,7 +1035,6 @@ paths:
       summary: Get all transactions an entity has been involved in
       tags:
       - entities
-      x-async: true
       x-openapi-router-controller: openapi_server.controllers.entities_controller
   /{currency}/rates/{height}:
     get:
@@ -1074,7 +1069,6 @@ paths:
       summary: Returns exchange rate for a given height
       tags:
       - rates
-      x-async: true
       x-openapi-router-controller: openapi_server.controllers.rates_controller
   /{currency}/txs/{tx_hash}:
     get:
@@ -1118,7 +1112,6 @@ paths:
       summary: Returns details of a specific transaction identified by its hash.
       tags:
       - txs
-      x-async: true
       x-openapi-router-controller: openapi_server.controllers.txs_controller
   /{currency}/txs/{tx_hash}/{io}:
     get:
@@ -1150,7 +1143,10 @@ paths:
         name: io
         required: true
         schema:
-          $ref: '#/components/schemas/io'
+          enum:
+          - inputs
+          - outputs
+          type: string
         style: simple
       responses:
         "200":
@@ -1163,7 +1159,6 @@ paths:
         its hash.
       tags:
       - txs
-      x-async: true
       x-openapi-router-controller: openapi_server.controllers.txs_controller
 components:
   parameters:
@@ -1175,8 +1170,7 @@ components:
       name: address
       required: true
       schema:
-        format: string
-        type: string
+        $ref: '#/components/schemas/address_id'
       style: simple
     address_ids:
       description: Restrict result to given set of comma separated addresses
@@ -1189,6 +1183,23 @@ components:
           type: string
         type: array
       style: form
+    api:
+      description: The api of the operation to execute in bulk
+      example: blocks
+      explode: false
+      in: path
+      name: api
+      required: true
+      schema:
+        enum:
+        - blocks
+        - addresses
+        - entities
+        - txs
+        - rates
+        - tags
+        type: string
+      style: simple
     breadth:
       description: How many siblings of each neighbor should be tried
       explode: true
@@ -1265,14 +1276,13 @@ components:
       name: neighbor
       required: true
       schema:
-        format: int32
-        type: integer
+        $ref: '#/components/schemas/entity_id'
       style: form
-    format:
+    form:
       description: The response data format
       explode: true
       in: query
-      name: format
+      name: form
       required: false
       schema:
         default: csv
@@ -1291,27 +1301,6 @@ components:
       schema:
         $ref: '#/components/schemas/height'
       style: simple
-    hex_address:
-      description: The cryptocurrency address in hexadecimal representation
-      example: "123456"
-      explode: false
-      in: path
-      name: address
-      required: true
-      schema:
-        format: string
-        type: string
-      style: simple
-    hex_neighbor:
-      description: Neighbor address in hexadecimal representation
-      example: "123456"
-      explode: true
-      in: query
-      name: neighbor
-      required: true
-      schema:
-        type: string
-      style: form
     include_io:
       description: Whether to include inputs/outputs of a transaction (UTXO only)
       explode: true
@@ -1350,7 +1339,10 @@ components:
       name: io
       required: true
       schema:
-        $ref: '#/components/schemas/io'
+        enum:
+        - inputs
+        - outputs
+        type: string
       style: simple
     label:
       description: The label of an entity
@@ -1380,7 +1372,7 @@ components:
       name: neighbor
       required: true
       schema:
-        type: string
+        $ref: '#/components/schemas/address_id'
       style: form
     only_entity_ids:
       description: Restrict result to given set of comma separated IDs
@@ -1389,11 +1381,36 @@ components:
       name: only_ids
       required: false
       schema:
-        items:
-          format: int32
-          type: integer
-        type: array
+        $ref: '#/components/schemas/only_entity_ids'
       style: form
+    operation:
+      description: The operation to execute in bulk
+      example: get_block
+      explode: false
+      in: path
+      name: operation
+      required: true
+      schema:
+        enum:
+        - get_block
+        - list_block_txs
+        - get_address
+        - list_address_txs
+        - list_tags_by_address
+        - list_address_neighbors
+        - get_address_entity
+        - list_address_links
+        - get_entity
+        - list_tags_by_entity
+        - list_entity_neighbors
+        - list_entity_txs
+        - list_entity_links
+        - list_entity_addresses
+        - get_tx
+        - get_tx_io
+        - get_exchange_rates
+        type: string
+      style: simple
     page:
       description: Resumption token for retrieving the next page
       explode: true
@@ -1688,23 +1705,6 @@ components:
           title: next_page
           type: string
       type: object
-    batch_operation:
-      discriminator:
-        mapping:
-          get_address: '#/components/schemas/get_address'
-          get_block: '#/components/schemas/get_block'
-          get_tx: '#/components/schemas/get_tx'
-          get_tx_io: '#/components/schemas/get_tx_io'
-          list_block_txs: '#/components/schemas/list_block_txs'
-          list_entity_addresses: '#/components/schemas/list_entity_addresses'
-        propertyName: operation
-      oneOf:
-      - $ref: '#/components/schemas/get_tx'
-      - $ref: '#/components/schemas/get_tx_io'
-      - $ref: '#/components/schemas/list_entity_addresses'
-      - $ref: '#/components/schemas/get_block'
-      - $ref: '#/components/schemas/list_block_txs'
-      - $ref: '#/components/schemas/get_address'
     block:
       example:
         block_hash: block_hash
@@ -1733,28 +1733,15 @@ components:
       title: block
       type: object
     blocks:
-      example:
-        next_page: next_page
-        blocks:
-        - block_hash: block_hash
-          height: 0
-          no_txs: 6
-          timestamp: 1
-        - block_hash: block_hash
-          height: 0
-          no_txs: 6
-          timestamp: 1
       properties:
         blocks:
           items:
             $ref: '#/components/schemas/block'
-          title: blocks
           type: array
         next_page:
           format: string
           title: next_page
           type: string
-      title: blocks
       type: object
     concept:
       example:
@@ -2081,89 +2068,12 @@ components:
       - $ref: '#/components/schemas/tag'
       - $ref: '#/components/schemas/entity_tag_allOf'
       title: entity_tag
-    get_address:
-      properties:
-        address:
-          items:
-            $ref: '#/components/schemas/address_id'
-          type: array
-        api:
-          default: addresses
-          type: string
-        operation:
-          default: get_address
-          type: string
-      required:
-      - address
-      - api
-      - operation
-      type: object
-    get_block:
-      properties:
-        api:
-          default: blocks
-          type: string
-        height:
-          items:
-            $ref: '#/components/schemas/height'
-          type: array
-        operation:
-          default: get_block
-          type: string
-      required:
-      - api
-      - height
-      - operation
-      type: object
-    get_tx:
-      properties:
-        api:
-          default: txs
-          type: string
-        operation:
-          default: get_tx
-          type: string
-        tx_hash:
-          items:
-            $ref: '#/components/schemas/tx_hash'
-          type: array
-      required:
-      - api
-      - operation
-      - tx_hash
-      type: object
-    get_tx_io:
-      properties:
-        api:
-          default: txs
-          type: string
-        io:
-          $ref: '#/components/schemas/io'
-        operation:
-          default: get_tx_io
-          type: string
-        tx_hash:
-          items:
-            $ref: '#/components/schemas/tx_hash'
-          type: array
-      required:
-      - api
-      - io
-      - operation
-      - tx_hash
-      type: object
     height:
       description: Height
       format: int64
       minimum: 0
       title: height
       type: integer
-    io:
-      enum:
-      - inputs
-      - outputs
-      title: io
-      type: string
     label:
       description: Label
       title: label
@@ -2227,40 +2137,6 @@ components:
           title: next_page
           type: string
       title: links
-      type: object
-    list_block_txs:
-      properties:
-        api:
-          default: blocks
-          type: string
-        height:
-          items:
-            $ref: '#/components/schemas/height'
-          type: array
-        operation:
-          default: list_block_txs
-          type: string
-      required:
-      - api
-      - height
-      - operation
-      type: object
-    list_entity_addresses:
-      properties:
-        api:
-          default: entities
-          type: string
-        entity:
-          items:
-            $ref: '#/components/schemas/entity_id'
-          type: array
-        operation:
-          default: list_entity_addresses
-          type: string
-      required:
-      - api
-      - entity
-      - operation
       type: object
     neighbor:
       example:
@@ -2408,6 +2284,11 @@ components:
       format: int64
       title: no_addresses
       type: integer
+    only_entity_ids:
+      items:
+        format: int32
+        type: integer
+      type: array
     rate:
       example:
         code: code

@@ -7,10 +7,10 @@ import asyncio
 import json
 
 
-async def batch(currency, batch_operation, format='csv'):
+async def bulk(currency, api, operation, body, form='csv'):
     result = ""
-    the_stack = stack(currency, batch_operation)
-    if format == 'csv':
+    the_stack = stack(currency, api, operation, body, form)
+    if form == 'csv':
         gen = to_csv(the_stack)
         mimetype = 'text/csv'
     else:
@@ -21,7 +21,7 @@ async def batch(currency, batch_operation, format='csv'):
         result += row
     return Response(result,
                     mimetype=mimetype,
-                    headers=create_download_header(f'batch.{format}'))
+                    headers=create_download_header(f'bulk.{format}'))
 
 
 class writer:
@@ -32,7 +32,7 @@ class writer:
         return self.str
 
 
-def flatten(item, name="", flat_dict=None):
+def flatten(item, name="", flat_dict=None, format=None):
     if flat_dict is None:
         # going this way instead of a default argument value
         # like "..., flat_dict = {}):" because
@@ -48,19 +48,23 @@ def flatten(item, name="", flat_dict=None):
         item = item.to_dict()
     if isinstance(item, dict):
         for sub_item in item:
-            flatten(item[sub_item], name + sub_item + "_", flat_dict)
+            flatten(item[sub_item], name + sub_item + "_", flat_dict, format)
     elif isinstance(item, list):
-        name = name[:-1]
-        item = [i if isinstance(i, str) else str(i)
-                for i in item if i]
-        flat_dict[name] = ','.join(item)
-        flat_dict[f'{name}_count'] = len(item)
+        if format == 'csv':
+            name = name[:-1]
+            item = [i if isinstance(i, str) else str(i)
+                    for i in item if i]
+            flat_dict[name] = ','.join(item)
+            flat_dict[f'{name}_count'] = len(item)
+        else:
+            flat_dict[name[:-1]] = \
+                [flatten(sub_item, format=format) for sub_item in item]
     else:
         flat_dict[name[:-1]] = item
     return flat_dict
 
 
-async def wrap(operation, currency, params, keys):
+async def wrap(operation, currency, params, keys, format):
     params = dict(params)
     for (k, v) in keys.items():
         params[k] = v
@@ -80,36 +84,34 @@ async def wrap(operation, currency, params, keys):
         page_state = result['next_page']
     flat = []
     for row in rows:
-        fl = flatten(row)
+        fl = flatten(row, format=format)
         for (k, v) in keys.items():
             fl[k] = v
         flat.append(fl)
     if page_state:
         params['page'] = page_state
-        more = await wrap(operation, currency, params)
+        more = await wrap(operation, currency, params, keys, format)
         for row in more:
             flat.append(row)
     return flat
 
 
-def stack(currency, batch_operation):
+def stack(currency, api, operation, body, format):
     try:
         mod = importlib.import_module(
-            f'gsrest.service.{batch_operation.api}_service')
-        operation = getattr(mod, batch_operation.operation)
+            f'gsrest.service.{api}_service')
+        operation = getattr(mod, operation)
     except ModuleNotFoundError:
-        raise RuntimeError(f'API {batch_operation.api} not found')
+        raise RuntimeError(f'API {api} not found')
     except AttributeError:
-        raise RuntimeError(f'{batch_operation.api}.{batch_operation.operation}'
+        raise RuntimeError(f'{api}.{operation}'
                            ' not found')
     aws = []
 
     params = {}
     keys = {}
     ln = 0
-    for (attr, a) in batch_operation.to_dict().items():
-        if attr in ['api', 'operation']:
-            continue
+    for (attr, a) in body.items():
         if a is None:
             continue
         if attr == 'only_ids' or not isinstance(a, list):
@@ -125,7 +127,7 @@ def stack(currency, batch_operation):
         the_keys = {}
         for (k, v) in keys.items():
             the_keys[k] = v[i]
-        aw = wrap(operation, currency, params, the_keys)
+        aw = wrap(operation, currency, params, the_keys, format)
 
         aws.append(aw)
 

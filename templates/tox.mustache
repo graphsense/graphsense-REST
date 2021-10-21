@@ -15,4 +15,4 @@ deps=-r{toxinidir}/requirements.txt
 
 commands=
   bash -c "cd {toxinidir}/tests/ && make .runtest"
-  {{^useNose}}pytest -x -k "list_concepts or list_taxo" --cov={{{pythonSrcRoot}}}{{{packageName}}}{{/useNose}}{{#useNose}}nosetests{{/useNose}}
+  {{^useNose}}pytest -x --cov={{{pythonSrcRoot}}}{{{packageName}}}{{/useNose}}{{#useNose}}nosetests{{/useNose}}

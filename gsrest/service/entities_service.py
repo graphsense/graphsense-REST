@@ -51,7 +51,7 @@ def from_row(currency, row, rates, tags=None):
         )
 
 
-async def list_tags_by_entity(currency, entity, tag_coherence):
+async def list_tags_by_entity(currency, entity, tag_coherence=False):
     entity_tags = await list_entity_tags_by_entity(currency, entity)
     address_tags = await list_address_tags_by_entity(currency, entity)
     tag_coherence = compute_tag_coherence(tag.label for tag in address_tags) \
@@ -104,7 +104,8 @@ async def list_address_tags_by_entity(currency, entity):
             for row in address_tags]
 
 
-async def get_entity(currency, entity, include_tags, tag_coherence):
+async def get_entity(currency, entity, include_tags=False,
+                     tag_coherence=False):
     db = get_connection()
     result = await db.get_entity(currency, entity)
 

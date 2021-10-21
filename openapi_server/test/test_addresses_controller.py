@@ -29,7 +29,7 @@ class TestAddressesController(BaseTestCase):
         if 'get_address_sync' in dir(test_service):
             test_service.get_address_sync(self)
 
-        if "get_address" in ["batch", "get_tx_io"]:
+        if "get_address" == "bulk":
             return
         query_string = [('','')]
         headers = { 
@@ -52,7 +52,7 @@ class TestAddressesController(BaseTestCase):
         if 'get_address_entity_sync' in dir(test_service):
             test_service.get_address_entity_sync(self)
 
-        if "get_address_entity" in ["batch", "get_tx_io"]:
+        if "get_address_entity" == "bulk":
             return
         query_string = [('',''),
                         ('','')]
@@ -70,13 +70,13 @@ class TestAddressesController(BaseTestCase):
     def test_list_address_links(self):
         """Test case for list_address_links
 
-        Get transactions between two addresses
+        Get outgoing transactions between two addresses
         """
         asyncio.run(test_service.list_address_links(self))
         if 'list_address_links_sync' in dir(test_service):
             test_service.list_address_links_sync(self)
 
-        if "list_address_links" in ["batch", "get_tx_io"]:
+        if "list_address_links" == "bulk":
             return
         query_string = [('neighbor', 'addressE')]
         headers = { 
@@ -99,7 +99,7 @@ class TestAddressesController(BaseTestCase):
         if 'list_address_neighbors_sync' in dir(test_service):
             test_service.list_address_neighbors_sync(self)
 
-        if "list_address_neighbors" in ["batch", "get_tx_io"]:
+        if "list_address_neighbors" == "bulk":
             return
         query_string = [('direction', 'out'),
                         ('',''),
@@ -125,7 +125,7 @@ class TestAddressesController(BaseTestCase):
         if 'list_address_txs_sync' in dir(test_service):
             test_service.list_address_txs_sync(self)
 
-        if "list_address_txs" in ["batch", "get_tx_io"]:
+        if "list_address_txs" == "bulk":
             return
         query_string = [('',''),
                         ('','')]
@@ -149,7 +149,7 @@ class TestAddressesController(BaseTestCase):
         if 'list_tags_by_address_sync' in dir(test_service):
             test_service.list_tags_by_address_sync(self)
 
-        if "list_tags_by_address" in ["batch", "get_tx_io"]:
+        if "list_tags_by_address" == "bulk":
             return
         headers = { 
             'Accept': 'application/json',

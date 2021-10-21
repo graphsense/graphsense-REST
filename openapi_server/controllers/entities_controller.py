@@ -42,6 +42,8 @@ def get_entity(currency, entity, include_tags=None, tag_coherence=None):  # noqa
         return notfound(str(e))
     except ValueError as e:
         return badrequest(str(e))
+    except TypeError as e:
+        return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         return internalerror("")
@@ -75,6 +77,8 @@ def list_entity_addresses(currency, entity, page=None, pagesize=None):  # noqa: 
         return notfound(str(e))
     except ValueError as e:
         return badrequest(str(e))
+    except TypeError as e:
+        return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         return internalerror("")
@@ -104,6 +108,8 @@ def list_entity_links(currency, entity, neighbor):  # noqa: E501
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
+        return badrequest(str(e))
+    except TypeError as e:
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
@@ -147,6 +153,8 @@ def list_entity_neighbors(currency, entity, direction, only_ids=None, include_la
         return notfound(str(e))
     except ValueError as e:
         return badrequest(str(e))
+    except TypeError as e:
+        return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         return internalerror("")
@@ -180,6 +188,8 @@ def list_entity_txs(currency, entity, page=None, pagesize=None):  # noqa: E501
         return notfound(str(e))
     except ValueError as e:
         return badrequest(str(e))
+    except TypeError as e:
+        return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         return internalerror("")
@@ -209,6 +219,8 @@ def list_tags_by_entity(currency, entity, tag_coherence=None):  # noqa: E501
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
+        return badrequest(str(e))
+    except TypeError as e:
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
@@ -254,6 +266,8 @@ def search_entity_neighbors(currency, entity, direction, key, value, depth, brea
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
+        return badrequest(str(e))
+    except TypeError as e:
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)

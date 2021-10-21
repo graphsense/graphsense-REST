@@ -111,21 +111,16 @@ def {{operationId}}({{#allParams}}{{paramName}}{{^required}}=None{{/required}}{{
         {{/isMap}}
     {{/allParams}}
     try:
-        {{^vendorExtensions.x-async}}
-        result = service.{{operationId}}(
-            {{#allParams}}{{paramName}}={{paramName}}{{^-last}},
-            {{/-last}}{{/allParams}})
-        {{/vendorExtensions.x-async}}
-        {{#vendorExtensions.x-async}}
         result = asyncio.run(
             service.{{operationId}}(
                 {{#allParams}}{{paramName}}={{paramName}}{{^-last}},
                 {{/-last}}{{/allParams}}))
-        {{/vendorExtensions.x-async}}
         return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
+        return badrequest(str(e))
+    except TypeError as e:
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)

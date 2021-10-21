@@ -47,7 +47,8 @@ def list_address_txs_csv(currency, address):
                             .format(address, currency.upper())))
 
 
-async def list_address_neighbors(currency, address, direction, include_labels,
+async def list_address_neighbors(currency, address, direction,
+                                 include_labels=False,
                                  page=None, pagesize=None):
     return await common.list_neighbors(currency, address, direction, 'address',
                                        include_labels=include_labels,
@@ -87,7 +88,8 @@ def list_address_links_csv(currency, address, neighbor):
                             .format(address, neighbor, currency.upper())))
 
 
-async def get_address_entity(currency, address, include_tags, tag_coherence):
+async def get_address_entity(currency, address, include_tags=False,
+                             tag_coherence=False):
     # from address to complete entity stats
     e = RuntimeError('Entity for address {} not found'.format(address))
     db = get_connection()

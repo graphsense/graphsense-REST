@@ -24,7 +24,7 @@ class TestRatesController(BaseTestCase):
         if 'get_exchange_rates_sync' in dir(test_service):
             test_service.get_exchange_rates_sync(self)
 
-        if "get_exchange_rates" in ["batch", "get_tx_io"]:
+        if "get_exchange_rates" == "bulk":
             return
         headers = { 
             'Accept': 'application/json',
