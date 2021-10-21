@@ -1115,7 +1115,6 @@ paths:
       summary: Returns details of a specific transaction identified by its hash.
       tags:
       - txs
-      x-async: true
       x-openapi-router-controller: openapi_server.controllers.txs_controller
   /{currency}/txs/{tx_hash}/{io}:
     get:
@@ -1147,7 +1146,10 @@ paths:
         name: io
         required: true
         schema:
-          $ref: '#/components/schemas/io'
+          enum:
+          - inputs
+          - outputs
+          type: string
         style: simple
       responses:
         "200":
@@ -1160,7 +1162,6 @@ paths:
         its hash.
       tags:
       - txs
-      x-async: true
       x-openapi-router-controller: openapi_server.controllers.txs_controller
 components:
   parameters:
@@ -1341,7 +1342,10 @@ components:
       name: io
       required: true
       schema:
-        $ref: '#/components/schemas/io'
+        enum:
+        - inputs
+        - outputs
+        type: string
       style: simple
     label:
       description: The label of an entity
@@ -1704,20 +1708,6 @@ components:
           title: next_page
           type: string
       type: object
-    batch_operation:
-      discriminator:
-        mapping:
-          get_tx_io: '#/components/schemas/get_tx_io'
-        propertyName: operation
-      oneOf:
-      - $ref: '#/components/schemas/get_tx_io'
-    batch_response:
-      discriminator:
-        mapping:
-          get_tx_io: '#/components/schemas/get_tx_io_response'
-        propertyName: operation
-      oneOf:
-      - $ref: '#/components/schemas/get_tx_io_response'
     block:
       example:
         block_hash: block_hash
@@ -2081,103 +2071,12 @@ components:
       - $ref: '#/components/schemas/tag'
       - $ref: '#/components/schemas/entity_tag_allOf'
       title: entity_tag
-    get_tx:
-      properties:
-        api:
-          default: txs
-          type: string
-        operation:
-          default: get_tx
-          type: string
-        parameters:
-          items:
-            $ref: '#/components/schemas/get_tx_parameters'
-          type: array
-      required:
-      - api
-      - operation
-      - parameters
-      type: object
-    get_tx_io:
-      properties:
-        api:
-          default: txs
-          type: string
-        operation:
-          default: get_tx_io
-          type: string
-        parameters:
-          items:
-            $ref: '#/components/schemas/get_tx_io_parameters'
-          type: array
-      required:
-      - api
-      - operation
-      - parameters
-      type: object
-    get_tx_io_parameters:
-      properties:
-        io:
-          $ref: '#/components/schemas/io'
-        tx_hash:
-          description: Transaction hash
-          title: tx_hash
-          type: string
-      required:
-      - io
-      - tx_hash
-      title: get_tx_io_parameters
-      type: object
-    get_tx_io_response:
-      properties:
-        operation:
-          default: get_tx_io
-          type: string
-        result:
-          items:
-            $ref: '#/components/schemas/get_tx_io_result'
-          type: array
-      required:
-      - operation
-      - result
-      type: object
-    get_tx_io_result:
-      properties:
-        data:
-          description: Transaction inputs/outputs
-          items:
-            $ref: '#/components/schemas/tx_value'
-          title: tx_values
-          type: array
-        parameters:
-          $ref: '#/components/schemas/get_tx_io_parameters'
-      required:
-      - data
-      - parameters
-      title: get_tx_io_result
-      type: object
-    get_tx_parameters:
-      properties:
-        tx_hash:
-          description: Transaction hash
-          title: tx_hash
-          type: string
-      required:
-      - tx_hash
-      title: get_tx_parameters
-      type: object
     height:
       description: Height
       format: int64
       minimum: 0
       title: height
       type: integer
-    io:
-      enum:
-      - inputs
-      - outputs
-      title: io
-      type: string
     label:
       description: Label
       title: label
@@ -2241,34 +2140,6 @@ components:
           title: next_page
           type: string
       title: links
-      type: object
-    list_entity_addresses:
-      properties:
-        api:
-          default: entities
-          type: string
-        operation:
-          default: list_entity_addresses
-          type: string
-        parameters:
-          items:
-            $ref: '#/components/schemas/list_entity_addresses_parameters'
-          type: array
-      required:
-      - api
-      - operation
-      - parameters
-      type: object
-    list_entity_addresses_parameters:
-      properties:
-        entity:
-          description: Entity id
-          format: int64
-          title: entity
-          type: integer
-      required:
-      - entity
-      title: list_entity_addresses_parameters
       type: object
     neighbor:
       example:
@@ -2982,13 +2853,11 @@ components:
           description: Transaction inputs/outputs
           items:
             $ref: '#/components/schemas/tx_value'
-          title: tx_values
           type: array
         outputs:
           description: Transaction inputs/outputs
           items:
             $ref: '#/components/schemas/tx_value'
-          title: tx_values
           type: array
         timestamp:
           description: Timestamp
@@ -3044,7 +2913,6 @@ components:
       description: Transaction inputs/outputs
       items:
         $ref: '#/components/schemas/tx_value'
-      title: tx_values
       type: array
     txs:
       properties:
