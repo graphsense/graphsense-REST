@@ -79,8 +79,8 @@ class Rates(Model):
         :param height: The height of this Rates.
         :type height: int
         """
-        if height is not None and height < 1:  # noqa: E501
-            raise ValueError("Invalid value for `height`, must be a value greater than or equal to `1`")  # noqa: E501
+        if height is not None and height < 0:  # noqa: E501
+            raise ValueError("Invalid value for `height`, must be a value greater than or equal to `0`")  # noqa: E501
 
         self._height = height
 

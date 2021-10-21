@@ -21,12 +21,15 @@ def list_concepts(taxonomy):  # noqa: E501
     :rtype: List[Concept]
     """
     try:
-        result = service.list_concepts(
-            taxonomy=taxonomy)
+        result = asyncio.run(
+            service.list_concepts(
+                taxonomy=taxonomy))
         return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
+        return badrequest(str(e))
+    except TypeError as e:
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
@@ -46,13 +49,16 @@ def list_tags(label, currency=None):  # noqa: E501
     :rtype: List[Tags]
     """
     try:
-        result = service.list_tags(
-            label=label,
-            currency=currency)
+        result = asyncio.run(
+            service.list_tags(
+                label=label,
+                currency=currency))
         return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
+        return badrequest(str(e))
+    except TypeError as e:
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
@@ -68,12 +74,15 @@ def list_taxonomies():  # noqa: E501
     :rtype: List[Taxonomy]
     """
     try:
-        result = service.list_taxonomies(
-            )
+        result = asyncio.run(
+            service.list_taxonomies(
+                ))
         return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
+        return badrequest(str(e))
+    except TypeError as e:
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)

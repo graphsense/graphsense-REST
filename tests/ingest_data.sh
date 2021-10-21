@@ -8,9 +8,9 @@ MOCK_CMD="docker exec $CASSANDRA_MOCK cqlsh"
 TAG=develop
 
 UTXO_RAW_SCHEMA="https://raw.githubusercontent.com/graphsense/graphsense-blocksci/$TAG/scripts/"
-UTXO_TRANSFORMED_SCHEMA="https://raw.githubusercontent.com/graphsense/graphsense-transformation/c417ce4202e91df4c5ec51e9cea4d02b1055f873/scripts/"
+UTXO_TRANSFORMED_SCHEMA="https://raw.githubusercontent.com/graphsense/graphsense-transformation/$TAG/scripts/"
 ETH_RAW_SCHEMA="https://raw.githubusercontent.com/graphsense/graphsense-ethereum-etl/$TAG/scripts/"
-ETH_TRANSFORMED_SCHEMA="https://raw.githubusercontent.com/graphsense/graphsense-ethereum-transformation/442e562b6d52c0af9062d1c2fbcfb87ab239fe9d/scripts/"
+ETH_TRANSFORMED_SCHEMA="https://raw.githubusercontent.com/graphsense/graphsense-ethereum-transformation/$TAG/scripts/"
 
 function schema() {
   temp=`mktemp`

@@ -21,13 +21,16 @@ def get_exchange_rates(currency, height):  # noqa: E501
     :rtype: Rates
     """
     try:
-        result = service.get_exchange_rates(
-            currency=currency,
-            height=height)
+        result = asyncio.run(
+            service.get_exchange_rates(
+                currency=currency,
+                height=height))
         return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
+        return badrequest(str(e))
+    except TypeError as e:
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)

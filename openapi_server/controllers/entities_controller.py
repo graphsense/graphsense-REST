@@ -3,14 +3,13 @@ import six
 import traceback
 import asyncio
 
-from openapi_server.models.entities import Entities  # noqa: E501
+from openapi_server.models.address_txs import AddressTxs  # noqa: E501
 from openapi_server.models.entity import Entity  # noqa: E501
 from openapi_server.models.entity_addresses import EntityAddresses  # noqa: E501
 from openapi_server.models.links import Links  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
 from openapi_server.models.search_result_level1 import SearchResultLevel1  # noqa: E501
 from openapi_server.models.tags import Tags  # noqa: E501
-from openapi_server.models.txs_account import TxsAccount  # noqa: E501
 import gsrest.service.entities_service as service
 from gsrest.service.problems import notfound, badrequest, internalerror
 
@@ -32,47 +31,18 @@ def get_entity(currency, entity, include_tags=None, tag_coherence=None):  # noqa
     :rtype: Entity
     """
     try:
-        result = service.get_entity(
-            currency=currency,
-            entity=entity,
-            include_tags=include_tags,
-            tag_coherence=tag_coherence)
+        result = asyncio.run(
+            service.get_entity(
+                currency=currency,
+                entity=entity,
+                include_tags=include_tags,
+                tag_coherence=tag_coherence))
         return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
         return badrequest(str(e))
-    except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
-
-
-def list_entities(currency, ids=None, page=None, pagesize=None):  # noqa: E501
-    """Get entities
-
-     # noqa: E501
-
-    :param currency: The cryptocurrency (e.g., btc)
-    :type currency: str
-    :param ids: Restrict result to given set of comma separated IDs
-    :type ids: List[int]
-    :param page: Resumption token for retrieving the next page
-    :type page: str
-    :param pagesize: Number of items returned in a single page
-    :type pagesize: int
-
-    :rtype: Entities
-    """
-    try:
-        result = service.list_entities(
-            currency=currency,
-            ids=ids,
-            page=page,
-            pagesize=pagesize)
-        return result
-    except RuntimeError as e:
-        return notfound(str(e))
-    except ValueError as e:
+    except TypeError as e:
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
@@ -96,15 +66,18 @@ def list_entity_addresses(currency, entity, page=None, pagesize=None):  # noqa: 
     :rtype: EntityAddresses
     """
     try:
-        result = service.list_entity_addresses(
-            currency=currency,
-            entity=entity,
-            page=page,
-            pagesize=pagesize)
+        result = asyncio.run(
+            service.list_entity_addresses(
+                currency=currency,
+                entity=entity,
+                page=page,
+                pagesize=pagesize))
         return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
+        return badrequest(str(e))
+    except TypeError as e:
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
@@ -126,21 +99,24 @@ def list_entity_links(currency, entity, neighbor):  # noqa: E501
     :rtype: Links
     """
     try:
-        result = service.list_entity_links(
-            currency=currency,
-            entity=entity,
-            neighbor=neighbor)
+        result = asyncio.run(
+            service.list_entity_links(
+                currency=currency,
+                entity=entity,
+                neighbor=neighbor))
         return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
+        return badrequest(str(e))
+    except TypeError as e:
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         return internalerror("")
 
 
-def list_entity_neighbors(currency, entity, direction, ids=None, include_labels=None, page=None, pagesize=None):  # noqa: E501
+def list_entity_neighbors(currency, entity, direction, only_ids=None, include_labels=None, page=None, pagesize=None):  # noqa: E501
     """Get an entity&#39;s neighbors in the entity graph
 
      # noqa: E501
@@ -151,8 +127,8 @@ def list_entity_neighbors(currency, entity, direction, ids=None, include_labels=
     :type entity: int
     :param direction: Incoming or outgoing neighbors
     :type direction: str
-    :param ids: Restrict result to given set of comma separated IDs
-    :type ids: List[int]
+    :param only_ids: Restrict result to given set of comma separated IDs
+    :type only_ids: List[int]
     :param include_labels: Whether to include labels of tags
     :type include_labels: bool
     :param page: Resumption token for retrieving the next page
@@ -163,18 +139,21 @@ def list_entity_neighbors(currency, entity, direction, ids=None, include_labels=
     :rtype: Neighbors
     """
     try:
-        result = service.list_entity_neighbors(
-            currency=currency,
-            entity=entity,
-            direction=direction,
-            ids=ids,
-            include_labels=include_labels,
-            page=page,
-            pagesize=pagesize)
+        result = asyncio.run(
+            service.list_entity_neighbors(
+                currency=currency,
+                entity=entity,
+                direction=direction,
+                only_ids=only_ids,
+                include_labels=include_labels,
+                page=page,
+                pagesize=pagesize))
         return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
+        return badrequest(str(e))
+    except TypeError as e:
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
@@ -195,18 +174,21 @@ def list_entity_txs(currency, entity, page=None, pagesize=None):  # noqa: E501
     :param pagesize: Number of items returned in a single page
     :type pagesize: int
 
-    :rtype: TxsAccount
+    :rtype: AddressTxs
     """
     try:
-        result = service.list_entity_txs(
-            currency=currency,
-            entity=entity,
-            page=page,
-            pagesize=pagesize)
+        result = asyncio.run(
+            service.list_entity_txs(
+                currency=currency,
+                entity=entity,
+                page=page,
+                pagesize=pagesize))
         return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
+        return badrequest(str(e))
+    except TypeError as e:
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
@@ -228,14 +210,17 @@ def list_tags_by_entity(currency, entity, tag_coherence=None):  # noqa: E501
     :rtype: Tags
     """
     try:
-        result = service.list_tags_by_entity(
-            currency=currency,
-            entity=entity,
-            tag_coherence=tag_coherence)
+        result = asyncio.run(
+            service.list_tags_by_entity(
+                currency=currency,
+                entity=entity,
+                tag_coherence=tag_coherence))
         return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
+        return badrequest(str(e))
+    except TypeError as e:
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
@@ -267,19 +252,22 @@ def search_entity_neighbors(currency, entity, direction, key, value, depth, brea
     :rtype: List[SearchResultLevel1]
     """
     try:
-        result = service.search_entity_neighbors(
-            currency=currency,
-            entity=entity,
-            direction=direction,
-            key=key,
-            value=value,
-            depth=depth,
-            breadth=breadth,
-            skip_num_addresses=skip_num_addresses)
+        result = asyncio.run(
+            service.search_entity_neighbors(
+                currency=currency,
+                entity=entity,
+                direction=direction,
+                key=key,
+                value=value,
+                depth=depth,
+                breadth=breadth,
+                skip_num_addresses=skip_num_addresses))
         return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
+        return badrequest(str(e))
+    except TypeError as e:
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)

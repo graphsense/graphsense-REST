@@ -14,42 +14,46 @@ def from_row(currency, row, rates):
             tx_hash=row['tx_hash'].hex(),
             timestamp=row['block_timestamp'],
             height=row['block_id'],
+            from_address=row['from_address'],
+            to_address=row['to_address'],
             value=convert_value(currency, row['value'], rates))
     return TxUtxo(
             tx_hash=row['tx_hash'].hex(),
             coinbase=row['coinbase'],
             height=row['block_id'],
-            inputs=io_from_rows(currency, row['inputs'], rates)
-            if row['inputs'] else [],
-            outputs=io_from_rows(currency, row['outputs'], rates)
-            if row['outputs'] else [],
+            inputs=io_from_rows(currency, row, 'inputs', rates),
+            outputs=io_from_rows(currency, row, 'outputs', rates),
             timestamp=row['timestamp'],
             total_input=convert_value(currency, row['total_input'], rates),
             total_output=convert_value(currency, row['total_output'], rates))
 
 
-def io_from_rows(currency, values, rates):
+def io_from_rows(currency, values, key, rates):
+    if key not in values:
+        return None
+    if not values[key]:
+        return []
     return [TxValue(address=i.address,
                     value=convert_value(currency, i.value, rates))
-            for i in values if i.address is not None]
+            for i in values[key] if i.address is not None]
 
 
-async def get_tx(currency, tx_hash):
+async def get_tx(currency, tx_hash, include_io=False):
     db = get_connection()
-    result = await db.get_tx(currency, tx_hash)
-    # TODO result is a generator, never None!
+    result = await db.get_tx(currency, tx_hash, include_io)
+    print(f'result {result}')
     if result is None:
         raise RuntimeError('Transaction {} in keyspace {} not found'
                            .format(tx_hash, currency))
 
-    rates = get_rates(currency, result['block_id'])['rates']
+    rates = (await get_rates(currency, result['block_id']))['rates']
     result = from_row(currency, result, rates)
     return result
 
 
 async def get_tx_io(currency, tx_hash, io):
     print(f'await {tx_hash}')
-    result = await get_tx(currency, tx_hash)
+    result = await get_tx(currency, tx_hash, include_io=True)
     print(f'received results for {result.tx_hash}')
     if currency == 'eth':
         raise RuntimeError('get_tx_io not implemented for ETH')
@@ -71,9 +75,9 @@ def list_txs(currency, page=None):
     return Txs(next_page=paging_state, txs=tx_list)
 
 
-def list_matching_txs(currency, expression):
+async def list_matching_txs(currency, expression):
     db = get_connection()
-    results = db.list_matching_txs(currency, expression)
+    results = await db.list_matching_txs(currency, expression)
 
     leading_zeros = 0
     pos = 0

@@ -18,12 +18,15 @@ def get_statistics():  # noqa: E501
     :rtype: Stats
     """
     try:
-        result = service.get_statistics(
-            )
+        result = asyncio.run(
+            service.get_statistics(
+                ))
         return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
+        return badrequest(str(e))
+    except TypeError as e:
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
@@ -45,14 +48,17 @@ def search(q, currency=None, limit=None):  # noqa: E501
     :rtype: SearchResult
     """
     try:
-        result = service.search(
-            q=q,
-            currency=currency,
-            limit=limit)
+        result = asyncio.run(
+            service.search(
+                q=q,
+                currency=currency,
+                limit=limit))
         return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
+        return badrequest(str(e))
+    except TypeError as e:
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)

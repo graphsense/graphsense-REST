@@ -10,6 +10,8 @@ import os
 import yaml
 import gsrest.db
 from flask_cors import CORS
+import jsonschema
+from connexion.decorators.validation import RequestBodyValidator
 
 from {{packageName}} import encoder
 
@@ -31,16 +33,27 @@ def load_config(app, instance_path):
             app.config[k] = v
 
 
+class DefaultsEnforcingRequestBodyValidator(RequestBodyValidator):
+    def __init__(self, *args, **kwargs):
+        super().__init__(
+            *args, validator=jsonschema.Draft7Validator, **kwargs)
+
+
 def main(instance_path=None):
     app = connexion.App(
         __name__,
         specification_dir='./openapi/',
         options={"swagger_ui": True, "serve_spec": True})
 
+    validator_map = {
+        'body': DefaultsEnforcingRequestBodyValidator
+    }
+
     app.app.json_encoder = encoder.JSONEncoder
     app.add_api('openapi.yaml',
                 arguments={'title': '{{appName}}'},
-                pythonic_params=True)
+                pythonic_params=True,
+                validator_map=validator_map)
     load_config(app.app, instance_path)
     with app.app.app_context():
         gsrest.db.get_connection()

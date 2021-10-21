@@ -54,13 +54,13 @@ ctag = EntityTag(
         )
 
 
-def list_tags(test_case):
-    result = service.list_tags(currency='btc', label='isolinks')
+async def list_tags(test_case):
+    result = await service.list_tags(currency='btc', label='isolinks')
     test_case.assertEqual(Tags(address_tags=[tag1], entity_tags=[ctag]),
                           result)
-    result = service.list_tags(currency='btc', label='cimedy')
+    result = await service.list_tags(currency='btc', label='cimedy')
     test_case.assertEqual(Tags([tag2], entity_tags=[]), result)
-    result = service.list_tags(label='cimedy')
+    result = await service.list_tags(label='cimedy')
     result.address_tags.sort(key=lambda x: x.currency)
     test_case.assertEqual(Tags([tag2, tag3], entity_tags=[]),
                           result)
@@ -88,13 +88,13 @@ taxonomies = [
         ]
 
 
-def list_concepts(test_case):
-    result = service.list_concepts('entity')
+async def list_concepts(test_case):
+    result = await service.list_concepts('entity')
     test_case.assertEqual([conceptA], result)
-    result = service.list_concepts('abuse')
+    result = await service.list_concepts('abuse')
     test_case.assertEqual([conceptB], result)
 
 
-def list_taxonomies(test_case):
-    result = service.list_taxonomies()
+async def list_taxonomies(test_case):
+    result = await service.list_taxonomies()
     test_case.assertEqual(taxonomies, result)

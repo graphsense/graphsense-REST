@@ -4,7 +4,7 @@ from gsrest.service.rates_service import get_rates
 from openapi_server.models.entity import Entity
 from openapi_server.models.entities import Entities
 from openapi_server.models.tx_summary import TxSummary
-from openapi_server.models.txs import Txs
+from openapi_server.models.address_txs import AddressTxs
 from gsrest.util.values import compute_balance, convert_value, to_values
 from openapi_server.models.entity_tag import EntityTag
 from openapi_server.models.address_tag import AddressTag
@@ -17,6 +17,7 @@ from openapi_server.models.address import Address
 from openapi_server.models.entity_addresses import EntityAddresses
 import gsrest.service.common_service as common
 import importlib
+import asyncio
 
 MAX_DEPTH = 6
 
@@ -50,9 +51,9 @@ def from_row(currency, row, rates, tags=None):
         )
 
 
-def list_tags_by_entity(currency, entity, tag_coherence):
-    entity_tags = list_entity_tags_by_entity(currency, entity)
-    address_tags = list_address_tags_by_entity(currency, entity)
+async def list_tags_by_entity(currency, entity, tag_coherence=False):
+    entity_tags = await list_entity_tags_by_entity(currency, entity)
+    address_tags = await list_address_tags_by_entity(currency, entity)
     tag_coherence = compute_tag_coherence(tag.label for tag in address_tags) \
         if tag_coherence else None
     return Tags(entity_tags=entity_tags,
@@ -73,9 +74,9 @@ def list_tags_by_entity_by_level_csv(currency, entity, level):
                         .format(level, entity, currency.upper())))
 
 
-def list_entity_tags_by_entity(currency, entity):
+async def list_entity_tags_by_entity(currency, entity):
     db = get_connection()
-    entity_tags = db.list_entity_tags_by_entity(currency, entity)
+    entity_tags = await db.list_entity_tags_by_entity(currency, entity)
     return [EntityTag(label=row['label'],
                       entity=row['cluster_id'],
                       category=row['category'],
@@ -88,9 +89,9 @@ def list_entity_tags_by_entity(currency, entity):
             for row in entity_tags]
 
 
-def list_address_tags_by_entity(currency, entity):
+async def list_address_tags_by_entity(currency, entity):
     db = get_connection()
-    address_tags = db.list_address_tags_by_entity(currency, entity)
+    address_tags = await db.list_address_tags_by_entity(currency, entity)
     return [AddressTag(label=row['label'],
                        address=row['address'],
                        category=row['category'],
@@ -103,16 +104,18 @@ def list_address_tags_by_entity(currency, entity):
             for row in address_tags]
 
 
-def get_entity(currency, entity, include_tags, tag_coherence):
+async def get_entity(currency, entity, include_tags=False,
+                     tag_coherence=False):
     db = get_connection()
-    result = db.get_entity(currency, entity)
+    result = await db.get_entity(currency, entity)
 
     if result is None:
         raise RuntimeError("Entity {} not found".format(entity))
 
-    tags = list_tags_by_entity(currency, result['cluster_id'], tag_coherence) \
-        if include_tags else None
-    return from_row(currency, result, get_rates(currency)['rates'], tags)
+    tags = await list_tags_by_entity(currency, result['cluster_id'],
+                                     tag_coherence) if include_tags else None
+    rates = (await get_rates(currency))['rates']
+    return from_row(currency, result, rates, tags)
 
 
 def list_entities(currency, ids=None, page=None, pagesize=None):
@@ -135,10 +138,12 @@ def list_entities_csv(currency, ids):
                             .format(currency.upper())))
 
 
-def list_entity_neighbors(currency, entity, direction, ids=None,
-                          include_labels=False, page=None, pagesize=None):
-    return common.list_neighbors(currency, entity, direction, 'entity',
-                                 ids, include_labels, page, pagesize)
+async def list_entity_neighbors(currency, entity, direction, only_ids=None,
+                                include_labels=False, page=None,
+                                pagesize=None):
+    return await common.list_neighbors(currency, entity, direction, 'entity',
+                                       only_ids, include_labels, page,
+                                       pagesize)
 
 
 def list_entity_neighbors_csv(currency, entity, direction,
@@ -155,12 +160,12 @@ def list_entity_neighbors_csv(currency, entity, direction,
                             .format(direction, entity, currency.upper())))
 
 
-def list_entity_addresses(currency, entity, page=None, pagesize=None):
+async def list_entity_addresses(currency, entity, page=None, pagesize=None):
     db = get_connection()
     addresses, paging_state = \
-        db.list_entity_addresses(currency, entity, page, pagesize)
+        await db.list_entity_addresses(currency, entity, page, pagesize)
 
-    rates = get_rates(currency)['rates']
+    rates = (await get_rates(currency))['rates']
     addresses = [Address(
             address=row['address'],
             entity=row['cluster_id'],
@@ -200,7 +205,8 @@ def list_entity_addresses_csv(currency, entity):
                             .format(entity, currency.upper())))
 
 
-def search_entity_neighbors(currency, entity, direction, key, value, depth, breadth, skip_num_addresses=None):  # noqa: E501
+async def search_entity_neighbors(currency, entity, direction, key, value,
+                                  depth, breadth, skip_num_addresses=None):
     params = dict()
     db = get_connection()
     if 'category' in key:
@@ -216,8 +222,9 @@ def search_entity_neighbors(currency, entity, direction, key, value, depth, brea
 
     elif 'addresses' in key:
         addresses_list = []
-        for address in value:
-            e = db.get_address_entity_id(currency, address)
+        aws = [db.get_address_entity_id(currency, address)
+               for address in value]
+        for (address, e) in zip(value, await asyncio.gather(*aws)):
             if e:
                 addresses_list.append({"address": address,
                                        "entity": e})
@@ -232,15 +239,15 @@ def search_entity_neighbors(currency, entity, direction, key, value, depth, brea
 
     level = 2
     result = \
-        recursive_search(currency, entity, params,
-                         breadth, depth, level, skip_num_addresses,
-                         direction)
+        await recursive_search(currency, entity, params,
+                               breadth, depth, level, skip_num_addresses,
+                               direction)
 
     return SearchResultLevel1(paths=result)
 
 
-def recursive_search(currency, entity, params, breadth, depth, level,
-                     skip_num_addresses, direction, cache=None):
+async def recursive_search(currency, entity, params, breadth, depth, level,
+                           skip_num_addresses, direction, cache=None):
     if cache is None:
         cache = dict()
     if depth <= 0:
@@ -255,21 +262,24 @@ def recursive_search(currency, entity, params, breadth, depth, level,
         cache[cl][key] = value
         return value
 
-    def cached(cl, key, get):
-        return get_cached(cl, key) or set_cached(cl, key, get())
+    async def cached(cl, key, get):
+        return get_cached(cl, key) or set_cached(cl, key, await get())
 
-    neighbors = cached(entity, 'neighbors',
-                       lambda: list_entity_neighbors(
-                        currency, entity, direction,
-                        pagesize=breadth).neighbors)
+    async def list_neighbors(entity):
+        return (await list_entity_neighbors(
+            currency, entity, direction, pagesize=breadth)).neighbors
+
+    neighbors = await cached(entity, 'neighbors',
+                             lambda: list_neighbors(entity))
 
     paths = []
 
     for neighbor in neighbors:
         match = True
-        props = cached(int(neighbor.id), 'props',
-                       lambda: get_entity(currency, int(neighbor.id),
-                                          True, False))
+        props = await cached(int(neighbor.id), 'props',
+                             lambda: get_entity(currency, int(neighbor.id),
+                                                include_tags=True,
+                                                tag_coherence=False))
         if props is None:
             continue
 
@@ -311,12 +321,12 @@ def recursive_search(currency, entity, params, breadth, depth, level,
                 level < MAX_DEPTH and \
                 (skip_num_addresses is None or
                  props.no_addresses <= skip_num_addresses):
-            subpaths = recursive_search(currency, int(neighbor.id),
-                                        params, breadth,
-                                        depth - 1,
-                                        level + 1,
-                                        skip_num_addresses,
-                                        direction, cache)
+            subpaths = await recursive_search(currency, int(neighbor.id),
+                                              params, breadth,
+                                              depth - 1,
+                                              level + 1,
+                                              skip_num_addresses,
+                                              direction, cache)
 
         if not subpaths:
             continue
@@ -332,8 +342,9 @@ def recursive_search(currency, entity, params, breadth, depth, level,
         obj = levelClass(node=props, relation=neighbor,
                          matching_addresses=[])
         if subpaths is True:
-            addresses_with_tags = [get_address(currency, address, True)
-                                   for address in matching_addresses]
+            aws = [get_address(currency, address, True)
+                   for address in matching_addresses]
+            addresses_with_tags = await asyncio.gather(*aws)
             obj.matching_addresses = [address for address in
                                       addresses_with_tags
                                       if address is not None]
@@ -343,12 +354,12 @@ def recursive_search(currency, entity, params, breadth, depth, level,
     return paths
 
 
-def list_entity_txs(currency, entity, page=None, pagesize=None):
+async def list_entity_txs(currency, entity, page=None, pagesize=None):
     db = get_connection()
     results, paging_state = \
-        db.list_entity_txs(currency, entity, page, pagesize)
-    entity_txs = common.txs_from_rows(currency, results)
-    return Txs(next_page=paging_state, txs=entity_txs)
+        await db.list_entity_txs(currency, entity, page, pagesize)
+    entity_txs = await common.txs_from_rows(currency, results)
+    return AddressTxs(next_page=paging_state, address_txs=entity_txs)
 
 
 def list_entity_txs_csv(currency, entity):
@@ -362,13 +373,13 @@ def list_entity_txs_csv(currency, entity):
                             .format(entity, currency.upper())))
 
 
-def list_entity_links(currency, entity, neighbor,
-                      page=None, pagesize=None):
+async def list_entity_links(currency, entity, neighbor,
+                            page=None, pagesize=None):
     db = get_connection()
-    result = db.list_entity_links(currency, entity, neighbor,
-                                  page=page, pagesize=pagesize)
+    result = await db.list_entity_links(currency, entity, neighbor,
+                                        page=page, pagesize=pagesize)
 
-    return common.links_response(currency, result)
+    return await common.links_response(currency, result)
 
 
 def list_entity_links_csv(currency, entity, neighbor):

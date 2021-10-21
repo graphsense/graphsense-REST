@@ -9,11 +9,10 @@ from six import BytesIO
 
 from openapi_server.models.address import Address  # noqa: E501
 from openapi_server.models.address_tag import AddressTag  # noqa: E501
-from openapi_server.models.addresses import Addresses  # noqa: E501
+from openapi_server.models.address_txs import AddressTxs  # noqa: E501
 from openapi_server.models.entity import Entity  # noqa: E501
 from openapi_server.models.links import Links  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
-from openapi_server.models.txs_account import TxsAccount  # noqa: E501
 from openapi_server.test import BaseTestCase
 import gsrest.test.addresses_service as test_service
 
@@ -26,9 +25,11 @@ class TestAddressesController(BaseTestCase):
 
         Get an address, optionally with tags
         """
-        test_service.get_address(self)
+        asyncio.run(test_service.get_address(self))
+        if 'get_address_sync' in dir(test_service):
+            test_service.get_address_sync(self)
 
-        if "get_address" in ["batch", "get_tx_io"]:
+        if "get_address" == "bulk":
             return
         query_string = [('','')]
         headers = { 
@@ -47,9 +48,11 @@ class TestAddressesController(BaseTestCase):
 
         Get the entity of an address
         """
-        test_service.get_address_entity(self)
+        asyncio.run(test_service.get_address_entity(self))
+        if 'get_address_entity_sync' in dir(test_service):
+            test_service.get_address_entity_sync(self)
 
-        if "get_address_entity" in ["batch", "get_tx_io"]:
+        if "get_address_entity" == "bulk":
             return
         query_string = [('',''),
                         ('','')]
@@ -67,11 +70,13 @@ class TestAddressesController(BaseTestCase):
     def test_list_address_links(self):
         """Test case for list_address_links
 
-        Get transactions between two addresses
+        Get outgoing transactions between two addresses
         """
-        test_service.list_address_links(self)
+        asyncio.run(test_service.list_address_links(self))
+        if 'list_address_links_sync' in dir(test_service):
+            test_service.list_address_links_sync(self)
 
-        if "list_address_links" in ["batch", "get_tx_io"]:
+        if "list_address_links" == "bulk":
             return
         query_string = [('neighbor', 'addressE')]
         headers = { 
@@ -90,9 +95,11 @@ class TestAddressesController(BaseTestCase):
 
         Get an addresses' neighbors in the address graph
         """
-        test_service.list_address_neighbors(self)
+        asyncio.run(test_service.list_address_neighbors(self))
+        if 'list_address_neighbors_sync' in dir(test_service):
+            test_service.list_address_neighbors_sync(self)
 
-        if "list_address_neighbors" in ["batch", "get_tx_io"]:
+        if "list_address_neighbors" == "bulk":
             return
         query_string = [('direction', 'out'),
                         ('',''),
@@ -114,9 +121,11 @@ class TestAddressesController(BaseTestCase):
 
         Get all transactions an address has been involved in
         """
-        test_service.list_address_txs(self)
+        asyncio.run(test_service.list_address_txs(self))
+        if 'list_address_txs_sync' in dir(test_service):
+            test_service.list_address_txs_sync(self)
 
-        if "list_address_txs" in ["batch", "get_tx_io"]:
+        if "list_address_txs" == "bulk":
             return
         query_string = [('',''),
                         ('','')]
@@ -131,37 +140,16 @@ class TestAddressesController(BaseTestCase):
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
-    def test_list_addresses(self):
-        """Test case for list_addresses
-
-        Get addresses
-        """
-        test_service.list_addresses(self)
-
-        if "list_addresses" in ["batch", "get_tx_io"]:
-            return
-        query_string = [('',''),
-                        ('',''),
-                        ('','')]
-        headers = { 
-            'Accept': 'application/json',
-        }
-        response = self.client.open(
-            '/{currency}/addresses'.format(currency='btc'),
-            method='GET',
-            headers=headers,
-            query_string=query_string)
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
-
     def test_list_tags_by_address(self):
         """Test case for list_tags_by_address
 
         Get attribution tags for a given address
         """
-        test_service.list_tags_by_address(self)
+        asyncio.run(test_service.list_tags_by_address(self))
+        if 'list_tags_by_address_sync' in dir(test_service):
+            test_service.list_tags_by_address_sync(self)
 
-        if "list_tags_by_address" in ["batch", "get_tx_io"]:
+        if "list_tags_by_address" == "bulk":
             return
         headers = { 
             'Accept': 'application/json',

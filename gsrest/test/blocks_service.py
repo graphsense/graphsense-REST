@@ -30,14 +30,22 @@ eth_block2 = Block(
         timestamp=234)
 
 
-def get_block(test_case):
+async def get_block(test_case):
     """Test case for get_block
     """
 
-    result = service.get_block("btc", 1)
+    result = await service.get_block("btc", 1)
     test_case.assertEqual(block, result)
-    result = service.get_block("btc", 2)
+    result = await service.get_block("btc", 2)
     test_case.assertEqual(block2, result)
+
+    result = await service.get_block("eth", 1)
+    test_case.assertEqual(eth_block, result)
+    result = await service.get_block("eth", 2300001)
+    test_case.assertEqual(eth_block2, result)
+
+
+def get_block_sync(test_case):
     headers = {
         'Accept': 'application/json',
     }
@@ -48,10 +56,6 @@ def get_block(test_case):
     test_case.assert404(response,
                         'Response body is : ' + response.data.decode('utf-8'))
 
-    result = service.get_block("eth", 1)
-    test_case.assertEqual(eth_block, result)
-    result = service.get_block("eth", 2300001)
-    test_case.assertEqual(eth_block2, result)
     headers = {
         'Accept': 'application/json',
     }
@@ -62,16 +66,15 @@ def get_block(test_case):
     test_case.assert404(response,
                         'Response body is : ' + response.data.decode('utf-8'))
 
-
-def list_block_txs(test_case):
+async def list_block_txs(test_case):
     """Test case for list_block_txs
     """
 
     block_txs = [tx1]
-    result = service.list_block_txs("btc", 1)
+    result = await service.list_block_txs("btc", 1)
     test_case.assertEqual(block_txs, result)
 
-    result = service.list_block_txs("eth", 1)
+    result = await service.list_block_txs("eth", 1)
 
     def s(tx):
         return tx.tx_hash
@@ -96,11 +99,11 @@ def list_block_txs_csv(test_case):
     test_case.assertEqual(7, len(splitted[0].split(',')))
 
 
-def list_blocks(test_case):
+async def list_blocks(test_case):
     """Test case for list_blocks
     """
     blocks = Blocks(next_page=None, blocks=[block, block2])
-    result = service.list_blocks("btc")
+    result = await service.list_blocks("btc")
     result = Blocks(
             next_page=None,
             blocks=sorted(result.blocks,
@@ -108,7 +111,7 @@ def list_blocks(test_case):
     test_case.assertEqual(blocks, result)
 
     blocks = Blocks(next_page=None, blocks=[eth_block, eth_block2])
-    result = service.list_blocks("eth")
+    result = await service.list_blocks("eth")
     result = Blocks(
             next_page=None,
             blocks=sorted(result.blocks,

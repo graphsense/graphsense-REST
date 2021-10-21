@@ -5,11 +5,10 @@ import asyncio
 
 from openapi_server.models.address import Address  # noqa: E501
 from openapi_server.models.address_tag import AddressTag  # noqa: E501
-from openapi_server.models.addresses import Addresses  # noqa: E501
+from openapi_server.models.address_txs import AddressTxs  # noqa: E501
 from openapi_server.models.entity import Entity  # noqa: E501
 from openapi_server.models.links import Links  # noqa: E501
 from openapi_server.models.neighbors import Neighbors  # noqa: E501
-from openapi_server.models.txs_account import TxsAccount  # noqa: E501
 import gsrest.service.addresses_service as service
 from gsrest.service.problems import notfound, badrequest, internalerror
 
@@ -29,14 +28,17 @@ def get_address(currency, address, include_tags=None):  # noqa: E501
     :rtype: Address
     """
     try:
-        result = service.get_address(
-            currency=currency,
-            address=address,
-            include_tags=include_tags)
+        result = asyncio.run(
+            service.get_address(
+                currency=currency,
+                address=address,
+                include_tags=include_tags))
         return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
+        return badrequest(str(e))
+    except TypeError as e:
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
@@ -60,15 +62,18 @@ def get_address_entity(currency, address, include_tags=None, tag_coherence=None)
     :rtype: Entity
     """
     try:
-        result = service.get_address_entity(
-            currency=currency,
-            address=address,
-            include_tags=include_tags,
-            tag_coherence=tag_coherence)
+        result = asyncio.run(
+            service.get_address_entity(
+                currency=currency,
+                address=address,
+                include_tags=include_tags,
+                tag_coherence=tag_coherence))
         return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
+        return badrequest(str(e))
+    except TypeError as e:
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
@@ -76,7 +81,7 @@ def get_address_entity(currency, address, include_tags=None, tag_coherence=None)
 
 
 def list_address_links(currency, address, neighbor):  # noqa: E501
-    """Get transactions between two addresses
+    """Get outgoing transactions between two addresses
 
      # noqa: E501
 
@@ -90,14 +95,17 @@ def list_address_links(currency, address, neighbor):  # noqa: E501
     :rtype: Links
     """
     try:
-        result = service.list_address_links(
-            currency=currency,
-            address=address,
-            neighbor=neighbor)
+        result = asyncio.run(
+            service.list_address_links(
+                currency=currency,
+                address=address,
+                neighbor=neighbor))
         return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
+        return badrequest(str(e))
+    except TypeError as e:
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
@@ -125,17 +133,20 @@ def list_address_neighbors(currency, address, direction, include_labels=None, pa
     :rtype: Neighbors
     """
     try:
-        result = service.list_address_neighbors(
-            currency=currency,
-            address=address,
-            direction=direction,
-            include_labels=include_labels,
-            page=page,
-            pagesize=pagesize)
+        result = asyncio.run(
+            service.list_address_neighbors(
+                currency=currency,
+                address=address,
+                direction=direction,
+                include_labels=include_labels,
+                page=page,
+                pagesize=pagesize))
         return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
+        return badrequest(str(e))
+    except TypeError as e:
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
@@ -156,50 +167,21 @@ def list_address_txs(currency, address, page=None, pagesize=None):  # noqa: E501
     :param pagesize: Number of items returned in a single page
     :type pagesize: int
 
-    :rtype: TxsAccount
+    :rtype: AddressTxs
     """
     try:
-        result = service.list_address_txs(
-            currency=currency,
-            address=address,
-            page=page,
-            pagesize=pagesize)
+        result = asyncio.run(
+            service.list_address_txs(
+                currency=currency,
+                address=address,
+                page=page,
+                pagesize=pagesize))
         return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
         return badrequest(str(e))
-    except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
-
-
-def list_addresses(currency, ids=None, page=None, pagesize=None):  # noqa: E501
-    """Get addresses
-
-     # noqa: E501
-
-    :param currency: The cryptocurrency (e.g., btc)
-    :type currency: str
-    :param ids: Restrict result to given set of comma separated addresses
-    :type ids: List[str]
-    :param page: Resumption token for retrieving the next page
-    :type page: str
-    :param pagesize: Number of items returned in a single page
-    :type pagesize: int
-
-    :rtype: Addresses
-    """
-    try:
-        result = service.list_addresses(
-            currency=currency,
-            ids=ids,
-            page=page,
-            pagesize=pagesize)
-        return result
-    except RuntimeError as e:
-        return notfound(str(e))
-    except ValueError as e:
+    except TypeError as e:
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
@@ -219,13 +201,16 @@ def list_tags_by_address(currency, address):  # noqa: E501
     :rtype: List[AddressTag]
     """
     try:
-        result = service.list_tags_by_address(
-            currency=currency,
-            address=address)
+        result = asyncio.run(
+            service.list_tags_by_address(
+                currency=currency,
+                address=address))
         return result
     except RuntimeError as e:
         return notfound(str(e))
     except ValueError as e:
+        return badrequest(str(e))
+    except TypeError as e:
         return badrequest(str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)

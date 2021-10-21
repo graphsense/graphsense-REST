@@ -21,30 +21,30 @@ def block_from_row(currency, row):
             timestamp=row['timestamp'])
 
 
-def get_block(currency, height):
+async def get_block(currency, height):
     db = get_connection()
-    row = db.get_block(currency, height)
+    row = await db.get_block(currency, height)
     if not row:
         raise RuntimeError("Block {} not found".format(height))
     return block_from_row(currency, row)
 
 
-def list_blocks(currency, page=None):
+async def list_blocks(currency, page=None):
     db = get_connection()
-    results, paging_state = db.list_blocks(currency, page)
+    results, paging_state = await db.list_blocks(currency, page)
     block_list = [block_from_row(currency, row)
-                  for row in results.current_rows]
+                  for row in results]
 
     return Blocks(blocks=block_list, next_page=paging_state)
 
 
-def list_block_txs(currency, height):
+async def list_block_txs(currency, height):
     db = get_connection()
-    txs = db.list_block_txs(currency, height)
+    txs = await db.list_block_txs(currency, height)
 
     if txs is None:
         raise RuntimeError("Block {} not found".format(height))
-    rates = get_rates(currency, height)
+    rates = await get_rates(currency, height)
 
     return [from_row(currency, tx, rates['rates'])
             for tx in txs]

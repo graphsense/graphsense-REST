@@ -23,7 +23,7 @@ class Tx(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, coinbase=None, height=None, inputs=None, outputs=None, timestamp=None, total_input=None, total_output=None, tx_hash=None, tx_type='account', value=None):  # noqa: E501
+    def __init__(self, coinbase=None, height=None, inputs=None, outputs=None, timestamp=None, total_input=None, total_output=None, tx_hash=None, tx_type='account', from_address=None, to_address=None, value=None):  # noqa: E501
         """Tx - a model defined in OpenAPI
 
         :param coinbase: The coinbase of this Tx.  # noqa: E501
@@ -44,6 +44,10 @@ class Tx(Model):
         :type tx_hash: str
         :param tx_type: The tx_type of this Tx.  # noqa: E501
         :type tx_type: str
+        :param from_address: The from_address of this Tx.  # noqa: E501
+        :type from_address: str
+        :param to_address: The to_address of this Tx.  # noqa: E501
+        :type to_address: str
         :param value: The value of this Tx.  # noqa: E501
         :type value: Values
         """
@@ -57,6 +61,8 @@ class Tx(Model):
             'total_output': Values,
             'tx_hash': str,
             'tx_type': str,
+            'from_address': str,
+            'to_address': str,
             'value': Values
         }
 
@@ -70,6 +76,8 @@ class Tx(Model):
             'total_output': 'total_output',
             'tx_hash': 'tx_hash',
             'tx_type': 'tx_type',
+            'from_address': 'from_address',
+            'to_address': 'to_address',
             'value': 'value'
         }
 
@@ -96,6 +104,12 @@ class Tx(Model):
         #if tx_type is None:
             #raise ValueError("Invalid value for `tx_type`, must not be `None`")  # noqa: E501
         self._tx_type = tx_type
+        #if from_address is None:
+            #raise ValueError("Invalid value for `from_address`, must not be `None`")  # noqa: E501
+        self._from_address = from_address
+        #if to_address is None:
+            #raise ValueError("Invalid value for `to_address`, must not be `None`")  # noqa: E501
+        self._to_address = to_address
         #if value is None:
             #raise ValueError("Invalid value for `value`, must not be `None`")  # noqa: E501
         self._value = value
@@ -126,6 +140,8 @@ class Tx(Model):
             'total_output': self._total_output,
             'tx_hash': self._tx_hash,
             'tx_type': self._tx_type,
+            'from_address': self._from_address,
+            'to_address': self._to_address,
             'value': self._value }
 
 
@@ -176,8 +192,8 @@ class Tx(Model):
         """
         if height is None:
             raise ValueError("Invalid value for `height`, must not be `None`")  # noqa: E501
-        if height is not None and height < 1:  # noqa: E501
-            raise ValueError("Invalid value for `height`, must be a value greater than or equal to `1`")  # noqa: E501
+        if height is not None and height < 0:  # noqa: E501
+            raise ValueError("Invalid value for `height`, must be a value greater than or equal to `0`")  # noqa: E501
 
         self._height = height
 
@@ -345,6 +361,56 @@ class Tx(Model):
             raise ValueError("Invalid value for `tx_type`, must not be `None`")  # noqa: E501
 
         self._tx_type = tx_type
+
+    @property
+    def from_address(self):
+        """Gets the from_address of this Tx.
+
+        Address  # noqa: E501
+
+        :return: The from_address of this Tx.
+        :rtype: str
+        """
+        return self._from_address
+
+    @from_address.setter
+    def from_address(self, from_address):
+        """Sets the from_address of this Tx.
+
+        Address  # noqa: E501
+
+        :param from_address: The from_address of this Tx.
+        :type from_address: str
+        """
+        if from_address is None:
+            raise ValueError("Invalid value for `from_address`, must not be `None`")  # noqa: E501
+
+        self._from_address = from_address
+
+    @property
+    def to_address(self):
+        """Gets the to_address of this Tx.
+
+        Address  # noqa: E501
+
+        :return: The to_address of this Tx.
+        :rtype: str
+        """
+        return self._to_address
+
+    @to_address.setter
+    def to_address(self, to_address):
+        """Sets the to_address of this Tx.
+
+        Address  # noqa: E501
+
+        :param to_address: The to_address of this Tx.
+        :type to_address: str
+        """
+        if to_address is None:
+            raise ValueError("Invalid value for `to_address`, must not be `None`")  # noqa: E501
+
+        self._to_address = to_address
 
     @property
     def value(self):

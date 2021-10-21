@@ -22,9 +22,11 @@ class TestTagsController(BaseTestCase):
 
         Returns the supported concepts of a taxonomy
         """
-        test_service.list_concepts(self)
+        asyncio.run(test_service.list_concepts(self))
+        if 'list_concepts_sync' in dir(test_service):
+            test_service.list_concepts_sync(self)
 
-        if "list_concepts" in ["batch", "get_tx_io"]:
+        if "list_concepts" == "bulk":
             return
         headers = { 
             'Accept': 'application/json',
@@ -41,9 +43,11 @@ class TestTagsController(BaseTestCase):
 
         Returns address and entity tags associated with a given label
         """
-        test_service.list_tags(self)
+        asyncio.run(test_service.list_tags(self))
+        if 'list_tags_sync' in dir(test_service):
+            test_service.list_tags_sync(self)
 
-        if "list_tags" in ["batch", "get_tx_io"]:
+        if "list_tags" == "bulk":
             return
         query_string = [('',''),
                         ('label', 'cimedy')]
@@ -63,9 +67,11 @@ class TestTagsController(BaseTestCase):
 
         Returns the supported taxonomies
         """
-        test_service.list_taxonomies(self)
+        asyncio.run(test_service.list_taxonomies(self))
+        if 'list_taxonomies_sync' in dir(test_service):
+            test_service.list_taxonomies_sync(self)
 
-        if "list_taxonomies" in ["batch", "get_tx_io"]:
+        if "list_taxonomies" == "bulk":
             return
         headers = { 
             'Accept': 'application/json',

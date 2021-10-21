@@ -8,7 +8,6 @@ from flask import json
 from six import BytesIO
 
 from openapi_server.models.block import Block  # noqa: E501
-from openapi_server.models.blocks import Blocks  # noqa: E501
 from openapi_server.models.tx import Tx  # noqa: E501
 from openapi_server.test import BaseTestCase
 import gsrest.test.blocks_service as test_service
@@ -22,9 +21,11 @@ class TestBlocksController(BaseTestCase):
 
         Get a block by its height
         """
-        test_service.get_block(self)
+        asyncio.run(test_service.get_block(self))
+        if 'get_block_sync' in dir(test_service):
+            test_service.get_block_sync(self)
 
-        if "get_block" in ["batch", "get_tx_io"]:
+        if "get_block" == "bulk":
             return
         headers = { 
             'Accept': 'application/json',
@@ -41,9 +42,11 @@ class TestBlocksController(BaseTestCase):
 
         Get block transactions
         """
-        test_service.list_block_txs(self)
+        asyncio.run(test_service.list_block_txs(self))
+        if 'list_block_txs_sync' in dir(test_service):
+            test_service.list_block_txs_sync(self)
 
-        if "list_block_txs" in ["batch", "get_tx_io"]:
+        if "list_block_txs" == "bulk":
             return
         headers = { 
             'Accept': 'application/json',
@@ -52,27 +55,6 @@ class TestBlocksController(BaseTestCase):
             '/{currency}/blocks/{height}/txs'.format(currency='btc', height=1),
             method='GET',
             headers=headers)
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
-
-    def test_list_blocks(self):
-        """Test case for list_blocks
-
-        Get all blocks
-        """
-        test_service.list_blocks(self)
-
-        if "list_blocks" in ["batch", "get_tx_io"]:
-            return
-        query_string = [('','')]
-        headers = { 
-            'Accept': 'application/json',
-        }
-        response = self.client.open(
-            '/{currency}/blocks'.format(currency='btc'),
-            method='GET',
-            headers=headers,
-            query_string=query_string)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
