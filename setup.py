@@ -14,9 +14,9 @@ VERSION = "1.0.0"
 # http://pypi.python.org/pypi/setuptools
 
 REQUIRES = [
-    "connexion>=2.0.2",
-    "swagger-ui-bundle>=0.0.2",
-    "python_dateutil>=2.6.0"
+    "connexion==2.6.0",
+    "swagger-ui-bundle==0.0.6",
+    "aiohttp_jinja2==1.2.0",
 ]
 
 with open("README.md", "r") as fh:
@@ -28,7 +28,7 @@ setup(
     description="GraphSense API",
     author_email="",
     keywords=["OpenAPI", "GraphSense API"],
-    python_requires='>=3.6',
+    python_requires='>=3.7',
     install_requires=REQUIRES,
     packages=find_packages(),
     package_data={'': ['openapi/openapi.yaml']},

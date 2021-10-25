@@ -1,9 +1,8 @@
 # coding: utf-8
 
-from __future__ import absolute_import
-from datetime import date, datetime  # noqa: F401
+from datetime import date, datetime
 
-from typing import List, Dict  # noqa: F401
+from typing import List, Dict, Type
 
 from openapi_server.models.base_model_ import Model
 from openapi_server import util
@@ -15,11 +14,10 @@ class AddressTagAllOf(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, address=None):  # noqa: E501
+    def __init__(self, address: str=None):
         """AddressTagAllOf - a model defined in OpenAPI
 
-        :param address: The address of this AddressTagAllOf.  # noqa: E501
-        :type address: str
+        :param address: The address of this AddressTagAllOf.
         """
         self.openapi_types = {
             'address': str
@@ -29,35 +27,22 @@ class AddressTagAllOf(Model):
             'address': 'address'
         }
 
-        #if address is None:
-            #raise ValueError("Invalid value for `address`, must not be `None`")  # noqa: E501
         self._address = address
 
     @classmethod
-    def from_dict(cls, dikt) -> 'AddressTagAllOf':
+    def from_dict(cls, dikt: dict) -> 'AddressTagAllOf':
         """Returns the dict as a model
 
         :param dikt: A dict.
-        :type: dict
-        :return: The address_tag_allOf of this AddressTagAllOf.  # noqa: E501
-        :rtype: AddressTagAllOf
+        :return: The address_tag_allOf of this AddressTagAllOf.
         """
         return util.deserialize_model(dikt, cls)
-
-    def to_dict(self, prefix=""):
-        """Returns the model as a dict:
-
-        :return: The AddressTagAllOf as a dict
-        :rtype: dict
-        """
-        return { 'address': self._address }
-
 
     @property
     def address(self):
         """Gets the address of this AddressTagAllOf.
 
-        Address  # noqa: E501
+        Address
 
         :return: The address of this AddressTagAllOf.
         :rtype: str
@@ -68,12 +53,12 @@ class AddressTagAllOf(Model):
     def address(self, address):
         """Sets the address of this AddressTagAllOf.
 
-        Address  # noqa: E501
+        Address
 
         :param address: The address of this AddressTagAllOf.
         :type address: str
         """
         if address is None:
-            raise ValueError("Invalid value for `address`, must not be `None`")  # noqa: E501
+            raise ValueError("Invalid value for `address`, must not be `None`")
 
         self._address = address

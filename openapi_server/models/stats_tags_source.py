@@ -1,9 +1,8 @@
 # coding: utf-8
 
-from __future__ import absolute_import
-from datetime import date, datetime  # noqa: F401
+from datetime import date, datetime
 
-from typing import List, Dict  # noqa: F401
+from typing import List, Dict, Type
 
 from openapi_server.models.base_model_ import Model
 from openapi_server import util
@@ -15,17 +14,13 @@ class StatsTagsSource(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id=None, report_uuid=None, version=None, visible_name=None):  # noqa: E501
+    def __init__(self, id: str=None, report_uuid: str=None, version: str=None, visible_name: str=None):
         """StatsTagsSource - a model defined in OpenAPI
 
-        :param id: The id of this StatsTagsSource.  # noqa: E501
-        :type id: str
-        :param report_uuid: The report_uuid of this StatsTagsSource.  # noqa: E501
-        :type report_uuid: str
-        :param version: The version of this StatsTagsSource.  # noqa: E501
-        :type version: str
-        :param visible_name: The visible_name of this StatsTagsSource.  # noqa: E501
-        :type visible_name: str
+        :param id: The id of this StatsTagsSource.
+        :param report_uuid: The report_uuid of this StatsTagsSource.
+        :param version: The version of this StatsTagsSource.
+        :param visible_name: The visible_name of this StatsTagsSource.
         """
         self.openapi_types = {
             'id': str,
@@ -47,27 +42,13 @@ class StatsTagsSource(Model):
         self._visible_name = visible_name
 
     @classmethod
-    def from_dict(cls, dikt) -> 'StatsTagsSource':
+    def from_dict(cls, dikt: dict) -> 'StatsTagsSource':
         """Returns the dict as a model
 
         :param dikt: A dict.
-        :type: dict
-        :return: The stats_tags_source of this StatsTagsSource.  # noqa: E501
-        :rtype: StatsTagsSource
+        :return: The stats_tags_source of this StatsTagsSource.
         """
         return util.deserialize_model(dikt, cls)
-
-    def to_dict(self, prefix=""):
-        """Returns the model as a dict:
-
-        :return: The StatsTagsSource as a dict
-        :rtype: dict
-        """
-        return { 'id': self._id,
-            'report_uuid': self._report_uuid,
-            'version': self._version,
-            'visible_name': self._visible_name }
-
 
     @property
     def id(self):

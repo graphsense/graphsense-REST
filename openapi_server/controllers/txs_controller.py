@@ -1,18 +1,18 @@
-import connexion
-import six
+from typing import List, Dict
+from aiohttp import web
 import traceback
-import asyncio
+import json
 
-from openapi_server.models.tx import Tx  # noqa: E501
-from openapi_server.models.tx_value import TxValue  # noqa: E501
+from openapi_server.models.tx import Tx
+from openapi_server.models.tx_value import TxValue
 import gsrest.service.txs_service as service
-from gsrest.service.problems import notfound, badrequest, internalerror
+from openapi_server import util
 
 
-def get_tx(currency, tx_hash, include_io=None):  # noqa: E501
+async def get_tx(request: web.Request, currency, tx_hash, include_io=None) -> web.Response:
     """Returns details of a specific transaction identified by its hash.
 
-     # noqa: E501
+    
 
     :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
@@ -21,30 +21,35 @@ def get_tx(currency, tx_hash, include_io=None):  # noqa: E501
     :param include_io: Whether to include inputs/outputs of a transaction (UTXO only)
     :type include_io: bool
 
-    :rtype: Tx
     """
     try:
-        result = asyncio.run(
-            service.get_tx(
-                currency=currency,
-                tx_hash=tx_hash,
-                include_io=include_io))
+        result = service.get_tx(request
+                ,currency=currency,tx_hash=tx_hash,include_io=include_io)
+        result = await result
+        if isinstance(result, list):
+            result = [d.to_dict() for d in result]
+        else:
+            result = result.to_dict()
+        result = web.Response(
+                    status=200,
+                    text=json.dumps(result),
+                    headers={'Content-type': 'application/json'})
         return result
     except RuntimeError as e:
-        return notfound(str(e))
+        return web.Response(status=404, text=str(e))
     except ValueError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except TypeError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
+        return web.Response(status=500)
 
 
-def get_tx_io(currency, tx_hash, io):  # noqa: E501
+async def get_tx_io(request: web.Request, currency, tx_hash, io) -> web.Response:
     """Returns input/output values of a specific transaction identified by its hash.
 
-     # noqa: E501
+    
 
     :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
@@ -53,21 +58,26 @@ def get_tx_io(currency, tx_hash, io):  # noqa: E501
     :param io: Input or outpus values of a transaction
     :type io: str
 
-    :rtype: List[TxValue]
     """
     try:
-        result = asyncio.run(
-            service.get_tx_io(
-                currency=currency,
-                tx_hash=tx_hash,
-                io=io))
+        result = service.get_tx_io(request
+                ,currency=currency,tx_hash=tx_hash,io=io)
+        result = await result
+        if isinstance(result, list):
+            result = [d.to_dict() for d in result]
+        else:
+            result = result.to_dict()
+        result = web.Response(
+                    status=200,
+                    text=json.dumps(result),
+                    headers={'Content-type': 'application/json'})
         return result
     except RuntimeError as e:
-        return notfound(str(e))
+        return web.Response(status=404, text=str(e))
     except ValueError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except TypeError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
+        return web.Response(status=500)

@@ -1,9 +1,8 @@
 # coding: utf-8
 
-from __future__ import absolute_import
-from datetime import date, datetime  # noqa: F401
+from datetime import date, datetime
 
-from typing import List, Dict  # noqa: F401
+from typing import List, Dict, Type
 
 from openapi_server.models.base_model_ import Model
 from openapi_server import util
@@ -15,13 +14,11 @@ class StatsLedgerVersion(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, nr=None, timestamp=None):  # noqa: E501
+    def __init__(self, nr: str=None, timestamp: str=None):
         """StatsLedgerVersion - a model defined in OpenAPI
 
-        :param nr: The nr of this StatsLedgerVersion.  # noqa: E501
-        :type nr: str
-        :param timestamp: The timestamp of this StatsLedgerVersion.  # noqa: E501
-        :type timestamp: str
+        :param nr: The nr of this StatsLedgerVersion.
+        :param timestamp: The timestamp of this StatsLedgerVersion.
         """
         self.openapi_types = {
             'nr': str,
@@ -37,25 +34,13 @@ class StatsLedgerVersion(Model):
         self._timestamp = timestamp
 
     @classmethod
-    def from_dict(cls, dikt) -> 'StatsLedgerVersion':
+    def from_dict(cls, dikt: dict) -> 'StatsLedgerVersion':
         """Returns the dict as a model
 
         :param dikt: A dict.
-        :type: dict
-        :return: The stats_ledger_version of this StatsLedgerVersion.  # noqa: E501
-        :rtype: StatsLedgerVersion
+        :return: The stats_ledger_version of this StatsLedgerVersion.
         """
         return util.deserialize_model(dikt, cls)
-
-    def to_dict(self, prefix=""):
-        """Returns the model as a dict:
-
-        :return: The StatsLedgerVersion as a dict
-        :rtype: dict
-        """
-        return { 'nr': self._nr,
-            'timestamp': self._timestamp }
-
 
     @property
     def nr(self):

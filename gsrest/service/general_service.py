@@ -12,7 +12,6 @@ from gsrest.service.stats_service import get_currency_statistics
 from gsrest.service.txs_service import list_matching_txs
 from gsrest.service.tags_service import list_labels
 from gsrest.service.addresses_service import list_matching_addresses
-from gsrest.db import get_connection
 
 import yaml
 
@@ -33,7 +32,7 @@ note2 = ('Our tags are all manually crawled or from credible sources,'
          'team (contact@graphsense.info) for more insight.')
 
 
-async def get_statistics():
+async def get_statistics(request):
     """
     Returns summary statistics on all available currencies
     """
@@ -42,10 +41,11 @@ async def get_statistics():
         version = input['info']['version']
         title = input['info']['title']
         currency_stats = list()
-        db = get_connection()
-        for currency in db.get_supported_currencies():
-            currency_stats.append(
-                await get_currency_statistics(currency, version))
+        db = request.app['db']
+        aws = [get_currency_statistics(request, currency, version)
+               for currency in db.get_supported_currencies()]
+        currency_stats = await asyncio.gather(*aws)
+
         return Stats(
                 currencies=currency_stats,
                 version=StatsVersion(
@@ -70,8 +70,8 @@ async def get_statistics():
                        StatsNote(note=note2)])
 
 
-async def search(q, currency=None, limit=None):
-    db = get_connection()
+async def search(request, q, currency=None, limit=None):
+    db = request.app['db']
     currencies = db.get_supported_currencies()
 
     q = q.strip()
@@ -92,7 +92,7 @@ async def search(q, currency=None, limit=None):
             list_labels(curr, q)
         )
 
-        #TODO improve by letting db limit the result during query
+        # TODO improve by letting db limit the result during query
         element.txs = txs[:limit]
         element.addresses = addresses[:limit]
 

@@ -1,20 +1,20 @@
-import connexion
-import six
+from typing import List, Dict
+from aiohttp import web
 import traceback
-import asyncio
+import json
 
-{{#imports}}{{import}}  # noqa: E501
+{{#imports}}{{import}}
 {{/imports}}
 import gsrest.service.{{baseName}}_service as service
-from gsrest.service.problems import notfound, badrequest, internalerror
+from {{packageName}} import util
 {{#operations}}
 {{#operation}}
 
 
-def {{operationId}}({{#allParams}}{{paramName}}{{^required}}=None{{/required}}{{^-last}}, {{/-last}}{{/allParams}}):  # noqa: E501
+async def {{operationId}}(request: web.Request, {{#allParams}}{{paramName}}{{^required}}=None{{/required}}{{^-last}}, {{/-last}}{{/allParams}}) -> web.Response:
     """{{#summary}}{{.}}{{/summary}}{{^summary}}{{operationId}}{{/summary}}
 
-    {{#notes}}{{.}}{{/notes}} # noqa: E501
+    {{#notes}}{{.}}{{/notes}}
 
     {{#allParams}}
     :param {{paramName}}: {{description}}
@@ -58,7 +58,6 @@ def {{operationId}}({{#allParams}}{{paramName}}{{^required}}=None{{/required}}{{
         {{/isMap}}
     {{/allParams}}
 
-    :rtype: {{#returnType}}{{.}}{{/returnType}}{{^returnType}}None{{/returnType}}
     """
     {{#allParams}}
         {{^isContainer}}
@@ -71,8 +70,7 @@ def {{operationId}}({{#allParams}}{{paramName}}{{^required}}=None{{/required}}{{
             {{^isPrimitiveType}}
                 {{^isFile}}
                     {{^isUuid}}
-    if connexion.request.is_json:
-        {{paramName}} = {{#baseType}}{{baseType}}{{/baseType}}{{^baseType}}{{#dataType}} {{dataType}}{{/dataType}}{{/baseType}}.from_dict(connexion.request.get_json())  # noqa: E501
+    {{paramName}} = {{baseType}}.from_dict({{paramName}})
                     {{/isUuid}}
                 {{/isFile}}
             {{/isPrimitiveType}}
@@ -80,50 +78,53 @@ def {{operationId}}({{#allParams}}{{paramName}}{{^required}}=None{{/required}}{{
         {{#isArray}}
             {{#items}}
                 {{#isDate}}
-    if connexion.request.is_json:
-        {{paramName}} = [util.deserialize_date(s) for s in connexion.request.get_json()]  # noqa: E501
+    {{paramName}} = [util.deserialize_date(s) for s in {{paramName}}]
                 {{/isDate}}
                 {{#isDateTime}}
-    if connexion.request.is_json:
-        {{paramName}} = [util.deserialize_datetime(s) for s in connexion.request.get_json()]  # noqa: E501
+    {{paramName}} = [util.deserialize_datetime(s) for s in {{paramName}}]
                 {{/isDateTime}}
                 {{#complexType}}
-    if connexion.request.is_json:
-        {{paramName}} = [{{complexType}}.from_dict(d) for d in connexion.request.get_json()]  # noqa: E501
+    {{paramName}} = [{{complexType}}.from_dict(d) for d in {{paramName}}]
                 {{/complexType}}
             {{/items}}
         {{/isArray}}
         {{#isMap}}
             {{#items}}
                 {{#isDate}}
-    if connexion.request.is_json:
-        {{paramName}} = {k: util.deserialize_date(v) for k, v in six.iteritems(connexion.request.get_json())}  # noqa: E501
+    {{paramName}} = {k: util.deserialize_date(v) for k, v in {{paramName}}}
                 {{/isDate}}
                 {{#isDateTime}}
-    if connexion.request.is_json:
-        {{paramName}} = {k: util.deserialize_datetime(v) for k, v in six.iteritems(connexion.request.get_json())}  # noqa: E501
+    {{paramName}} = {k: util.deserialize_datetime(v) for k, v in {{paramName}}}
                 {{/isDateTime}}
                 {{#complexType}}
-    if connexion.request.is_json:
-        {{paramName}} = {k: {{baseType}}.from_dict(v) for k, v in six.iteritems(connexion.request.get_json())}  # noqa: E501
+    {{paramName}} = {k: {{baseType}}.from_dict(v) for k, v in {{paramName}}}
                 {{/complexType}}
             {{/items}}
         {{/isMap}}
     {{/allParams}}
     try:
-        result = asyncio.run(
-            service.{{operationId}}(
-                {{#allParams}}{{paramName}}={{paramName}}{{^-last}},
-                {{/-last}}{{/allParams}}))
+        result = service.{{operationId}}(request
+                {{#allParams}},{{paramName}}={{paramName}}{{/allParams}})
+        {{^vendorExtensions.x-streamed}}
+        result = await result
+        if isinstance(result, list):
+            result = [d.to_dict() for d in result]
+        else:
+            result = result.to_dict()
+        result = web.Response(
+                    status=200,
+                    text=json.dumps(result),
+                    headers={'Content-type': 'application/json'})
+        {{/vendorExtensions.x-streamed}}
         return result
     except RuntimeError as e:
-        return notfound(str(e))
+        return web.Response(status=404, text=str(e))
     except ValueError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except TypeError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
+        return web.Response(status=500)
 {{/operation}}
 {{/operations}}

@@ -1,9 +1,8 @@
 # coding: utf-8
 
-from __future__ import absolute_import
-from datetime import date, datetime  # noqa: F401
+from datetime import date, datetime
 
-from typing import List, Dict  # noqa: F401
+from typing import List, Dict, Type
 
 from openapi_server.models.base_model_ import Model
 from openapi_server import util
@@ -15,19 +14,14 @@ class StatsTool(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id=None, responsible_for=None, titanium_replayable=None, version=None, visible_name=None):  # noqa: E501
+    def __init__(self, id: str=None, responsible_for: List[str]=None, titanium_replayable: bool=None, version: str=None, visible_name: str=None):
         """StatsTool - a model defined in OpenAPI
 
-        :param id: The id of this StatsTool.  # noqa: E501
-        :type id: str
-        :param responsible_for: The responsible_for of this StatsTool.  # noqa: E501
-        :type responsible_for: List[str]
-        :param titanium_replayable: The titanium_replayable of this StatsTool.  # noqa: E501
-        :type titanium_replayable: bool
-        :param version: The version of this StatsTool.  # noqa: E501
-        :type version: str
-        :param visible_name: The visible_name of this StatsTool.  # noqa: E501
-        :type visible_name: str
+        :param id: The id of this StatsTool.
+        :param responsible_for: The responsible_for of this StatsTool.
+        :param titanium_replayable: The titanium_replayable of this StatsTool.
+        :param version: The version of this StatsTool.
+        :param visible_name: The visible_name of this StatsTool.
         """
         self.openapi_types = {
             'id': str,
@@ -52,28 +46,13 @@ class StatsTool(Model):
         self._visible_name = visible_name
 
     @classmethod
-    def from_dict(cls, dikt) -> 'StatsTool':
+    def from_dict(cls, dikt: dict) -> 'StatsTool':
         """Returns the dict as a model
 
         :param dikt: A dict.
-        :type: dict
-        :return: The stats_tool of this StatsTool.  # noqa: E501
-        :rtype: StatsTool
+        :return: The stats_tool of this StatsTool.
         """
         return util.deserialize_model(dikt, cls)
-
-    def to_dict(self, prefix=""):
-        """Returns the model as a dict:
-
-        :return: The StatsTool as a dict
-        :rtype: dict
-        """
-        return { 'id': self._id,
-            'responsible_for': self._responsible_for,
-            'titanium_replayable': self._titanium_replayable,
-            'version': self._version,
-            'visible_name': self._visible_name }
-
 
     @property
     def id(self):

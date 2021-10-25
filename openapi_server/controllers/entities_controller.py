@@ -1,23 +1,23 @@
-import connexion
-import six
+from typing import List, Dict
+from aiohttp import web
 import traceback
-import asyncio
+import json
 
-from openapi_server.models.address_txs import AddressTxs  # noqa: E501
-from openapi_server.models.entity import Entity  # noqa: E501
-from openapi_server.models.entity_addresses import EntityAddresses  # noqa: E501
-from openapi_server.models.links import Links  # noqa: E501
-from openapi_server.models.neighbors import Neighbors  # noqa: E501
-from openapi_server.models.search_result_level1 import SearchResultLevel1  # noqa: E501
-from openapi_server.models.tags import Tags  # noqa: E501
+from openapi_server.models.address_txs import AddressTxs
+from openapi_server.models.entity import Entity
+from openapi_server.models.entity_addresses import EntityAddresses
+from openapi_server.models.links import Links
+from openapi_server.models.neighbors import Neighbors
+from openapi_server.models.search_result_level1 import SearchResultLevel1
+from openapi_server.models.tags import Tags
 import gsrest.service.entities_service as service
-from gsrest.service.problems import notfound, badrequest, internalerror
+from openapi_server import util
 
 
-def get_entity(currency, entity, include_tags=None, tag_coherence=None):  # noqa: E501
+async def get_entity(request: web.Request, currency, entity, include_tags=None, tag_coherence=None) -> web.Response:
     """Get an entity, optionally with tags
 
-     # noqa: E501
+    
 
     :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
@@ -28,31 +28,35 @@ def get_entity(currency, entity, include_tags=None, tag_coherence=None):  # noqa
     :param tag_coherence: Whether to calculate coherence of address tags
     :type tag_coherence: bool
 
-    :rtype: Entity
     """
     try:
-        result = asyncio.run(
-            service.get_entity(
-                currency=currency,
-                entity=entity,
-                include_tags=include_tags,
-                tag_coherence=tag_coherence))
+        result = service.get_entity(request
+                ,currency=currency,entity=entity,include_tags=include_tags,tag_coherence=tag_coherence)
+        result = await result
+        if isinstance(result, list):
+            result = [d.to_dict() for d in result]
+        else:
+            result = result.to_dict()
+        result = web.Response(
+                    status=200,
+                    text=json.dumps(result),
+                    headers={'Content-type': 'application/json'})
         return result
     except RuntimeError as e:
-        return notfound(str(e))
+        return web.Response(status=404, text=str(e))
     except ValueError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except TypeError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
+        return web.Response(status=500)
 
 
-def list_entity_addresses(currency, entity, page=None, pagesize=None):  # noqa: E501
+async def list_entity_addresses(request: web.Request, currency, entity, page=None, pagesize=None) -> web.Response:
     """Get an entity&#39;s addresses
 
-     # noqa: E501
+    
 
     :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
@@ -63,31 +67,35 @@ def list_entity_addresses(currency, entity, page=None, pagesize=None):  # noqa: 
     :param pagesize: Number of items returned in a single page
     :type pagesize: int
 
-    :rtype: EntityAddresses
     """
     try:
-        result = asyncio.run(
-            service.list_entity_addresses(
-                currency=currency,
-                entity=entity,
-                page=page,
-                pagesize=pagesize))
+        result = service.list_entity_addresses(request
+                ,currency=currency,entity=entity,page=page,pagesize=pagesize)
+        result = await result
+        if isinstance(result, list):
+            result = [d.to_dict() for d in result]
+        else:
+            result = result.to_dict()
+        result = web.Response(
+                    status=200,
+                    text=json.dumps(result),
+                    headers={'Content-type': 'application/json'})
         return result
     except RuntimeError as e:
-        return notfound(str(e))
+        return web.Response(status=404, text=str(e))
     except ValueError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except TypeError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
+        return web.Response(status=500)
 
 
-def list_entity_links(currency, entity, neighbor):  # noqa: E501
+async def list_entity_links(request: web.Request, currency, entity, neighbor) -> web.Response:
     """Get transactions between two entities
 
-     # noqa: E501
+    
 
     :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
@@ -96,30 +104,35 @@ def list_entity_links(currency, entity, neighbor):  # noqa: E501
     :param neighbor: Neighbor entity
     :type neighbor: int
 
-    :rtype: Links
     """
     try:
-        result = asyncio.run(
-            service.list_entity_links(
-                currency=currency,
-                entity=entity,
-                neighbor=neighbor))
+        result = service.list_entity_links(request
+                ,currency=currency,entity=entity,neighbor=neighbor)
+        result = await result
+        if isinstance(result, list):
+            result = [d.to_dict() for d in result]
+        else:
+            result = result.to_dict()
+        result = web.Response(
+                    status=200,
+                    text=json.dumps(result),
+                    headers={'Content-type': 'application/json'})
         return result
     except RuntimeError as e:
-        return notfound(str(e))
+        return web.Response(status=404, text=str(e))
     except ValueError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except TypeError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
+        return web.Response(status=500)
 
 
-def list_entity_neighbors(currency, entity, direction, only_ids=None, include_labels=None, page=None, pagesize=None):  # noqa: E501
+async def list_entity_neighbors(request: web.Request, currency, entity, direction, only_ids=None, include_labels=None, page=None, pagesize=None) -> web.Response:
     """Get an entity&#39;s neighbors in the entity graph
 
-     # noqa: E501
+    
 
     :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
@@ -136,34 +149,35 @@ def list_entity_neighbors(currency, entity, direction, only_ids=None, include_la
     :param pagesize: Number of items returned in a single page
     :type pagesize: int
 
-    :rtype: Neighbors
     """
     try:
-        result = asyncio.run(
-            service.list_entity_neighbors(
-                currency=currency,
-                entity=entity,
-                direction=direction,
-                only_ids=only_ids,
-                include_labels=include_labels,
-                page=page,
-                pagesize=pagesize))
+        result = service.list_entity_neighbors(request
+                ,currency=currency,entity=entity,direction=direction,only_ids=only_ids,include_labels=include_labels,page=page,pagesize=pagesize)
+        result = await result
+        if isinstance(result, list):
+            result = [d.to_dict() for d in result]
+        else:
+            result = result.to_dict()
+        result = web.Response(
+                    status=200,
+                    text=json.dumps(result),
+                    headers={'Content-type': 'application/json'})
         return result
     except RuntimeError as e:
-        return notfound(str(e))
+        return web.Response(status=404, text=str(e))
     except ValueError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except TypeError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
+        return web.Response(status=500)
 
 
-def list_entity_txs(currency, entity, page=None, pagesize=None):  # noqa: E501
+async def list_entity_txs(request: web.Request, currency, entity, page=None, pagesize=None) -> web.Response:
     """Get all transactions an entity has been involved in
 
-     # noqa: E501
+    
 
     :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
@@ -174,31 +188,35 @@ def list_entity_txs(currency, entity, page=None, pagesize=None):  # noqa: E501
     :param pagesize: Number of items returned in a single page
     :type pagesize: int
 
-    :rtype: AddressTxs
     """
     try:
-        result = asyncio.run(
-            service.list_entity_txs(
-                currency=currency,
-                entity=entity,
-                page=page,
-                pagesize=pagesize))
+        result = service.list_entity_txs(request
+                ,currency=currency,entity=entity,page=page,pagesize=pagesize)
+        result = await result
+        if isinstance(result, list):
+            result = [d.to_dict() for d in result]
+        else:
+            result = result.to_dict()
+        result = web.Response(
+                    status=200,
+                    text=json.dumps(result),
+                    headers={'Content-type': 'application/json'})
         return result
     except RuntimeError as e:
-        return notfound(str(e))
+        return web.Response(status=404, text=str(e))
     except ValueError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except TypeError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
+        return web.Response(status=500)
 
 
-def list_tags_by_entity(currency, entity, tag_coherence=None):  # noqa: E501
+async def list_tags_by_entity(request: web.Request, currency, entity, tag_coherence=None) -> web.Response:
     """Get tags for a given entity
 
-     # noqa: E501
+    
 
     :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
@@ -207,30 +225,35 @@ def list_tags_by_entity(currency, entity, tag_coherence=None):  # noqa: E501
     :param tag_coherence: Whether to calculate coherence of address tags
     :type tag_coherence: bool
 
-    :rtype: Tags
     """
     try:
-        result = asyncio.run(
-            service.list_tags_by_entity(
-                currency=currency,
-                entity=entity,
-                tag_coherence=tag_coherence))
+        result = service.list_tags_by_entity(request
+                ,currency=currency,entity=entity,tag_coherence=tag_coherence)
+        result = await result
+        if isinstance(result, list):
+            result = [d.to_dict() for d in result]
+        else:
+            result = result.to_dict()
+        result = web.Response(
+                    status=200,
+                    text=json.dumps(result),
+                    headers={'Content-type': 'application/json'})
         return result
     except RuntimeError as e:
-        return notfound(str(e))
+        return web.Response(status=404, text=str(e))
     except ValueError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except TypeError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
+        return web.Response(status=500)
 
 
-def search_entity_neighbors(currency, entity, direction, key, value, depth, breadth=None, skip_num_addresses=None):  # noqa: E501
+async def search_entity_neighbors(request: web.Request, currency, entity, direction, key, value, depth, breadth=None, skip_num_addresses=None) -> web.Response:
     """Search deeply for matching neighbors
 
-     # noqa: E501
+    
 
     :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
@@ -249,26 +272,26 @@ def search_entity_neighbors(currency, entity, direction, key, value, depth, brea
     :param skip_num_addresses: Skip entities containing more addresses
     :type skip_num_addresses: int
 
-    :rtype: List[SearchResultLevel1]
     """
     try:
-        result = asyncio.run(
-            service.search_entity_neighbors(
-                currency=currency,
-                entity=entity,
-                direction=direction,
-                key=key,
-                value=value,
-                depth=depth,
-                breadth=breadth,
-                skip_num_addresses=skip_num_addresses))
+        result = service.search_entity_neighbors(request
+                ,currency=currency,entity=entity,direction=direction,key=key,value=value,depth=depth,breadth=breadth,skip_num_addresses=skip_num_addresses)
+        result = await result
+        if isinstance(result, list):
+            result = [d.to_dict() for d in result]
+        else:
+            result = result.to_dict()
+        result = web.Response(
+                    status=200,
+                    text=json.dumps(result),
+                    headers={'Content-type': 'application/json'})
         return result
     except RuntimeError as e:
-        return notfound(str(e))
+        return web.Response(status=404, text=str(e))
     except ValueError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except TypeError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
+        return web.Response(status=500)

@@ -1,8 +1,6 @@
-from gsrest.db import get_connection
 from gsrest.service.common_service import get_address
 from gsrest.service.rates_service import get_rates
 from openapi_server.models.entity import Entity
-from openapi_server.models.entities import Entities
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.address_txs import AddressTxs
 from gsrest.util.values import compute_balance, convert_value, to_values
@@ -11,8 +9,6 @@ from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.tags import Tags
 from openapi_server.models.search_result_level1 import SearchResultLevel1
 from gsrest.util.tag_coherence import compute_tag_coherence
-from flask import Response, stream_with_context
-from gsrest.util.csvify import create_download_header, to_csv
 from openapi_server.models.address import Address
 from openapi_server.models.entity_addresses import EntityAddresses
 import gsrest.service.common_service as common
@@ -51,9 +47,9 @@ def from_row(currency, row, rates, tags=None):
         )
 
 
-async def list_tags_by_entity(currency, entity, tag_coherence=False):
-    entity_tags = await list_entity_tags_by_entity(currency, entity)
-    address_tags = await list_address_tags_by_entity(currency, entity)
+async def list_tags_by_entity(request, currency, entity, tag_coherence=False):
+    entity_tags = await list_entity_tags_by_entity(request, currency, entity)
+    address_tags = await list_address_tags_by_entity(request, currency, entity)
     tag_coherence = compute_tag_coherence(tag.label for tag in address_tags) \
         if tag_coherence else None
     return Tags(entity_tags=entity_tags,
@@ -61,21 +57,8 @@ async def list_tags_by_entity(currency, entity, tag_coherence=False):
                 tag_coherence=tag_coherence)
 
 
-def list_tags_by_entity_by_level_csv(currency, entity, level):
-    def query_function(_):
-        tags = list_entity_tags_by_entity(currency, entity) \
-            if level == 'entity' \
-            else list_address_tags_by_entity(currency, entity)
-        return (None, tags)
-    return Response(stream_with_context(to_csv(query_function)),
-                    mimetype="text/csv",
-                    headers=create_download_header(
-                        '{} tags of entity {} ({}).csv'
-                        .format(level, entity, currency.upper())))
-
-
-async def list_entity_tags_by_entity(currency, entity):
-    db = get_connection()
+async def list_entity_tags_by_entity(request, currency, entity):
+    db = request.app['db']
     entity_tags = await db.list_entity_tags_by_entity(currency, entity)
     return [EntityTag(label=row['label'],
                       entity=row['cluster_id'],
@@ -89,8 +72,8 @@ async def list_entity_tags_by_entity(currency, entity):
             for row in entity_tags]
 
 
-async def list_address_tags_by_entity(currency, entity):
-    db = get_connection()
+async def list_address_tags_by_entity(request, currency, entity):
+    db = request.app['db']
     address_tags = await db.list_address_tags_by_entity(currency, entity)
     return [AddressTag(label=row['label'],
                        address=row['address'],
@@ -104,9 +87,9 @@ async def list_address_tags_by_entity(currency, entity):
             for row in address_tags]
 
 
-async def get_entity(currency, entity, include_tags=False,
+async def get_entity(request, currency, entity, include_tags=False,
                      tag_coherence=False):
-    db = get_connection()
+    db = request.app['db']
     result = await db.get_entity(currency, entity)
 
     if result is None:
@@ -114,58 +97,26 @@ async def get_entity(currency, entity, include_tags=False,
 
     tags = await list_tags_by_entity(currency, result['cluster_id'],
                                      tag_coherence) if include_tags else None
-    rates = (await get_rates(currency))['rates']
+    rates = (await get_rates(request, currency))['rates']
     return from_row(currency, result, rates, tags)
 
 
-def list_entities(currency, ids=None, page=None, pagesize=None):
-    db = get_connection()
-    result, next_page = db.list_entities(currency, ids, page, pagesize)
-    rates = get_rates(currency)['rates']
-    return Entities(entities=[from_row(currency, row, rates)
-                              for row in result],
-                    next_page=next_page)
-
-
-def list_entities_csv(currency, ids):
-    def query_function(page_state):
-        result = list_entities(currency, ids, page_state)
-        return (result.next_page, result.entities)
-    return Response(stream_with_context(to_csv(query_function)),
-                    mimetype="text/csv",
-                    headers=create_download_header(
-                            'entities ({}).csv'
-                            .format(currency.upper())))
-
-
-async def list_entity_neighbors(currency, entity, direction, only_ids=None,
-                                include_labels=False, page=None,
-                                pagesize=None):
-    return await common.list_neighbors(currency, entity, direction, 'entity',
+async def list_entity_neighbors(request, currency, entity, direction,
+                                only_ids=None, include_labels=False,
+                                page=None, pagesize=None):
+    return await common.list_neighbors(request, currency, entity, direction,
+                                       'entity',
                                        only_ids, include_labels, page,
                                        pagesize)
 
 
-def list_entity_neighbors_csv(currency, entity, direction,
-                              include_labels=False):
-    def query_function(page_state):
-        result = list_entity_neighbors(currency, entity, direction,
-                                       include_labels=include_labels,
-                                       page=page_state)
-        return (result.next_page, result.neighbors)
-    return Response(stream_with_context(to_csv(query_function)),
-                    mimetype="text/csv",
-                    headers=create_download_header(
-                            '{} neighbors of entity {} ({}).csv'
-                            .format(direction, entity, currency.upper())))
-
-
-async def list_entity_addresses(currency, entity, page=None, pagesize=None):
-    db = get_connection()
+async def list_entity_addresses(request, currency, entity,
+                                page=None, pagesize=None):
+    db = request.app['db']
     addresses, paging_state = \
         await db.list_entity_addresses(currency, entity, page, pagesize)
 
-    rates = (await get_rates(currency))['rates']
+    rates = (await get_rates(request, currency))['rates']
     addresses = [Address(
             address=row['address'],
             entity=row['cluster_id'],
@@ -194,21 +145,11 @@ async def list_entity_addresses(currency, entity, page=None, pagesize=None):
     return EntityAddresses(next_page=paging_state, addresses=addresses)
 
 
-def list_entity_addresses_csv(currency, entity):
-    def query_function(page_state):
-        result = list_entity_addresses(currency, entity, page_state)
-        return (result.next_page, result.addresses)
-    return Response(stream_with_context(to_csv(query_function)),
-                    mimetype="text/csv",
-                    headers=create_download_header(
-                            'addresses of entity {} ({}).csv'
-                            .format(entity, currency.upper())))
-
-
-async def search_entity_neighbors(currency, entity, direction, key, value,
+async def search_entity_neighbors(request, currency, entity, direction,
+                                  key, value,
                                   depth, breadth, skip_num_addresses=None):
     params = dict()
-    db = get_connection()
+    db = request.app['db']
     if 'category' in key:
         params['category'] = value[0]
 
@@ -239,15 +180,15 @@ async def search_entity_neighbors(currency, entity, direction, key, value,
 
     level = 2
     result = \
-        await recursive_search(currency, entity, params,
+        await recursive_search(request, currency, entity, params,
                                breadth, depth, level, skip_num_addresses,
                                direction)
 
     return SearchResultLevel1(paths=result)
 
 
-async def recursive_search(currency, entity, params, breadth, depth, level,
-                           skip_num_addresses, direction, cache=None):
+async def recursive_search(request, currency, entity, params, breadth, depth,
+                           level, skip_num_addresses, direction, cache=None):
     if cache is None:
         cache = dict()
     if depth <= 0:
@@ -321,7 +262,8 @@ async def recursive_search(currency, entity, params, breadth, depth, level,
                 level < MAX_DEPTH and \
                 (skip_num_addresses is None or
                  props.no_addresses <= skip_num_addresses):
-            subpaths = await recursive_search(currency, int(neighbor.id),
+            subpaths = await recursive_search(request,
+                                              currency, int(neighbor.id),
                                               params, breadth,
                                               depth - 1,
                                               level + 1,
@@ -342,7 +284,7 @@ async def recursive_search(currency, entity, params, breadth, depth, level,
         obj = levelClass(node=props, relation=neighbor,
                          matching_addresses=[])
         if subpaths is True:
-            aws = [get_address(currency, address, True)
+            aws = [get_address(request, currency, address, True)
                    for address in matching_addresses]
             addresses_with_tags = await asyncio.gather(*aws)
             obj.matching_addresses = [address for address in
@@ -354,41 +296,18 @@ async def recursive_search(currency, entity, params, breadth, depth, level,
     return paths
 
 
-async def list_entity_txs(currency, entity, page=None, pagesize=None):
-    db = get_connection()
+async def list_entity_txs(request, currency, entity, page=None, pagesize=None):
+    db = request.app['db']
     results, paging_state = \
         await db.list_entity_txs(currency, entity, page, pagesize)
-    entity_txs = await common.txs_from_rows(currency, results)
+    entity_txs = await common.txs_from_rows(request, currency, results)
     return AddressTxs(next_page=paging_state, address_txs=entity_txs)
 
 
-def list_entity_txs_csv(currency, entity):
-    def query_function(page_state):
-        result = list_entity_txs(currency, entity, page_state)
-        return (result.next_page, result.txs)
-    return Response(stream_with_context(to_csv(query_function)),
-                    mimetype="text/csv",
-                    headers=create_download_header(
-                            'transactions of entity {} ({}).csv'
-                            .format(entity, currency.upper())))
-
-
-async def list_entity_links(currency, entity, neighbor,
+async def list_entity_links(request, currency, entity, neighbor,
                             page=None, pagesize=None):
-    db = get_connection()
+    db = request.app['db']
     result = await db.list_entity_links(currency, entity, neighbor,
                                         page=page, pagesize=pagesize)
 
-    return await common.links_response(currency, result)
-
-
-def list_entity_links_csv(currency, entity, neighbor):
-    def query_function(page_state):
-        result = list_entity_links(currency, entity, neighbor,
-                                   page=page_state)
-        return (result.next_page, result.links)
-    return Response(stream_with_context(to_csv(query_function)),
-                    mimetype="text/csv",
-                    headers=create_download_header(
-                            'transactions between {} and {} ({}).csv'
-                            .format(entity, neighbor, currency.upper())))
+    return await common.links_response(request, currency, result)

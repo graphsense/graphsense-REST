@@ -1,12 +1,11 @@
 from datetime import datetime
-from gsrest.db import get_connection
 from openapi_server.models.currency_stats import CurrencyStats
 from openapi_server.models.stats_ledger import StatsLedger
 from openapi_server.models.stats_ledger_version import StatsLedgerVersion
 
 
-async def get_currency_statistics(currency, version=None):
-    db = get_connection()
+async def get_currency_statistics(request, currency, version=None):
+    db = request.app['db']
     result = await db.get_currency_statistics(currency)
     if result is None:
         raise ValueError('statistics for currency {} not found'
@@ -31,6 +30,3 @@ async def get_currency_statistics(currency, version=None):
                     nr=str(result['no_blocks']), timestamp=tstamp),
                 report_uuid=currency + '_ledger')]
         )
-
-
-

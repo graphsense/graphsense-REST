@@ -1,22 +1,22 @@
-import connexion
-import six
+from typing import List, Dict
+from aiohttp import web
 import traceback
-import asyncio
+import json
 
-from openapi_server.models.address import Address  # noqa: E501
-from openapi_server.models.address_tag import AddressTag  # noqa: E501
-from openapi_server.models.address_txs import AddressTxs  # noqa: E501
-from openapi_server.models.entity import Entity  # noqa: E501
-from openapi_server.models.links import Links  # noqa: E501
-from openapi_server.models.neighbors import Neighbors  # noqa: E501
+from openapi_server.models.address import Address
+from openapi_server.models.address_tag import AddressTag
+from openapi_server.models.address_txs import AddressTxs
+from openapi_server.models.entity import Entity
+from openapi_server.models.links import Links
+from openapi_server.models.neighbors import Neighbors
 import gsrest.service.addresses_service as service
-from gsrest.service.problems import notfound, badrequest, internalerror
+from openapi_server import util
 
 
-def get_address(currency, address, include_tags=None):  # noqa: E501
+async def get_address(request: web.Request, currency, address, include_tags=None) -> web.Response:
     """Get an address, optionally with tags
 
-     # noqa: E501
+    
 
     :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
@@ -25,30 +25,35 @@ def get_address(currency, address, include_tags=None):  # noqa: E501
     :param include_tags: Whether to include tags
     :type include_tags: bool
 
-    :rtype: Address
     """
     try:
-        result = asyncio.run(
-            service.get_address(
-                currency=currency,
-                address=address,
-                include_tags=include_tags))
+        result = service.get_address(request
+                ,currency=currency,address=address,include_tags=include_tags)
+        result = await result
+        if isinstance(result, list):
+            result = [d.to_dict() for d in result]
+        else:
+            result = result.to_dict()
+        result = web.Response(
+                    status=200,
+                    text=json.dumps(result),
+                    headers={'Content-type': 'application/json'})
         return result
     except RuntimeError as e:
-        return notfound(str(e))
+        return web.Response(status=404, text=str(e))
     except ValueError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except TypeError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
+        return web.Response(status=500)
 
 
-def get_address_entity(currency, address, include_tags=None, tag_coherence=None):  # noqa: E501
+async def get_address_entity(request: web.Request, currency, address, include_tags=None, tag_coherence=None) -> web.Response:
     """Get the entity of an address
 
-     # noqa: E501
+    
 
     :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
@@ -59,31 +64,35 @@ def get_address_entity(currency, address, include_tags=None, tag_coherence=None)
     :param tag_coherence: Whether to calculate coherence of address tags
     :type tag_coherence: bool
 
-    :rtype: Entity
     """
     try:
-        result = asyncio.run(
-            service.get_address_entity(
-                currency=currency,
-                address=address,
-                include_tags=include_tags,
-                tag_coherence=tag_coherence))
+        result = service.get_address_entity(request
+                ,currency=currency,address=address,include_tags=include_tags,tag_coherence=tag_coherence)
+        result = await result
+        if isinstance(result, list):
+            result = [d.to_dict() for d in result]
+        else:
+            result = result.to_dict()
+        result = web.Response(
+                    status=200,
+                    text=json.dumps(result),
+                    headers={'Content-type': 'application/json'})
         return result
     except RuntimeError as e:
-        return notfound(str(e))
+        return web.Response(status=404, text=str(e))
     except ValueError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except TypeError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
+        return web.Response(status=500)
 
 
-def list_address_links(currency, address, neighbor):  # noqa: E501
+async def list_address_links(request: web.Request, currency, address, neighbor) -> web.Response:
     """Get outgoing transactions between two addresses
 
-     # noqa: E501
+    
 
     :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
@@ -92,30 +101,35 @@ def list_address_links(currency, address, neighbor):  # noqa: E501
     :param neighbor: Neighbor address
     :type neighbor: str
 
-    :rtype: Links
     """
     try:
-        result = asyncio.run(
-            service.list_address_links(
-                currency=currency,
-                address=address,
-                neighbor=neighbor))
+        result = service.list_address_links(request
+                ,currency=currency,address=address,neighbor=neighbor)
+        result = await result
+        if isinstance(result, list):
+            result = [d.to_dict() for d in result]
+        else:
+            result = result.to_dict()
+        result = web.Response(
+                    status=200,
+                    text=json.dumps(result),
+                    headers={'Content-type': 'application/json'})
         return result
     except RuntimeError as e:
-        return notfound(str(e))
+        return web.Response(status=404, text=str(e))
     except ValueError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except TypeError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
+        return web.Response(status=500)
 
 
-def list_address_neighbors(currency, address, direction, include_labels=None, page=None, pagesize=None):  # noqa: E501
+async def list_address_neighbors(request: web.Request, currency, address, direction, include_labels=None, page=None, pagesize=None) -> web.Response:
     """Get an addresses&#39; neighbors in the address graph
 
-     # noqa: E501
+    
 
     :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
@@ -130,33 +144,35 @@ def list_address_neighbors(currency, address, direction, include_labels=None, pa
     :param pagesize: Number of items returned in a single page
     :type pagesize: int
 
-    :rtype: Neighbors
     """
     try:
-        result = asyncio.run(
-            service.list_address_neighbors(
-                currency=currency,
-                address=address,
-                direction=direction,
-                include_labels=include_labels,
-                page=page,
-                pagesize=pagesize))
+        result = service.list_address_neighbors(request
+                ,currency=currency,address=address,direction=direction,include_labels=include_labels,page=page,pagesize=pagesize)
+        result = await result
+        if isinstance(result, list):
+            result = [d.to_dict() for d in result]
+        else:
+            result = result.to_dict()
+        result = web.Response(
+                    status=200,
+                    text=json.dumps(result),
+                    headers={'Content-type': 'application/json'})
         return result
     except RuntimeError as e:
-        return notfound(str(e))
+        return web.Response(status=404, text=str(e))
     except ValueError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except TypeError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
+        return web.Response(status=500)
 
 
-def list_address_txs(currency, address, page=None, pagesize=None):  # noqa: E501
+async def list_address_txs(request: web.Request, currency, address, page=None, pagesize=None) -> web.Response:
     """Get all transactions an address has been involved in
 
-     # noqa: E501
+    
 
     :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
@@ -167,51 +183,61 @@ def list_address_txs(currency, address, page=None, pagesize=None):  # noqa: E501
     :param pagesize: Number of items returned in a single page
     :type pagesize: int
 
-    :rtype: AddressTxs
     """
     try:
-        result = asyncio.run(
-            service.list_address_txs(
-                currency=currency,
-                address=address,
-                page=page,
-                pagesize=pagesize))
+        result = service.list_address_txs(request
+                ,currency=currency,address=address,page=page,pagesize=pagesize)
+        result = await result
+        if isinstance(result, list):
+            result = [d.to_dict() for d in result]
+        else:
+            result = result.to_dict()
+        result = web.Response(
+                    status=200,
+                    text=json.dumps(result),
+                    headers={'Content-type': 'application/json'})
         return result
     except RuntimeError as e:
-        return notfound(str(e))
+        return web.Response(status=404, text=str(e))
     except ValueError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except TypeError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
+        return web.Response(status=500)
 
 
-def list_tags_by_address(currency, address):  # noqa: E501
+async def list_tags_by_address(request: web.Request, currency, address) -> web.Response:
     """Get attribution tags for a given address
 
-     # noqa: E501
+    
 
     :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
     :param address: The cryptocurrency address
     :type address: str
 
-    :rtype: List[AddressTag]
     """
     try:
-        result = asyncio.run(
-            service.list_tags_by_address(
-                currency=currency,
-                address=address))
+        result = service.list_tags_by_address(request
+                ,currency=currency,address=address)
+        result = await result
+        if isinstance(result, list):
+            result = [d.to_dict() for d in result]
+        else:
+            result = result.to_dict()
+        result = web.Response(
+                    status=200,
+                    text=json.dumps(result),
+                    headers={'Content-type': 'application/json'})
         return result
     except RuntimeError as e:
-        return notfound(str(e))
+        return web.Response(status=404, text=str(e))
     except ValueError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except TypeError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
+        return web.Response(status=500)

@@ -1,10 +1,7 @@
-import asyncio
-from gsrest.db import get_connection
-from openapi_server.models.txs import Txs
 from openapi_server.models.tx_utxo import TxUtxo
 from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.tx_value import TxValue
-from gsrest.service.rates_service import get_rates, list_rates
+from gsrest.service.rates_service import get_rates
 from gsrest.util.values import convert_value
 
 
@@ -38,45 +35,27 @@ def io_from_rows(currency, values, key, rates):
             for i in values[key] if i.address is not None]
 
 
-async def get_tx(currency, tx_hash, include_io=False):
-    db = get_connection()
+async def get_tx(request, currency, tx_hash, include_io=False):
+    db = request.app['db']
     result = await db.get_tx(currency, tx_hash, include_io)
-    print(f'result {result}')
     if result is None:
         raise RuntimeError('Transaction {} in keyspace {} not found'
                            .format(tx_hash, currency))
 
-    rates = (await get_rates(currency, result['block_id']))['rates']
+    rates = (await get_rates(request, currency, result['block_id']))['rates']
     result = from_row(currency, result, rates)
     return result
 
 
-async def get_tx_io(currency, tx_hash, io):
-    print(f'await {tx_hash}')
-    result = await get_tx(currency, tx_hash, include_io=True)
-    print(f'received results for {result.tx_hash}')
+async def get_tx_io(request, currency, tx_hash, io):
+    result = await get_tx(request, currency, tx_hash, include_io=True)
     if currency == 'eth':
         raise RuntimeError('get_tx_io not implemented for ETH')
     return getattr(result, io)
 
 
-def list_txs(currency, page=None):
-    db = get_connection()
-    results, paging_state = db.list_txs(currency, page)
-
-    def acc(row):
-        return row['block_id'] if currency == 'eth' else row['block_id']
-
-    heights = [acc(row) for row in results]
-    rates = list_rates(currency, heights)
-    tx_list = [from_row(currency, row, rates[acc(row)])
-               for row in results]
-
-    return Txs(next_page=paging_state, txs=tx_list)
-
-
-async def list_matching_txs(currency, expression):
-    db = get_connection()
+async def list_matching_txs(request, currency, expression):
+    db = request.app['db']
     results = await db.list_matching_txs(currency, expression)
 
     leading_zeros = 0

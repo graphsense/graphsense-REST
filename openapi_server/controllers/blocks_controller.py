@@ -1,67 +1,79 @@
-import connexion
-import six
+from typing import List, Dict
+from aiohttp import web
 import traceback
-import asyncio
+import json
 
-from openapi_server.models.block import Block  # noqa: E501
-from openapi_server.models.tx import Tx  # noqa: E501
+from openapi_server.models.block import Block
+from openapi_server.models.tx import Tx
 import gsrest.service.blocks_service as service
-from gsrest.service.problems import notfound, badrequest, internalerror
+from openapi_server import util
 
 
-def get_block(currency, height):  # noqa: E501
+async def get_block(request: web.Request, currency, height) -> web.Response:
     """Get a block by its height
 
-     # noqa: E501
+    
 
     :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
     :param height: The block height
     :type height: int
 
-    :rtype: Block
     """
     try:
-        result = asyncio.run(
-            service.get_block(
-                currency=currency,
-                height=height))
+        result = service.get_block(request
+                ,currency=currency,height=height)
+        result = await result
+        if isinstance(result, list):
+            result = [d.to_dict() for d in result]
+        else:
+            result = result.to_dict()
+        result = web.Response(
+                    status=200,
+                    text=json.dumps(result),
+                    headers={'Content-type': 'application/json'})
         return result
     except RuntimeError as e:
-        return notfound(str(e))
+        return web.Response(status=404, text=str(e))
     except ValueError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except TypeError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
+        return web.Response(status=500)
 
 
-def list_block_txs(currency, height):  # noqa: E501
+async def list_block_txs(request: web.Request, currency, height) -> web.Response:
     """Get block transactions
 
-     # noqa: E501
+    
 
     :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
     :param height: The block height
     :type height: int
 
-    :rtype: List[Tx]
     """
     try:
-        result = asyncio.run(
-            service.list_block_txs(
-                currency=currency,
-                height=height))
+        result = service.list_block_txs(request
+                ,currency=currency,height=height)
+        result = await result
+        if isinstance(result, list):
+            result = [d.to_dict() for d in result]
+        else:
+            result = result.to_dict()
+        result = web.Response(
+                    status=200,
+                    text=json.dumps(result),
+                    headers={'Content-type': 'application/json'})
         return result
     except RuntimeError as e:
-        return notfound(str(e))
+        return web.Response(status=404, text=str(e))
     except ValueError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except TypeError as e:
-        return badrequest(str(e))
+        return web.Response(status=400, text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
+        return web.Response(status=500)

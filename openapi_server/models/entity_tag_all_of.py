@@ -1,9 +1,8 @@
 # coding: utf-8
 
-from __future__ import absolute_import
-from datetime import date, datetime  # noqa: F401
+from datetime import date, datetime
 
-from typing import List, Dict  # noqa: F401
+from typing import List, Dict, Type
 
 from openapi_server.models.base_model_ import Model
 from openapi_server import util
@@ -15,11 +14,10 @@ class EntityTagAllOf(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, entity=None):  # noqa: E501
+    def __init__(self, entity: int=None):
         """EntityTagAllOf - a model defined in OpenAPI
 
-        :param entity: The entity of this EntityTagAllOf.  # noqa: E501
-        :type entity: int
+        :param entity: The entity of this EntityTagAllOf.
         """
         self.openapi_types = {
             'entity': int
@@ -29,35 +27,22 @@ class EntityTagAllOf(Model):
             'entity': 'entity'
         }
 
-        #if entity is None:
-            #raise ValueError("Invalid value for `entity`, must not be `None`")  # noqa: E501
         self._entity = entity
 
     @classmethod
-    def from_dict(cls, dikt) -> 'EntityTagAllOf':
+    def from_dict(cls, dikt: dict) -> 'EntityTagAllOf':
         """Returns the dict as a model
 
         :param dikt: A dict.
-        :type: dict
-        :return: The entity_tag_allOf of this EntityTagAllOf.  # noqa: E501
-        :rtype: EntityTagAllOf
+        :return: The entity_tag_allOf of this EntityTagAllOf.
         """
         return util.deserialize_model(dikt, cls)
-
-    def to_dict(self, prefix=""):
-        """Returns the model as a dict:
-
-        :return: The EntityTagAllOf as a dict
-        :rtype: dict
-        """
-        return { 'entity': self._entity }
-
 
     @property
     def entity(self):
         """Gets the entity of this EntityTagAllOf.
 
-        Entity id  # noqa: E501
+        Entity id
 
         :return: The entity of this EntityTagAllOf.
         :rtype: int
@@ -68,12 +53,12 @@ class EntityTagAllOf(Model):
     def entity(self, entity):
         """Sets the entity of this EntityTagAllOf.
 
-        Entity id  # noqa: E501
+        Entity id
 
         :param entity: The entity of this EntityTagAllOf.
         :type entity: int
         """
         if entity is None:
-            raise ValueError("Invalid value for `entity`, must not be `None`")  # noqa: E501
+            raise ValueError("Invalid value for `entity`, must not be `None`")
 
         self._entity = entity

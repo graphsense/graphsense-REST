@@ -588,6 +588,7 @@ paths:
               type: object
         description: Map of the operation's parameter names to (arrays of) values
         required: true
+        x-body-name: body
       responses:
         "200":
           content:
@@ -604,7 +605,9 @@ paths:
       summary: Get data as CSV or JSON in bulk
       tags:
       - bulk
+      x-streamed: true
       x-openapi-router-controller: openapi_server.controllers.bulk_controller
+      x-codegen-request-body-name: body
   /{currency}/entities/{entity}:
     get:
       operationId: get_entity
