@@ -3,7 +3,7 @@ import time
 import asyncio
 from collections import namedtuple
 from cassandra.cluster import Cluster, NoHostAvailable
-from cassandra.query import SimpleStatement, dict_factory
+from cassandra.query import SimpleStatement, dict_factory, ValueSequence
 from math import floor
 # from codetiming import Timer
 
@@ -44,7 +44,7 @@ def replaceFrom(keyspace, query):
 
 def replacePerc(query):
     r = re.compile(r'%s', re.IGNORECASE)
-    return r.sub(f'?', query)
+    return r.sub('?', query)
 
 
 class Result:
@@ -764,7 +764,8 @@ class Cassandra:
                     id_group)
             sec_in = self.sec_in(secondary_id_group)
             sec_condition = \
-                f' AND {this}_address_id_secondary_group in {sec_in}'
+                f' AND {this}_address_id_secondary_group in %s'
+            parameters.append(sec_in)
 
         basequery = (f"SELECT * FROM {node_type}_{direction}_relations WHERE "
                      f"{this}_{node_type}_id_group = %s AND "
@@ -774,8 +775,9 @@ class Cassandra:
                 return None
 
             query = basequery.replace('*', f'{that}_{node_type}_id')
-            targets = ','.join(map(str, targets))
-            query += f' AND {that}_{node_type}_id in ({targets})'
+            targets = ValueSequence(targets)
+            query += f' AND {that}_{node_type}_id in %s'
+            parameters.append(targets)
         else:
             query = basequery
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
@@ -1277,11 +1279,11 @@ class Cassandra:
         sec_in = self.sec_in(secondary_id_group)
         query = ("SELECT transaction_id, value FROM address_transactions "
                  "WHERE address_id_group = %s and "
-                 f"address_id_secondary_group in {sec_in}"
+                 "address_id_secondary_group in %s"
                  " and address_id = %s")
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
         result = await self.execute_async(currency, 'transformed', query,
-                                          [id_group, address_id],
+                                          [id_group, address_id, sec_in],
                                           paging_state=paging_state,
                                           fetch_size=fetch_size)
         if result is None:
@@ -1383,7 +1385,7 @@ class Cassandra:
         query = \
             f"SELECT no_transactions FROM {node_type}_{{direction}}_relations"\
             f" WHERE {{src}}_{node_type}_id_group = %s AND"\
-            f" {{src}}_{node_type}_id_secondary_group in {{sec}} AND"\
+            f" {{src}}_{node_type}_id_secondary_group in %s AND"\
             f" {{src}}_{node_type}_id = %s AND"\
             f" {{dst}}_{node_type}_id = %s"
 
@@ -1395,7 +1397,9 @@ class Cassandra:
                                          sec=address_id_secondary_group,
                                          src='src',
                                          dst='dst'),
-                                     [address_id_group, address_id,
+                                     [address_id_group,
+                                      address_id_secondary_group,
+                                      address_id,
                                       neighbor_id])
             ).one()
 
@@ -1435,9 +1439,9 @@ class Cassandra:
                     "address_id_group = %s AND address_id = %s " \
                     "AND is_outgoing = %s "
         first_query = basequery + \
-            f"AND address_id_secondary_group IN {address_id_secondary_group}"
+            "AND address_id_secondary_group IN %s"
         second_query = basequery + \
-            f"AND address_id_secondary_group IN {neighbor_id_secondary_group}"\
+            "AND address_id_secondary_group IN %s"\
             " AND transaction_id = %s"
 
         fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
@@ -1450,7 +1454,8 @@ class Cassandra:
             results1 = await self.execute_async(currency, 'transformed',
                                                 first_query,
                                                 [first_id_group, first_id,
-                                                 isOutgoing],
+                                                 isOutgoing,
+                                                 first_id_secondary_group],
                                                 paging_state=paging_state,
                                                 fetch_size=fetch_size)
 
@@ -1460,7 +1465,9 @@ class Cassandra:
             paging_state = results1.paging_state
             has_more_pages = paging_state is not None
 
-            params = [[second_id_group, second_id, not isOutgoing,
+            params = [[second_id_group, second_id,
+                       not isOutgoing,
+                       second_id_secondary_group,
                        row['transaction_id']]
                       for row in results1.current_rows]
 
@@ -1562,5 +1569,4 @@ class Cassandra:
         return rows
 
     def sec_in(self, id):
-        return "(" + ','.join(map(str, range(0, id+1))) + ")"
-
+        return ValueSequence(range(0, id+1))
