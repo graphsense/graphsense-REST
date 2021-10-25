@@ -22,18 +22,6 @@ class TestBlocksController(BaseTestCase):
         """
         await test_service.get_block(self)
 
-        if "get_block" == "bulk":
-            return
-        headers = { 
-            'Accept': 'application/json',
-        }
-        response = await self.client.request(
-            method='GET',
-            path='/{currency}/blocks/{height}'.format(currency='btc', height=1),
-            headers=headers,
-            )
-        assert response.status == 200, 'Response body is : ' + (await response.read()).decode('utf-8')
-
 
     @unittest_run_loop
     async def test_list_block_txs(self):
@@ -42,16 +30,4 @@ class TestBlocksController(BaseTestCase):
         Get block transactions
         """
         await test_service.list_block_txs(self)
-
-        if "list_block_txs" == "bulk":
-            return
-        headers = { 
-            'Accept': 'application/json',
-        }
-        response = await self.client.request(
-            method='GET',
-            path='/{currency}/blocks/{height}/txs'.format(currency='btc', height=1),
-            headers=headers,
-            )
-        assert response.status == 200, 'Response body is : ' + (await response.read()).decode('utf-8')
 

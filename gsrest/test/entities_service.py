@@ -338,14 +338,12 @@ async def list_entity_neighbors(test_case):
     yamldump(result)
     test_case.assertEqual(eth_entityWithTagsOutNeighbors, result)
 
-
-def list_entity_neighbors_sync(test_case):
     query_string = [('direction', 'in'), ('only_ids', '67065,144534')]
     headers = {
         'Accept': 'application/json',
     }
-    response = test_case.client.open(
-        '/{currency}/entities/{entity}/neighbors'.format(
+    response = await test_case.client.open(
+        path='/{currency}/entities/{entity}/neighbors'.format(
             currency="btc",
             entity="17642138"),
         method='GET',
@@ -365,8 +363,8 @@ def list_entity_neighbors_sync(test_case):
     headers = {
         'Accept': 'application/json',
     }
-    response = test_case.client.open(
-        '/{currency}/entities/{entity}/neighbors'.format(
+    response = await test_case.client.open(
+        path='/{currency}/entities/{entity}/neighbors'.format(
             currency="btc",
             entity="17642138"),
         method='GET',
@@ -388,8 +386,8 @@ def list_entity_neighbors_sync(test_case):
     headers = {
         'Accept': 'application/json',
     }
-    response = test_case.client.open(
-        '/{currency}/entities/{entity}/neighbors'.format(
+    response = await test_case.client.open(
+        path='/{currency}/entities/{entity}/neighbors'.format(
             currency="eth",
             entity=eth_entityWithTags.entity),
         method='GET',

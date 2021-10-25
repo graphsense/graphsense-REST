@@ -575,20 +575,28 @@ eth_entityWithTags = Entity(
 async def get_address(test_case):
     """Test case for get_address
     """
-    result = await service.get_address(
-            'btc', addressWithoutTags.address, True)
-    test_case.assertEqual(addressWithoutTags, result)
-    result = await service.get_address(
-            'btc', addressWithTags.address, True)
-    test_case.assertEqual(addressWithTags, result)
-    result = await service.get_address(
-                currency='btc', address=addressWithTotalSpent0.address)
-    test_case.assertEqual(addressWithTotalSpent0, result)
+    basepath = '/{currency}/addresses/{address}'
+    path = basepath + '?include_tags={include_tags}'
+    result = await test_case.request(path,
+                                     currency='btc',
+                                     address=addressWithoutTags.address,
+                                     include_tags=True)
+    test_case.assertEqual(addressWithoutTags.to_dict(), result)
+    result = await test_case.request(path,
+                                     currency='btc',
+                                     address=addressWithTags.address,
+                                     include_tags=True)
+    test_case.assertEqual(addressWithTags.to_dict(), result)
+    result = await test_case.request(basepath,
+                                     currency='btc',
+                                     address=addressWithTotalSpent0.address)
+    test_case.assertEqual(addressWithTotalSpent0.to_dict(), result)
 
     # ETH
-    result = await service.get_address(
-            'eth', eth_addressWithTags.address)
-    test_case.assertEqual(eth_address, result)
+    result = await test_case.request(basepath,
+                                     currency='eth',
+                                     address=eth_addressWithTags.address)
+    test_case.assertEqual(eth_address.to_dict(), result)
 
 
 async def list_address_txs(test_case):
@@ -596,7 +604,8 @@ async def list_address_txs(test_case):
 
     Get all transactions an address has been involved in
     """
-    rates = await list_rates(currency='btc', heights=[2])
+    path = '/{currency}/addresses/{address}/txs'
+    rates = await list_rates(test_case, currency='btc', heights=[2])
     address_txs = AddressTxs(
                     next_page=None,
                     address_txs=[
@@ -617,11 +626,13 @@ async def list_address_txs(test_case):
                             timestamp=1510347492)
                         ]
                     )
-    result = await service.list_address_txs('btc', address2.address)
-    test_case.assertEqual(address_txs, result)
+    result = await test_case.request(path,
+                                     currency='btc',
+                                     address=address2.address)
+    test_case.assertEqual(address_txs, AddressTxs.from_dict(result))
 
     def reverse(tx):
-        tx_r = TxAccount(**copy.deepcopy(tx.to_dict()))
+        tx_r = TxAccount.from_dict(copy.deepcopy(tx.to_dict()))
         tx_r.value.value = -tx_r.value.value
         for v in tx_r.value.fiat_values:
             v.value = -v.value
@@ -629,31 +640,10 @@ async def list_address_txs(test_case):
     tx2_eth_r = reverse(tx2_eth)
     tx22_eth_r = reverse(tx22_eth)
     txs = AddressTxs(address_txs=[tx1_eth, tx4_eth, tx2_eth_r, tx22_eth_r])
-    result = await service.list_address_txs('eth', eth_address.address)
-    yamldump(result)
-    test_case.assertEqual(txs, result)
-
-
-def list_address_txs_csv(test_case):
-    result = service.list_address_txs_csv('btc', address2.address)
-    test_case.assertEqual(
-        'height,timestamp,tx_hash,tx_type,value_eur,value_usd,'
-        'value_value\r\n'
-        '2,1510347493,123456,account,0.01,0.03,'
-        '1260000\r\n'
-        '2,1511153263,abcdef,account,-0.01,-0.03,'
-        '-1260000\r\n'
-        '2,1510347492,4567,account,-0.0,-0.0,'
-        '-1\r\n', result.data.decode('utf-8'))
-
-    result = service.list_address_txs_csv('eth', eth_address.address)
-    test_case.assertEqual(
-        'height,timestamp,tx_hash,tx_type,value_eur,value_usd,'
-        'value_value\r\n'
-        '1,15,af6e0000,account,123.0,246.0,123000000000000000000\r\n'
-        '1,16,af6e0003,account,-123.0,-246.0,-123000000000000000000\r\n'
-        '1,17,123456,account,234.0,468.0,234000000000000000000\r\n',
-        result.data.decode('utf-8'))
+    result = await test_case.request(path,
+                                     currency='eth',
+                                     address=eth_address.address)
+    test_case.assertEqual(txs, AddressTxs.from_dict(result))
 
 
 async def list_tags_by_address(test_case):
@@ -663,19 +653,6 @@ async def list_tags_by_address(test_case):
     result = await service.list_tags_by_address('eth',
                                                 eth_addressWithTags.address)
     assertEqual(eth_addressWithTags.tags, result)
-
-
-def list_tags_by_address_csv(test_case):
-    csv = ("abuse,active,address,category,currency,label,lastmod,"
-           "source,tagpack_uri\r\n,True,addressA"
-           ",organization,btc,\"Internet, Archive\",1560290400"
-           ",https://archive.org/donate/cryptocurrency,http://tagpack_uri\r\n")
-    csv = csv.encode("utf-8")
-    result = service.list_tags_by_address_csv(
-                        "btc",
-                        address.address).data.decode('utf-8')
-    result = result.encode("utf-8")
-    test_case.assertEqual(csv, result)
 
 
 async def list_address_neighbors(test_case):

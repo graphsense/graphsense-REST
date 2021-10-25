@@ -20,10 +20,11 @@ class BaseTestCase(AioHTTPTestCase):
             path=path.format(**kwargs),
             method='GET',
             headers=headers)
-        self.assertEqual(code, response.status)
+        content = (await response.read()).decode('utf-8')
+        self.assertEqual(code, response.status, "response is " + content)
         if code != 200:
             return
-        return json.loads((await response.read()).decode('utf-8'))
+        return json.loads(content)
 
     def request(self, path, **kwargs):
         return self.requestWithCode(path, 200, **kwargs)
