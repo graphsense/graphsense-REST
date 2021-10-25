@@ -68,7 +68,7 @@ async def get_address(request, currency, address, include_tags=False):
 
     tags = None
     if include_tags:
-        tags = await list_tags_by_address(currency, address)
+        tags = await list_tags_by_address(request, currency, address)
 
     if not result:
         raise RuntimeError("Address {} not found in currency {}".format(

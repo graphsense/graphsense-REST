@@ -211,10 +211,8 @@ class Cassandra:
         q = replaceFrom(keyspace, query)
         q = replacePerc(q)
         now = time.time()
-        print(f'execute {q}, token {now}')
         prep = self.prepared_statements.get(q, None)
         if prep is None:
-            print(f'not prep found for {q}')
             self.prepared_statements[q] = prep = self.session.prepare(q)
         try:
             response_future = self.session.execute_async(
@@ -228,7 +226,6 @@ class Cassandra:
                                 params=params,
                                 paging_state=response_future._paging_state)
                 diff = time.time() - now
-                print(f'done {now}, time {diff}')
                 loop.call_soon_threadsafe(future.set_result, result)
 
             def on_err(result):
@@ -1283,7 +1280,7 @@ class Cassandra:
                  " and address_id = %s")
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
         result = await self.execute_async(currency, 'transformed', query,
-                                          [id_group, address_id, sec_in],
+                                          [id_group, sec_in, address_id],
                                           paging_state=paging_state,
                                           fetch_size=fetch_size)
         if result is None:

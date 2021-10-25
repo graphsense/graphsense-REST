@@ -4,17 +4,15 @@ import aiohttp_cors
 import gsrest.db
 import yaml
 
-CONFIG_FILE = "config.yaml"
+CONFIG_FILE = "./instance/config.yaml"
 
 
-def load_config(instance_path):
-    # ensure that instance path and config file exists
-    config_file_path = os.path.join(instance_path, CONFIG_FILE)
-    if not os.path.exists(config_file_path):
-        raise ValueError("Instance path with {} file is missing."
-                         .format(CONFIG_FILE))
+def load_config(config_file):
+    if not os.path.exists(config_file):
+        raise ValueError("Config file {} not found."
+                         .format(config_file))
 
-    with open(config_file_path, 'r') as input_file:
+    with open(config_file, 'r') as input_file:
         config = yaml.safe_load(input_file)
     return config
 
@@ -29,15 +27,18 @@ def factory(args=None):
                                specification_dir=specification_dir, 
                                only_one_api=True,
                                options=options)
-    app.add_api('openapi.yaml',
+    openapi_yaml = 'openapi.yaml'
+    app.add_api(openapi_yaml,
                 arguments={'title': '{{appName}}'},
                 pythonic_params=True,
                 pass_context_arg_name='request')
-    instance_path = './instance'
+    config_file = CONFIG_FILE
     if args:
-        instance_path = args
-    print(instance_path)
-    app.app['config'] = load_config(instance_path)
+        config_file = args
+    app.app.logger.info(f'reading config from {config_file}')
+    app.app['config'] = load_config(config_file)
+    with open(os.path.join(specification_dir, openapi_yaml)) as yaml_file:
+        app.app['openapi'] = yaml.safe_load(yaml_file)
 
     app.app.cleanup_ctx.append(gsrest.db.get_connection)
 
