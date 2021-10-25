@@ -1420,9 +1420,9 @@ class Cassandra:
                     "address_id_group = %s AND address_id = %s " \
                     "AND is_outgoing = %s "
         first_query = basequery + \
-            f"AND address_id_secondary_group IN {address_id_secondary_group}"
+            f"AND address_id_secondary_group IN {first_id_secondary_group}"
         second_query = basequery + \
-            f"AND address_id_secondary_group IN {neighbor_id_secondary_group}"\
+            f"AND address_id_secondary_group IN {second_id_secondary_group}"\
             " AND transaction_id = %s"
 
         fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
