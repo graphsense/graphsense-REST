@@ -34,6 +34,9 @@ def factory(args=None):
                 pythonic_params=True,
                 pass_context_arg_name='request')
     instance_path = './instance'
+    if args:
+        instance_path = args
+    print(instance_path)
     app.app['config'] = load_config(instance_path)
 
     app.app.cleanup_ctx.append(gsrest.db.get_connection)

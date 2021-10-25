@@ -3,7 +3,6 @@ import connexion
 import aiohttp_cors
 import gsrest.db
 import yaml
-import logging
 
 CONFIG_FILE = "config.yaml"
 
@@ -26,16 +25,18 @@ def factory(args=None):
         "serve_spec": True
         }
     specification_dir = os.path.join(os.path.dirname(__file__), 'openapi')
-    app = connexion.AioHttpApp(__name__,
-                               specification_dir=specification_dir,
+    app = connexion.AioHttpApp(__name__, 
+                               specification_dir=specification_dir, 
                                only_one_api=True,
                                options=options)
-    logging.basicConfig(level=logging.DEBUG)
     app.add_api('openapi.yaml',
                 arguments={'title': 'GraphSense API'},
                 pythonic_params=True,
                 pass_context_arg_name='request')
     instance_path = './instance'
+    if args:
+        instance_path = args
+    print(instance_path)
     app.app['config'] = load_config(instance_path)
 
     app.app.cleanup_ctx.append(gsrest.db.get_connection)

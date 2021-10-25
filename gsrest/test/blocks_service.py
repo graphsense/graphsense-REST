@@ -1,6 +1,6 @@
 from openapi_server.models.block import Block
-from openapi_server.models.blocks import Blocks
-import gsrest.service.blocks_service as service
+from openapi_server.models.tx_utxo import TxUtxo
+from openapi_server.models.tx_account import TxAccount
 from gsrest.test.txs_service import tx1, tx1_eth, tx2_eth
 
 block = Block(
@@ -33,48 +33,36 @@ eth_block2 = Block(
 async def get_block(test_case):
     """Test case for get_block
     """
+    path = '/{currency}/blocks/{height}'
+    result = await test_case.request(path, currency="btc", height=1)
+    test_case.assertEqual(block, Block.from_dict(result))
+    result = await test_case.request(path, currency="btc", height=2)
+    test_case.assertEqual(block2, Block.from_dict(result))
 
-    result = await service.get_block("btc", 1)
-    test_case.assertEqual(block, result)
-    result = await service.get_block("btc", 2)
-    test_case.assertEqual(block2, result)
+    result = await test_case.request(path, currency="eth", height=1)
+    test_case.assertEqual(eth_block, Block.from_dict(result))
+    result = await test_case.request(path, currency="eth", height=2300001)
+    test_case.assertEqual(eth_block2, Block.from_dict(result))
 
-    result = await service.get_block("eth", 1)
-    test_case.assertEqual(eth_block, result)
-    result = await service.get_block("eth", 2300001)
-    test_case.assertEqual(eth_block2, result)
+    await test_case.requestWithCode(path, 404,
+                                    currency="btc", height="0")
 
+    await test_case.requestWithCode(path, 404,
+                                    currency="eth", height="0")
 
-def get_block_sync(test_case):
-    headers = {
-        'Accept': 'application/json',
-    }
-    response = test_case.client.open(
-        '/{currency}/blocks/{height}'.format(currency="btc", height="0"),
-        method='GET',
-        headers=headers)
-    test_case.assert404(response,
-                        'Response body is : ' + response.data.decode('utf-8'))
-
-    headers = {
-        'Accept': 'application/json',
-    }
-    response = test_case.client.open(
-        '/eth/blocks/{height}'.format(height="0"),
-        method='GET',
-        headers=headers)
-    test_case.assert404(response,
-                        'Response body is : ' + response.data.decode('utf-8'))
 
 async def list_block_txs(test_case):
     """Test case for list_block_txs
     """
 
+    path = '/{currency}/blocks/{height}/txs'
     block_txs = [tx1]
-    result = await service.list_block_txs("btc", 1)
-    test_case.assertEqual(block_txs, result)
+    result = await test_case.request(path, currency="btc", height=1)
+    test_case.assertEqual(block_txs, [TxUtxo.from_dict(r) for r in result])
 
-    result = await service.list_block_txs("eth", 1)
+    result = await test_case.request(path, currency="eth", height=1)
+
+    result = [TxAccount.from_dict(r) for r in result]
 
     def s(tx):
         return tx.tx_hash
@@ -83,37 +71,3 @@ async def list_block_txs(test_case):
     test_case.assertEqual(
         sorted([tx1_eth, tx2_eth], key=s),
         result)
-
-
-def list_block_txs_csv(test_case):
-    """Test case for list_block_txs_csv
-    """
-    result = service.list_block_txs_csv("btc", 2).data.decode('utf-8')
-    splitted = result.split("\r\n")
-    test_case.assertEqual(3, len(splitted))
-    test_case.assertEqual(13, len(splitted[0].split(',')))
-
-    result = service.list_block_txs_csv("eth", 1).data.decode('utf-8')
-    splitted = result.split("\r\n")
-    test_case.assertEqual(4, len(splitted))
-    test_case.assertEqual(7, len(splitted[0].split(',')))
-
-
-async def list_blocks(test_case):
-    """Test case for list_blocks
-    """
-    blocks = Blocks(next_page=None, blocks=[block, block2])
-    result = await service.list_blocks("btc")
-    result = Blocks(
-            next_page=None,
-            blocks=sorted(result.blocks,
-                          key=lambda block: block.height))
-    test_case.assertEqual(blocks, result)
-
-    blocks = Blocks(next_page=None, blocks=[eth_block, eth_block2])
-    result = await service.list_blocks("eth")
-    result = Blocks(
-            next_page=None,
-            blocks=sorted(result.blocks,
-                          key=lambda block: block.height))
-    test_case.assertEqual(blocks, result)

@@ -3,6 +3,7 @@
 import pytest
 import json
 from aiohttp import web
+from aiohttp.test_utils import unittest_run_loop
 {{#operations}}
 {{#operation}}
 {{#isMultipart}}
@@ -13,7 +14,7 @@ from aiohttp import FormData
 
 {{#imports}}{{import}}
 {{/imports}}
-from {{packageName}}.test import BaseTestCase
+from tests import BaseTestCase
 import gsrest.test.{{baseName}}_service as test_service
 
 
@@ -24,14 +25,13 @@ class {{#operations}}Test{{classname}}(BaseTestCase):
     {{#vendorExtensions.x-skip-test}}
     @pytest.mark.skip("{{reason}}")
     {{/vendorExtensions.x-skip-test}}
-    async def test_{{operationId}}(self, client):
+    @unittest_run_loop
+    async def test_{{operationId}}(self):
         """Test case for {{{operationId}}}
 
         {{{summary}}}
         """
         await test_service.{{operationId}}(self)
-        if '{{operationId}}_sync' in dir(test_service):
-            test_service.{{operationId}}_sync(self)
 
         if "{{operationId}}" == "bulk":
             return
@@ -64,7 +64,7 @@ class {{#operations}}Test{{classname}}(BaseTestCase):
         {{/-last}}
         {{/isMultipart}}
         {{/formParams}}
-        response = await client.request(
+        response = await self.client.request(
             method='{{httpMethod}}',
             path='{{#contextPath}}{{{.}}}{{/contextPath}}{{{path}}}'{{#pathParams}}{{#-first}}.format({{/-first}}{{paramName}}={{{example}}}{{^-last}}, {{/-last}}{{#-last}}){{/-last}}{{/pathParams}},
             headers=headers,{{#bodyParam}}
