@@ -30,14 +30,17 @@ async def get_statistics(request: web.Request, ) -> web.Response:
                     headers={'Content-type': 'application/json'})
         return result
     except RuntimeError as e:
-        return web.Response(status=404, text=str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPNotFound(text=str(e))
     except ValueError as e:
-        return web.Response(status=400, text=str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
     except TypeError as e:
-        return web.Response(status=400, text=str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return web.Response(status=500)
+        raise web.HTTPInternalServerError()
 
 
 async def search(request: web.Request, q, currency=None, limit=None) -> web.Response:
@@ -67,11 +70,14 @@ async def search(request: web.Request, q, currency=None, limit=None) -> web.Resp
                     headers={'Content-type': 'application/json'})
         return result
     except RuntimeError as e:
-        return web.Response(status=404, text=str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPNotFound(text=str(e))
     except ValueError as e:
-        return web.Response(status=400, text=str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
     except TypeError as e:
-        return web.Response(status=400, text=str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return web.Response(status=500)
+        raise web.HTTPInternalServerError()
