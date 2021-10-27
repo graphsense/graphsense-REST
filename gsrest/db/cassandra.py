@@ -222,10 +222,12 @@ class Cassandra:
             future = loop.create_future()
 
             def on_done(result):
+                if future.cancelled():
+                    loop.call_soon_threadsafe(future.set_result, None)
+                    return
                 result = Result(current_rows=result,
                                 params=params,
                                 paging_state=response_future._paging_state)
-                diff = time.time() - now
                 loop.call_soon_threadsafe(future.set_result, result)
 
             def on_err(result):
