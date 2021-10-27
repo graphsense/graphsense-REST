@@ -1,5 +1,4 @@
 from openapi_server.models.rates import Rates
-import gsrest.service.rates_service as service
 
 rate = Rates(
    height=1,
@@ -8,5 +7,5 @@ rate = Rates(
 
 
 async def get_exchange_rates(test_case):
-    result = await service.get_exchange_rates(currency='btc', height=1)
-    test_case.assertEqual(rate, result)
+    result = await test_case.request('/btc/rates/1')
+    test_case.assertEqual(rate.to_dict(), result)
