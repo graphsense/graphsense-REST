@@ -12,9 +12,7 @@ from openapi_server.models.entity_tag import EntityTag
 from openapi_server.models.links import Links
 from openapi_server.models.link_utxo import LinkUtxo
 from openapi_server.models.tags import Tags
-import json
 from gsrest.util.values import make_values
-import gsrest.service.entities_service as service
 from gsrest.test.addresses_service import addressD, addressE, eth_address, \
         eth_addressWithTagsOutNeighbors, atag1, atag2, eth_tag, eth_tag2
 from gsrest.test.txs_service import tx1_eth, tx2_eth, tx22_eth, tx4_eth
@@ -545,7 +543,8 @@ async def list_entity_txs(test_case):
 
     Get all transactions an entity has been involved in
     """
-    rates = await list_rates(currency='btc', heights=[2])
+    path = '/{currency}/entities/{entity}/txs'
+    rates = await list_rates(test_case, currency='btc', heights=[2])
     entity_txs = AddressTxs(
                     next_page=None,
                     address_txs=[
@@ -566,11 +565,11 @@ async def list_entity_txs(test_case):
                             timestamp=1510347492)
                         ]
                     )
-    result = await service.list_entity_txs('btc', 144534)
-    test_case.assertEqual(entity_txs, result)
+    result = await test_case.request(path, currency='btc', entity=144534)
+    test_case.assertEqual(entity_txs.to_dict(), result)
 
     def reverse(tx):
-        tx_r = TxAccount(**copy.deepcopy(tx.to_dict()))
+        tx_r = TxAccount.from_dict(copy.deepcopy(tx.to_dict()))
         tx_r.value.value = -tx_r.value.value
         for v in tx_r.value.fiat_values:
             v.value = -v.value
@@ -578,15 +577,16 @@ async def list_entity_txs(test_case):
     tx2_eth_r = reverse(tx2_eth)
     tx22_eth_r = reverse(tx22_eth)
     txs = AddressTxs(address_txs=[tx1_eth, tx4_eth, tx2_eth_r, tx22_eth_r])
-    result = await service.list_entity_txs('eth', 107925000)
-    test_case.assertEqual(txs, result)
+    result = await test_case.request(path, currency='eth', entity=107925000)
+    test_case.assertEqual(txs.to_dict(), result)
 
 
 async def list_entity_links(test_case):
-    result = await service.list_entity_links(
-                currency='btc',
-                entity=144534,
-                neighbor=10102718)
+    path = '/{currency}/entities/{entity}/links?neighbor={neighbor}'
+    result = await test_case.request(path,
+                                     currency='btc',
+                                     entity=144534,
+                                     neighbor=10102718)
     link = Links(links=[LinkUtxo(tx_hash='abcdef',
                                  input_value=make_values(
                                      eur=-0.01, usd=-0.03, value=-1260000),
@@ -594,12 +594,12 @@ async def list_entity_links(test_case):
                                      eur=0.01, usd=0.03, value=1260000),
                                  timestamp=1511153263,
                                  height=2)])
-    test_case.assertEqual(link, result)
+    test_case.assertEqual(link.to_dict(), result)
 
-    result = await service.list_entity_links(
-                currency='btc',
-                entity=10102718,
-                neighbor=144534)
+    result = await test_case.request(path,
+                                     currency='btc',
+                                     entity=10102718,
+                                     neighbor=144534)
     link = Links(links=[LinkUtxo(tx_hash='123456',
                                  input_value=make_values(
                                      eur=-0.01, usd=-0.03, value=-1260000),
@@ -607,11 +607,11 @@ async def list_entity_links(test_case):
                                      eur=0.01, usd=0.03, value=1260000),
                                  timestamp=1510347493,
                                  height=2)])
-    test_case.assertEqual(link, result)
+    test_case.assertEqual(link.to_dict(), result)
 
-    result = await service.list_entity_links(
-                currency='eth',
-                entity=107925000,
-                neighbor=107925001)
+    result = await test_case.request(path,
+                                     currency='eth',
+                                     entity=107925000,
+                                     neighbor=107925001)
     txs = Links(links=[tx2_eth, tx22_eth])
-    test_case.assertEqual(txs, result)
+    test_case.assertEqual(txs.to_dict(), result)

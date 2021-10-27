@@ -40,14 +40,17 @@ async def get_address(request: web.Request, currency, address, include_tags=None
                     headers={'Content-type': 'application/json'})
         return result
     except RuntimeError as e:
-        return web.Response(status=404, text=str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPNotFound(text=str(e))
     except ValueError as e:
-        return web.Response(status=400, text=str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
     except TypeError as e:
-        return web.Response(status=400, text=str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return web.Response(status=500)
+        raise web.HTTPInternalServerError()
 
 
 async def get_address_entity(request: web.Request, currency, address, include_tags=None, tag_coherence=None) -> web.Response:
@@ -79,17 +82,20 @@ async def get_address_entity(request: web.Request, currency, address, include_ta
                     headers={'Content-type': 'application/json'})
         return result
     except RuntimeError as e:
-        return web.Response(status=404, text=str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPNotFound(text=str(e))
     except ValueError as e:
-        return web.Response(status=400, text=str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
     except TypeError as e:
-        return web.Response(status=400, text=str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return web.Response(status=500)
+        raise web.HTTPInternalServerError()
 
 
-async def list_address_links(request: web.Request, currency, address, neighbor) -> web.Response:
+async def list_address_links(request: web.Request, currency, address, neighbor, page=None, pagesize=None) -> web.Response:
     """Get outgoing transactions between two addresses
 
     
@@ -100,11 +106,15 @@ async def list_address_links(request: web.Request, currency, address, neighbor) 
     :type address: str
     :param neighbor: Neighbor address
     :type neighbor: str
+    :param page: Resumption token for retrieving the next page
+    :type page: str
+    :param pagesize: Number of items returned in a single page
+    :type pagesize: int
 
     """
     try:
         result = service.list_address_links(request
-                ,currency=currency,address=address,neighbor=neighbor)
+                ,currency=currency,address=address,neighbor=neighbor,page=page,pagesize=pagesize)
         result = await result
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
@@ -116,14 +126,17 @@ async def list_address_links(request: web.Request, currency, address, neighbor) 
                     headers={'Content-type': 'application/json'})
         return result
     except RuntimeError as e:
-        return web.Response(status=404, text=str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPNotFound(text=str(e))
     except ValueError as e:
-        return web.Response(status=400, text=str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
     except TypeError as e:
-        return web.Response(status=400, text=str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return web.Response(status=500)
+        raise web.HTTPInternalServerError()
 
 
 async def list_address_neighbors(request: web.Request, currency, address, direction, include_labels=None, page=None, pagesize=None) -> web.Response:
@@ -159,14 +172,17 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
                     headers={'Content-type': 'application/json'})
         return result
     except RuntimeError as e:
-        return web.Response(status=404, text=str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPNotFound(text=str(e))
     except ValueError as e:
-        return web.Response(status=400, text=str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
     except TypeError as e:
-        return web.Response(status=400, text=str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return web.Response(status=500)
+        raise web.HTTPInternalServerError()
 
 
 async def list_address_txs(request: web.Request, currency, address, page=None, pagesize=None) -> web.Response:
@@ -198,14 +214,17 @@ async def list_address_txs(request: web.Request, currency, address, page=None, p
                     headers={'Content-type': 'application/json'})
         return result
     except RuntimeError as e:
-        return web.Response(status=404, text=str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPNotFound(text=str(e))
     except ValueError as e:
-        return web.Response(status=400, text=str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
     except TypeError as e:
-        return web.Response(status=400, text=str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return web.Response(status=500)
+        raise web.HTTPInternalServerError()
 
 
 async def list_tags_by_address(request: web.Request, currency, address) -> web.Response:
@@ -233,11 +252,14 @@ async def list_tags_by_address(request: web.Request, currency, address) -> web.R
                     headers={'Content-type': 'application/json'})
         return result
     except RuntimeError as e:
-        return web.Response(status=404, text=str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPNotFound(text=str(e))
     except ValueError as e:
-        return web.Response(status=400, text=str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
     except TypeError as e:
-        return web.Response(status=400, text=str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return web.Response(status=500)
+        raise web.HTTPInternalServerError()

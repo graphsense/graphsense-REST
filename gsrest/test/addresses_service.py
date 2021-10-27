@@ -1,5 +1,4 @@
 from openapi_server.models.address import Address
-from openapi_server.models.addresses import Addresses
 from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.entity_tag import EntityTag
 from openapi_server.models.tags import Tags
@@ -9,7 +8,6 @@ from openapi_server.models.neighbor import Neighbor
 from openapi_server.models.entity import Entity
 from openapi_server.models.link_utxo import LinkUtxo
 from openapi_server.models.links import Links
-import gsrest.service.addresses_service as service
 from gsrest.test.assertion import assertEqual
 from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.address_tx_utxo import AddressTxUtxo
@@ -19,8 +17,6 @@ from gsrest.service.rates_service import list_rates
 from gsrest.test.txs_service import tx1_eth, tx2_eth, tx22_eth, tx4_eth
 from gsrest.util.values import make_values
 import copy
-from tests.util.util import yamldump
-import yaml
 
 
 tag = AddressTag(
@@ -759,5 +755,3 @@ async def list_address_links(test_case):
                                      page=result['next_page'],
                                      pagesize=1)
     test_case.assertEqual(Links(links=[]).to_dict(), result)
-
-
