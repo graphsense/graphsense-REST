@@ -118,8 +118,10 @@ async def {{operationId}}(request: web.Request, {{#allParams}}{{paramName}}{{^re
         {{/vendorExtensions.x-streamed}}
         return result
     except RuntimeError as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
     except ValueError as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except TypeError as e:
         traceback.print_exception(type(e), e, e.__traceback__)

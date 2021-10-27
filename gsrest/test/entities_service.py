@@ -1,4 +1,3 @@
-from gsrest.test.assertion import assertEqual
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.address_tx_utxo import AddressTxUtxo
@@ -216,209 +215,111 @@ entityWithTagsAddresses = EntityAddresses(
 
 
 async def get_entity(test_case):
-    result = await service.get_entity(currency='btc',
-                                      entity=entityWithTags.entity,
-                                      include_tags=True,
-                                      tag_coherence=True)
+    path = '/{currency}/entities/{entity}'\
+           '?include_tags={include_tags}&tag_coherence={tag_coherence}'
+    result = await test_case.request(path,
+                                     currency='btc',
+                                     entity=entityWithTags.entity,
+                                     include_tags=True,
+                                     tag_coherence=True)
 
     # tag_coherence tested by tests/util/test_tag_coherence.py so hardcode here
-    test_case.assertIsNot(result.tags.tag_coherence, None)
-    result.tags.tag_coherence = 0.5
-    test_case.assertEqual(entityWithTags, result)
+    test_case.assertIsNot(result['tags']['tag_coherence'], None)
+    result['tags']['tag_coherence'] = 0.5
+    test_case.assertEqual(entityWithTags.to_dict(), result)
 
-    result = await service.get_entity(currency='eth',
-                                      entity=eth_entity.entity,
-                                      include_tags=True,
-                                      tag_coherence=False)
+    result = await test_case.request(path,
+                                     currency='eth',
+                                     entity=eth_entity.entity,
+                                     include_tags=True,
+                                     tag_coherence=False)
 
-    test_case.assertEqual(eth_entityWithTags, result)
-
-
-def list_entities(test_case):
-    result = service.list_entities(currency='btc')
-    ids = [67065, 144534, 10102718, 10164852, 17642138, 2818641,
-           8361735, 123, 456, 789]
-    test_case.assertEqual(ids.sort(),
-                          [row.entity for row in result.entities].sort())
-
-    result = service.list_entities(currency='btc', ids=[67065, 456, 42])
-    ids = [67065, 456]
-    test_case.assertEqual(sorted(ids),
-                          sorted([row.entity for row in result.entities]))
-
-    result = service.list_entities(currency='eth')
-    test_case.assertEqual([107925000, 107925001, 107925002],
-                          sorted([row.entity for row in result.entities]))
-
-    result = service.list_entities(currency='eth', ids=[107925000])
-    test_case.assertEqual([eth_entity],
-                          result.entities)
-
-    ids = [144534, 10102718]
-    query_string = [('ids', ','.join([str(id) for id in ids]))]
-    headers = {
-        'Accept': 'application/json',
-    }
-    response = test_case.client.open(
-        '/{currency}/entities'.format(
-            currency="btc"),
-        method='GET',
-        headers=headers,
-        query_string=query_string)
-    test_case.assert200(response,
-                        'Response body is : ' + response.data.decode('utf-8'))
-
-    result = json.loads(response.data.decode('utf-8'))
-
-    assertEqual(
-        ids,
-        [n['entity'] for n in result['entities']]
-    )
-
-
-def list_entities_csv(test_case):
-    result = service.list_entities_csv(
-                "btc", [456, 67065]).data.decode('utf-8')
-    assertEqual(4, len(result.split("\r\n")))
-    result = service.list_entities_csv(
-                "eth", [eth_entity.entity]).data.decode('utf-8')
-    assertEqual(3, len(result.split("\r\n")))
+    test_case.assertEqual(eth_entityWithTags.to_dict(), result)
 
 
 async def list_tags_by_entity(test_case):
-    result = await service.list_tags_by_entity(currency='btc',
-                                               entity=entityWithTags.entity,
-                                               tag_coherence=False)
-    result.tag_coherence = 0.5
-    test_case.assertEqual(entityWithTags.tags, result)
-    result = await service.list_tags_by_entity(
-        currency='eth',
-        entity=eth_entityWithTags.entity,
-        tag_coherence=False)
-    test_case.assertEqual(eth_entityWithTags.tags, result)
-
-
-def list_tags_by_entity_by_level_csv(test_case):
-    csv = ("abuse,active,category,currency,entity,label,lastmod,source,"
-           "tagpack_uri\r\n"
-           ",True,organization,btc,17642138,"
-           "Internet Archive 2,1560290400,https://archive.org/donate/crypto"
-           "currency,http://tagpack_uri\r\n"
-           ",True,"
-           "organization,btc,17642138,\"Internet, Archive\",1560290400,"
-           "https://archive.org/donate/cryptocurrency,http://tagpack_uri\r\n"
-           )
-    assertEqual(
-        csv,
-        service.list_tags_by_entity_by_level_csv(
-            "btc", entityWithTags.entity, 'entity')
-        .data.decode('utf-8'))
+    path = '/{currency}/entities/{entity}/tags'
+    result = await test_case.request(path,
+                                     currency='btc',
+                                     entity=entityWithTags.entity,
+                                     tag_coherence=False)
+    result['tag_coherence'] = 0.5
+    test_case.assertEqual(entityWithTags.tags.to_dict(), result)
+    result = await test_case.request(path,
+                                     currency='eth',
+                                     entity=eth_entityWithTags.entity,
+                                     tag_coherence=False)
+    test_case.assertEqual(eth_entityWithTags.tags.to_dict(),
+                          result)
 
 
 async def list_entity_neighbors(test_case):
-    result = await service.list_entity_neighbors(
+    basepath = '/{currency}/entities/{entity}/neighbors'\
+               '?direction={direction}'
+    path = basepath + '&include_labels={include_labels}'
+    result = await test_case.request(
+        path,
         currency='btc',
         entity=entityWithTags.entity,
         include_labels=True,
         direction='out')
-    test_case.assertEqual(entityWithTagsOutNeighbors, result)
+    test_case.assertEqual(entityWithTagsOutNeighbors.to_dict(), result)
 
-    result = await service.list_entity_neighbors(
+    result = await test_case.request(
+        path,
         currency='btc',
         entity=entityWithTags.entity,
         include_labels=True,
         direction='in')
-    test_case.assertEqual(entityWithTagsInNeighbors, result)
+    test_case.assertEqual(entityWithTagsInNeighbors.to_dict(), result)
 
-    result = await service.list_entity_neighbors(
+    result = await test_case.request(
+        path,
         currency='eth',
         entity=eth_entityWithTags.entity,
         include_labels=True,
         direction='out')
-    yamldump(result)
-    test_case.assertEqual(eth_entityWithTagsOutNeighbors, result)
+    test_case.assertEqual(eth_entityWithTagsOutNeighbors.to_dict(), result)
 
-    query_string = [('direction', 'in'), ('only_ids', '67065,144534')]
-    headers = {
-        'Accept': 'application/json',
-    }
-    response = await test_case.client.open(
-        path='/{currency}/entities/{entity}/neighbors'.format(
-            currency="btc",
-            entity="17642138"),
-        method='GET',
-        headers=headers,
-        query_string=query_string)
-    test_case.assert200(response,
-                        'Response body is : ' + response.data.decode('utf-8'))
+    path = basepath + '&only_ids={only_ids}'
+    result = await test_case.request(
+        path,
+        currency="btc",
+        entity="17642138",
+        direction='in',
+        only_ids='67065,144534'
+        )
 
-    result = json.loads(response.data.decode('utf-8'))
-
-    assertEqual(
+    test_case.assertEqual(
         [n.id for n in entityWithTagsInNeighbors.neighbors],
         [n['id'] for n in result['neighbors']]
     )
 
-    query_string = [('direction', 'in'), ('only_ids', '144534')]
-    headers = {
-        'Accept': 'application/json',
-    }
-    response = await test_case.client.open(
-        path='/{currency}/entities/{entity}/neighbors'.format(
-            currency="btc",
-            entity="17642138"),
-        method='GET',
-        headers=headers,
-        query_string=query_string)
-    test_case.assert200(response,
-                        'Response body is : ' + response.data.decode('utf-8'))
-
-    result = json.loads(response.data.decode('utf-8'))
+    result = await test_case.request(
+        path,
+        currency="btc",
+        entity="17642138",
+        direction='in',
+        only_ids='144534'
+        )
 
     test_case.assertEqual(
         [entityWithTagsInNeighbors.neighbors[1].id],
         [n['id'] for n in result['neighbors']]
     )
 
-    query_string = [('direction', 'out'),
-                    ('ids',
-                     eth_entityWithTagsOutNeighbors.neighbors[0].id)]
-    headers = {
-        'Accept': 'application/json',
-    }
-    response = await test_case.client.open(
-        path='/{currency}/entities/{entity}/neighbors'.format(
-            currency="eth",
-            entity=eth_entityWithTags.entity),
-        method='GET',
-        headers=headers,
-        query_string=query_string)
-    test_case.assert200(response,
-                        'Response body is : ' + response.data.decode('utf-8'))
-
-    result = json.loads(response.data.decode('utf-8'))
+    result = await test_case.request(
+        path,
+        currency="eth",
+        entity=eth_entityWithTags.entity,
+        direction='out',
+        only_ids=eth_entityWithTagsOutNeighbors.neighbors[0].id
+        )
 
     test_case.assertEqual(
-        [n.id for n in eth_entityWithTagsOutNeighbors.neighbors],
+        [eth_entityWithTagsOutNeighbors.neighbors[0].id],
         [n['id'] for n in result['neighbors']]
     )
-
-
-def list_entity_neighbors_csv(test_case):
-    csv = ("balance_eur,balance_usd,balance_value,id,labels,no_txs,"
-           "node_type,received_eur,received_usd,received_value,"
-           "value_eur,value_usd,value_value\r\n"
-           "1.15,2.31,115422577,2818641,\"['labelX', 'labelY']\","
-           "1,entity,2162085.5,2583655.0,139057689444,2411.06,"
-           "3074.92,48610000000\r\n"
-           "1.15,2.31,115422577,8361735,[],3,entity,2162085.5,2583655.0,"
-           "139057689444,1078.04,1397.54,3375700000\r\n")
-    result = service.list_entity_neighbors_csv(
-        currency='btc',
-        entity=entityWithTags.entity,
-        direction='out',
-        include_labels=True)
-    test_case.assertEqual(csv, result.data.decode('utf-8'))
 
 
 async def list_entity_addresses(test_case):

@@ -246,7 +246,6 @@ class Cassandra:
 
     async def concurrent_with_args(self, currency, keyspace_type, query,
                                    params, filter_empty=True, one=True,
-                                   results_generator=False,
                                    keep_meta=False):
         aws = [self.execute_async(currency, keyspace_type, query, param,
                                   autopaging=True)
@@ -755,7 +754,7 @@ class Cassandra:
             direction, this, that = ('incoming', 'dst', 'src')
 
         id_group = self.get_id_group(currency, id)
-        parameters = [id_group, id]
+        base_parameters = [id_group, id]
         has_targets = isinstance(targets, list)
         sec_condition = ''
         if currency == 'eth':
@@ -766,11 +765,12 @@ class Cassandra:
             sec_in = self.sec_in(secondary_id_group)
             sec_condition = \
                 f' AND {this}_address_id_secondary_group in %s'
-            parameters.append(sec_in)
+            base_parameters.append(sec_in)
 
         basequery = (f"SELECT * FROM {node_type}_{direction}_relations WHERE "
                      f"{this}_{node_type}_id_group = %s AND "
                      f"{this}_{node_type}_id = %s {sec_condition}")
+        parameters = base_parameters.copy()
         if has_targets:
             if len(targets) == 0:
                 return None
@@ -792,10 +792,12 @@ class Cassandra:
         if has_targets:
             params = []
             query = basequery + f" AND {that}_{node_type}_id = %s"
+            print(query)
             for row in results:
-                p = parameters.copy()
+                p = base_parameters.copy()
                 p.append(row[f'{that}_{node_type}_id'])
                 params.append(p)
+            print(f'params {params}')
             results = await self.concurrent_with_args(
                         currency, 'transformed', query, params)
 

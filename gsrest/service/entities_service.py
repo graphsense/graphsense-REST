@@ -95,7 +95,7 @@ async def get_entity(request, currency, entity, include_tags=False,
     if result is None:
         raise RuntimeError("Entity {} not found".format(entity))
 
-    tags = await list_tags_by_entity(currency, result['cluster_id'],
+    tags = await list_tags_by_entity(request, currency, result['cluster_id'],
                                      tag_coherence) if include_tags else None
     rates = (await get_rates(request, currency))['rates']
     return from_row(currency, result, rates, tags)
