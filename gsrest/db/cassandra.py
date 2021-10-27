@@ -200,6 +200,7 @@ class Cassandra:
                     currency, keyspace_type, query,
                     params=params, paging_state=result.paging_state,
                     fetch_size=fetch_size, autopaging=True)
+
         for row in more.current_rows:
             result.current_rows.append(row)
         return result
@@ -210,11 +211,11 @@ class Cassandra:
         keyspace = self.get_keyspace_mapping(currency, keyspace_type)
         q = replaceFrom(keyspace, query)
         q = replacePerc(q)
-        now = time.time()
         prep = self.prepared_statements.get(q, None)
         if prep is None:
             self.prepared_statements[q] = prep = self.session.prepare(q)
         try:
+            prep.fetch_size = fetch_size
             response_future = self.session.execute_async(
                 prep, params, timeout=30,
                 paging_state=paging_state)
@@ -237,10 +238,11 @@ class Cassandra:
             return future
         except NoHostAvailable:
             self.connect()
-            return self.execute_async(currency, keyspace_type, query,
-                                      params=params,
-                                      paging_state=paging_state,
-                                      fetch_size=fetch_size)
+            return self.execute_async_lowlevel(
+                      currency, keyspace_type, query,
+                      params=params,
+                      paging_state=paging_state,
+                      fetch_size=fetch_size)
 
     async def concurrent_with_args(self, currency, keyspace_type, query,
                                    params, filter_empty=True, one=True,
@@ -1388,18 +1390,19 @@ class Cassandra:
             f" {{src}}_{node_type}_id = %s AND"\
             f" {{dst}}_{node_type}_id = %s"
 
+        params = [address_id_group,
+                  address_id_secondary_group,
+                  address_id,
+                  neighbor_id]
+
         no_outgoing_txs = (
             await self.execute_async(currency,
                                      'transformed',
                                      query.format(
                                          direction='outgoing',
-                                         sec=address_id_secondary_group,
                                          src='src',
                                          dst='dst'),
-                                     [address_id_group,
-                                      address_id_secondary_group,
-                                      address_id,
-                                      neighbor_id])
+                                     params)
             ).one()
 
         if no_outgoing_txs is None:
@@ -1407,16 +1410,19 @@ class Cassandra:
 
         no_outgoing_txs = no_outgoing_txs['no_transactions']
 
+        params = [neighbor_id_group,
+                  neighbor_id_secondary_group,
+                  neighbor_id,
+                  address_id]
+
         no_incoming_txs = (
             await self.execute_async(currency,
                                      'transformed',
                                      query.format(
                                          direction='incoming',
-                                         sec=neighbor_id_secondary_group,
                                          src='dst',
                                          dst='src'),
-                                     [neighbor_id_group, neighbor_id,
-                                      address_id])
+                                     params)
             ).one()
 
         if no_incoming_txs is None:

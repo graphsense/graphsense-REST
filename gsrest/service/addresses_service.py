@@ -32,6 +32,7 @@ async def list_address_neighbors(request, currency, address, direction,
 async def list_address_links(request, currency, address, neighbor,
                              page=None, pagesize=None):
     db = request.app['db']
+    print(f'pagesize {pagesize}')
     result = await db.list_address_links(currency, address, neighbor,
                                          page=page, pagesize=pagesize)
 

@@ -270,6 +270,24 @@ paths:
         schema:
           $ref: '#/components/schemas/address_id'
         style: form
+      - description: Resumption token for retrieving the next page
+        explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Number of items returned in a single page
+        example: 10
+        explode: true
+        in: query
+        name: pagesize
+        required: false
+        schema:
+          minimum: 1
+          type: integer
+        style: form
       responses:
         "200":
           content:
@@ -743,6 +761,24 @@ paths:
         required: true
         schema:
           $ref: '#/components/schemas/entity_id'
+        style: form
+      - description: Resumption token for retrieving the next page
+        explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Number of items returned in a single page
+        example: 10
+        explode: true
+        in: query
+        name: pagesize
+        required: false
+        schema:
+          minimum: 1
+          type: integer
         style: form
       responses:
         "200":
