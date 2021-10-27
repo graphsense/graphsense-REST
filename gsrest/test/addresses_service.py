@@ -629,7 +629,7 @@ async def list_address_txs(test_case):
     result = await test_case.request(path,
                                      currency='btc',
                                      address=address2.address)
-    test_case.assertEqual(address_txs, AddressTxs.from_dict(result))
+    test_case.assertEqual(address_txs.to_dict(), result)
 
     def reverse(tx):
         tx_r = TxAccount.from_dict(copy.deepcopy(tx.to_dict()))
@@ -643,7 +643,7 @@ async def list_address_txs(test_case):
     result = await test_case.request(path,
                                      currency='eth',
                                      address=eth_address.address)
-    test_case.assertEqual(txs, AddressTxs.from_dict(result))
+    test_case.assertEqual(txs.to_dict(), result)
 
 
 async def list_tags_by_address(test_case):
@@ -676,24 +676,6 @@ async def list_address_neighbors(test_case):
         include_labels=True,
         direction='out')
     test_case.assertEqual(eth_addressWithTagsOutNeighbors, result)
-
-
-def list_address_neighbors_csv(test_case):
-    csv = ("balance_eur,balance_usd,balance_value,id,labels,no_txs,"
-           "node_type,received_eur,received_usd,received_value,"
-           "value_eur,value_usd,value_value\r\n"
-           "0.0,0.0,0,addressE,"
-           "\"['labelX', 'labelY']\""
-           ",1,address,114.86,142.18,87789282,72.08,87.24,27789282\r\n"
-           "1.15,2.31,115422577,addressF,[],1,address,2130676.5,2543214.5,"
-           "40412296129,72.08,87.24,27789282\r\n")
-    result = service.list_address_neighbors_csv(
-        currency='btc',
-        address=address.address,
-        direction='out',
-        include_labels=True
-        )
-    test_case.assertEqual(csv, result.data.decode('utf-8'))
 
 
 async def get_address_entity(test_case):
@@ -764,64 +746,3 @@ async def list_address_links(test_case):
     test_case.assertEqual(Links(links=[]), result)
 
 
-def list_address_links_csv(test_case):
-    result = service.list_address_links_csv(
-                currency='btc',
-                address=address.address,
-                neighbor='addressE')
-
-    csv = ('height,input_value_eur,input_value_usd,'
-           'input_value_value,output_value_eur,output_value_usd,'
-           'output_value_value,timestamp,tx_hash,tx_type\r\n'
-           '2,-0.1,-0.2,-10000000,0.1,0.2,10000000,'
-           '1361497172,123456,utxo\r\n')
-
-    test_case.assertEqual(csv, result.data.decode('utf-8'))
-
-    result = service.list_address_links_csv(
-                currency='eth',
-                address=eth_address.address,
-                neighbor='0x123456')
-
-    csv = ('height,timestamp,tx_hash,tx_type,value_eur,'
-           'value_usd,value_value\r\n'
-           '1,15,af6e0000,account,123.0,246.0,123000000000000000000\r\n'
-           '1,16,af6e0003,account,123.0,246.0,123000000000000000000\r\n')
-    test_case.assertEqual(csv, result.data.decode('utf-8'))
-
-
-def list_addresses(test_case):
-    result = service.list_addresses('btc', pagesize=2)
-    test_case.assertEqual([addressD, address],
-                          result.addresses)
-    test_case.assertIsNot(result.next_page, None)
-
-    ids = [address.address,
-           address3.address,
-           'doesnotexist']
-    result = service.list_addresses('btc', ids=ids)
-
-    test_case.assertEqual(Addresses(
-                            next_page=None,
-                            addresses=[address, address3]),
-                          result)
-
-    result = service.list_addresses('eth')
-    test_case.assertEqual([eth_address, eth_address2, eth_address3],
-                          result.addresses)
-    test_case.assertIs(result.next_page, None)
-
-    ids = [eth_address2.address, 'aaaa']
-
-    result = service.list_addresses('eth', ids=ids)
-    test_case.assertEqual([eth_address2], result.addresses)
-    test_case.assertIs(result.next_page, None)
-
-
-def list_addresses_csv(test_case):
-    result = service.list_addresses_csv(
-                "btc", [address.address]).data.decode('utf-8')
-    assertEqual(3, len(result.split("\r\n")))
-    result = service.list_addresses_csv(
-                "eth", [eth_address.address]).data.decode('utf-8')
-    assertEqual(3, len(result.split("\r\n")))

@@ -10,7 +10,7 @@ class BaseTestCase(AioHTTPTestCase):
 
     async def get_application(self):
         logging.getLogger('connexion.operation').setLevel('ERROR')
-        return main(os.path.join(os.getcwd(), 'tests/instance'))
+        return main(os.path.join(os.getcwd(), 'tests/instance/config.yaml'))
 
     async def requestWithCode(self, path, code, **kwargs):
         headers = {
