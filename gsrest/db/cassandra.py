@@ -792,12 +792,10 @@ class Cassandra:
         if has_targets:
             params = []
             query = basequery + f" AND {that}_{node_type}_id = %s"
-            print(query)
             for row in results:
                 p = base_parameters.copy()
                 p.append(row[f'{that}_{node_type}_id'])
                 params.append(p)
-            print(f'params {params}')
             results = await self.concurrent_with_args(
                         currency, 'transformed', query, params)
 

@@ -208,7 +208,7 @@ async def recursive_search(request, currency, entity, params, breadth, depth,
 
     async def list_neighbors(entity):
         return (await list_entity_neighbors(
-            currency, entity, direction, pagesize=breadth)).neighbors
+            request, currency, entity, direction, pagesize=breadth)).neighbors
 
     neighbors = await cached(entity, 'neighbors',
                              lambda: list_neighbors(entity))
@@ -218,7 +218,8 @@ async def recursive_search(request, currency, entity, params, breadth, depth,
     for neighbor in neighbors:
         match = True
         props = await cached(int(neighbor.id), 'props',
-                             lambda: get_entity(currency, int(neighbor.id),
+                             lambda: get_entity(request,
+                                                currency, int(neighbor.id),
                                                 include_tags=True,
                                                 tag_coherence=False))
         if props is None:
