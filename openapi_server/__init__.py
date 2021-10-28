@@ -45,15 +45,20 @@ def factory(args=None):
     origins = app.app['config']['ALLOWED_ORIGINS'] \
         if 'ALLOWED_ORIGINS' in app.app['config'] else '*'
 
+    options = aiohttp_cors.ResourceOptions(
+        allow_credentials=True,
+        expose_headers="*",
+        allow_headers="*",
+    )
+
+    defaults = {}
+
+    for origin in origins:
+        defaults[origin] = options
+
     app.app.logger.info('ALLOWED_ORIGINS: {}'.format(origins))
     # Enable CORS for all origins.
-    cors = aiohttp_cors.setup(app.app, defaults={
-        origins: aiohttp_cors.ResourceOptions(
-            allow_credentials=True,
-            expose_headers="*",
-            allow_headers="*",
-        )
-    })
+    cors = aiohttp_cors.setup(app.app, defaults=defaults)
 
     # Register all routers for CORS.
     for route in list(app.app.router.routes()):
