@@ -40,18 +40,13 @@ Install the requirements
 
     pip install -r requirements.txt
 
-Export REST interface environment variables
-
-    export FLASK_APP=openapi_server:flask
-    export FLASK_ENV=development
-
 You need access to GraphSense raw and transformed keyspaces.
 See [Graphsense Transformation Pipeline][graphsense-transformation]
 for further details.
 
 Run the REST interface
 
-    flask run
+    python -m aiohttp.web -H localhost -P 5000 openapi_server:main
 
 Test the service in your browser:
 
@@ -59,20 +54,17 @@ Test the service in your browser:
 
 ## Deployment
 
-When used in production, GraphSense-REST must be deployed to a WSGI server
-because Flask's built-in server is not suitable for production -
-it doesn't scale. From several [deployment options][flask-deployment],
-we have chosen [Gunicorn][gunicorn].
+In order to utilize multiple cores, you may run the REST interface through [Gunicorn][gunicorn].
 
-Install gunicorn
+Install gunicorn:
 
     pip install gunicorn
 
 If unspecified gunicorn is run with a number of workers and threads both equal to the number of CPUs x 2. 
 
-Run production server, overriding number of workers and threads through command line options (4 workers, 4 threads):
+Run production server, overriding number of workers and threads through command line options (4 workers, 4 threads). Specify the aiohttp specific WebWorker class to leverage the full power of lightweight threads:
 
-    gunicorn -w 4 --threads 4 "openapi_server:main()"
+    gunicorn -w 4 --threads 4 "openapi_server:main()" --worker-class aiohttp.GunicornWebWorker
 
 ### Deployment with docker
 

@@ -44,11 +44,11 @@ async def get_block(test_case):
     result = await test_case.request(path, currency="eth", height=2300001)
     test_case.assertEqual(eth_block2, Block.from_dict(result))
 
-    await test_case.requestWithCode(path, 404,
-                                    currency="btc", height="0")
+    await test_case.requestWithCodeAndBody(path, 404, None,
+                                           currency="btc", height="0")
 
-    await test_case.requestWithCode(path, 404,
-                                    currency="eth", height="0")
+    await test_case.requestWithCodeAndBody(path, 404, None,
+                                           currency="eth", height="0")
 
 
 async def list_block_txs(test_case):
