@@ -6,6 +6,16 @@ import json
 from aiohttp import web
 
 
+def bulk_json(*args, **kwargs):
+    kwargs['form'] = 'json'
+    return bulk(*args, **kwargs)
+
+
+def bulk_csv(*args, **kwargs):
+    kwargs['form'] = 'csv'
+    return bulk(*args, **kwargs)
+
+
 async def bulk(request, currency, api, operation, body, form='csv'):
     the_stack = stack(request, currency, api, operation, body, form)
     if form == 'csv':

@@ -1,9 +1,9 @@
 from gsrest.test.blocks_service import block, block2
 
 
-async def bulk(test_case):
+async def bulk_csv(test_case):
     body = {'height': [1, 2]}
-    path = '/{currency}/bulk/blocks/get_block?form={form}'
+    path = '/{currency}/bulk.csv/blocks/get_block'
     headers = {
         'Accept': 'application/json',
     }
@@ -19,6 +19,10 @@ async def bulk(test_case):
     test_case.assertEqual(sorted(expected.split('\r\n')),
                           sorted(result.split('\r\n')))
 
+
+async def bulk_json(test_case):
+    body = {'height': [1, 2]}
+    path = '/{currency}/bulk.json/blocks/get_block'
     result = await test_case.requestWithCodeAndBody(
                         path, 200, body,
                         currency="btc",
