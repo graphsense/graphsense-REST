@@ -14,32 +14,32 @@ class StatsTagsSource(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, report_uuid: str=None, version: str=None, visible_name: str=None):
+    def __init__(self, visible_name: str=None, id: str=None, version: str=None, report_uuid: str=None):
         """StatsTagsSource - a model defined in OpenAPI
 
-        :param id: The id of this StatsTagsSource.
-        :param report_uuid: The report_uuid of this StatsTagsSource.
-        :param version: The version of this StatsTagsSource.
         :param visible_name: The visible_name of this StatsTagsSource.
+        :param id: The id of this StatsTagsSource.
+        :param version: The version of this StatsTagsSource.
+        :param report_uuid: The report_uuid of this StatsTagsSource.
         """
         self.openapi_types = {
+            'visible_name': str,
             'id': str,
-            'report_uuid': str,
             'version': str,
-            'visible_name': str
+            'report_uuid': str
         }
 
         self.attribute_map = {
+            'visible_name': 'visible_name',
             'id': 'id',
-            'report_uuid': 'report_uuid',
             'version': 'version',
-            'visible_name': 'visible_name'
+            'report_uuid': 'report_uuid'
         }
 
-        self._id = id
-        self._report_uuid = report_uuid
-        self._version = version
         self._visible_name = visible_name
+        self._id = id
+        self._version = version
+        self._report_uuid = report_uuid
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'StatsTagsSource':
@@ -49,6 +49,27 @@ class StatsTagsSource(Model):
         :return: The stats_tags_source of this StatsTagsSource.
         """
         return util.deserialize_model(dikt, cls)
+
+    @property
+    def visible_name(self):
+        """Gets the visible_name of this StatsTagsSource.
+
+
+        :return: The visible_name of this StatsTagsSource.
+        :rtype: str
+        """
+        return self._visible_name
+
+    @visible_name.setter
+    def visible_name(self, visible_name):
+        """Sets the visible_name of this StatsTagsSource.
+
+
+        :param visible_name: The visible_name of this StatsTagsSource.
+        :type visible_name: str
+        """
+
+        self._visible_name = visible_name
 
     @property
     def id(self):
@@ -72,27 +93,6 @@ class StatsTagsSource(Model):
         self._id = id
 
     @property
-    def report_uuid(self):
-        """Gets the report_uuid of this StatsTagsSource.
-
-
-        :return: The report_uuid of this StatsTagsSource.
-        :rtype: str
-        """
-        return self._report_uuid
-
-    @report_uuid.setter
-    def report_uuid(self, report_uuid):
-        """Sets the report_uuid of this StatsTagsSource.
-
-
-        :param report_uuid: The report_uuid of this StatsTagsSource.
-        :type report_uuid: str
-        """
-
-        self._report_uuid = report_uuid
-
-    @property
     def version(self):
         """Gets the version of this StatsTagsSource.
 
@@ -114,22 +114,22 @@ class StatsTagsSource(Model):
         self._version = version
 
     @property
-    def visible_name(self):
-        """Gets the visible_name of this StatsTagsSource.
+    def report_uuid(self):
+        """Gets the report_uuid of this StatsTagsSource.
 
 
-        :return: The visible_name of this StatsTagsSource.
+        :return: The report_uuid of this StatsTagsSource.
         :rtype: str
         """
-        return self._visible_name
+        return self._report_uuid
 
-    @visible_name.setter
-    def visible_name(self, visible_name):
-        """Sets the visible_name of this StatsTagsSource.
+    @report_uuid.setter
+    def report_uuid(self, report_uuid):
+        """Sets the report_uuid of this StatsTagsSource.
 
 
-        :param visible_name: The visible_name of this StatsTagsSource.
-        :type visible_name: str
+        :param report_uuid: The report_uuid of this StatsTagsSource.
+        :type report_uuid: str
         """
 
-        self._visible_name = visible_name
+        self._report_uuid = report_uuid

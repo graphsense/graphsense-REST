@@ -15,24 +15,24 @@ class AddressTxs(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, address_txs: List[AddressTx]=None, next_page: str=None):
+    def __init__(self, next_page: str=None, address_txs: List[AddressTx]=None):
         """AddressTxs - a model defined in OpenAPI
 
-        :param address_txs: The address_txs of this AddressTxs.
         :param next_page: The next_page of this AddressTxs.
+        :param address_txs: The address_txs of this AddressTxs.
         """
         self.openapi_types = {
-            'address_txs': List[AddressTx],
-            'next_page': str
+            'next_page': str,
+            'address_txs': List[AddressTx]
         }
 
         self.attribute_map = {
-            'address_txs': 'address_txs',
-            'next_page': 'next_page'
+            'next_page': 'next_page',
+            'address_txs': 'address_txs'
         }
 
-        self._address_txs = address_txs
         self._next_page = next_page
+        self._address_txs = address_txs
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'AddressTxs':
@@ -42,27 +42,6 @@ class AddressTxs(Model):
         :return: The address_txs of this AddressTxs.
         """
         return util.deserialize_model(dikt, cls)
-
-    @property
-    def address_txs(self):
-        """Gets the address_txs of this AddressTxs.
-
-
-        :return: The address_txs of this AddressTxs.
-        :rtype: List[AddressTx]
-        """
-        return self._address_txs
-
-    @address_txs.setter
-    def address_txs(self, address_txs):
-        """Sets the address_txs of this AddressTxs.
-
-
-        :param address_txs: The address_txs of this AddressTxs.
-        :type address_txs: List[AddressTx]
-        """
-
-        self._address_txs = address_txs
 
     @property
     def next_page(self):
@@ -84,3 +63,24 @@ class AddressTxs(Model):
         """
 
         self._next_page = next_page
+
+    @property
+    def address_txs(self):
+        """Gets the address_txs of this AddressTxs.
+
+
+        :return: The address_txs of this AddressTxs.
+        :rtype: List[AddressTx]
+        """
+        return self._address_txs
+
+    @address_txs.setter
+    def address_txs(self, address_txs):
+        """Sets the address_txs of this AddressTxs.
+
+
+        :param address_txs: The address_txs of this AddressTxs.
+        :type address_txs: List[AddressTx]
+        """
+
+        self._address_txs = address_txs

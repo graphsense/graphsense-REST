@@ -19,36 +19,36 @@ class Stats(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, currencies: List[CurrencyStats]=None, notes: List[StatsNote]=None, tags_source: StatsTagsSource=None, tools: List[StatsTool]=None, version: StatsVersion=None):
+    def __init__(self, currencies: List[CurrencyStats]=None, version: StatsVersion=None, tools: List[StatsTool]=None, tags_source: StatsTagsSource=None, notes: List[StatsNote]=None):
         """Stats - a model defined in OpenAPI
 
         :param currencies: The currencies of this Stats.
-        :param notes: The notes of this Stats.
-        :param tags_source: The tags_source of this Stats.
-        :param tools: The tools of this Stats.
         :param version: The version of this Stats.
+        :param tools: The tools of this Stats.
+        :param tags_source: The tags_source of this Stats.
+        :param notes: The notes of this Stats.
         """
         self.openapi_types = {
             'currencies': List[CurrencyStats],
-            'notes': List[StatsNote],
-            'tags_source': StatsTagsSource,
+            'version': StatsVersion,
             'tools': List[StatsTool],
-            'version': StatsVersion
+            'tags_source': StatsTagsSource,
+            'notes': List[StatsNote]
         }
 
         self.attribute_map = {
             'currencies': 'currencies',
-            'notes': 'notes',
-            'tags_source': 'tags_source',
+            'version': 'version',
             'tools': 'tools',
-            'version': 'version'
+            'tags_source': 'tags_source',
+            'notes': 'notes'
         }
 
         self._currencies = currencies
-        self._notes = notes
-        self._tags_source = tags_source
-        self._tools = tools
         self._version = version
+        self._tools = tools
+        self._tags_source = tags_source
+        self._notes = notes
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'Stats':
@@ -81,46 +81,25 @@ class Stats(Model):
         self._currencies = currencies
 
     @property
-    def notes(self):
-        """Gets the notes of this Stats.
+    def version(self):
+        """Gets the version of this Stats.
 
 
-        :return: The notes of this Stats.
-        :rtype: List[StatsNote]
+        :return: The version of this Stats.
+        :rtype: StatsVersion
         """
-        return self._notes
+        return self._version
 
-    @notes.setter
-    def notes(self, notes):
-        """Sets the notes of this Stats.
-
-
-        :param notes: The notes of this Stats.
-        :type notes: List[StatsNote]
-        """
-
-        self._notes = notes
-
-    @property
-    def tags_source(self):
-        """Gets the tags_source of this Stats.
+    @version.setter
+    def version(self, version):
+        """Sets the version of this Stats.
 
 
-        :return: The tags_source of this Stats.
-        :rtype: StatsTagsSource
-        """
-        return self._tags_source
-
-    @tags_source.setter
-    def tags_source(self, tags_source):
-        """Sets the tags_source of this Stats.
-
-
-        :param tags_source: The tags_source of this Stats.
-        :type tags_source: StatsTagsSource
+        :param version: The version of this Stats.
+        :type version: StatsVersion
         """
 
-        self._tags_source = tags_source
+        self._version = version
 
     @property
     def tools(self):
@@ -144,22 +123,43 @@ class Stats(Model):
         self._tools = tools
 
     @property
-    def version(self):
-        """Gets the version of this Stats.
+    def tags_source(self):
+        """Gets the tags_source of this Stats.
 
 
-        :return: The version of this Stats.
-        :rtype: StatsVersion
+        :return: The tags_source of this Stats.
+        :rtype: StatsTagsSource
         """
-        return self._version
+        return self._tags_source
 
-    @version.setter
-    def version(self, version):
-        """Sets the version of this Stats.
+    @tags_source.setter
+    def tags_source(self, tags_source):
+        """Sets the tags_source of this Stats.
 
 
-        :param version: The version of this Stats.
-        :type version: StatsVersion
+        :param tags_source: The tags_source of this Stats.
+        :type tags_source: StatsTagsSource
         """
 
-        self._version = version
+        self._tags_source = tags_source
+
+    @property
+    def notes(self):
+        """Gets the notes of this Stats.
+
+
+        :return: The notes of this Stats.
+        :rtype: List[StatsNote]
+        """
+        return self._notes
+
+    @notes.setter
+    def notes(self, notes):
+        """Sets the notes of this Stats.
+
+
+        :param notes: The notes of this Stats.
+        :type notes: List[StatsNote]
+        """
+
+        self._notes = notes

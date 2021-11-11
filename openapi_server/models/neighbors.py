@@ -15,24 +15,24 @@ class Neighbors(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, neighbors: List[Neighbor]=None, next_page: str=None):
+    def __init__(self, next_page: str=None, neighbors: List[Neighbor]=None):
         """Neighbors - a model defined in OpenAPI
 
-        :param neighbors: The neighbors of this Neighbors.
         :param next_page: The next_page of this Neighbors.
+        :param neighbors: The neighbors of this Neighbors.
         """
         self.openapi_types = {
-            'neighbors': List[Neighbor],
-            'next_page': str
+            'next_page': str,
+            'neighbors': List[Neighbor]
         }
 
         self.attribute_map = {
-            'neighbors': 'neighbors',
-            'next_page': 'next_page'
+            'next_page': 'next_page',
+            'neighbors': 'neighbors'
         }
 
-        self._neighbors = neighbors
         self._next_page = next_page
+        self._neighbors = neighbors
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'Neighbors':
@@ -42,27 +42,6 @@ class Neighbors(Model):
         :return: The neighbors of this Neighbors.
         """
         return util.deserialize_model(dikt, cls)
-
-    @property
-    def neighbors(self):
-        """Gets the neighbors of this Neighbors.
-
-
-        :return: The neighbors of this Neighbors.
-        :rtype: List[Neighbor]
-        """
-        return self._neighbors
-
-    @neighbors.setter
-    def neighbors(self, neighbors):
-        """Sets the neighbors of this Neighbors.
-
-
-        :param neighbors: The neighbors of this Neighbors.
-        :type neighbors: List[Neighbor]
-        """
-
-        self._neighbors = neighbors
 
     @property
     def next_page(self):
@@ -84,3 +63,24 @@ class Neighbors(Model):
         """
 
         self._next_page = next_page
+
+    @property
+    def neighbors(self):
+        """Gets the neighbors of this Neighbors.
+
+
+        :return: The neighbors of this Neighbors.
+        :rtype: List[Neighbor]
+        """
+        return self._neighbors
+
+    @neighbors.setter
+    def neighbors(self, neighbors):
+        """Sets the neighbors of this Neighbors.
+
+
+        :param neighbors: The neighbors of this Neighbors.
+        :type neighbors: List[Neighbor]
+        """
+
+        self._neighbors = neighbors

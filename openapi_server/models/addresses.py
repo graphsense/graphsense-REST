@@ -15,24 +15,24 @@ class Addresses(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, addresses: List[Address]=None, next_page: str=None):
+    def __init__(self, next_page: str=None, addresses: List[Address]=None):
         """Addresses - a model defined in OpenAPI
 
-        :param addresses: The addresses of this Addresses.
         :param next_page: The next_page of this Addresses.
+        :param addresses: The addresses of this Addresses.
         """
         self.openapi_types = {
-            'addresses': List[Address],
-            'next_page': str
+            'next_page': str,
+            'addresses': List[Address]
         }
 
         self.attribute_map = {
-            'addresses': 'addresses',
-            'next_page': 'next_page'
+            'next_page': 'next_page',
+            'addresses': 'addresses'
         }
 
-        self._addresses = addresses
         self._next_page = next_page
+        self._addresses = addresses
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'Addresses':
@@ -42,27 +42,6 @@ class Addresses(Model):
         :return: The addresses of this Addresses.
         """
         return util.deserialize_model(dikt, cls)
-
-    @property
-    def addresses(self):
-        """Gets the addresses of this Addresses.
-
-
-        :return: The addresses of this Addresses.
-        :rtype: List[Address]
-        """
-        return self._addresses
-
-    @addresses.setter
-    def addresses(self, addresses):
-        """Sets the addresses of this Addresses.
-
-
-        :param addresses: The addresses of this Addresses.
-        :type addresses: List[Address]
-        """
-
-        self._addresses = addresses
 
     @property
     def next_page(self):
@@ -84,3 +63,24 @@ class Addresses(Model):
         """
 
         self._next_page = next_page
+
+    @property
+    def addresses(self):
+        """Gets the addresses of this Addresses.
+
+
+        :return: The addresses of this Addresses.
+        :rtype: List[Address]
+        """
+        return self._addresses
+
+    @addresses.setter
+    def addresses(self, addresses):
+        """Sets the addresses of this Addresses.
+
+
+        :param addresses: The addresses of this Addresses.
+        :type addresses: List[Address]
+        """
+
+        self._addresses = addresses

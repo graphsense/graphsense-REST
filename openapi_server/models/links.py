@@ -15,24 +15,24 @@ class Links(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, links: List[Link]=None, next_page: str=None):
+    def __init__(self, next_page: str=None, links: List[Link]=None):
         """Links - a model defined in OpenAPI
 
-        :param links: The links of this Links.
         :param next_page: The next_page of this Links.
+        :param links: The links of this Links.
         """
         self.openapi_types = {
-            'links': List[Link],
-            'next_page': str
+            'next_page': str,
+            'links': List[Link]
         }
 
         self.attribute_map = {
-            'links': 'links',
-            'next_page': 'next_page'
+            'next_page': 'next_page',
+            'links': 'links'
         }
 
-        self._links = links
         self._next_page = next_page
+        self._links = links
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'Links':
@@ -42,27 +42,6 @@ class Links(Model):
         :return: The links of this Links.
         """
         return util.deserialize_model(dikt, cls)
-
-    @property
-    def links(self):
-        """Gets the links of this Links.
-
-
-        :return: The links of this Links.
-        :rtype: List[Link]
-        """
-        return self._links
-
-    @links.setter
-    def links(self, links):
-        """Sets the links of this Links.
-
-
-        :param links: The links of this Links.
-        :type links: List[Link]
-        """
-
-        self._links = links
 
     @property
     def next_page(self):
@@ -84,3 +63,24 @@ class Links(Model):
         """
 
         self._next_page = next_page
+
+    @property
+    def links(self):
+        """Gets the links of this Links.
+
+
+        :return: The links of this Links.
+        :rtype: List[Link]
+        """
+        return self._links
+
+    @links.setter
+    def links(self, links):
+        """Sets the links of this Links.
+
+
+        :param links: The links of this Links.
+        :type links: List[Link]
+        """
+
+        self._links = links

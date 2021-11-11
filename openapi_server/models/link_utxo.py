@@ -15,40 +15,40 @@ class LinkUtxo(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, height: int=None, input_value: Values=None, output_value: Values=None, timestamp: int=None, tx_hash: str=None, tx_type: str='utxo'):
+    def __init__(self, tx_type: str='utxo', tx_hash: str=None, height: int=None, timestamp: int=None, input_value: Values=None, output_value: Values=None):
         """LinkUtxo - a model defined in OpenAPI
 
+        :param tx_type: The tx_type of this LinkUtxo.
+        :param tx_hash: The tx_hash of this LinkUtxo.
         :param height: The height of this LinkUtxo.
+        :param timestamp: The timestamp of this LinkUtxo.
         :param input_value: The input_value of this LinkUtxo.
         :param output_value: The output_value of this LinkUtxo.
-        :param timestamp: The timestamp of this LinkUtxo.
-        :param tx_hash: The tx_hash of this LinkUtxo.
-        :param tx_type: The tx_type of this LinkUtxo.
         """
         self.openapi_types = {
-            'height': int,
-            'input_value': Values,
-            'output_value': Values,
-            'timestamp': int,
+            'tx_type': str,
             'tx_hash': str,
-            'tx_type': str
+            'height': int,
+            'timestamp': int,
+            'input_value': Values,
+            'output_value': Values
         }
 
         self.attribute_map = {
-            'height': 'height',
-            'input_value': 'input_value',
-            'output_value': 'output_value',
-            'timestamp': 'timestamp',
+            'tx_type': 'tx_type',
             'tx_hash': 'tx_hash',
-            'tx_type': 'tx_type'
+            'height': 'height',
+            'timestamp': 'timestamp',
+            'input_value': 'input_value',
+            'output_value': 'output_value'
         }
 
+        self._tx_type = tx_type
+        self._tx_hash = tx_hash
         self._height = height
+        self._timestamp = timestamp
         self._input_value = input_value
         self._output_value = output_value
-        self._timestamp = timestamp
-        self._tx_hash = tx_hash
-        self._tx_type = tx_type
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'LinkUtxo':
@@ -58,6 +58,54 @@ class LinkUtxo(Model):
         :return: The link_utxo of this LinkUtxo.
         """
         return util.deserialize_model(dikt, cls)
+
+    @property
+    def tx_type(self):
+        """Gets the tx_type of this LinkUtxo.
+
+
+        :return: The tx_type of this LinkUtxo.
+        :rtype: str
+        """
+        return self._tx_type
+
+    @tx_type.setter
+    def tx_type(self, tx_type):
+        """Sets the tx_type of this LinkUtxo.
+
+
+        :param tx_type: The tx_type of this LinkUtxo.
+        :type tx_type: str
+        """
+        if tx_type is None:
+            raise ValueError("Invalid value for `tx_type`, must not be `None`")
+
+        self._tx_type = tx_type
+
+    @property
+    def tx_hash(self):
+        """Gets the tx_hash of this LinkUtxo.
+
+        Transaction hash
+
+        :return: The tx_hash of this LinkUtxo.
+        :rtype: str
+        """
+        return self._tx_hash
+
+    @tx_hash.setter
+    def tx_hash(self, tx_hash):
+        """Sets the tx_hash of this LinkUtxo.
+
+        Transaction hash
+
+        :param tx_hash: The tx_hash of this LinkUtxo.
+        :type tx_hash: str
+        """
+        if tx_hash is None:
+            raise ValueError("Invalid value for `tx_hash`, must not be `None`")
+
+        self._tx_hash = tx_hash
 
     @property
     def height(self):
@@ -85,6 +133,31 @@ class LinkUtxo(Model):
             raise ValueError("Invalid value for `height`, must be a value greater than or equal to `0`")
 
         self._height = height
+
+    @property
+    def timestamp(self):
+        """Gets the timestamp of this LinkUtxo.
+
+        Timestamp
+
+        :return: The timestamp of this LinkUtxo.
+        :rtype: int
+        """
+        return self._timestamp
+
+    @timestamp.setter
+    def timestamp(self, timestamp):
+        """Sets the timestamp of this LinkUtxo.
+
+        Timestamp
+
+        :param timestamp: The timestamp of this LinkUtxo.
+        :type timestamp: int
+        """
+        if timestamp is None:
+            raise ValueError("Invalid value for `timestamp`, must not be `None`")
+
+        self._timestamp = timestamp
 
     @property
     def input_value(self):
@@ -131,76 +204,3 @@ class LinkUtxo(Model):
             raise ValueError("Invalid value for `output_value`, must not be `None`")
 
         self._output_value = output_value
-
-    @property
-    def timestamp(self):
-        """Gets the timestamp of this LinkUtxo.
-
-        Timestamp
-
-        :return: The timestamp of this LinkUtxo.
-        :rtype: int
-        """
-        return self._timestamp
-
-    @timestamp.setter
-    def timestamp(self, timestamp):
-        """Sets the timestamp of this LinkUtxo.
-
-        Timestamp
-
-        :param timestamp: The timestamp of this LinkUtxo.
-        :type timestamp: int
-        """
-        if timestamp is None:
-            raise ValueError("Invalid value for `timestamp`, must not be `None`")
-
-        self._timestamp = timestamp
-
-    @property
-    def tx_hash(self):
-        """Gets the tx_hash of this LinkUtxo.
-
-        Transaction hash
-
-        :return: The tx_hash of this LinkUtxo.
-        :rtype: str
-        """
-        return self._tx_hash
-
-    @tx_hash.setter
-    def tx_hash(self, tx_hash):
-        """Sets the tx_hash of this LinkUtxo.
-
-        Transaction hash
-
-        :param tx_hash: The tx_hash of this LinkUtxo.
-        :type tx_hash: str
-        """
-        if tx_hash is None:
-            raise ValueError("Invalid value for `tx_hash`, must not be `None`")
-
-        self._tx_hash = tx_hash
-
-    @property
-    def tx_type(self):
-        """Gets the tx_type of this LinkUtxo.
-
-
-        :return: The tx_type of this LinkUtxo.
-        :rtype: str
-        """
-        return self._tx_type
-
-    @tx_type.setter
-    def tx_type(self, tx_type):
-        """Sets the tx_type of this LinkUtxo.
-
-
-        :param tx_type: The tx_type of this LinkUtxo.
-        :type tx_type: str
-        """
-        if tx_type is None:
-            raise ValueError("Invalid value for `tx_type`, must not be `None`")
-
-        self._tx_type = tx_type

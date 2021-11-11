@@ -14,32 +14,32 @@ class StatsVersion(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, file: str=None, hash: str=None, nr: str=None, timestamp: str=None):
+    def __init__(self, nr: str=None, hash: str=None, timestamp: str=None, file: str=None):
         """StatsVersion - a model defined in OpenAPI
 
-        :param file: The file of this StatsVersion.
-        :param hash: The hash of this StatsVersion.
         :param nr: The nr of this StatsVersion.
+        :param hash: The hash of this StatsVersion.
         :param timestamp: The timestamp of this StatsVersion.
+        :param file: The file of this StatsVersion.
         """
         self.openapi_types = {
-            'file': str,
-            'hash': str,
             'nr': str,
-            'timestamp': str
+            'hash': str,
+            'timestamp': str,
+            'file': str
         }
 
         self.attribute_map = {
-            'file': 'file',
-            'hash': 'hash',
             'nr': 'nr',
-            'timestamp': 'timestamp'
+            'hash': 'hash',
+            'timestamp': 'timestamp',
+            'file': 'file'
         }
 
-        self._file = file
-        self._hash = hash
         self._nr = nr
+        self._hash = hash
         self._timestamp = timestamp
+        self._file = file
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'StatsVersion':
@@ -49,48 +49,6 @@ class StatsVersion(Model):
         :return: The stats_version of this StatsVersion.
         """
         return util.deserialize_model(dikt, cls)
-
-    @property
-    def file(self):
-        """Gets the file of this StatsVersion.
-
-
-        :return: The file of this StatsVersion.
-        :rtype: str
-        """
-        return self._file
-
-    @file.setter
-    def file(self, file):
-        """Sets the file of this StatsVersion.
-
-
-        :param file: The file of this StatsVersion.
-        :type file: str
-        """
-
-        self._file = file
-
-    @property
-    def hash(self):
-        """Gets the hash of this StatsVersion.
-
-
-        :return: The hash of this StatsVersion.
-        :rtype: str
-        """
-        return self._hash
-
-    @hash.setter
-    def hash(self, hash):
-        """Sets the hash of this StatsVersion.
-
-
-        :param hash: The hash of this StatsVersion.
-        :type hash: str
-        """
-
-        self._hash = hash
 
     @property
     def nr(self):
@@ -114,6 +72,27 @@ class StatsVersion(Model):
         self._nr = nr
 
     @property
+    def hash(self):
+        """Gets the hash of this StatsVersion.
+
+
+        :return: The hash of this StatsVersion.
+        :rtype: str
+        """
+        return self._hash
+
+    @hash.setter
+    def hash(self, hash):
+        """Sets the hash of this StatsVersion.
+
+
+        :param hash: The hash of this StatsVersion.
+        :type hash: str
+        """
+
+        self._hash = hash
+
+    @property
     def timestamp(self):
         """Gets the timestamp of this StatsVersion.
 
@@ -133,3 +112,24 @@ class StatsVersion(Model):
         """
 
         self._timestamp = timestamp
+
+    @property
+    def file(self):
+        """Gets the file of this StatsVersion.
+
+
+        :return: The file of this StatsVersion.
+        :rtype: str
+        """
+        return self._file
+
+    @file.setter
+    def file(self, file):
+        """Sets the file of this StatsVersion.
+
+
+        :param file: The file of this StatsVersion.
+        :type file: str
+        """
+
+        self._file = file

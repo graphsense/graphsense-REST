@@ -15,24 +15,24 @@ class Entities(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, entities: List[Entity]=None, next_page: str=None):
+    def __init__(self, next_page: str=None, entities: List[Entity]=None):
         """Entities - a model defined in OpenAPI
 
-        :param entities: The entities of this Entities.
         :param next_page: The next_page of this Entities.
+        :param entities: The entities of this Entities.
         """
         self.openapi_types = {
-            'entities': List[Entity],
-            'next_page': str
+            'next_page': str,
+            'entities': List[Entity]
         }
 
         self.attribute_map = {
-            'entities': 'entities',
-            'next_page': 'next_page'
+            'next_page': 'next_page',
+            'entities': 'entities'
         }
 
-        self._entities = entities
         self._next_page = next_page
+        self._entities = entities
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'Entities':
@@ -42,27 +42,6 @@ class Entities(Model):
         :return: The entities of this Entities.
         """
         return util.deserialize_model(dikt, cls)
-
-    @property
-    def entities(self):
-        """Gets the entities of this Entities.
-
-
-        :return: The entities of this Entities.
-        :rtype: List[Entity]
-        """
-        return self._entities
-
-    @entities.setter
-    def entities(self, entities):
-        """Sets the entities of this Entities.
-
-
-        :param entities: The entities of this Entities.
-        :type entities: List[Entity]
-        """
-
-        self._entities = entities
 
     @property
     def next_page(self):
@@ -84,3 +63,24 @@ class Entities(Model):
         """
 
         self._next_page = next_page
+
+    @property
+    def entities(self):
+        """Gets the entities of this Entities.
+
+
+        :return: The entities of this Entities.
+        :rtype: List[Entity]
+        """
+        return self._entities
+
+    @entities.setter
+    def entities(self, entities):
+        """Sets the entities of this Entities.
+
+
+        :param entities: The entities of this Entities.
+        :type entities: List[Entity]
+        """
+
+        self._entities = entities

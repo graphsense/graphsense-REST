@@ -17,41 +17,41 @@ class AddressTx(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, height: int=None, timestamp: int=None, tx_hash: str=None, tx_type: str='account', value: Values=None, from_address: str=None, to_address: str=None):
+    def __init__(self, tx_type: str='account', tx_hash: str=None, height: int=None, timestamp: int=None, value: Values=None, from_address: str=None, to_address: str=None):
         """AddressTx - a model defined in OpenAPI
 
+        :param tx_type: The tx_type of this AddressTx.
+        :param tx_hash: The tx_hash of this AddressTx.
         :param height: The height of this AddressTx.
         :param timestamp: The timestamp of this AddressTx.
-        :param tx_hash: The tx_hash of this AddressTx.
-        :param tx_type: The tx_type of this AddressTx.
         :param value: The value of this AddressTx.
         :param from_address: The from_address of this AddressTx.
         :param to_address: The to_address of this AddressTx.
         """
         self.openapi_types = {
+            'tx_type': str,
+            'tx_hash': str,
             'height': int,
             'timestamp': int,
-            'tx_hash': str,
-            'tx_type': str,
             'value': Values,
             'from_address': str,
             'to_address': str
         }
 
         self.attribute_map = {
+            'tx_type': 'tx_type',
+            'tx_hash': 'tx_hash',
             'height': 'height',
             'timestamp': 'timestamp',
-            'tx_hash': 'tx_hash',
-            'tx_type': 'tx_type',
             'value': 'value',
             'from_address': 'from_address',
             'to_address': 'to_address'
         }
 
+        self._tx_type = tx_type
+        self._tx_hash = tx_hash
         self._height = height
         self._timestamp = timestamp
-        self._tx_hash = tx_hash
-        self._tx_type = tx_type
         self._value = value
         self._from_address = from_address
         self._to_address = to_address
@@ -64,6 +64,54 @@ class AddressTx(Model):
         :return: The address_tx of this AddressTx.
         """
         return util.deserialize_model(dikt, cls)
+
+    @property
+    def tx_type(self):
+        """Gets the tx_type of this AddressTx.
+
+
+        :return: The tx_type of this AddressTx.
+        :rtype: str
+        """
+        return self._tx_type
+
+    @tx_type.setter
+    def tx_type(self, tx_type):
+        """Sets the tx_type of this AddressTx.
+
+
+        :param tx_type: The tx_type of this AddressTx.
+        :type tx_type: str
+        """
+        if tx_type is None:
+            raise ValueError("Invalid value for `tx_type`, must not be `None`")
+
+        self._tx_type = tx_type
+
+    @property
+    def tx_hash(self):
+        """Gets the tx_hash of this AddressTx.
+
+        Transaction hash
+
+        :return: The tx_hash of this AddressTx.
+        :rtype: str
+        """
+        return self._tx_hash
+
+    @tx_hash.setter
+    def tx_hash(self, tx_hash):
+        """Sets the tx_hash of this AddressTx.
+
+        Transaction hash
+
+        :param tx_hash: The tx_hash of this AddressTx.
+        :type tx_hash: str
+        """
+        if tx_hash is None:
+            raise ValueError("Invalid value for `tx_hash`, must not be `None`")
+
+        self._tx_hash = tx_hash
 
     @property
     def height(self):
@@ -116,54 +164,6 @@ class AddressTx(Model):
             raise ValueError("Invalid value for `timestamp`, must not be `None`")
 
         self._timestamp = timestamp
-
-    @property
-    def tx_hash(self):
-        """Gets the tx_hash of this AddressTx.
-
-        Transaction hash
-
-        :return: The tx_hash of this AddressTx.
-        :rtype: str
-        """
-        return self._tx_hash
-
-    @tx_hash.setter
-    def tx_hash(self, tx_hash):
-        """Sets the tx_hash of this AddressTx.
-
-        Transaction hash
-
-        :param tx_hash: The tx_hash of this AddressTx.
-        :type tx_hash: str
-        """
-        if tx_hash is None:
-            raise ValueError("Invalid value for `tx_hash`, must not be `None`")
-
-        self._tx_hash = tx_hash
-
-    @property
-    def tx_type(self):
-        """Gets the tx_type of this AddressTx.
-
-
-        :return: The tx_type of this AddressTx.
-        :rtype: str
-        """
-        return self._tx_type
-
-    @tx_type.setter
-    def tx_type(self, tx_type):
-        """Sets the tx_type of this AddressTx.
-
-
-        :param tx_type: The tx_type of this AddressTx.
-        :type tx_type: str
-        """
-        if tx_type is None:
-            raise ValueError("Invalid value for `tx_type`, must not be `None`")
-
-        self._tx_type = tx_type
 
     @property
     def value(self):

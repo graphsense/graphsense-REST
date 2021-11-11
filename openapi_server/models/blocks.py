@@ -15,24 +15,24 @@ class Blocks(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, blocks: List[Block]=None, next_page: str=None):
+    def __init__(self, next_page: str=None, blocks: List[Block]=None):
         """Blocks - a model defined in OpenAPI
 
-        :param blocks: The blocks of this Blocks.
         :param next_page: The next_page of this Blocks.
+        :param blocks: The blocks of this Blocks.
         """
         self.openapi_types = {
-            'blocks': List[Block],
-            'next_page': str
+            'next_page': str,
+            'blocks': List[Block]
         }
 
         self.attribute_map = {
-            'blocks': 'blocks',
-            'next_page': 'next_page'
+            'next_page': 'next_page',
+            'blocks': 'blocks'
         }
 
-        self._blocks = blocks
         self._next_page = next_page
+        self._blocks = blocks
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'Blocks':
@@ -42,27 +42,6 @@ class Blocks(Model):
         :return: The blocks of this Blocks.
         """
         return util.deserialize_model(dikt, cls)
-
-    @property
-    def blocks(self):
-        """Gets the blocks of this Blocks.
-
-
-        :return: The blocks of this Blocks.
-        :rtype: List[Block]
-        """
-        return self._blocks
-
-    @blocks.setter
-    def blocks(self, blocks):
-        """Sets the blocks of this Blocks.
-
-
-        :param blocks: The blocks of this Blocks.
-        :type blocks: List[Block]
-        """
-
-        self._blocks = blocks
 
     @property
     def next_page(self):
@@ -84,3 +63,24 @@ class Blocks(Model):
         """
 
         self._next_page = next_page
+
+    @property
+    def blocks(self):
+        """Gets the blocks of this Blocks.
+
+
+        :return: The blocks of this Blocks.
+        :rtype: List[Block]
+        """
+        return self._blocks
+
+    @blocks.setter
+    def blocks(self, blocks):
+        """Sets the blocks of this Blocks.
+
+
+        :param blocks: The blocks of this Blocks.
+        :type blocks: List[Block]
+        """
+
+        self._blocks = blocks

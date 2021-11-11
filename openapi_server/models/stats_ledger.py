@@ -15,32 +15,32 @@ class StatsLedger(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, report_uuid: str=None, version: StatsLedgerVersion=None, visible_name: str=None):
+    def __init__(self, visible_name: str=None, id: str=None, version: StatsLedgerVersion=None, report_uuid: str=None):
         """StatsLedger - a model defined in OpenAPI
 
-        :param id: The id of this StatsLedger.
-        :param report_uuid: The report_uuid of this StatsLedger.
-        :param version: The version of this StatsLedger.
         :param visible_name: The visible_name of this StatsLedger.
+        :param id: The id of this StatsLedger.
+        :param version: The version of this StatsLedger.
+        :param report_uuid: The report_uuid of this StatsLedger.
         """
         self.openapi_types = {
+            'visible_name': str,
             'id': str,
-            'report_uuid': str,
             'version': StatsLedgerVersion,
-            'visible_name': str
+            'report_uuid': str
         }
 
         self.attribute_map = {
+            'visible_name': 'visible_name',
             'id': 'id',
-            'report_uuid': 'report_uuid',
             'version': 'version',
-            'visible_name': 'visible_name'
+            'report_uuid': 'report_uuid'
         }
 
-        self._id = id
-        self._report_uuid = report_uuid
-        self._version = version
         self._visible_name = visible_name
+        self._id = id
+        self._version = version
+        self._report_uuid = report_uuid
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'StatsLedger':
@@ -50,6 +50,27 @@ class StatsLedger(Model):
         :return: The stats_ledger of this StatsLedger.
         """
         return util.deserialize_model(dikt, cls)
+
+    @property
+    def visible_name(self):
+        """Gets the visible_name of this StatsLedger.
+
+
+        :return: The visible_name of this StatsLedger.
+        :rtype: str
+        """
+        return self._visible_name
+
+    @visible_name.setter
+    def visible_name(self, visible_name):
+        """Sets the visible_name of this StatsLedger.
+
+
+        :param visible_name: The visible_name of this StatsLedger.
+        :type visible_name: str
+        """
+
+        self._visible_name = visible_name
 
     @property
     def id(self):
@@ -73,27 +94,6 @@ class StatsLedger(Model):
         self._id = id
 
     @property
-    def report_uuid(self):
-        """Gets the report_uuid of this StatsLedger.
-
-
-        :return: The report_uuid of this StatsLedger.
-        :rtype: str
-        """
-        return self._report_uuid
-
-    @report_uuid.setter
-    def report_uuid(self, report_uuid):
-        """Sets the report_uuid of this StatsLedger.
-
-
-        :param report_uuid: The report_uuid of this StatsLedger.
-        :type report_uuid: str
-        """
-
-        self._report_uuid = report_uuid
-
-    @property
     def version(self):
         """Gets the version of this StatsLedger.
 
@@ -115,22 +115,22 @@ class StatsLedger(Model):
         self._version = version
 
     @property
-    def visible_name(self):
-        """Gets the visible_name of this StatsLedger.
+    def report_uuid(self):
+        """Gets the report_uuid of this StatsLedger.
 
 
-        :return: The visible_name of this StatsLedger.
+        :return: The report_uuid of this StatsLedger.
         :rtype: str
         """
-        return self._visible_name
+        return self._report_uuid
 
-    @visible_name.setter
-    def visible_name(self, visible_name):
-        """Sets the visible_name of this StatsLedger.
+    @report_uuid.setter
+    def report_uuid(self, report_uuid):
+        """Sets the report_uuid of this StatsLedger.
 
 
-        :param visible_name: The visible_name of this StatsLedger.
-        :type visible_name: str
+        :param report_uuid: The report_uuid of this StatsLedger.
+        :type report_uuid: str
         """
 
-        self._visible_name = visible_name
+        self._report_uuid = report_uuid

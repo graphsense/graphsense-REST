@@ -17,64 +17,64 @@ class Entity(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, balance: Values=None, entity: int=None, first_tx: TxSummary=None, in_degree: int=None, last_tx: TxSummary=None, no_addresses: int=None, no_incoming_txs: int=None, no_outgoing_txs: int=None, out_degree: int=None, tags: Tags=None, total_received: Values=None, total_spent: Values=None):
+    def __init__(self, entity: int=None, balance: Values=None, first_tx: TxSummary=None, last_tx: TxSummary=None, in_degree: int=None, out_degree: int=None, no_addresses: int=None, no_incoming_txs: int=None, no_outgoing_txs: int=None, total_received: Values=None, total_spent: Values=None, tags: Tags=None):
         """Entity - a model defined in OpenAPI
 
-        :param balance: The balance of this Entity.
         :param entity: The entity of this Entity.
+        :param balance: The balance of this Entity.
         :param first_tx: The first_tx of this Entity.
-        :param in_degree: The in_degree of this Entity.
         :param last_tx: The last_tx of this Entity.
+        :param in_degree: The in_degree of this Entity.
+        :param out_degree: The out_degree of this Entity.
         :param no_addresses: The no_addresses of this Entity.
         :param no_incoming_txs: The no_incoming_txs of this Entity.
         :param no_outgoing_txs: The no_outgoing_txs of this Entity.
-        :param out_degree: The out_degree of this Entity.
-        :param tags: The tags of this Entity.
         :param total_received: The total_received of this Entity.
         :param total_spent: The total_spent of this Entity.
+        :param tags: The tags of this Entity.
         """
         self.openapi_types = {
-            'balance': Values,
             'entity': int,
+            'balance': Values,
             'first_tx': TxSummary,
-            'in_degree': int,
             'last_tx': TxSummary,
+            'in_degree': int,
+            'out_degree': int,
             'no_addresses': int,
             'no_incoming_txs': int,
             'no_outgoing_txs': int,
-            'out_degree': int,
-            'tags': Tags,
             'total_received': Values,
-            'total_spent': Values
+            'total_spent': Values,
+            'tags': Tags
         }
 
         self.attribute_map = {
-            'balance': 'balance',
             'entity': 'entity',
+            'balance': 'balance',
             'first_tx': 'first_tx',
-            'in_degree': 'in_degree',
             'last_tx': 'last_tx',
+            'in_degree': 'in_degree',
+            'out_degree': 'out_degree',
             'no_addresses': 'no_addresses',
             'no_incoming_txs': 'no_incoming_txs',
             'no_outgoing_txs': 'no_outgoing_txs',
-            'out_degree': 'out_degree',
-            'tags': 'tags',
             'total_received': 'total_received',
-            'total_spent': 'total_spent'
+            'total_spent': 'total_spent',
+            'tags': 'tags'
         }
 
-        self._balance = balance
         self._entity = entity
+        self._balance = balance
         self._first_tx = first_tx
-        self._in_degree = in_degree
         self._last_tx = last_tx
+        self._in_degree = in_degree
+        self._out_degree = out_degree
         self._no_addresses = no_addresses
         self._no_incoming_txs = no_incoming_txs
         self._no_outgoing_txs = no_outgoing_txs
-        self._out_degree = out_degree
-        self._tags = tags
         self._total_received = total_received
         self._total_spent = total_spent
+        self._tags = tags
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'Entity':
@@ -84,29 +84,6 @@ class Entity(Model):
         :return: The entity of this Entity.
         """
         return util.deserialize_model(dikt, cls)
-
-    @property
-    def balance(self):
-        """Gets the balance of this Entity.
-
-
-        :return: The balance of this Entity.
-        :rtype: Values
-        """
-        return self._balance
-
-    @balance.setter
-    def balance(self, balance):
-        """Sets the balance of this Entity.
-
-
-        :param balance: The balance of this Entity.
-        :type balance: Values
-        """
-        if balance is None:
-            raise ValueError("Invalid value for `balance`, must not be `None`")
-
-        self._balance = balance
 
     @property
     def entity(self):
@@ -134,6 +111,29 @@ class Entity(Model):
         self._entity = entity
 
     @property
+    def balance(self):
+        """Gets the balance of this Entity.
+
+
+        :return: The balance of this Entity.
+        :rtype: Values
+        """
+        return self._balance
+
+    @balance.setter
+    def balance(self, balance):
+        """Sets the balance of this Entity.
+
+
+        :param balance: The balance of this Entity.
+        :type balance: Values
+        """
+        if balance is None:
+            raise ValueError("Invalid value for `balance`, must not be `None`")
+
+        self._balance = balance
+
+    @property
     def first_tx(self):
         """Gets the first_tx of this Entity.
 
@@ -155,6 +155,29 @@ class Entity(Model):
             raise ValueError("Invalid value for `first_tx`, must not be `None`")
 
         self._first_tx = first_tx
+
+    @property
+    def last_tx(self):
+        """Gets the last_tx of this Entity.
+
+
+        :return: The last_tx of this Entity.
+        :rtype: TxSummary
+        """
+        return self._last_tx
+
+    @last_tx.setter
+    def last_tx(self, last_tx):
+        """Sets the last_tx of this Entity.
+
+
+        :param last_tx: The last_tx of this Entity.
+        :type last_tx: TxSummary
+        """
+        if last_tx is None:
+            raise ValueError("Invalid value for `last_tx`, must not be `None`")
+
+        self._last_tx = last_tx
 
     @property
     def in_degree(self):
@@ -180,27 +203,27 @@ class Entity(Model):
         self._in_degree = in_degree
 
     @property
-    def last_tx(self):
-        """Gets the last_tx of this Entity.
+    def out_degree(self):
+        """Gets the out_degree of this Entity.
 
 
-        :return: The last_tx of this Entity.
-        :rtype: TxSummary
+        :return: The out_degree of this Entity.
+        :rtype: int
         """
-        return self._last_tx
+        return self._out_degree
 
-    @last_tx.setter
-    def last_tx(self, last_tx):
-        """Sets the last_tx of this Entity.
+    @out_degree.setter
+    def out_degree(self, out_degree):
+        """Sets the out_degree of this Entity.
 
 
-        :param last_tx: The last_tx of this Entity.
-        :type last_tx: TxSummary
+        :param out_degree: The out_degree of this Entity.
+        :type out_degree: int
         """
-        if last_tx is None:
-            raise ValueError("Invalid value for `last_tx`, must not be `None`")
+        if out_degree is None:
+            raise ValueError("Invalid value for `out_degree`, must not be `None`")
 
-        self._last_tx = last_tx
+        self._out_degree = out_degree
 
     @property
     def no_addresses(self):
@@ -274,50 +297,6 @@ class Entity(Model):
         self._no_outgoing_txs = no_outgoing_txs
 
     @property
-    def out_degree(self):
-        """Gets the out_degree of this Entity.
-
-
-        :return: The out_degree of this Entity.
-        :rtype: int
-        """
-        return self._out_degree
-
-    @out_degree.setter
-    def out_degree(self, out_degree):
-        """Sets the out_degree of this Entity.
-
-
-        :param out_degree: The out_degree of this Entity.
-        :type out_degree: int
-        """
-        if out_degree is None:
-            raise ValueError("Invalid value for `out_degree`, must not be `None`")
-
-        self._out_degree = out_degree
-
-    @property
-    def tags(self):
-        """Gets the tags of this Entity.
-
-
-        :return: The tags of this Entity.
-        :rtype: Tags
-        """
-        return self._tags
-
-    @tags.setter
-    def tags(self, tags):
-        """Sets the tags of this Entity.
-
-
-        :param tags: The tags of this Entity.
-        :type tags: Tags
-        """
-
-        self._tags = tags
-
-    @property
     def total_received(self):
         """Gets the total_received of this Entity.
 
@@ -362,3 +341,24 @@ class Entity(Model):
             raise ValueError("Invalid value for `total_spent`, must not be `None`")
 
         self._total_spent = total_spent
+
+    @property
+    def tags(self):
+        """Gets the tags of this Entity.
+
+
+        :return: The tags of this Entity.
+        :rtype: Tags
+        """
+        return self._tags
+
+    @tags.setter
+    def tags(self, tags):
+        """Sets the tags of this Entity.
+
+
+        :param tags: The tags of this Entity.
+        :type tags: Tags
+        """
+
+        self._tags = tags
