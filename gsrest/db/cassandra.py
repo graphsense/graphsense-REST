@@ -118,7 +118,7 @@ class Cassandra:
             retry = self.config['retry_interval']
             retry = 5 if retry is None else retry
             if self.logger:
-                self.app.logger.error(
+                self.logger.error(
                     f'Could not connect. Retrying in {retry} secs.')
             time.sleep(retry)
             self.connect()
