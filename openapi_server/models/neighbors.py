@@ -15,24 +15,24 @@ class Neighbors(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, next_page: str=None, neighbors: List[Neighbor]=None):
+    def __init__(self, neighbors: List[Neighbor]=None, next_page: str=None):
         """Neighbors - a model defined in OpenAPI
 
-        :param next_page: The next_page of this Neighbors.
         :param neighbors: The neighbors of this Neighbors.
+        :param next_page: The next_page of this Neighbors.
         """
         self.openapi_types = {
-            'next_page': str,
-            'neighbors': List[Neighbor]
+            'neighbors': List[Neighbor],
+            'next_page': str
         }
 
         self.attribute_map = {
-            'next_page': 'next_page',
-            'neighbors': 'neighbors'
+            'neighbors': 'neighbors',
+            'next_page': 'next_page'
         }
 
-        self._next_page = next_page
         self._neighbors = neighbors
+        self._next_page = next_page
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'Neighbors':
@@ -42,27 +42,6 @@ class Neighbors(Model):
         :return: The neighbors of this Neighbors.
         """
         return util.deserialize_model(dikt, cls)
-
-    @property
-    def next_page(self):
-        """Gets the next_page of this Neighbors.
-
-
-        :return: The next_page of this Neighbors.
-        :rtype: str
-        """
-        return self._next_page
-
-    @next_page.setter
-    def next_page(self, next_page):
-        """Sets the next_page of this Neighbors.
-
-
-        :param next_page: The next_page of this Neighbors.
-        :type next_page: str
-        """
-
-        self._next_page = next_page
 
     @property
     def neighbors(self):
@@ -84,3 +63,24 @@ class Neighbors(Model):
         """
 
         self._neighbors = neighbors
+
+    @property
+    def next_page(self):
+        """Gets the next_page of this Neighbors.
+
+
+        :return: The next_page of this Neighbors.
+        :rtype: str
+        """
+        return self._next_page
+
+    @next_page.setter
+    def next_page(self, next_page):
+        """Sets the next_page of this Neighbors.
+
+
+        :param next_page: The next_page of this Neighbors.
+        :type next_page: str
+        """
+
+        self._next_page = next_page

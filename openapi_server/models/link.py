@@ -17,52 +17,52 @@ class Link(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, tx_type: str='account', tx_hash: str=None, height: int=None, timestamp: int=None, input_value: Values=None, output_value: Values=None, value: Values=None, from_address: str=None, to_address: str=None):
+    def __init__(self, height: int=None, input_value: Values=None, output_value: Values=None, timestamp: int=None, tx_hash: str=None, tx_type: str='account', from_address: str=None, to_address: str=None, value: Values=None):
         """Link - a model defined in OpenAPI
 
-        :param tx_type: The tx_type of this Link.
-        :param tx_hash: The tx_hash of this Link.
         :param height: The height of this Link.
-        :param timestamp: The timestamp of this Link.
         :param input_value: The input_value of this Link.
         :param output_value: The output_value of this Link.
-        :param value: The value of this Link.
+        :param timestamp: The timestamp of this Link.
+        :param tx_hash: The tx_hash of this Link.
+        :param tx_type: The tx_type of this Link.
         :param from_address: The from_address of this Link.
         :param to_address: The to_address of this Link.
+        :param value: The value of this Link.
         """
         self.openapi_types = {
-            'tx_type': str,
-            'tx_hash': str,
             'height': int,
-            'timestamp': int,
             'input_value': Values,
             'output_value': Values,
-            'value': Values,
+            'timestamp': int,
+            'tx_hash': str,
+            'tx_type': str,
             'from_address': str,
-            'to_address': str
+            'to_address': str,
+            'value': Values
         }
 
         self.attribute_map = {
-            'tx_type': 'tx_type',
-            'tx_hash': 'tx_hash',
             'height': 'height',
-            'timestamp': 'timestamp',
             'input_value': 'input_value',
             'output_value': 'output_value',
-            'value': 'value',
+            'timestamp': 'timestamp',
+            'tx_hash': 'tx_hash',
+            'tx_type': 'tx_type',
             'from_address': 'from_address',
-            'to_address': 'to_address'
+            'to_address': 'to_address',
+            'value': 'value'
         }
 
-        self._tx_type = tx_type
-        self._tx_hash = tx_hash
         self._height = height
-        self._timestamp = timestamp
         self._input_value = input_value
         self._output_value = output_value
-        self._value = value
+        self._timestamp = timestamp
+        self._tx_hash = tx_hash
+        self._tx_type = tx_type
         self._from_address = from_address
         self._to_address = to_address
+        self._value = value
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'Link':
@@ -72,54 +72,6 @@ class Link(Model):
         :return: The link of this Link.
         """
         return util.deserialize_model(dikt, cls)
-
-    @property
-    def tx_type(self):
-        """Gets the tx_type of this Link.
-
-
-        :return: The tx_type of this Link.
-        :rtype: str
-        """
-        return self._tx_type
-
-    @tx_type.setter
-    def tx_type(self, tx_type):
-        """Sets the tx_type of this Link.
-
-
-        :param tx_type: The tx_type of this Link.
-        :type tx_type: str
-        """
-        if tx_type is None:
-            raise ValueError("Invalid value for `tx_type`, must not be `None`")
-
-        self._tx_type = tx_type
-
-    @property
-    def tx_hash(self):
-        """Gets the tx_hash of this Link.
-
-        Transaction hash
-
-        :return: The tx_hash of this Link.
-        :rtype: str
-        """
-        return self._tx_hash
-
-    @tx_hash.setter
-    def tx_hash(self, tx_hash):
-        """Sets the tx_hash of this Link.
-
-        Transaction hash
-
-        :param tx_hash: The tx_hash of this Link.
-        :type tx_hash: str
-        """
-        if tx_hash is None:
-            raise ValueError("Invalid value for `tx_hash`, must not be `None`")
-
-        self._tx_hash = tx_hash
 
     @property
     def height(self):
@@ -147,31 +99,6 @@ class Link(Model):
             raise ValueError("Invalid value for `height`, must be a value greater than or equal to `0`")
 
         self._height = height
-
-    @property
-    def timestamp(self):
-        """Gets the timestamp of this Link.
-
-        Timestamp
-
-        :return: The timestamp of this Link.
-        :rtype: int
-        """
-        return self._timestamp
-
-    @timestamp.setter
-    def timestamp(self, timestamp):
-        """Sets the timestamp of this Link.
-
-        Timestamp
-
-        :param timestamp: The timestamp of this Link.
-        :type timestamp: int
-        """
-        if timestamp is None:
-            raise ValueError("Invalid value for `timestamp`, must not be `None`")
-
-        self._timestamp = timestamp
 
     @property
     def input_value(self):
@@ -220,27 +147,77 @@ class Link(Model):
         self._output_value = output_value
 
     @property
-    def value(self):
-        """Gets the value of this Link.
+    def timestamp(self):
+        """Gets the timestamp of this Link.
 
+        Timestamp
 
-        :return: The value of this Link.
-        :rtype: Values
+        :return: The timestamp of this Link.
+        :rtype: int
         """
-        return self._value
+        return self._timestamp
 
-    @value.setter
-    def value(self, value):
-        """Sets the value of this Link.
+    @timestamp.setter
+    def timestamp(self, timestamp):
+        """Sets the timestamp of this Link.
 
+        Timestamp
 
-        :param value: The value of this Link.
-        :type value: Values
+        :param timestamp: The timestamp of this Link.
+        :type timestamp: int
         """
-        if value is None:
-            raise ValueError("Invalid value for `value`, must not be `None`")
+        if timestamp is None:
+            raise ValueError("Invalid value for `timestamp`, must not be `None`")
 
-        self._value = value
+        self._timestamp = timestamp
+
+    @property
+    def tx_hash(self):
+        """Gets the tx_hash of this Link.
+
+        Transaction hash
+
+        :return: The tx_hash of this Link.
+        :rtype: str
+        """
+        return self._tx_hash
+
+    @tx_hash.setter
+    def tx_hash(self, tx_hash):
+        """Sets the tx_hash of this Link.
+
+        Transaction hash
+
+        :param tx_hash: The tx_hash of this Link.
+        :type tx_hash: str
+        """
+        if tx_hash is None:
+            raise ValueError("Invalid value for `tx_hash`, must not be `None`")
+
+        self._tx_hash = tx_hash
+
+    @property
+    def tx_type(self):
+        """Gets the tx_type of this Link.
+
+
+        :return: The tx_type of this Link.
+        :rtype: str
+        """
+        return self._tx_type
+
+    @tx_type.setter
+    def tx_type(self, tx_type):
+        """Sets the tx_type of this Link.
+
+
+        :param tx_type: The tx_type of this Link.
+        :type tx_type: str
+        """
+        if tx_type is None:
+            raise ValueError("Invalid value for `tx_type`, must not be `None`")
+
+        self._tx_type = tx_type
 
     @property
     def from_address(self):
@@ -291,3 +268,26 @@ class Link(Model):
             raise ValueError("Invalid value for `to_address`, must not be `None`")
 
         self._to_address = to_address
+
+    @property
+    def value(self):
+        """Gets the value of this Link.
+
+
+        :return: The value of this Link.
+        :rtype: Values
+        """
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        """Sets the value of this Link.
+
+
+        :param value: The value of this Link.
+        :type value: Values
+        """
+        if value is None:
+            raise ValueError("Invalid value for `value`, must not be `None`")
+
+        self._value = value

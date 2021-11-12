@@ -17,7 +17,9 @@ def load_config(config_file):
     return config
 
 
-def factory(args=None):
+def factory(config_file=None, validate_responses=False):
+    if not config_file:
+        config_file = CONFIG_FILE
     options = {
         "swagger_ui": True,
         "serve_spec": True
@@ -31,10 +33,8 @@ def factory(args=None):
     app.add_api(openapi_yaml,
                 arguments={'title': 'GraphSense API'},
                 pythonic_params=True,
+                validate_responses=validate_responses,
                 pass_context_arg_name='request')
-    config_file = CONFIG_FILE
-    if args:
-        config_file = args
     app.app.logger.info(f'reading config from {config_file}')
     app.app['config'] = load_config(config_file)
     with open(os.path.join(specification_dir, openapi_yaml)) as yaml_file:

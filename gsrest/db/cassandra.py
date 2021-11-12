@@ -143,6 +143,8 @@ class Cassandra:
                 self.parameters[keyspace][key] = value
 
     def get_prefix_lengths(self, currency):
+        if currency not in self.parameters:
+            raise RuntimeError(f'{currency} not found')
         p = self.parameters[currency]
         return \
             {'address': p['address_prefix_length'],
@@ -158,10 +160,9 @@ class Cassandra:
         if currency is None:
             raise ValueError('Missing currency')
         if keyspace_type not in ('raw', 'transformed'):
-            raise ValueError('Unknown keyspace type {}'.format(keyspace_type))
+            raise ValueError(f'Unknown keyspace type {keyspace_type}')
         if currency not in self.config['currencies']:
-            raise BadConfigError('Unknown currency in config: {}'
-                                 .format(currency))
+            raise ValueError(f'Unknown currency in config: {currency}')
         return self.config['currencies'][currency][keyspace_type]
 
     def close(self):
@@ -375,6 +376,7 @@ class Cassandra:
             row['tx_hash'] = tx['tx_hash']
             row['height'] = tx['block_id']
             row['timestamp'] = tx['timestamp']
+            row['coinbase'] = tx['coinbase']
             rows.append(row)
 
         return rows, to_hex(results.paging_state)
@@ -424,13 +426,19 @@ class Cassandra:
         return address_id, id_group
 
     def get_id_group(self, keyspace, id_):
+        if keyspace not in self.parameters:
+            raise RuntimeError(f'{keyspace} not found')
         return floor(int(id_) / self.parameters[keyspace]['bucket_size'])
 
     def get_block_id_group(self, keyspace, id_):
+        if keyspace not in self.parameters:
+            raise RuntimeError(f'{keyspace} not found')
         return floor(int(id_) / self.parameters[keyspace]['block_bucket_size'])
 
     @eth
     def get_tx_id_group(self, keyspace, id_):
+        if keyspace not in self.parameters:
+            raise RuntimeError(f'{keyspace} not found')
         return floor(int(id_) / self.parameters[keyspace]['tx_bucket_size'])
 
     def get_tx_id_group_eth(self, keyspace, id_):
@@ -973,6 +981,8 @@ class Cassandra:
 
     @eth
     def scrub_prefix(self, currency, expression):
+        if currency not in self.parameters:
+            raise RuntimeError(f'{currency} not found')
         bech32_prefix = self.parameters[currency]['bech_32_prefix']
         return expression[len(bech32_prefix):] \
             if expression.startswith(bech32_prefix) \

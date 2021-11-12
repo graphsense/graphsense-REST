@@ -15,24 +15,24 @@ class Entities(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, next_page: str=None, entities: List[Entity]=None):
+    def __init__(self, entities: List[Entity]=None, next_page: str=None):
         """Entities - a model defined in OpenAPI
 
-        :param next_page: The next_page of this Entities.
         :param entities: The entities of this Entities.
+        :param next_page: The next_page of this Entities.
         """
         self.openapi_types = {
-            'next_page': str,
-            'entities': List[Entity]
+            'entities': List[Entity],
+            'next_page': str
         }
 
         self.attribute_map = {
-            'next_page': 'next_page',
-            'entities': 'entities'
+            'entities': 'entities',
+            'next_page': 'next_page'
         }
 
-        self._next_page = next_page
         self._entities = entities
+        self._next_page = next_page
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'Entities':
@@ -42,27 +42,6 @@ class Entities(Model):
         :return: The entities of this Entities.
         """
         return util.deserialize_model(dikt, cls)
-
-    @property
-    def next_page(self):
-        """Gets the next_page of this Entities.
-
-
-        :return: The next_page of this Entities.
-        :rtype: str
-        """
-        return self._next_page
-
-    @next_page.setter
-    def next_page(self, next_page):
-        """Sets the next_page of this Entities.
-
-
-        :param next_page: The next_page of this Entities.
-        :type next_page: str
-        """
-
-        self._next_page = next_page
 
     @property
     def entities(self):
@@ -84,3 +63,24 @@ class Entities(Model):
         """
 
         self._entities = entities
+
+    @property
+    def next_page(self):
+        """Gets the next_page of this Entities.
+
+
+        :return: The next_page of this Entities.
+        :rtype: str
+        """
+        return self._next_page
+
+    @next_page.setter
+    def next_page(self, next_page):
+        """Sets the next_page of this Entities.
+
+
+        :param next_page: The next_page of this Entities.
+        :type next_page: str
+        """
+
+        self._next_page = next_page

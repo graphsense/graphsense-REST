@@ -57,6 +57,7 @@ async def txs_from_rows(request, currency, rows):
     return [AddressTxUtxo(
             height=row['height'],
             timestamp=row['timestamp'],
+            coinbase=row['coinbase'],
             tx_hash=row['tx_hash'].hex(),
             value=convert_value(currency, row['value'], rates[row['height']]))
             for row in rows]

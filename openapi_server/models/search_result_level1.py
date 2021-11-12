@@ -20,31 +20,31 @@ class SearchResultLevel1(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, node: Entity=None, relation: Neighbor=None, matching_addresses: List[Address]=None, paths: List[SearchResultLevel2]=None):
+    def __init__(self, matching_addresses: List[Address]=None, node: Entity=None, relation: Neighbor=None, paths: List[SearchResultLevel2]=None):
         """SearchResultLevel1 - a model defined in OpenAPI
 
+        :param matching_addresses: The matching_addresses of this SearchResultLevel1.
         :param node: The node of this SearchResultLevel1.
         :param relation: The relation of this SearchResultLevel1.
-        :param matching_addresses: The matching_addresses of this SearchResultLevel1.
         :param paths: The paths of this SearchResultLevel1.
         """
         self.openapi_types = {
+            'matching_addresses': List[Address],
             'node': Entity,
             'relation': Neighbor,
-            'matching_addresses': List[Address],
             'paths': List[SearchResultLevel2]
         }
 
         self.attribute_map = {
+            'matching_addresses': 'matching_addresses',
             'node': 'node',
             'relation': 'relation',
-            'matching_addresses': 'matching_addresses',
             'paths': 'paths'
         }
 
+        self._matching_addresses = matching_addresses
         self._node = node
         self._relation = relation
-        self._matching_addresses = matching_addresses
         self._paths = paths
 
     @classmethod
@@ -55,6 +55,27 @@ class SearchResultLevel1(Model):
         :return: The search_result_level1 of this SearchResultLevel1.
         """
         return util.deserialize_model(dikt, cls)
+
+    @property
+    def matching_addresses(self):
+        """Gets the matching_addresses of this SearchResultLevel1.
+
+
+        :return: The matching_addresses of this SearchResultLevel1.
+        :rtype: List[Address]
+        """
+        return self._matching_addresses
+
+    @matching_addresses.setter
+    def matching_addresses(self, matching_addresses):
+        """Sets the matching_addresses of this SearchResultLevel1.
+
+
+        :param matching_addresses: The matching_addresses of this SearchResultLevel1.
+        :type matching_addresses: List[Address]
+        """
+
+        self._matching_addresses = matching_addresses
 
     @property
     def node(self):
@@ -97,27 +118,6 @@ class SearchResultLevel1(Model):
         """
 
         self._relation = relation
-
-    @property
-    def matching_addresses(self):
-        """Gets the matching_addresses of this SearchResultLevel1.
-
-
-        :return: The matching_addresses of this SearchResultLevel1.
-        :rtype: List[Address]
-        """
-        return self._matching_addresses
-
-    @matching_addresses.setter
-    def matching_addresses(self, matching_addresses):
-        """Sets the matching_addresses of this SearchResultLevel1.
-
-
-        :param matching_addresses: The matching_addresses of this SearchResultLevel1.
-        :type matching_addresses: List[Address]
-        """
-
-        self._matching_addresses = matching_addresses
 
     @property
     def paths(self):

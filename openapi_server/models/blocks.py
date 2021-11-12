@@ -15,24 +15,24 @@ class Blocks(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, next_page: str=None, blocks: List[Block]=None):
+    def __init__(self, blocks: List[Block]=None, next_page: str=None):
         """Blocks - a model defined in OpenAPI
 
-        :param next_page: The next_page of this Blocks.
         :param blocks: The blocks of this Blocks.
+        :param next_page: The next_page of this Blocks.
         """
         self.openapi_types = {
-            'next_page': str,
-            'blocks': List[Block]
+            'blocks': List[Block],
+            'next_page': str
         }
 
         self.attribute_map = {
-            'next_page': 'next_page',
-            'blocks': 'blocks'
+            'blocks': 'blocks',
+            'next_page': 'next_page'
         }
 
-        self._next_page = next_page
         self._blocks = blocks
+        self._next_page = next_page
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'Blocks':
@@ -42,27 +42,6 @@ class Blocks(Model):
         :return: The blocks of this Blocks.
         """
         return util.deserialize_model(dikt, cls)
-
-    @property
-    def next_page(self):
-        """Gets the next_page of this Blocks.
-
-
-        :return: The next_page of this Blocks.
-        :rtype: str
-        """
-        return self._next_page
-
-    @next_page.setter
-    def next_page(self, next_page):
-        """Sets the next_page of this Blocks.
-
-
-        :param next_page: The next_page of this Blocks.
-        :type next_page: str
-        """
-
-        self._next_page = next_page
 
     @property
     def blocks(self):
@@ -84,3 +63,24 @@ class Blocks(Model):
         """
 
         self._blocks = blocks
+
+    @property
+    def next_page(self):
+        """Gets the next_page of this Blocks.
+
+
+        :return: The next_page of this Blocks.
+        :rtype: str
+        """
+        return self._next_page
+
+    @next_page.setter
+    def next_page(self, next_page):
+        """Sets the next_page of this Blocks.
+
+
+        :param next_page: The next_page of this Blocks.
+        :type next_page: str
+        """
+
+        self._next_page = next_page

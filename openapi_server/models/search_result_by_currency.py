@@ -14,27 +14,27 @@ class SearchResultByCurrency(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, currency: str=None, addresses: List[str]=None, txs: List[str]=None):
+    def __init__(self, addresses: List[str]=None, currency: str=None, txs: List[str]=None):
         """SearchResultByCurrency - a model defined in OpenAPI
 
-        :param currency: The currency of this SearchResultByCurrency.
         :param addresses: The addresses of this SearchResultByCurrency.
+        :param currency: The currency of this SearchResultByCurrency.
         :param txs: The txs of this SearchResultByCurrency.
         """
         self.openapi_types = {
-            'currency': str,
             'addresses': List[str],
+            'currency': str,
             'txs': List[str]
         }
 
         self.attribute_map = {
-            'currency': 'currency',
             'addresses': 'addresses',
+            'currency': 'currency',
             'txs': 'txs'
         }
 
-        self._currency = currency
         self._addresses = addresses
+        self._currency = currency
         self._txs = txs
 
     @classmethod
@@ -45,29 +45,6 @@ class SearchResultByCurrency(Model):
         :return: The search_result_by_currency of this SearchResultByCurrency.
         """
         return util.deserialize_model(dikt, cls)
-
-    @property
-    def currency(self):
-        """Gets the currency of this SearchResultByCurrency.
-
-        Currency
-
-        :return: The currency of this SearchResultByCurrency.
-        :rtype: str
-        """
-        return self._currency
-
-    @currency.setter
-    def currency(self, currency):
-        """Sets the currency of this SearchResultByCurrency.
-
-        Currency
-
-        :param currency: The currency of this SearchResultByCurrency.
-        :type currency: str
-        """
-
-        self._currency = currency
 
     @property
     def addresses(self):
@@ -91,6 +68,29 @@ class SearchResultByCurrency(Model):
         """
 
         self._addresses = addresses
+
+    @property
+    def currency(self):
+        """Gets the currency of this SearchResultByCurrency.
+
+        Currency
+
+        :return: The currency of this SearchResultByCurrency.
+        :rtype: str
+        """
+        return self._currency
+
+    @currency.setter
+    def currency(self, currency):
+        """Sets the currency of this SearchResultByCurrency.
+
+        Currency
+
+        :param currency: The currency of this SearchResultByCurrency.
+        :type currency: str
+        """
+
+        self._currency = currency
 
     @property
     def txs(self):

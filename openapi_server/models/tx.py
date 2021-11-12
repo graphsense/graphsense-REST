@@ -18,11 +18,9 @@ class Tx(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, tx_type: str='account', tx_hash: str=None, coinbase: bool=None, height: int=None, inputs: List[TxValue]=None, outputs: List[TxValue]=None, timestamp: int=None, total_input: Values=None, total_output: Values=None, value: Values=None, from_address: str=None, to_address: str=None):
+    def __init__(self, coinbase: bool=None, height: int=None, inputs: List[TxValue]=None, outputs: List[TxValue]=None, timestamp: int=None, total_input: Values=None, total_output: Values=None, tx_hash: str=None, tx_type: str='account', from_address: str=None, to_address: str=None, value: Values=None):
         """Tx - a model defined in OpenAPI
 
-        :param tx_type: The tx_type of this Tx.
-        :param tx_hash: The tx_hash of this Tx.
         :param coinbase: The coinbase of this Tx.
         :param height: The height of this Tx.
         :param inputs: The inputs of this Tx.
@@ -30,13 +28,13 @@ class Tx(Model):
         :param timestamp: The timestamp of this Tx.
         :param total_input: The total_input of this Tx.
         :param total_output: The total_output of this Tx.
-        :param value: The value of this Tx.
+        :param tx_hash: The tx_hash of this Tx.
+        :param tx_type: The tx_type of this Tx.
         :param from_address: The from_address of this Tx.
         :param to_address: The to_address of this Tx.
+        :param value: The value of this Tx.
         """
         self.openapi_types = {
-            'tx_type': str,
-            'tx_hash': str,
             'coinbase': bool,
             'height': int,
             'inputs': List[TxValue],
@@ -44,14 +42,14 @@ class Tx(Model):
             'timestamp': int,
             'total_input': Values,
             'total_output': Values,
-            'value': Values,
+            'tx_hash': str,
+            'tx_type': str,
             'from_address': str,
-            'to_address': str
+            'to_address': str,
+            'value': Values
         }
 
         self.attribute_map = {
-            'tx_type': 'tx_type',
-            'tx_hash': 'tx_hash',
             'coinbase': 'coinbase',
             'height': 'height',
             'inputs': 'inputs',
@@ -59,13 +57,13 @@ class Tx(Model):
             'timestamp': 'timestamp',
             'total_input': 'total_input',
             'total_output': 'total_output',
-            'value': 'value',
+            'tx_hash': 'tx_hash',
+            'tx_type': 'tx_type',
             'from_address': 'from_address',
-            'to_address': 'to_address'
+            'to_address': 'to_address',
+            'value': 'value'
         }
 
-        self._tx_type = tx_type
-        self._tx_hash = tx_hash
         self._coinbase = coinbase
         self._height = height
         self._inputs = inputs
@@ -73,9 +71,11 @@ class Tx(Model):
         self._timestamp = timestamp
         self._total_input = total_input
         self._total_output = total_output
-        self._value = value
+        self._tx_hash = tx_hash
+        self._tx_type = tx_type
         self._from_address = from_address
         self._to_address = to_address
+        self._value = value
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'Tx':
@@ -85,54 +85,6 @@ class Tx(Model):
         :return: The tx of this Tx.
         """
         return util.deserialize_model(dikt, cls)
-
-    @property
-    def tx_type(self):
-        """Gets the tx_type of this Tx.
-
-
-        :return: The tx_type of this Tx.
-        :rtype: str
-        """
-        return self._tx_type
-
-    @tx_type.setter
-    def tx_type(self, tx_type):
-        """Sets the tx_type of this Tx.
-
-
-        :param tx_type: The tx_type of this Tx.
-        :type tx_type: str
-        """
-        if tx_type is None:
-            raise ValueError("Invalid value for `tx_type`, must not be `None`")
-
-        self._tx_type = tx_type
-
-    @property
-    def tx_hash(self):
-        """Gets the tx_hash of this Tx.
-
-        Transaction hash
-
-        :return: The tx_hash of this Tx.
-        :rtype: str
-        """
-        return self._tx_hash
-
-    @tx_hash.setter
-    def tx_hash(self, tx_hash):
-        """Sets the tx_hash of this Tx.
-
-        Transaction hash
-
-        :param tx_hash: The tx_hash of this Tx.
-        :type tx_hash: str
-        """
-        if tx_hash is None:
-            raise ValueError("Invalid value for `tx_hash`, must not be `None`")
-
-        self._tx_hash = tx_hash
 
     @property
     def coinbase(self):
@@ -304,27 +256,52 @@ class Tx(Model):
         self._total_output = total_output
 
     @property
-    def value(self):
-        """Gets the value of this Tx.
+    def tx_hash(self):
+        """Gets the tx_hash of this Tx.
 
+        Transaction hash
 
-        :return: The value of this Tx.
-        :rtype: Values
+        :return: The tx_hash of this Tx.
+        :rtype: str
         """
-        return self._value
+        return self._tx_hash
 
-    @value.setter
-    def value(self, value):
-        """Sets the value of this Tx.
+    @tx_hash.setter
+    def tx_hash(self, tx_hash):
+        """Sets the tx_hash of this Tx.
 
+        Transaction hash
 
-        :param value: The value of this Tx.
-        :type value: Values
+        :param tx_hash: The tx_hash of this Tx.
+        :type tx_hash: str
         """
-        if value is None:
-            raise ValueError("Invalid value for `value`, must not be `None`")
+        if tx_hash is None:
+            raise ValueError("Invalid value for `tx_hash`, must not be `None`")
 
-        self._value = value
+        self._tx_hash = tx_hash
+
+    @property
+    def tx_type(self):
+        """Gets the tx_type of this Tx.
+
+
+        :return: The tx_type of this Tx.
+        :rtype: str
+        """
+        return self._tx_type
+
+    @tx_type.setter
+    def tx_type(self, tx_type):
+        """Sets the tx_type of this Tx.
+
+
+        :param tx_type: The tx_type of this Tx.
+        :type tx_type: str
+        """
+        if tx_type is None:
+            raise ValueError("Invalid value for `tx_type`, must not be `None`")
+
+        self._tx_type = tx_type
 
     @property
     def from_address(self):
@@ -375,3 +352,26 @@ class Tx(Model):
             raise ValueError("Invalid value for `to_address`, must not be `None`")
 
         self._to_address = to_address
+
+    @property
+    def value(self):
+        """Gets the value of this Tx.
+
+
+        :return: The value of this Tx.
+        :rtype: Values
+        """
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        """Sets the value of this Tx.
+
+
+        :param value: The value of this Tx.
+        :type value: Values
+        """
+        if value is None:
+            raise ValueError("Invalid value for `value`, must not be `None`")
+
+        self._value = value
