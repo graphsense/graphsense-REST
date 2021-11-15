@@ -3,7 +3,6 @@ from openapi_server.models.entity_tag import EntityTag
 from openapi_server.models.tags import Tags
 from openapi_server.models.taxonomy import Taxonomy
 from openapi_server.models.concept import Concept
-import gsrest.service.tags_service as service
 
 tag1 = AddressTag(
    tagpack_uri="https://tagpack_uri",
@@ -55,15 +54,19 @@ ctag = EntityTag(
 
 
 async def list_tags(test_case):
-    result = await service.list_tags(currency='btc', label='isolinks')
-    test_case.assertEqual(Tags(address_tags=[tag1], entity_tags=[ctag]),
+    path = '/tags?label={label}'
+    result = await test_case.request(path, label='cimedy')
+    result['address_tags'].sort(key=lambda x: x['currency'])
+    test_case.assertEqual(Tags([tag2, tag3], entity_tags=[]).to_dict(),
                           result)
-    result = await service.list_tags(currency='btc', label='cimedy')
-    test_case.assertEqual(Tags([tag2], entity_tags=[]), result)
-    result = await service.list_tags(label='cimedy')
-    result.address_tags.sort(key=lambda x: x.currency)
-    test_case.assertEqual(Tags([tag2, tag3], entity_tags=[]),
-                          result)
+
+    path += '&currency={currency}'
+    result = await test_case.request(path, currency='btc', label='isolinks')
+    test_case.assertEqual(
+        Tags(address_tags=[tag1], entity_tags=[ctag]).to_dict(),
+        result)
+    result = await test_case.request(path, currency='btc', label='cimedy')
+    test_case.assertEqual(Tags([tag2], entity_tags=[]).to_dict(), result)
 
 
 conceptA = Concept(
@@ -89,12 +92,13 @@ taxonomies = [
 
 
 async def list_concepts(test_case):
-    result = await service.list_concepts('entity')
-    test_case.assertEqual([conceptA], result)
-    result = await service.list_concepts('abuse')
-    test_case.assertEqual([conceptB], result)
+    path = '/tags/taxonomies/{taxonomy}/concepts'
+    result = await test_case.request(path, taxonomy='entity')
+    test_case.assertEqual([conceptA.to_dict()], result)
+    result = await test_case.request(path, taxonomy='abuse')
+    test_case.assertEqual([conceptB.to_dict()], result)
 
 
 async def list_taxonomies(test_case):
-    result = await service.list_taxonomies()
-    test_case.assertEqual(taxonomies, result)
+    result = await test_case.request('/tags/taxonomies')
+    test_case.assertEqual([t.to_dict() for t in taxonomies], result)

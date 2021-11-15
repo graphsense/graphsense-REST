@@ -1,13 +1,12 @@
-from gsrest.db import get_connection
 import asyncio
-from openapi_server.test import BaseTestCase
+from tests import BaseTestCase
 import pprint
 
 
 class TestCassandra(BaseTestCase):
 
     def test_concurrent_with_args(test_case):
-        db = get_connection()
+        db = test_case.app['db']
 
         query = "select tx_id from transaction where tx_id_group = %s"
         params = [[0], [1]]

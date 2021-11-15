@@ -1,16 +1,16 @@
-import connexion
-import six
+from typing import List, Dict
+from aiohttp import web
 import traceback
-import asyncio
+import json
 
 import gsrest.service.bulk_service as service
-from gsrest.service.problems import notfound, badrequest, internalerror
+from openapi_server import util
 
 
-def bulk(currency, api, operation, body, form=None):  # noqa: E501
-    """Get data as CSV or JSON in bulk
+async def bulk_csv(request: web.Request, currency, api, operation, body) -> web.Response:
+    """Get data as CSV in bulk
 
-     # noqa: E501
+    
 
     :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
@@ -20,26 +20,54 @@ def bulk(currency, api, operation, body, form=None):  # noqa: E501
     :type operation: str
     :param body: Map of the operation&#39;s parameter names to (arrays of) values
     :type body: 
-    :param form: The response data format
-    :type form: str
 
-    :rtype: List[Dict[str, object]]
     """
     try:
-        result = asyncio.run(
-            service.bulk(
-                currency=currency,
-                api=api,
-                operation=operation,
-                body=body,
-                form=form))
+        result = service.bulk_csv(request
+                ,currency=currency,api=api,operation=operation,body=body)
         return result
     except RuntimeError as e:
-        return notfound(str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPNotFound(text=str(e))
     except ValueError as e:
-        return badrequest(str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
     except TypeError as e:
-        return badrequest(str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
+        raise web.HTTPInternalServerError()
+
+
+async def bulk_json(request: web.Request, currency, api, operation, body) -> web.Response:
+    """Get data as JSON in bulk
+
+    
+
+    :param currency: The cryptocurrency (e.g., btc)
+    :type currency: str
+    :param api: The api of the operation to execute in bulk
+    :type api: str
+    :param operation: The operation to execute in bulk
+    :type operation: str
+    :param body: Map of the operation&#39;s parameter names to (arrays of) values
+    :type body: 
+
+    """
+    try:
+        result = service.bulk_json(request
+                ,currency=currency,api=api,operation=operation,body=body)
+        return result
+    except RuntimeError as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPNotFound(text=str(e))
+    except ValueError as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
+    except TypeError as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
+    except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPInternalServerError()

@@ -1,4 +1,3 @@
-from gsrest.db import get_connection
 from openapi_server.models.address import Address
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.address_tag import AddressTag
@@ -42,11 +41,10 @@ def address_from_row(currency, row, rates, tags=None):
         )
 
 
-async def txs_from_rows(currency, rows):
+async def txs_from_rows(request, currency, rows):
     heights = [row['height'] for row in rows]
-    rates = await list_rates(currency, heights)
+    rates = await list_rates(request, currency, heights)
     if currency == 'eth':
-        print(f'rows {rows}')
         return [TxAccount(
                 height=row['height'],
                 timestamp=row['timestamp'],
@@ -59,28 +57,30 @@ async def txs_from_rows(currency, rows):
     return [AddressTxUtxo(
             height=row['height'],
             timestamp=row['timestamp'],
+            coinbase=row['coinbase'],
             tx_hash=row['tx_hash'].hex(),
             value=convert_value(currency, row['value'], rates[row['height']]))
             for row in rows]
 
 
-async def get_address(currency, address, include_tags=False):
-    db = get_connection()
+async def get_address(request, currency, address, include_tags=False):
+    db = request.app['db']
     result = await db.get_address(currency, address)
 
     tags = None
     if include_tags:
-        tags = await list_tags_by_address(currency, address)
+        tags = await list_tags_by_address(request, currency, address)
 
     if not result:
         raise RuntimeError("Address {} not found in currency {}".format(
             address, currency))
     return address_from_row(currency, result,
-                            (await get_rates(currency))['rates'], tags)
+                            (await get_rates(request, currency)
+                             )['rates'], tags)
 
 
-async def list_tags_by_address(currency, address):
-    db = get_connection()
+async def list_tags_by_address(request, currency, address):
+    db = request.app['db']
     results = await db.list_tags_by_address(currency, address)
 
     if results is None:
@@ -101,23 +101,12 @@ async def list_tags_by_address(currency, address):
     return address_tags
 
 
-def get_address_entity_id(currency, address):
-    db = get_connection()
-    result = db.get_address_entity_id(currency, address)
-
-    # from address to entity id only
-    if result is None:
-        raise RuntimeError('cluster for address {} in currency {} not found'
-                           .format(address, currency))
-    return result.cluster
-
-
-async def list_neighbors(currency, id, direction, node_type, ids=None,
+async def list_neighbors(request, currency, id, direction, node_type, ids=None,
                          include_labels=False, page=None, pagesize=None):
     if node_type not in ['address', 'entity']:
         raise RuntimeError(f'Unknown node type {node_type}')
     is_outgoing = "out" in direction
-    db = get_connection()
+    db = request.app['db']
     results, paging_state = await db.list_neighbors(
                                     currency,
                                     id,
@@ -128,7 +117,7 @@ async def list_neighbors(currency, id, direction, node_type, ids=None,
                                     page=page,
                                     pagesize=pagesize)
     dst = 'dst' if is_outgoing else 'src'
-    rates = (await get_rates(currency))['rates']
+    rates = (await get_rates(request, currency))['rates']
     relations = []
     if results is None:
         return Neighbors()
@@ -153,11 +142,11 @@ async def list_neighbors(currency, id, direction, node_type, ids=None,
                      neighbors=relations)
 
 
-async def links_response(currency, result):
+async def links_response(request, currency, result):
     links, next_page = result
     if currency == 'eth':
         heights = [row['block_id'] for row in links]
-        rates = await list_rates(currency, heights)
+        rates = await list_rates(request, currency, heights)
         return Links(links=[TxAccount(
                             tx_hash=row['tx_hash'].hex(),
                             timestamp=row['block_timestamp'],
@@ -171,7 +160,7 @@ async def links_response(currency, result):
                      next_page=next_page)
 
     heights = [row['height'] for row in links]
-    rates = await list_rates(currency, heights)
+    rates = await list_rates(request, currency, heights)
 
     return Links(links=[LinkUtxo(tx_hash=e['tx_hash'].hex(),
                         height=e['height'],

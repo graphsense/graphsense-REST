@@ -1,89 +1,118 @@
-import connexion
-import six
+from typing import List, Dict
+from aiohttp import web
 import traceback
-import asyncio
+import json
 
-from openapi_server.models.concept import Concept  # noqa: E501
-from openapi_server.models.tags import Tags  # noqa: E501
-from openapi_server.models.taxonomy import Taxonomy  # noqa: E501
+from openapi_server.models.concept import Concept
+from openapi_server.models.tags import Tags
+from openapi_server.models.taxonomy import Taxonomy
 import gsrest.service.tags_service as service
-from gsrest.service.problems import notfound, badrequest, internalerror
+from openapi_server import util
 
 
-def list_concepts(taxonomy):  # noqa: E501
+async def list_concepts(request: web.Request, taxonomy) -> web.Response:
     """Returns the supported concepts of a taxonomy
 
-     # noqa: E501
+    
 
     :param taxonomy: The taxonomy
     :type taxonomy: str
 
-    :rtype: List[Concept]
     """
     try:
-        result = asyncio.run(
-            service.list_concepts(
-                taxonomy=taxonomy))
+        result = service.list_concepts(request
+                ,taxonomy=taxonomy)
+        result = await result
+        if isinstance(result, list):
+            result = [d.to_dict() for d in result]
+        else:
+            result = result.to_dict()
+        result = web.Response(
+                    status=200,
+                    text=json.dumps(result),
+                    headers={'Content-type': 'application/json'})
         return result
     except RuntimeError as e:
-        return notfound(str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPNotFound(text=str(e))
     except ValueError as e:
-        return badrequest(str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
     except TypeError as e:
-        return badrequest(str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
+        raise web.HTTPInternalServerError()
 
 
-def list_tags(label, currency=None):  # noqa: E501
+async def list_tags(request: web.Request, label, currency=None) -> web.Response:
     """Returns address and entity tags associated with a given label
 
-     # noqa: E501
+    
 
     :param label: The label of an entity
     :type label: str
     :param currency: The cryptocurrency (e.g., btc)
     :type currency: str
 
-    :rtype: List[Tags]
     """
     try:
-        result = asyncio.run(
-            service.list_tags(
-                label=label,
-                currency=currency))
+        result = service.list_tags(request
+                ,label=label,currency=currency)
+        result = await result
+        if isinstance(result, list):
+            result = [d.to_dict() for d in result]
+        else:
+            result = result.to_dict()
+        result = web.Response(
+                    status=200,
+                    text=json.dumps(result),
+                    headers={'Content-type': 'application/json'})
         return result
     except RuntimeError as e:
-        return notfound(str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPNotFound(text=str(e))
     except ValueError as e:
-        return badrequest(str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
     except TypeError as e:
-        return badrequest(str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
+        raise web.HTTPInternalServerError()
 
 
-def list_taxonomies():  # noqa: E501
+async def list_taxonomies(request: web.Request, ) -> web.Response:
     """Returns the supported taxonomies
 
-     # noqa: E501
+    
 
 
-    :rtype: List[Taxonomy]
     """
     try:
-        result = asyncio.run(
-            service.list_taxonomies(
-                ))
+        result = service.list_taxonomies(request
+                )
+        result = await result
+        if isinstance(result, list):
+            result = [d.to_dict() for d in result]
+        else:
+            result = result.to_dict()
+        result = web.Response(
+                    status=200,
+                    text=json.dumps(result),
+                    headers={'Content-type': 'application/json'})
         return result
     except RuntimeError as e:
-        return notfound(str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPNotFound(text=str(e))
     except ValueError as e:
-        return badrequest(str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
     except TypeError as e:
-        return badrequest(str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
+        raise web.HTTPInternalServerError()

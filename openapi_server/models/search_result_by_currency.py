@@ -1,9 +1,8 @@
 # coding: utf-8
 
-from __future__ import absolute_import
-from datetime import date, datetime  # noqa: F401
+from datetime import date, datetime
 
-from typing import List, Dict  # noqa: F401
+from typing import List, Dict, Type
 
 from openapi_server.models.base_model_ import Model
 from openapi_server import util
@@ -15,15 +14,12 @@ class SearchResultByCurrency(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, addresses=None, currency=None, txs=None):  # noqa: E501
+    def __init__(self, addresses: List[str]=None, currency: str=None, txs: List[str]=None):
         """SearchResultByCurrency - a model defined in OpenAPI
 
-        :param addresses: The addresses of this SearchResultByCurrency.  # noqa: E501
-        :type addresses: List[str]
-        :param currency: The currency of this SearchResultByCurrency.  # noqa: E501
-        :type currency: str
-        :param txs: The txs of this SearchResultByCurrency.  # noqa: E501
-        :type txs: List[str]
+        :param addresses: The addresses of this SearchResultByCurrency.
+        :param currency: The currency of this SearchResultByCurrency.
+        :param txs: The txs of this SearchResultByCurrency.
         """
         self.openapi_types = {
             'addresses': List[str],
@@ -42,32 +38,19 @@ class SearchResultByCurrency(Model):
         self._txs = txs
 
     @classmethod
-    def from_dict(cls, dikt) -> 'SearchResultByCurrency':
+    def from_dict(cls, dikt: dict) -> 'SearchResultByCurrency':
         """Returns the dict as a model
 
         :param dikt: A dict.
-        :type: dict
-        :return: The search_result_by_currency of this SearchResultByCurrency.  # noqa: E501
-        :rtype: SearchResultByCurrency
+        :return: The search_result_by_currency of this SearchResultByCurrency.
         """
         return util.deserialize_model(dikt, cls)
-
-    def to_dict(self, prefix=""):
-        """Returns the model as a dict:
-
-        :return: The SearchResultByCurrency as a dict
-        :rtype: dict
-        """
-        return { 'addresses': self._addresses,
-            'currency': self._currency,
-            'txs': self._txs }
-
 
     @property
     def addresses(self):
         """Gets the addresses of this SearchResultByCurrency.
 
-        The list of found addresses  # noqa: E501
+        The list of found addresses
 
         :return: The addresses of this SearchResultByCurrency.
         :rtype: List[str]
@@ -78,7 +61,7 @@ class SearchResultByCurrency(Model):
     def addresses(self, addresses):
         """Sets the addresses of this SearchResultByCurrency.
 
-        The list of found addresses  # noqa: E501
+        The list of found addresses
 
         :param addresses: The addresses of this SearchResultByCurrency.
         :type addresses: List[str]
@@ -90,7 +73,7 @@ class SearchResultByCurrency(Model):
     def currency(self):
         """Gets the currency of this SearchResultByCurrency.
 
-        Currency  # noqa: E501
+        Currency
 
         :return: The currency of this SearchResultByCurrency.
         :rtype: str
@@ -101,7 +84,7 @@ class SearchResultByCurrency(Model):
     def currency(self, currency):
         """Sets the currency of this SearchResultByCurrency.
 
-        Currency  # noqa: E501
+        Currency
 
         :param currency: The currency of this SearchResultByCurrency.
         :type currency: str
@@ -113,7 +96,7 @@ class SearchResultByCurrency(Model):
     def txs(self):
         """Gets the txs of this SearchResultByCurrency.
 
-        The list of found transactions  # noqa: E501
+        The list of found transactions
 
         :return: The txs of this SearchResultByCurrency.
         :rtype: List[str]
@@ -124,7 +107,7 @@ class SearchResultByCurrency(Model):
     def txs(self, txs):
         """Sets the txs of this SearchResultByCurrency.
 
-        The list of found transactions  # noqa: E501
+        The list of found transactions
 
         :param txs: The txs of this SearchResultByCurrency.
         :type txs: List[str]

@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   description: GraphSense API
   title: GraphSense API
-  version: "0.5"
+  version: 0.5.1-dev
 servers:
 - url: http://graphsense-rest:9000
 paths:
@@ -93,9 +93,7 @@ paths:
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/tags'
-                type: array
+                $ref: '#/components/schemas/tags'
           description: OK
       summary: Returns address and entity tags associated with a given label
       tags:
@@ -269,6 +267,24 @@ paths:
         required: true
         schema:
           $ref: '#/components/schemas/address_id'
+        style: form
+      - description: Resumption token for retrieving the next page
+        explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Number of items returned in a single page
+        example: 10
+        explode: true
+        in: query
+        name: pagesize
+        required: false
+        schema:
+          minimum: 1
+          type: integer
         style: form
       responses:
         "200":
@@ -512,9 +528,9 @@ paths:
       tags:
       - blocks
       x-openapi-router-controller: openapi_server.controllers.blocks_controller
-  /{currency}/bulk/{api}/{operation}:
+  /{currency}/bulk.csv/{api}/{operation}:
     post:
-      operationId: bulk
+      operationId: bulk_csv
       parameters:
       - description: The cryptocurrency (e.g., btc)
         example: btc
@@ -569,18 +585,89 @@ paths:
           - get_exchange_rates
           type: string
         style: simple
-      - description: The response data format
-        explode: true
-        in: query
-        name: form
-        required: false
+      requestBody:
+        content:
+          application/json:
+            example:
+              height:
+              - 1
+              - 2
+              - 3
+            schema:
+              type: object
+        description: Map of the operation's parameter names to (arrays of) values
+        required: true
+        x-body-name: body
+      responses:
+        "200":
+          content:
+            text/csv:
+              schema:
+                type: string
+          description: OK
+      summary: Get data as CSV in bulk
+      tags:
+      - bulk
+      x-streamed: true
+      x-openapi-router-controller: openapi_server.controllers.bulk_controller
+      x-codegen-request-body-name: body
+  /{currency}/bulk.json/{api}/{operation}:
+    post:
+      operationId: bulk_json
+      parameters:
+      - description: The cryptocurrency (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
         schema:
-          default: csv
-          enum:
-          - csv
-          - json
+          format: string
           type: string
-        style: form
+        style: simple
+      - description: The api of the operation to execute in bulk
+        example: blocks
+        explode: false
+        in: path
+        name: api
+        required: true
+        schema:
+          enum:
+          - blocks
+          - addresses
+          - entities
+          - txs
+          - rates
+          - tags
+          type: string
+        style: simple
+      - description: The operation to execute in bulk
+        example: get_block
+        explode: false
+        in: path
+        name: operation
+        required: true
+        schema:
+          enum:
+          - get_block
+          - list_block_txs
+          - get_address
+          - list_address_txs
+          - list_tags_by_address
+          - list_address_neighbors
+          - get_address_entity
+          - list_address_links
+          - get_entity
+          - list_tags_by_entity
+          - list_entity_neighbors
+          - list_entity_txs
+          - list_entity_links
+          - list_entity_addresses
+          - get_tx
+          - get_tx_io
+          - get_exchange_rates
+          type: string
+        style: simple
       requestBody:
         content:
           application/json:
@@ -588,6 +675,7 @@ paths:
               type: object
         description: Map of the operation's parameter names to (arrays of) values
         required: true
+        x-body-name: body
       responses:
         "200":
           content:
@@ -597,14 +685,13 @@ paths:
                   additionalProperties: true
                   type: object
                 type: array
-            text/csv:
-              schema:
-                type: string
           description: OK
-      summary: Get data as CSV or JSON in bulk
+      summary: Get data as JSON in bulk
       tags:
       - bulk
+      x-streamed: true
       x-openapi-router-controller: openapi_server.controllers.bulk_controller
+      x-codegen-request-body-name: body
   /{currency}/entities/{entity}:
     get:
       operationId: get_entity
@@ -740,6 +827,24 @@ paths:
         required: true
         schema:
           $ref: '#/components/schemas/entity_id'
+        style: form
+      - description: Resumption token for retrieving the next page
+        explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Number of items returned in a single page
+        example: 10
+        explode: true
+        in: query
+        name: pagesize
+        required: false
+        schema:
+          minimum: 1
+          type: integer
         style: form
       responses:
         "200":
@@ -936,9 +1041,7 @@ paths:
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/search_result_level1'
-                type: array
+                $ref: '#/components/schemas/search_result_level1'
           description: OK
       summary: Search deeply for matching neighbors
       tags:
@@ -1584,27 +1687,27 @@ components:
           $ref: '#/components/schemas/values'
         entity:
           description: Entity id
-          format: int64
+          format: int32
           title: entity
           type: integer
         first_tx:
           $ref: '#/components/schemas/tx_summary'
         in_degree:
-          format: int64
+          format: int32
           title: in_degree
           type: integer
         last_tx:
           $ref: '#/components/schemas/tx_summary'
         no_incoming_txs:
-          format: int64
+          format: int32
           title: no_incoming_txs
           type: integer
         no_outgoing_txs:
-          format: int64
+          format: int32
           title: no_outgoing_txs
           type: integer
         out_degree:
-          format: int64
+          format: int32
           title: out_degree
           type: integer
         tags:
@@ -1652,15 +1755,18 @@ components:
       title: address_tx
     address_tx_utxo:
       properties:
+        coinbase:
+          description: Coinbase transaction flag
+          type: boolean
         height:
           description: Height
-          format: int64
+          format: int32
           minimum: 0
           title: height
           type: integer
         timestamp:
           description: Timestamp
-          format: int64
+          format: int32
           title: timestamp
           type: integer
         tx_hash:
@@ -1673,6 +1779,7 @@ components:
         value:
           $ref: '#/components/schemas/values'
       required:
+      - coinbase
       - height
       - timestamp
       - tx_hash
@@ -1721,16 +1828,16 @@ components:
           type: string
         height:
           description: Height
-          format: int64
+          format: int32
           minimum: 0
           title: height
           type: integer
         no_txs:
-          format: int64
+          format: int32
           title: no_txs
           type: integer
         timestamp:
-          format: int64
+          format: int32
           title: timestamp
           type: integer
       title: block
@@ -1746,6 +1853,9 @@ components:
           title: next_page
           type: string
       type: object
+    coinbase:
+      description: Coinbase transaction flag
+      type: boolean
     concept:
       example:
         description: description
@@ -1821,27 +1931,27 @@ components:
           title: name
           type: string
         no_address_relations:
-          format: int64
+          format: int32
           title: no_address_relations
           type: integer
         no_addresses:
-          format: int64
+          format: int32
           title: no_addresses
           type: integer
         no_blocks:
-          format: int64
+          format: int32
           title: no_blocks
           type: integer
         no_entities:
-          format: int64
+          format: int32
           title: no_entities
           type: integer
         no_labels:
-          format: int64
+          format: int32
           title: no_labels
           type: integer
         no_txs:
-          format: int64
+          format: int32
           title: no_txs
           type: integer
         notes:
@@ -1850,7 +1960,7 @@ components:
           title: notes
           type: array
         timestamp:
-          format: int64
+          format: int32
           title: timestamp
           type: integer
         tools:
@@ -1921,32 +2031,32 @@ components:
           $ref: '#/components/schemas/values'
         entity:
           description: Entity id
-          format: int64
+          format: int32
           title: entity
           type: integer
         first_tx:
           $ref: '#/components/schemas/tx_summary'
         in_degree:
-          format: int64
+          format: int32
           title: in_degree
           type: integer
         last_tx:
           $ref: '#/components/schemas/tx_summary'
         no_addresses:
           description: number of contained addresses
-          format: int64
+          format: int32
           title: no_addresses
           type: integer
         no_incoming_txs:
-          format: int64
+          format: int32
           title: no_incoming_txs
           type: integer
         no_outgoing_txs:
-          format: int64
+          format: int32
           title: no_outgoing_txs
           type: integer
         out_degree:
-          format: int64
+          format: int32
           title: out_degree
           type: integer
         tags:
@@ -2063,7 +2173,7 @@ components:
       type: object
     entity_id:
       description: Entity id
-      format: int64
+      format: int32
       title: entity
       type: integer
     entity_tag:
@@ -2073,7 +2183,7 @@ components:
       title: entity_tag
     height:
       description: Height
-      format: int64
+      format: int32
       minimum: 0
       title: height
       type: integer
@@ -2095,7 +2205,7 @@ components:
       properties:
         height:
           description: Height
-          format: int64
+          format: int32
           minimum: 0
           title: height
           type: integer
@@ -2105,7 +2215,7 @@ components:
           $ref: '#/components/schemas/values'
         timestamp:
           description: Timestamp
-          format: int64
+          format: int32
           title: timestamp
           type: integer
         tx_hash:
@@ -2284,7 +2394,7 @@ components:
       type: string
     no_addresses:
       description: number of contained addresses
-      format: int64
+      format: int32
       title: no_addresses
       type: integer
     only_entity_ids:
@@ -2319,7 +2429,7 @@ components:
       properties:
         height:
           description: Height
-          format: int64
+          format: int32
           minimum: 0
           title: height
           type: integer
@@ -2752,7 +2862,7 @@ components:
       type: string
     timestamp:
       description: Timestamp
-      format: int64
+      format: int32
       title: timestamp
       type: integer
     tx:
@@ -2773,13 +2883,13 @@ components:
           type: string
         height:
           description: Height
-          format: int64
+          format: int32
           minimum: 0
           title: height
           type: integer
         timestamp:
           description: Timestamp
-          format: int64
+          format: int32
           title: timestamp
           type: integer
         to_address:
@@ -2816,13 +2926,13 @@ components:
       properties:
         height:
           description: Height
-          format: int64
+          format: int32
           minimum: 0
           title: height
           type: integer
         timestamp:
           description: Timestamp
-          format: int64
+          format: int32
           title: timestamp
           type: integer
         tx_hash:
@@ -2845,7 +2955,7 @@ components:
           type: boolean
         height:
           description: Height
-          format: int64
+          format: int32
           minimum: 0
           title: height
           type: integer
@@ -2861,7 +2971,7 @@ components:
           type: array
         timestamp:
           description: Timestamp
-          format: int64
+          format: int32
           title: timestamp
           type: integer
         total_input:
@@ -2962,7 +3072,7 @@ components:
       properties:
         entity:
           description: Entity id
-          format: int64
+          format: int32
           title: entity
           type: integer
       required:

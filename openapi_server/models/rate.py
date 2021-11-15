@@ -1,9 +1,8 @@
 # coding: utf-8
 
-from __future__ import absolute_import
-from datetime import date, datetime  # noqa: F401
+from datetime import date, datetime
 
-from typing import List, Dict  # noqa: F401
+from typing import List, Dict, Type
 
 from openapi_server.models.base_model_ import Model
 from openapi_server import util
@@ -15,13 +14,11 @@ class Rate(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, code=None, value=None):  # noqa: E501
+    def __init__(self, code: str=None, value: float=None):
         """Rate - a model defined in OpenAPI
 
-        :param code: The code of this Rate.  # noqa: E501
-        :type code: str
-        :param value: The value of this Rate.  # noqa: E501
-        :type value: float
+        :param code: The code of this Rate.
+        :param value: The value of this Rate.
         """
         self.openapi_types = {
             'code': str,
@@ -37,31 +34,19 @@ class Rate(Model):
         self._value = value
 
     @classmethod
-    def from_dict(cls, dikt) -> 'Rate':
+    def from_dict(cls, dikt: dict) -> 'Rate':
         """Returns the dict as a model
 
         :param dikt: A dict.
-        :type: dict
-        :return: The rate of this Rate.  # noqa: E501
-        :rtype: Rate
+        :return: The rate of this Rate.
         """
         return util.deserialize_model(dikt, cls)
-
-    def to_dict(self, prefix=""):
-        """Returns the model as a dict:
-
-        :return: The Rate as a dict
-        :rtype: dict
-        """
-        return { 'code': self._code,
-            'value': self._value }
-
 
     @property
     def code(self):
         """Gets the code of this Rate.
 
-        iso currency code  # noqa: E501
+        iso currency code
 
         :return: The code of this Rate.
         :rtype: str
@@ -72,7 +57,7 @@ class Rate(Model):
     def code(self, code):
         """Sets the code of this Rate.
 
-        iso currency code  # noqa: E501
+        iso currency code
 
         :param code: The code of this Rate.
         :type code: str
@@ -84,7 +69,7 @@ class Rate(Model):
     def value(self):
         """Gets the value of this Rate.
 
-        exchange rate  # noqa: E501
+        exchange rate
 
         :return: The value of this Rate.
         :rtype: float
@@ -95,7 +80,7 @@ class Rate(Model):
     def value(self, value):
         """Sets the value of this Rate.
 
-        exchange rate  # noqa: E501
+        exchange rate
 
         :param value: The value of this Rate.
         :type value: float

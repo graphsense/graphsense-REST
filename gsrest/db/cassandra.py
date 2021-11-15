@@ -3,16 +3,14 @@ import time
 import asyncio
 from collections import namedtuple
 from cassandra.cluster import Cluster, NoHostAvailable
-from cassandra.query import SimpleStatement, dict_factory
-from cassandra.concurrent import execute_concurrent_with_args
+from cassandra.query import SimpleStatement, dict_factory, ValueSequence
 from math import floor
-from flask import current_app
 # from codetiming import Timer
 
 from gsrest.util.exceptions import BadConfigError
 
 SMALL_PAGE_SIZE = 1000
-BIG_PAGE_SIZE = 10000
+BIG_PAGE_SIZE = 5000
 SEARCH_PAGE_SIZE = 100
 
 
@@ -42,6 +40,11 @@ def identity(x):
 def replaceFrom(keyspace, query):
     r = re.compile(r'\s+FROM\s+', re.IGNORECASE)
     return r.sub(f' FROM {keyspace}.', query)
+
+
+def replacePerc(query):
+    r = re.compile(r'%s', re.IGNORECASE)
+    return r.sub('?', query)
 
 
 class Result:
@@ -86,7 +89,8 @@ class Cassandra:
             return func(*args, **kwargs)
         return check
 
-    def __init__(self, config):
+    def __init__(self, config, logger):
+        self.logger = logger
         if 'currencies' not in config:
             raise BadConfigError('Missing config property: currencies')
         if 'nodes' not in config:
@@ -94,6 +98,7 @@ class Cassandra:
         if 'tagpacks' not in config:
             raise BadConfigError('Missing config property: tagpacks')
         self.config = config
+        self.prepared_statements = {}
         self.connect()
         self.check_keyspace(config['tagpacks'])
         self.parameters = {}
@@ -107,12 +112,14 @@ class Cassandra:
             self.cluster = Cluster(self.config['nodes'])
             self.session = self.cluster.connect()
             self.session.row_factory = dict_factory
-            current_app.logger.info('Connection ready.')
+            if self.logger:
+                self.logger.info('Connection ready.')
         except NoHostAvailable:
             retry = self.config['retry_interval']
             retry = 5 if retry is None else retry
-            current_app.logger.error(
-                f'Could not connect. Retrying in {retry} secs.')
+            if self.logger:
+                self.logger.error(
+                    f'Could not connect. Retrying in {retry} secs.')
             time.sleep(retry)
             self.connect()
 
@@ -136,6 +143,8 @@ class Cassandra:
                 self.parameters[keyspace][key] = value
 
     def get_prefix_lengths(self, currency):
+        if currency not in self.parameters:
+            raise RuntimeError(f'{currency} not found')
         p = self.parameters[currency]
         return \
             {'address': p['address_prefix_length'],
@@ -151,10 +160,9 @@ class Cassandra:
         if currency is None:
             raise ValueError('Missing currency')
         if keyspace_type not in ('raw', 'transformed'):
-            raise ValueError('Unknown keyspace type {}'.format(keyspace_type))
+            raise ValueError(f'Unknown keyspace type {keyspace_type}')
         if currency not in self.config['currencies']:
-            raise BadConfigError('Unknown currency in config: {}'
-                                 .format(currency))
+            raise ValueError(f'Unknown currency in config: {currency}')
         return self.config['currencies'][currency][keyspace_type]
 
     def close(self):
@@ -193,6 +201,7 @@ class Cassandra:
                     currency, keyspace_type, query,
                     params=params, paging_state=result.paging_state,
                     fetch_size=fetch_size, autopaging=True)
+
         for row in more.current_rows:
             result.current_rows.append(row)
         return result
@@ -202,15 +211,22 @@ class Cassandra:
                                fetch_size=None):
         keyspace = self.get_keyspace_mapping(currency, keyspace_type)
         q = replaceFrom(keyspace, query)
-        q = SimpleStatement(q, fetch_size=fetch_size)
+        q = replacePerc(q)
+        prep = self.prepared_statements.get(q, None)
+        if prep is None:
+            self.prepared_statements[q] = prep = self.session.prepare(q)
         try:
+            prep.fetch_size = fetch_size
             response_future = self.session.execute_async(
-                q, params,
+                prep, params, timeout=30,
                 paging_state=paging_state)
             loop = asyncio.get_event_loop()
             future = loop.create_future()
 
             def on_done(result):
+                if future.cancelled():
+                    loop.call_soon_threadsafe(future.set_result, None)
+                    return
                 result = Result(current_rows=result,
                                 params=params,
                                 paging_state=response_future._paging_state)
@@ -223,14 +239,14 @@ class Cassandra:
             return future
         except NoHostAvailable:
             self.connect()
-            return self.execute_async(currency, keyspace_type, query,
-                                      params=params,
-                                      paging_state=paging_state,
-                                      fetch_size=fetch_size)
+            return self.execute_async_lowlevel(
+                      currency, keyspace_type, query,
+                      params=params,
+                      paging_state=paging_state,
+                      fetch_size=fetch_size)
 
     async def concurrent_with_args(self, currency, keyspace_type, query,
                                    params, filter_empty=True, one=True,
-                                   results_generator=False,
                                    keep_meta=False):
         aws = [self.execute_async(currency, keyspace_type, query, param,
                                   autopaging=True)
@@ -360,6 +376,7 @@ class Cassandra:
             row['tx_hash'] = tx['tx_hash']
             row['height'] = tx['block_id']
             row['timestamp'] = tx['timestamp']
+            row['coinbase'] = tx['coinbase']
             rows.append(row)
 
         return rows, to_hex(results.paging_state)
@@ -409,13 +426,19 @@ class Cassandra:
         return address_id, id_group
 
     def get_id_group(self, keyspace, id_):
+        if keyspace not in self.parameters:
+            raise RuntimeError(f'{keyspace} not found')
         return floor(int(id_) / self.parameters[keyspace]['bucket_size'])
 
     def get_block_id_group(self, keyspace, id_):
+        if keyspace not in self.parameters:
+            raise RuntimeError(f'{keyspace} not found')
         return floor(int(id_) / self.parameters[keyspace]['block_bucket_size'])
 
     @eth
     def get_tx_id_group(self, keyspace, id_):
+        if keyspace not in self.parameters:
+            raise RuntimeError(f'{keyspace} not found')
         return floor(int(id_) / self.parameters[keyspace]['tx_bucket_size'])
 
     def get_tx_id_group_eth(self, keyspace, id_):
@@ -739,7 +762,7 @@ class Cassandra:
             direction, this, that = ('incoming', 'dst', 'src')
 
         id_group = self.get_id_group(currency, id)
-        parameters = [id_group, id]
+        base_parameters = [id_group, id]
         has_targets = isinstance(targets, list)
         sec_condition = ''
         if currency == 'eth':
@@ -749,18 +772,21 @@ class Cassandra:
                     id_group)
             sec_in = self.sec_in(secondary_id_group)
             sec_condition = \
-                f' AND {this}_address_id_secondary_group in {sec_in}'
+                f' AND {this}_address_id_secondary_group in %s'
+            base_parameters.append(sec_in)
 
         basequery = (f"SELECT * FROM {node_type}_{direction}_relations WHERE "
                      f"{this}_{node_type}_id_group = %s AND "
                      f"{this}_{node_type}_id = %s {sec_condition}")
+        parameters = base_parameters.copy()
         if has_targets:
             if len(targets) == 0:
                 return None
 
             query = basequery.replace('*', f'{that}_{node_type}_id')
-            targets = ','.join(map(str, targets))
-            query += f' AND {that}_{node_type}_id in ({targets})'
+            targets = ValueSequence(targets)
+            query += f' AND {that}_{node_type}_id in %s'
+            parameters.append(targets)
         else:
             query = basequery
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
@@ -775,7 +801,7 @@ class Cassandra:
             params = []
             query = basequery + f" AND {that}_{node_type}_id = %s"
             for row in results:
-                p = parameters.copy()
+                p = base_parameters.copy()
                 p.append(row[f'{that}_{node_type}_id'])
                 params.append(p)
             results = await self.concurrent_with_args(
@@ -955,6 +981,8 @@ class Cassandra:
 
     @eth
     def scrub_prefix(self, currency, expression):
+        if currency not in self.parameters:
+            raise RuntimeError(f'{currency} not found')
         bech32_prefix = self.parameters[currency]['bech_32_prefix']
         return expression[len(bech32_prefix):] \
             if expression.startswith(bech32_prefix) \
@@ -1262,11 +1290,11 @@ class Cassandra:
         sec_in = self.sec_in(secondary_id_group)
         query = ("SELECT transaction_id, value FROM address_transactions "
                  "WHERE address_id_group = %s and "
-                 f"address_id_secondary_group in {sec_in}"
+                 "address_id_secondary_group in %s"
                  " and address_id = %s")
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
         result = await self.execute_async(currency, 'transformed', query,
-                                          [id_group, address_id],
+                                          [id_group, sec_in, address_id],
                                           paging_state=paging_state,
                                           fetch_size=fetch_size)
         if result is None:
@@ -1368,20 +1396,23 @@ class Cassandra:
         query = \
             f"SELECT no_transactions FROM {node_type}_{{direction}}_relations"\
             f" WHERE {{src}}_{node_type}_id_group = %s AND"\
-            f" {{src}}_{node_type}_id_secondary_group in {{sec}} AND"\
+            f" {{src}}_{node_type}_id_secondary_group in %s AND"\
             f" {{src}}_{node_type}_id = %s AND"\
             f" {{dst}}_{node_type}_id = %s"
+
+        params = [address_id_group,
+                  address_id_secondary_group,
+                  address_id,
+                  neighbor_id]
 
         no_outgoing_txs = (
             await self.execute_async(currency,
                                      'transformed',
                                      query.format(
                                          direction='outgoing',
-                                         sec=address_id_secondary_group,
                                          src='src',
                                          dst='dst'),
-                                     [address_id_group, address_id,
-                                      neighbor_id])
+                                     params)
             ).one()
 
         if no_outgoing_txs is None:
@@ -1389,16 +1420,19 @@ class Cassandra:
 
         no_outgoing_txs = no_outgoing_txs['no_transactions']
 
+        params = [neighbor_id_group,
+                  neighbor_id_secondary_group,
+                  neighbor_id,
+                  address_id]
+
         no_incoming_txs = (
             await self.execute_async(currency,
                                      'transformed',
                                      query.format(
                                          direction='incoming',
-                                         sec=neighbor_id_secondary_group,
                                          src='dst',
                                          dst='src'),
-                                     [neighbor_id_group, neighbor_id,
-                                      address_id])
+                                     params)
             ).one()
 
         if no_incoming_txs is None:
@@ -1420,9 +1454,9 @@ class Cassandra:
                     "address_id_group = %s AND address_id = %s " \
                     "AND is_outgoing = %s "
         first_query = basequery + \
-            f"AND address_id_secondary_group IN {first_id_secondary_group}"
+            "AND address_id_secondary_group IN %s"
         second_query = basequery + \
-            f"AND address_id_secondary_group IN {second_id_secondary_group}"\
+            "AND address_id_secondary_group IN %s"\
             " AND transaction_id = %s"
 
         fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
@@ -1435,7 +1469,8 @@ class Cassandra:
             results1 = await self.execute_async(currency, 'transformed',
                                                 first_query,
                                                 [first_id_group, first_id,
-                                                 isOutgoing],
+                                                 isOutgoing,
+                                                 first_id_secondary_group],
                                                 paging_state=paging_state,
                                                 fetch_size=fetch_size)
 
@@ -1445,7 +1480,9 @@ class Cassandra:
             paging_state = results1.paging_state
             has_more_pages = paging_state is not None
 
-            params = [[second_id_group, second_id, not isOutgoing,
+            params = [[second_id_group, second_id,
+                       not isOutgoing,
+                       second_id_secondary_group,
                        row['transaction_id']]
                       for row in results1.current_rows]
 
@@ -1547,5 +1584,4 @@ class Cassandra:
         return rows
 
     def sec_in(self, id):
-        return "(" + ','.join(map(str, range(0, id+1))) + ")"
-
+        return ValueSequence(range(0, id+1))

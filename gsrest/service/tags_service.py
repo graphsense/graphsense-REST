@@ -1,5 +1,4 @@
 import asyncio
-from gsrest.db import get_connection
 from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.entity_tag import EntityTag
 from openapi_server.models.tags import Tags
@@ -8,8 +7,8 @@ from openapi_server.models.concept import Concept
 from gsrest.util.string_edit import alphanumeric_lower
 
 
-async def list_tags(label, currency=None):
-    db = get_connection()
+async def list_tags(request, label, currency=None):
+    db = request.app['db']
     label = alphanumeric_lower(label)
     if(currency is None):
         address_tags = []
@@ -53,10 +52,10 @@ async def list_tags(label, currency=None):
                              for row in entity_tags])
 
 
-async def list_labels(currency, expression):
+async def list_labels(request, currency, expression):
     # Normalize label
     expression_norm = alphanumeric_lower(expression)
-    db = get_connection()
+    db = request.app['db']
     result = await db.list_labels(currency, expression_norm)
 
     if currency:
@@ -69,8 +68,8 @@ async def list_labels(currency, expression):
         if row['label_norm'].startswith(expression_norm)]))
 
 
-async def list_concepts(taxonomy):
-    db = get_connection()
+async def list_concepts(request, taxonomy):
+    db = request.app['db']
     rows = await db.list_concepts(taxonomy)
 
     return [Concept(
@@ -81,8 +80,8 @@ async def list_concepts(taxonomy):
             uri=row['uri']) for row in rows]
 
 
-async def list_taxonomies():
-    db = get_connection()
+async def list_taxonomies(request):
+    db = request.app['db']
     rows = await db.list_taxonomies()
 
     return [Taxonomy(taxonomy=row['key'], uri=row['uri']) for row in rows]

@@ -1,42 +1,52 @@
-import connexion
-import six
+from typing import List, Dict
+from aiohttp import web
 import traceback
-import asyncio
+import json
 
-from openapi_server.models.search_result import SearchResult  # noqa: E501
-from openapi_server.models.stats import Stats  # noqa: E501
+from openapi_server.models.search_result import SearchResult
+from openapi_server.models.stats import Stats
 import gsrest.service.general_service as service
-from gsrest.service.problems import notfound, badrequest, internalerror
+from openapi_server import util
 
 
-def get_statistics():  # noqa: E501
+async def get_statistics(request: web.Request, ) -> web.Response:
     """Get statistics of supported currencies
 
-     # noqa: E501
+    
 
 
-    :rtype: Stats
     """
     try:
-        result = asyncio.run(
-            service.get_statistics(
-                ))
+        result = service.get_statistics(request
+                )
+        result = await result
+        if isinstance(result, list):
+            result = [d.to_dict() for d in result]
+        else:
+            result = result.to_dict()
+        result = web.Response(
+                    status=200,
+                    text=json.dumps(result),
+                    headers={'Content-type': 'application/json'})
         return result
     except RuntimeError as e:
-        return notfound(str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPNotFound(text=str(e))
     except ValueError as e:
-        return badrequest(str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
     except TypeError as e:
-        return badrequest(str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
+        raise web.HTTPInternalServerError()
 
 
-def search(q, currency=None, limit=None):  # noqa: E501
+async def search(request: web.Request, q, currency=None, limit=None) -> web.Response:
     """Returns matching addresses, transactions and labels
 
-     # noqa: E501
+    
 
     :param q: It can be (the beginning of) an address, a transaction or a label
     :type q: str
@@ -45,21 +55,29 @@ def search(q, currency=None, limit=None):  # noqa: E501
     :param limit: Maximum number of search results
     :type limit: int
 
-    :rtype: SearchResult
     """
     try:
-        result = asyncio.run(
-            service.search(
-                q=q,
-                currency=currency,
-                limit=limit))
+        result = service.search(request
+                ,q=q,currency=currency,limit=limit)
+        result = await result
+        if isinstance(result, list):
+            result = [d.to_dict() for d in result]
+        else:
+            result = result.to_dict()
+        result = web.Response(
+                    status=200,
+                    text=json.dumps(result),
+                    headers={'Content-type': 'application/json'})
         return result
     except RuntimeError as e:
-        return notfound(str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPNotFound(text=str(e))
     except ValueError as e:
-        return badrequest(str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
     except TypeError as e:
-        return badrequest(str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror("")
+        raise web.HTTPInternalServerError()

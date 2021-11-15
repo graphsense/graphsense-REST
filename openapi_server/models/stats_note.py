@@ -1,9 +1,8 @@
 # coding: utf-8
 
-from __future__ import absolute_import
-from datetime import date, datetime  # noqa: F401
+from datetime import date, datetime
 
-from typing import List, Dict  # noqa: F401
+from typing import List, Dict, Type
 
 from openapi_server.models.base_model_ import Model
 from openapi_server import util
@@ -15,11 +14,10 @@ class StatsNote(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, note=None):  # noqa: E501
+    def __init__(self, note: str=None):
         """StatsNote - a model defined in OpenAPI
 
-        :param note: The note of this StatsNote.  # noqa: E501
-        :type note: str
+        :param note: The note of this StatsNote.
         """
         self.openapi_types = {
             'note': str
@@ -32,24 +30,13 @@ class StatsNote(Model):
         self._note = note
 
     @classmethod
-    def from_dict(cls, dikt) -> 'StatsNote':
+    def from_dict(cls, dikt: dict) -> 'StatsNote':
         """Returns the dict as a model
 
         :param dikt: A dict.
-        :type: dict
-        :return: The stats_note of this StatsNote.  # noqa: E501
-        :rtype: StatsNote
+        :return: The stats_note of this StatsNote.
         """
         return util.deserialize_model(dikt, cls)
-
-    def to_dict(self, prefix=""):
-        """Returns the model as a dict:
-
-        :return: The StatsNote as a dict
-        :rtype: dict
-        """
-        return { 'note': self._note }
-
 
     @property
     def note(self):

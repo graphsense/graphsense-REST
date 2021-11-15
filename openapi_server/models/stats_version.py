@@ -1,9 +1,8 @@
 # coding: utf-8
 
-from __future__ import absolute_import
-from datetime import date, datetime  # noqa: F401
+from datetime import date, datetime
 
-from typing import List, Dict  # noqa: F401
+from typing import List, Dict, Type
 
 from openapi_server.models.base_model_ import Model
 from openapi_server import util
@@ -15,17 +14,13 @@ class StatsVersion(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, file=None, hash=None, nr=None, timestamp=None):  # noqa: E501
+    def __init__(self, file: str=None, hash: str=None, nr: str=None, timestamp: str=None):
         """StatsVersion - a model defined in OpenAPI
 
-        :param file: The file of this StatsVersion.  # noqa: E501
-        :type file: str
-        :param hash: The hash of this StatsVersion.  # noqa: E501
-        :type hash: str
-        :param nr: The nr of this StatsVersion.  # noqa: E501
-        :type nr: str
-        :param timestamp: The timestamp of this StatsVersion.  # noqa: E501
-        :type timestamp: str
+        :param file: The file of this StatsVersion.
+        :param hash: The hash of this StatsVersion.
+        :param nr: The nr of this StatsVersion.
+        :param timestamp: The timestamp of this StatsVersion.
         """
         self.openapi_types = {
             'file': str,
@@ -47,27 +42,13 @@ class StatsVersion(Model):
         self._timestamp = timestamp
 
     @classmethod
-    def from_dict(cls, dikt) -> 'StatsVersion':
+    def from_dict(cls, dikt: dict) -> 'StatsVersion':
         """Returns the dict as a model
 
         :param dikt: A dict.
-        :type: dict
-        :return: The stats_version of this StatsVersion.  # noqa: E501
-        :rtype: StatsVersion
+        :return: The stats_version of this StatsVersion.
         """
         return util.deserialize_model(dikt, cls)
-
-    def to_dict(self, prefix=""):
-        """Returns the model as a dict:
-
-        :return: The StatsVersion as a dict
-        :rtype: dict
-        """
-        return { 'file': self._file,
-            'hash': self._hash,
-            'nr': self._nr,
-            'timestamp': self._timestamp }
-
 
     @property
     def file(self):

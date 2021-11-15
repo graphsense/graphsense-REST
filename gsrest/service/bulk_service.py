@@ -1,15 +1,23 @@
 import importlib
-from flask import Response
-from gsrest.util.csvify import create_download_header
 from csv import DictWriter
 from openapi_server.models.values import Values
 import asyncio
 import json
+from aiohttp import web
 
 
-async def bulk(currency, api, operation, body, form='csv'):
-    result = ""
-    the_stack = stack(currency, api, operation, body, form)
+def bulk_json(*args, **kwargs):
+    kwargs['form'] = 'json'
+    return bulk(*args, **kwargs)
+
+
+def bulk_csv(*args, **kwargs):
+    kwargs['form'] = 'csv'
+    return bulk(*args, **kwargs)
+
+
+async def bulk(request, currency, api, operation, body, form='csv'):
+    the_stack = stack(request, currency, api, operation, body, form)
     if form == 'csv':
         gen = to_csv(the_stack)
         mimetype = 'text/csv'
@@ -17,11 +25,19 @@ async def bulk(currency, api, operation, body, form='csv'):
         gen = to_json(the_stack)
         mimetype = 'application/json'
 
+    response = web.StreamResponse(
+        status=200,
+        reason='OK',
+        headers={'Content-Type': mimetype,
+                 'Content-Disposition': f'attachment; filename=bulk.{form}'})
+
+    response.enable_chunked_encoding()
+    await response.prepare(request)
+
     async for row in gen:
-        result += row
-    return Response(result,
-                    mimetype=mimetype,
-                    headers=create_download_header(f'bulk.{format}'))
+        await response.write(bytes(row, 'utf-8'))
+    await response.write_eof()
+    return response
 
 
 class writer:
@@ -64,11 +80,11 @@ def flatten(item, name="", flat_dict=None, format=None):
     return flat_dict
 
 
-async def wrap(operation, currency, params, keys, format):
+async def wrap(request, operation, currency, params, keys, format):
     params = dict(params)
     for (k, v) in keys.items():
         params[k] = v
-    result = await operation(currency, **params)
+    result = await operation(request, currency, **params)
     if isinstance(result, list):
         rows = result
         page_state = None
@@ -90,13 +106,13 @@ async def wrap(operation, currency, params, keys, format):
         flat.append(fl)
     if page_state:
         params['page'] = page_state
-        more = await wrap(operation, currency, params, keys, format)
+        more = await wrap(request, operation, currency, params, keys, format)
         for row in more:
             flat.append(row)
     return flat
 
 
-def stack(currency, api, operation, body, format):
+def stack(request, currency, api, operation, body, format):
     try:
         mod = importlib.import_module(
             f'gsrest.service.{api}_service')
@@ -127,7 +143,7 @@ def stack(currency, api, operation, body, format):
         the_keys = {}
         for (k, v) in keys.items():
             the_keys[k] = v[i]
-        aw = wrap(operation, currency, params, the_keys, format)
+        aw = wrap(request, operation, currency, params, the_keys, format)
 
         aws.append(aw)
 

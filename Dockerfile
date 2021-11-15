@@ -42,6 +42,6 @@ USER dockeruser
 WORKDIR /srv/graphsense-rest
 
 CMD /usr/bin/gunicorn \
-    --limit-request-line 0 \
     -c /home/dockeruser/gunicorn-conf.py \
-    "openapi_server:main()"
+    "openapi_server:main('./instance/config.yaml')" \
+     --worker-class aiohttp.GunicornWebWorker

@@ -1,131 +1,62 @@
-from gsrest.db import get_connection
 from openapi_server.models.address_txs import AddressTxs
-from openapi_server.models.addresses import Addresses
 from gsrest.service.entities_service import get_entity
 import gsrest.service.common_service as common
-from flask import Response, stream_with_context
-from gsrest.util.csvify import create_download_header, to_csv
-from gsrest.service.rates_service import get_rates
 
 
-async def get_address(currency, address, include_tags=False):
-    return await common.get_address(currency, address, include_tags)
+async def get_address(request, currency, address, include_tags=False):
+    return await common.get_address(request, currency, address, include_tags)
 
 
-def list_tags_by_address(currency, address):
-    return common.list_tags_by_address(currency, address)
+async def list_tags_by_address(request, currency, address):
+    return await common.list_tags_by_address(request, currency, address)
 
 
-def list_tags_by_address_csv(currency, address):
-    def query_function(_):
-        tags = common.list_tags_by_address(currency, address)
-        return (None, tags)
-    return Response(stream_with_context(to_csv(query_function)),
-                    mimetype="text/csv",
-                    headers=create_download_header(
-                        'tags of address {} ({}).csv'
-                        .format(address,
-                                currency.upper())))
-
-
-async def list_address_txs(currency, address, page=None, pagesize=None):
-    db = get_connection()
+async def list_address_txs(request, currency, address, page=None,
+                           pagesize=None):
+    db = request.app['db']
     results, paging_state = \
         await db.list_address_txs(currency, address, page, pagesize)
-    address_txs = await common.txs_from_rows(currency, results)
+    address_txs = await common.txs_from_rows(request, currency, results)
     return AddressTxs(next_page=paging_state, address_txs=address_txs)
 
 
-def list_address_txs_csv(currency, address):
-    def query_function(page_state):
-        result = list_address_txs(currency, address, page_state)
-        return (result.next_page, result.txs)
-    return Response(stream_with_context(to_csv(query_function)),
-                    mimetype="text/csv",
-                    headers=create_download_header(
-                            'transactions of address {} ({}).csv'
-                            .format(address, currency.upper())))
-
-
-async def list_address_neighbors(currency, address, direction,
+async def list_address_neighbors(request, currency, address, direction,
                                  include_labels=False,
                                  page=None, pagesize=None):
-    return await common.list_neighbors(currency, address, direction, 'address',
+    return await common.list_neighbors(request, currency, address, direction,
+                                       'address',
                                        include_labels=include_labels,
                                        page=page, pagesize=pagesize, ids=None)
 
 
-def list_address_neighbors_csv(currency, address, direction,
-                               include_labels=False):
-    def query_function(page_state):
-        result = list_address_neighbors(currency, address, direction,
-                                        include_labels, page_state)
-        return (result.next_page, result.neighbors)
-    return Response(stream_with_context(to_csv(query_function)),
-                    mimetype="text/csv",
-                    headers=create_download_header(
-                            '{} neighbors of address {} ({}).csv'
-                            .format(direction, address, currency.upper())))
-
-
-async def list_address_links(currency, address, neighbor,
+async def list_address_links(request, currency, address, neighbor,
                              page=None, pagesize=None):
-    db = get_connection()
+    db = request.app['db']
+    print(f'pagesize {pagesize}')
     result = await db.list_address_links(currency, address, neighbor,
                                          page=page, pagesize=pagesize)
 
-    return await common.links_response(currency, result)
+    return await common.links_response(request, currency, result)
 
 
-def list_address_links_csv(currency, address, neighbor):
-    def query_function(_):
-        result = list_address_links(currency, address, neighbor)
-        return (result.next_page, result.links)
-    return Response(stream_with_context(to_csv(query_function)),
-                    mimetype="text/csv",
-                    headers=create_download_header(
-                            'transactions between {} and {} ({}).csv'
-                            .format(address, neighbor, currency.upper())))
-
-
-async def get_address_entity(currency, address, include_tags=False,
+async def get_address_entity(request, currency, address, include_tags=False,
                              tag_coherence=False):
     # from address to complete entity stats
     e = RuntimeError('Entity for address {} not found'.format(address))
-    db = get_connection()
+    db = request.app['db']
 
     entity_id = await db.get_address_entity_id(currency, address)
     if entity_id is None:
         raise e
 
-    result = await get_entity(currency, entity_id, include_tags, tag_coherence)
+    result = await get_entity(request, currency, entity_id,
+                              include_tags, tag_coherence)
     if result is None:
         raise e
 
     return result
 
 
-async def list_matching_addresses(currency, expression):
-    db = get_connection()
+async def list_matching_addresses(request, currency, expression):
+    db = request.app['db']
     return await db.list_matching_addresses(currency, expression)
-
-
-def list_addresses(currency, ids=None, page=None, pagesize=None):
-    db = get_connection()
-    result, paging_state = db.list_addresses(currency, ids, page, pagesize)
-    rates = get_rates(currency)['rates']
-    return Addresses(
-            next_page=paging_state,
-            addresses=[common.address_from_row(currency, row, rates)
-                       for row in result])
-
-
-def list_addresses_csv(currency, ids=None):
-    def query_function(page_state):
-        result = list_addresses(currency, ids, page_state)
-        return (result.next_page, result.addresses)
-    return Response(stream_with_context(to_csv(query_function)),
-                    mimetype="text/csv",
-                    headers=create_download_header(
-                            'addresses ({}).csv'
-                            .format(currency.upper())))
