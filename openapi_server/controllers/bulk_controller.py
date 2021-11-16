@@ -12,7 +12,7 @@ async def bulk_csv(request: web.Request, currency, api, operation, body) -> web.
 
     
 
-    :param currency: The cryptocurrency (e.g., btc)
+    :param currency: The cryptocurrency code (e.g., btc)
     :type currency: str
     :param api: The api of the operation to execute in bulk
     :type api: str
@@ -45,7 +45,7 @@ async def bulk_json(request: web.Request, currency, api, operation, body) -> web
 
     
 
-    :param currency: The cryptocurrency (e.g., btc)
+    :param currency: The cryptocurrency code (e.g., btc)
     :type currency: str
     :param api: The api of the operation to execute in bulk
     :type api: str

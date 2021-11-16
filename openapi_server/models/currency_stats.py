@@ -5,7 +5,6 @@ from datetime import date, datetime
 from typing import List, Dict, Type
 
 from openapi_server.models.base_model_ import Model
-from openapi_server.models.stats_ledger import StatsLedger
 from openapi_server import util
 
 
@@ -15,10 +14,9 @@ class CurrencyStats(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, data_sources: List[StatsLedger]=None, name: str=None, no_address_relations: int=None, no_addresses: int=None, no_blocks: int=None, no_entities: int=None, no_labels: int=None, no_txs: int=None, notes: List[str]=None, timestamp: int=None, tools: List[str]=None):
+    def __init__(self, name: str=None, no_address_relations: int=None, no_addresses: int=None, no_blocks: int=None, no_entities: int=None, no_labels: int=None, no_txs: int=None, timestamp: int=None):
         """CurrencyStats - a model defined in OpenAPI
 
-        :param data_sources: The data_sources of this CurrencyStats.
         :param name: The name of this CurrencyStats.
         :param no_address_relations: The no_address_relations of this CurrencyStats.
         :param no_addresses: The no_addresses of this CurrencyStats.
@@ -26,12 +24,9 @@ class CurrencyStats(Model):
         :param no_entities: The no_entities of this CurrencyStats.
         :param no_labels: The no_labels of this CurrencyStats.
         :param no_txs: The no_txs of this CurrencyStats.
-        :param notes: The notes of this CurrencyStats.
         :param timestamp: The timestamp of this CurrencyStats.
-        :param tools: The tools of this CurrencyStats.
         """
         self.openapi_types = {
-            'data_sources': List[StatsLedger],
             'name': str,
             'no_address_relations': int,
             'no_addresses': int,
@@ -39,13 +34,10 @@ class CurrencyStats(Model):
             'no_entities': int,
             'no_labels': int,
             'no_txs': int,
-            'notes': List[str],
-            'timestamp': int,
-            'tools': List[str]
+            'timestamp': int
         }
 
         self.attribute_map = {
-            'data_sources': 'data_sources',
             'name': 'name',
             'no_address_relations': 'no_address_relations',
             'no_addresses': 'no_addresses',
@@ -53,12 +45,9 @@ class CurrencyStats(Model):
             'no_entities': 'no_entities',
             'no_labels': 'no_labels',
             'no_txs': 'no_txs',
-            'notes': 'notes',
-            'timestamp': 'timestamp',
-            'tools': 'tools'
+            'timestamp': 'timestamp'
         }
 
-        self._data_sources = data_sources
         self._name = name
         self._no_address_relations = no_address_relations
         self._no_addresses = no_addresses
@@ -66,9 +55,7 @@ class CurrencyStats(Model):
         self._no_entities = no_entities
         self._no_labels = no_labels
         self._no_txs = no_txs
-        self._notes = notes
         self._timestamp = timestamp
-        self._tools = tools
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'CurrencyStats':
@@ -78,27 +65,6 @@ class CurrencyStats(Model):
         :return: The currency_stats of this CurrencyStats.
         """
         return util.deserialize_model(dikt, cls)
-
-    @property
-    def data_sources(self):
-        """Gets the data_sources of this CurrencyStats.
-
-
-        :return: The data_sources of this CurrencyStats.
-        :rtype: List[StatsLedger]
-        """
-        return self._data_sources
-
-    @data_sources.setter
-    def data_sources(self, data_sources):
-        """Sets the data_sources of this CurrencyStats.
-
-
-        :param data_sources: The data_sources of this CurrencyStats.
-        :type data_sources: List[StatsLedger]
-        """
-
-        self._data_sources = data_sources
 
     @property
     def name(self):
@@ -230,6 +196,7 @@ class CurrencyStats(Model):
     def no_txs(self):
         """Gets the no_txs of this CurrencyStats.
 
+        number of transactions
 
         :return: The no_txs of this CurrencyStats.
         :rtype: int
@@ -240,6 +207,7 @@ class CurrencyStats(Model):
     def no_txs(self, no_txs):
         """Sets the no_txs of this CurrencyStats.
 
+        number of transactions
 
         :param no_txs: The no_txs of this CurrencyStats.
         :type no_txs: int
@@ -248,30 +216,10 @@ class CurrencyStats(Model):
         self._no_txs = no_txs
 
     @property
-    def notes(self):
-        """Gets the notes of this CurrencyStats.
-
-
-        :return: The notes of this CurrencyStats.
-        :rtype: List[str]
-        """
-        return self._notes
-
-    @notes.setter
-    def notes(self, notes):
-        """Sets the notes of this CurrencyStats.
-
-
-        :param notes: The notes of this CurrencyStats.
-        :type notes: List[str]
-        """
-
-        self._notes = notes
-
-    @property
     def timestamp(self):
         """Gets the timestamp of this CurrencyStats.
 
+        Timestamp
 
         :return: The timestamp of this CurrencyStats.
         :rtype: int
@@ -282,30 +230,10 @@ class CurrencyStats(Model):
     def timestamp(self, timestamp):
         """Sets the timestamp of this CurrencyStats.
 
+        Timestamp
 
         :param timestamp: The timestamp of this CurrencyStats.
         :type timestamp: int
         """
 
         self._timestamp = timestamp
-
-    @property
-    def tools(self):
-        """Gets the tools of this CurrencyStats.
-
-
-        :return: The tools of this CurrencyStats.
-        :rtype: List[str]
-        """
-        return self._tools
-
-    @tools.setter
-    def tools(self, tools):
-        """Sets the tools of this CurrencyStats.
-
-
-        :param tools: The tools of this CurrencyStats.
-        :type tools: List[str]
-        """
-
-        self._tools = tools

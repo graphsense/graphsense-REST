@@ -14,7 +14,7 @@ async def get_tx(request: web.Request, currency, tx_hash, include_io=None) -> we
 
     
 
-    :param currency: The cryptocurrency (e.g., btc)
+    :param currency: The cryptocurrency code (e.g., btc)
     :type currency: str
     :param tx_hash: The transaction hash
     :type tx_hash: str
@@ -54,7 +54,7 @@ async def get_tx_io(request: web.Request, currency, tx_hash, io) -> web.Response
 
     
 
-    :param currency: The cryptocurrency (e.g., btc)
+    :param currency: The cryptocurrency code (e.g., btc)
     :type currency: str
     :param tx_hash: The transaction hash
     :type tx_hash: str

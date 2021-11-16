@@ -147,7 +147,7 @@ class AddressTag(Model):
     def currency(self):
         """Gets the currency of this AddressTag.
 
-        Currency
+        crypto currency code
 
         :return: The currency of this AddressTag.
         :rtype: str
@@ -158,7 +158,7 @@ class AddressTag(Model):
     def currency(self, currency):
         """Sets the currency of this AddressTag.
 
-        Currency
+        crypto currency code
 
         :param currency: The currency of this AddressTag.
         :type currency: str

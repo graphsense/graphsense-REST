@@ -1,4 +1,3 @@
-from openapi_server.models.txs import Txs
 from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.tx_utxo import TxUtxo
 from openapi_server.models.tx_value import TxValue

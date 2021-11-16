@@ -1,7 +1,5 @@
 from gsrest.test.assertion import assertEqual
 from openapi_server.models.stats import Stats
-from openapi_server.models.stats_ledger import StatsLedger
-from openapi_server.models.stats_ledger_version import StatsLedgerVersion
 from openapi_server.models.search_result import SearchResult
 from openapi_server.models.search_result_by_currency \
         import SearchResultByCurrency
@@ -17,16 +15,7 @@ stats = Stats(
             timestamp=420,
             no_txs=110,
             no_labels=470,
-            no_address_relations=1230,
-            notes=[],
-            tools=[],
-            data_sources=[StatsLedger(
-                id='btc_ledger',
-                report_uuid='btc_ledger',
-                visible_name='BTC Blockchain',
-                version=StatsLedgerVersion(
-                    nr='3', timestamp='1970-01-01 00:07:00'),
-                )]
+            no_address_relations=1230
             ),
         CurrencyStats(
             name='eth',
@@ -36,17 +25,7 @@ stats = Stats(
             timestamp=16,
             no_txs=10,
             no_labels=7,
-            no_address_relations=2,
-            notes=[],
-            tools=[],
-            data_sources=[StatsLedger(
-                id='eth_ledger',
-                report_uuid='eth_ledger',
-                visible_name='ETH Blockchain',
-                version=StatsLedgerVersion(
-                    nr='3', timestamp='1970-01-01 00:00:16'),
-                )]
-            ),
+            no_address_relations=2),
         CurrencyStats(
             name='ltc',
             no_entities=789,
@@ -55,17 +34,7 @@ stats = Stats(
             timestamp=42,
             no_txs=11,
             no_labels=47,
-            no_address_relations=123,
-            notes=[],
-            tools=[],
-            data_sources=[StatsLedger(
-                id='ltc_ledger',
-                report_uuid='ltc_ledger',
-                visible_name='LTC Blockchain',
-                version=StatsLedgerVersion(
-                    nr='3', timestamp='1970-01-01 00:00:42'),
-                )]
-            )])
+            no_address_relations=123)])
 
 
 async def get_statistics(test_case):

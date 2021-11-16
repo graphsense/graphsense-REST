@@ -14,7 +14,7 @@ async def get_block(request: web.Request, currency, height) -> web.Response:
 
     
 
-    :param currency: The cryptocurrency (e.g., btc)
+    :param currency: The cryptocurrency code (e.g., btc)
     :type currency: str
     :param height: The block height
     :type height: int
@@ -52,7 +52,7 @@ async def list_block_txs(request: web.Request, currency, height) -> web.Response
 
     
 
-    :param currency: The cryptocurrency (e.g., btc)
+    :param currency: The cryptocurrency code (e.g., btc)
     :type currency: str
     :param height: The block height
     :type height: int

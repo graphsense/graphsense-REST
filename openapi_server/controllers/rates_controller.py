@@ -13,7 +13,7 @@ async def get_exchange_rates(request: web.Request, currency, height) -> web.Resp
 
     
 
-    :param currency: The cryptocurrency (e.g., btc)
+    :param currency: The cryptocurrency code (e.g., btc)
     :type currency: str
     :param height: The block height
     :type height: int

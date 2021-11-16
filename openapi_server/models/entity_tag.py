@@ -147,7 +147,7 @@ class EntityTag(Model):
     def currency(self):
         """Gets the currency of this EntityTag.
 
-        Currency
+        crypto currency code
 
         :return: The currency of this EntityTag.
         :rtype: str
@@ -158,7 +158,7 @@ class EntityTag(Model):
     def currency(self, currency):
         """Sets the currency of this EntityTag.
 
-        Currency
+        crypto currency code
 
         :param currency: The currency of this EntityTag.
         :type currency: str

@@ -19,7 +19,7 @@ async def get_entity(request: web.Request, currency, entity, include_tags=None, 
 
     
 
-    :param currency: The cryptocurrency (e.g., btc)
+    :param currency: The cryptocurrency code (e.g., btc)
     :type currency: str
     :param entity: The entity ID
     :type entity: int
@@ -61,7 +61,7 @@ async def list_entity_addresses(request: web.Request, currency, entity, page=Non
 
     
 
-    :param currency: The cryptocurrency (e.g., btc)
+    :param currency: The cryptocurrency code (e.g., btc)
     :type currency: str
     :param entity: The entity ID
     :type entity: int
@@ -103,7 +103,7 @@ async def list_entity_links(request: web.Request, currency, entity, neighbor, pa
 
     
 
-    :param currency: The cryptocurrency (e.g., btc)
+    :param currency: The cryptocurrency code (e.g., btc)
     :type currency: str
     :param entity: The entity ID
     :type entity: int
@@ -147,7 +147,7 @@ async def list_entity_neighbors(request: web.Request, currency, entity, directio
 
     
 
-    :param currency: The cryptocurrency (e.g., btc)
+    :param currency: The cryptocurrency code (e.g., btc)
     :type currency: str
     :param entity: The entity ID
     :type entity: int
@@ -195,7 +195,7 @@ async def list_entity_txs(request: web.Request, currency, entity, page=None, pag
 
     
 
-    :param currency: The cryptocurrency (e.g., btc)
+    :param currency: The cryptocurrency code (e.g., btc)
     :type currency: str
     :param entity: The entity ID
     :type entity: int
@@ -237,7 +237,7 @@ async def list_tags_by_entity(request: web.Request, currency, entity, tag_cohere
 
     
 
-    :param currency: The cryptocurrency (e.g., btc)
+    :param currency: The cryptocurrency code (e.g., btc)
     :type currency: str
     :param entity: The entity ID
     :type entity: int
@@ -277,7 +277,7 @@ async def search_entity_neighbors(request: web.Request, currency, entity, direct
 
     
 
-    :param currency: The cryptocurrency (e.g., btc)
+    :param currency: The cryptocurrency code (e.g., btc)
     :type currency: str
     :param entity: The entity ID
     :type entity: int

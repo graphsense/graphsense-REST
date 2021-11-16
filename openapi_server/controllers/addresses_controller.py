@@ -18,7 +18,7 @@ async def get_address(request: web.Request, currency, address, include_tags=None
 
     
 
-    :param currency: The cryptocurrency (e.g., btc)
+    :param currency: The cryptocurrency code (e.g., btc)
     :type currency: str
     :param address: The cryptocurrency address
     :type address: str
@@ -58,7 +58,7 @@ async def get_address_entity(request: web.Request, currency, address, include_ta
 
     
 
-    :param currency: The cryptocurrency (e.g., btc)
+    :param currency: The cryptocurrency code (e.g., btc)
     :type currency: str
     :param address: The cryptocurrency address
     :type address: str
@@ -100,7 +100,7 @@ async def list_address_links(request: web.Request, currency, address, neighbor, 
 
     
 
-    :param currency: The cryptocurrency (e.g., btc)
+    :param currency: The cryptocurrency code (e.g., btc)
     :type currency: str
     :param address: The cryptocurrency address
     :type address: str
@@ -144,7 +144,7 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
 
     
 
-    :param currency: The cryptocurrency (e.g., btc)
+    :param currency: The cryptocurrency code (e.g., btc)
     :type currency: str
     :param address: The cryptocurrency address
     :type address: str
@@ -190,7 +190,7 @@ async def list_address_txs(request: web.Request, currency, address, page=None, p
 
     
 
-    :param currency: The cryptocurrency (e.g., btc)
+    :param currency: The cryptocurrency code (e.g., btc)
     :type currency: str
     :param address: The cryptocurrency address
     :type address: str
@@ -232,7 +232,7 @@ async def list_tags_by_address(request: web.Request, currency, address) -> web.R
 
     
 
-    :param currency: The cryptocurrency (e.g., btc)
+    :param currency: The cryptocurrency code (e.g., btc)
     :type currency: str
     :param address: The cryptocurrency address
     :type address: str

@@ -141,7 +141,7 @@ class Tag(Model):
     def currency(self):
         """Gets the currency of this Tag.
 
-        Currency
+        crypto currency code
 
         :return: The currency of this Tag.
         :rtype: str
@@ -152,7 +152,7 @@ class Tag(Model):
     def currency(self, currency):
         """Sets the currency of this Tag.
 
-        Currency
+        crypto currency code
 
         :param currency: The currency of this Tag.
         :type currency: str

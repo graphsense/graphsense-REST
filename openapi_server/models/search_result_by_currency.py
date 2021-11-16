@@ -73,7 +73,7 @@ class SearchResultByCurrency(Model):
     def currency(self):
         """Gets the currency of this SearchResultByCurrency.
 
-        Currency
+        crypto currency code
 
         :return: The currency of this SearchResultByCurrency.
         :rtype: str
@@ -84,7 +84,7 @@ class SearchResultByCurrency(Model):
     def currency(self, currency):
         """Sets the currency of this SearchResultByCurrency.
 
-        Currency
+        crypto currency code
 
         :param currency: The currency of this SearchResultByCurrency.
         :type currency: str
@@ -96,7 +96,7 @@ class SearchResultByCurrency(Model):
     def txs(self):
         """Gets the txs of this SearchResultByCurrency.
 
-        The list of found transactions
+        The list of found transaction ids
 
         :return: The txs of this SearchResultByCurrency.
         :rtype: List[str]
@@ -107,7 +107,7 @@ class SearchResultByCurrency(Model):
     def txs(self, txs):
         """Sets the txs of this SearchResultByCurrency.
 
-        The list of found transactions
+        The list of found transaction ids
 
         :param txs: The txs of this SearchResultByCurrency.
         :type txs: List[str]
