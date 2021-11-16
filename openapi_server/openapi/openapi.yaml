@@ -2651,6 +2651,7 @@ components:
       title: search_result_level6
     stats:
       example:
+        request_timestamp: request_timestamp
         version: version
         currencies:
         - no_addresses: 12345
@@ -2675,6 +2676,9 @@ components:
             $ref: '#/components/schemas/currency_stats'
           title: currencies
           type: array
+        request_timestamp:
+          title: request_timestamp
+          type: string
         version:
           title: version
           type: string
