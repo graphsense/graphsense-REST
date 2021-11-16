@@ -456,10 +456,9 @@ class Cassandra:
                  " AND address_id_group = %s")
         result = await self.execute_async(currency, 'transformed', query,
                                           [address_id, address_id_group])
+        result = result.one()
         if not result:
             return None
-
-        result = result.one()
 
         return await self.finish_address(currency, result)
 
