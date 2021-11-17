@@ -1032,6 +1032,7 @@ class Cassandra:
 
     def list_addresses(self, currency, ids=None, page=None, pagesize=None):
         has_ids = isinstance(ids, list)
+
         if has_ids:
             prefix_length = self.get_prefix_lengths(currency)['address']
             params = [[self.scrub_prefix(currency, id)[:prefix_length],
@@ -1284,7 +1285,7 @@ class Cassandra:
                                                   id_group)
 
         sec_in = self.sec_in(secondary_id_group)
-        query = ("SELECT transaction_id, value FROM address_transactions "
+        query = ("SELECT transaction_id, is_outgoing FROM address_transactions "
                  "WHERE address_id_group = %s and "
                  "address_id_secondary_group in %s"
                  " and address_id = %s")
@@ -1301,11 +1302,13 @@ class Cassandra:
         for (row1, row2) in zip(
                 result.current_rows,
                 await self.list_txs_by_ids(currency, txs)):
+            value = row2['value'] * (-1 if row1['is_outgoing'] else 1)
             row1['tx_hash'] = row2['tx_hash']
             row1['height'] = row2['block_id']
             row1['timestamp'] = row2['block_timestamp']
             row1['to_address'] = eth_address_to_hex(row2['to_address'])
             row1['from_address'] = eth_address_to_hex(row2['from_address'])
+            row1['value'] = value
         return result.current_rows, to_hex(paging_state)
 
     async def list_txs_by_ids_eth(self, currency, ids):
