@@ -57,5 +57,6 @@ async def search(request, q, currency=None, limit=None):
 
         if labels:
             result.labels += labels
+        result.labels = list(set(result.labels))
 
     return result
