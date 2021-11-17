@@ -3,6 +3,7 @@ from openapi_server.models.entity_tag import EntityTag
 from openapi_server.models.tags import Tags
 from openapi_server.models.taxonomy import Taxonomy
 from openapi_server.models.concept import Concept
+import yaml
 
 tag1 = AddressTag(
    tagpack_uri="https://tagpack_uri",
@@ -57,8 +58,11 @@ async def list_tags(test_case):
     path = '/tags?label={label}'
     result = await test_case.request(path, label='cimedy')
     result['address_tags'].sort(key=lambda x: x['currency'])
-    test_case.assertEqual(Tags([tag2, tag3], entity_tags=[]).to_dict(),
-                          result)
+    tag_eth = AddressTag(**tag2.to_dict())
+    tag_eth.currency = 'ETH'
+    test_case.assertEqual(
+        Tags([tag2, tag_eth, tag3], entity_tags=[]).to_dict(),
+        result)
 
     path += '&currency={currency}'
     result = await test_case.request(path, currency='btc', label='isolinks')
@@ -67,6 +71,12 @@ async def list_tags(test_case):
         result)
     result = await test_case.request(path, currency='btc', label='cimedy')
     test_case.assertEqual(Tags([tag2], entity_tags=[]).to_dict(), result)
+
+    result = await test_case.request(path, currency='eth', label='cimedy')
+    test_case.assertEqual(Tags([tag_eth], entity_tags=[]).to_dict(), result)
+
+    result = await test_case.request(path, currency='ltc', label='cimedy')
+    test_case.assertEqual(Tags([tag3], entity_tags=[]).to_dict(), result)
 
 
 conceptA = Concept(
