@@ -884,6 +884,9 @@ class Cassandra:
                                         [label_norm_prefix, label])
         if rows is None:
             return []
+        if currency == 'eth':
+            for row in rows.current_rows:
+                row['active'] = row['active_address']
         return rows.current_rows
 
     @eth
