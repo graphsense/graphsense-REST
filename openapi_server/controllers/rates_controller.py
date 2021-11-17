@@ -20,8 +20,9 @@ async def get_exchange_rates(request: web.Request, currency, height) -> web.Resp
 
     """
     try:
-        if currency is not None and isinstance(str, currency):
-            currency = currency.lower()
+        if 'currency' in ['','currency','height']:
+            if currency is not None:
+                currency = currency.lower() 
         result = service.get_exchange_rates(request
                 ,currency=currency,height=height)
         result = await result

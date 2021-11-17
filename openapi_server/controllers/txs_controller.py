@@ -23,8 +23,9 @@ async def get_tx(request: web.Request, currency, tx_hash, include_io=None) -> we
 
     """
     try:
-        if currency is not None and isinstance(str, currency):
-            currency = currency.lower()
+        if 'currency' in ['','currency','tx_hash','include_io']:
+            if currency is not None:
+                currency = currency.lower() 
         result = service.get_tx(request
                 ,currency=currency,tx_hash=tx_hash,include_io=include_io)
         result = await result
@@ -65,8 +66,9 @@ async def get_tx_io(request: web.Request, currency, tx_hash, io) -> web.Response
 
     """
     try:
-        if currency is not None and isinstance(str, currency):
-            currency = currency.lower()
+        if 'currency' in ['','currency','tx_hash','io']:
+            if currency is not None:
+                currency = currency.lower() 
         result = service.get_tx_io(request
                 ,currency=currency,tx_hash=tx_hash,io=io)
         result = await result

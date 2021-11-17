@@ -21,8 +21,9 @@ async def get_block(request: web.Request, currency, height) -> web.Response:
 
     """
     try:
-        if currency is not None and isinstance(str, currency):
-            currency = currency.lower()
+        if 'currency' in ['','currency','height']:
+            if currency is not None:
+                currency = currency.lower() 
         result = service.get_block(request
                 ,currency=currency,height=height)
         result = await result
@@ -61,8 +62,9 @@ async def list_block_txs(request: web.Request, currency, height) -> web.Response
 
     """
     try:
-        if currency is not None and isinstance(str, currency):
-            currency = currency.lower()
+        if 'currency' in ['','currency','height']:
+            if currency is not None:
+                currency = currency.lower() 
         result = service.list_block_txs(request
                 ,currency=currency,height=height)
         result = await result

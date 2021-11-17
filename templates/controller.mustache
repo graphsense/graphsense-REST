@@ -103,8 +103,9 @@ async def {{operationId}}(request: web.Request, {{#allParams}}{{paramName}}{{^re
         {{/isMap}}
     {{/allParams}}
     try:
-        if currency is not None and isinstance(str, currency):
-            currency = currency.lower()
+        if 'currency' in [''{{#allParams}},'{{paramName}}'{{/allParams}}]:
+            if currency is not None:
+                currency = currency.lower() 
         result = service.{{operationId}}(request
                 {{#allParams}},{{paramName}}={{paramName}}{{/allParams}})
         {{^vendorExtensions.x-streamed}}

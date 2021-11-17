@@ -30,8 +30,9 @@ async def get_entity(request: web.Request, currency, entity, include_tags=None, 
 
     """
     try:
-        if currency is not None and isinstance(str, currency):
-            currency = currency.lower()
+        if 'currency' in ['','currency','entity','include_tags','tag_coherence']:
+            if currency is not None:
+                currency = currency.lower() 
         result = service.get_entity(request
                 ,currency=currency,entity=entity,include_tags=include_tags,tag_coherence=tag_coherence)
         result = await result
@@ -74,8 +75,9 @@ async def list_entity_addresses(request: web.Request, currency, entity, page=Non
 
     """
     try:
-        if currency is not None and isinstance(str, currency):
-            currency = currency.lower()
+        if 'currency' in ['','currency','entity','page','pagesize']:
+            if currency is not None:
+                currency = currency.lower() 
         result = service.list_entity_addresses(request
                 ,currency=currency,entity=entity,page=page,pagesize=pagesize)
         result = await result
@@ -120,8 +122,9 @@ async def list_entity_links(request: web.Request, currency, entity, neighbor, pa
 
     """
     try:
-        if currency is not None and isinstance(str, currency):
-            currency = currency.lower()
+        if 'currency' in ['','currency','entity','neighbor','page','pagesize']:
+            if currency is not None:
+                currency = currency.lower() 
         result = service.list_entity_links(request
                 ,currency=currency,entity=entity,neighbor=neighbor,page=page,pagesize=pagesize)
         result = await result
@@ -170,8 +173,9 @@ async def list_entity_neighbors(request: web.Request, currency, entity, directio
 
     """
     try:
-        if currency is not None and isinstance(str, currency):
-            currency = currency.lower()
+        if 'currency' in ['','currency','entity','direction','only_ids','include_labels','page','pagesize']:
+            if currency is not None:
+                currency = currency.lower() 
         result = service.list_entity_neighbors(request
                 ,currency=currency,entity=entity,direction=direction,only_ids=only_ids,include_labels=include_labels,page=page,pagesize=pagesize)
         result = await result
@@ -214,8 +218,9 @@ async def list_entity_txs(request: web.Request, currency, entity, page=None, pag
 
     """
     try:
-        if currency is not None and isinstance(str, currency):
-            currency = currency.lower()
+        if 'currency' in ['','currency','entity','page','pagesize']:
+            if currency is not None:
+                currency = currency.lower() 
         result = service.list_entity_txs(request
                 ,currency=currency,entity=entity,page=page,pagesize=pagesize)
         result = await result
@@ -256,8 +261,9 @@ async def list_tags_by_entity(request: web.Request, currency, entity, tag_cohere
 
     """
     try:
-        if currency is not None and isinstance(str, currency):
-            currency = currency.lower()
+        if 'currency' in ['','currency','entity','tag_coherence']:
+            if currency is not None:
+                currency = currency.lower() 
         result = service.list_tags_by_entity(request
                 ,currency=currency,entity=entity,tag_coherence=tag_coherence)
         result = await result
@@ -308,8 +314,9 @@ async def search_entity_neighbors(request: web.Request, currency, entity, direct
 
     """
     try:
-        if currency is not None and isinstance(str, currency):
-            currency = currency.lower()
+        if 'currency' in ['','currency','entity','direction','key','value','depth','breadth','skip_num_addresses']:
+            if currency is not None:
+                currency = currency.lower() 
         result = service.search_entity_neighbors(request
                 ,currency=currency,entity=entity,direction=direction,key=key,value=value,depth=depth,breadth=breadth,skip_num_addresses=skip_num_addresses)
         result = await result
