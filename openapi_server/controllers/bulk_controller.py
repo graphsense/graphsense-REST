@@ -23,6 +23,8 @@ async def bulk_csv(request: web.Request, currency, api, operation, body) -> web.
 
     """
     try:
+        if currency is not None and isinstance(str, currency):
+            currency = currency.lower()
         result = service.bulk_csv(request
                 ,currency=currency,api=api,operation=operation,body=body)
         return result
@@ -56,6 +58,8 @@ async def bulk_json(request: web.Request, currency, api, operation, body) -> web
 
     """
     try:
+        if currency is not None and isinstance(str, currency):
+            currency = currency.lower()
         result = service.bulk_json(request
                 ,currency=currency,api=api,operation=operation,body=body)
         return result

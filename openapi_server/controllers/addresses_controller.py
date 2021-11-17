@@ -27,6 +27,8 @@ async def get_address(request: web.Request, currency, address, include_tags=None
 
     """
     try:
+        if currency is not None and isinstance(str, currency):
+            currency = currency.lower()
         result = service.get_address(request
                 ,currency=currency,address=address,include_tags=include_tags)
         result = await result
@@ -69,6 +71,8 @@ async def get_address_entity(request: web.Request, currency, address, include_ta
 
     """
     try:
+        if currency is not None and isinstance(str, currency):
+            currency = currency.lower()
         result = service.get_address_entity(request
                 ,currency=currency,address=address,include_tags=include_tags,tag_coherence=tag_coherence)
         result = await result
@@ -113,6 +117,8 @@ async def list_address_links(request: web.Request, currency, address, neighbor, 
 
     """
     try:
+        if currency is not None and isinstance(str, currency):
+            currency = currency.lower()
         result = service.list_address_links(request
                 ,currency=currency,address=address,neighbor=neighbor,page=page,pagesize=pagesize)
         result = await result
@@ -159,6 +165,8 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
 
     """
     try:
+        if currency is not None and isinstance(str, currency):
+            currency = currency.lower()
         result = service.list_address_neighbors(request
                 ,currency=currency,address=address,direction=direction,include_labels=include_labels,page=page,pagesize=pagesize)
         result = await result
@@ -201,6 +209,8 @@ async def list_address_txs(request: web.Request, currency, address, page=None, p
 
     """
     try:
+        if currency is not None and isinstance(str, currency):
+            currency = currency.lower()
         result = service.list_address_txs(request
                 ,currency=currency,address=address,page=page,pagesize=pagesize)
         result = await result
@@ -239,6 +249,8 @@ async def list_tags_by_address(request: web.Request, currency, address) -> web.R
 
     """
     try:
+        if currency is not None and isinstance(str, currency):
+            currency = currency.lower()
         result = service.list_tags_by_address(request
                 ,currency=currency,address=address)
         result = await result

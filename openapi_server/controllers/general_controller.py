@@ -17,6 +17,8 @@ async def get_statistics(request: web.Request, ) -> web.Response:
 
     """
     try:
+        if currency is not None and isinstance(str, currency):
+            currency = currency.lower()
         result = service.get_statistics(request
                 )
         result = await result
@@ -57,6 +59,8 @@ async def search(request: web.Request, q, currency=None, limit=None) -> web.Resp
 
     """
     try:
+        if currency is not None and isinstance(str, currency):
+            currency = currency.lower()
         result = service.search(request
                 ,q=q,currency=currency,limit=limit)
         result = await result

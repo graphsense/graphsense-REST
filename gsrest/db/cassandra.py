@@ -159,7 +159,6 @@ class Cassandra:
             return self.config['tagpacks']
         if currency is None:
             raise ValueError('Missing currency')
-        currency = currency.lower()
         if keyspace_type not in ('raw', 'transformed'):
             raise ValueError(f'Unknown keyspace type {keyspace_type}')
         if currency not in self.config['currencies']:
@@ -427,20 +426,17 @@ class Cassandra:
         return address_id, id_group
 
     def get_id_group(self, keyspace, id_):
-        keyspace = keyspace.lower()
         if keyspace not in self.parameters:
             raise RuntimeError(f'{keyspace} not found')
         return floor(int(id_) / self.parameters[keyspace]['bucket_size'])
 
     def get_block_id_group(self, keyspace, id_):
-        keyspace = keyspace.lower()
         if keyspace not in self.parameters:
             raise RuntimeError(f'{keyspace} not found')
         return floor(int(id_) / self.parameters[keyspace]['block_bucket_size'])
 
     @eth
     def get_tx_id_group(self, keyspace, id_):
-        keyspace = keyspace.lower()
         if keyspace not in self.parameters:
             raise RuntimeError(f'{keyspace} not found')
         return floor(int(id_) / self.parameters[keyspace]['tx_bucket_size'])

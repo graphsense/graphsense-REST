@@ -20,6 +20,8 @@ async def list_concepts(request: web.Request, taxonomy) -> web.Response:
 
     """
     try:
+        if currency is not None and isinstance(str, currency):
+            currency = currency.lower()
         result = service.list_concepts(request
                 ,taxonomy=taxonomy)
         result = await result
@@ -58,6 +60,8 @@ async def list_tags(request: web.Request, label, currency=None) -> web.Response:
 
     """
     try:
+        if currency is not None and isinstance(str, currency):
+            currency = currency.lower()
         result = service.list_tags(request
                 ,label=label,currency=currency)
         result = await result
@@ -92,6 +96,8 @@ async def list_taxonomies(request: web.Request, ) -> web.Response:
 
     """
     try:
+        if currency is not None and isinstance(str, currency):
+            currency = currency.lower()
         result = service.list_taxonomies(request
                 )
         result = await result
