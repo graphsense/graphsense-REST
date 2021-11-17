@@ -401,14 +401,11 @@ class Cassandra:
     # @Timer(text="Timer: get_address_id {:.2f}")
     async def get_address_id(self, currency, address):
         prefix = self.scrub_prefix(currency, address)
-        table = "address_by_address_prefix"
         if currency == 'eth':
             address = eth_address_from_hex(address)
-            table = "address_ids_by_address_prefix"
             prefix = prefix.upper()
-        query = (
-            f"SELECT address_id FROM {table} "
-            "WHERE address_prefix = %s AND address = %s")
+        query = ("SELECT address_id FROM address_ids_by_address_prefix "
+                 "WHERE address_prefix = %s AND address = %s")
         prefix_length = self.get_prefix_lengths(currency)['address']
         result = await self.execute_async(
                               currency, 'transformed',
@@ -614,17 +611,16 @@ class Cassandra:
         prefix_lengths = self.get_prefix_lengths(currency)
         if len(expression) < prefix_lengths['address']:
             return []
-        table = "address_by_address_prefix"
         norm = identity
         prefix = self.scrub_prefix(currency, expression)
         prefix = prefix[:prefix_lengths['address']]
         if currency == 'eth':
             # eth addresses are case insensitive
             expression = expression.lower()
-            table = "address_ids_by_address_prefix"
             norm = eth_address_to_hex
             prefix = prefix.upper()
-        query = f"SELECT address FROM {table} WHERE address_prefix = %s"
+        query = "SELECT address FROM address_ids_by_address_prefix "\
+                "WHERE address_prefix = %s"
         result = None
         paging_state = None
         rows = []
@@ -1040,13 +1036,11 @@ class Cassandra:
             prefix_length = self.get_prefix_lengths(currency)['address']
             params = [[self.scrub_prefix(currency, id)[:prefix_length],
                        id] for id in ids]
-            table = 'address_by_address_prefix'
             if currency == 'eth':
-                table = 'address_ids_by_address_prefix'
                 params = [[param[0].upper(),
                            eth_address_from_hex(param[1])] for param in params]
-            query = (f"SELECT address_id FROM {table}"
-                     " WHERE address_prefix = %s AND address = %s")
+            query = "SELECT address_id FROM address_ids_by_address_prefix"\
+                    " WHERE address_prefix = %s AND address = %s"
             ids = self.concurrent_with_args(currency, 'transformed', query,
                                             params)
             query = ("SELECT * FROM address WHERE "
