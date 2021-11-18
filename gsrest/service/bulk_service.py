@@ -102,7 +102,7 @@ async def wrap(request, operation, currency, params, keys, format):
     for row in rows:
         fl = flatten(row, format=format)
         for (k, v) in keys.items():
-            fl[k] = v
+            fl['request_'+k] = v
         flat.append(fl)
     if page_state:
         params['page'] = page_state
