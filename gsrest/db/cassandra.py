@@ -1250,10 +1250,10 @@ class Cassandra:
                  "block_id_group = %s and block_id = %s")
         result = await self.execute_async(currency, 'transformed', query,
                                           [height_group, height])
+        result = result.one()
         if result is None:
-            raise RuntimeError(
-                    f'block {height} not found in currency {currency}')
-        return await self.list_txs_by_ids(currency, result.one()['txs'])
+            return []
+        return await self.list_txs_by_ids(currency, result['txs'])
 
     # @Timer(text="Timer: get_id_secondary_group_eth {:.2f}")
     async def get_id_secondary_group_eth(self, table, id_group):
@@ -1285,8 +1285,8 @@ class Cassandra:
                                                   id_group)
 
         sec_in = self.sec_in(secondary_id_group)
-        query = ("SELECT transaction_id, is_outgoing FROM address_transactions "
-                 "WHERE address_id_group = %s and "
+        query = ("SELECT transaction_id, is_outgoing FROM address_transactions"
+                 " WHERE address_id_group = %s and "
                  "address_id_secondary_group in %s"
                  " and address_id = %s")
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
