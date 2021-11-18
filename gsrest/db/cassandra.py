@@ -218,7 +218,7 @@ class Cassandra:
         try:
             prep.fetch_size = fetch_size
             response_future = self.session.execute_async(
-                prep, params, timeout=30,
+                prep, params, timeout=None,
                 paging_state=paging_state)
             loop = asyncio.get_event_loop()
             future = loop.create_future()
