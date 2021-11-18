@@ -1251,7 +1251,7 @@ class Cassandra:
         result = await self.execute_async(currency, 'transformed', query,
                                           [height_group, height])
         result = result.one()
-        if result is None:
+        if result is None or result['txs'] is None:
             return []
         return await self.list_txs_by_ids(currency, result['txs'])
 
