@@ -568,7 +568,7 @@ paths:
       tags:
       - blocks
       x-openapi-router-controller: openapi_server.controllers.blocks_controller
-  /{currency}/bulk.csv/{api}/{operation}:
+  /{currency}/bulk.csv/{operation}:
     post:
       operationId: bulk_csv
       parameters:
@@ -580,22 +580,6 @@ paths:
         required: true
         schema:
           format: string
-          type: string
-        style: simple
-      - description: The api of the operation to execute in bulk
-        example: blocks
-        explode: false
-        in: path
-        name: api
-        required: true
-        schema:
-          enum:
-          - blocks
-          - addresses
-          - entities
-          - txs
-          - rates
-          - tags
           type: string
         style: simple
       - description: The operation to execute in bulk
@@ -651,7 +635,7 @@ paths:
       x-streamed: true
       x-openapi-router-controller: openapi_server.controllers.bulk_controller
       x-codegen-request-body-name: body
-  /{currency}/bulk.json/{api}/{operation}:
+  /{currency}/bulk.json/{operation}:
     post:
       operationId: bulk_json
       parameters:
@@ -663,22 +647,6 @@ paths:
         required: true
         schema:
           format: string
-          type: string
-        style: simple
-      - description: The api of the operation to execute in bulk
-        example: blocks
-        explode: false
-        in: path
-        name: api
-        required: true
-        schema:
-          enum:
-          - blocks
-          - addresses
-          - entities
-          - txs
-          - rates
-          - tags
           type: string
         style: simple
       - description: The operation to execute in bulk
@@ -1407,23 +1375,6 @@ components:
           type: string
         type: array
       style: form
-    api:
-      description: The api of the operation to execute in bulk
-      example: blocks
-      explode: false
-      in: path
-      name: api
-      required: true
-      schema:
-        enum:
-        - blocks
-        - addresses
-        - entities
-        - txs
-        - rates
-        - tags
-        type: string
-      style: simple
     breadth:
       description: How many siblings of each neighbor should be tried
       explode: true

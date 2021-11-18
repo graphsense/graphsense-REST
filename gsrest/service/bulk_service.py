@@ -16,8 +16,11 @@ def bulk_csv(*args, **kwargs):
     return bulk(*args, **kwargs)
 
 
-async def bulk(request, currency, api, operation, body, form='csv'):
-    the_stack = stack(request, currency, api, operation, body, form)
+apis = ['addresses', 'entities', 'blocks', 'txs', 'rates', 'tags']
+
+
+async def bulk(request, currency, operation, body, form='csv'):
+    the_stack = stack(request, currency, operation, body, form)
     if form == 'csv':
         gen = to_csv(the_stack)
         mimetype = 'text/csv'
@@ -112,11 +115,14 @@ async def wrap(request, operation, currency, params, keys, format):
     return flat
 
 
-def stack(request, currency, api, operation, body, format):
+def stack(request, currency, operation, body, format):
     try:
-        mod = importlib.import_module(
-            f'gsrest.service.{api}_service')
-        operation = getattr(mod, operation)
+        for api in apis:
+            mod = importlib.import_module(
+                f'gsrest.service.{api}_service')
+            if hasattr(mod, operation):
+                operation = getattr(mod, operation)
+                break
     except ModuleNotFoundError:
         raise RuntimeError(f'API {api} not found')
     except AttributeError:

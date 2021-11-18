@@ -7,15 +7,13 @@ import gsrest.service.bulk_service as service
 from openapi_server import util
 
 
-async def bulk_csv(request: web.Request, currency, api, operation, body) -> web.Response:
+async def bulk_csv(request: web.Request, currency, operation, body) -> web.Response:
     """Get data as CSV in bulk
 
     
 
     :param currency: The cryptocurrency code (e.g., btc)
     :type currency: str
-    :param api: The api of the operation to execute in bulk
-    :type api: str
     :param operation: The operation to execute in bulk
     :type operation: str
     :param body: Map of the operation&#39;s parameter names to (arrays of) values
@@ -23,11 +21,11 @@ async def bulk_csv(request: web.Request, currency, api, operation, body) -> web.
 
     """
     try:
-        if 'currency' in ['','currency','api','operation','body']:
+        if 'currency' in ['','currency','operation','body']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.bulk_csv(request
-                ,currency=currency,api=api,operation=operation,body=body)
+                ,currency=currency,operation=operation,body=body)
         return result
     except RuntimeError as e:
         traceback.print_exception(type(e), e, e.__traceback__)
@@ -43,15 +41,13 @@ async def bulk_csv(request: web.Request, currency, api, operation, body) -> web.
         raise web.HTTPInternalServerError()
 
 
-async def bulk_json(request: web.Request, currency, api, operation, body) -> web.Response:
+async def bulk_json(request: web.Request, currency, operation, body) -> web.Response:
     """Get data as JSON in bulk
 
     
 
     :param currency: The cryptocurrency code (e.g., btc)
     :type currency: str
-    :param api: The api of the operation to execute in bulk
-    :type api: str
     :param operation: The operation to execute in bulk
     :type operation: str
     :param body: Map of the operation&#39;s parameter names to (arrays of) values
@@ -59,11 +55,11 @@ async def bulk_json(request: web.Request, currency, api, operation, body) -> web
 
     """
     try:
-        if 'currency' in ['','currency','api','operation','body']:
+        if 'currency' in ['','currency','operation','body']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.bulk_json(request
-                ,currency=currency,api=api,operation=operation,body=body)
+                ,currency=currency,operation=operation,body=body)
         return result
     except RuntimeError as e:
         traceback.print_exception(type(e), e, e.__traceback__)
