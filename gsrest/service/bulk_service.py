@@ -19,8 +19,8 @@ def bulk_csv(*args, **kwargs):
 apis = ['addresses', 'entities', 'blocks', 'txs', 'rates', 'tags']
 
 
-async def bulk(request, currency, operation, body, form='csv'):
-    the_stack = stack(request, currency, operation, body, form)
+async def bulk(request, currency, operation, body, num_pages, form='csv'):
+    the_stack = stack(request, currency, operation, body, num_pages, form)
     if form == 'csv':
         gen = to_csv(the_stack)
         mimetype = 'text/csv'
@@ -83,7 +83,7 @@ def flatten(item, name="", flat_dict=None, format=None):
     return flat_dict
 
 
-async def wrap(request, operation, currency, params, keys, format):
+async def wrap(request, operation, currency, params, keys, num_pages, format):
     params = dict(params)
     for (k, v) in keys.items():
         params[k] = v
@@ -100,22 +100,24 @@ async def wrap(request, operation, currency, params, keys, format):
             if k != 'next_page':
                 rows = result[k]
                 break
-        page_state = result['next_page']
+        page_state = result.get('next_page', None)
     flat = []
     for row in rows:
         fl = flatten(row, format=format)
         for (k, v) in keys.items():
             fl['request_'+k] = v
         flat.append(fl)
-    if page_state:
+    num_pages -= 1
+    if num_pages > 0 and page_state:
         params['page'] = page_state
-        more = await wrap(request, operation, currency, params, keys, format)
+        more = await wrap(request, operation, currency, params, keys,
+                          num_pages, format)
         for row in more:
             flat.append(row)
     return flat
 
 
-def stack(request, currency, operation, body, format):
+def stack(request, currency, operation, body, num_pages, format):
     try:
         for api in apis:
             mod = importlib.import_module(
@@ -149,7 +151,8 @@ def stack(request, currency, operation, body, format):
         the_keys = {}
         for (k, v) in keys.items():
             the_keys[k] = v[i]
-        aw = wrap(request, operation, currency, params, the_keys, format)
+        aw = wrap(request, operation, currency, params, the_keys, num_pages,
+                  format)
 
         aws.append(aw)
 

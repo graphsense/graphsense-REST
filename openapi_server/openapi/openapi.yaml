@@ -609,6 +609,15 @@ paths:
           - get_exchange_rates
           type: string
         style: simple
+      - description: Number of pages to retrieve for operations with list response
+        example: 1
+        explode: true
+        in: query
+        name: num_pages
+        required: true
+        schema:
+          type: integer
+        style: form
       requestBody:
         content:
           application/json:
@@ -676,6 +685,15 @@ paths:
           - get_exchange_rates
           type: string
         style: simple
+      - description: Number of pages to retrieve for operations with list response
+        example: 1
+        explode: true
+        in: query
+        name: num_pages
+        required: true
+        schema:
+          type: integer
+        style: form
       requestBody:
         content:
           application/json:
@@ -1453,19 +1471,6 @@ components:
       schema:
         $ref: '#/components/schemas/entity_id'
       style: form
-    form:
-      description: The response data format
-      explode: true
-      in: query
-      name: form
-      required: false
-      schema:
-        default: csv
-        enum:
-        - csv
-        - json
-        type: string
-      style: form
     height:
       description: The block height
       example: 1
@@ -1548,6 +1553,16 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/address_id'
+      style: form
+    num_pages:
+      description: Number of pages to retrieve for operations with list response
+      example: 1
+      explode: true
+      in: query
+      name: num_pages
+      required: true
+      schema:
+        type: integer
       style: form
     only_entity_ids:
       description: Restrict result to given set of comma separated IDs

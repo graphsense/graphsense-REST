@@ -7,7 +7,7 @@ import gsrest.service.bulk_service as service
 from openapi_server import util
 
 
-async def bulk_csv(request: web.Request, currency, operation, body) -> web.Response:
+async def bulk_csv(request: web.Request, currency, operation, num_pages, body) -> web.Response:
     """Get data as CSV in bulk
 
     
@@ -16,16 +16,18 @@ async def bulk_csv(request: web.Request, currency, operation, body) -> web.Respo
     :type currency: str
     :param operation: The operation to execute in bulk
     :type operation: str
+    :param num_pages: Number of pages to retrieve for operations with list response
+    :type num_pages: int
     :param body: Map of the operation&#39;s parameter names to (arrays of) values
     :type body: 
 
     """
     try:
-        if 'currency' in ['','currency','operation','body']:
+        if 'currency' in ['','currency','operation','num_pages','body']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.bulk_csv(request
-                ,currency=currency,operation=operation,body=body)
+                ,currency=currency,operation=operation,num_pages=num_pages,body=body)
         return result
     except RuntimeError as e:
         traceback.print_exception(type(e), e, e.__traceback__)
@@ -41,7 +43,7 @@ async def bulk_csv(request: web.Request, currency, operation, body) -> web.Respo
         raise web.HTTPInternalServerError()
 
 
-async def bulk_json(request: web.Request, currency, operation, body) -> web.Response:
+async def bulk_json(request: web.Request, currency, operation, num_pages, body) -> web.Response:
     """Get data as JSON in bulk
 
     
@@ -50,16 +52,18 @@ async def bulk_json(request: web.Request, currency, operation, body) -> web.Resp
     :type currency: str
     :param operation: The operation to execute in bulk
     :type operation: str
+    :param num_pages: Number of pages to retrieve for operations with list response
+    :type num_pages: int
     :param body: Map of the operation&#39;s parameter names to (arrays of) values
     :type body: 
 
     """
     try:
-        if 'currency' in ['','currency','operation','body']:
+        if 'currency' in ['','currency','operation','num_pages','body']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.bulk_json(request
-                ,currency=currency,operation=operation,body=body)
+                ,currency=currency,operation=operation,num_pages=num_pages,body=body)
         return result
     except RuntimeError as e:
         traceback.print_exception(type(e), e, e.__traceback__)

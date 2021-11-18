@@ -3,7 +3,7 @@ from gsrest.test.blocks_service import block, block2
 
 async def bulk_csv(test_case):
     body = {'height': [1, 2]}
-    path = '/{currency}/bulk.csv/get_block'
+    path = '/{currency}/bulk.csv/get_block?num_pages=1'
     headers = {
         'Accept': 'application/json',
     }
@@ -22,7 +22,7 @@ async def bulk_csv(test_case):
 
 async def bulk_json(test_case):
     body = {'height': [1, 2]}
-    path = '/{currency}/bulk.json/get_block'
+    path = '/{currency}/bulk.json/get_block?num_pages=1'
     result = await test_case.requestWithCodeAndBody(
                         path, 200, body,
                         currency="btc",
