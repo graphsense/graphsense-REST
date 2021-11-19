@@ -11,7 +11,7 @@ class TestCassandra(BaseTestCase):
         query = "select tx_id from transaction where tx_id_group = %s"
         params = [[0], [1]]
         result = asyncio.run(db.concurrent_with_args("btc", "raw", query,
-                                                     params, one=False))
+                                                     params, return_one=False))
         pprint.pprint(result)
         txs = [[{'tx_id': 345},
                 {'tx_id': 456},
