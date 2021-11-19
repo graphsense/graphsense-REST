@@ -47,6 +47,12 @@ def replacePerc(query):
     return r.sub('?', query)
 
 
+def one(result):
+    if result is not None:
+        return result.one()
+    return None
+
+
 class Result:
     def __init__(self, current_rows, params, paging_state):
         self.current_rows = current_rows
@@ -127,7 +133,7 @@ class Cassandra:
         query = ("SELECT * FROM system_schema.keyspaces "
                  "where keyspace_name = %s")
         result = self.session.execute(query, [keyspace])
-        if result is None or result.one() is None:
+        if one(result) is None:
             raise BadConfigError("Keyspace {} does not exist".format(keyspace))
 
     def load_parameters(self, keyspace):
@@ -135,7 +141,7 @@ class Cassandra:
         for kind in ['raw', 'transformed']:
             query = "SELECT * FROM configuration"
             result = self.execute(keyspace, kind, query)
-            if result is None or result.one() is None:
+            if one(result) is None:
                 raise BadConfigError(
                     "No configuration table found for keyspace {}"
                     .format(keyspace))
@@ -256,7 +262,7 @@ class Cassandra:
             if filter_empty and result is None:
                 continue
             if one:
-                o = result.one()
+                o = one(result)
                 if not keep_meta:
                     result = o
                 else:
@@ -278,7 +284,7 @@ class Cassandra:
     async def get_currency_statistics(self, currency):
         query = "SELECT * FROM summary_statistics LIMIT 1"
         result = await self.execute_async(currency, 'transformed', query)
-        return result.one()
+        return one(result)
 
     @eth
     # @Timer(text="Timer: get_block {:.2f}")
@@ -307,7 +313,7 @@ class Cassandra:
                  "block_id_group = %s and block_id = %s")
         result = await self.execute_async(currency, 'raw', query,
                                           [height_group, height])
-        if result is None or result.one() is None:
+        if one(result) is None:
             return None
         txs = [tx.tx_id for tx in result.one()['txs']]
         return await self.list_txs_by_ids(currency, txs)
@@ -317,9 +323,9 @@ class Cassandra:
         query = "SELECT * FROM exchange_rates WHERE block_id = %s"
         result = await self.execute_async(currency, 'transformed', query,
                                           [height])
+        result = one(result)
         if result is None:
             return None
-        result = result.one()
         return self.markup_rates(currency, result)
 
     # @Timer(text="Timer: list_rates {:.2f}")
@@ -410,7 +416,7 @@ class Cassandra:
         result = await self.execute_async(
                               currency, 'transformed',
                               query, [prefix[:prefix_length], address])
-        result = result.one()
+        result = one(result)
         return result['address_id'] if result else None
 
     # @Timer(text="Timer: get_address_id_id_group {:.2f}")
@@ -449,7 +455,7 @@ class Cassandra:
                  " AND address_id_group = %s")
         result = await self.execute_async(currency, 'transformed', query,
                                           [address_id, address_id_group])
-        result = result.one()
+        result = one(result)
         if not result:
             return None
 
@@ -480,7 +486,7 @@ class Cassandra:
                 "address_id_group = %s AND address_id = %s "
         result = await self.execute_async(currency, 'transformed', query,
                                           [address_id_group, address_id])
-        result = result.one()
+        result = one(result)
         if not result:
             return None
         return result['cluster_id']
@@ -677,7 +683,7 @@ class Cassandra:
                  "WHERE cluster_id_group = %s AND cluster_id = %s ")
         result = await self.execute_async(currency, 'transformed', query,
                                           [entity_id_group, entity])
-        result = result.one()
+        result = one(result)
         if not result:
             return None
         return (await self.finish_entities(currency, [result]))[0]
@@ -936,7 +942,7 @@ class Cassandra:
                  'tx_prefix=%s and tx_hash=%s')
         params = [tx_hash[:prefix['tx']], bytearray.fromhex(tx_hash)]
         result = await self.execute_async(currency, 'raw', query, params)
-        result = result.one()
+        result = one(result)
         if not result:
             raise RuntimeError(
                 f'Transaction {tx_hash} not found in {currency}')
@@ -949,7 +955,7 @@ class Cassandra:
         query = (f'SELECT {fields} FROM transaction WHERE '
                  'tx_id_group = %s and tx_id = %s')
         result = await self.execute_async(currency, 'raw', query, params)
-        return result.one()
+        return one(result)
 
     # @Timer(text="Timer: list_txs {:.2f}")
     def list_txs(self, currency, page=None):
@@ -1007,7 +1013,7 @@ class Cassandra:
         statement = ('SELECT tx_id from transaction_by_tx_prefix where '
                      'tx_prefix=%s and tx_hash=%s')
         result = await self.execute_async(currency, 'raw', statement, params)
-        result = result.one()
+        result = one(result)
         if not result:
             return None
         return self.get_tx_by_id(currency, result['tx_id'])
@@ -1173,7 +1179,7 @@ class Cassandra:
             "address_id_group = %s AND address_id = %s")
         result = await self.execute_async(currency, 'transformed', query,
                                           [id_group, entity])
-        result = result.one()
+        result = one(result)
         if not result:
             return None
 
@@ -1225,7 +1231,7 @@ class Cassandra:
         id_id_group = [self.get_id_group(currency, entity), entity]
         result = await self.execute_async(currency, 'transformed', query,
                                           id_id_group)
-        result = result.one()
+        result = one(result)
         if result is None:
             return None
         address = result['address']
@@ -1250,7 +1256,7 @@ class Cassandra:
                  "block_id_group = %s and block_id = %s")
         result = await self.execute_async(currency, 'transformed', query,
                                           [height_group, height])
-        result = result.one()
+        result = one(result)
         if result is None or result['txs'] is None:
             return []
         return await self.list_txs_by_ids(currency, result['txs'])
@@ -1328,7 +1334,7 @@ class Cassandra:
             ' where transaction_id_group = %s and transaction_id = %s')
         result = await self.execute_async(currency, 'transformed', statement,
                                           params)
-        result = result.one()
+        result = one(result)
         if not result:
             return None
         return await self.get_tx_by_hash(currency,
@@ -1358,7 +1364,7 @@ class Cassandra:
             'from_address, to_address from '
             'transaction where tx_hash_prefix=%s and tx_hash=%s')
         result = await self.execute_async(currency, 'raw', statement, params)
-        result = result.one()
+        result = one(result)
         if not result:
             return None
         result['from_address'] = eth_address_to_hex(result['from_address'])
