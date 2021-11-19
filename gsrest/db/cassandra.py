@@ -1251,13 +1251,17 @@ class Cassandra:
 
     # @Timer(text="Timer: list_block_txs_eth {:.2f}")
     async def list_block_txs_eth(self, currency, height):
-        height_group = self.get_block_id_group(currency, height)
+        height_group = self.get_id_group(currency, height)
         query = ("SELECT txs FROM block_transactions WHERE "
                  "block_id_group = %s and block_id = %s")
         result = await self.execute_async(currency, 'transformed', query,
                                           [height_group, height])
         result = one(result)
-        if result is None or result['txs'] is None:
+        if result is None:
+            raise RuntimeError(
+                f'Block {height} not found in currency {currency}')
+
+        if result['txs'] is None:
             return []
         return await self.list_txs_by_ids(currency, result['txs'])
 
