@@ -213,9 +213,16 @@ async def recursive_search(request, currency, entity, params, breadth, depth,
     neighbors = await cached(entity, 'neighbors',
                              lambda: list_neighbors(entity))
 
-    paths = []
+    if level < MAX_DEPTH:
+        mod = importlib.import_module(
+            f'openapi_server.models.search_result_level{level}')
+        levelClass = getattr(mod, f'SearchResultLevel{level}')
+    else:
+        mod = importlib.import_module(
+            'openapi_server.models.search_result_leaf')
+        levelClass = getattr(mod, 'SearchResultLeaf')
 
-    for neighbor in neighbors:
+    async def handle_neighbor(neighbor):
         match = True
         props = await cached(int(neighbor.id), 'props',
                              lambda: get_entity(request,
@@ -223,7 +230,7 @@ async def recursive_search(request, currency, entity, params, breadth, depth,
                                                 include_tags=True,
                                                 tag_coherence=False))
         if props is None:
-            continue
+            return
 
         if 'category' in params:
             # find first occurrence of category in tags
@@ -272,28 +279,34 @@ async def recursive_search(request, currency, entity, params, breadth, depth,
                                               direction, cache)
 
         if not subpaths:
+            return
+
+        return {'props': props,
+                'neighbor': neighbor,
+                'subpaths': subpaths,
+                'matching_addresses': matching_addresses}
+
+    aws = [handle_neighbor(neighbor) for neighbor in neighbors]
+
+    paths = []
+
+    for result in await asyncio.gather(*aws):
+        if not result:
             continue
 
-        if level < MAX_DEPTH:
-            mod = importlib.import_module(
-                f'openapi_server.models.search_result_level{level}')
-            levelClass = getattr(mod, f'SearchResultLevel{level}')
-        else:
-            mod = importlib.import_module(
-                'openapi_server.models.search_result_leaf')
-            levelClass = getattr(mod, 'SearchResultLeaf')
-        obj = levelClass(node=props, relation=neighbor,
+        obj = levelClass(node=result['props'], relation=result['neighbor'],
                          matching_addresses=[])
-        if subpaths is True:
+        if result['subpaths'] is True:
             aws = [get_address(request, currency, address, True)
-                   for address in matching_addresses]
+                   for address in result['matching_addresses']]
             addresses_with_tags = await asyncio.gather(*aws)
             obj.matching_addresses = [address for address in
                                       addresses_with_tags
                                       if address is not None]
-            subpaths = None
-        obj.paths = subpaths
+            result['subpaths'] = None
+        obj.paths = result['subpaths']
         paths.append(obj)
+
     return paths
 
 
