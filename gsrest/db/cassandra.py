@@ -252,7 +252,7 @@ class Cassandra:
                       fetch_size=fetch_size)
 
     async def concurrent_with_args(self, currency, keyspace_type, query,
-                                   params, filter_empty=True, one=True,
+                                   params, filter_empty=True, return_one=True,
                                    keep_meta=False):
         aws = [self.execute_async(currency, keyspace_type, query, param,
                                   autopaging=True)
@@ -261,7 +261,7 @@ class Cassandra:
         for result in await asyncio.gather(*aws):
             if filter_empty and result is None:
                 continue
-            if one:
+            if return_one:
                 o = one(result)
                 if not keep_meta:
                     result = o
@@ -854,7 +854,7 @@ class Cassandra:
             query = ('select cluster_id, label from cluster_tags where '
                      'cluster_id_group = %s and cluster_id = %s')
             results = await self.concurrent_with_args(
-                currency, 'transformed', query, params, one=False)
+                currency, 'transformed', query, params, return_one=False)
             i = 0
             for result in results:
                 while nodes[i][key] != result[0]['cluster_id']:
@@ -867,7 +867,7 @@ class Cassandra:
             query = ('select address_id, label from address_tags where '
                      'address_id = %s and address_id_group = %s')
             results = await self.concurrent_with_args(
-                currency, 'transformed', query, params, one=False)
+                currency, 'transformed', query, params, return_one=False)
             i = 0
             for result in results:
                 while nodes[i][key] != result[0]['address_id']:
@@ -1532,7 +1532,7 @@ class Cassandra:
             query = ('select address_id, label from address_tags where '
                      'address_id=%s and address_id_group=%s')
             results = await self.concurrent_with_args(
-                currency, 'transformed', query, params, one=False)
+                currency, 'transformed', query, params, return_one=False)
             i = 0
             for result in results:
                 while nodes[i][key] != result[0]['address_id']:
