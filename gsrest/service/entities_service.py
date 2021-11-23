@@ -3,7 +3,7 @@ from gsrest.service.rates_service import get_rates
 from openapi_server.models.entity import Entity
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.address_txs import AddressTxs
-from gsrest.util.values import compute_balance, convert_value, to_values
+from gsrest.util.values import convert_value, to_values
 from openapi_server.models.entity_tag import EntityTag
 from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.tags import Tags
@@ -36,13 +36,7 @@ def from_row(currency, row, rates, tags=None):
         total_spent=to_values(row['total_spent']),
         in_degree=row['in_degree'],
         out_degree=row['out_degree'],
-        balance=convert_value(
-                currency,
-                compute_balance(
-                    row['total_received'].value,
-                    row['total_spent'].value,
-                ),
-                rates),
+        balance=convert_value(currency, row['balance'], rates),
         tags=tags
         )
 
@@ -134,12 +128,7 @@ async def list_entity_addresses(request, currency, entity,
             total_spent=to_values(row['total_spent']),
             in_degree=row['in_degree'],
             out_degree=row['out_degree'],
-            balance=convert_value(
-                    currency,
-                    compute_balance(
-                        row['total_received'].value,
-                        row['total_spent'].value,
-                    ), rates)
+            balance=convert_value(currency, row['balance'], rates)
             )
             for row in addresses]
     return EntityAddresses(next_page=paging_state, addresses=addresses)

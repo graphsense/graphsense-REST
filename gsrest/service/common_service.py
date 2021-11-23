@@ -3,7 +3,7 @@ from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.neighbors import Neighbors
 from openapi_server.models.neighbor import Neighbor
-from gsrest.util.values import compute_balance, convert_value, to_values
+from gsrest.util.values import convert_value, to_values
 from gsrest.service.rates_service import get_rates
 from openapi_server.models.link_utxo import LinkUtxo
 from openapi_server.models.links import Links
@@ -30,13 +30,7 @@ def address_from_row(currency, row, rates, tags=None):
         total_spent=to_values(row['total_spent']),
         in_degree=row['in_degree'],
         out_degree=row['out_degree'],
-        balance=convert_value(
-                currency,
-                compute_balance(
-                    row['total_received'].value,
-                    row['total_spent'].value,
-                ),
-                rates),
+        balance=convert_value(currency, row['balance'], rates),
         tags=tags
         )
 
@@ -130,13 +124,7 @@ async def list_neighbors(request, currency, id, direction, node_type, ids=None,
             labels=row['labels'] if 'labels' in row else None,
             received=to_values(row['total_received']),
             value=to_values(row['value']),
-            balance=convert_value(
-                currency,
-                compute_balance(
-                    row['total_received'].value,
-                    row['total_spent'].value,
-                ),
-                rates),
+            balance=convert_value(currency, row['balance'], rates),
             no_txs=row['no_transactions']))
     return Neighbors(next_page=paging_state,
                      neighbors=relations)

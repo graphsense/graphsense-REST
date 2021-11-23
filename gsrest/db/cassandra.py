@@ -392,7 +392,8 @@ class Cassandra:
                                    address_only=False):
         params = [(self.get_id_group(currency, address_id),
                    address_id) for address_id in address_ids]
-        fields = 'address' if address_only else '*'
+        fields = 'address, address_id, address_id_group' \
+            if address_only else '*'
         query = (f"SELECT {fields} FROM address WHERE "
                  "address_id_group = %s and address_id = %s")
         result = await self.concurrent_with_args(
@@ -810,7 +811,9 @@ class Cassandra:
 
         if orig_node_type == 'entity' and currency == 'eth':
             for neighbor in results:
-                neighbor[that + '_cluster_id'] = neighbor[that + '_address_id']
+                neighbor['address_id'] = \
+                    neighbor[that + '_cluster_id'] = \
+                    neighbor[that + '_address_id']
 
         if orig_node_type == 'address':
             ids = [row[that+'_address_id'] for row in results]
@@ -839,6 +842,13 @@ class Cassandra:
 
         if include_labels:
             await self.include_labels(currency, node_type, that, results)
+
+        if currency == 'eth':
+            for row in results:
+                row['address_id'] = row[that + '_address_id']
+        aws = [self.add_balance(currency, row) for row in results]
+
+        await asyncio.gather(*aws)
 
         return results, to_hex(paging_state)
 
@@ -1099,6 +1109,7 @@ class Cassandra:
             self.markup_currency(currency, row['total_received'])
         row['total_spent'] = \
             self.markup_currency(currency, row['total_spent'])
+        await self.add_balance(currency, row)
 
         if not with_txs:
             return row
@@ -1132,6 +1143,7 @@ class Cassandra:
             self.markup_currency(currency, row['total_received'])
         row['total_spent'] = \
             self.markup_currency(currency, row['total_spent'])
+        await self.add_balance(currency, row)
 
         if not with_txs:
             return row
@@ -1156,6 +1168,26 @@ class Cassandra:
             timestamp=tx2['block_timestamp'],
             height=tx2['block_id'])
         return row
+
+    @eth
+    async def add_balance(self, currency, row):
+        row['balance'] = row['total_received'].value - row['total_spent'].value
+
+    async def add_balance_eth(self, currency, row):
+        if 'address_id_group' not in row:
+            row['address_id_group'] = \
+                self.get_id_group(currency, row['address_id'])
+        query = 'SELECT balance from balance where address_id=%s '\
+                'and address_id_group=%s'
+        result = await self.execute_async(
+                        currency, 'transformed', query,
+                        [row['address_id'], row['address_id_group']])
+        result = one(result)
+        if result is None:
+            result = {'balance':
+                      row['total_received'].value
+                      - row['total_spent'].value}
+        row['balance'] = result['balance']
 
 #####################
 # ETHEREUM VARIANTS #
@@ -1206,6 +1238,8 @@ class Cassandra:
     async def list_entities_eth(self, currency, ids, page=None, pagesize=None,
                                 fields=['*']):
         fields = ['address_id' if i == 'cluster_id' else i for i in fields]
+        if '*' not in fields:
+            fields += ['address_id', 'address_id_group']
         flds = ','.join(fields)
         query = f"SELECT {flds} FROM address"
         has_ids = isinstance(ids, list)

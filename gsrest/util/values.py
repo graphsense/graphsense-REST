@@ -11,10 +11,6 @@ def make_values(value, eur, usd):
             )
 
 
-def compute_balance(total_received_value, total_spent_value):
-    return total_received_value - total_spent_value
-
-
 def convert_value(currency, value, rates):
     if currency == 'eth':
         factor = 1e-18
