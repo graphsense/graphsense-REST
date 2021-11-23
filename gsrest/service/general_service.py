@@ -6,8 +6,8 @@ from openapi_server.models.search_result_by_currency \
     import SearchResultByCurrency
 from gsrest.service.stats_service import get_currency_statistics
 from gsrest.service.txs_service import list_matching_txs
-from gsrest.service.tags_service import list_labels
 from gsrest.service.addresses_service import list_matching_addresses
+from gsrest.util.string_edit import alphanumeric_lower
 
 
 async def get_statistics(request):
@@ -27,7 +27,7 @@ async def get_statistics(request):
                  request_timestamp=tstamp)
 
 
-async def search(request, q, currency=None, limit=None):
+async def search(request, q, currency=None, limit=10):
     db = request.app['db']
     currencies = db.get_supported_currencies()
 
@@ -43,10 +43,12 @@ async def search(request, q, currency=None, limit=None):
                     txs=[]
                     )
 
+        expression_norm = alphanumeric_lower(q)
+
         [txs, addresses, labels] = await asyncio.gather(
             list_matching_txs(request, curr, q),
             list_matching_addresses(request, curr, q),
-            list_labels(request, curr, q)
+            db.list_labels(curr, expression_norm, limit)
         )
 
         # TODO improve by letting db limit the result during query

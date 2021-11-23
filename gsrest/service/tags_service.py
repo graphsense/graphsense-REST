@@ -52,22 +52,6 @@ async def list_tags(request, label, currency=None):
                              for row in entity_tags])
 
 
-async def list_labels(request, currency, expression):
-    # Normalize label
-    expression_norm = alphanumeric_lower(expression)
-    db = request.app['db']
-    result = await db.list_labels(currency, expression_norm)
-
-    if currency:
-        return list(dict.fromkeys([
-            row['label'] for row in result
-            if row['label_norm'].startswith(expression_norm) and
-            row['currency'].lower() == currency]))
-    return list(dict.fromkeys([
-        row['label'] for row in result
-        if row['label_norm'].startswith(expression_norm)]))
-
-
 async def list_concepts(request, taxonomy):
     db = request.app['db']
     rows = await db.list_concepts(taxonomy)

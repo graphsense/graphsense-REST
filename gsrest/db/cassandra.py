@@ -881,7 +881,7 @@ class Cassandra:
         prefix_length = self.get_prefix_lengths(currency)['label']
         label_norm_prefix = label[:prefix_length]
         query = ("SELECT * FROM address_tag_by_label WHERE "
-                 "label_norm_prefix = %s and label_norm = %s")
+                 "label_norm_prefix = %s and label_norm = %s LIMIT 1000")
         rows = await self.execute_async(currency, 'transformed', query,
                                         [label_norm_prefix, label])
         if rows is None:
@@ -897,26 +897,39 @@ class Cassandra:
         prefix_length = self.get_prefix_lengths(currency)['label']
         label_norm_prefix = label[:prefix_length]
         query = ("SELECT * FROM cluster_tag_by_label WHERE "
-                 "label_norm_prefix = %s and label_norm = %s")
+                 "label_norm_prefix = %s and label_norm = %s LIMIT 1000")
         rows = await self.execute_async(currency, 'transformed', query,
                                         [label_norm_prefix, label])
         if rows is None:
             return []
         return rows.current_rows
 
-    async def list_labels(self, currency, expression_norm):
+    async def list_labels(self, currency, expression_norm, limit):
         prefix_lengths = self.get_prefix_lengths(currency)
         if len(expression_norm) < prefix_lengths['label']:
             return []
         expression_norm_prefix = expression_norm[:prefix_lengths['label']]
-        query = ("SELECT label, label_norm, currency FROM address_tag_by_label"
-                 " WHERE label_norm_prefix = %s GROUP BY label_norm_prefix, "
-                 "label_norm")
-        result = await self.execute_async(currency, 'transformed', query,
-                                          [expression_norm_prefix])
-        if result.is_empty():
-            return []
-        return result.current_rows
+        query = "SELECT label, label_norm FROM address_tag_by_label"\
+                " WHERE label_norm_prefix = %s"
+        labels = []
+        prev_label = None
+        page_state = True
+        while len(labels) < limit and page_state:
+            if page_state is True:
+                page_state = None
+            result = await self.execute_async(currency, 'transformed', query,
+                                              [expression_norm_prefix],
+                                              paging_state=page_state,
+                                              fetch_size=SEARCH_PAGE_SIZE)
+            for row in result.current_rows:
+                if not row['label_norm'].startswith(expression_norm):
+                    continue
+                if prev_label == row['label']:
+                    continue
+                labels.append(row['label'])
+                prev_label = row['label']
+
+        return labels
 
     # @Timer(text="Timer: list_concepts {:.2f}")
     async def list_concepts(self, taxonomy):

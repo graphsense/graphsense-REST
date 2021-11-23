@@ -38,6 +38,8 @@ paths:
         name: limit
         required: false
         schema:
+          default: 10
+          maximum: 100
           type: integer
         style: form
       responses:
@@ -1542,6 +1544,8 @@ components:
       name: limit
       required: false
       schema:
+        default: 10
+        maximum: 100
         type: integer
       style: form
     neighbor:
