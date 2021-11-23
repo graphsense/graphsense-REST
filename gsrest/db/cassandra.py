@@ -614,13 +614,14 @@ class Cassandra:
 
         return list(links.values()), to_hex(paging_state)
 
-    async def list_matching_addresses(self, currency, expression):
+    async def list_matching_addresses(self, currency, expression, limit=10):
         prefix_lengths = self.get_prefix_lengths(currency)
         if len(expression) < prefix_lengths['address']:
             return []
         norm = identity
         prefix = self.scrub_prefix(currency, expression)
         prefix = prefix[:prefix_lengths['address']]
+        print(f'prefix {prefix}')
         if currency == 'eth':
             # eth addresses are case insensitive
             expression = expression.lower()
@@ -628,10 +629,11 @@ class Cassandra:
             prefix = prefix.upper()
         query = "SELECT address FROM address_ids_by_address_prefix "\
                 "WHERE address_prefix = %s"
-        result = None
-        paging_state = None
+        paging_state = True
         rows = []
-        while result is None or paging_state is not None:
+        while paging_state and len(rows) < limit:
+            if paging_state is True:
+                paging_state = None
             result = await self.execute_async(
                         currency, 'transformed', query, [prefix],
                         paging_state=paging_state,
@@ -992,19 +994,49 @@ class Cassandra:
             return [], None
         return results.current_rows, to_hex(results.paging_state)
 
-    @new
-    # @Timer(text="Timer: list_matching_txs {:.2f}")
-    async def list_matching_txs(self, currency, expression):
+    async def list_matching_txs(self, currency, expression, limit):
         prefix_lengths = self.get_prefix_lengths(currency)
         if len(expression) < prefix_lengths['tx']:
             return []
-        query = ('SELECT tx_hash from transaction_by_tx_prefix where '
-                 'tx_prefix=%s')
-        results = await self.execute_async(currency, 'raw', query,
-                                           [expression[:prefix_lengths['tx']]])
-        if results.is_empty():
-            return []
-        return results.current_rows
+        leading_zeros = 0
+        pos = 0
+        # leading zeros will be lost when casting to int
+        while expression[pos] == "0":
+            pos += 1
+            leading_zeros += 1
+        prefix = expression[:prefix_lengths['tx']]
+        if currency == 'eth':
+            prefix = prefix.upper()
+            kind = 'transformed'
+            key = 'transaction'
+            query = ('SELECT transaction from transaction_ids_by_transaction_'
+                     'prefix where transaction_prefix = %s')
+        else:
+            kind = 'raw'
+            key = 'tx_hash'
+            query = ('SELECT tx_hash from transaction_by_tx_prefix where '
+                     'tx_prefix=%s')
+        paging_state = True
+        rows = []
+        while paging_state and len(rows) < limit:
+            if paging_state is True:
+                paging_state = None
+            result = await self.execute_async(
+                        currency, kind, query,
+                        [prefix],
+                        paging_state=paging_state,
+                        fetch_size=SEARCH_PAGE_SIZE)
+            if result.is_empty():
+                break
+
+            txs = ["0" * leading_zeros +
+                   str(hex(int.from_bytes(row[key],
+                                          byteorder="big")))[2:]
+                   for row in result.current_rows]
+            rows += [tx for tx in txs if tx.startswith(expression)]
+            paging_state = result.paging_state
+
+        return rows
 
     @eth
     def scrub_prefix(self, currency, expression):
@@ -1610,21 +1642,6 @@ class Cassandra:
     def markup_rates(self, currency, row):
         row['rates'] = self.markup_values(currency, row['fiat_values'])
         return row
-
-    async def list_matching_txs_new(self, currency, expression):
-        prefix_lengths = self.get_prefix_lengths(currency)
-        if len(expression) < prefix_lengths['tx']:
-            return []
-        query = ('SELECT transaction from transaction_ids_by_transaction_pre'
-                 'fix where transaction_prefix = %s')
-        prefix = expression[:prefix_lengths['tx']].upper()
-        results = await self.execute_async(currency, 'transformed', query,
-                                           [prefix])
-        if results.is_empty():
-            return []
-        for row in results.current_rows:
-            row['tx_hash'] = row['transaction']
-        return results.current_rows
 
     # @Timer(text="Timer: list_tags_new {:.2f}")
     def list_tags_new(self, currency, label):

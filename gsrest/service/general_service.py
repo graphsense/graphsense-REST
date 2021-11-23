@@ -5,8 +5,6 @@ from openapi_server.models.search_result import SearchResult
 from openapi_server.models.search_result_by_currency \
     import SearchResultByCurrency
 from gsrest.service.stats_service import get_currency_statistics
-from gsrest.service.txs_service import list_matching_txs
-from gsrest.service.addresses_service import list_matching_addresses
 from gsrest.util.string_edit import alphanumeric_lower
 
 
@@ -46,14 +44,14 @@ async def search(request, q, currency=None, limit=10):
         expression_norm = alphanumeric_lower(q)
 
         [txs, addresses, labels] = await asyncio.gather(
-            list_matching_txs(request, curr, q),
-            list_matching_addresses(request, curr, q),
+            db.list_matching_txs(curr, q, limit),
+            db.list_matching_addresses(curr, q, limit),
             db.list_labels(curr, expression_norm, limit)
         )
 
         # TODO improve by letting db limit the result during query
         element.txs = txs[:limit]
-        element.addresses = addresses[:limit]
+        element.addresses = addresses
 
         result.currencies.append(element)
 

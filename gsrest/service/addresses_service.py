@@ -55,8 +55,3 @@ async def get_address_entity(request, currency, address, include_tags=False,
         raise e
 
     return result
-
-
-async def list_matching_addresses(request, currency, expression):
-    db = request.app['db']
-    return await db.list_matching_addresses(currency, expression)
