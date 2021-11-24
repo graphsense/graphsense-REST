@@ -32,31 +32,39 @@ async def search(request, q, currency=None, limit=10):
     q = q.strip()
     result = SearchResult(currencies=[], labels=[])
 
-    for curr in currencies:
-        if currency is not None and currency.lower() != curr.lower():
-            continue
-        element = SearchResultByCurrency(
-                    currency=curr,
-                    addresses=[],
-                    txs=[]
-                    )
+    currs = [curr for curr in currencies
+             if currency is None or currency.lower() == curr.lower()]
 
-        expression_norm = alphanumeric_lower(q)
+    expression_norm = alphanumeric_lower(q)
 
-        [txs, addresses, labels] = await asyncio.gather(
+    async def s(curr):
+        r = SearchResultByCurrency(currency=curr,
+                                   addresses=[],
+                                   txs=[])
+
+        [txs, addresses] = await asyncio.gather(
             db.list_matching_txs(curr, q, limit),
             db.list_matching_addresses(curr, q, limit),
-            db.list_matching_labels(curr, expression_norm, limit)
         )
 
-        # TODO improve by letting db limit the result during query
-        element.txs = txs[:limit]
-        element.addresses = addresses
+        r.txs = txs
+        r.addresses = addresses
+        return r
 
-        result.currencies.append(element)
+    aws1 = [s(curr) for curr in currs]
+    aws2 = [db.list_matching_labels(curr, expression_norm, limit)
+            for curr in currs]
 
+    aw1 = asyncio.gather(*aws1)
+    aw2 = asyncio.gather(*aws2)
+
+    [r1, r2] = await asyncio.gather(aw1, aw2)
+
+    result.currencies = r1
+    for labels in r2:
         if labels:
             result.labels += labels
-        result.labels = list(set(result.labels))
+
+    result.labels = sorted(list(set(result.labels)), key=lambda x: x.lower())
 
     return result
