@@ -1,7 +1,6 @@
 from openapi_server.models.address import Address
 from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.entity_tag import EntityTag
-from openapi_server.models.tags import Tags
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.neighbors import Neighbors
 from openapi_server.models.neighbor import Neighbor
@@ -433,10 +432,7 @@ entityWithTagsOfAddressWithTags = Entity(
             value=115422577,
             usd=2.31,
             eur=1.15),
-   tags=Tags(
-       entity_tags=[etag2, etag],
-       address_tags=[atag2, atag1],
-       tag_coherence=None)
+   tags=[etag2, etag]
 )
 
 eth_address = Address(
@@ -564,8 +560,7 @@ eth_entityWithTags = Entity(
    out_degree=eth_address.out_degree,
    first_tx=eth_address.first_tx,
    balance=eth_address.balance,
-   tags=Tags(address_tags=[eth_tag, eth_tag2], entity_tags=[],
-             tag_coherence=None)
+   tags=[]
 )
 
 
@@ -651,12 +646,14 @@ async def list_tags_by_address(test_case):
     result = await test_case.request(path,
                                      currency='btc',
                                      address=addressWithTags.address)
-    assertEqual([tag.to_dict() for tag in addressWithTags.tags], result)
+    assertEqual([tag.to_dict() for tag in addressWithTags.tags],
+                result['address_tags'])
 
     result = await test_case.request(path,
                                      currency='eth',
                                      address=eth_addressWithTags.address)
-    assertEqual([tag.to_dict() for tag in eth_addressWithTags.tags], result)
+    assertEqual([tag.to_dict() for tag in eth_addressWithTags.tags],
+                result['address_tags'])
 
 
 async def list_address_neighbors(test_case):
@@ -690,17 +687,13 @@ async def get_address_entity(test_case):
     result = await test_case.request(path,
                                      currency='btc',
                                      address=address.address,
-                                     include_tags=True,
-                                     tag_coherence=False)
-    result['tags'].pop('tag_coherence', None)
+                                     include_tags=True)
     test_case.assertEqual(entityWithTagsOfAddressWithTags.to_dict(), result)
 
     result = await test_case.request(path,
                                      currency='eth',
                                      address=eth_address.address,
-                                     include_tags=True,
-                                     tag_coherence=False)
-    result['tags'].pop('tag_coherence', None)
+                                     include_tags=True)
     test_case.assertEqual(eth_entityWithTags.to_dict(), result)
 
 

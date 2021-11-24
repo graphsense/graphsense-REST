@@ -1,6 +1,7 @@
 from openapi_server.models.address import Address
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.address_tag import AddressTag
+from openapi_server.models.address_tags import AddressTags
 from openapi_server.models.neighbors import Neighbors
 from openapi_server.models.neighbor import Neighbor
 from gsrest.util.values import convert_value, to_values
@@ -63,7 +64,8 @@ async def get_address(request, currency, address, include_tags=False):
 
     tags = None
     if include_tags:
-        tags = await list_tags_by_address(request, currency, address)
+        tags = (await list_tags_by_address(request, currency, address)
+                ).address_tags
 
     if not result:
         raise RuntimeError("Address {} not found in currency {}".format(
@@ -73,9 +75,12 @@ async def get_address(request, currency, address, include_tags=False):
                              )['rates'], tags)
 
 
-async def list_tags_by_address(request, currency, address):
+async def list_tags_by_address(request, currency, address,
+                               page=None, pagesize=None):
     db = request.app['db']
-    results = await db.list_tags_by_address(currency, address)
+    results, next_page = \
+        await db.list_tags_by_address(currency, address,
+                                      page=page, pagesize=pagesize)
 
     if results is None:
         return []
@@ -92,7 +97,7 @@ async def list_tags_by_address(request, currency, address):
                     )
                     for row in results]
 
-    return address_tags
+    return AddressTags(address_tags=address_tags, next_page=next_page)
 
 
 async def list_neighbors(request, currency, id, direction, node_type, ids=None,

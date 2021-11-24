@@ -75,10 +75,7 @@ entityWithTags = Entity(
             value=115422577,
             usd=2.31,
             eur=1.15),
-   tags=Tags(
-       entity_tags=[tag2, tag],
-       address_tags=[atag2, atag1],
-       tag_coherence=0.5)
+   tags=[tag2, tag]
 )
 
 eth_entity = Entity(
@@ -96,8 +93,7 @@ eth_entity = Entity(
 )
 
 eth_entityWithTags = Entity(**eth_entity.to_dict())
-eth_entityWithTags.tags = Tags(address_tags=[eth_tag, eth_tag2],
-                               entity_tags=[])
+eth_entityWithTags.tags = []
 
 eth_neighbors = []
 for n in eth_addressWithTagsOutNeighbors.neighbors:
@@ -213,41 +209,48 @@ entityWithTagsAddresses = EntityAddresses(
 
 async def get_entity(test_case):
     path = '/{currency}/entities/{entity}'\
-           '?include_tags={include_tags}&tag_coherence={tag_coherence}'
+           '?include_tags={include_tags}'
     result = await test_case.request(path,
                                      currency='btc',
                                      entity=entityWithTags.entity,
-                                     include_tags=True,
-                                     tag_coherence=True)
+                                     include_tags=True)
 
-    # tag_coherence tested by tests/util/test_tag_coherence.py so hardcode here
-    test_case.assertIsNot(result['tags']['tag_coherence'], None)
-    result['tags']['tag_coherence'] = 0.5
     test_case.assertEqual(entityWithTags.to_dict(), result)
 
     result = await test_case.request(path,
                                      currency='eth',
                                      entity=eth_entity.entity,
-                                     include_tags=True,
-                                     tag_coherence=False)
+                                     include_tags=True)
 
     test_case.assertEqual(eth_entityWithTags.to_dict(), result)
 
 
 async def list_tags_by_entity(test_case):
-    path = '/{currency}/entities/{entity}/tags'
+    path = '/{currency}/entities/{entity}/tags?level={level}'
     result = await test_case.request(path,
                                      currency='btc',
                                      entity=entityWithTags.entity,
-                                     tag_coherence=False)
-    result['tag_coherence'] = 0.5
-    test_case.assertEqual(entityWithTags.tags.to_dict(), result)
+                                     level='entity')
+    expected = Tags(entity_tags=entityWithTags.tags)
+    test_case.assertEqual(expected.to_dict(), result)
+    result = await test_case.request(path,
+                                     currency='btc',
+                                     entity=entityWithTags.entity,
+                                     level='address')
+    expected = Tags(address_tags=[atag2, atag1])
+    test_case.assertEqual(expected.to_dict(), result)
     result = await test_case.request(path,
                                      currency='eth',
                                      entity=eth_entityWithTags.entity,
-                                     tag_coherence=False)
-    test_case.assertEqual(eth_entityWithTags.tags.to_dict(),
-                          result)
+                                     level='entity')
+    expected = Tags(entity_tags=eth_entityWithTags.tags)
+    test_case.assertEqual(expected.to_dict(), result)
+    result = await test_case.request(path,
+                                     currency='eth',
+                                     entity=eth_entityWithTags.entity,
+                                     level='address')
+    expected = Tags(address_tags=[eth_tag, eth_tag2])
+    test_case.assertEqual(expected.to_dict(), result)
 
 
 async def list_entity_neighbors(test_case):
@@ -375,7 +378,7 @@ async def search_entity_neighbors(test_case):
                           result['paths'][0]['paths'][0]['node']['entity'])
     test_case.assertEqual(
         category,
-        result['paths'][0]['paths'][0]['node']['tags']['entity_tags'][0]
+        result['paths'][0]['paths'][0]['node']['tags'][0]
               ['category'])
 
     category = 'MyCategory'
@@ -394,7 +397,7 @@ async def search_entity_neighbors(test_case):
                           result['paths'][0]['paths'][0]['node']['entity'])
     test_case.assertEqual(category,
                           result['paths'][0]['paths'][0]['node']['tags']
-                                ['entity_tags'][0]['category'])
+                                [0]['category'])
 
     # Test addresses matching
 

@@ -98,40 +98,6 @@ paths:
       tags:
       - general
       x-openapi-router-controller: openapi_server.controllers.general_controller
-  /tags:
-    get:
-      operationId: list_tags
-      parameters:
-      - description: The cryptocurrency (e.g., btc)
-        example: btc
-        explode: true
-        in: query
-        name: currency
-        required: false
-        schema:
-          format: string
-          type: string
-        style: form
-      - description: The label of an entity
-        example: cimedy
-        explode: true
-        in: query
-        name: label
-        required: true
-        schema:
-          type: string
-        style: form
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/tags'
-          description: OK
-      summary: Returns address and entity tags associated with a given label
-      tags:
-      - tags
-      x-openapi-router-controller: openapi_server.controllers.tags_controller
   /tags/taxonomies:
     get:
       operationId: list_taxonomies
@@ -197,7 +163,8 @@ paths:
         schema:
           $ref: '#/components/schemas/address_id'
         style: simple
-      - description: Whether to include tags
+      - description: Whether to include the first page of tags. Use the respective
+          /tags endpoint to retrieve more if needed.
         explode: true
         in: query
         name: include_tags
@@ -240,19 +207,11 @@ paths:
         schema:
           $ref: '#/components/schemas/address_id'
         style: simple
-      - description: Whether to include tags
+      - description: Whether to include the first page of tags. Use the respective
+          /tags endpoint to retrieve more if needed.
         explode: true
         in: query
         name: include_tags
-        required: false
-        schema:
-          default: false
-          type: boolean
-        style: form
-      - description: Whether to calculate coherence of address tags
-        explode: true
-        in: query
-        name: tag_coherence
         required: false
         schema:
           default: false
@@ -365,7 +324,7 @@ paths:
           - out
           type: string
         style: form
-      - description: Whether to include labels of tags
+      - description: Whether to include labels of first page of tags
         explode: true
         in: query
         name: include_labels
@@ -426,14 +385,30 @@ paths:
         schema:
           $ref: '#/components/schemas/address_id'
         style: simple
+      - description: Resumption token for retrieving the next page
+        explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Number of items returned in a single page
+        example: 10
+        explode: true
+        in: query
+        name: pagesize
+        required: false
+        schema:
+          minimum: 1
+          type: integer
+        style: form
       responses:
         "200":
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/address_tag'
-                type: array
+                $ref: '#/components/schemas/address_tags'
           description: OK
       summary: Get attribution tags for a given address
       tags:
@@ -743,19 +718,11 @@ paths:
         schema:
           $ref: '#/components/schemas/entity_id'
         style: simple
-      - description: Whether to include tags
+      - description: Whether to include the first page of tags. Use the respective
+          /tags endpoint to retrieve more if needed.
         explode: true
         in: query
         name: include_tags
-        required: false
-        schema:
-          default: false
-          type: boolean
-        style: form
-      - description: Whether to calculate coherence of address tags
-        explode: true
-        in: query
-        name: tag_coherence
         required: false
         schema:
           default: false
@@ -928,7 +895,7 @@ paths:
         schema:
           $ref: '#/components/schemas/only_entity_ids'
         style: form
-      - description: Whether to include labels of tags
+      - description: Whether to include labels of first page of tags
         explode: true
         in: query
         name: include_labels
@@ -1098,14 +1065,35 @@ paths:
         schema:
           $ref: '#/components/schemas/entity_id'
         style: simple
-      - description: Whether to calculate coherence of address tags
+      - description: Whether tags on the address or entity level are requested
+        example: address
         explode: true
         in: query
-        name: tag_coherence
+        name: level
+        required: true
+        schema:
+          enum:
+          - address
+          - entity
+          type: string
+        style: form
+      - description: Resumption token for retrieving the next page
+        explode: true
+        in: query
+        name: page
         required: false
         schema:
-          default: false
-          type: boolean
+          type: string
+        style: form
+      - description: Number of items returned in a single page
+        example: 10
+        explode: true
+        in: query
+        name: pagesize
+        required: false
+        schema:
+          minimum: 1
+          type: integer
         style: form
       responses:
         "200":
@@ -1114,7 +1102,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/tags'
           description: OK
-      summary: Get tags for a given entity
+      summary: Get tags for a given entity for the given level
       tags:
       - entities
       x-openapi-router-controller: openapi_server.controllers.entities_controller
@@ -1204,6 +1192,70 @@ paths:
       tags:
       - rates
       x-openapi-router-controller: openapi_server.controllers.rates_controller
+  /{currency}/tags:
+    get:
+      operationId: list_tags
+      parameters:
+      - description: The cryptocurrency code (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The label of an entity
+        example: cimedy
+        explode: true
+        in: query
+        name: label
+        required: true
+        schema:
+          type: string
+        style: form
+      - description: Whether tags on the address or entity level are requested
+        example: address
+        explode: true
+        in: query
+        name: level
+        required: true
+        schema:
+          enum:
+          - address
+          - entity
+          type: string
+        style: form
+      - description: Resumption token for retrieving the next page
+        explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Number of items returned in a single page
+        example: 10
+        explode: true
+        in: query
+        name: pagesize
+        required: false
+        schema:
+          minimum: 1
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tags'
+          description: OK
+      summary: Returns address or entity tags associated with a given label
+      tags:
+      - tags
+      x-openapi-router-controller: openapi_server.controllers.tags_controller
   /{currency}/txs/{tx_hash}:
     get:
       operationId: get_tx
@@ -1494,7 +1546,7 @@ components:
         type: boolean
       style: form
     include_labels:
-      description: Whether to include labels of tags
+      description: Whether to include labels of first page of tags
       explode: true
       in: query
       name: include_labels
@@ -1504,7 +1556,8 @@ components:
         type: boolean
       style: form
     include_tags:
-      description: Whether to include tags
+      description: Whether to include the first page of tags. Use the respective /tags
+        endpoint to retrieve more if needed.
       explode: true
       in: query
       name: include_tags
@@ -1682,16 +1735,6 @@ components:
         format: int32
         type: integer
       style: form
-    tag_coherence:
-      description: Whether to calculate coherence of address tags
-      explode: true
-      in: query
-      name: tag_coherence
-      required: false
-      schema:
-        default: false
-        type: boolean
-      style: form
     tag_level:
       description: Whether tags on the address or entity level are requested
       example: address
@@ -1801,7 +1844,7 @@ components:
           title: out_degree
           type: integer
         tags:
-          description: Tags
+          description: First page of tags of this address
           items:
             $ref: '#/components/schemas/address_tag'
           title: tags
@@ -1834,6 +1877,26 @@ components:
       - $ref: '#/components/schemas/tag'
       - $ref: '#/components/schemas/address_tag_allOf'
       title: address_tag
+    address_tags:
+      example:
+        next_page: next_page
+        address_tags:
+        - null
+        - null
+      properties:
+        address_tags:
+          items:
+            $ref: '#/components/schemas/address_tag'
+          title: address_tags
+          type: array
+        next_page:
+          format: string
+          title: next_page
+          type: string
+      required:
+      - address_tags
+      title: address_tags
+      type: object
     address_tx:
       discriminator:
         mapping:
@@ -2072,13 +2135,8 @@ components:
             value: 0.8008282
           value: 6
         tags:
-          entity_tags:
-          - null
-          - null
-          address_tags:
-          - null
-          - null
-          tag_coherence: 0.67
+        - null
+        - null
       properties:
         balance:
           $ref: '#/components/schemas/values'
@@ -2114,7 +2172,11 @@ components:
           title: out_degree
           type: integer
         tags:
-          $ref: '#/components/schemas/tags'
+          description: First page of tags of this entity
+          items:
+            $ref: '#/components/schemas/entity_tag'
+          title: tags
+          type: array
         total_received:
           $ref: '#/components/schemas/values'
         total_spent:
@@ -2236,6 +2298,19 @@ components:
       - $ref: '#/components/schemas/tag'
       - $ref: '#/components/schemas/entity_tag_allOf'
       title: entity_tag
+    entity_tags:
+      properties:
+        entity_tags:
+          items:
+            $ref: '#/components/schemas/entity_tag'
+          type: array
+        next_page:
+          format: string
+          title: next_page
+          type: string
+      required:
+      - entity_tags
+      type: object
     height:
       description: Height
       example: 47
@@ -2697,38 +2772,10 @@ components:
       - label
       type: object
     tags:
-      example:
-        entity_tags:
-        - null
-        - null
-        address_tags:
-        - null
-        - null
-        tag_coherence: 0.67
-      properties:
-        address_tags:
-          description: Aggregated tags of contained addresses
-          items:
-            $ref: '#/components/schemas/address_tag'
-          title: address_tags
-          type: array
-        entity_tags:
-          description: Tags of this entity
-          items:
-            $ref: '#/components/schemas/entity_tag'
-          title: entity_tags
-          type: array
-        tag_coherence:
-          description: Tag coherence
-          example: 0.67
-          format: float
-          title: tag_coherence
-          type: number
-      required:
-      - address_tags
-      - entity_tags
+      oneOf:
+      - $ref: '#/components/schemas/entity_tags'
+      - $ref: '#/components/schemas/address_tags'
       title: tags
-      type: object
     taxonomy:
       example:
         taxonomy: abuse

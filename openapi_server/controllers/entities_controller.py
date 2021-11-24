@@ -14,7 +14,7 @@ import gsrest.service.entities_service as service
 from openapi_server import util
 
 
-async def get_entity(request: web.Request, currency, entity, include_tags=None, tag_coherence=None) -> web.Response:
+async def get_entity(request: web.Request, currency, entity, include_tags=None) -> web.Response:
     """Get an entity, optionally with tags
 
     
@@ -23,18 +23,16 @@ async def get_entity(request: web.Request, currency, entity, include_tags=None, 
     :type currency: str
     :param entity: The entity ID
     :type entity: int
-    :param include_tags: Whether to include tags
+    :param include_tags: Whether to include the first page of tags. Use the respective /tags endpoint to retrieve more if needed.
     :type include_tags: bool
-    :param tag_coherence: Whether to calculate coherence of address tags
-    :type tag_coherence: bool
 
     """
     try:
-        if 'currency' in ['','currency','entity','include_tags','tag_coherence']:
+        if 'currency' in ['','currency','entity','include_tags']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.get_entity(request
-                ,currency=currency,entity=entity,include_tags=include_tags,tag_coherence=tag_coherence)
+                ,currency=currency,entity=entity,include_tags=include_tags)
         result = await result
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
@@ -164,7 +162,7 @@ async def list_entity_neighbors(request: web.Request, currency, entity, directio
     :type direction: str
     :param only_ids: Restrict result to given set of comma separated IDs
     :type only_ids: List[int]
-    :param include_labels: Whether to include labels of tags
+    :param include_labels: Whether to include labels of first page of tags
     :type include_labels: bool
     :param page: Resumption token for retrieving the next page
     :type page: str
@@ -247,8 +245,8 @@ async def list_entity_txs(request: web.Request, currency, entity, page=None, pag
         raise web.HTTPInternalServerError()
 
 
-async def list_tags_by_entity(request: web.Request, currency, entity, tag_coherence=None) -> web.Response:
-    """Get tags for a given entity
+async def list_tags_by_entity(request: web.Request, currency, entity, level, page=None, pagesize=None) -> web.Response:
+    """Get tags for a given entity for the given level
 
     
 
@@ -256,16 +254,20 @@ async def list_tags_by_entity(request: web.Request, currency, entity, tag_cohere
     :type currency: str
     :param entity: The entity ID
     :type entity: int
-    :param tag_coherence: Whether to calculate coherence of address tags
-    :type tag_coherence: bool
+    :param level: Whether tags on the address or entity level are requested
+    :type level: str
+    :param page: Resumption token for retrieving the next page
+    :type page: str
+    :param pagesize: Number of items returned in a single page
+    :type pagesize: int
 
     """
     try:
-        if 'currency' in ['','currency','entity','tag_coherence']:
+        if 'currency' in ['','currency','entity','level','page','pagesize']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.list_tags_by_entity(request
-                ,currency=currency,entity=entity,tag_coherence=tag_coherence)
+                ,currency=currency,entity=entity,level=level,page=page,pagesize=pagesize)
         result = await result
         if isinstance(result, list):
             result = [d.to_dict() for d in result]

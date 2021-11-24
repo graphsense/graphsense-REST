@@ -46,7 +46,7 @@ async def search(request, q, currency=None, limit=10):
         [txs, addresses, labels] = await asyncio.gather(
             db.list_matching_txs(curr, q, limit),
             db.list_matching_addresses(curr, q, limit),
-            db.list_labels(curr, expression_norm, limit)
+            db.list_matching_labels(curr, expression_norm, limit)
         )
 
         # TODO improve by letting db limit the result during query

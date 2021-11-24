@@ -1,9 +1,9 @@
 from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.entity_tag import EntityTag
-from openapi_server.models.tags import Tags
+from openapi_server.models.address_tags import AddressTags
+from openapi_server.models.entity_tags import EntityTags
 from openapi_server.models.taxonomy import Taxonomy
 from openapi_server.models.concept import Concept
-import yaml
 
 tag1 = AddressTag(
    tagpack_uri="https://tagpack_uri",
@@ -55,28 +55,42 @@ ctag = EntityTag(
 
 
 async def list_tags(test_case):
-    path = '/tags?label={label}'
-    result = await test_case.request(path, label='cimedy')
-    result['address_tags'].sort(key=lambda x: x['currency'])
+    path = '/{currency}/tags?label={label}&level={level}'
+    result = await test_case.request(path, currency='btc', label='isolinks',
+                                     level='address')
+    test_case.assertEqual(
+        AddressTags(address_tags=[tag1]).to_dict(),
+        result)
+    result = await test_case.request(path, currency='btc', label='isolinks',
+                                     level='entity')
+    test_case.assertEqual(
+        EntityTags(entity_tags=[ctag]).to_dict(),
+        result)
+    result = await test_case.request(path, currency='btc', label='cimedy',
+                                     level='address')
+    test_case.assertEqual(AddressTags([tag2]).to_dict(), result)
+
+    result = await test_case.request(path, currency='btc', label='cimedy',
+                                     level='entity')
+    test_case.assertEqual(EntityTags(entity_tags=[]).to_dict(), result)
+
     tag_eth = AddressTag(**tag2.to_dict())
     tag_eth.currency = 'ETH'
-    test_case.assertEqual(
-        Tags([tag2, tag_eth, tag3], entity_tags=[]).to_dict(),
-        result)
+    result = await test_case.request(path, currency='eth', label='cimedy',
+                                     level='address')
+    test_case.assertEqual(AddressTags(address_tags=[tag_eth]).to_dict(),
+                          result)
 
-    path += '&currency={currency}'
-    result = await test_case.request(path, currency='btc', label='isolinks')
-    test_case.assertEqual(
-        Tags(address_tags=[tag1], entity_tags=[ctag]).to_dict(),
-        result)
-    result = await test_case.request(path, currency='btc', label='cimedy')
-    test_case.assertEqual(Tags([tag2], entity_tags=[]).to_dict(), result)
+    result = await test_case.request(path, currency='eth', label='cimedy',
+                                     level='entity')
+    test_case.assertEqual(EntityTags(entity_tags=[]).to_dict(), result)
 
-    result = await test_case.request(path, currency='eth', label='cimedy')
-    test_case.assertEqual(Tags([tag_eth], entity_tags=[]).to_dict(), result)
-
-    result = await test_case.request(path, currency='ltc', label='cimedy')
-    test_case.assertEqual(Tags([tag3], entity_tags=[]).to_dict(), result)
+    result = await test_case.request(path, currency='ltc', label='cimedy',
+                                     level='address')
+    test_case.assertEqual(AddressTags([tag3]).to_dict(), result)
+    result = await test_case.request(path, currency='ltc', label='cimedy',
+                                     level='entity')
+    test_case.assertEqual(EntityTags(entity_tags=[]).to_dict(), result)
 
 
 conceptA = Concept(

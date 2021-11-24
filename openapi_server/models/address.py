@@ -300,7 +300,7 @@ class Address(Model):
     def tags(self):
         """Gets the tags of this Address.
 
-        Tags
+        First page of tags of this address
 
         :return: The tags of this Address.
         :rtype: List[AddressTag]
@@ -311,7 +311,7 @@ class Address(Model):
     def tags(self, tags):
         """Sets the tags of this Address.
 
-        Tags
+        First page of tags of this address
 
         :param tags: The tags of this Address.
         :type tags: List[AddressTag]

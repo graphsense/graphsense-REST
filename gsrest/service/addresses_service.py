@@ -7,8 +7,10 @@ async def get_address(request, currency, address, include_tags=False):
     return await common.get_address(request, currency, address, include_tags)
 
 
-async def list_tags_by_address(request, currency, address):
-    return await common.list_tags_by_address(request, currency, address)
+async def list_tags_by_address(request, currency, address,
+                               page=None, pagesize=None):
+    return await common.list_tags_by_address(request, currency, address,
+                                             page=page, pagesize=pagesize)
 
 
 async def list_address_txs(request, currency, address, page=None,
@@ -32,15 +34,13 @@ async def list_address_neighbors(request, currency, address, direction,
 async def list_address_links(request, currency, address, neighbor,
                              page=None, pagesize=None):
     db = request.app['db']
-    print(f'pagesize {pagesize}')
     result = await db.list_address_links(currency, address, neighbor,
                                          page=page, pagesize=pagesize)
 
     return await common.links_response(request, currency, result)
 
 
-async def get_address_entity(request, currency, address, include_tags=False,
-                             tag_coherence=False):
+async def get_address_entity(request, currency, address, include_tags=False):
     # from address to complete entity stats
     e = RuntimeError('Entity for address {} not found'.format(address))
     db = request.app['db']
@@ -49,8 +49,7 @@ async def get_address_entity(request, currency, address, include_tags=False,
     if entity_id is None:
         raise e
 
-    result = await get_entity(request, currency, entity_id,
-                              include_tags, tag_coherence)
+    result = await get_entity(request, currency, entity_id, include_tags)
     if result is None:
         raise e
 

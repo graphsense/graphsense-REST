@@ -4,7 +4,7 @@ import traceback
 import json
 
 from openapi_server.models.address import Address
-from openapi_server.models.address_tag import AddressTag
+from openapi_server.models.address_tags import AddressTags
 from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.entity import Entity
 from openapi_server.models.links import Links
@@ -22,7 +22,7 @@ async def get_address(request: web.Request, currency, address, include_tags=None
     :type currency: str
     :param address: The cryptocurrency address
     :type address: str
-    :param include_tags: Whether to include tags
+    :param include_tags: Whether to include the first page of tags. Use the respective /tags endpoint to retrieve more if needed.
     :type include_tags: bool
 
     """
@@ -56,7 +56,7 @@ async def get_address(request: web.Request, currency, address, include_tags=None
         raise web.HTTPInternalServerError()
 
 
-async def get_address_entity(request: web.Request, currency, address, include_tags=None, tag_coherence=None) -> web.Response:
+async def get_address_entity(request: web.Request, currency, address, include_tags=None) -> web.Response:
     """Get the entity of an address
 
     
@@ -65,18 +65,16 @@ async def get_address_entity(request: web.Request, currency, address, include_ta
     :type currency: str
     :param address: The cryptocurrency address
     :type address: str
-    :param include_tags: Whether to include tags
+    :param include_tags: Whether to include the first page of tags. Use the respective /tags endpoint to retrieve more if needed.
     :type include_tags: bool
-    :param tag_coherence: Whether to calculate coherence of address tags
-    :type tag_coherence: bool
 
     """
     try:
-        if 'currency' in ['','currency','address','include_tags','tag_coherence']:
+        if 'currency' in ['','currency','address','include_tags']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.get_address_entity(request
-                ,currency=currency,address=address,include_tags=include_tags,tag_coherence=tag_coherence)
+                ,currency=currency,address=address,include_tags=include_tags)
         result = await result
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
@@ -159,7 +157,7 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
     :type address: str
     :param direction: Incoming or outgoing neighbors
     :type direction: str
-    :param include_labels: Whether to include labels of tags
+    :param include_labels: Whether to include labels of first page of tags
     :type include_labels: bool
     :param page: Resumption token for retrieving the next page
     :type page: str
@@ -242,7 +240,7 @@ async def list_address_txs(request: web.Request, currency, address, page=None, p
         raise web.HTTPInternalServerError()
 
 
-async def list_tags_by_address(request: web.Request, currency, address) -> web.Response:
+async def list_tags_by_address(request: web.Request, currency, address, page=None, pagesize=None) -> web.Response:
     """Get attribution tags for a given address
 
     
@@ -251,14 +249,18 @@ async def list_tags_by_address(request: web.Request, currency, address) -> web.R
     :type currency: str
     :param address: The cryptocurrency address
     :type address: str
+    :param page: Resumption token for retrieving the next page
+    :type page: str
+    :param pagesize: Number of items returned in a single page
+    :type pagesize: int
 
     """
     try:
-        if 'currency' in ['','currency','address']:
+        if 'currency' in ['','currency','address','page','pagesize']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.list_tags_by_address(request
-                ,currency=currency,address=address)
+                ,currency=currency,address=address,page=page,pagesize=pagesize)
         result = await result
         if isinstance(result, list):
             result = [d.to_dict() for d in result]

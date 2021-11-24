@@ -8,7 +8,6 @@ from openapi_server.models.entity_tag import EntityTag
 from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.tags import Tags
 from openapi_server.models.search_result_level1 import SearchResultLevel1
-from gsrest.util.tag_coherence import compute_tag_coherence
 from openapi_server.models.address import Address
 from openapi_server.models.entity_addresses import EntityAddresses
 import gsrest.service.common_service as common
@@ -41,19 +40,24 @@ def from_row(currency, row, rates, tags=None):
         )
 
 
-async def list_tags_by_entity(request, currency, entity, tag_coherence=False):
-    entity_tags = await list_entity_tags_by_entity(request, currency, entity)
-    address_tags = await list_address_tags_by_entity(request, currency, entity)
-    tag_coherence = compute_tag_coherence(tag.label for tag in address_tags) \
-        if tag_coherence else None
-    return Tags(entity_tags=entity_tags,
-                address_tags=address_tags,
-                tag_coherence=tag_coherence)
+async def list_tags_by_entity(request, currency, entity, level,
+                              page=None, pagesize=None):
+    if level == 'address':
+        address_tags, next_page = \
+            await list_address_tags_by_entity(request, currency, entity)
+        return Tags(address_tags=address_tags, next_page=next_page)
+    else:
+        entity_tags, next_page = \
+            await list_entity_tags_by_entity(request, currency, entity)
+        return Tags(entity_tags=entity_tags, next_page=next_page)
 
 
-async def list_entity_tags_by_entity(request, currency, entity):
+async def list_entity_tags_by_entity(request, currency, entity,
+                                     page=None, pagesize=None):
     db = request.app['db']
-    entity_tags = await db.list_entity_tags_by_entity(currency, entity)
+    entity_tags, next_page = \
+        await db.list_entity_tags_by_entity(currency, entity,
+                                            page=page, pagesize=pagesize)
     return [EntityTag(label=row['label'],
                       entity=row['cluster_id'],
                       category=row['category'],
@@ -63,12 +67,15 @@ async def list_entity_tags_by_entity(request, currency, entity):
                       lastmod=row['lastmod'],
                       active=True,
                       currency=currency)
-            for row in entity_tags]
+            for row in entity_tags], next_page
 
 
-async def list_address_tags_by_entity(request, currency, entity):
+async def list_address_tags_by_entity(request, currency, entity,
+                                      page=None, pagesize=None):
     db = request.app['db']
-    address_tags = await db.list_address_tags_by_entity(currency, entity)
+    address_tags, next_page = \
+        await db.list_address_tags_by_entity(currency, entity,
+                                             page=page, pagesize=pagesize)
     return [AddressTag(label=row['label'],
                        address=row['address'],
                        category=row['category'],
@@ -78,19 +85,20 @@ async def list_address_tags_by_entity(request, currency, entity):
                        lastmod=row['lastmod'],
                        active=True,
                        currency=currency)
-            for row in address_tags]
+            for row in address_tags], next_page
 
 
-async def get_entity(request, currency, entity, include_tags=False,
-                     tag_coherence=False):
+async def get_entity(request, currency, entity, include_tags=False):
     db = request.app['db']
     result = await db.get_entity(currency, entity)
 
     if result is None:
         raise RuntimeError("Entity {} not found".format(entity))
 
-    tags = await list_tags_by_entity(request, currency, result['cluster_id'],
-                                     tag_coherence) if include_tags else None
+    tags = None
+    if include_tags:
+        tags, _ = await list_entity_tags_by_entity(request, currency,
+                                                   result['cluster_id'])
     rates = (await get_rates(request, currency))['rates']
     return from_row(currency, result, rates, tags)
 
@@ -199,6 +207,11 @@ async def recursive_search(request, currency, entity, params, breadth, depth,
         return (await list_entity_neighbors(
             request, currency, entity, direction, pagesize=breadth)).neighbors
 
+    async def get_entity_and_tags(entity):
+        return await asyncio.gather(
+            get_entity(request, currency, entity, include_tags=True),
+            list_address_tags_by_entity(request, currency, entity))
+
     neighbors = await cached(entity, 'neighbors',
                              lambda: list_neighbors(entity))
 
@@ -213,17 +226,15 @@ async def recursive_search(request, currency, entity, params, breadth, depth,
 
     async def handle_neighbor(neighbor):
         match = True
-        props = await cached(int(neighbor.id), 'props',
-                             lambda: get_entity(request,
-                                                currency, int(neighbor.id),
-                                                include_tags=True,
-                                                tag_coherence=False))
+        [props, (address_tags, _)] = \
+            await cached(int(neighbor.id), 'props',
+                         lambda: get_entity_and_tags(int(neighbor.id)))
         if props is None:
             return
 
         if 'category' in params:
             # find first occurrence of category in tags
-            tags = props.tags.entity_tags + props.tags.address_tags
+            tags = props.tags + address_tags
             match = next((True for t in tags if t.category and
                           t.category.lower() == params['category'].lower()),
                          False)
@@ -286,7 +297,7 @@ async def recursive_search(request, currency, entity, params, breadth, depth,
         obj = levelClass(node=result['props'], relation=result['neighbor'],
                          matching_addresses=[])
         if result['subpaths'] is True:
-            aws = [get_address(request, currency, address, True)
+            aws = [get_address(request, currency, address, include_tags=True)
                    for address in result['matching_addresses']]
             addresses_with_tags = await asyncio.gather(*aws)
             obj.matching_addresses = [address for address in

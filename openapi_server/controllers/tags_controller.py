@@ -49,23 +49,29 @@ async def list_concepts(request: web.Request, taxonomy) -> web.Response:
         raise web.HTTPInternalServerError()
 
 
-async def list_tags(request: web.Request, label, currency=None) -> web.Response:
-    """Returns address and entity tags associated with a given label
+async def list_tags(request: web.Request, currency, label, level, page=None, pagesize=None) -> web.Response:
+    """Returns address or entity tags associated with a given label
 
     
 
+    :param currency: The cryptocurrency code (e.g., btc)
+    :type currency: str
     :param label: The label of an entity
     :type label: str
-    :param currency: The cryptocurrency (e.g., btc)
-    :type currency: str
+    :param level: Whether tags on the address or entity level are requested
+    :type level: str
+    :param page: Resumption token for retrieving the next page
+    :type page: str
+    :param pagesize: Number of items returned in a single page
+    :type pagesize: int
 
     """
     try:
-        if 'currency' in ['','label','currency']:
+        if 'currency' in ['','currency','label','level','page','pagesize']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.list_tags(request
-                ,label=label,currency=currency)
+                ,currency=currency,label=label,level=level,page=page,pagesize=pagesize)
         result = await result
         if isinstance(result, list):
             result = [d.to_dict() for d in result]

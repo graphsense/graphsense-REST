@@ -68,7 +68,7 @@ class TestEntitiesController(BaseTestCase):
     async def test_list_tags_by_entity(self):
         """Test case for list_tags_by_entity
 
-        Get tags for a given entity
+        Get tags for a given entity for the given level
         """
         await test_service.list_tags_by_entity(self)
 

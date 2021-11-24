@@ -463,19 +463,24 @@ class Cassandra:
         return await self.finish_address(currency, result)
 
     # @Timer(text="Timer: list_tags_by_address {:.2f}")
-    async def list_tags_by_address(self, currency, address):
+    async def list_tags_by_address(self, currency, address,
+                                   page=None, pagesize=None):
         address_id, address_id_group = \
             await self.get_address_id_id_group(currency, address)
 
         query = ("SELECT * FROM address_tags WHERE address_id = %s "
                  "and address_id_group = %s")
+        paging_state = from_hex(page)
+        fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
         results = await self.execute_async(currency, 'transformed', query,
-                                           [address_id, address_id_group])
+                                           [address_id, address_id_group],
+                                           paging_state=paging_state,
+                                           fetch_size=fetch_size)
         if results is None:
             return []
         for tag in results.current_rows:
             tag['address'] = address
-        return results.current_rows
+        return results.current_rows, to_hex(results.paging_state)
 
     @eth
     # @Timer(text="Timer: get_address_entity_id {:.2f}")
@@ -647,35 +652,45 @@ class Cassandra:
 
     @eth
     # @Timer(text="Timer: list_entity_tags_by_entity {:.2f}")
-    async def list_entity_tags_by_entity(self, currency, entity):
+    async def list_entity_tags_by_entity(self, currency, entity, page=None,
+                                         pagesize=None):
         entity = int(entity)
         group = self.get_id_group(currency, entity)
         query = ("SELECT * FROM cluster_tags "
                  "WHERE cluster_id_group = %s and cluster_id = %s")
+        fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
+        paging_state = from_hex(page)
         results = await self.execute_async(currency, 'transformed', query,
-                                           [group, entity])
+                                           [group, entity],
+                                           paging_state=paging_state,
+                                           fetch_size=fetch_size)
 
         if results is None:
-            return []
-        return results.current_rows
+            return [], None
+        return results.current_rows, to_hex(results.paging_state)
 
     @eth
     # @Timer(text="Timer: list_address_tags_by_entity {:.2f}")
-    async def list_address_tags_by_entity(self, currency, entity):
+    async def list_address_tags_by_entity(self, currency, entity, page=None,
+                                          pagesize=None):
         entity = int(entity)
         group = self.get_id_group(currency, entity)
         query = ("SELECT * FROM cluster_address_tags "
                  "WHERE cluster_id_group = %s and cluster_id = %s")
+        fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
+        paging_state = from_hex(page)
         results = await self.execute_async(currency, 'transformed', query,
-                                           [group, entity])
+                                           [group, entity],
+                                           paging_state=paging_state,
+                                           fetch_size=fetch_size)
 
         if results is None:
-            return []
+            return [], None
         ids = [row['address_id'] for row in results.current_rows]
         addresses = await self.get_addresses_by_ids(currency, ids, True)
         for (row, address) in zip(results.current_rows, addresses):
             row['address'] = address['address']
-        return results.current_rows
+        return results.current_rows, to_hex(results.paging_state)
 
     @eth
     # @Timer(text="Timer: get_entity {:.2f}")
@@ -889,34 +904,44 @@ class Cassandra:
         return nodes
 
     # @Timer(text="Timer: list_address_tags {:.2f}")
-    async def list_address_tags(self, currency, label):
+    async def list_address_tags(self, currency, label, page=None,
+                                pagesize=None):
         prefix_length = self.get_prefix_lengths(currency)['label']
         label_norm_prefix = label[:prefix_length]
+        paging_state = from_hex(page)
+        fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
         query = ("SELECT * FROM address_tag_by_label WHERE "
                  "label_norm_prefix = %s and label_norm = %s LIMIT 1000")
         rows = await self.execute_async(currency, 'transformed', query,
-                                        [label_norm_prefix, label])
+                                        [label_norm_prefix, label],
+                                        paging_state=paging_state,
+                                        fetch_size=fetch_size)
         if rows is None:
-            return []
+            return [], None
         if currency == 'eth':
             for row in rows.current_rows:
                 row['active'] = row['active_address']
-        return rows.current_rows
+        return rows.current_rows, to_hex(rows.paging_state)
 
     @eth
     # @Timer(text="Timer: list_entity_tags {:.2f}")
-    async def list_entity_tags(self, currency, label):
+    async def list_entity_tags(self, currency, label, page=None,
+                               pagesize=None):
         prefix_length = self.get_prefix_lengths(currency)['label']
         label_norm_prefix = label[:prefix_length]
+        paging_state = from_hex(page)
+        fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
         query = ("SELECT * FROM cluster_tag_by_label WHERE "
                  "label_norm_prefix = %s and label_norm = %s LIMIT 1000")
         rows = await self.execute_async(currency, 'transformed', query,
-                                        [label_norm_prefix, label])
+                                        [label_norm_prefix, label],
+                                        paging_state=paging_state,
+                                        fetch_size=fetch_size)
         if rows is None:
-            return []
-        return rows.current_rows
+            return [], None
+        return rows.current_rows, to_hex(rows.paging_state)
 
-    async def list_labels(self, currency, expression_norm, limit):
+    async def list_matching_labels(self, currency, expression_norm, limit):
         prefix_lengths = self.get_prefix_lengths(currency)
         if len(expression_norm) < prefix_lengths['label']:
             return []
@@ -1300,11 +1325,13 @@ class Cassandra:
             address['no_addresses'] = 1
         return result, to_hex(paging_state)
 
-    async def list_entity_tags_by_entity_eth(self, currency, entity):
-        return []
+    async def list_entity_tags_by_entity_eth(self, currency, entity, page=None,
+                                             pagesize=None):
+        return [], None
 
     # @Timer(text="Timer: list_address_tags_by_entity_eth {:.2f}")
-    async def list_address_tags_by_entity_eth(self, currency, entity):
+    async def list_address_tags_by_entity_eth(self, currency, entity,
+                                              page=None, pagesize=None):
         query = ("SELECT address FROM address "
                  "WHERE address_id_group=%s and address_id=%s")
         id_id_group = [self.get_id_group(currency, entity), entity]
@@ -1312,17 +1339,22 @@ class Cassandra:
                                           id_id_group)
         result = one(result)
         if result is None:
-            return None
+            raise RuntimeError(f'entity {entity} not found for currency'
+                               ' {currency}')
+        fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
+        paging_state = from_hex(page)
         address = result['address']
         query = ("SELECT * FROM address_tags WHERE address_id_group = %s "
                  "and address_id = %s")
         results = await self.execute_async(currency, 'transformed', query,
-                                           id_id_group)
+                                           id_id_group,
+                                           paging_state=paging_state,
+                                           fetch_size=fetch_size)
         if results is None:
-            return []
+            return [], None
         for tag in results.current_rows:
             tag['address'] = eth_address_to_hex(address)
-        return results.current_rows
+        return results.current_rows, to_hex(results.paging_state)
 
     # @Timer(text="Timer: get_address_entity_id_eth {:.2f}")
     def get_address_entity_id_eth(self, currency, address):
@@ -1595,8 +1627,9 @@ class Cassandra:
         addresses = await self.get_addresses_by_ids(currency, [entity])
         return await self.finish_addresses(currency, addresses), None
 
-    async def list_entity_tags_eth(self, currency, label):
-        return []
+    async def list_entity_tags_eth(self, currency, label, page=None,
+                                   pagesize=None):
+        return [], None
 
     async def include_labels_eth(self, currency, node_type, that, nodes):
         for node in nodes:

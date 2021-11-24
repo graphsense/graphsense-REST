@@ -28,7 +28,7 @@ class TestTagsController(BaseTestCase):
     async def test_list_tags(self):
         """Test case for list_tags
 
-        Returns address and entity tags associated with a given label
+        Returns address or entity tags associated with a given label
         """
         await test_service.list_tags(self)
 

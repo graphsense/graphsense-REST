@@ -6,7 +6,9 @@ from typing import List, Dict, Type
 
 from openapi_server.models.base_model_ import Model
 from openapi_server.models.address_tag import AddressTag
+from openapi_server.models.address_tags import AddressTags
 from openapi_server.models.entity_tag import EntityTag
+from openapi_server.models.entity_tags import EntityTags
 from openapi_server import util
 
 
@@ -16,28 +18,28 @@ class Tags(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, address_tags: List[AddressTag]=None, entity_tags: List[EntityTag]=None, tag_coherence: float=None):
+    def __init__(self, entity_tags: List[EntityTag]=None, next_page: str=None, address_tags: List[AddressTag]=None):
         """Tags - a model defined in OpenAPI
 
-        :param address_tags: The address_tags of this Tags.
         :param entity_tags: The entity_tags of this Tags.
-        :param tag_coherence: The tag_coherence of this Tags.
+        :param next_page: The next_page of this Tags.
+        :param address_tags: The address_tags of this Tags.
         """
         self.openapi_types = {
-            'address_tags': List[AddressTag],
             'entity_tags': List[EntityTag],
-            'tag_coherence': float
+            'next_page': str,
+            'address_tags': List[AddressTag]
         }
 
         self.attribute_map = {
-            'address_tags': 'address_tags',
             'entity_tags': 'entity_tags',
-            'tag_coherence': 'tag_coherence'
+            'next_page': 'next_page',
+            'address_tags': 'address_tags'
         }
 
-        self._address_tags = address_tags
         self._entity_tags = entity_tags
-        self._tag_coherence = tag_coherence
+        self._next_page = next_page
+        self._address_tags = address_tags
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'Tags':
@@ -49,35 +51,9 @@ class Tags(Model):
         return util.deserialize_model(dikt, cls)
 
     @property
-    def address_tags(self):
-        """Gets the address_tags of this Tags.
-
-        Aggregated tags of contained addresses
-
-        :return: The address_tags of this Tags.
-        :rtype: List[AddressTag]
-        """
-        return self._address_tags
-
-    @address_tags.setter
-    def address_tags(self, address_tags):
-        """Sets the address_tags of this Tags.
-
-        Aggregated tags of contained addresses
-
-        :param address_tags: The address_tags of this Tags.
-        :type address_tags: List[AddressTag]
-        """
-        if address_tags is None:
-            raise ValueError("Invalid value for `address_tags`, must not be `None`")
-
-        self._address_tags = address_tags
-
-    @property
     def entity_tags(self):
         """Gets the entity_tags of this Tags.
 
-        Tags of this entity
 
         :return: The entity_tags of this Tags.
         :rtype: List[EntityTag]
@@ -88,7 +64,6 @@ class Tags(Model):
     def entity_tags(self, entity_tags):
         """Sets the entity_tags of this Tags.
 
-        Tags of this entity
 
         :param entity_tags: The entity_tags of this Tags.
         :type entity_tags: List[EntityTag]
@@ -99,24 +74,45 @@ class Tags(Model):
         self._entity_tags = entity_tags
 
     @property
-    def tag_coherence(self):
-        """Gets the tag_coherence of this Tags.
+    def next_page(self):
+        """Gets the next_page of this Tags.
 
-        Tag coherence
 
-        :return: The tag_coherence of this Tags.
-        :rtype: float
+        :return: The next_page of this Tags.
+        :rtype: str
         """
-        return self._tag_coherence
+        return self._next_page
 
-    @tag_coherence.setter
-    def tag_coherence(self, tag_coherence):
-        """Sets the tag_coherence of this Tags.
+    @next_page.setter
+    def next_page(self, next_page):
+        """Sets the next_page of this Tags.
 
-        Tag coherence
 
-        :param tag_coherence: The tag_coherence of this Tags.
-        :type tag_coherence: float
+        :param next_page: The next_page of this Tags.
+        :type next_page: str
         """
 
-        self._tag_coherence = tag_coherence
+        self._next_page = next_page
+
+    @property
+    def address_tags(self):
+        """Gets the address_tags of this Tags.
+
+
+        :return: The address_tags of this Tags.
+        :rtype: List[AddressTag]
+        """
+        return self._address_tags
+
+    @address_tags.setter
+    def address_tags(self, address_tags):
+        """Sets the address_tags of this Tags.
+
+
+        :param address_tags: The address_tags of this Tags.
+        :type address_tags: List[AddressTag]
+        """
+        if address_tags is None:
+            raise ValueError("Invalid value for `address_tags`, must not be `None`")
+
+        self._address_tags = address_tags
