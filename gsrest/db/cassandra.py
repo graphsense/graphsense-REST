@@ -626,7 +626,6 @@ class Cassandra:
         norm = identity
         prefix = self.scrub_prefix(currency, expression)
         prefix = prefix[:prefix_lengths['address']]
-        print(f'prefix {prefix}')
         if currency == 'eth':
             # eth addresses are case insensitive
             expression = expression.lower()
@@ -909,9 +908,9 @@ class Cassandra:
         prefix_length = self.get_prefix_lengths(currency)['label']
         label_norm_prefix = label[:prefix_length]
         paging_state = from_hex(page)
-        fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
+        fetch_size = min(pagesize or SMALL_PAGE_SIZE * 2, SMALL_PAGE_SIZE * 2)
         query = ("SELECT * FROM address_tag_by_label WHERE "
-                 "label_norm_prefix = %s and label_norm = %s LIMIT 1000")
+                 "label_norm_prefix = %s and label_norm = %s")
         rows = await self.execute_async(currency, 'transformed', query,
                                         [label_norm_prefix, label],
                                         paging_state=paging_state,
@@ -930,9 +929,9 @@ class Cassandra:
         prefix_length = self.get_prefix_lengths(currency)['label']
         label_norm_prefix = label[:prefix_length]
         paging_state = from_hex(page)
-        fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
+        fetch_size = min(pagesize or SMALL_PAGE_SIZE * 2, SMALL_PAGE_SIZE * 2)
         query = ("SELECT * FROM cluster_tag_by_label WHERE "
-                 "label_norm_prefix = %s and label_norm = %s LIMIT 1000")
+                 "label_norm_prefix = %s and label_norm = %s")
         rows = await self.execute_async(currency, 'transformed', query,
                                         [label_norm_prefix, label],
                                         paging_state=paging_state,

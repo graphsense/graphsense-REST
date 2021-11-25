@@ -2,6 +2,7 @@
 
 # import models into model package
 from openapi_server.models.address import Address
+from openapi_server.models.address_and_entity_tags import AddressAndEntityTags
 from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.address_tag_all_of import AddressTagAllOf
 from openapi_server.models.address_tags import AddressTags

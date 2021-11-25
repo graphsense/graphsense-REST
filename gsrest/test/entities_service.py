@@ -12,6 +12,7 @@ from openapi_server.models.entity_tag import EntityTag
 from openapi_server.models.links import Links
 from openapi_server.models.link_utxo import LinkUtxo
 from openapi_server.models.tags import Tags
+from openapi_server.models.address_and_entity_tags import AddressAndEntityTags
 from gsrest.util.values import make_values
 from gsrest.test.addresses_service import addressD, addressE, eth_address, \
         eth_addressWithTagsOutNeighbors, atag1, atag2, eth_tag, eth_tag2
@@ -75,7 +76,9 @@ entityWithTags = Entity(
             value=115422577,
             usd=2.31,
             eur=1.15),
-   tags=[tag2, tag]
+   tags=AddressAndEntityTags(
+       entity_tags=[tag2, tag],
+       address_tags=[atag2, atag1])
 )
 
 eth_entity = Entity(
@@ -93,7 +96,9 @@ eth_entity = Entity(
 )
 
 eth_entityWithTags = Entity(**eth_entity.to_dict())
-eth_entityWithTags.tags = []
+eth_entityWithTags.tags = AddressAndEntityTags(
+    address_tags=[eth_tag, eth_tag2],
+    entity_tags=[])
 
 eth_neighbors = []
 for n in eth_addressWithTagsOutNeighbors.neighbors:
@@ -231,25 +236,25 @@ async def list_tags_by_entity(test_case):
                                      currency='btc',
                                      entity=entityWithTags.entity,
                                      level='entity')
-    expected = Tags(entity_tags=entityWithTags.tags)
+    expected = Tags(entity_tags=entityWithTags.tags.entity_tags)
     test_case.assertEqual(expected.to_dict(), result)
     result = await test_case.request(path,
                                      currency='btc',
                                      entity=entityWithTags.entity,
                                      level='address')
-    expected = Tags(address_tags=[atag2, atag1])
+    expected = Tags(address_tags=entityWithTags.tags.address_tags)
     test_case.assertEqual(expected.to_dict(), result)
     result = await test_case.request(path,
                                      currency='eth',
                                      entity=eth_entityWithTags.entity,
                                      level='entity')
-    expected = Tags(entity_tags=eth_entityWithTags.tags)
+    expected = Tags(entity_tags=eth_entityWithTags.tags.entity_tags)
     test_case.assertEqual(expected.to_dict(), result)
     result = await test_case.request(path,
                                      currency='eth',
                                      entity=eth_entityWithTags.entity,
                                      level='address')
-    expected = Tags(address_tags=[eth_tag, eth_tag2])
+    expected = Tags(address_tags=eth_entityWithTags.tags.address_tags)
     test_case.assertEqual(expected.to_dict(), result)
 
 
@@ -378,7 +383,7 @@ async def search_entity_neighbors(test_case):
                           result['paths'][0]['paths'][0]['node']['entity'])
     test_case.assertEqual(
         category,
-        result['paths'][0]['paths'][0]['node']['tags'][0]
+        result['paths'][0]['paths'][0]['node']['tags']['entity_tags'][0]
               ['category'])
 
     category = 'MyCategory'
@@ -397,7 +402,7 @@ async def search_entity_neighbors(test_case):
                           result['paths'][0]['paths'][0]['node']['entity'])
     test_case.assertEqual(category,
                           result['paths'][0]['paths'][0]['node']['tags']
-                                [0]['category'])
+                                ['entity_tags'][0]['category'])
 
     # Test addresses matching
 

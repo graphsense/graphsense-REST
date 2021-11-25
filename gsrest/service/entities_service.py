@@ -6,6 +6,7 @@ from openapi_server.models.address_txs import AddressTxs
 from gsrest.util.values import convert_value, to_values
 from openapi_server.models.entity_tag import EntityTag
 from openapi_server.models.address_tag import AddressTag
+from openapi_server.models.address_and_entity_tags import AddressAndEntityTags
 from openapi_server.models.tags import Tags
 from openapi_server.models.search_result_level1 import SearchResultLevel1
 from openapi_server.models.address import Address
@@ -97,8 +98,13 @@ async def get_entity(request, currency, entity, include_tags=False):
 
     tags = None
     if include_tags:
-        tags, _ = await list_entity_tags_by_entity(request, currency,
-                                                   result['cluster_id'])
+        [(entity_tags, _), (address_tags, _)] = await asyncio.gather(
+            list_entity_tags_by_entity(request, currency,
+                                       result['cluster_id']),
+            list_address_tags_by_entity(request, currency,
+                                        result['cluster_id']))
+        tags = AddressAndEntityTags(address_tags=address_tags,
+                                    entity_tags=entity_tags)
     rates = (await get_rates(request, currency))['rates']
     return from_row(currency, result, rates, tags)
 
@@ -208,9 +214,7 @@ async def recursive_search(request, currency, entity, params, breadth, depth,
             request, currency, entity, direction, pagesize=breadth)).neighbors
 
     async def get_entity_and_tags(entity):
-        return await asyncio.gather(
-            get_entity(request, currency, entity, include_tags=True),
-            list_address_tags_by_entity(request, currency, entity))
+        return await get_entity(request, currency, entity, include_tags=True)
 
     neighbors = await cached(entity, 'neighbors',
                              lambda: list_neighbors(entity))
@@ -226,7 +230,7 @@ async def recursive_search(request, currency, entity, params, breadth, depth,
 
     async def handle_neighbor(neighbor):
         match = True
-        [props, (address_tags, _)] = \
+        props = \
             await cached(int(neighbor.id), 'props',
                          lambda: get_entity_and_tags(int(neighbor.id)))
         if props is None:
@@ -234,7 +238,7 @@ async def recursive_search(request, currency, entity, params, breadth, depth,
 
         if 'category' in params:
             # find first occurrence of category in tags
-            tags = props.tags + address_tags
+            tags = props.tags.entity_tags + props.tags.address_tags
             match = next((True for t in tags if t.category and
                           t.category.lower() == params['category'].lower()),
                          False)

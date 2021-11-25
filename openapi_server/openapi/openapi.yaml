@@ -1867,6 +1867,32 @@ components:
       - total_spent
       title: address
       type: object
+    address_and_entity_tags:
+      example:
+        entity_tags:
+        - null
+        - null
+        address_tags:
+        - null
+        - null
+      properties:
+        address_tags:
+          description: First page of address tags of this entity
+          items:
+            $ref: '#/components/schemas/address_tag'
+          title: address_tags
+          type: array
+        entity_tags:
+          description: First page of entity tags of this entity
+          items:
+            $ref: '#/components/schemas/entity_tag'
+          title: entity_tags
+          type: array
+      required:
+      - address_tags
+      - entity_tags
+      title: address_and_entity_tags
+      type: object
     address_id:
       description: Address
       example: addressA
@@ -2135,8 +2161,12 @@ components:
             value: 0.8008282
           value: 6
         tags:
-        - null
-        - null
+          entity_tags:
+          - null
+          - null
+          address_tags:
+          - null
+          - null
       properties:
         balance:
           $ref: '#/components/schemas/values'
@@ -2172,11 +2202,7 @@ components:
           title: out_degree
           type: integer
         tags:
-          description: First page of tags of this entity
-          items:
-            $ref: '#/components/schemas/entity_tag'
-          title: tags
-          type: array
+          $ref: '#/components/schemas/address_and_entity_tags'
         total_received:
           $ref: '#/components/schemas/values'
         total_spent:

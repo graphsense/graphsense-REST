@@ -5,7 +5,7 @@ from datetime import date, datetime
 from typing import List, Dict, Type
 
 from openapi_server.models.base_model_ import Model
-from openapi_server.models.entity_tag import EntityTag
+from openapi_server.models.address_and_entity_tags import AddressAndEntityTags
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.values import Values
 from openapi_server import util
@@ -17,7 +17,7 @@ class Entity(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, balance: Values=None, entity: int=None, first_tx: TxSummary=None, in_degree: int=None, last_tx: TxSummary=None, no_addresses: int=None, no_incoming_txs: int=None, no_outgoing_txs: int=None, out_degree: int=None, tags: List[EntityTag]=None, total_received: Values=None, total_spent: Values=None):
+    def __init__(self, balance: Values=None, entity: int=None, first_tx: TxSummary=None, in_degree: int=None, last_tx: TxSummary=None, no_addresses: int=None, no_incoming_txs: int=None, no_outgoing_txs: int=None, out_degree: int=None, tags: AddressAndEntityTags=None, total_received: Values=None, total_spent: Values=None):
         """Entity - a model defined in OpenAPI
 
         :param balance: The balance of this Entity.
@@ -43,7 +43,7 @@ class Entity(Model):
             'no_incoming_txs': int,
             'no_outgoing_txs': int,
             'out_degree': int,
-            'tags': List[EntityTag],
+            'tags': AddressAndEntityTags,
             'total_received': Values,
             'total_spent': Values
         }
@@ -300,10 +300,9 @@ class Entity(Model):
     def tags(self):
         """Gets the tags of this Entity.
 
-        First page of tags of this entity
 
         :return: The tags of this Entity.
-        :rtype: List[EntityTag]
+        :rtype: AddressAndEntityTags
         """
         return self._tags
 
@@ -311,10 +310,9 @@ class Entity(Model):
     def tags(self, tags):
         """Sets the tags of this Entity.
 
-        First page of tags of this entity
 
         :param tags: The tags of this Entity.
-        :type tags: List[EntityTag]
+        :type tags: AddressAndEntityTags
         """
 
         self._tags = tags
