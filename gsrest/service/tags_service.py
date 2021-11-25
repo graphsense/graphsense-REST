@@ -16,7 +16,6 @@ async def list_tags(request, currency, label, level, page=None,
     tags = []
     fun = db.list_address_tags if level == 'address' else db.list_entity_tags
     tags, next_page = await fun(currency, label, page=page, pagesize=pagesize)
-    print(f'next_apge {next_page}')
 
     if level == 'address':
         return AddressTags(

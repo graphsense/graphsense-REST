@@ -5,7 +5,6 @@ from collections import namedtuple
 from cassandra.cluster import Cluster, NoHostAvailable
 from cassandra.query import SimpleStatement, dict_factory, ValueSequence
 from math import floor
-# from codetiming import Timer
 
 from gsrest.util.exceptions import BadConfigError
 
@@ -462,7 +461,6 @@ class Cassandra:
 
         return await self.finish_address(currency, result)
 
-    # @Timer(text="Timer: list_tags_by_address {:.2f}")
     async def list_tags_by_address(self, currency, address,
                                    page=None, pagesize=None):
         address_id, address_id_group = \
@@ -483,7 +481,6 @@ class Cassandra:
         return results.current_rows, to_hex(results.paging_state)
 
     @eth
-    # @Timer(text="Timer: get_address_entity_id {:.2f}")
     async def get_address_entity_id(self, currency, address):
         address_id, address_id_group = \
             await self.get_address_id_id_group(currency, address)
@@ -645,7 +642,6 @@ class Cassandra:
         return rows
 
     @eth
-    # @Timer(text="Timer: list_entity_tags_by_entity {:.2f}")
     async def list_entity_tags_by_entity(self, currency, entity, page=None,
                                          pagesize=None):
         entity = int(entity)
@@ -664,7 +660,6 @@ class Cassandra:
         return results.current_rows, to_hex(results.paging_state)
 
     @eth
-    # @Timer(text="Timer: list_address_tags_by_entity {:.2f}")
     async def list_address_tags_by_entity(self, currency, entity, page=None,
                                           pagesize=None):
         entity = int(entity)
@@ -687,7 +682,6 @@ class Cassandra:
         return results.current_rows, to_hex(results.paging_state)
 
     @eth
-    # @Timer(text="Timer: get_entity {:.2f}")
     async def get_entity(self, currency, entity):
         entity_id_group = self.get_id_group(currency, entity)
         entity = int(entity)
@@ -701,7 +695,6 @@ class Cassandra:
         return (await self.finish_entities(currency, [result]))[0]
 
     @eth
-    # @Timer(text="Timer: list_entities {:.2f}")
     async def list_entities(self, currency, ids, page=None, pagesize=None,
                             fields=['*']):
         fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
@@ -730,7 +723,6 @@ class Cassandra:
             to_hex(paging_state)
 
     @eth
-    # @Timer(text="Timer: list_entity_addresses {:.2f}")
     async def list_entity_addresses(self, currency, entity, page=None,
                                     pagesize=None):
         paging_state = from_hex(page)
@@ -757,7 +749,6 @@ class Cassandra:
         return await self.finish_addresses(currency, result),\
             to_hex(results.paging_state)
 
-    # @Timer(text="Timer: list_neighbors {:.2f}")
     async def list_neighbors(self, currency, id, is_outgoing, node_type,
                              targets, include_labels, page, pagesize):
         orig_node_type = node_type
@@ -864,7 +855,6 @@ class Cassandra:
         return results, to_hex(paging_state)
 
     @eth
-    # @Timer(text="Timer: include_labels {:.2f}")
     async def include_labels(self, currency, node_type, that, nodes):
         for node in nodes:
             node['labels'] = []
@@ -897,7 +887,6 @@ class Cassandra:
 
         return nodes
 
-    # @Timer(text="Timer: list_address_tags {:.2f}")
     async def list_address_tags(self, currency, label, page=None,
                                 pagesize=None):
         prefix_length = self.get_prefix_lengths(currency)['label']
@@ -915,10 +904,10 @@ class Cassandra:
         if currency == 'eth':
             for row in rows.current_rows:
                 row['active'] = row['active_address']
+                row['address'] = '0x' + row['address']
         return rows.current_rows, to_hex(rows.paging_state)
 
     @eth
-    # @Timer(text="Timer: list_entity_tags {:.2f}")
     async def list_entity_tags(self, currency, label, page=None,
                                pagesize=None):
         prefix_length = self.get_prefix_lengths(currency)['label']
@@ -962,7 +951,6 @@ class Cassandra:
 
         return labels
 
-    # @Timer(text="Timer: list_concepts {:.2f}")
     async def list_concepts(self, taxonomy):
         query = "SELECT * FROM concept_by_taxonomy_id WHERE taxonomy = %s"
         rows = await self.execute_async(None, 'tagpacks', query, [taxonomy])
@@ -970,7 +958,6 @@ class Cassandra:
             return []
         return rows.current_rows
 
-    # @Timer(text="Timer: list_taxonomies {:.2f}")
     async def list_taxonomies(self, ):
         query = "SELECT * FROM taxonomy_by_key LIMIT 100"
         rows = await self.execute_async(None, 'tagpacks', query)
@@ -979,7 +966,6 @@ class Cassandra:
         return rows.current_rows
 
     @eth
-    # @Timer(text="Timer: get_tx {:.2f}")
     async def get_tx(self, currency, tx_hash, include_io=False):
         prefix = self.get_prefix_lengths(currency)
         query = ('SELECT tx_id from transaction_by_tx_prefix where '
@@ -1001,7 +987,6 @@ class Cassandra:
         result = await self.execute_async(currency, 'raw', query, params)
         return one(result)
 
-    # @Timer(text="Timer: list_txs {:.2f}")
     def list_txs(self, currency, page=None):
 
         paging_state = from_hex(page)
@@ -1067,7 +1052,6 @@ class Cassandra:
             else expression
 
     @eth
-    # @Timer(text="Timer: list_txs_by_hashes {:.2f}")
     async def list_txs_by_hashes(self, currency, hashes):
         prefix = self.get_prefix_lengths(currency)
         params = [[hash[:prefix['tx']],
@@ -1093,7 +1077,6 @@ class Cassandra:
         return self.get_tx_by_id(currency, result['tx_id'])
 
     @eth
-    # @Timer(text="Timer: list_txs_by_ids {:.2f}")
     async def list_txs_by_ids(self, currency, ids, filter_empty=True):
         params = ([self.get_tx_id_group(currency, id), id] for id in ids)
         statement = ('SELECT * FROM transaction WHERE '
@@ -1244,7 +1227,6 @@ class Cassandra:
 # ETHEREUM VARIANTS #
 #####################
 
-    # @Timer(text="Timer: get_currency_statistics_eth {:.2f}")
     async def get_currency_statistics_eth(self, currency):
         query = "SELECT * FROM summary_statistics LIMIT 1"
         result = (await self.execute_async(currency, 'transformed', query)
@@ -1266,7 +1248,6 @@ class Cassandra:
                                          [block_group, height])).one()
 
     # entity = address_id
-    # @Timer(text="Timer: get_entity_eth {:.2f}")
     async def get_entity_eth(self, currency, entity):
         # mockup entity by address
         id_group = self.get_id_group(currency, entity)
@@ -1285,7 +1266,6 @@ class Cassandra:
         entity.pop('address', None)
         return entity
 
-    # @Timer(text="Timer: list_entities_eth {:.2f}")
     async def list_entities_eth(self, currency, ids, page=None, pagesize=None,
                                 fields=['*']):
         fields = ['address_id' if i == 'cluster_id' else i for i in fields]
@@ -1323,7 +1303,6 @@ class Cassandra:
                                              pagesize=None):
         return [], None
 
-    # @Timer(text="Timer: list_address_tags_by_entity_eth {:.2f}")
     async def list_address_tags_by_entity_eth(self, currency, entity,
                                               page=None, pagesize=None):
         query = ("SELECT address FROM address "
@@ -1350,11 +1329,9 @@ class Cassandra:
             tag['address'] = eth_address_to_hex(address)
         return results.current_rows, to_hex(results.paging_state)
 
-    # @Timer(text="Timer: get_address_entity_id_eth {:.2f}")
     def get_address_entity_id_eth(self, currency, address):
         return self.get_address_id(currency, address)
 
-    # @Timer(text="Timer: list_block_txs_eth {:.2f}")
     async def list_block_txs_eth(self, currency, height):
         height_group = self.get_id_group(currency, height)
         query = ("SELECT txs FROM block_transactions WHERE "
@@ -1370,7 +1347,6 @@ class Cassandra:
             return []
         return await self.list_txs_by_ids(currency, result['txs'])
 
-    # @Timer(text="Timer: get_id_secondary_group_eth {:.2f}")
     async def get_id_secondary_group_eth(self, table, id_group):
         column_prefix = ''
         if table == 'address_incoming_relations':
@@ -1449,7 +1425,6 @@ class Cassandra:
         return await self.get_tx_by_hash(currency,
                                          result['transaction'])
 
-    # @Timer(text="Timer: list_txs_by_hashes_eth {:.2f}")
     async def list_txs_by_hashes_eth(self, currency, hashes):
         prefix = self.get_prefix_lengths(currency)
         params = [[hash.hex()[:prefix['tx']], hash]
@@ -1610,12 +1585,10 @@ class Cassandra:
         return await self.list_txs_by_ids(currency, tx_ids), \
             to_hex(paging_state)
 
-    # @Timer(text="Timer: get_tx_eth {:.2f}")
     async def get_tx_eth(self, currency, tx_hash, include_io=False):
         return await self.get_tx_by_hash(currency,
                                          bytearray.fromhex(tx_hash))
 
-    # @Timer(text="Timer: list_entity_addresses_eth {:.2f}")
     async def list_entity_addresses_eth(self, currency, entity, page=None,
                                         pagesize=None):
         addresses = await self.get_addresses_by_ids(currency, [entity])
@@ -1647,10 +1620,6 @@ class Cassandra:
 
         return nodes
 
-##################################
-# VARIANTS USING NEW DATA SCHEME #
-##################################
-
     def markup_values(self, currency, fiat_values):
         values = []
         for (fiat, curr) in zip(
@@ -1669,19 +1638,6 @@ class Cassandra:
     def markup_rates(self, currency, row):
         row['rates'] = self.markup_values(currency, row['fiat_values'])
         return row
-
-    # @Timer(text="Timer: list_tags_new {:.2f}")
-    def list_tags_new(self, currency, label):
-        prefix_length = self.get_prefix_lengths(currency)['label']
-        label_norm_prefix = label[:prefix_length]
-
-        query = ("SELECT * FROM address_tag_by_label WHERE label_norm_prefix"
-                 "= %s and label_norm = %s")
-        rows = self.execute(currency, 'transformed', query,
-                            [label_norm_prefix, label])
-        if rows is None:
-            return []
-        return rows
 
     def sec_in(self, id):
         return ValueSequence(range(0, id+1))
