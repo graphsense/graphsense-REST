@@ -525,38 +525,33 @@ class Cassandra:
                                .format(id, neighbor))
 
         query = \
-            f"SELECT no_transactions FROM {node_type}_{{direction}}_relations"\
-            f" WHERE {{src}}_{node_type}_id_group = %s AND"\
-            f" {{src}}_{node_type}_id = %s AND"\
-            f" {{dst}}_{node_type}_id = %s"
+            f"SELECT no_{{direction}}_txs FROM {node_type}"\
+            f" WHERE {node_type}_id_group = %s AND"\
+            f" {node_type}_id = %s"
 
         no_outgoing_txs = (
             await self.execute_async(currency,
                                      'transformed',
-                                     query.format(direction='outgoing',
-                                                  src='src',
-                                                  dst='dst'),
-                                     [id_group, id, neighbor_id])
+                                     query.format(direction='outgoing'),
+                                     [id_group, id])
             ).one()
 
         if no_outgoing_txs is None:
             return [], None
 
-        no_outgoing_txs = no_outgoing_txs['no_transactions']
+        no_outgoing_txs = no_outgoing_txs['no_outgoing_txs']
 
         no_incoming_txs = (
             await self.execute_async(currency,
                                      'transformed',
-                                     query.format(direction='incoming',
-                                                  src='dst',
-                                                  dst='src'),
-                                     [neighbor_id_group, neighbor_id, id])
+                                     query.format(direction='incoming'),
+                                     [neighbor_id_group, neighbor_id])
             ).one()
 
         if no_incoming_txs is None:
             return [], None
 
-        no_incoming_txs = no_incoming_txs['no_transactions']
+        no_incoming_txs = no_incoming_txs['no_incoming_txs']
 
         isOutgoing = no_outgoing_txs < no_incoming_txs
 
