@@ -238,7 +238,7 @@ async def recursive_search(request, currency, entity, params, breadth, depth,
 
         if 'category' in params:
             # find first occurrence of category in tags
-            tags = props.tags.entity_tags + props.tags.address_tags
+            tags = props.tags.entity_tags
             match = next((True for t in tags if t.category and
                           t.category.lower() == params['category'].lower()),
                          False)
