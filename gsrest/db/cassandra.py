@@ -279,14 +279,12 @@ class Cassandra:
         return results
 
     @eth
-    # @Timer(text="Timer: stats {:.2f}")
     async def get_currency_statistics(self, currency):
         query = "SELECT * FROM summary_statistics LIMIT 1"
         result = await self.execute_async(currency, 'transformed', query)
         return one(result)
 
     @eth
-    # @Timer(text="Timer: get_block {:.2f}")
     async def get_block(self, currency, height):
         query = ("SELECT * FROM block WHERE block_id_group = %s "
                  "AND block_id = %s")
@@ -294,16 +292,6 @@ class Cassandra:
                             currency, 'raw', query,
                             [self.get_block_id_group(currency, height), height]
                             )).one()
-
-    # @Timer(text="Timer: list_blocks {:.2f}")
-    async def list_blocks(self, currency, page=None):
-        paging_state = from_hex(page)
-
-        query = "SELECT * FROM block"
-        results = await self.execute_async(currency, 'raw', query,
-                                           paging_state=paging_state)
-
-        return results.current_rows, to_hex(results.paging_state)
 
     @eth
     async def list_block_txs(self, currency, height):
@@ -317,7 +305,6 @@ class Cassandra:
         txs = [tx.tx_id for tx in result.one()['txs']]
         return await self.list_txs_by_ids(currency, txs)
 
-    # @Timer(text="Timer: get_rates {:.2f}")
     async def get_rates(self, currency, height):
         query = "SELECT * FROM exchange_rates WHERE block_id = %s"
         result = await self.execute_async(currency, 'transformed', query,
@@ -327,7 +314,6 @@ class Cassandra:
             return None
         return self.markup_rates(currency, result)
 
-    # @Timer(text="Timer: list_rates {:.2f}")
     async def list_rates(self, currency, heights):
         result = await self.concurrent_with_args(
             currency,
@@ -349,7 +335,6 @@ class Cassandra:
             currency, 'cluster', entity, page=page, pagesize=pagesize)
 
     @eth
-    # @Timer(text="Timer: list_address_txs {:.2f}")
     async def list_txs_by_node_type(self, currency, node_type, id, page=None,
                                     pagesize=None):
         paging_state = from_hex(page)
@@ -386,7 +371,6 @@ class Cassandra:
 
         return rows, to_hex(results.paging_state)
 
-    # @Timer(text="Timer: get_addresses_by_ids {:.2f}")
     async def get_addresses_by_ids(self, currency, address_ids,
                                    address_only=False):
         params = [(self.get_id_group(currency, address_id),
@@ -404,7 +388,6 @@ class Cassandra:
                     eth_address_to_hex(row['address'])
         return result
 
-    # @Timer(text="Timer: get_address_id {:.2f}")
     async def get_address_id(self, currency, address):
         prefix = self.scrub_prefix(currency, address)
         if currency == 'eth':
@@ -419,7 +402,6 @@ class Cassandra:
         result = one(result)
         return result['address_id'] if result else None
 
-    # @Timer(text="Timer: get_address_id_id_group {:.2f}")
     async def get_address_id_id_group(self, currency, address):
         address_id = await self.get_address_id(currency, address)
         if address_id is None:
@@ -447,7 +429,6 @@ class Cassandra:
     def get_tx_id_group_eth(self, keyspace, id_):
         return self.get_id_group(keyspace, id_)
 
-    # @Timer(text="Timer: get_address {:.2f}")
     async def get_address(self, currency, address):
         address_id, address_id_group = \
             await self.get_address_id_id_group(currency, address)
@@ -904,7 +885,7 @@ class Cassandra:
         if currency == 'eth':
             for row in rows.current_rows:
                 row['active'] = row['active_address']
-                row['address'] = '0x' + row['address']
+                row['address'] = '0x' + row['address'].lower()
         return rows.current_rows, to_hex(rows.paging_state)
 
     @eth
@@ -986,17 +967,6 @@ class Cassandra:
                  'tx_id_group = %s and tx_id = %s')
         result = await self.execute_async(currency, 'raw', query, params)
         return one(result)
-
-    def list_txs(self, currency, page=None):
-
-        paging_state = from_hex(page)
-        query = "SELECT * FROM transaction"
-        results = self.execute(currency, 'raw', query,
-                               paging_state=paging_state)
-
-        if results is None:
-            return [], None
-        return results.current_rows, to_hex(results.paging_state)
 
     async def list_matching_txs(self, currency, expression, limit):
         prefix_lengths = self.get_prefix_lengths(currency)
@@ -1092,42 +1062,6 @@ class Cassandra:
                      'tx_id_group = %s and tx_id = %s')
         return (await self.execute_async(currency, 'raw', statement, params)
                 ).one()
-
-    def list_addresses(self, currency, ids=None, page=None, pagesize=None):
-        has_ids = isinstance(ids, list)
-
-        if has_ids:
-            prefix_length = self.get_prefix_lengths(currency)['address']
-            params = [[self.scrub_prefix(currency, id)[:prefix_length],
-                       id] for id in ids]
-            if currency == 'eth':
-                params = [[param[0].upper(),
-                           eth_address_from_hex(param[1])] for param in params]
-            query = "SELECT address_id FROM address_ids_by_address_prefix"\
-                    " WHERE address_prefix = %s AND address = %s"
-            ids = self.concurrent_with_args(currency, 'transformed', query,
-                                            params)
-            query = ("SELECT * FROM address WHERE "
-                     "address_id_group = %s AND address_id = %s")
-            params = [[self.get_id_group(currency, row['address_id']),
-                       row['address_id']] for row in ids]
-            result = self.concurrent_with_args(currency, 'transformed', query,
-                                               params)
-            paging_state = None
-        else:
-            query = "SELECT * FROM address"
-            fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
-            result = self.execute(currency, 'transformed', query,
-                                  paging_state=from_hex(page),
-                                  fetch_size=fetch_size)
-            paging_state = result.paging_state
-            result = result.current_rows
-
-        result = self.finish_addresses(currency, result)
-        if currency != 'eth':
-            return result, to_hex(paging_state)
-
-        return result, to_hex(paging_state)
 
     async def finish_entities(self, currency, rows, with_txs=True):
         return await self.finish_addresses(currency, rows, with_txs)
