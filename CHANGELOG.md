@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.5.1] - Unreleased
+### Added
+- Service for requesting data from other endpoints in bulk (CSV and JSON)
+- Redesign algorithm for retrieving the transactions between two addresses/entities
+- Automatically reconnect to DB
+- Listing entity transactions
+- Endpoint for getting inputs/outputs of a transaction
+- Minor performance improvements
+- Bux fixes
+
+### Changed
+- Webserver from Flask to AIOHttp to support asynchronous request handling
+- Tag response model
+- Consider entity tags only in deep search for entity neighbors
+
+### Removed
+- Tag coherence
+- CSV variants of routes in favour of new bulk interface
+- Retrieving arbitrary lists of things (list_entities, list_addresses, list_blocks, list_txs)
+- Metadata from stats endpoint response
+
 ## [0.5.0] 2021-06-02
 ### Added
 - Ethereum support
