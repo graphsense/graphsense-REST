@@ -76,7 +76,7 @@ async def list_tags(test_case):
 
     tag_eth = AddressTag(**tag2.to_dict())
     tag_eth.currency = 'ETH'
-    tag_eth.address = '0x' + tag_eth.address
+    tag_eth.address = '0x' + tag_eth.address.lower()
     result = await test_case.request(path, currency='eth', label='cimedy',
                                      level='address')
     test_case.assertEqual(AddressTags(address_tags=[tag_eth]).to_dict(),
