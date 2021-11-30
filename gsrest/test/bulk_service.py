@@ -6,6 +6,7 @@ async def bulk_csv(test_case):
     path = '/{currency}/bulk.csv/get_block?num_pages=1'
     headers = {
         'Accept': 'application/json',
+        'Authorization': 'x'
     }
     response = await test_case.client.request(
         path=path.format(form="csv", currency="btc"),
