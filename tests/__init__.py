@@ -16,6 +16,7 @@ class BaseTestCase(AioHTTPTestCase):
     async def requestWithCodeAndBody(self, path, code, body, **kwargs):
         headers = {
             'Accept': 'application/json',
+            'Authorization': 'x'
         }
         response = await self.client.request(
             path=path.format(**kwargs),
@@ -30,5 +31,3 @@ class BaseTestCase(AioHTTPTestCase):
 
     def request(self, path, **kwargs):
         return self.requestWithCodeAndBody(path, 200, None, **kwargs)
-
-
