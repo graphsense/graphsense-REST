@@ -1,9 +1,8 @@
 # coding: utf-8
 
-from __future__ import absolute_import
-from datetime import date, datetime  # noqa: F401
+from datetime import date, datetime
 
-from typing import List, Dict  # noqa: F401
+from typing import List, Dict, Type
 
 from openapi_server.models.base_model_ import Model
 from openapi_server import util
@@ -15,156 +14,51 @@ class Concept(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, label=None, taxonomy=None, uri=None, description=None, id=None):  # noqa: E501
+    def __init__(self, description: str=None, id: str=None, label: str=None, taxonomy: str=None, uri: str=None):
         """Concept - a model defined in OpenAPI
 
-        :param label: The label of this Concept.  # noqa: E501
-        :type label: str
-        :param taxonomy: The taxonomy of this Concept.  # noqa: E501
-        :type taxonomy: str
-        :param uri: The uri of this Concept.  # noqa: E501
-        :type uri: str
-        :param description: The description of this Concept.  # noqa: E501
-        :type description: str
-        :param id: The id of this Concept.  # noqa: E501
-        :type id: str
+        :param description: The description of this Concept.
+        :param id: The id of this Concept.
+        :param label: The label of this Concept.
+        :param taxonomy: The taxonomy of this Concept.
+        :param uri: The uri of this Concept.
         """
         self.openapi_types = {
+            'description': str,
+            'id': str,
             'label': str,
             'taxonomy': str,
-            'uri': str,
-            'description': str,
-            'id': str
+            'uri': str
         }
 
         self.attribute_map = {
+            'description': 'description',
+            'id': 'id',
             'label': 'label',
             'taxonomy': 'taxonomy',
-            'uri': 'uri',
-            'description': 'description',
-            'id': 'id'
+            'uri': 'uri'
         }
 
-        if label is None:
-            raise ValueError("Invalid value for `label`, must not be `None`")  # noqa: E501
-        self._label = label
-        if taxonomy is None:
-            raise ValueError("Invalid value for `taxonomy`, must not be `None`")  # noqa: E501
-        self._taxonomy = taxonomy
-        if uri is None:
-            raise ValueError("Invalid value for `uri`, must not be `None`")  # noqa: E501
-        self._uri = uri
-        if description is None:
-            raise ValueError("Invalid value for `description`, must not be `None`")  # noqa: E501
         self._description = description
-        if id is None:
-            raise ValueError("Invalid value for `id`, must not be `None`")  # noqa: E501
         self._id = id
+        self._label = label
+        self._taxonomy = taxonomy
+        self._uri = uri
 
     @classmethod
-    def from_dict(cls, dikt) -> 'Concept':
+    def from_dict(cls, dikt: dict) -> 'Concept':
         """Returns the dict as a model
 
         :param dikt: A dict.
-        :type: dict
-        :return: The concept of this Concept.  # noqa: E501
-        :rtype: Concept
+        :return: The concept of this Concept.
         """
         return util.deserialize_model(dikt, cls)
-
-    def to_dict(self, prefix=""):
-        """Returns the model as a dict:
-
-        :return: The Concept as a dict
-        :rtype: dict
-        """
-        return { 'label': self._label,
-            'taxonomy': self._taxonomy,
-            'uri': self._uri,
-            'description': self._description,
-            'id': self._id }
-
-
-    @property
-    def label(self):
-        """Gets the label of this Concept.
-
-        Label  # noqa: E501
-
-        :return: The label of this Concept.
-        :rtype: str
-        """
-        return self._label
-
-    @label.setter
-    def label(self, label):
-        """Sets the label of this Concept.
-
-        Label  # noqa: E501
-
-        :param label: The label of this Concept.
-        :type label: str
-        """
-        if label is None:
-            raise ValueError("Invalid value for `label`, must not be `None`")  # noqa: E501
-
-        self._label = label
-
-    @property
-    def taxonomy(self):
-        """Gets the taxonomy of this Concept.
-
-        Taxonomy  # noqa: E501
-
-        :return: The taxonomy of this Concept.
-        :rtype: str
-        """
-        return self._taxonomy
-
-    @taxonomy.setter
-    def taxonomy(self, taxonomy):
-        """Sets the taxonomy of this Concept.
-
-        Taxonomy  # noqa: E501
-
-        :param taxonomy: The taxonomy of this Concept.
-        :type taxonomy: str
-        """
-        if taxonomy is None:
-            raise ValueError("Invalid value for `taxonomy`, must not be `None`")  # noqa: E501
-
-        self._taxonomy = taxonomy
-
-    @property
-    def uri(self):
-        """Gets the uri of this Concept.
-
-        URI  # noqa: E501
-
-        :return: The uri of this Concept.
-        :rtype: str
-        """
-        return self._uri
-
-    @uri.setter
-    def uri(self, uri):
-        """Sets the uri of this Concept.
-
-        URI  # noqa: E501
-
-        :param uri: The uri of this Concept.
-        :type uri: str
-        """
-        if uri is None:
-            raise ValueError("Invalid value for `uri`, must not be `None`")  # noqa: E501
-
-        self._uri = uri
 
     @property
     def description(self):
         """Gets the description of this Concept.
 
-        Description  # noqa: E501
+        Description
 
         :return: The description of this Concept.
         :rtype: str
@@ -175,13 +69,13 @@ class Concept(Model):
     def description(self, description):
         """Sets the description of this Concept.
 
-        Description  # noqa: E501
+        Description
 
         :param description: The description of this Concept.
         :type description: str
         """
         if description is None:
-            raise ValueError("Invalid value for `description`, must not be `None`")  # noqa: E501
+            raise ValueError("Invalid value for `description`, must not be `None`")
 
         self._description = description
 
@@ -189,7 +83,7 @@ class Concept(Model):
     def id(self):
         """Gets the id of this Concept.
 
-        ID  # noqa: E501
+        ID
 
         :return: The id of this Concept.
         :rtype: str
@@ -200,12 +94,87 @@ class Concept(Model):
     def id(self, id):
         """Sets the id of this Concept.
 
-        ID  # noqa: E501
+        ID
 
         :param id: The id of this Concept.
         :type id: str
         """
         if id is None:
-            raise ValueError("Invalid value for `id`, must not be `None`")  # noqa: E501
+            raise ValueError("Invalid value for `id`, must not be `None`")
 
         self._id = id
+
+    @property
+    def label(self):
+        """Gets the label of this Concept.
+
+        Label
+
+        :return: The label of this Concept.
+        :rtype: str
+        """
+        return self._label
+
+    @label.setter
+    def label(self, label):
+        """Sets the label of this Concept.
+
+        Label
+
+        :param label: The label of this Concept.
+        :type label: str
+        """
+        if label is None:
+            raise ValueError("Invalid value for `label`, must not be `None`")
+
+        self._label = label
+
+    @property
+    def taxonomy(self):
+        """Gets the taxonomy of this Concept.
+
+        Taxonomy
+
+        :return: The taxonomy of this Concept.
+        :rtype: str
+        """
+        return self._taxonomy
+
+    @taxonomy.setter
+    def taxonomy(self, taxonomy):
+        """Sets the taxonomy of this Concept.
+
+        Taxonomy
+
+        :param taxonomy: The taxonomy of this Concept.
+        :type taxonomy: str
+        """
+        if taxonomy is None:
+            raise ValueError("Invalid value for `taxonomy`, must not be `None`")
+
+        self._taxonomy = taxonomy
+
+    @property
+    def uri(self):
+        """Gets the uri of this Concept.
+
+        URI
+
+        :return: The uri of this Concept.
+        :rtype: str
+        """
+        return self._uri
+
+    @uri.setter
+    def uri(self, uri):
+        """Sets the uri of this Concept.
+
+        URI
+
+        :param uri: The uri of this Concept.
+        :type uri: str
+        """
+        if uri is None:
+            raise ValueError("Invalid value for `uri`, must not be `None`")
+
+        self._uri = uri

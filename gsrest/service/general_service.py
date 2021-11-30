@@ -1,100 +1,70 @@
-import time
+import asyncio
+from datetime import datetime
 from openapi_server.models.stats import Stats
-from openapi_server.models.stats_version import StatsVersion
-from openapi_server.models.stats_tool import StatsTool
-from openapi_server.models.stats_tags_source import StatsTagsSource
-from openapi_server.models.stats_note import StatsNote
 from openapi_server.models.search_result import SearchResult
 from openapi_server.models.search_result_by_currency \
     import SearchResultByCurrency
 from gsrest.service.stats_service import get_currency_statistics
-from gsrest.service.txs_service import list_matching_txs
-from gsrest.service.tags_service import list_labels
-from gsrest.service.addresses_service import list_matching_addresses
-from gsrest.db import get_connection
-
-import yaml
-
-note1 = ('Please **note** that the clustering dataset is built with'
-         ' multi input address clustering to avoid false clustering '
-         'results due to coinjoins (see TITANIUM glossary '
-         'http://titanium-project.eu/glossary/#coinjoin), we exclude'
-         ' coinjoins prior to clustering. This does not eliminate '
-         'the risk of false results, since coinjoin detection is also'
-         ' heuristic in nature, but it should decrease the potential '
-         'for wrong cluster merges.')
+from gsrest.util.string_edit import alphanumeric_lower
 
 
-note2 = ('Our tags are all manually crawled or from credible sources,'
-         ' we do not use tags that where automatically extracted '
-         'without human interaction. Origins of the tags have been '
-         'saved for reproducibility please contact the GraphSense '
-         'team (contact@graphsense.info) for more insight.')
-
-
-def get_statistics():
+async def get_statistics(request):
     """
     Returns summary statistics on all available currencies
     """
-    with open('./openapi_server/openapi/openapi.yaml', 'r') as input_file:
-        input = yaml.safe_load(input_file)
-        version = input['info']['version']
-        title = input['info']['title']
-        currency_stats = list()
-        db = get_connection()
-        for currency in db.get_supported_currencies():
-            currency_stats.append(get_currency_statistics(currency, version))
-        return Stats(
-                currencies=currency_stats,
-                version=StatsVersion(
-                    nr=version,
-                    hash=None,
-                    timestamp=time.strftime(
-                        "%Y-%m-%d %H:%M:%S", time.gmtime()),
-                    file=version),
-                tools=[StatsTool(
-                    visible_name=title,
-                    version=version,
-                    id='ait:graphsense',
-                    titanium_replayable=False,
-                    responsible_for=[]
-                    )],
-                tags_source=StatsTagsSource(
-                    visible_name="GraphSense attribution tags",
-                    version=version,
-                    id="graphsense_tags",
-                    report_uuid="graphsense_tags"),
-                notes=[StatsNote(note=note1),
-                       StatsNote(note=note2)])
+    version = request.app['openapi']['info']['version']
+    currency_stats = list()
+    db = request.app['db']
+    aws = [get_currency_statistics(request, currency, version)
+           for currency in db.get_supported_currencies()]
+    currency_stats = await asyncio.gather(*aws)
+
+    tstamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    return Stats(currencies=currency_stats,
+                 version=version,
+                 request_timestamp=tstamp)
 
 
-def search(q, currency=None, limit=None):
-    db = get_connection()
+async def search(request, q, currency=None, limit=10):
+    db = request.app['db']
     currencies = db.get_supported_currencies()
 
     q = q.strip()
     result = SearchResult(currencies=[], labels=[])
 
-    for curr in currencies:
-        if currency is not None and currency.lower() != curr.lower():
-            continue
-        element = SearchResultByCurrency(
-                    currency=curr,
-                    addresses=[],
-                    txs=[]
-                    )
+    currs = [curr for curr in currencies
+             if currency is None or currency.lower() == curr.lower()]
 
-        # Look for addresses and transactions
-        txs = list_matching_txs(curr, q)
-        element.txs = txs[:limit]
+    expression_norm = alphanumeric_lower(q)
 
-        addresses = list_matching_addresses(curr, q)
-        element.addresses = addresses[:limit]
+    async def s(curr):
+        r = SearchResultByCurrency(currency=curr,
+                                   addresses=[],
+                                   txs=[])
 
-        result.currencies.append(element)
+        [txs, addresses] = await asyncio.gather(
+            db.list_matching_txs(curr, q, limit),
+            db.list_matching_addresses(curr, q, limit),
+        )
 
-        labels = list_labels(curr, q)[:limit]
+        r.txs = txs
+        r.addresses = addresses
+        return r
+
+    aws1 = [s(curr) for curr in currs]
+    aws2 = [db.list_matching_labels(curr, expression_norm, limit)
+            for curr in currs]
+
+    aw1 = asyncio.gather(*aws1)
+    aw2 = asyncio.gather(*aws2)
+
+    [r1, r2] = await asyncio.gather(aw1, aw2)
+
+    result.currencies = r1
+    for labels in r2:
         if labels:
             result.labels += labels
+
+    result.labels = sorted(list(set(result.labels)), key=lambda x: x.lower())
 
     return result

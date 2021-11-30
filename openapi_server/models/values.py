@@ -1,11 +1,11 @@
 # coding: utf-8
 
-from __future__ import absolute_import
-from datetime import date, datetime  # noqa: F401
+from datetime import date, datetime
 
-from typing import List, Dict  # noqa: F401
+from typing import List, Dict, Type
 
 from openapi_server.models.base_model_ import Model
+from openapi_server.models.rate import Rate
 from openapi_server import util
 
 
@@ -15,95 +15,54 @@ class Values(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, eur=None, usd=None, value=None):  # noqa: E501
+    def __init__(self, fiat_values: List[Rate]=None, value: int=None):
         """Values - a model defined in OpenAPI
 
-        :param eur: The eur of this Values.  # noqa: E501
-        :type eur: float
-        :param usd: The usd of this Values.  # noqa: E501
-        :type usd: float
-        :param value: The value of this Values.  # noqa: E501
-        :type value: int
+        :param fiat_values: The fiat_values of this Values.
+        :param value: The value of this Values.
         """
         self.openapi_types = {
-            'eur': float,
-            'usd': float,
+            'fiat_values': List[Rate],
             'value': int
         }
 
         self.attribute_map = {
-            'eur': 'eur',
-            'usd': 'usd',
+            'fiat_values': 'fiat_values',
             'value': 'value'
         }
 
-        self._eur = eur
-        self._usd = usd
+        self._fiat_values = fiat_values
         self._value = value
 
     @classmethod
-    def from_dict(cls, dikt) -> 'Values':
+    def from_dict(cls, dikt: dict) -> 'Values':
         """Returns the dict as a model
 
         :param dikt: A dict.
-        :type: dict
-        :return: The values of this Values.  # noqa: E501
-        :rtype: Values
+        :return: The values of this Values.
         """
         return util.deserialize_model(dikt, cls)
 
-    def to_dict(self, prefix=""):
-        """Returns the model as a dict:
-
-        :return: The Values as a dict
-        :rtype: dict
-        """
-        return { 'eur': self._eur,
-            'usd': self._usd,
-            'value': self._value }
-
-
     @property
-    def eur(self):
-        """Gets the eur of this Values.
+    def fiat_values(self):
+        """Gets the fiat_values of this Values.
 
 
-        :return: The eur of this Values.
-        :rtype: float
+        :return: The fiat_values of this Values.
+        :rtype: List[Rate]
         """
-        return self._eur
+        return self._fiat_values
 
-    @eur.setter
-    def eur(self, eur):
-        """Sets the eur of this Values.
-
-
-        :param eur: The eur of this Values.
-        :type eur: float
-        """
-
-        self._eur = eur
-
-    @property
-    def usd(self):
-        """Gets the usd of this Values.
+    @fiat_values.setter
+    def fiat_values(self, fiat_values):
+        """Sets the fiat_values of this Values.
 
 
-        :return: The usd of this Values.
-        :rtype: float
-        """
-        return self._usd
-
-    @usd.setter
-    def usd(self, usd):
-        """Sets the usd of this Values.
-
-
-        :param usd: The usd of this Values.
-        :type usd: float
+        :param fiat_values: The fiat_values of this Values.
+        :type fiat_values: List[Rate]
         """
 
-        self._usd = usd
+        self._fiat_values = fiat_values
 
     @property
     def value(self):

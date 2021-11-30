@@ -1,109 +1,91 @@
-import connexion
-import six
+from typing import List, Dict
+from aiohttp import web
 import traceback
+import json
 
-from openapi_server.models.block import Block  # noqa: E501
-from openapi_server.models.block_tx import BlockTx  # noqa: E501
-from openapi_server.models.blocks import Blocks  # noqa: E501
+from openapi_server.models.block import Block
+from openapi_server.models.tx import Tx
 import gsrest.service.blocks_service as service
-from gsrest.service.problems import notfound, badrequest, internalerror
+from openapi_server import util
 
 
-def get_block(currency, height):  # noqa: E501
+async def get_block(request: web.Request, currency, height) -> web.Response:
     """Get a block by its height
 
-     # noqa: E501
+    
 
-    :param currency: The cryptocurrency (e.g., btc)
+    :param currency: The cryptocurrency code (e.g., btc)
     :type currency: str
     :param height: The block height
     :type height: int
 
-    :rtype: Block
     """
     try:
-        return service.get_block(
-            currency=currency,
-            height=height)
+        if 'currency' in ['','currency','height']:
+            if currency is not None:
+                currency = currency.lower() 
+        result = service.get_block(request
+                ,currency=currency,height=height)
+        result = await result
+        if isinstance(result, list):
+            result = [d.to_dict() for d in result]
+        else:
+            result = result.to_dict()
+        result = web.Response(
+                    status=200,
+                    text=json.dumps(result),
+                    headers={'Content-type': 'application/json'})
+        return result
     except RuntimeError as e:
-        return notfound(str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPNotFound(text=str(e))
     except ValueError as e:
-        return badrequest(str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
+    except TypeError as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        raise web.HTTPInternalServerError()
 
 
-def list_block_txs(currency, height):  # noqa: E501
-    """Get block transactions (100 per page)
+async def list_block_txs(request: web.Request, currency, height) -> web.Response:
+    """Get block transactions
 
-     # noqa: E501
+    
 
-    :param currency: The cryptocurrency (e.g., btc)
+    :param currency: The cryptocurrency code (e.g., btc)
     :type currency: str
     :param height: The block height
     :type height: int
 
-    :rtype: List[BlockTx]
     """
     try:
-        return service.list_block_txs(
-            currency=currency,
-            height=height)
+        if 'currency' in ['','currency','height']:
+            if currency is not None:
+                currency = currency.lower() 
+        result = service.list_block_txs(request
+                ,currency=currency,height=height)
+        result = await result
+        if isinstance(result, list):
+            result = [d.to_dict() for d in result]
+        else:
+            result = result.to_dict()
+        result = web.Response(
+                    status=200,
+                    text=json.dumps(result),
+                    headers={'Content-type': 'application/json'})
+        return result
     except RuntimeError as e:
-        return notfound(str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPNotFound(text=str(e))
     except ValueError as e:
-        return badrequest(str(e))
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
+    except TypeError as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
-
-
-def list_block_txs_csv(currency, height):  # noqa: E501
-    """Get block transactions as CSV
-
-     # noqa: E501
-
-    :param currency: The cryptocurrency (e.g., btc)
-    :type currency: str
-    :param height: The block height
-    :type height: int
-
-    :rtype: str
-    """
-    try:
-        return service.list_block_txs_csv(
-            currency=currency,
-            height=height)
-    except RuntimeError as e:
-        return notfound(str(e))
-    except ValueError as e:
-        return badrequest(str(e))
-    except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
-
-
-def list_blocks(currency, page=None):  # noqa: E501
-    """Get all blocks
-
-     # noqa: E501
-
-    :param currency: The cryptocurrency (e.g., btc)
-    :type currency: str
-    :param page: Resumption token for retrieving the next page
-    :type page: str
-
-    :rtype: Blocks
-    """
-    try:
-        return service.list_blocks(
-            currency=currency,
-            page=page)
-    except RuntimeError as e:
-        return notfound(str(e))
-    except ValueError as e:
-        return badrequest(str(e))
-    except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        return internalerror(str(e))
+        raise web.HTTPInternalServerError()

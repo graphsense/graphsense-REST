@@ -1,50 +1,75 @@
-#!/usr/bin/env python3
-
-import connexion
 import os
-import yaml
+import connexion
+import aiohttp_cors
 import gsrest.db
-from flask_cors import CORS
+import yaml
 
-from openapi_server import encoder
-
-CONFIG_FILE = "config.yaml"
+CONFIG_FILE = "./instance/config.yaml"
 
 
-def load_config(app, instance_path):
-    instance_path = app.instance_path if not instance_path else instance_path
-    # ensure that instance path and config file exists
-    config_file_path = os.path.join(instance_path, CONFIG_FILE)
-    if not os.path.exists(config_file_path):
-        raise ValueError("Instance path with {} file is missing."
-                         .format(CONFIG_FILE))
+def load_config(config_file):
+    if not os.path.exists(config_file):
+        raise ValueError("Config file {} not found."
+                         .format(config_file))
 
-    with open(config_file_path, 'r') as input_file:
+    with open(config_file, 'r') as input_file:
         config = yaml.safe_load(input_file)
-        app.config.from_object(config)
-        for k, v in config.items():
-            app.config[k] = v
+    return config
 
 
-def main(instance_path=None):
-    app = connexion.App(
-        __name__,
-        specification_dir='./openapi/',
-        options={"swagger_ui": True, "serve_spec": True})
-
-    app.app.json_encoder = encoder.JSONEncoder
-    app.add_api('openapi.yaml',
+def factory(config_file=None, validate_responses=False):
+    if not config_file:
+        config_file = CONFIG_FILE
+    options = {
+        "swagger_ui": True,
+        "serve_spec": True
+        }
+    specification_dir = os.path.join(os.path.dirname(__file__), 'openapi')
+    app = connexion.AioHttpApp(__name__, 
+                               specification_dir=specification_dir, 
+                               only_one_api=True,
+                               options=options)
+    openapi_yaml = 'openapi.yaml'
+    app.add_api(openapi_yaml,
                 arguments={'title': 'GraphSense API'},
-                pythonic_params=True)
-    load_config(app.app, instance_path)
-    with app.app.app_context():
-        gsrest.db.init_app(app.app)
-    origins = app.app.config['ALLOWED_ORIGINS'] \
-        if 'ALLOWED_ORIGINS' in app.app.config else '*'
+                pythonic_params=True,
+                validate_responses=validate_responses,
+                pass_context_arg_name='request')
+    app.app.logger.info(f'reading config from {config_file}')
+    app.app['config'] = load_config(config_file)
+    with open(os.path.join(specification_dir, openapi_yaml)) as yaml_file:
+        app.app['openapi'] = yaml.safe_load(yaml_file)
+
+    app.app.cleanup_ctx.append(gsrest.db.get_connection)
+
+    origins = app.app['config']['ALLOWED_ORIGINS'] \
+        if 'ALLOWED_ORIGINS' in app.app['config'] else '*'
+
+    options = aiohttp_cors.ResourceOptions(
+        allow_credentials=True,
+        expose_headers="*",
+        allow_headers="*",
+    )
+
+    defaults = {}
+
+    for origin in origins:
+        defaults[origin] = options
+
     app.app.logger.info('ALLOWED_ORIGINS: {}'.format(origins))
-    CORS(app.app, supports_credentials=True, origins=origins)
+    # Enable CORS for all origins.
+    cors = aiohttp_cors.setup(app.app, defaults=defaults)
+
+    # Register all routers for CORS.
+    for route in list(app.app.router.routes()):
+        cors.add(route)
+
     return app
 
 
-def flask():
-    return main().app
+def main(args=None):
+    return factory(args).app
+
+
+def run(args=None):
+    factory().run(port=8080)

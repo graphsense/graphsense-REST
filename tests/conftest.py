@@ -1,0 +1,13 @@
+import logging
+import pytest
+import os
+
+import connexion
+from openapi_server import main
+
+
+@pytest.fixture
+def client(loop, aiohttp_client):
+    logging.getLogger('connexion.operation').setLevel('ERROR')
+    app = main(os.path.join(os.getcwd(), 'tests/instance'))
+    return loop.run_until_complete(aiohttp_client(app))

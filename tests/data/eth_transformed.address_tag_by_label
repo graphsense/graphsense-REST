@@ -1,0 +1,2 @@
+ {"label_norm_prefix": "iso", "label_norm": "isolinks", "label": "isolinks", "address": "addressX", "currency": "ETH", "source": "Unspecified", "tagpack_uri": "https://tagpack_uri", "abuse": null, "active_address": true, "category": null, "lastmod": 1}
+     {"label_norm_prefix": "cim", "label_norm": "cimedy", "label": "cimedy", "address": "addressY", "currency": "ETH", "source": "Unspecified", "tagpack_uri": "https://tagpack_uri", "abuse": null, "active_address": true, "category": null, "lastmod": 2}

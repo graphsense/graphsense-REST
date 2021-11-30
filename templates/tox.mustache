@@ -4,7 +4,6 @@ requires=tox-venv
 
 [gh-actions]
 python =
-    3.6: py36
     3.7: py37
     3.8: py38
     3.9: py39
@@ -16,4 +15,4 @@ deps=-r{toxinidir}/requirements.txt
 
 commands=
   bash -c "cd {toxinidir}/tests/ && make .runtest"
-  {{^useNose}}pytest --cov={{{pythonSrcRoot}}}{{{packageName}}}{{/useNose}}{{#useNose}}nosetests{{/useNose}}
+  {{^useNose}}pytest -x --cov={{{pythonSrcRoot}}}{{{packageName}}}{{/useNose}}{{#useNose}}nosetests{{/useNose}}

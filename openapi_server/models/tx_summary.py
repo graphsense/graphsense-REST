@@ -1,9 +1,8 @@
 # coding: utf-8
 
-from __future__ import absolute_import
-from datetime import date, datetime  # noqa: F401
+from datetime import date, datetime
 
-from typing import List, Dict  # noqa: F401
+from typing import List, Dict, Type
 
 from openapi_server.models.base_model_ import Model
 from openapi_server import util
@@ -15,15 +14,12 @@ class TxSummary(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, height=None, timestamp=None, tx_hash=None):  # noqa: E501
+    def __init__(self, height: int=None, timestamp: int=None, tx_hash: str=None):
         """TxSummary - a model defined in OpenAPI
 
-        :param height: The height of this TxSummary.  # noqa: E501
-        :type height: int
-        :param timestamp: The timestamp of this TxSummary.  # noqa: E501
-        :type timestamp: int
-        :param tx_hash: The tx_hash of this TxSummary.  # noqa: E501
-        :type tx_hash: str
+        :param height: The height of this TxSummary.
+        :param timestamp: The timestamp of this TxSummary.
+        :param tx_hash: The tx_hash of this TxSummary.
         """
         self.openapi_types = {
             'height': int,
@@ -37,43 +33,24 @@ class TxSummary(Model):
             'tx_hash': 'tx_hash'
         }
 
-        if height is None:
-            raise ValueError("Invalid value for `height`, must not be `None`")  # noqa: E501
         self._height = height
-        if timestamp is None:
-            raise ValueError("Invalid value for `timestamp`, must not be `None`")  # noqa: E501
         self._timestamp = timestamp
-        if tx_hash is None:
-            raise ValueError("Invalid value for `tx_hash`, must not be `None`")  # noqa: E501
         self._tx_hash = tx_hash
 
     @classmethod
-    def from_dict(cls, dikt) -> 'TxSummary':
+    def from_dict(cls, dikt: dict) -> 'TxSummary':
         """Returns the dict as a model
 
         :param dikt: A dict.
-        :type: dict
-        :return: The tx_summary of this TxSummary.  # noqa: E501
-        :rtype: TxSummary
+        :return: The tx_summary of this TxSummary.
         """
         return util.deserialize_model(dikt, cls)
-
-    def to_dict(self, prefix=""):
-        """Returns the model as a dict:
-
-        :return: The TxSummary as a dict
-        :rtype: dict
-        """
-        return { 'height': self._height,
-            'timestamp': self._timestamp,
-            'tx_hash': self._tx_hash }
-
 
     @property
     def height(self):
         """Gets the height of this TxSummary.
 
-        Height  # noqa: E501
+        Height
 
         :return: The height of this TxSummary.
         :rtype: int
@@ -84,15 +61,15 @@ class TxSummary(Model):
     def height(self, height):
         """Sets the height of this TxSummary.
 
-        Height  # noqa: E501
+        Height
 
         :param height: The height of this TxSummary.
         :type height: int
         """
         if height is None:
-            raise ValueError("Invalid value for `height`, must not be `None`")  # noqa: E501
-        if height is not None and height < 1:  # noqa: E501
-            raise ValueError("Invalid value for `height`, must be a value greater than or equal to `1`")  # noqa: E501
+            raise ValueError("Invalid value for `height`, must not be `None`")
+        if height is not None and height < 0:
+            raise ValueError("Invalid value for `height`, must be a value greater than or equal to `0`")
 
         self._height = height
 
@@ -100,7 +77,7 @@ class TxSummary(Model):
     def timestamp(self):
         """Gets the timestamp of this TxSummary.
 
-        Timestamp  # noqa: E501
+        Timestamp
 
         :return: The timestamp of this TxSummary.
         :rtype: int
@@ -111,13 +88,13 @@ class TxSummary(Model):
     def timestamp(self, timestamp):
         """Sets the timestamp of this TxSummary.
 
-        Timestamp  # noqa: E501
+        Timestamp
 
         :param timestamp: The timestamp of this TxSummary.
         :type timestamp: int
         """
         if timestamp is None:
-            raise ValueError("Invalid value for `timestamp`, must not be `None`")  # noqa: E501
+            raise ValueError("Invalid value for `timestamp`, must not be `None`")
 
         self._timestamp = timestamp
 
@@ -125,7 +102,7 @@ class TxSummary(Model):
     def tx_hash(self):
         """Gets the tx_hash of this TxSummary.
 
-        Transaction hash  # noqa: E501
+        Transaction hash
 
         :return: The tx_hash of this TxSummary.
         :rtype: str
@@ -136,12 +113,12 @@ class TxSummary(Model):
     def tx_hash(self, tx_hash):
         """Sets the tx_hash of this TxSummary.
 
-        Transaction hash  # noqa: E501
+        Transaction hash
 
         :param tx_hash: The tx_hash of this TxSummary.
         :type tx_hash: str
         """
         if tx_hash is None:
-            raise ValueError("Invalid value for `tx_hash`, must not be `None`")  # noqa: E501
+            raise ValueError("Invalid value for `tx_hash`, must not be `None`")
 
         self._tx_hash = tx_hash

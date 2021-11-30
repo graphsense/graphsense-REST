@@ -73,7 +73,8 @@ tags
 .openapi-generator*
 
 #Flask
-instance
+instance/config.yaml
+tests/instance/config.yaml
 
 #Flask tests
 .runtest

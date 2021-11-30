@@ -1,9 +1,8 @@
 # coding: utf-8
 
-from __future__ import absolute_import
-from datetime import date, datetime  # noqa: F401
+from datetime import date, datetime
 
-from typing import List, Dict  # noqa: F401
+from typing import List, Dict, Type
 
 from openapi_server.models.base_model_ import Model
 from openapi_server import util
@@ -15,17 +14,13 @@ class Block(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, block_hash=None, height=None, no_txs=None, timestamp=None):  # noqa: E501
+    def __init__(self, block_hash: str=None, height: int=None, no_txs: int=None, timestamp: int=None):
         """Block - a model defined in OpenAPI
 
-        :param block_hash: The block_hash of this Block.  # noqa: E501
-        :type block_hash: str
-        :param height: The height of this Block.  # noqa: E501
-        :type height: int
-        :param no_txs: The no_txs of this Block.  # noqa: E501
-        :type no_txs: int
-        :param timestamp: The timestamp of this Block.  # noqa: E501
-        :type timestamp: int
+        :param block_hash: The block_hash of this Block.
+        :param height: The height of this Block.
+        :param no_txs: The no_txs of this Block.
+        :param timestamp: The timestamp of this Block.
         """
         self.openapi_types = {
             'block_hash': str,
@@ -47,27 +42,13 @@ class Block(Model):
         self._timestamp = timestamp
 
     @classmethod
-    def from_dict(cls, dikt) -> 'Block':
+    def from_dict(cls, dikt: dict) -> 'Block':
         """Returns the dict as a model
 
         :param dikt: A dict.
-        :type: dict
-        :return: The block of this Block.  # noqa: E501
-        :rtype: Block
+        :return: The block of this Block.
         """
         return util.deserialize_model(dikt, cls)
-
-    def to_dict(self, prefix=""):
-        """Returns the model as a dict:
-
-        :return: The Block as a dict
-        :rtype: dict
-        """
-        return { 'block_hash': self._block_hash,
-            'height': self._height,
-            'no_txs': self._no_txs,
-            'timestamp': self._timestamp }
-
 
     @property
     def block_hash(self):
@@ -94,7 +75,7 @@ class Block(Model):
     def height(self):
         """Gets the height of this Block.
 
-        Height  # noqa: E501
+        Height
 
         :return: The height of this Block.
         :rtype: int
@@ -105,13 +86,13 @@ class Block(Model):
     def height(self, height):
         """Sets the height of this Block.
 
-        Height  # noqa: E501
+        Height
 
         :param height: The height of this Block.
         :type height: int
         """
-        if height is not None and height < 1:  # noqa: E501
-            raise ValueError("Invalid value for `height`, must be a value greater than or equal to `1`")  # noqa: E501
+        if height is not None and height < 0:
+            raise ValueError("Invalid value for `height`, must be a value greater than or equal to `0`")
 
         self._height = height
 
@@ -140,6 +121,7 @@ class Block(Model):
     def timestamp(self):
         """Gets the timestamp of this Block.
 
+        Timestamp
 
         :return: The timestamp of this Block.
         :rtype: int
@@ -150,6 +132,7 @@ class Block(Model):
     def timestamp(self, timestamp):
         """Sets the timestamp of this Block.
 
+        Timestamp
 
         :param timestamp: The timestamp of this Block.
         :type timestamp: int

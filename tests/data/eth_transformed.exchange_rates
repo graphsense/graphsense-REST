@@ -1,3 +1,3 @@
-{"height": 1, "fiat_values": [1.0, 2.0]}
-{"height": 2, "fiat_values": [1.0, 2.0]}
-{"height": 2300001, "fiat_values": [1.0, 2.0]}
+{"block_id": 1, "fiat_values": [1.0, 2.0]}
+{"block_id": 2, "fiat_values": [1.0, 2.0]}
+{"block_id": 2300001, "fiat_values": [1.0, 2.0]}
