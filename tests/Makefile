@@ -1,14 +1,13 @@
 MARKER=.runtest
 CASSANDRA_MOCK=cassandra_mock
-testcmd=docker exec $(CASSANDRA_MOCK) cqlsh -e 'describe keyspaces'
 
 test: $(MARKER)
 	# start container if it's not running
 	docker ps -a | grep $(CASSANDRA_MOCK) || bash -c 'rm $(MARKER) && make .runtest'
 	tox -e py37
 
-$(MARKER): $(wildcard data/*)
-	./start_cassandra_mock.sh $(CASSANDRA_MOCK) "$?"
+$(MARKER): $(wildcard cassandra/data/*)
+	./cassandra/start_cassandra_mock.sh $(CASSANDRA_MOCK) "$?"
 	touch $(MARKER)
 	@ip=`docker exec $(CASSANDRA_MOCK) cat /etc/hosts | tail -n 1 | awk '{print $$1}'`;\
 		echo "Cassandra mock container ip is $$ip"; \
