@@ -77,4 +77,5 @@ instance/config.yaml
 tests/instance/config.yaml
 
 #Flask tests
-.runtest
+.runcass
+.runts

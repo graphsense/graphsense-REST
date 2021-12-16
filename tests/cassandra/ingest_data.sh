@@ -2,7 +2,14 @@
 
 datadir=`dirname $0`/data
 CASSANDRA_MOCK=$1
-data="$2"
+data=""
+if [ ! -z "$2" ]; then
+    for f in $2; do
+        case $f in cassandra/*)
+            data="$data $f"
+        esac
+    done
+fi
 MOCK_CMD="docker exec $CASSANDRA_MOCK cqlsh"
 
 TAG=develop

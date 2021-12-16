@@ -111,8 +111,8 @@ conceptB = Concept(
 )
 
 taxonomies = [
-        Taxonomy(taxonomy="abuse", uri="https://abuse"),
-        Taxonomy(taxonomy="entity", uri="https://entity"),
+        Taxonomy(taxonomy="entity", uri="http://entity"),
+        Taxonomy(taxonomy="abuse", uri="http://abuse")
         ]
 
 

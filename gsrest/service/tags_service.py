@@ -59,7 +59,9 @@ async def list_concepts(request, taxonomy):
 
 
 async def list_taxonomies(request):
-    db = request.app['db']
-    rows = await db.list_taxonomies()
+    aws = [ts.list_taxonomies() for ts in request.app['tagstores']]
+    results = await asyncio.gather(*aws)
 
-    return [Taxonomy(taxonomy=row['key'], uri=row['uri']) for row in rows]
+    return [Taxonomy(taxonomy=row['id'], uri=row['source'])
+            for rows in results
+            for row in rows]
