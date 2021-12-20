@@ -2,14 +2,6 @@
 
 datadir=`dirname $0`/data
 TAGSTORE_MOCK=$1
-data=""
-if [ ! -z "$2" ]; then
-    for f in $2; do
-        case $f in tagstore/*)
-            data="$data $f"
-        esac
-    done
-fi
 MOCK_CMD="docker exec $TAGSTORE_MOCK psql -U tagstore -d tagstore"
 
 TAG=develop

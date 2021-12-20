@@ -5,13 +5,11 @@ INSERT INTO concept (id, label, source, description, taxonomy) VALUES
     ('organization', 'An organization', 'https://organization', 'An organization is foo.', 'entity'),
     ('exchange', 'An exchange', 'https://exchange', 'An exchange is foo.', 'entity'),
     ('conceptB', 'Concept B', 'https://conceptB', 'A concept B.', 'abuse');
-
- INSERT INTO tagpack (id, title, description, creator, owner) VALUES
+INSERT INTO tagpack (id, title, description, creator, owner) VALUES
     ("http://tagpack_uri", "", "", "", ""),
     ("uriX", "", "", "", ""),
     ("uriY", "", "", "", "");
-    
- INSERT INTO tag (label, address, currency, category, source, tagpack, lastmod, is_cluster_definer) VALUES
+INSERT INTO tag (label, address, currency, category, source, tagpack, lastmod, is_cluster_definer) VALUES
     ("Internet, Archive", "addressA", "btc", "organization", "https://archive.org/donate/cryptocurrency", "http://tagpack_uri", 1560290400, true),
     ("Internet, Archive 2", "addressA", "btc", "organization", "https://archive.org/donate/cryptocurrency", "http://tagpack_uri", 1560290400, true),
     ("labelABC", "a123456", "btc", "exchange", "https://source", "http://tagpack_uri", 1560290400, true),
