@@ -94,12 +94,20 @@ async def list_tags(test_case):
     test_case.assertEqual(EntityTags(entity_tags=[]).to_dict(), result)
 
 
-conceptA = Concept(
-   uri="https://conceptA",
-   id="conceptA",
+organization = Concept(
+   uri="https://organization",
+   id="organization",
    taxonomy="entity",
-   label="Concept A",
-   description="A concept A."
+   label="An organization",
+   description="An organization is foo."
+)
+
+exchange = Concept(
+   uri="https://exchange",
+   id="exchange",
+   taxonomy="entity",
+   label="An exchange",
+   description="An exchange is foo."
 )
 
 conceptB = Concept(
@@ -119,7 +127,7 @@ taxonomies = [
 async def list_concepts(test_case):
     path = '/tags/taxonomies/{taxonomy}/concepts'
     result = await test_case.request(path, taxonomy='entity')
-    test_case.assertEqual([conceptA.to_dict()], result)
+    test_case.assertEqual([organization.to_dict(), exchange.to_dict()], result)
     result = await test_case.request(path, taxonomy='abuse')
     test_case.assertEqual([conceptB.to_dict()], result)
 

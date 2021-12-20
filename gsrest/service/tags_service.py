@@ -47,15 +47,17 @@ async def list_tags(request, currency, label, level, page=None,
 
 
 async def list_concepts(request, taxonomy):
-    db = request.app['db']
-    rows = await db.list_concepts(taxonomy)
+    aws = [ts.list_concepts(taxonomy) for ts in request.app['tagstores']]
+    results = await asyncio.gather(*aws)
 
     return [Concept(
             id=row['id'],
             label=row['label'],
             description=row['description'],
             taxonomy=row['taxonomy'],
-            uri=row['uri']) for row in rows]
+            uri=row['source'])
+            for rows in results
+            for row in rows]
 
 
 async def list_taxonomies(request):

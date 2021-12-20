@@ -367,7 +367,7 @@ async def search_entity_neighbors(test_case):
            '&depth={depth}'\
            '&breadth={breadth}'
 
-    category = 'MyCategory'
+    category = 'exchange'
     result = await test_case.request(
                     path,
                     currency='btc',
@@ -386,7 +386,7 @@ async def search_entity_neighbors(test_case):
         result['paths'][0]['paths'][0]['node']['tags']['entity_tags'][0]
               ['category'])
 
-    category = 'MyCategory'
+    category = 'exchange'
     result = await test_case.request(
                     path,
                     currency='btc',

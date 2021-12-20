@@ -60,11 +60,16 @@ class Tagstore:
     async def execute(self, query, params=None):
         async with self.pool.acquire() as conn:
             async with conn.cursor() as cur:
-                await cur.execute(query)
+                await cur.execute(query, params)
                 return await to_result(cur)
 
     def list_taxonomies(self):
         return self.execute("select * from taxonomy")
+
+    def list_concepts(self, taxonomy):
+        return self.execute("select * from concept where taxonomy = %s",
+                            (taxonomy,))
+
 
 """
 # list tags by address
