@@ -11,6 +11,7 @@ from openapi_server.models.links import Links
 from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from gsrest.service.rates_service import list_rates
+from gsrest.db.util import tagstores_with_paging, dt_to_int
 
 
 def address_from_row(currency, row, rates, tags=None):
@@ -77,25 +78,23 @@ async def get_address(request, currency, address, include_tags=False):
 
 async def list_tags_by_address(request, currency, address,
                                page=None, pagesize=None):
-    db = request.app['db']
-    results, next_page = \
-        await db.list_tags_by_address(currency, address,
-                                      page=page, pagesize=pagesize)
-
-    if results is None:
-        return []
-    address_tags = [AddressTag(
+    address_tags, next_page = \
+        await tagstores_with_paging(
+            request.app['tagstores'],
+            lambda row:
+                AddressTag(
                     label=row['label'],
                     address=row['address'],
                     category=row['category'],
                     abuse=row['abuse'],
-                    tagpack_uri=row['tagpack_uri'],
+                    tagpack_uri=row['tagpack'],
                     source=row['source'],
-                    lastmod=row['lastmod'],
+                    lastmod=dt_to_int(row['lastmod']),
                     active=True,
-                    currency=currency
-                    )
-                    for row in results]
+                    currency=row['currency'].upper()
+                    ),
+            'list_tags_by_address',
+            page, pagesize, currency, address)
 
     return AddressTags(address_tags=address_tags, next_page=next_page)
 

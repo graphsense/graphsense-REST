@@ -157,6 +157,24 @@ class Tagstore:
         return self.execute(query,
                             params=[currency, expression + '%', limit])
 
+    def list_tags_by_address(self, currency, address, page=None,
+                             pagesize=None):
+        query = """select t.*, tp.is_public from
+                        tag t,
+                        tagpack tp
+                   where
+                        t.tagpack=tp.id
+                        and t.currency = %s
+                        and t.address = %s"""
+
+        return self.execute(query,
+                            params=[currency, address],
+                            paging_key='t.id',
+                            page=page,
+                            pagesize=pagesize)
+
+
+
 
 
 

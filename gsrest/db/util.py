@@ -1,5 +1,6 @@
 import asyncio
 import base64
+from datetime import timezone
 
 
 ts_sep = '$'
@@ -69,3 +70,7 @@ async def tagstores_with_paging(tss, wrapper, fun, page, pagesize, *args):
     next_page = encode_page_handles(pagesAndIds)
 
     return [wrapper(row) for rows, _ in results for row in rows], next_page
+
+
+def dt_to_int(dt):
+    return int(dt.replace(tzinfo=timezone.utc).timestamp())

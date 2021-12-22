@@ -26,9 +26,9 @@ tag = AddressTag(
            lastmod=1560290400,
            source="https://archive.org/donate/cryptocurrency",
            address="addressA",
-           tagpack_uri="http://tagpack_uri",
+           tagpack_uri="https://tagpack_uri",
            active=True,
-           currency='btc'
+           currency='BTC'
         )
 
 tag2 = AddressTag(
@@ -38,9 +38,9 @@ tag2 = AddressTag(
            lastmod=1560290400,
            source="https://archive.org/donate/cryptocurrency",
            address="addressA",
-           tagpack_uri="http://tagpack_uri",
+           tagpack_uri="https://tagpack_uri",
            active=True,
-           currency='btc'
+           currency='BTC'
         )
 
 eth_tag = AddressTag(
@@ -52,7 +52,7 @@ eth_tag = AddressTag(
            address="0xabcdef",
            tagpack_uri="uriX",
            active=True,
-           currency='eth'
+           currency='ETH'
         )
 
 eth_tag2 = AddressTag(
@@ -64,7 +64,7 @@ eth_tag2 = AddressTag(
            address="0xabcdef",
            tagpack_uri="uriY",
            active=True,
-           currency='eth'
+           currency='ETH'
         )
 
 etag = EntityTag(
@@ -76,7 +76,7 @@ etag = EntityTag(
            entity=17642138,
            tagpack_uri="http://tagpack_uri",
            active=True,
-           currency='btc'
+           currency='BTC'
         )
 
 etag2 = EntityTag(
@@ -88,7 +88,7 @@ etag2 = EntityTag(
            entity=17642138,
            tagpack_uri="http://tagpack_uri",
            active=True,
-           currency='btc'
+           currency='BTC'
         )
 
 atag1 = AddressTag(
@@ -96,7 +96,7 @@ atag1 = AddressTag(
     active=True,
     address='addressA',
     category='organization',
-    currency='btc',
+    currency='BTC',
     label='addressTag1',
     lastmod=1,
     source='https://archive.org/donate/cryptocurrency',
@@ -108,7 +108,7 @@ atag2 = AddressTag(
     active=True,
     address='addressH',
     category='organization',
-    currency='btc',
+    currency='BTC',
     label='addressTag2',
     lastmod=2,
     source='https://archive.org/donate/cryptocurrency',
@@ -150,7 +150,7 @@ address = Address(
 addressWithTags = Address(
    **address.to_dict()
    )
-addressWithTags.tags = [tag]
+addressWithTags.tags = [tag, tag2]
 
 
 address2 = Address(

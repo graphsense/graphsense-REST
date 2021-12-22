@@ -5,8 +5,7 @@ from openapi_server.models.entity_tags import EntityTags
 from openapi_server.models.taxonomy import Taxonomy
 from openapi_server.models.concept import Concept
 from gsrest.util.string_edit import alphanumeric_lower
-from gsrest.db.util import tagstores, tagstores_with_paging
-from datetime import timezone
+from gsrest.db.util import tagstores, tagstores_with_paging, dt_to_int
 
 
 async def list_tags(request, currency, label, level, page=None,
@@ -23,8 +22,7 @@ async def list_tags(request, currency, label, level, page=None,
                 abuse=row['abuse'],
                 tagpack_uri=row['tagpack'],
                 source=row['source'],
-                lastmod=int(row['lastmod'].replace(
-                    tzinfo=timezone.utc).timestamp()),
+                lastmod=dt_to_int(row['lastmod']),
                 active=True,
                 currency=row['currency'].upper())
     else:
@@ -38,8 +36,7 @@ async def list_tags(request, currency, label, level, page=None,
                 abuse=row['abuse'],
                 tagpack_uri=row['tagpack'],
                 source=row['source'],
-                lastmod=int(row['lastmod'].replace(
-                    tzinfo=timezone.utc).timestamp()),
+                lastmod=dt_to_int(row['lastmod']),
                 active=True,
                 currency=row['currency'].upper())
 
