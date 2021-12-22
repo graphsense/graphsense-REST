@@ -41,6 +41,18 @@ tag3 = AddressTag(
    active=True
         )
 
+tag_eth = AddressTag(
+   lastmod=1,
+   source="sourceX",
+   abuse=None,
+   address="0xabcdef",
+   category=None,
+   tagpack_uri="uriX",
+   currency="ETH",
+   label="TagA",
+   active=True
+        )
+
 ctag = EntityTag(
    tagpack_uri="https://tagpack_uri",
    lastmod=1,
@@ -58,37 +70,65 @@ async def list_tags(test_case):
     path = '/{currency}/tags?label={label}&level={level}'
     result = await test_case.request(path, currency='btc', label='isolinks',
                                      level='address')
+    t1 = tag1.to_dict()
+    t2 = {**t1}
+    t2['address'] = 'addressY'
     test_case.assertEqual(
-        AddressTags(address_tags=[tag1]).to_dict(),
-        result)
+        [t1, t2],
+        result['address_tags'])
+
+    result = await test_case.request(path, currency='btc', label='cimedy',
+                                     level='address')
+    test_case.assertEqual([tag2.to_dict()], result['address_tags'])
+
+    # test paging
+
+    path_with_page = path + '&pagesize={pagesize}'
+    result = await test_case.request(path_with_page, currency='btc',
+                                     label='isolinks',
+                                     level='address', pagesize=1,
+                                     page=None)
+    test_case.assertEqual(
+        [t1],
+        result['address_tags'])
+    path_with_page += '&page={page}'
+    result = await test_case.request(path_with_page, currency='btc',
+                                     label='isolinks',
+                                     level='address', pagesize=1,
+                                     page=result['next_page'])
+    test_case.assertEqual(
+        [t2],
+        result['address_tags'])
+    result = await test_case.request(path_with_page, currency='btc',
+                                     label='isolinks',
+                                     level='address', pagesize=1,
+                                     page=result['next_page'])
+    test_case.assertEqual(AddressTags(address_tags=[]).to_dict(), result)
+
+    # test entity tags
+
     result = await test_case.request(path, currency='btc', label='isolinks',
                                      level='entity')
     test_case.assertEqual(
-        EntityTags(entity_tags=[ctag]).to_dict(),
-        result)
-    result = await test_case.request(path, currency='btc', label='cimedy',
-                                     level='address')
-    test_case.assertEqual(AddressTags([tag2]).to_dict(), result)
+        [ctag.to_dict()],
+        result['entity_tags'])
 
     result = await test_case.request(path, currency='btc', label='cimedy',
                                      level='entity')
     test_case.assertEqual(EntityTags(entity_tags=[]).to_dict(), result)
 
-    tag_eth = AddressTag(**tag2.to_dict())
-    tag_eth.currency = 'ETH'
-    tag_eth.address = '0x' + tag_eth.address.lower()
-    result = await test_case.request(path, currency='eth', label='cimedy',
+    result = await test_case.request(path, currency='eth', label='TagA',
                                      level='address')
-    test_case.assertEqual(AddressTags(address_tags=[tag_eth]).to_dict(),
-                          result)
+    test_case.assertEqual([tag_eth.to_dict()],
+                          result['address_tags'])
 
-    result = await test_case.request(path, currency='eth', label='cimedy',
+    result = await test_case.request(path, currency='eth', label='TagA',
                                      level='entity')
     test_case.assertEqual(EntityTags(entity_tags=[]).to_dict(), result)
 
     result = await test_case.request(path, currency='ltc', label='cimedy',
                                      level='address')
-    test_case.assertEqual(AddressTags([tag3]).to_dict(), result)
+    test_case.assertEqual([tag3.to_dict()], result['address_tags'])
     result = await test_case.request(path, currency='ltc', label='cimedy',
                                      level='entity')
     test_case.assertEqual(EntityTags(entity_tags=[]).to_dict(), result)

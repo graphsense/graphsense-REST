@@ -1,4 +1,5 @@
 import aiopg
+import hashlib
 
 
 class Result:
@@ -14,7 +15,13 @@ class Result:
         if self.pointer >= len(self.rows):
             raise StopIteration
         self.pointer += 1
-        return Row(self.rows[self.pointer - 1], self.columns)
+        return self[self.pointer - 1]
+
+    def __len__(self):
+        return len(self.rows)
+
+    def __getitem__(self, i):
+        return Row(self.rows[i], self.columns)
 
 
 class Row:
@@ -26,14 +33,23 @@ class Row:
         return self.row[self.columns[key]]
 
 
-async def to_result(cursor):
+async def to_result(cursor, paging_key=None):
     rows = await cursor.fetchall()
     columns = {}
     i = 0
     for c in cursor.description:
         columns[c.name] = i
         i += 1
-    return Result(rows, columns)
+    result = Result(rows, columns)
+    le = len(result)
+    if paging_key is None:
+        paging_key = cursor.description[0].name
+    else:
+        pos = paging_key.find('.') + 1
+        paging_key = paging_key[pos:]
+    next_page = None if le == 0 else result[le - 1][paging_key]
+
+    return result, next_page
 
 
 class Tagstore:
@@ -53,22 +69,85 @@ class Tagstore:
               f" port={config['port']}"
         self.pool = await aiopg.create_pool(dsn)
 
+    def id(self):
+        h = self.config['database'] +\
+                    self.config['host'] +\
+                    self.config['user']
+        h = h.encode('utf-8')
+        return hashlib.md5(h).hexdigest()
+
     async def close(self):
         self.pool.terminate()
         await self.pool.wait_closed()
 
-    async def execute(self, query, params=None):
+    async def execute(self, query, params=None, paging_key=None, page=None,
+                      pagesize=None):
+        if params is None:
+            params = []
         async with self.pool.acquire() as conn:
             async with conn.cursor() as cur:
+                if "where" not in query.lower():
+                    query += " where"
+                    andd = ""
+                else:
+                    andd = "and"
+
+                if page and paging_key:
+                    query += f" {andd} {paging_key} > %s"
+                    params.append(page)
+                if paging_key:
+                    query += f" order by {paging_key}"
+                if pagesize:
+                    query += f" limit {pagesize}"
+                print(query)
+                print(params)
                 await cur.execute(query, params)
-                return await to_result(cur)
+                return await to_result(cur, paging_key)
 
     def list_taxonomies(self):
         return self.execute("select * from taxonomy")
 
     def list_concepts(self, taxonomy):
         return self.execute("select * from concept where taxonomy = %s",
-                            (taxonomy,))
+                            [taxonomy])
+
+    def list_address_tags(self, currency, label, page=None, pagesize=None):
+        query = """select t.*, tp.is_public from
+                       tag t,
+                       tagpack tp
+                   where
+                       t.tagpack = tp.id
+                       and t.currency = %s
+                       and t.label ilike %s """
+        return self.execute(query,
+                            params=[currency, label + '%'],
+                            paging_key='t.id',
+                            page=page,
+                            pagesize=pagesize)
+
+    def list_entity_tags(self, currency, label, page=None, pagesize=None):
+        query = """select
+                    t.*,
+                    acm.gs_cluster_id as cluster_id,
+                    tp.is_public
+                   from
+                    tag t,
+                    tagpack tp,
+                    address_cluster_mapping acm
+                   where
+                    t.tagpack = tp.id
+                    and t.address = acm.address
+                    and t.currency = acm.currency
+                    and t.is_cluster_definer = true
+                    and t.currency = %s
+                    and t.label ilike %s"""
+
+        return self.execute(query,
+                            params=[currency, label + '%'],
+                            paging_key='t.id',
+                            page=page,
+                            pagesize=pagesize)
+
 
 
 """

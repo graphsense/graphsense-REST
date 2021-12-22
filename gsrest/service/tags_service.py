@@ -1,69 +1,75 @@
-import asyncio
 from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.address_tags import AddressTags
 from openapi_server.models.entity_tag import EntityTag
 from openapi_server.models.entity_tags import EntityTags
-from openapi_server.models.tags import Tags
 from openapi_server.models.taxonomy import Taxonomy
 from openapi_server.models.concept import Concept
 from gsrest.util.string_edit import alphanumeric_lower
+from gsrest.db.util import tagstores, tagstores_with_paging
+from datetime import timezone
 
 
 async def list_tags(request, currency, label, level, page=None,
                     pagesize=None):
-    db = request.app['db']
-    label = alphanumeric_lower(label)
-    tags = []
-    fun = db.list_address_tags if level == 'address' else db.list_entity_tags
-    tags, next_page = await fun(currency, label, page=page, pagesize=pagesize)
 
     if level == 'address':
-        return AddressTags(
-            next_page=next_page,
-            address_tags=[AddressTag(
+        fun = 'list_address_tags'
+
+        def to_obj(row):
+            return AddressTag(
                 address=row['address'],
                 label=row['label'],
                 category=row['category'],
                 abuse=row['abuse'],
-                tagpack_uri=row['tagpack_uri'],
+                tagpack_uri=row['tagpack'],
                 source=row['source'],
-                lastmod=row['lastmod'],
-                active=row['active'],
-                currency=row['currency'])
-                for row in tags])
-    return EntityTags(
-            next_page=next_page,
-            entity_tags=[EntityTag(
+                lastmod=int(row['lastmod'].replace(
+                    tzinfo=timezone.utc).timestamp()),
+                active=True,
+                currency=row['currency'].upper())
+    else:
+        fun = 'list_entity_tags'
+
+        def to_obj(row):
+            return EntityTag(
                 entity=row['cluster_id'],
                 label=row['label'],
                 category=row['category'],
                 abuse=row['abuse'],
-                tagpack_uri=row['tagpack_uri'],
+                tagpack_uri=row['tagpack'],
                 source=row['source'],
-                lastmod=row['lastmod'],
-                active=row['active'],
-                currency=row['currency'])
-                for row in tags])
+                lastmod=int(row['lastmod'].replace(
+                    tzinfo=timezone.utc).timestamp()),
+                active=True,
+                currency=row['currency'].upper())
+
+    label = alphanumeric_lower(label)
+    tags, next_page = await tagstores_with_paging(
+        request.app['tagstores'], to_obj, fun, page, pagesize, currency, label)
+    print(f'tags {tags}')
+
+    if level == 'address':
+        return AddressTags(next_page=next_page, address_tags=tags)
+    return EntityTags(next_page=next_page, entity_tags=tags)
 
 
 async def list_concepts(request, taxonomy):
-    aws = [ts.list_concepts(taxonomy) for ts in request.app['tagstores']]
-    results = await asyncio.gather(*aws)
-
-    return [Concept(
+    return await tagstores(
+        request.app['tagstores'],
+        lambda row:
+        Concept(
             id=row['id'],
             label=row['label'],
             description=row['description'],
             taxonomy=row['taxonomy'],
-            uri=row['source'])
-            for rows in results
-            for row in rows]
+            uri=row['source']),
+        'list_concepts',
+        taxonomy)
 
 
 async def list_taxonomies(request):
-    aws = [ts.list_taxonomies() for ts in request.app['tagstores']]
-    results = await asyncio.gather(*aws)
-
-    return [Taxonomy(taxonomy=row['id'], uri=row['source'])
-            for rows in results
-            for row in rows]
+    return await tagstores(
+        request.app['tagstores'],
+        lambda row:
+        Taxonomy(taxonomy=row['id'], uri=row['source']),
+        'list_taxonomies')
