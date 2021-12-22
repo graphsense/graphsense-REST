@@ -148,6 +148,16 @@ class Tagstore:
                             page=page,
                             pagesize=pagesize)
 
+    def list_matching_labels(self, currency, expression, limit):
+        query = """select label from tag
+                   where
+                    currency = %s
+                    and label ilike %s
+                   limit %s"""
+        return self.execute(query,
+                            params=[currency, expression + '%', limit])
+
+
 
 
 """
