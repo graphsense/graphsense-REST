@@ -823,9 +823,6 @@ class Cassandra:
             neighbor['value'] = \
                 self.markup_currency(currency, neighbor[field])
 
-        if include_labels:
-            await self.include_labels(currency, node_type, that, results)
-
         if currency == 'eth':
             for row in results:
                 row['address_id'] = row[that + '_address_id']
@@ -834,39 +831,6 @@ class Cassandra:
         await asyncio.gather(*aws)
 
         return results, to_hex(paging_state)
-
-    @eth
-    async def include_labels(self, currency, node_type, that, nodes):
-        for node in nodes:
-            node['labels'] = []
-        if node_type == 'cluster':
-            key = f'{that}_cluster_id'
-            params = [(self.get_id_group(currency, row[key]), row[key])
-                      for row in nodes if row[f'has_{that}_labels']]
-            query = ('select cluster_id, label from cluster_tags where '
-                     'cluster_id_group = %s and cluster_id = %s')
-            results = await self.concurrent_with_args(
-                currency, 'transformed', query, params, return_one=False)
-            i = 0
-            for result in results:
-                while nodes[i][key] != result[0]['cluster_id']:
-                    i += 1
-                nodes[i]['labels'] = [row['label'] for row in result]
-        else:
-            key = f'{that}_address_id'
-            params = [[row[key], self.get_id_group(currency, row[key])]
-                      for row in nodes if row[f'has_{that}_labels']]
-            query = ('select address_id, label from address_tags where '
-                     'address_id = %s and address_id_group = %s')
-            results = await self.concurrent_with_args(
-                currency, 'transformed', query, params, return_one=False)
-            i = 0
-            for result in results:
-                while nodes[i][key] != result[0]['address_id']:
-                    i += 1
-                nodes[i]['labels'] = [row['label'] for row in result]
-
-        return nodes
 
     async def list_address_tags(self, currency, label, page=None,
                                 pagesize=None):

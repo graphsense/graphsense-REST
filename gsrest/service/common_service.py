@@ -148,14 +148,16 @@ async def add_labels(request, currency, node_type, that, nodes):
 
     result = await tagstores(request.app['tagstores'],
                              lambda row: row, fun, currency, ids)
-    iterator = iter(nodes)
-    node = next(iterator)
-    for row in result:
-        if node[thatfield] != row[field]:
+    iterator = iter(result)
+    for node in nodes:
+        try:
+            row = next(iterator)
+            if node[thatfield] != row[field]:
+                node['labels'] = []
+                continue
+            node['labels'] = row['labels']
+        except StopIteration:
             node['labels'] = []
-            continue
-        node['labels'] = row['labels']
-        node = next(iterator)
 
     return nodes
 

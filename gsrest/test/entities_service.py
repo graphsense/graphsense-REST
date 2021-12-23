@@ -105,6 +105,7 @@ eth_neighbors = []
 for n in eth_addressWithTagsOutNeighbors.neighbors:
     nn = Neighbor(**n.to_dict())
     nn.node_type = 'entity'
+    nn.labels = [nn.labels[0]]
     eth_neighbors.append(nn)
 
 eth_neighbors[0].id = '107925000'
@@ -274,6 +275,7 @@ async def list_entity_neighbors(test_case):
         entity=entityWithTags.entity,
         include_labels=True,
         direction='out')
+    print(result)
     test_case.assertEqual(entityWithTagsOutNeighbors.to_dict(), result)
 
     result = await test_case.request(

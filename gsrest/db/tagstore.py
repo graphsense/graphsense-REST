@@ -225,6 +225,24 @@ class Tagstore:
         return self.execute(query,
                             params=[currency, addresses])
 
+    def list_labels_for_entities(self, currency, entities):
+        query = """select
+                    acm.gs_cluster_id as cluster_id,
+                    json_agg(t.label) as labels
+                   from
+                    tag t,
+                    address_cluster_mapping acm
+                   where
+                    t.address = acm.address
+                    and t.currency = acm.currency
+                    and t.is_cluster_definer = true
+                    and acm.currency = %s
+                    and acm.gs_cluster_id in %s
+                   group by acm.gs_cluster_id
+                   order by acm.gs_cluster_id"""
+        return self.execute(query,
+                            params=[currency, entities])
+
 
 
 
