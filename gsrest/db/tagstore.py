@@ -173,6 +173,48 @@ class Tagstore:
                             page=page,
                             pagesize=pagesize)
 
+    def list_address_tags_by_entity(self, currency, entity, page=None,
+                                    pagesize=None):
+        query = """select t.*, tp.is_public from
+                        tag t,
+                        tagpack tp,
+                        address_cluster_mapping acm
+                   where
+                        acm.address=t.address
+                        and t.currency = %s
+                        and acm.gs_cluster_id = %s
+                        and t.tagpack=tp.id"""
+
+        return self.execute(query,
+                            params=[currency, entity],
+                            paging_key='t.id',
+                            page=page,
+                            pagesize=pagesize)
+
+    def list_entity_tags_by_entity(self, currency, entity, page=None,
+                                   pagesize=None):
+        query = """select
+                        t.*,
+                        tp.is_public,
+                        acm.gs_cluster_id as cluster_id
+                   from
+                        tag t,
+                        tagpack tp,
+                        address_cluster_mapping acm
+                   where
+                        acm.address=t.address
+                        and t.is_cluster_definer = true
+                        and t.currency = acm.currency
+                        and t.currency = %s
+                        and acm.gs_cluster_id = %s
+                        and t.tagpack=tp.id"""
+
+        return self.execute(query,
+                            params=[currency, entity],
+                            paging_key='t.id',
+                            page=page,
+                            pagesize=pagesize)
+
 
 
 

@@ -11,6 +11,7 @@ from openapi_server.models.tags import Tags
 from openapi_server.models.search_result_level1 import SearchResultLevel1
 from openapi_server.models.address import Address
 from openapi_server.models.entity_addresses import EntityAddresses
+from gsrest.db.util import tagstores_with_paging, dt_to_int
 import gsrest.service.common_service as common
 import importlib
 import asyncio
@@ -55,38 +56,40 @@ async def list_tags_by_entity(request, currency, entity, level,
 
 async def list_entity_tags_by_entity(request, currency, entity,
                                      page=None, pagesize=None):
-    db = request.app['db']
-    entity_tags, next_page = \
-        await db.list_entity_tags_by_entity(currency, entity,
-                                            page=page, pagesize=pagesize)
-    return [EntityTag(label=row['label'],
+    return await tagstores_with_paging(
+            request.app['tagstores'],
+            lambda row:
+            EntityTag(label=row['label'],
                       entity=row['cluster_id'],
                       category=row['category'],
                       abuse=row['abuse'],
-                      tagpack_uri=row['tagpack_uri'],
+                      tagpack_uri=row['tagpack'],
                       source=row['source'],
-                      lastmod=row['lastmod'],
+                      lastmod=dt_to_int(row['lastmod']),
                       active=True,
-                      currency=currency)
-            for row in entity_tags], next_page
+                      currency=row['currency'].upper()),
+            'list_entity_tags_by_entity',
+            page, pagesize,
+            currency, entity)
 
 
-async def list_address_tags_by_entity(request, currency, entity,
+async def list_address_tags_by_entity(request, currency, address,
                                       page=None, pagesize=None):
-    db = request.app['db']
-    address_tags, next_page = \
-        await db.list_address_tags_by_entity(currency, entity,
-                                             page=page, pagesize=pagesize)
-    return [AddressTag(label=row['label'],
+    return await tagstores_with_paging(
+            request.app['tagstores'],
+            lambda row:
+            AddressTag(label=row['label'],
                        address=row['address'],
                        category=row['category'],
                        abuse=row['abuse'],
-                       tagpack_uri=row['tagpack_uri'],
+                       tagpack_uri=row['tagpack'],
                        source=row['source'],
-                       lastmod=row['lastmod'],
+                       lastmod=dt_to_int(row['lastmod']),
                        active=True,
-                       currency=currency)
-            for row in address_tags], next_page
+                       currency=row['currency'].upper()),
+            'list_address_tags_by_entity',
+            page, pagesize,
+            currency, address)
 
 
 async def get_entity(request, currency, entity, include_tags=False):

@@ -43,6 +43,31 @@ tag2 = AddressTag(
            currency='BTC'
         )
 
+tag3 = AddressTag(
+    abuse=None,
+    active=True,
+    address='addressA',
+    category='organization',
+    currency='BTC',
+    label='addressTag1',
+    lastmod=1,
+    source='https://archive.org/donate/cryptocurrency',
+    tagpack_uri='https://tagpack_uri'
+)
+
+tag4 = AddressTag(
+    abuse=None,
+    active=True,
+    address='addressH',
+    category='organization',
+    currency='BTC',
+    label='addressTag2',
+    lastmod=2,
+    source='https://archive.org/donate/cryptocurrency',
+    tagpack_uri='https://tagpack_uri'
+)
+
+
 eth_tag = AddressTag(
            category=None,
            label="TagA",
@@ -90,30 +115,6 @@ etag2 = EntityTag(
            active=True,
            currency='BTC'
         )
-
-atag1 = AddressTag(
-    abuse=None,
-    active=True,
-    address='addressA',
-    category='organization',
-    currency='BTC',
-    label='addressTag1',
-    lastmod=1,
-    source='https://archive.org/donate/cryptocurrency',
-    tagpack_uri='http://tagpack_uri'
-)
-
-atag2 = AddressTag(
-    abuse=None,
-    active=True,
-    address='addressH',
-    category='organization',
-    currency='BTC',
-    label='addressTag2',
-    lastmod=2,
-    source='https://archive.org/donate/cryptocurrency',
-    tagpack_uri='http://tagpack_uri'
-)
 
 address = Address(
    first_tx=TxSummary(
@@ -434,7 +435,7 @@ entityWithTagsOfAddressWithTags = Entity(
             usd=2.31,
             eur=1.15),
    tags=AddressAndEntityTags(entity_tags=[etag2, etag],
-                             address_tags=[atag2, atag1])
+                             address_tags=[tag2, tag])
 )
 
 eth_address = Address(

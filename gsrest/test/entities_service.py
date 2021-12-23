@@ -15,34 +15,35 @@ from openapi_server.models.tags import Tags
 from openapi_server.models.address_and_entity_tags import AddressAndEntityTags
 from gsrest.util.values import make_values
 from gsrest.test.addresses_service import addressD, addressE, eth_address, \
-        eth_addressWithTagsOutNeighbors, atag1, atag2, eth_tag, eth_tag2
+        eth_addressWithTagsOutNeighbors, tag as atag1, tag2 as atag2, \
+        tag3 as atag3, tag4 as atag4, eth_tag, eth_tag2
 from gsrest.test.txs_service import tx1_eth, tx2_eth, tx22_eth, tx4_eth
 from gsrest.service.rates_service import list_rates
 from gsrest.util.values import convert_value
 import copy
 
 tag = EntityTag(
-           category="organization",
-           label="Internet, Archive",
-           abuse=None,
-           lastmod=1560290400,
-           source="https://archive.org/donate/cryptocurrency",
+           category=atag1.category,
+           label=atag1.label,
+           abuse=atag1.abuse,
+           lastmod=atag1.lastmod,
+           source=atag1.source,
            entity=17642138,
-           tagpack_uri="http://tagpack_uri",
-           active=True,
-           currency='btc'
+           tagpack_uri=atag1.tagpack_uri,
+           active=atag1.active,
+           currency=atag1.currency
         )
 
 tag2 = EntityTag(
-           category="organization",
-           label="Internet Archive 2",
-           abuse=None,
-           lastmod=1560290400,
-           source="https://archive.org/donate/cryptocurrency",
+           category=atag2.category,
+           label=atag2.label,
+           abuse=atag2.abuse,
+           lastmod=atag2.lastmod,
+           source=atag2.source,
            entity=17642138,
-           tagpack_uri="http://tagpack_uri",
-           active=True,
-           currency='btc'
+           tagpack_uri=atag2.tagpack_uri,
+           active=atag2.active,
+           currency=atag2.currency
         )
 
 entityWithTags = Entity(
@@ -77,8 +78,8 @@ entityWithTags = Entity(
             usd=2.31,
             eur=1.15),
    tags=AddressAndEntityTags(
-       entity_tags=[tag2, tag],
-       address_tags=[atag2, atag1])
+       entity_tags=[tag, tag2],
+       address_tags=[atag1, atag2, atag3, atag4])
 )
 
 eth_entity = Entity(
@@ -237,13 +238,17 @@ async def list_tags_by_entity(test_case):
                                      entity=entityWithTags.entity,
                                      level='entity')
     expected = Tags(entity_tags=entityWithTags.tags.entity_tags)
-    test_case.assertEqual(expected.to_dict(), result)
+    test_case.assertEqual(expected.to_dict()['entity_tags'],
+                          result['entity_tags'])
+
     result = await test_case.request(path,
                                      currency='btc',
                                      entity=entityWithTags.entity,
                                      level='address')
     expected = Tags(address_tags=entityWithTags.tags.address_tags)
-    test_case.assertEqual(expected.to_dict(), result)
+    test_case.assertEqual(expected.to_dict()['address_tags'],
+                          result['address_tags'])
+
     result = await test_case.request(path,
                                      currency='eth',
                                      entity=eth_entityWithTags.entity,
@@ -255,7 +260,8 @@ async def list_tags_by_entity(test_case):
                                      entity=eth_entityWithTags.entity,
                                      level='address')
     expected = Tags(address_tags=eth_entityWithTags.tags.address_tags)
-    test_case.assertEqual(expected.to_dict(), result)
+    test_case.assertEqual(expected.to_dict()['address_tags'],
+                          result['address_tags'])
 
 
 async def list_entity_neighbors(test_case):
