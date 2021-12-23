@@ -215,6 +215,17 @@ class Tagstore:
                             page=page,
                             pagesize=pagesize)
 
+    def list_labels_for_addresses(self, currency, addresses):
+        query = """select address, json_agg(label) as labels from tag
+                   where
+                    currency = %s
+                    and address in %s
+                   group by address
+                   order by address"""
+        return self.execute(query,
+                            params=[currency, addresses])
+
+
 
 
 

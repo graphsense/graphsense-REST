@@ -517,7 +517,7 @@ eth_addressWithTagsOutNeighbors = Neighbors(
             Neighbor(
                 id="0xabcdef",
                 node_type='address',
-                labels=[],
+                labels=['TagA', 'TagB'],
                 received=make_values(
                         value=234000000000000000000,
                         eur=10.11,

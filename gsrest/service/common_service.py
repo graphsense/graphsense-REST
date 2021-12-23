@@ -11,7 +11,7 @@ from openapi_server.models.links import Links
 from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from gsrest.service.rates_service import list_rates
-from gsrest.db.util import tagstores_with_paging, dt_to_int
+from gsrest.db.util import tagstores, tagstores_with_paging, dt_to_int
 
 
 def address_from_row(currency, row, rates, tags=None):
@@ -114,7 +114,12 @@ async def list_neighbors(request, currency, id, direction, node_type, ids=None,
                                     include_labels=include_labels,
                                     page=page,
                                     pagesize=pagesize)
+
     dst = 'dst' if is_outgoing else 'src'
+
+    if include_labels:
+        await add_labels(request, currency, node_type, dst, results)
+
     rates = (await get_rates(request, currency))['rates']
     relations = []
     if results is None:
@@ -132,6 +137,27 @@ async def list_neighbors(request, currency, id, direction, node_type, ids=None,
             no_txs=row['no_transactions']))
     return Neighbors(next_page=paging_state,
                      neighbors=relations)
+
+
+async def add_labels(request, currency, node_type, that, nodes):
+    (field, fun) = ('address', 'list_labels_for_addresses') \
+        if node_type == 'address' else \
+        ('cluster_id', 'list_labels_for_entities')
+    thatfield = that + '_' + field
+    ids = tuple((node[thatfield] for node in nodes))
+
+    result = await tagstores(request.app['tagstores'],
+                             lambda row: row, fun, currency, ids)
+    iterator = iter(nodes)
+    node = next(iterator)
+    for row in result:
+        if node[thatfield] != row[field]:
+            node['labels'] = []
+            continue
+        node['labels'] = row['labels']
+        node = next(iterator)
+
+    return nodes
 
 
 async def links_response(request, currency, result):
