@@ -10,7 +10,7 @@ tag1 = AddressTag(
    lastmod=1,
    label="isolinks",
    source="Unspecified",
-   category=None,
+   category='exchange',
    active=True,
    currency="BTC",
    address="addressX",
@@ -58,7 +58,7 @@ ctag = EntityTag(
    lastmod=1,
    label="isolinks",
    source="Unspecified",
-   category=None,
+   category='exchange',
    active=True,
    currency="BTC",
    entity=123,
@@ -73,6 +73,7 @@ async def list_tags(test_case):
     t1 = tag1.to_dict()
     t2 = {**t1}
     t2['address'] = 'addressY'
+    t2.pop('category')
     test_case.assertEqual(
         [t1, t2],
         result['address_tags'])

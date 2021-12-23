@@ -1,5 +1,6 @@
 from openapi_server.models.address import Address
 from openapi_server.models.address_tag import AddressTag
+import yaml
 from openapi_server.models.address_and_entity_tags import AddressAndEntityTags
 from openapi_server.models.entity_tag import EntityTag
 from openapi_server.models.tx_summary import TxSummary
@@ -99,7 +100,7 @@ etag = EntityTag(
            lastmod=1560290400,
            source="https://archive.org/donate/cryptocurrency",
            entity=17642138,
-           tagpack_uri="http://tagpack_uri",
+           tagpack_uri="https://tagpack_uri",
            active=True,
            currency='BTC'
         )
@@ -111,7 +112,7 @@ etag2 = EntityTag(
            lastmod=1560290400,
            source="https://archive.org/donate/cryptocurrency",
            entity=17642138,
-           tagpack_uri="http://tagpack_uri",
+           tagpack_uri="https://tagpack_uri",
            active=True,
            currency='BTC'
         )
@@ -151,7 +152,7 @@ address = Address(
 addressWithTags = Address(
    **address.to_dict()
    )
-addressWithTags.tags = [tag, tag2]
+addressWithTags.tags = [tag, tag2, tag3]
 
 
 address2 = Address(
@@ -434,8 +435,8 @@ entityWithTagsOfAddressWithTags = Entity(
             value=115422577,
             usd=2.31,
             eur=1.15),
-   tags=AddressAndEntityTags(entity_tags=[etag2, etag],
-                             address_tags=[tag2, tag])
+   tags=AddressAndEntityTags(entity_tags=[etag, etag2],
+                             address_tags=[tag, tag2, tag3, tag4])
 )
 
 eth_address = Address(

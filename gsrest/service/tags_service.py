@@ -43,7 +43,6 @@ async def list_tags(request, currency, label, level, page=None,
     label = alphanumeric_lower(label)
     tags, next_page = await tagstores_with_paging(
         request.app['tagstores'], to_obj, fun, page, pagesize, currency, label)
-    print(f'tags {tags}')
 
     if level == 'address':
         return AddressTags(next_page=next_page, address_tags=tags)

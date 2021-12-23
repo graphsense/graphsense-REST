@@ -86,21 +86,19 @@ class Tagstore:
             params = []
         async with self.pool.acquire() as conn:
             async with conn.cursor() as cur:
-                if "where" not in query.lower():
-                    query += " where"
-                    andd = ""
-                else:
-                    andd = "and"
-
                 if page and paging_key:
+                    if "where" not in query.lower():
+                        query += " where"
+                        andd = ""
+                    else:
+                        andd = "and"
+
                     query += f" {andd} {paging_key} > %s"
                     params.append(page)
                 if paging_key:
                     query += f" order by {paging_key}"
                 if pagesize:
                     query += f" limit {pagesize}"
-                print(query)
-                print(params)
                 await cur.execute(query, params)
                 return await to_result(cur, paging_key)
 

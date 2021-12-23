@@ -149,6 +149,8 @@ async def add_labels(request, currency, node_type, that, nodes):
     result = await tagstores(request.app['tagstores'],
                              lambda row: row, fun, currency, ids)
     iterator = iter(result)
+    if node_type == 'address':
+        nodes = sorted(nodes, key=lambda node: node[thatfield])
     for node in nodes:
         try:
             row = next(iterator)
