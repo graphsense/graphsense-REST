@@ -60,11 +60,11 @@ class Tagstore:
     async def connect(self):
         config = self.config
         config['database'] = config.get('database', 'tagstore')
-        config['user'] = config.get('user', 'tagstore')
+        config['username'] = config.get('username', 'tagstore')
         config['password'] = config.get('password', 'tagstore')
         config['host'] = config.get('host', 'localhost')
         config['port'] = config.get('port', 5432)
-        dsn = f"dbname={config['database']} user={config['user']}"\
+        dsn = f"dbname={config['database']} user={config['username']}"\
               f" password={config['password']} host={config['host']}"\
               f" port={config['port']}"
         self.pool = await aiopg.create_pool(dsn)
@@ -72,7 +72,7 @@ class Tagstore:
     def id(self):
         h = self.config['database'] +\
                     self.config['host'] +\
-                    self.config['user']
+                    self.config['username']
         h = h.encode('utf-8')
         return hashlib.md5(h).hexdigest()
 
