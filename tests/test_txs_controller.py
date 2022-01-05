@@ -14,7 +14,6 @@ import gsrest.test.txs_service as test_service
 class TestTxsController(BaseTestCase):
     """TxsController integration test stubs"""
 
-    @unittest_run_loop
     async def test_get_tx(self):
         """Test case for get_tx
 
@@ -23,7 +22,6 @@ class TestTxsController(BaseTestCase):
         await test_service.get_tx(self)
 
 
-    @unittest_run_loop
     async def test_get_tx_io(self):
         """Test case for get_tx_io
 

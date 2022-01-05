@@ -13,7 +13,6 @@ import gsrest.test.rates_service as test_service
 class TestRatesController(BaseTestCase):
     """RatesController integration test stubs"""
 
-    @unittest_run_loop
     async def test_get_exchange_rates(self):
         """Test case for get_exchange_rates
 

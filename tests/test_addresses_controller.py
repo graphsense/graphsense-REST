@@ -18,7 +18,6 @@ import gsrest.test.addresses_service as test_service
 class TestAddressesController(BaseTestCase):
     """AddressesController integration test stubs"""
 
-    @unittest_run_loop
     async def test_get_address(self):
         """Test case for get_address
 
@@ -27,7 +26,6 @@ class TestAddressesController(BaseTestCase):
         await test_service.get_address(self)
 
 
-    @unittest_run_loop
     async def test_get_address_entity(self):
         """Test case for get_address_entity
 
@@ -36,7 +34,6 @@ class TestAddressesController(BaseTestCase):
         await test_service.get_address_entity(self)
 
 
-    @unittest_run_loop
     async def test_list_address_links(self):
         """Test case for list_address_links
 
@@ -45,7 +42,6 @@ class TestAddressesController(BaseTestCase):
         await test_service.list_address_links(self)
 
 
-    @unittest_run_loop
     async def test_list_address_neighbors(self):
         """Test case for list_address_neighbors
 
@@ -54,7 +50,6 @@ class TestAddressesController(BaseTestCase):
         await test_service.list_address_neighbors(self)
 
 
-    @unittest_run_loop
     async def test_list_address_txs(self):
         """Test case for list_address_txs
 
@@ -63,7 +58,6 @@ class TestAddressesController(BaseTestCase):
         await test_service.list_address_txs(self)
 
 
-    @unittest_run_loop
     async def test_list_tags_by_address(self):
         """Test case for list_tags_by_address
 

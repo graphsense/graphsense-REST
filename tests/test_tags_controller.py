@@ -15,7 +15,6 @@ import gsrest.test.tags_service as test_service
 class TestTagsController(BaseTestCase):
     """TagsController integration test stubs"""
 
-    @unittest_run_loop
     async def test_list_concepts(self):
         """Test case for list_concepts
 
@@ -24,7 +23,6 @@ class TestTagsController(BaseTestCase):
         await test_service.list_concepts(self)
 
 
-    @unittest_run_loop
     async def test_list_tags(self):
         """Test case for list_tags
 
@@ -33,7 +31,6 @@ class TestTagsController(BaseTestCase):
         await test_service.list_tags(self)
 
 
-    @unittest_run_loop
     async def test_list_taxonomies(self):
         """Test case for list_taxonomies
 
