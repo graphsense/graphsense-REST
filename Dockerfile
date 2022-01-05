@@ -10,7 +10,12 @@ RUN mkdir -p /srv/graphsense-rest/
 
 COPY requirements.txt /srv/graphsense-rest/
 
-RUN apk --no-cache --update add bash python3 py3-gunicorn shadow && \
+RUN apk --no-cache --update add \
+        bash \
+        python3 \
+        py3-gunicorn \
+        shadow \
+        postgresql-dev && \
     useradd -r -m -u 10000 dockeruser && \
     apk --no-cache --update --virtual build-dependendencies add \
         gcc \
