@@ -17,20 +17,23 @@ INSERT INTO address (currency, address) VALUES
     ('btc', 'addressE'),
     ('btc', 'addressX'),
     ('btc', 'addressY'),
+    ('btc', 'addressH'),
     ('ltc', 'addressA'),
     ('ltc', 'addressB'),
     ('eth', '0xabcdef'),
     ('eth', '0x123456');
 INSERT INTO tag (label, address, currency, category, source, tagpack, lastmod, is_cluster_definer) VALUES
     ('Internet, Archive', 'addressA', 'btc', 'organization', 'https://archive.org/donate/cryptocurrency', 'https://tagpack_uri', to_timestamp(1560290400), true),
-    ('Internet, Archive 2', 'addressA', 'btc', 'organization', 'https://archive.org/donate/cryptocurrency', 'https://tagpack_uri', to_timestamp(1560290400), true),
+    ('Internet Archive 2', 'addressA', 'btc', 'organization', 'https://archive.org/donate/cryptocurrency', 'https://tagpack_uri', to_timestamp(1560290400), true),
+    ('addressTag1', 'addressA', 'btc', 'organization', 'https://archive.org/donate/cryptocurrency', 'https://tagpack_uri', to_timestamp(1), false),
+    ('addressTag2', 'addressH', 'btc', 'organization', 'https://archive.org/donate/cryptocurrency', 'https://tagpack_uri', to_timestamp(2), false),
     ('labelABC', 'a123456', 'btc', 'exchange', 'https://source', 'https://tagpack_uri', to_timestamp(1560290400), true),
     ('labelX', 'address2818641', 'btc', 'organization', 'https://source', 'https://tagpack_uri', to_timestamp(1560290400), true),
     ('labelY', 'address2818641', 'btc', 'organization', 'https://source', 'https://tagpack_uri', to_timestamp(1560290400), true),
     ('abcdefgLabel', 'abcdefg', 'btc', 'organization', 'https://source', 'https://tagpack_uri', to_timestamp(1560290400), false),
     ('labelX', 'addressE', 'btc', 'organization', 'https://source', 'https://tagpack_uri', to_timestamp(1560290400), false),
     ('labelY', 'addressE', 'btc', 'organization', 'https://source', 'https://tagpack_uri', to_timestamp(1560290400), false),
-    ('isolinks', 'addressX', 'btc', NULL, 'Unspecified', 'https://tagpack_uri', to_timestamp(1), true),
+    ('isolinks', 'addressX', 'btc', 'exchange', 'Unspecified', 'https://tagpack_uri', to_timestamp(1), true),
     ('isolinks', 'addressY', 'btc', NULL, 'Unspecified', 'https://tagpack_uri', to_timestamp(1), true),
     ('cimedy', 'addressY', 'btc', NULL, 'Unspecified', 'https://tagpack_uri', to_timestamp(2), false),
     ('cimedy', 'addressA', 'ltc', 'exchange', 'source', 'https://tagpack_uri', to_timestamp(3), false),
@@ -40,5 +43,10 @@ INSERT INTO tag (label, address, currency, category, source, tagpack, lastmod, i
     ('LabelX', '0x123456', 'eth', NULL, 'sourceX', 'uriX', to_timestamp(1), false),
     ('LabelY', '0x123456', 'eth', NULL, 'sourceY', 'uriY', to_timestamp(1), false);
 INSERT INTO address_cluster_mapping (currency, address, gs_cluster_id, gs_cluster_def_addr) VALUES
-    ('btc', 'addressX', 123, '');
+    ('btc', 'addressX', 123, ''),
+    ('btc', 'addressA', 17642138, ''),
+    ('btc', 'addressH', 17642138, ''),
+    ('btc', 'address2818641', 2818641, ''),
+    ('eth', '0xabcdef', 107925000, ''),
+    ('eth', '0x123456', 107925001, '');
 
