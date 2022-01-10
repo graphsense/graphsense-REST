@@ -62,12 +62,16 @@ class Tagstore:
         config['database'] = config.get('database', 'tagstore')
         config['username'] = config.get('username', 'tagstore')
         config['password'] = config.get('password', 'tagstore')
+        config['schema'] = config.get('schema', 'tagstore')
         config['host'] = config.get('host', 'localhost')
         config['port'] = config.get('port', 5432)
         dsn = f"dbname={config['database']} user={config['username']}"\
               f" password={config['password']} host={config['host']}"\
               f" port={config['port']}"
         self.pool = await aiopg.create_pool(dsn)
+        async with self.pool.acquire() as conn:
+            async with conn.cursor() as cur:
+                await cur.execute(f"set search_path to {config['schema']}")
 
     def id(self):
         h = self.config['database'] +\
