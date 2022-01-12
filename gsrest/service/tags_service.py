@@ -4,7 +4,6 @@ from openapi_server.models.entity_tag import EntityTag
 from openapi_server.models.entity_tags import EntityTags
 from openapi_server.models.taxonomy import Taxonomy
 from openapi_server.models.concept import Concept
-from gsrest.util.string_edit import alphanumeric_lower
 from gsrest.db.util import tagstores, tagstores_with_paging, dt_to_int
 
 
@@ -30,7 +29,7 @@ async def list_tags(request, currency, label, level, page=None,
 
         def to_obj(row):
             return EntityTag(
-                entity=row['cluster_id'],
+                entity=row['gs_cluster_id'],
                 label=row['label'],
                 category=row['category'],
                 abuse=row['abuse'],
@@ -40,7 +39,6 @@ async def list_tags(request, currency, label, level, page=None,
                 active=True,
                 currency=row['currency'].upper())
 
-    label = alphanumeric_lower(label)
     tags, next_page = await tagstores_with_paging(
         request.app['tagstores'], to_obj, fun, page, pagesize, currency, label)
 

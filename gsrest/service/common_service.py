@@ -140,9 +140,10 @@ async def list_neighbors(request, currency, id, direction, node_type, ids=None,
 
 
 async def add_labels(request, currency, node_type, that, nodes):
-    (field, fun) = ('address', 'list_labels_for_addresses') \
+    (field, tfield, fun) = \
+        ('address', 'address', 'list_labels_for_addresses') \
         if node_type == 'address' else \
-        ('cluster_id', 'list_labels_for_entities')
+        ('cluster_id', 'gs_cluster_id', 'list_labels_for_entities')
     thatfield = that + '_' + field
     ids = tuple((node[thatfield] for node in nodes))
 
@@ -154,7 +155,7 @@ async def add_labels(request, currency, node_type, that, nodes):
     for node in nodes:
         try:
             row = next(iterator)
-            if node[thatfield] != row[field]:
+            if node[thatfield] != row[tfield]:
                 node['labels'] = []
                 continue
             node['labels'] = row['labels']
