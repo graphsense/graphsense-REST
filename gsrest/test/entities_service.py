@@ -639,4 +639,4 @@ async def list_entity_links(test_case):
                                      entity=107925000,
                                      neighbor=107925001)
     txs = Links(links=[tx2_eth, tx22_eth])
-    test_case.assertEqual(txs.to_dict(), result)
+    test_case.assertEqualWithList(txs.to_dict(), result, 'links', 'tx_hash')
