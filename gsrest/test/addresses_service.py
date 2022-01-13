@@ -1,6 +1,5 @@
 from openapi_server.models.address import Address
 from openapi_server.models.address_tag import AddressTag
-import yaml
 from openapi_server.models.address_and_entity_tags import AddressAndEntityTags
 from openapi_server.models.entity_tag import EntityTag
 from openapi_server.models.tx_summary import TxSummary
@@ -717,7 +716,7 @@ async def list_address_links(test_case):
                                  timestamp=1361497172,
                                  height=2)])
 
-    test_case.assertEqual(link.to_dict(), result)
+    test_case.assertEqualWithList(link.to_dict(), result, 'links', 'tx_hash')
 
     txs = Links(links=[tx2_eth, tx22_eth])
     result = await test_case.request(path,
@@ -725,7 +724,11 @@ async def list_address_links(test_case):
                                      address=eth_address.address,
                                      neighbor='0x123456')
 
-    test_case.assertEqual(txs.to_dict(), result)
+    # remember here in which order eth links are stored in db (might change
+    # from ingest to ingest:
+    first = result['links'][0]
+    second = result['links'][1]
+    test_case.assertEqualWithList(txs.to_dict(), result, 'links', 'tx_hash')
 
     path += '&pagesize={pagesize}'
     result = await test_case.request(path,
@@ -733,7 +736,8 @@ async def list_address_links(test_case):
                                      address=eth_address.address,
                                      neighbor='0x123456',
                                      pagesize=1)
-    txs = Links(links=[tx2_eth])
+    txs = Links(links=[tx2_eth if first['tx_hash'] == tx2_eth.tx_hash else
+                       tx22_eth])
     test_case.assertEqual([li.to_dict() for li in txs.links], result['links'])
     test_case.assertNotEqual(None, result.get('next_page', None))
 
@@ -744,7 +748,8 @@ async def list_address_links(test_case):
                                      neighbor='0x123456',
                                      page=result['next_page'],
                                      pagesize=1)
-    txs = Links(links=[tx22_eth])
+    txs = Links(links=[tx22_eth if second['tx_hash'] == tx22_eth.tx_hash else
+                       tx2_eth])
     test_case.assertEqual([li.to_dict() for li in txs.links], result['links'])
     test_case.assertNotEqual(None, result.get('next_page', None))
 
