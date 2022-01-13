@@ -627,7 +627,8 @@ async def list_address_txs(test_case):
     result = await test_case.request(path,
                                      currency='btc',
                                      address=address2.address)
-    test_case.assertEqual(address_txs.to_dict(), result)
+    test_case.assertEqualWithList(address_txs.to_dict(), result, 'address_txs',
+                                  'tx_hash')
 
     def reverse(tx):
         tx_r = TxAccount.from_dict(copy.deepcopy(tx.to_dict()))
@@ -641,7 +642,8 @@ async def list_address_txs(test_case):
     result = await test_case.request(path,
                                      currency='eth',
                                      address=eth_address.address)
-    test_case.assertEqual(txs.to_dict(), result)
+    test_case.assertEqualWithList(txs.to_dict(), result, 'address_txs',
+                                  'tx_hash')
 
 
 async def list_tags_by_address(test_case):

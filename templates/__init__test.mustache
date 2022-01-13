@@ -32,4 +32,26 @@ class BaseTestCase(AioHTTPTestCase):
     def request(self, path, **kwargs):
         return self.requestWithCodeAndBody(path, 200, None, **kwargs)
 
+    def assertEqualWithList(self, a, b, *keys):
+        keys = iter(keys)
+        key = next(keys)
+        pa = a
+        pb = b
+        aa = a[key]
+        bb = b[key]
+        while not isinstance(aa, list):
+            key = next(keys)
+            pa = aa
+            pb = bb
+            aa = aa[key]
+            bb = bb[key]
+        listkey = next(keys)
+
+        def fun(x):
+            return x[listkey]
+
+        pa[key] = sorted(pa[key], key=fun)
+        pb[key] = sorted(pb[key], key=fun)
+
+        return self.assertEqual(a, b)
 
