@@ -434,7 +434,7 @@ entityWithTagsOfAddressWithTags = Entity(
             value=115422577,
             usd=2.31,
             eur=1.15),
-   tags=AddressAndEntityTags(entity_tags=[etag, etag2],
+   tags=AddressAndEntityTags(entity_tags=[etag],
                              address_tags=[tag, tag2, tag3, tag4])
 )
 
