@@ -35,5 +35,6 @@ tagstores:
     # add postgres db configuration for each tagstore like:
     - host: "POSTGRES_HOST" 
       database: "POSTGRES_DB" # default "tagstore"
+      schema: "POSTGRES_SCHEMA" # default "tagstore"
       user: "POSTGRES_USER" # default "tagstore"
       password: "POSTGRES_PASSWORD" # default "tagstore"
