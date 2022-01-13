@@ -21,6 +21,7 @@ from gsrest.test.txs_service import tx1_eth, tx2_eth, tx22_eth, tx4_eth
 from gsrest.service.rates_service import list_rates
 from gsrest.util.values import convert_value
 import copy
+import yaml
 
 tag = EntityTag(
            category=atag1.category,
@@ -570,20 +571,22 @@ async def list_entity_txs(test_case):
                             height=2,
                             timestamp=1510347493),
                         AddressTxUtxo(
-                            tx_hash="abcdef",
-                            value=convert_value('btc', -1260000, rates[2]),
-                            coinbase=False,
-                            height=2,
-                            timestamp=1511153263),
-                        AddressTxUtxo(
                             tx_hash="4567",
                             value=convert_value('btc', -1, rates[2]),
                             coinbase=False,
                             height=2,
-                            timestamp=1510347492)
+                            timestamp=1510347492),
+                        AddressTxUtxo(
+                            tx_hash="abcdef",
+                            value=convert_value('btc', -1260000, rates[2]),
+                            coinbase=False,
+                            height=2,
+                            timestamp=1511153263)
                         ]
                     )
     result = await test_case.request(path, currency='btc', entity=144534)
+    result['address_txs'] = sorted(result['address_txs'],
+                                   key=lambda t: t['tx_hash'])
     test_case.assertEqual(entity_txs.to_dict(), result)
 
     def reverse(tx):
@@ -595,7 +598,10 @@ async def list_entity_txs(test_case):
     tx2_eth_r = reverse(tx2_eth)
     tx22_eth_r = reverse(tx22_eth)
     txs = AddressTxs(address_txs=[tx1_eth, tx4_eth, tx2_eth_r, tx22_eth_r])
+    txs.address_txs = sorted(txs.address_txs, key=lambda t: t.tx_hash)
     result = await test_case.request(path, currency='eth', entity=107925000)
+    result['address_txs'] = sorted(result['address_txs'],
+                                   key=lambda t: t['tx_hash'])
     test_case.assertEqual(txs.to_dict(), result)
 
 
