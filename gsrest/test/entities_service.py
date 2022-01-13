@@ -79,7 +79,7 @@ entityWithTags = Entity(
             usd=2.31,
             eur=1.15),
    tags=AddressAndEntityTags(
-       entity_tags=[tag, tag2],
+       entity_tags=[tag],
        address_tags=[atag1, atag2, atag3, atag4])
 )
 
@@ -223,6 +223,7 @@ async def get_entity(test_case):
                                      entity=entityWithTags.entity,
                                      include_tags=True)
 
+    print(yaml.dump(result['tags']))
     test_case.assertEqual(entityWithTags.to_dict(), result)
 
     result = await test_case.request(path,
