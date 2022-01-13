@@ -159,13 +159,21 @@ class Tagstore:
                             pagesize=pagesize)
 
     def list_matching_labels(self, currency, expression, limit):
-        query = """select distinct label from tag
+        query = """select
+                    t.label
+                   from
+                    tag t, label l
                    where
-                    currency = %s
-                    and label ilike %s
+                    t.label = l.label
+                    and t.currency = %s
+                    and similarity(l.label, %s) > 0.2
+                   order by l.label <-> %s
                    limit %s"""
         return self.execute(query,
-                            params=[currency.upper(), expression + '%', limit])
+                            params=[currency.upper(),
+                                    expression,
+                                    expression,
+                                    limit])
 
     def list_tags_by_address(self, currency, address, page=None,
                              pagesize=None):
