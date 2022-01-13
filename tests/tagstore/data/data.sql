@@ -50,3 +50,4 @@ INSERT INTO address_cluster_mapping (currency, address, gs_cluster_id, gs_cluste
     ('ETH', '0xabcdef', 107925000, ''),
     ('ETH', '0x123456', 107925001, '');
 
+REFRESH MATERIALIZED VIEW label;
