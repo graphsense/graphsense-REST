@@ -8,6 +8,7 @@ import gsrest.service.rates_service as service
 from openapi_server import util
 
 
+
 async def get_exchange_rates(request: web.Request, currency, height) -> web.Response:
     """Returns exchange rate for a given height
 

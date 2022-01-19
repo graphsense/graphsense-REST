@@ -9,6 +9,7 @@ import gsrest.service.general_service as service
 from openapi_server import util
 
 
+
 async def get_statistics(request: web.Request, ) -> web.Response:
     """Get statistics of supported currencies
 

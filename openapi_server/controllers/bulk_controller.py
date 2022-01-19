@@ -7,6 +7,7 @@ import gsrest.service.bulk_service as service
 from openapi_server import util
 
 
+
 async def bulk_csv(request: web.Request, currency, operation, num_pages, body) -> web.Response:
     """Get data as CSV in bulk
 

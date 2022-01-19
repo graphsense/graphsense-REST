@@ -9,6 +9,14 @@ import gsrest.service.{{baseName}}_service as service
 from {{packageName}} import util
 {{#operations}}
 {{#operation}}
+{{#vendorExtensions.x-post-processing}}
+import {{{this}}}
+{{/vendorExtensions.x-post-processing}}
+{{/operation}}
+{{/operations}}
+
+{{#operations}}
+{{#operation}}
 
 
 async def {{operationId}}(request: web.Request, {{#allParams}}{{paramName}}{{^required}}=None{{/required}}{{^-last}}, {{/-last}}{{/allParams}}) -> web.Response:

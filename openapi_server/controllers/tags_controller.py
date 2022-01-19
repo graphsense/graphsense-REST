@@ -10,6 +10,7 @@ import gsrest.service.tags_service as service
 from openapi_server import util
 
 
+
 async def list_concepts(request: web.Request, taxonomy) -> web.Response:
     """Returns the supported concepts of a taxonomy
 

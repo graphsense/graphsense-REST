@@ -11,6 +11,8 @@ from openapi_server.models.links import Links
 from openapi_server.models.neighbors import Neighbors
 import gsrest.service.addresses_service as service
 from openapi_server import util
+import gsrest.plugins.obfuscate_tags
+
 
 
 async def get_address(request: web.Request, currency, address, include_tags=None) -> web.Response:

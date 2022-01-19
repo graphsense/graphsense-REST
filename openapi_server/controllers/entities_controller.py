@@ -14,6 +14,7 @@ import gsrest.service.entities_service as service
 from openapi_server import util
 
 
+
 async def get_entity(request: web.Request, currency, entity, include_tags=None) -> web.Response:
     """Get an entity, optionally with tags
 

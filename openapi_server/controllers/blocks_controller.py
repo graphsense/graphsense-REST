@@ -9,6 +9,7 @@ import gsrest.service.blocks_service as service
 from openapi_server import util
 
 
+
 async def get_block(request: web.Request, currency, height) -> web.Response:
     """Get a block by its height
 

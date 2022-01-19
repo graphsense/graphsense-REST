@@ -9,6 +9,7 @@ import gsrest.service.txs_service as service
 from openapi_server import util
 
 
+
 async def get_tx(request: web.Request, currency, tx_hash, include_io=None) -> web.Response:
     """Returns details of a specific transaction identified by its hash.
 
