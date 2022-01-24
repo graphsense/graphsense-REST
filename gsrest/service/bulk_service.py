@@ -4,6 +4,8 @@ from openapi_server.models.values import Values
 import asyncio
 import json
 from aiohttp import web
+import traceback
+import inspect
 
 
 def bulk_json(*args, **kwargs):
@@ -20,7 +22,15 @@ apis = ['addresses', 'entities', 'blocks', 'txs', 'rates', 'tags']
 
 
 async def bulk(request, currency, operation, body, num_pages, form='csv'):
-    the_stack = stack(request, currency, operation, body, num_pages, form)
+    try:
+        the_stack = stack(request, currency, operation, body, num_pages, form)
+    except TypeError as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        text = str(e).replace('positional ', '') \
+            .replace('()', '') \
+            .replace('keyword ', '')
+        raise web.HTTPBadRequest(text=text)
+
     if form == 'csv':
         gen = to_csv(the_stack)
         mimetype = 'text/csv'
@@ -134,6 +144,10 @@ def stack(request, currency, operation, body, num_pages, format):
 
     params = {}
     keys = {}
+    check = {
+        'request': None,
+        'currency': currency
+    }
     ln = 0
     for (attr, a) in body.items():
         if a is None:
@@ -142,10 +156,14 @@ def stack(request, currency, operation, body, num_pages, format):
             # filter out this param because it's also a list
             # and must not be taken as a key
             params[attr] = a
+            check[attr] = a
         else:
             keys[attr] = a
             le = len(a)
             ln = min(le, ln) if ln > 0 else le
+            check[attr] = a[0]
+
+    inspect.getcallargs(operation, **check)
 
     for i in range(0, ln):
         the_keys = {}
@@ -190,7 +208,7 @@ async def to_json(stack):
             rows = await op
         except RuntimeError:
             continue
-        if started:
+        if started and rows:
             yield ","
         else:
             started = True

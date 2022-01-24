@@ -1,13 +1,15 @@
 from gsrest.test.blocks_service import block, block2
 
+error_bodies = [{'x': 'x'}, {}]
+path = '/{currency}/bulk.{form}/get_block?num_pages=1'
+headers = {
+    'Accept': 'application/json',
+    'Authorization': 'x'
+}
+
 
 async def bulk_csv(test_case):
     body = {'height': [1, 2]}
-    path = '/{currency}/bulk.csv/get_block?num_pages=1'
-    headers = {
-        'Accept': 'application/json',
-        'Authorization': 'x'
-    }
     response = await test_case.client.request(
         path=path.format(form="csv", currency="btc"),
         method='POST',
@@ -20,12 +22,20 @@ async def bulk_csv(test_case):
     test_case.assertEqual(sorted(expected.split('\r\n')),
                           sorted(result.split('\r\n')))
 
+    for body in error_bodies:
+        response = await test_case.client.request(
+            path=path.format(form="csv", currency="btc"),
+            method='POST',
+            json=body,
+            headers=headers)
+        content = (await response.read()).decode('utf-8')
+        test_case.assertEqual(400, response.status, "response is " + content)
+
 
 async def bulk_json(test_case):
     body = {'height': [1, 2]}
-    path = '/{currency}/bulk.json/get_block?num_pages=1'
     result = await test_case.requestWithCodeAndBody(
-                        path, 200, body,
+                        path.format(form="json", currency="btc"), 200, body,
                         currency="btc",
                         form='json')
 
