@@ -107,8 +107,6 @@ class Tagstore:
                     query += f" order by {paging_key}"
                 if pagesize:
                     query += f" limit {pagesize}"
-                print(query)
-                print(params)
                 await cur.execute(query, params)
                 return await to_result(cur, paging_key)
 
