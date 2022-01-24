@@ -20,6 +20,10 @@ def bulk_csv(*args, **kwargs):
 
 apis = ['addresses', 'entities', 'blocks', 'txs', 'rates', 'tags']
 
+error_field = '_error'
+info_field = '_info'
+request_field_prefix = '_request_'
+
 
 async def bulk(request, currency, operation, body, num_pages, form='csv'):
     try:
@@ -97,7 +101,10 @@ async def wrap(request, operation, currency, params, keys, num_pages, format):
     params = dict(params)
     for (k, v) in keys.items():
         params[k] = v
-    result = await operation(request, currency, **params)
+    try:
+        result = await operation(request, currency, **params)
+    except RuntimeError:
+        result = {error_field: 'Not found'}
     if isinstance(result, list):
         rows = result
         page_state = None
@@ -112,10 +119,19 @@ async def wrap(request, operation, currency, params, keys, num_pages, format):
                 break
         page_state = result.get('next_page', None)
     flat = []
+
+    def append_keys(fl):
+        for (k, v) in keys.items():
+            fl[request_field_prefix+k] = v
+
     for row in rows:
         fl = flatten(row, format=format)
-        for (k, v) in keys.items():
-            fl['request_'+k] = v
+        append_keys(fl)
+        flat.append(fl)
+    if not rows:
+        fl = {}
+        append_keys(fl)
+        fl[info_field] = 'no data'
         flat.append(fl)
     num_pages -= 1
     if num_pages > 0 and page_state:
@@ -181,20 +197,56 @@ async def to_csv(stack):
     wr = writer()
     csv = None
 
+    stash = []
+    has_info_field = False
+    has_error_field = False
+    has_data = False
+
     for op in stack:
-        try:
-            rows = await op
-        except RuntimeError:
-            continue
+        rows = await op
 
         for row in rows:
+            if error_field in row and not csv:
+                stash.append(row)
+                has_error_field = True
+                continue
+
+            if info_field in row and not csv:
+                stash.append(row)
+                has_info_field = True
+                continue
+
             head = ""
+            has_data = True
             if not csv:
                 fieldnames = sorted(row.keys())
+                if has_info_field:
+                    fieldnames += [info_field]
+                if has_error_field:
+                    fieldnames += [error_field]
                 csv = DictWriter(wr, fieldnames)
                 csv.writeheader()
                 head = wr.get()
                 yield head
+
+            for stashed_row in stash:
+                csv.writerow(stashed_row)
+                yield wr.get()
+
+            csv.writerow(row)
+            yield wr.get()
+
+    if not has_data:
+        for row in stash:
+            if not csv:
+                fieldnames = sorted(row.keys())
+                if has_info_field and info_field not in fieldnames:
+                    fieldnames += [info_field]
+                if has_error_field and error_field not in fieldnames:
+                    fieldnames += [error_field]
+                csv = DictWriter(wr, fieldnames)
+                csv.writeheader()
+                yield wr.get()
 
             csv.writerow(row)
             yield wr.get()
