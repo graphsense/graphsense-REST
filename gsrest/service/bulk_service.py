@@ -78,7 +78,7 @@ def flatten(item, name="", flat_dict=None, format=None):
             flat_dict[name + rate.code] = rate.value
         return
     if 'to_dict' in dir(item):
-        item = item.to_dict()
+        item = item.to_dict(shallow=True)
     if isinstance(item, dict):
         for sub_item in item:
             flatten(item[sub_item], name + sub_item + "_", flat_dict, format)
