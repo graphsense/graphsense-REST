@@ -43,12 +43,14 @@ class SearchResult(Model):
         """
         return util.deserialize_model(dikt, cls)
 
-    def to_dict(self, prefix=""):
+    def to_dict(self, shallow=False):
         """Returns the model as a dict:
 
         :return: The SearchResult as a dict
         :rtype: dict
         """
+        if not shallow:
+            return Model.to_dict(self)
         return { 'currencies': self._currencies,
             'labels': self._labels }
 

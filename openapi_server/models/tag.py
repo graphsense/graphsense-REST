@@ -66,12 +66,14 @@ class Tag(Model):
         """
         return util.deserialize_model(dikt, cls)
 
-    def to_dict(self, prefix=""):
+    def to_dict(self, shallow=False):
         """Returns the model as a dict:
 
         :return: The Tag as a dict
         :rtype: dict
         """
+        if not shallow:
+            return Model.to_dict(self)
         return { 'abuse': self._abuse,
             'active': self._active,
             'category': self._category,

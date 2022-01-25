@@ -43,12 +43,14 @@ class AddressTxs(Model):
         """
         return util.deserialize_model(dikt, cls)
 
-    def to_dict(self, prefix=""):
+    def to_dict(self, shallow=False):
         """Returns the model as a dict:
 
         :return: The AddressTxs as a dict
         :rtype: dict
         """
+        if not shallow:
+            return Model.to_dict(self)
         return { 'address_txs': self._address_txs,
             'next_page': self._next_page }
 

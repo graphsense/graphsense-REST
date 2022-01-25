@@ -44,12 +44,14 @@ class AddressAndEntityTags(Model):
         """
         return util.deserialize_model(dikt, cls)
 
-    def to_dict(self, prefix=""):
+    def to_dict(self, shallow=False):
         """Returns the model as a dict:
 
         :return: The AddressAndEntityTags as a dict
         :rtype: dict
         """
+        if not shallow:
+            return Model.to_dict(self)
         return { 'address_tags': self._address_tags,
             'entity_tags': self._entity_tags }
 

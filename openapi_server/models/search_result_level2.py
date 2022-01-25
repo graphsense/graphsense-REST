@@ -56,12 +56,14 @@ class SearchResultLevel2(Model):
         """
         return util.deserialize_model(dikt, cls)
 
-    def to_dict(self, prefix=""):
+    def to_dict(self, shallow=False):
         """Returns the model as a dict:
 
         :return: The SearchResultLevel2 as a dict
         :rtype: dict
         """
+        if not shallow:
+            return Model.to_dict(self)
         return { 'matching_addresses': self._matching_addresses,
             'node': self._node,
             'relation': self._relation,

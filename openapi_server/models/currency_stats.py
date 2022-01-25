@@ -66,12 +66,14 @@ class CurrencyStats(Model):
         """
         return util.deserialize_model(dikt, cls)
 
-    def to_dict(self, prefix=""):
+    def to_dict(self, shallow=False):
         """Returns the model as a dict:
 
         :return: The CurrencyStats as a dict
         :rtype: dict
         """
+        if not shallow:
+            return Model.to_dict(self)
         return { 'name': self._name,
             'no_address_relations': self._no_address_relations,
             'no_addresses': self._no_addresses,

@@ -50,12 +50,14 @@ class Block(Model):
         """
         return util.deserialize_model(dikt, cls)
 
-    def to_dict(self, prefix=""):
+    def to_dict(self, shallow=False):
         """Returns the model as a dict:
 
         :return: The Block as a dict
         :rtype: dict
         """
+        if not shallow:
+            return Model.to_dict(self)
         return { 'block_hash': self._block_hash,
             'height': self._height,
             'no_txs': self._no_txs,

@@ -30,9 +30,9 @@ async def bulk_csv(test_case):
         json=body,
         headers=headers)
     result = (await response.read()).decode('utf-8')
-    expected = ('_request_height,_info\r\n'
-        '100,no data\r\n' # noqa
-        '200,no data\r\n') # noqa
+    expected = ('_error,_request_height\r\n'
+        'Not found,100\r\n' # noqa
+        'Not found,200\r\n') # noqa
 
     test_case.assertEqual(sorted(expected.split('\r\n')),
                           sorted(result.split('\r\n')))
