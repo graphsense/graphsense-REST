@@ -77,7 +77,6 @@ async def list_entity_tags_by_entity(request, currency, entity):
 async def list_address_tags_by_entity(request, currency, address,
                                       page=None, pagesize=None):
     def f(row):
-        print(row['id'])
         return AddressTag(label=row['label'],
                           address=row['address'],
                           category=row['category'],

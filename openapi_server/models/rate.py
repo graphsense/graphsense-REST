@@ -42,6 +42,16 @@ class Rate(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, prefix=""):
+        """Returns the model as a dict:
+
+        :return: The Rate as a dict
+        :rtype: dict
+        """
+        return { 'code': self._code,
+            'value': self._value }
+
+
     @property
     def code(self):
         """Gets the code of this Rate.

@@ -413,6 +413,8 @@ paths:
       summary: Get attribution tags for a given address
       tags:
       - addresses
+      x-post-processing:
+      - gsrest.plugins.obfuscate_tags
       x-openapi-router-controller: openapi_server.controllers.addresses_controller
   /{currency}/addresses/{address}/txs:
     get:

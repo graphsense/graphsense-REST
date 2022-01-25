@@ -59,6 +59,20 @@ class AddressTxUtxo(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, prefix=""):
+        """Returns the model as a dict:
+
+        :return: The AddressTxUtxo as a dict
+        :rtype: dict
+        """
+        return { 'coinbase': self._coinbase,
+            'height': self._height,
+            'timestamp': self._timestamp,
+            'tx_hash': self._tx_hash,
+            'tx_type': self._tx_type,
+            'value': self._value }
+
+
     @property
     def coinbase(self):
         """Gets the coinbase of this AddressTxUtxo.

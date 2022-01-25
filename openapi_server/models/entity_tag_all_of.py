@@ -38,6 +38,15 @@ class EntityTagAllOf(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, prefix=""):
+        """Returns the model as a dict:
+
+        :return: The EntityTagAllOf as a dict
+        :rtype: dict
+        """
+        return { 'entity': self._entity }
+
+
     @property
     def entity(self):
         """Gets the entity of this EntityTagAllOf.

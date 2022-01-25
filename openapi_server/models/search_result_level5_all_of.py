@@ -39,6 +39,15 @@ class SearchResultLevel5AllOf(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, prefix=""):
+        """Returns the model as a dict:
+
+        :return: The SearchResultLevel5AllOf as a dict
+        :rtype: dict
+        """
+        return { 'paths': self._paths }
+
+
     @property
     def paths(self):
         """Gets the paths of this SearchResultLevel5AllOf.

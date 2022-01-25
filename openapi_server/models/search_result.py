@@ -43,6 +43,16 @@ class SearchResult(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, prefix=""):
+        """Returns the model as a dict:
+
+        :return: The SearchResult as a dict
+        :rtype: dict
+        """
+        return { 'currencies': self._currencies,
+            'labels': self._labels }
+
+
     @property
     def currencies(self):
         """Gets the currencies of this SearchResult.

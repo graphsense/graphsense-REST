@@ -46,6 +46,17 @@ class TxSummary(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, prefix=""):
+        """Returns the model as a dict:
+
+        :return: The TxSummary as a dict
+        :rtype: dict
+        """
+        return { 'height': self._height,
+            'timestamp': self._timestamp,
+            'tx_hash': self._tx_hash }
+
+
     @property
     def height(self):
         """Gets the height of this TxSummary.

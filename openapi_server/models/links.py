@@ -43,6 +43,16 @@ class Links(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, prefix=""):
+        """Returns the model as a dict:
+
+        :return: The Links as a dict
+        :rtype: dict
+        """
+        return { 'links': self._links,
+            'next_page': self._next_page }
+
+
     @property
     def links(self):
         """Gets the links of this Links.

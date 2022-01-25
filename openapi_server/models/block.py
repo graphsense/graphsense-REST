@@ -50,6 +50,18 @@ class Block(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, prefix=""):
+        """Returns the model as a dict:
+
+        :return: The Block as a dict
+        :rtype: dict
+        """
+        return { 'block_hash': self._block_hash,
+            'height': self._height,
+            'no_txs': self._no_txs,
+            'timestamp': self._timestamp }
+
+
     @property
     def block_hash(self):
         """Gets the block_hash of this Block.

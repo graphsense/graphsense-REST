@@ -54,6 +54,19 @@ class Concept(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, prefix=""):
+        """Returns the model as a dict:
+
+        :return: The Concept as a dict
+        :rtype: dict
+        """
+        return { 'description': self._description,
+            'id': self._id,
+            'label': self._label,
+            'taxonomy': self._taxonomy,
+            'uri': self._uri }
+
+
     @property
     def description(self):
         """Gets the description of this Concept.

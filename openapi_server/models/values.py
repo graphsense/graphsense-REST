@@ -43,6 +43,16 @@ class Values(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, prefix=""):
+        """Returns the model as a dict:
+
+        :return: The Values as a dict
+        :rtype: dict
+        """
+        return { 'fiat_values': self._fiat_values,
+            'value': self._value }
+
+
     @property
     def fiat_values(self):
         """Gets the fiat_values of this Values.

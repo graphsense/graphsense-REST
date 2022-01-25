@@ -42,6 +42,16 @@ class Taxonomy(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, prefix=""):
+        """Returns the model as a dict:
+
+        :return: The Taxonomy as a dict
+        :rtype: dict
+        """
+        return { 'taxonomy': self._taxonomy,
+            'uri': self._uri }
+
+
     @property
     def taxonomy(self):
         """Gets the taxonomy of this Taxonomy.

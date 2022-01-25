@@ -86,6 +86,26 @@ class Tx(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, prefix=""):
+        """Returns the model as a dict:
+
+        :return: The Tx as a dict
+        :rtype: dict
+        """
+        return { 'coinbase': self._coinbase,
+            'height': self._height,
+            'inputs': self._inputs,
+            'outputs': self._outputs,
+            'timestamp': self._timestamp,
+            'total_input': self._total_input,
+            'total_output': self._total_output,
+            'tx_hash': self._tx_hash,
+            'tx_type': self._tx_type,
+            'from_address': self._from_address,
+            'to_address': self._to_address,
+            'value': self._value }
+
+
     @property
     def coinbase(self):
         """Gets the coinbase of this Tx.

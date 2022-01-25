@@ -43,6 +43,16 @@ class Rates(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, prefix=""):
+        """Returns the model as a dict:
+
+        :return: The Rates as a dict
+        :rtype: dict
+        """
+        return { 'height': self._height,
+            'rates': self._rates }
+
+
     @property
     def height(self):
         """Gets the height of this Rates.

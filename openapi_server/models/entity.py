@@ -85,6 +85,26 @@ class Entity(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, prefix=""):
+        """Returns the model as a dict:
+
+        :return: The Entity as a dict
+        :rtype: dict
+        """
+        return { 'balance': self._balance,
+            'entity': self._entity,
+            'first_tx': self._first_tx,
+            'in_degree': self._in_degree,
+            'last_tx': self._last_tx,
+            'no_addresses': self._no_addresses,
+            'no_incoming_txs': self._no_incoming_txs,
+            'no_outgoing_txs': self._no_outgoing_txs,
+            'out_degree': self._out_degree,
+            'tags': self._tags,
+            'total_received': self._total_received,
+            'total_spent': self._total_spent }
+
+
     @property
     def balance(self):
         """Gets the balance of this Entity.

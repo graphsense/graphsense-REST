@@ -63,6 +63,21 @@ class TxAccount(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, prefix=""):
+        """Returns the model as a dict:
+
+        :return: The TxAccount as a dict
+        :rtype: dict
+        """
+        return { 'from_address': self._from_address,
+            'height': self._height,
+            'timestamp': self._timestamp,
+            'to_address': self._to_address,
+            'tx_hash': self._tx_hash,
+            'tx_type': self._tx_type,
+            'value': self._value }
+
+
     @property
     def from_address(self):
         """Gets the from_address of this TxAccount.

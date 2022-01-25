@@ -66,6 +66,22 @@ class Tag(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, prefix=""):
+        """Returns the model as a dict:
+
+        :return: The Tag as a dict
+        :rtype: dict
+        """
+        return { 'abuse': self._abuse,
+            'active': self._active,
+            'category': self._category,
+            'currency': self._currency,
+            'label': self._label,
+            'lastmod': self._lastmod,
+            'source': self._source,
+            'tagpack_uri': self._tagpack_uri }
+
+
     @property
     def abuse(self):
         """Gets the abuse of this Tag.

@@ -56,6 +56,18 @@ class SearchResultLevel1(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, prefix=""):
+        """Returns the model as a dict:
+
+        :return: The SearchResultLevel1 as a dict
+        :rtype: dict
+        """
+        return { 'matching_addresses': self._matching_addresses,
+            'node': self._node,
+            'relation': self._relation,
+            'paths': self._paths }
+
+
     @property
     def matching_addresses(self):
         """Gets the matching_addresses of this SearchResultLevel1.

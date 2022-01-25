@@ -66,6 +66,22 @@ class CurrencyStats(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, prefix=""):
+        """Returns the model as a dict:
+
+        :return: The CurrencyStats as a dict
+        :rtype: dict
+        """
+        return { 'name': self._name,
+            'no_address_relations': self._no_address_relations,
+            'no_addresses': self._no_addresses,
+            'no_blocks': self._no_blocks,
+            'no_entities': self._no_entities,
+            'no_labels': self._no_labels,
+            'no_txs': self._no_txs,
+            'timestamp': self._timestamp }
+
+
     @property
     def name(self):
         """Gets the name of this CurrencyStats.

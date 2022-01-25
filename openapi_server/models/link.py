@@ -73,6 +73,23 @@ class Link(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, prefix=""):
+        """Returns the model as a dict:
+
+        :return: The Link as a dict
+        :rtype: dict
+        """
+        return { 'height': self._height,
+            'input_value': self._input_value,
+            'output_value': self._output_value,
+            'timestamp': self._timestamp,
+            'tx_hash': self._tx_hash,
+            'tx_type': self._tx_type,
+            'from_address': self._from_address,
+            'to_address': self._to_address,
+            'value': self._value }
+
+
     @property
     def height(self):
         """Gets the height of this Link.

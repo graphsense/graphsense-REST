@@ -44,6 +44,16 @@ class AddressAndEntityTags(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, prefix=""):
+        """Returns the model as a dict:
+
+        :return: The AddressAndEntityTags as a dict
+        :rtype: dict
+        """
+        return { 'address_tags': self._address_tags,
+            'entity_tags': self._entity_tags }
+
+
     @property
     def address_tags(self):
         """Gets the address_tags of this AddressAndEntityTags.

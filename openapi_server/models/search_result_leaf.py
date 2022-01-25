@@ -49,6 +49,17 @@ class SearchResultLeaf(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, prefix=""):
+        """Returns the model as a dict:
+
+        :return: The SearchResultLeaf as a dict
+        :rtype: dict
+        """
+        return { 'matching_addresses': self._matching_addresses,
+            'node': self._node,
+            'relation': self._relation }
+
+
     @property
     def matching_addresses(self):
         """Gets the matching_addresses of this SearchResultLeaf.

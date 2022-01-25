@@ -38,6 +38,15 @@ class AddressTagAllOf(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, prefix=""):
+        """Returns the model as a dict:
+
+        :return: The AddressTagAllOf as a dict
+        :rtype: dict
+        """
+        return { 'address': self._address }
+
+
     @property
     def address(self):
         """Gets the address of this AddressTagAllOf.
