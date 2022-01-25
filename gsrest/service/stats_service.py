@@ -14,6 +14,6 @@ async def get_currency_statistics(request, currency, version=None):
             no_addresses=result['no_addresses'],
             no_entities=result['no_clusters'],
             no_txs=result['no_transactions'],
-            no_labels=result['no_tags'],
+            no_labels=0,
             timestamp=result['timestamp']
         )

@@ -14,7 +14,7 @@ stats = Stats(
             no_blocks=3,
             timestamp=420,
             no_txs=110,
-            no_labels=470,
+            no_labels=0,
             no_address_relations=1230
             ),
         CurrencyStats(
@@ -24,7 +24,7 @@ stats = Stats(
             no_blocks=3,
             timestamp=16,
             no_txs=10,
-            no_labels=7,
+            no_labels=0,
             no_address_relations=2),
         CurrencyStats(
             name='ltc',
@@ -33,7 +33,7 @@ stats = Stats(
             no_blocks=3,
             timestamp=42,
             no_txs=11,
-            no_labels=47,
+            no_labels=0,
             no_address_relations=123)])
 
 

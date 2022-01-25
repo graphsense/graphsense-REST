@@ -111,7 +111,6 @@ async def list_neighbors(request, currency, id, direction, node_type, ids=None,
                                     is_outgoing,
                                     node_type,
                                     targets=ids,
-                                    include_labels=include_labels,
                                     page=page,
                                     pagesize=pagesize)
 
