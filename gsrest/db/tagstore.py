@@ -1,5 +1,7 @@
 import aiopg
 import hashlib
+from psycopg2.extensions import QueryCanceledError
+import time
 
 
 class Result:
@@ -64,11 +66,23 @@ class Tagstore:
         config['password'] = config.get('password', 'tagstore')
         config['schema'] = config.get('schema', 'tagstore')
         config['host'] = config.get('host', 'localhost')
-        config['port'] = config.get('port', 5432)
+        config['port'] = int(config.get('port', 5432))
+        config['query_timeout'] = int(config.get('query_timeout', 300))
+        config['max_connections'] = int(config.get('max_connections', 10))
         dsn = f"dbname={config['database']} user={config['username']}"\
               f" password={config['password']} host={config['host']}"\
               f" port={config['port']}"
-        self.pool = await aiopg.create_pool(dsn)
+
+        async def on_connect(conn):
+            async with conn.cursor() as cur:
+                await cur.execute(
+                    f"set search_path to {self.config['schema']}")
+
+        self.pool = await aiopg.create_pool(
+            dsn,
+            maxsize=config['max_connections'],
+            on_connect=on_connect,
+            timeout=config['query_timeout'])
 
     def id(self):
         h = self.config['database'] +\
@@ -87,8 +101,6 @@ class Tagstore:
             params = []
         async with self.pool.acquire() as conn:
             async with conn.cursor() as cur:
-                await cur.execute(
-                    f"set search_path to {self.config['schema']}")
                 if page and paging_key:
                     if "where" not in query.lower():
                         query += " where"
@@ -107,6 +119,7 @@ class Tagstore:
                     query += f" order by {paging_key}"
                 if pagesize:
                     query += f" limit {pagesize}"
+
                 await cur.execute(query, params)
                 return await to_result(cur, paging_key)
 
@@ -208,6 +221,7 @@ class Tagstore:
                             pagesize=pagesize)
 
     def list_entity_tags_by_entity(self, currency, entity):
+        #return Result([], {}), None
         query = """select
                         t.*,
                         tp.is_public,

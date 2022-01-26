@@ -57,7 +57,6 @@ async def list_tags_by_entity(request, currency, entity, level,
 
 async def list_entity_tags_by_entity(request, currency, entity):
     def f(row):
-        print(row['id'])
         return EntityTag(label=row['label'],
                          entity=row['gs_cluster_id'],
                          category=row['category'],

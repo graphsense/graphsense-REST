@@ -34,7 +34,10 @@ database:
 tagstores:
     # add postgres db configuration for each tagstore like:
     - host: "POSTGRES_HOST" 
-      database: "POSTGRES_DB" # default "tagstore"
-      schema: "POSTGRES_SCHEMA" # default "tagstore"
-      username: "POSTGRES_USER" # default "tagstore"
-      password: "POSTGRES_PASSWORD" # default "tagstore"
+    # additional properties with default values:
+    # database: "tagstore"
+    # schema: "tagstore" 
+    # username: "tagstore"
+    # password: "tagstore"
+    # query_timeout: 300
+    # max_connections: 10
