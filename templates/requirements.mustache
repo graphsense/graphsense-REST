@@ -1,13 +1,13 @@
-connexion[aiohttp,swagger-ui] >= 2.10.0; python_version>="3.6"
+connexion[aiohttp,swagger-ui] >= 2.6.0; python_version>="3.6"
 # connexion requires werkzeug but connexion < 2.4.0 does not install werkzeug
 # we must peg werkzeug versions below to fix connexion
 # https://github.com/zalando/connexion/pull/1044
-swagger-ui-bundle == 0.0.6
-aiohttp_jinja2 == 1.2.0
+swagger-ui-bundle >= 0.0.6
+aiohttp_jinja2 >= 1.2.0
 aiohttp_cors >= 0.7.0
 cassandra-driver==3.23.0
 aiopg==1.3.3
 psycopg2-binary==2.9.2
 # a dependency of connexion is currently not compatible with version 0.2.0
 # issue here: https://github.com/p1c2u/openapi-spec-validator/issues/135
-openapi-schema-validator < 0.2.0 
+openapi-schema-validator >= 0.2.1 
