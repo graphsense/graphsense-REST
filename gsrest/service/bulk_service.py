@@ -104,7 +104,11 @@ async def wrap(request, operation, currency, params, keys, num_pages, format):
     try:
         result = await operation(request, currency, **params)
     except RuntimeError:
-        result = {error_field: 'Not found'}
+        result = {error_field: 'not found'}
+    except TypeError as e:
+        result = {error_field: str(e)}
+    except Exception:
+        result = {error_field: 'internal error'}
     if isinstance(result, list):
         rows = result
         page_state = None
@@ -112,7 +116,7 @@ async def wrap(request, operation, currency, params, keys, num_pages, format):
         rows = [result]
         page_state = None
     else:
-        result = result.to_dict()
+        result = result.to_dict(shallow=True)
         for k in result:
             if k != 'next_page':
                 rows = result[k]
@@ -232,6 +236,8 @@ async def to_csv(stack):
             for stashed_row in stash:
                 csv.writerow(stashed_row)
                 yield wr.get()
+
+            stash = []
 
             csv.writerow(row)
             yield wr.get()
