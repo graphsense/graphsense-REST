@@ -910,7 +910,8 @@ class Cassandra:
         [tx1, tx2] = await asyncio.gather(*aws)
 
         if not tx1 or not tx2:
-            raise RuntimeError(f"transactions for {row['address']} not found")
+            id = row['address'] if 'address' in row else row['cluster_id']
+            raise RuntimeError(f"transactions for {id} not found")
 
         row['first_tx'] = TxSummary(
             tx_hash=tx1['tx_hash'],
