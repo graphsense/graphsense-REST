@@ -2,6 +2,7 @@ from typing import List, Dict
 from aiohttp import web
 import traceback
 import json
+import re
 
 from openapi_server.models.tx import Tx
 from openapi_server.models.tx_value import TxValue
@@ -23,6 +24,25 @@ async def get_tx(request: web.Request, currency, tx_hash, include_io=None) -> we
     :type include_io: bool
 
     """
+
+    for plugin in request.app['plugins']:
+        if hasattr(plugin, 'before_request'):
+            request = plugin.before_request(request)
+
+    show_private_tags_conf = \
+        request.app['config'].get('show_private_tags', False)
+    show_private_tags = bool(show_private_tags_conf)
+    if show_private_tags:
+        for (k,v) in show_private_tags_conf['on_header'].items():
+            hval = request.headers.get(k, None)
+            if not hval:
+                show_private_tags = False
+                break
+            show_private_tags = show_private_tags and \
+                bool(re.match(re.compile(v), hval))
+            
+    request.app['show_private_tags'] = show_private_tags
+
     try:
         if 'currency' in ['','currency','tx_hash','include_io']:
             if currency is not None:
@@ -30,10 +50,16 @@ async def get_tx(request: web.Request, currency, tx_hash, include_io=None) -> we
         result = service.get_tx(request
                 ,currency=currency,tx_hash=tx_hash,include_io=include_io)
         result = await result
+
+        for plugin in request.app['plugins']:
+            if hasattr(plugin, 'before_response'):
+                plugin.before_response(request, result)
+
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
+
         result = web.Response(
                     status=200,
                     text=json.dumps(result),
@@ -66,6 +92,25 @@ async def get_tx_io(request: web.Request, currency, tx_hash, io) -> web.Response
     :type io: str
 
     """
+
+    for plugin in request.app['plugins']:
+        if hasattr(plugin, 'before_request'):
+            request = plugin.before_request(request)
+
+    show_private_tags_conf = \
+        request.app['config'].get('show_private_tags', False)
+    show_private_tags = bool(show_private_tags_conf)
+    if show_private_tags:
+        for (k,v) in show_private_tags_conf['on_header'].items():
+            hval = request.headers.get(k, None)
+            if not hval:
+                show_private_tags = False
+                break
+            show_private_tags = show_private_tags and \
+                bool(re.match(re.compile(v), hval))
+            
+    request.app['show_private_tags'] = show_private_tags
+
     try:
         if 'currency' in ['','currency','tx_hash','io']:
             if currency is not None:
@@ -73,10 +118,16 @@ async def get_tx_io(request: web.Request, currency, tx_hash, io) -> web.Response
         result = service.get_tx_io(request
                 ,currency=currency,tx_hash=tx_hash,io=io)
         result = await result
+
+        for plugin in request.app['plugins']:
+            if hasattr(plugin, 'before_response'):
+                plugin.before_response(request, result)
+
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
+
         result = web.Response(
                     status=200,
                     text=json.dumps(result),

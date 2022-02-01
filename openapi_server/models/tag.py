@@ -14,13 +14,14 @@ class Tag(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, abuse: str=None, active: bool=None, category: str=None, currency: str=None, label: str=None, lastmod: int=None, source: str=None, tagpack_uri: str=None):
+    def __init__(self, abuse: str=None, active: bool=None, category: str=None, currency: str=None, is_public: bool=None, label: str=None, lastmod: int=None, source: str=None, tagpack_uri: str=None):
         """Tag - a model defined in OpenAPI
 
         :param abuse: The abuse of this Tag.
         :param active: The active of this Tag.
         :param category: The category of this Tag.
         :param currency: The currency of this Tag.
+        :param is_public: The is_public of this Tag.
         :param label: The label of this Tag.
         :param lastmod: The lastmod of this Tag.
         :param source: The source of this Tag.
@@ -31,6 +32,7 @@ class Tag(Model):
             'active': bool,
             'category': str,
             'currency': str,
+            'is_public': bool,
             'label': str,
             'lastmod': int,
             'source': str,
@@ -42,6 +44,7 @@ class Tag(Model):
             'active': 'active',
             'category': 'category',
             'currency': 'currency',
+            'is_public': 'is_public',
             'label': 'label',
             'lastmod': 'lastmod',
             'source': 'source',
@@ -52,6 +55,7 @@ class Tag(Model):
         self._active = active
         self._category = category
         self._currency = currency
+        self._is_public = is_public
         self._label = label
         self._lastmod = lastmod
         self._source = source
@@ -78,6 +82,7 @@ class Tag(Model):
             'active': self._active,
             'category': self._category,
             'currency': self._currency,
+            'is_public': self._is_public,
             'label': self._label,
             'lastmod': self._lastmod,
             'source': self._source,
@@ -179,6 +184,29 @@ class Tag(Model):
             raise ValueError("Invalid value for `currency`, must not be `None`")
 
         self._currency = currency
+
+    @property
+    def is_public(self):
+        """Gets the is_public of this Tag.
+
+        whether the address is public
+
+        :return: The is_public of this Tag.
+        :rtype: bool
+        """
+        return self._is_public
+
+    @is_public.setter
+    def is_public(self, is_public):
+        """Sets the is_public of this Tag.
+
+        whether the address is public
+
+        :param is_public: The is_public of this Tag.
+        :type is_public: bool
+        """
+
+        self._is_public = is_public
 
     @property
     def label(self):

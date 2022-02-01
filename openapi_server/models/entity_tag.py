@@ -16,13 +16,14 @@ class EntityTag(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, abuse: str=None, active: bool=None, category: str=None, currency: str=None, label: str=None, lastmod: int=None, source: str=None, tagpack_uri: str=None, entity: int=None):
+    def __init__(self, abuse: str=None, active: bool=None, category: str=None, currency: str=None, is_public: bool=None, label: str=None, lastmod: int=None, source: str=None, tagpack_uri: str=None, entity: int=None):
         """EntityTag - a model defined in OpenAPI
 
         :param abuse: The abuse of this EntityTag.
         :param active: The active of this EntityTag.
         :param category: The category of this EntityTag.
         :param currency: The currency of this EntityTag.
+        :param is_public: The is_public of this EntityTag.
         :param label: The label of this EntityTag.
         :param lastmod: The lastmod of this EntityTag.
         :param source: The source of this EntityTag.
@@ -34,6 +35,7 @@ class EntityTag(Model):
             'active': bool,
             'category': str,
             'currency': str,
+            'is_public': bool,
             'label': str,
             'lastmod': int,
             'source': str,
@@ -46,6 +48,7 @@ class EntityTag(Model):
             'active': 'active',
             'category': 'category',
             'currency': 'currency',
+            'is_public': 'is_public',
             'label': 'label',
             'lastmod': 'lastmod',
             'source': 'source',
@@ -57,6 +60,7 @@ class EntityTag(Model):
         self._active = active
         self._category = category
         self._currency = currency
+        self._is_public = is_public
         self._label = label
         self._lastmod = lastmod
         self._source = source
@@ -84,6 +88,7 @@ class EntityTag(Model):
             'active': self._active,
             'category': self._category,
             'currency': self._currency,
+            'is_public': self._is_public,
             'label': self._label,
             'lastmod': self._lastmod,
             'source': self._source,
@@ -186,6 +191,29 @@ class EntityTag(Model):
             raise ValueError("Invalid value for `currency`, must not be `None`")
 
         self._currency = currency
+
+    @property
+    def is_public(self):
+        """Gets the is_public of this EntityTag.
+
+        whether the address is public
+
+        :return: The is_public of this EntityTag.
+        :rtype: bool
+        """
+        return self._is_public
+
+    @is_public.setter
+    def is_public(self, is_public):
+        """Sets the is_public of this EntityTag.
+
+        whether the address is public
+
+        :param is_public: The is_public of this EntityTag.
+        :type is_public: bool
+        """
+
+        self._is_public = is_public
 
     @property
     def label(self):

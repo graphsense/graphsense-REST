@@ -2,6 +2,7 @@ from typing import List, Dict
 from aiohttp import web
 import traceback
 import json
+import re
 
 import gsrest.service.bulk_service as service
 from openapi_server import util
@@ -23,6 +24,25 @@ async def bulk_csv(request: web.Request, currency, operation, num_pages, body) -
     :type body: 
 
     """
+
+    for plugin in request.app['plugins']:
+        if hasattr(plugin, 'before_request'):
+            request = plugin.before_request(request)
+
+    show_private_tags_conf = \
+        request.app['config'].get('show_private_tags', False)
+    show_private_tags = bool(show_private_tags_conf)
+    if show_private_tags:
+        for (k,v) in show_private_tags_conf['on_header'].items():
+            hval = request.headers.get(k, None)
+            if not hval:
+                show_private_tags = False
+                break
+            show_private_tags = show_private_tags and \
+                bool(re.match(re.compile(v), hval))
+            
+    request.app['show_private_tags'] = show_private_tags
+
     try:
         if 'currency' in ['','currency','operation','num_pages','body']:
             if currency is not None:
@@ -59,6 +79,25 @@ async def bulk_json(request: web.Request, currency, operation, num_pages, body) 
     :type body: 
 
     """
+
+    for plugin in request.app['plugins']:
+        if hasattr(plugin, 'before_request'):
+            request = plugin.before_request(request)
+
+    show_private_tags_conf = \
+        request.app['config'].get('show_private_tags', False)
+    show_private_tags = bool(show_private_tags_conf)
+    if show_private_tags:
+        for (k,v) in show_private_tags_conf['on_header'].items():
+            hval = request.headers.get(k, None)
+            if not hval:
+                show_private_tags = False
+                break
+            show_private_tags = show_private_tags and \
+                bool(re.match(re.compile(v), hval))
+            
+    request.app['show_private_tags'] = show_private_tags
+
     try:
         if 'currency' in ['','currency','operation','num_pages','body']:
             if currency is not None:

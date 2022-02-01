@@ -1,7 +1,5 @@
 import aiopg
 import hashlib
-from psycopg2.extensions import QueryCanceledError
-import time
 
 
 class Result:
@@ -52,6 +50,11 @@ async def to_result(cursor, paging_key=None):
     next_page = None if le == 0 else result[le - 1][paging_key]
 
     return result, next_page
+
+
+def hide_private_condition(show_private):
+    return 'and tp.is_public=true' \
+        if not show_private else ''
 
 
 class Tagstore:
@@ -186,15 +189,18 @@ class Tagstore:
                                     expression,
                                     limit])
 
-    def list_tags_by_address(self, currency, address, page=None,
+    def list_tags_by_address(self, currency, address, show_private=False,
+                             page=None,
                              pagesize=None):
-        query = """select t.*, tp.is_public from
+        query = f"""select t.*, tp.is_public from
                         tag t,
                         tagpack tp
                    where
                         t.tagpack=tp.id
                         and t.currency = %s
-                        and t.address = %s"""
+                        and t.address = %s
+                        {hide_private_condition(show_private)}
+                        """
 
         return self.execute(query,
                             params=[currency.upper(), address],
@@ -221,7 +227,6 @@ class Tagstore:
                             pagesize=pagesize)
 
     def list_entity_tags_by_entity(self, currency, entity):
-        #return Result([], {}), None
         query = """select
                         t.*,
                         tp.is_public,
@@ -243,26 +248,31 @@ class Tagstore:
 
         return self.execute(query, [currency.upper(), entity])
 
-    def list_labels_for_addresses(self, currency, addresses):
-        query = """select
-                    address,
-                    json_agg(distinct label) as labels
+    def list_labels_for_addresses(self, currency, addresses,
+                                  show_private=False):
+        query = f"""select
+                    t.address,
+                    json_agg(distinct t.label) as labels
                    from
-                    tag
+                    tag t,
+                    tagpack tp
                    where
-                    currency = %s
-                    and address in %s
+                    t.tagpack = tp.id
+                    and t.currency = %s
+                    and t.address in %s
+                    {hide_private_condition(show_private)}
                    group by address
                    order by address"""
         return self.execute(query,
                             params=[currency.upper(), addresses])
 
-    def list_labels_for_entities(self, currency, entities):
-        query = """select
+    def list_labels_for_entities(self, currency, entities, show_private=False):
+        query = f"""select
                     acm.gs_cluster_id,
                     json_agg(distinct t.label) as labels
                    from
                     tag t,
+                    tagpack tp,
                     address_cluster_mapping acm
                    where
                     t.address = acm.address
@@ -270,6 +280,8 @@ class Tagstore:
                     and t.is_cluster_definer = true
                     and acm.currency = %s
                     and acm.gs_cluster_id in %s
+                    and tp.id = t.tagpack
+                    {hide_private_condition(show_private)}
                    group by
                     acm.gs_cluster_id
                    order by acm.gs_cluster_id"""

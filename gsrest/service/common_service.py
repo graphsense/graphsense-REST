@@ -94,7 +94,8 @@ async def list_tags_by_address(request, currency, address,
                     currency=row['currency'].upper()
                     ),
             'list_tags_by_address',
-            page, pagesize, currency, address)
+            page, pagesize, currency, address,
+            request.app['show_private_tags'])
 
     return AddressTags(address_tags=address_tags, next_page=next_page)
 
@@ -126,6 +127,7 @@ async def list_neighbors(request, currency, id, direction, node_type, ids=None,
     ntype, suffix = (node_type, '') \
         if node_type == 'address' else ('cluster', '_id')
     for row in results:
+        print(f'row {row}')
         relations.append(Neighbor(
             id=str(row[f'{dst}_{ntype}{suffix}']),
             node_type=node_type,
@@ -147,7 +149,8 @@ async def add_labels(request, currency, node_type, that, nodes):
     ids = tuple((node[thatfield] for node in nodes))
 
     result = await tagstores(request.app['tagstores'],
-                             lambda row: row, fun, currency, ids)
+                             lambda row: row, fun, currency, ids,
+                             request.app['show_private_tags'])
     iterator = iter(result)
     if node_type == 'address':
         nodes = sorted(nodes, key=lambda node: node[thatfield])
