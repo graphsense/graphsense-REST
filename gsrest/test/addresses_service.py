@@ -1,7 +1,5 @@
 from openapi_server.models.address import Address
-from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.address_and_entity_tags import AddressAndEntityTags
-from openapi_server.models.entity_tag import EntityTag
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.neighbors import Neighbors
 from openapi_server.models.neighbor import Neighbor
@@ -16,114 +14,9 @@ from gsrest.util.values import convert_value
 from gsrest.service.rates_service import list_rates
 from gsrest.test.txs_service import tx1_eth, tx2_eth, tx22_eth, tx4_eth
 from gsrest.util.values import make_values
-from gsrest.test.tags_service import eth_etag
+import gsrest.test.tags_service as ts
 import copy
 
-
-tag = AddressTag(
-           category="organization",
-           label="Internet, Archive",
-           abuse=None,
-           lastmod=1560290400,
-           source="https://archive.org/donate/cryptocurrency",
-           address="addressA",
-           tagpack_uri="https://tagpack_uri",
-           active=True,
-           currency='BTC',
-           is_public=True
-        )
-
-tag2 = AddressTag(
-           category="organization",
-           label="Internet Archive 2",
-           abuse=None,
-           lastmod=1560290400,
-           source="https://archive.org/donate/cryptocurrency",
-           address="addressA",
-           tagpack_uri="https://tagpack_uri_private",
-           active=True,
-           currency='BTC',
-           is_public=False
-        )
-
-tag3 = AddressTag(
-    abuse=None,
-    active=True,
-    address='addressA',
-    category='organization',
-    currency='BTC',
-    label='addressTag1',
-    lastmod=1,
-    source='https://archive.org/donate/cryptocurrency',
-    tagpack_uri='https://tagpack_uri',
-    is_public=True
-)
-
-tag4 = AddressTag(
-    abuse=None,
-    active=True,
-    address='addressH',
-    category='organization',
-    currency='BTC',
-    label='addressTag2',
-    lastmod=2,
-    source='https://archive.org/donate/cryptocurrency',
-    tagpack_uri='https://tagpack_uri',
-    is_public=True
-)
-
-
-eth_tag = AddressTag(
-    category=None,
-    label="TagA",
-    abuse=None,
-    lastmod=1,
-    source="sourceX",
-    address="0xabcdef",
-    tagpack_uri="uriX",
-    active=True,
-    currency='ETH',
-    is_public=False
-)
-
-eth_tag2 = AddressTag(
-    category=None,
-    label="TagB",
-    abuse=None,
-    lastmod=1,
-    source="sourceY",
-    address="0xabcdef",
-    tagpack_uri="uriY",
-    active=True,
-    currency='ETH',
-    is_public=True
-)
-
-etag = EntityTag(
-    category="organization",
-    label="Internet, Archive",
-    abuse=None,
-    lastmod=1560290400,
-    source="https://archive.org/donate/cryptocurrency",
-    entity=17642138,
-    tagpack_uri="https://tagpack_uri",
-    active=True,
-    is_public=True,
-    currency='BTC'
-)
-
-etag2 = EntityTag(
-    category="organization",
-    label="Internet Archive 2",
-    abuse=None,
-    lastmod=1560290400,
-    source="https://archive.org/donate/cryptocurrency",
-    entity=17642138,
-    tagpack_uri="https://tagpack_uri_private",
-    active=True,
-    is_public=False,
-    currency='BTC'
-)
 
 address = Address(
    first_tx=TxSummary(
@@ -160,7 +53,7 @@ address = Address(
 addressWithTags = Address(
    **address.to_dict()
    )
-addressWithTags.tags = [tag, tag2, tag3]
+addressWithTags.tags = [ts.tag1, ts.tag2, ts.tag3]
 
 
 address2 = Address(
@@ -443,8 +336,8 @@ entityWithTagsOfAddressWithTags = Entity(
             value=115422577,
             usd=2.31,
             eur=1.15),
-   tags=AddressAndEntityTags(entity_tags=[etag],
-                             address_tags=[tag, tag2, tag3, tag4])
+   tags=AddressAndEntityTags(entity_tags=[ts.etag1],
+                             address_tags=[ts.tag1, ts.tag2, ts.tag3, ts.tag4])
 )
 
 eth_address = Address(
@@ -480,7 +373,7 @@ eth_address = Address(
 eth_addressWithTags = Address(
    **eth_address.to_dict()
    )
-eth_addressWithTags.tags = [eth_tag, eth_tag2]
+eth_addressWithTags.tags = [ts.eth_tag1, ts.eth_tag2]
 
 
 eth_address2 = Address(
@@ -573,8 +466,8 @@ eth_entityWithTags = Entity(
    first_tx=eth_address.first_tx,
    balance=eth_address.balance,
    tags=AddressAndEntityTags(
-       address_tags=[eth_tag, eth_tag2],
-       entity_tags=[eth_etag])
+       address_tags=[ts.eth_tag1, ts.eth_tag2],
+       entity_tags=[ts.eth_etag1])
 )
 
 
@@ -596,7 +489,7 @@ async def get_address(test_case):
     awt = addressWithTags.to_dict()
     test_case.assertEqual(awt, result)
     awt_public = Address(**awt)
-    awt_public.tags = [tag, tag3]
+    awt_public.tags = [ts.tag1, ts.tag3]
     result = await test_case.request(path,
                                      currency='btc',
                                      auth='unauthorized',

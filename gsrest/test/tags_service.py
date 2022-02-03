@@ -4,9 +4,113 @@ from openapi_server.models.address_tags import AddressTags
 from openapi_server.models.entity_tags import EntityTags
 from openapi_server.models.taxonomy import Taxonomy
 from openapi_server.models.concept import Concept
-from gsrest.test.addresses_service import eth_tag
 
 tag1 = AddressTag(
+    category="organization",
+    label="Internet, Archive",
+    abuse=None,
+    lastmod=1560290400,
+    source="https://archive.org/donate/cryptocurrency",
+    address="addressA",
+    tagpack_uri="https://tagpack_uri",
+    active=True,
+    currency='BTC',
+    is_public=True
+)
+
+tag2 = AddressTag(
+    category="organization",
+    label="Internet Archive 2",
+    abuse=None,
+    lastmod=1560290400,
+    source="https://archive.org/donate/cryptocurrency",
+    address="addressA",
+    tagpack_uri="https://tagpack_uri_private",
+    active=True,
+    currency='BTC',
+    is_public=False
+)
+
+tag3 = AddressTag(
+    abuse=None,
+    active=True,
+    address='addressA',
+    category='organization',
+    currency='BTC',
+    label='addressTag1',
+    lastmod=1,
+    source='https://archive.org/donate/cryptocurrency',
+    tagpack_uri='https://tagpack_uri',
+    is_public=True
+)
+
+tag4 = AddressTag(
+    abuse=None,
+    active=True,
+    address='addressH',
+    category='organization',
+    currency='BTC',
+    label='addressTag2',
+    lastmod=2,
+    source='https://archive.org/donate/cryptocurrency',
+    tagpack_uri='https://tagpack_uri',
+    is_public=True
+)
+
+eth_tag1 = AddressTag(
+    category=None,
+    label="TagA",
+    abuse=None,
+    lastmod=1,
+    source="sourceX",
+    address="0xabcdef",
+    tagpack_uri="uriX",
+    active=True,
+    currency='ETH',
+    is_public=False
+)
+
+eth_tag2 = AddressTag(
+    category=None,
+    label="TagB",
+    abuse=None,
+    lastmod=1,
+    source="sourceY",
+    address="0xabcdef",
+    tagpack_uri="uriY",
+    active=True,
+    currency='ETH',
+    is_public=True
+)
+
+etag1 = EntityTag(
+    category="organization",
+    label="Internet, Archive",
+    abuse=None,
+    lastmod=1560290400,
+    source="https://archive.org/donate/cryptocurrency",
+    entity=17642138,
+    tagpack_uri="https://tagpack_uri",
+    active=True,
+    is_public=True,
+    currency='BTC'
+)
+
+etag2 = EntityTag(
+    category="organization",
+    label="Internet Archive 2",
+    abuse=None,
+    lastmod=1560290400,
+    source="https://archive.org/donate/cryptocurrency",
+    entity=17642138,
+    tagpack_uri="https://tagpack_uri_private",
+    active=True,
+    is_public=False,
+    currency='BTC'
+)
+
+
+tag5 = AddressTag(
     tagpack_uri="https://tagpack_uri",
     lastmod=1,
     label="isolinks",
@@ -19,7 +123,7 @@ tag1 = AddressTag(
     is_public=True
 )
 
-tag2 = AddressTag(
+tag6 = AddressTag(
     lastmod=2,
     source="Unspecified",
     abuse=None,
@@ -32,7 +136,7 @@ tag2 = AddressTag(
     is_public=True
 )
 
-tag3 = AddressTag(
+tag7 = AddressTag(
     lastmod=3,
     source="source",
     abuse=None,
@@ -45,7 +149,7 @@ tag3 = AddressTag(
     is_public=True
 )
 
-tag_eth = AddressTag(
+eth_tag3 = AddressTag(
     lastmod=1,
     source="sourceX",
     abuse=None,
@@ -58,7 +162,7 @@ tag_eth = AddressTag(
     is_public=False
 )
 
-ctag = EntityTag(
+etag2 = EntityTag(
     tagpack_uri="https://tagpack_uri",
     lastmod=1,
     label="isolinks",
@@ -71,17 +175,43 @@ ctag = EntityTag(
     is_public=True
 )
 
-eth_etag = eth_tag.to_dict()
-eth_etag.pop('address')
-eth_etag['entity'] = 107925000
-eth_etag = EntityTag(**eth_etag)
+eth_etag1 = eth_tag1.to_dict()
+eth_etag1.pop('address')
+eth_etag1['entity'] = 107925000
+eth_etag1 = EntityTag(**eth_etag1)
+
+etag3 = EntityTag(
+    category=tag1.category,
+    label=tag1.label,
+    abuse=tag1.abuse,
+    lastmod=tag1.lastmod,
+    source=tag1.source,
+    entity=17642138,
+    tagpack_uri=tag1.tagpack_uri,
+    active=tag1.active,
+    currency=tag1.currency,
+    is_public=tag1.is_public
+)
+
+etag4 = EntityTag(
+    category=tag2.category,
+    label=tag2.label,
+    abuse=tag2.abuse,
+    lastmod=tag2.lastmod,
+    source=tag2.source,
+    entity=17642138,
+    tagpack_uri=tag2.tagpack_uri,
+    active=tag2.active,
+    currency=tag2.currency,
+    is_public=tag2.is_public
+)
 
 
 async def list_tags(test_case):
     path = '/{currency}/tags?label={label}&level={level}'
     result = await test_case.request(path, currency='btc', label='isolinks',
                                      level='address')
-    t1 = tag1.to_dict()
+    t1 = tag5.to_dict()
     t2 = {**t1}
     t2['address'] = 'addressY'
     t2.pop('category')
@@ -99,7 +229,7 @@ async def list_tags(test_case):
 
     result = await test_case.request(path, currency='btc', label='cimedy',
                                      level='address')
-    test_case.assertEqual([tag2.to_dict()], result['address_tags'])
+    test_case.assertEqual([tag6.to_dict()], result['address_tags'])
 
     # test paging
 
@@ -130,7 +260,7 @@ async def list_tags(test_case):
     result = await test_case.request(path, currency='btc', label='isolinks',
                                      level='entity')
     test_case.assertEqual(
-        [ctag.to_dict()],
+        [etag2.to_dict()],
         result['entity_tags'])
 
     result = await test_case.request(path, currency='btc', label='cimedy',
@@ -139,16 +269,16 @@ async def list_tags(test_case):
 
     result = await test_case.request(path, currency='eth', label='TagA',
                                      level='address')
-    test_case.assertEqual([tag_eth.to_dict()],
+    test_case.assertEqual([eth_tag3.to_dict()],
                           result['address_tags'])
 
     result = await test_case.request(path, currency='eth', label='TagA',
                                      level='entity')
-    test_case.assertEqual([eth_etag.to_dict()], result['entity_tags'])
+    test_case.assertEqual([eth_etag1.to_dict()], result['entity_tags'])
 
     result = await test_case.request(path, currency='ltc', label='cimedy',
                                      level='address')
-    test_case.assertEqual([tag3.to_dict()], result['address_tags'])
+    test_case.assertEqual([tag7.to_dict()], result['address_tags'])
     result = await test_case.request(path, currency='ltc', label='cimedy',
                                      level='entity')
     test_case.assertEqual(EntityTags(entity_tags=[]).to_dict(), result)

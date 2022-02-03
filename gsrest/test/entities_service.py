@@ -8,46 +8,18 @@ from openapi_server.models.address import Address
 from openapi_server.models.entity_addresses import EntityAddresses
 from openapi_server.models.entity import Entity
 from openapi_server.models.search_result_level1 import SearchResultLevel1
-from openapi_server.models.entity_tag import EntityTag
 from openapi_server.models.links import Links
 from openapi_server.models.link_utxo import LinkUtxo
 from openapi_server.models.tags import Tags
 from openapi_server.models.address_and_entity_tags import AddressAndEntityTags
 from gsrest.util.values import make_values
 from gsrest.test.addresses_service import addressD, addressE, eth_address, \
-        eth_addressWithTagsOutNeighbors, tag as atag1, tag2 as atag2, \
-        tag3 as atag3, tag4 as atag4, eth_tag, eth_tag2
-from gsrest.test.tags_service import eth_etag
+        eth_addressWithTagsOutNeighbors
+import gsrest.test.tags_service as ts
 from gsrest.test.txs_service import tx1_eth, tx2_eth, tx22_eth, tx4_eth
 from gsrest.service.rates_service import list_rates
 from gsrest.util.values import convert_value
 import copy
-
-tag = EntityTag(
-    category=atag1.category,
-    label=atag1.label,
-    abuse=atag1.abuse,
-    lastmod=atag1.lastmod,
-    source=atag1.source,
-    entity=17642138,
-    tagpack_uri=atag1.tagpack_uri,
-    active=atag1.active,
-    currency=atag1.currency,
-    is_public=atag1.is_public
-)
-
-tag2 = EntityTag(
-    category=atag2.category,
-    label=atag2.label,
-    abuse=atag2.abuse,
-    lastmod=atag2.lastmod,
-    source=atag2.source,
-    entity=17642138,
-    tagpack_uri=atag2.tagpack_uri,
-    active=atag2.active,
-    currency=atag2.currency,
-    is_public=atag2.is_public
-)
 
 entityWithTags = Entity(
    no_outgoing_txs=280,
@@ -81,8 +53,8 @@ entityWithTags = Entity(
             usd=2.31,
             eur=1.15),
    tags=AddressAndEntityTags(
-       entity_tags=[tag],
-       address_tags=[atag1, atag2, atag3, atag4])
+       entity_tags=[ts.etag3],
+       address_tags=[ts.tag1, ts.tag2, ts.tag3, ts.tag4])
 )
 
 eth_entity = Entity(
@@ -101,8 +73,8 @@ eth_entity = Entity(
 
 eth_entityWithTags = Entity(**eth_entity.to_dict())
 eth_entityWithTags.tags = AddressAndEntityTags(
-    address_tags=[eth_tag, eth_tag2],
-    entity_tags=[eth_etag])
+    address_tags=[ts.eth_tag1, ts.eth_tag2],
+    entity_tags=[ts.eth_etag1])
 
 eth_neighbors = []
 for n in eth_addressWithTagsOutNeighbors.neighbors:
@@ -112,7 +84,7 @@ for n in eth_addressWithTagsOutNeighbors.neighbors:
     eth_neighbors.append(nn)
 
 eth_neighbors[0].id = '107925000'
-eth_neighbors[0].labels = [eth_etag.label]
+eth_neighbors[0].labels = [ts.eth_etag1.label]
 eth_neighbors[1].id = '107925001'
 
 eth_entityWithTagsOutNeighbors = Neighbors(
