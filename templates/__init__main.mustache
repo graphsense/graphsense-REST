@@ -4,6 +4,7 @@ import aiohttp_cors
 import gsrest.db
 import yaml
 import importlib
+from gsrest.plugins import get_subclass
 
 CONFIG_FILE = "./instance/config.yaml"
 
@@ -68,7 +69,7 @@ def factory(config_file=None, validate_responses=False):
     app.app['config']['hide_private_tags'] = \
         app.app['config'].get('hide_private_tags', False)
 
-    app.app['plugins'] = [importlib.import_module(name)
+    app.app['plugins'] = [get_subclass(importlib.import_module(name))
                           for name in app.app['config'].get('plugins', [])]
 
     return app

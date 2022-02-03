@@ -23,6 +23,7 @@ async def list_tags(request, currency, label, level, page=None,
                 source=row['source'],
                 lastmod=dt_to_int(row['lastmod']),
                 active=True,
+                is_public=row['is_public'],
                 currency=row['currency'].upper())
     else:
         fun = 'list_entity_tags'
@@ -37,10 +38,12 @@ async def list_tags(request, currency, label, level, page=None,
                 source=row['source'],
                 lastmod=dt_to_int(row['lastmod']),
                 active=True,
+                is_public=row['is_public'],
                 currency=row['currency'].upper())
 
     tags, next_page = await tagstores_with_paging(
-        request.app['tagstores'], to_obj, fun, page, pagesize, currency, label)
+        request.app['tagstores'], to_obj, fun, page, pagesize,
+        currency, label, request.app['show_private_tags'])
 
     if level == 'address':
         return AddressTags(next_page=next_page, address_tags=tags)

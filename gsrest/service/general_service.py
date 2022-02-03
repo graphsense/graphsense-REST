@@ -57,7 +57,8 @@ async def search(request, q, currency=None, limit=10):
                 request.app['tagstores'],
                 lambda row: row['label'],
                 'list_matching_labels',
-                curr, expression_norm, limit)
+                curr, expression_norm, limit,
+                request.app['show_private_tags'])
             for curr in currs]
 
     aw1 = asyncio.gather(*aws1)

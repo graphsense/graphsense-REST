@@ -41,3 +41,14 @@ tagstores:
     # password: "tagstore"
     # query_timeout: 300
     # max_connections: 10
+
+# configure when to include private tags in responses
+# private tags are excluded by default 
+#
+# show_private_tags:
+  # on_header:
+    # set <header name> : <regexp for matching header value>
+    # eg. Authorization: password
+
+# name plugins implementing gsrest.plugins interface
+# plugins: []

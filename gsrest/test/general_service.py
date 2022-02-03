@@ -110,9 +110,13 @@ async def search(test_case):
     test_case.assertEqual(expected.to_dict(), result)
 
     expected = base_search_results()
-    expected.labels = ['isolinks']
+    expected.labels = ['Internet Archive 2', 'Internet, Archive']
 
-    result = await test_case.request(path, q='iso')
+    result = await test_case.request(path, q='internet')
+    test_case.assertEqual(expected.to_dict(), result)
+
+    result = await test_case.request(path, auth='y', q='internet')
+    expected.labels = ['Internet, Archive']
     test_case.assertEqual(expected.to_dict(), result)
 
     expected = base_search_results()

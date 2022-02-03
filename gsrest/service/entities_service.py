@@ -65,12 +65,13 @@ async def list_entity_tags_by_entity(request, currency, entity):
                          source=row['source'],
                          lastmod=dt_to_int(row['lastmod']),
                          active=True,
+                         is_public=row['is_public'],
                          currency=row['currency'].upper())
     return await tagstores(
             request.app['tagstores'],
             f,
             'list_entity_tags_by_entity',
-            currency, entity)
+            currency, entity, request.app['show_private_tags'])
 
 
 async def list_address_tags_by_entity(request, currency, address,
@@ -84,6 +85,7 @@ async def list_address_tags_by_entity(request, currency, address,
                           source=row['source'],
                           lastmod=dt_to_int(row['lastmod']),
                           active=True,
+                          is_public=row['is_public'],
                           currency=row['currency'].upper())
 
     return await tagstores_with_paging(
@@ -91,7 +93,7 @@ async def list_address_tags_by_entity(request, currency, address,
             f,
             'list_address_tags_by_entity',
             page, pagesize,
-            currency, address)
+            currency, address, request.app['show_private_tags'])
 
 
 async def get_entity(request, currency, entity, include_tags=False):

@@ -133,12 +133,14 @@ class Tagstore:
         return self.execute("select * from concept where taxonomy = %s",
                             [taxonomy])
 
-    def list_address_tags(self, currency, label, page=None, pagesize=None):
-        query = """select t.*, tp.is_public from
+    def list_address_tags(self, currency, label, show_private=False,
+                          page=None, pagesize=None):
+        query = f"""select t.*, tp.is_public from
                        tag t,
                        tagpack tp
                    where
                        t.tagpack = tp.id
+                       {hide_private_condition(show_private)}
                        and t.currency = %s
                        and t.label = %s """
         return self.execute(query,
@@ -147,8 +149,9 @@ class Tagstore:
                             page=page,
                             pagesize=pagesize)
 
-    def list_entity_tags(self, currency, label, page=None, pagesize=None):
-        query = """select distinct on (acm.gs_cluster_id)
+    def list_entity_tags(self, currency, label, show_private=False,
+                         page=None, pagesize=None):
+        query = f"""select distinct on (acm.gs_cluster_id)
                     t.*,
                     acm.gs_cluster_id,
                     tp.is_public
@@ -158,6 +161,7 @@ class Tagstore:
                     address_cluster_mapping acm
                    where
                     t.tagpack = tp.id
+                    {hide_private_condition(show_private)}
                     and t.currency = %s
                     and t.label = %s
                     and t.is_cluster_definer = true
@@ -172,15 +176,20 @@ class Tagstore:
                             page=page,
                             pagesize=pagesize)
 
-    def list_matching_labels(self, currency, expression, limit):
-        query = """select
+    def list_matching_labels(self, currency, expression, limit,
+                             show_private=False):
+        query = f"""select
                     t.label
                    from
-                    tag t, label l
+                    tag t,
+                    label l,
+                    tagpack tp
                    where
                     t.label = l.label
+                    and tp.id = t.tagpack
                     and t.currency = %s
                     and similarity(l.label, %s) > 0.2
+                    {hide_private_condition(show_private)}
                    order by l.label <-> %s
                    limit %s"""
         return self.execute(query,
@@ -208,9 +217,9 @@ class Tagstore:
                             page=page,
                             pagesize=pagesize)
 
-    def list_address_tags_by_entity(self, currency, entity, page=None,
-                                    pagesize=None):
-        query = """select t.*, tp.is_public from
+    def list_address_tags_by_entity(self, currency, entity, show_private=False,
+                                    page=None, pagesize=None):
+        query = f"""select t.*, tp.is_public from
                         tag t,
                         tagpack tp,
                         address_cluster_mapping acm
@@ -218,6 +227,7 @@ class Tagstore:
                         acm.address=t.address
                         and t.currency = %s
                         and acm.gs_cluster_id = %s
+                        {hide_private_condition(show_private)}
                         and t.tagpack=tp.id"""
 
         return self.execute(query,
@@ -226,8 +236,8 @@ class Tagstore:
                             page=page,
                             pagesize=pagesize)
 
-    def list_entity_tags_by_entity(self, currency, entity):
-        query = """select
+    def list_entity_tags_by_entity(self, currency, entity, show_private=False):
+        query = f"""select
                         t.*,
                         tp.is_public,
                         acm.gs_cluster_id
@@ -242,6 +252,7 @@ class Tagstore:
                         and t.currency = %s
                         and acm.gs_cluster_id = %s
                         and t.tagpack=tp.id
+                        {hide_private_condition(show_private)}
                    order by
                         t.confidence desc
                    limit 1"""

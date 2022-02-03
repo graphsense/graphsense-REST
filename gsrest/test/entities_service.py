@@ -17,35 +17,37 @@ from gsrest.util.values import make_values
 from gsrest.test.addresses_service import addressD, addressE, eth_address, \
         eth_addressWithTagsOutNeighbors, tag as atag1, tag2 as atag2, \
         tag3 as atag3, tag4 as atag4, eth_tag, eth_tag2
+from gsrest.test.tags_service import eth_etag
 from gsrest.test.txs_service import tx1_eth, tx2_eth, tx22_eth, tx4_eth
 from gsrest.service.rates_service import list_rates
 from gsrest.util.values import convert_value
 import copy
-import yaml
 
 tag = EntityTag(
-           category=atag1.category,
-           label=atag1.label,
-           abuse=atag1.abuse,
-           lastmod=atag1.lastmod,
-           source=atag1.source,
-           entity=17642138,
-           tagpack_uri=atag1.tagpack_uri,
-           active=atag1.active,
-           currency=atag1.currency
-        )
+    category=atag1.category,
+    label=atag1.label,
+    abuse=atag1.abuse,
+    lastmod=atag1.lastmod,
+    source=atag1.source,
+    entity=17642138,
+    tagpack_uri=atag1.tagpack_uri,
+    active=atag1.active,
+    currency=atag1.currency,
+    is_public=atag1.is_public
+)
 
 tag2 = EntityTag(
-           category=atag2.category,
-           label=atag2.label,
-           abuse=atag2.abuse,
-           lastmod=atag2.lastmod,
-           source=atag2.source,
-           entity=17642138,
-           tagpack_uri=atag2.tagpack_uri,
-           active=atag2.active,
-           currency=atag2.currency
-        )
+    category=atag2.category,
+    label=atag2.label,
+    abuse=atag2.abuse,
+    lastmod=atag2.lastmod,
+    source=atag2.source,
+    entity=17642138,
+    tagpack_uri=atag2.tagpack_uri,
+    active=atag2.active,
+    currency=atag2.currency,
+    is_public=atag2.is_public
+)
 
 entityWithTags = Entity(
    no_outgoing_txs=280,
@@ -100,7 +102,7 @@ eth_entity = Entity(
 eth_entityWithTags = Entity(**eth_entity.to_dict())
 eth_entityWithTags.tags = AddressAndEntityTags(
     address_tags=[eth_tag, eth_tag2],
-    entity_tags=[])
+    entity_tags=[eth_etag])
 
 eth_neighbors = []
 for n in eth_addressWithTagsOutNeighbors.neighbors:
@@ -110,6 +112,7 @@ for n in eth_addressWithTagsOutNeighbors.neighbors:
     eth_neighbors.append(nn)
 
 eth_neighbors[0].id = '107925000'
+eth_neighbors[0].labels = [eth_etag.label]
 eth_neighbors[1].id = '107925001'
 
 eth_entityWithTagsOutNeighbors = Neighbors(
@@ -222,9 +225,18 @@ async def get_entity(test_case):
                                      currency='btc',
                                      entity=entityWithTags.entity,
                                      include_tags=True)
+    ewt = entityWithTags.to_dict()
+    test_case.assertEqual(ewt, result)
 
-    print(yaml.dump(result['tags']))
-    test_case.assertEqual(entityWithTags.to_dict(), result)
+    result = await test_case.request(path,
+                                     auth='unauthorized',
+                                     currency='btc',
+                                     entity=entityWithTags.entity,
+                                     include_tags=True)
+    ewt['tags']['address_tags'] = \
+        [tag for tag in ewt['tags']['address_tags'] if
+         tag['is_public']]
+    test_case.assertEqual(ewt, result)
 
     result = await test_case.request(path,
                                      currency='eth',
@@ -258,6 +270,15 @@ async def list_tags_by_entity(test_case):
                                      level='entity')
     expected = Tags(entity_tags=eth_entityWithTags.tags.entity_tags)
     test_case.assertEqual(expected.to_dict(), result)
+
+    result = await test_case.request(path,
+                                     currency='eth',
+                                     auth='unauthorized',
+                                     entity=eth_entityWithTags.entity,
+                                     level='entity')
+    expected = Tags(entity_tags=[])
+    test_case.assertEqual(expected.to_dict(), result)
+
     result = await test_case.request(path,
                                      currency='eth',
                                      entity=eth_entityWithTags.entity,
@@ -266,18 +287,40 @@ async def list_tags_by_entity(test_case):
     test_case.assertEqual(expected.to_dict()['address_tags'],
                           result['address_tags'])
 
+    result = await test_case.request(path,
+                                     auth='unauthorized',
+                                     currency='eth',
+                                     entity=eth_entityWithTags.entity,
+                                     level='address')
+    public_address_tags = [tag for tag in eth_entityWithTags.tags.address_tags
+                           if tag.is_public]
+    expected = Tags(address_tags=public_address_tags)
+    test_case.assertEqual(expected.to_dict()['address_tags'],
+                          result['address_tags'])
+
 
 async def list_entity_neighbors(test_case):
     basepath = '/{currency}/entities/{entity}/neighbors'\
                '?direction={direction}'
     path = basepath + '&include_labels={include_labels}'
+    ewton = entityWithTagsOutNeighbors.to_dict()
     result = await test_case.request(
         path,
         currency='btc',
         entity=entityWithTags.entity,
         include_labels=True,
         direction='out')
-    test_case.assertEqual(entityWithTagsOutNeighbors.to_dict(), result)
+    test_case.assertEqual(ewton, result)
+
+    result = await test_case.request(
+        path,
+        auth='unauthorized',
+        currency='btc',
+        entity=entityWithTags.entity,
+        include_labels=True,
+        direction='out')
+    ewton['neighbors'][0]['labels'] = ['labelX']
+    test_case.assertEqual(ewton, result)
 
     result = await test_case.request(
         path,
