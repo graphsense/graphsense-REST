@@ -1,4 +1,3 @@
-from gsrest.test.assertion import assertEqual
 from openapi_server.models.stats import Stats
 from openapi_server.models.search_result import SearchResult
 from openapi_server.models.search_result_by_currency \
@@ -45,7 +44,7 @@ async def get_statistics(test_case):
     result['currencies'] = \
         sorted(result['currencies'], key=lambda c: c['name'])
     cs = [c.to_dict() for c in stats.currencies]
-    assertEqual(cs, result['currencies'])
+    test_case.assertEqual(cs, result['currencies'])
 
     result = await test_case.request('/stats', auth='unauthenticated')
     result['currencies'] = \
@@ -54,7 +53,7 @@ async def get_statistics(test_case):
     cs[0]['no_labels'] = 8
     cs[1]['no_labels'] = 2
 
-    assertEqual(cs, result['currencies'])
+    test_case.assertEqual(cs, result['currencies'])
 
 
 async def search(test_case):

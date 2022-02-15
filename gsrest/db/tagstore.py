@@ -299,18 +299,18 @@ class Tagstore:
         return self.execute(query,
                             params=[currency.upper(), entities])
 
-
     def count(self, currency, show_private=False):
+        hide_private_condition = "is_public = true" \
+            if not show_private \
+            else "is_public is null"
         query = f"""
             select
-                count(distinct label) as no_labels,
-                count(distinct address) as no_tagged_addresses
+                no_labels,
+                no_tagged_addresses
             from
-                tag t,
-                tagpack tp
+                statistics tp
             where
                 currency = %s
-                and tp.id = t.tagpack
-                {hide_private_condition(show_private)}"""
+                and {hide_private_condition}"""
         return self.execute(query,
                             params=[currency.upper()])
