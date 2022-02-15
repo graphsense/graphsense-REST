@@ -2072,6 +2072,7 @@ components:
       type: string
     currency_stats:
       example:
+        no_tagged_addresses: 123
         no_addresses: 12345
         no_labels: 123
         name: name
@@ -2108,6 +2109,11 @@ components:
           example: 123
           format: int32
           title: no_labels
+          type: integer
+        no_tagged_addresses:
+          example: 123
+          format: int32
+          title: no_tagged_addresses
           type: integer
         no_txs:
           description: number of transactions
@@ -2725,7 +2731,8 @@ components:
         request_timestamp: request_timestamp
         version: version
         currencies:
-        - no_addresses: 12345
+        - no_tagged_addresses: 123
+          no_addresses: 12345
           no_labels: 123
           name: name
           no_entities: 123
@@ -2733,7 +2740,8 @@ components:
           no_blocks: 12345
           no_txs: 11
           timestamp: 123456789
-        - no_addresses: 12345
+        - no_tagged_addresses: 123
+          no_addresses: 12345
           no_labels: 123
           name: name
           no_entities: 123

@@ -14,7 +14,8 @@ stats = Stats(
             no_blocks=3,
             timestamp=420,
             no_txs=110,
-            no_labels=0,
+            no_labels=10,
+            no_tagged_addresses=8,
             no_address_relations=1230
             ),
         CurrencyStats(
@@ -24,7 +25,8 @@ stats = Stats(
             no_blocks=3,
             timestamp=16,
             no_txs=10,
-            no_labels=0,
+            no_labels=4,
+            no_tagged_addresses=2,
             no_address_relations=2),
         CurrencyStats(
             name='ltc',
@@ -33,7 +35,8 @@ stats = Stats(
             no_blocks=3,
             timestamp=42,
             no_txs=11,
-            no_labels=0,
+            no_labels=2,
+            no_tagged_addresses=2,
             no_address_relations=123)])
 
 
@@ -41,7 +44,17 @@ async def get_statistics(test_case):
     result = await test_case.request('/stats')
     result['currencies'] = \
         sorted(result['currencies'], key=lambda c: c['name'])
-    assertEqual([c.to_dict() for c in stats.currencies], result['currencies'])
+    cs = [c.to_dict() for c in stats.currencies]
+    assertEqual(cs, result['currencies'])
+
+    result = await test_case.request('/stats', auth='unauthenticated')
+    result['currencies'] = \
+        sorted(result['currencies'], key=lambda c: c['name'])
+
+    cs[0]['no_labels'] = 8
+    cs[1]['no_labels'] = 2
+
+    assertEqual(cs, result['currencies'])
 
 
 async def search(test_case):

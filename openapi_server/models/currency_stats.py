@@ -14,7 +14,7 @@ class CurrencyStats(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, name: str=None, no_address_relations: int=None, no_addresses: int=None, no_blocks: int=None, no_entities: int=None, no_labels: int=None, no_txs: int=None, timestamp: int=None):
+    def __init__(self, name: str=None, no_address_relations: int=None, no_addresses: int=None, no_blocks: int=None, no_entities: int=None, no_labels: int=None, no_tagged_addresses: int=None, no_txs: int=None, timestamp: int=None):
         """CurrencyStats - a model defined in OpenAPI
 
         :param name: The name of this CurrencyStats.
@@ -23,6 +23,7 @@ class CurrencyStats(Model):
         :param no_blocks: The no_blocks of this CurrencyStats.
         :param no_entities: The no_entities of this CurrencyStats.
         :param no_labels: The no_labels of this CurrencyStats.
+        :param no_tagged_addresses: The no_tagged_addresses of this CurrencyStats.
         :param no_txs: The no_txs of this CurrencyStats.
         :param timestamp: The timestamp of this CurrencyStats.
         """
@@ -33,6 +34,7 @@ class CurrencyStats(Model):
             'no_blocks': int,
             'no_entities': int,
             'no_labels': int,
+            'no_tagged_addresses': int,
             'no_txs': int,
             'timestamp': int
         }
@@ -44,6 +46,7 @@ class CurrencyStats(Model):
             'no_blocks': 'no_blocks',
             'no_entities': 'no_entities',
             'no_labels': 'no_labels',
+            'no_tagged_addresses': 'no_tagged_addresses',
             'no_txs': 'no_txs',
             'timestamp': 'timestamp'
         }
@@ -54,6 +57,7 @@ class CurrencyStats(Model):
         self._no_blocks = no_blocks
         self._no_entities = no_entities
         self._no_labels = no_labels
+        self._no_tagged_addresses = no_tagged_addresses
         self._no_txs = no_txs
         self._timestamp = timestamp
 
@@ -80,6 +84,7 @@ class CurrencyStats(Model):
             'no_blocks': self._no_blocks,
             'no_entities': self._no_entities,
             'no_labels': self._no_labels,
+            'no_tagged_addresses': self._no_tagged_addresses,
             'no_txs': self._no_txs,
             'timestamp': self._timestamp }
 
@@ -209,6 +214,27 @@ class CurrencyStats(Model):
         """
 
         self._no_labels = no_labels
+
+    @property
+    def no_tagged_addresses(self):
+        """Gets the no_tagged_addresses of this CurrencyStats.
+
+
+        :return: The no_tagged_addresses of this CurrencyStats.
+        :rtype: int
+        """
+        return self._no_tagged_addresses
+
+    @no_tagged_addresses.setter
+    def no_tagged_addresses(self, no_tagged_addresses):
+        """Sets the no_tagged_addresses of this CurrencyStats.
+
+
+        :param no_tagged_addresses: The no_tagged_addresses of this CurrencyStats.
+        :type no_tagged_addresses: int
+        """
+
+        self._no_tagged_addresses = no_tagged_addresses
 
     @property
     def no_txs(self):

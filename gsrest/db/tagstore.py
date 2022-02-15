@@ -298,3 +298,19 @@ class Tagstore:
                    order by acm.gs_cluster_id"""
         return self.execute(query,
                             params=[currency.upper(), entities])
+
+
+    def count(self, currency, show_private=False):
+        query = f"""
+            select
+                count(distinct label) as no_labels,
+                count(distinct address) as no_tagged_addresses
+            from
+                tag t,
+                tagpack tp
+            where
+                currency = %s
+                and tp.id = t.tagpack
+                {hide_private_condition(show_private)}"""
+        return self.execute(query,
+                            params=[currency.upper()])
