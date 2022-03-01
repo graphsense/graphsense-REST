@@ -1,4 +1,5 @@
 import os
+import logging
 import connexion
 import aiohttp_cors
 import gsrest.db
@@ -17,6 +18,13 @@ def load_config(config_file):
     with open(config_file, 'r') as input_file:
         config = yaml.safe_load(input_file)
     return config
+
+
+def getLogLevel(config):
+    level = config.get('logLevel', 'INFO').upper()
+    if level not in ['INFO', 'DEBUG', 'ERROR']:
+        return logging.INFO
+    return getattr(logging, level)
 
 
 def factory(config_file=None, validate_responses=False):
@@ -39,6 +47,7 @@ def factory(config_file=None, validate_responses=False):
                 pass_context_arg_name='request')
     app.app.logger.info(f'reading config from {config_file}')
     app.app['config'] = load_config(config_file)
+    logging.basicConfig(level=getLogLevel(app.app['config']))
     with open(os.path.join(specification_dir, openapi_yaml)) as yaml_file:
         app.app['openapi'] = yaml.safe_load(yaml_file)
 

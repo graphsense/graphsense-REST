@@ -171,6 +171,7 @@ class Cassandra:
                 params=None, paging_state=None, fetch_size=None):
         keyspace = self.get_keyspace_mapping(currency, keyspace_type)
         q = replaceFrom(keyspace, query)
+        self.logger.debug(f'{query} {params}')
         q = SimpleStatement(q, fetch_size=fetch_size)
         try:
             result = self.session.execute(q, params, paging_state=paging_state)
@@ -211,6 +212,7 @@ class Cassandra:
         keyspace = self.get_keyspace_mapping(currency, keyspace_type)
         q = replaceFrom(keyspace, query)
         q = replacePerc(q)
+        self.logger.debug(f'{query} {params}')
         prep = self.prepared_statements.get(q, None)
         if prep is None:
             self.prepared_statements[q] = prep = self.session.prepare(q)
