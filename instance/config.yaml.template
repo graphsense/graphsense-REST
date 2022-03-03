@@ -1,6 +1,6 @@
 # This file contains instance specific configuration options.
 
-debugLevel: DEBUG
+logLevel: DEBUG
 
 # Replace Cassandra hostnames and keyspaces
 
