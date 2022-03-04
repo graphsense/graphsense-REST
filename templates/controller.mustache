@@ -161,7 +161,9 @@ async def {{operationId}}(request: web.Request, {{#allParams}}{{paramName}}{{^re
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb = "\n".join(tb)
+        request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
 {{/operation}}
 {{/operations}}
