@@ -1361,5 +1361,3 @@ class Cassandra:
         self.logger.critical(
             f'nodes existing in `{query}` {params} but not '
             f'in {node_type} table: {missing}')
-
-

@@ -3,7 +3,7 @@ import hashlib
 
 
 class Result:
-    def __init__(self, rows = None, columns = None):
+    def __init__(self, rows=None, columns=None):
         if rows is None:
             rows = []
         if columns is None:
