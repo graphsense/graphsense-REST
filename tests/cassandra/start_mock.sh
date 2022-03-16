@@ -7,5 +7,5 @@ echo "Waiting for DB ..."
 bash -c "$testcmd" > /dev/null 2>&1 
 while [ $? -gt 0 ]; do echo -n '.'; sleep 1; bash -c "$testcmd" > /dev/null 2>&1 ; done
 echo
-`dirname $0`/ingest_data.sh $MOCK_DB $ORGANIZATION "$3"
+`dirname $0`/ingest_data.sh $CASSANDRA_MOCK $ORGANIZATION "$3"
 exit $?
