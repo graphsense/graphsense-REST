@@ -6,7 +6,7 @@ MOCK_CMD="docker exec $TAGSTORE_MOCK psql -U tagstore -d tagstore"
 
 TAG=develop
 
-SCHEMA="https://raw.githubusercontent.com/graphsense/graphsense-tagpack-tool/$TAG/tagpack/db/tagstore_schema.sql"
+SCHEMA="https://raw.githubusercontent.com/iknaio/graphsense-tagpack-tool/$TAG/tagpack/db/tagstore_schema.sql"
 
 function schema() {
   temp=`mktemp`

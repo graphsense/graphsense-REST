@@ -1,3 +1,4 @@
+include .env
 CASSANDRA_MARKER=.runcass
 TAGSTORE_MARKER=.runts
 CASSANDRA_MOCK=cassandra_mock
@@ -10,7 +11,7 @@ test: $(MARKER)
 	tox -e py37
 
 $(CASSANDRA_MARKER): $(wildcard cassandra/data/*)
-	./cassandra/start_mock.sh $(CASSANDRA_MOCK) "$?"
+	./cassandra/start_mock.sh $(CASSANDRA_MOCK) $(ORGANIZATION) "$?"
 	touch $(CASSANDRA_MARKER)
 	@ip=`docker exec $(CASSANDRA_MOCK) cat /etc/hosts | tail -n 1 | awk '{print $$1}'`;\
 		echo "Cassandra mock container ip is $$ip"; \
@@ -18,7 +19,7 @@ $(CASSANDRA_MARKER): $(wildcard cassandra/data/*)
 		sed "s/CASSANDRA_MOCK_IP/$$ip/" ./config.yaml.tmp > ./instance/config.yaml
 
 $(TAGSTORE_MARKER): $(wildcard tagstore/data/*)
-	./tagstore/start_mock.sh $(TAGSTORE_MOCK) "$?"
+	./tagstore/start_mock.sh $(TAGSTORE_MOCK) $(ORGANIZATION) "$?"
 	touch $(TAGSTORE_MARKER)
 	@ip=`docker exec $(TAGSTORE_MOCK) cat /etc/hosts | tail -n 1 | awk '{print $$1}'`;\
 		echo "Tagstore mock container ip is $$ip"; \
