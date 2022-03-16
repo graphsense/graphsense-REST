@@ -33,12 +33,13 @@ RUN apk --no-cache --update add \
 COPY conf/gunicorn-conf.py /home/dockeruser/gunicorn-conf.py
 COPY setup.py /srv/graphsense-rest/
 COPY README.md /srv/graphsense-rest/
-COPY gsrest /srv/graphsense-rest/gsrest
-COPY openapi_server /srv/graphsense-rest/openapi_server
 
 RUN mkdir /var/lib/graphsense-rest && \
     chown dockeruser /var/lib/graphsense-rest && \
     pip3 install /srv/graphsense-rest/
+
+COPY gsrest /srv/graphsense-rest/gsrest
+COPY openapi_server /srv/graphsense-rest/openapi_server
 
 COPY instance /srv/graphsense-rest/instance
 
