@@ -14,6 +14,7 @@ async def list_tags(request, currency, label, level, page=None,
         fun = 'list_address_tags'
 
         def to_obj(row):
+            print(f'row {row["is_cluster_definer"]}')
             return AddressTag(
                 address=row['address'],
                 label=row['label'],
@@ -24,6 +25,7 @@ async def list_tags(request, currency, label, level, page=None,
                 lastmod=dt_to_int(row['lastmod']),
                 active=True,
                 is_public=row['is_public'],
+                is_cluster_definer=row['is_cluster_definer'],
                 currency=row['currency'].upper())
     else:
         fun = 'list_entity_tags'
@@ -39,6 +41,7 @@ async def list_tags(request, currency, label, level, page=None,
                 lastmod=dt_to_int(row['lastmod']),
                 active=True,
                 is_public=row['is_public'],
+                is_cluster_definer=row['is_cluster_definer'],
                 currency=row['currency'].upper())
 
     tags, next_page = await tagstores_with_paging(

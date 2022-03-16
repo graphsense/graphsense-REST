@@ -2782,6 +2782,10 @@ components:
           example: btc
           title: currency
           type: string
+        is_cluster_definer:
+          description: whether the address tag applies to the entity level
+          example: true
+          type: boolean
         is_public:
           description: whether the address is public
           example: true

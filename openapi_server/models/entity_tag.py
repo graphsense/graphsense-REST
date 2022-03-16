@@ -16,13 +16,14 @@ class EntityTag(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, abuse: str=None, active: bool=None, category: str=None, currency: str=None, is_public: bool=None, label: str=None, lastmod: int=None, source: str=None, tagpack_uri: str=None, entity: int=None):
+    def __init__(self, abuse: str=None, active: bool=None, category: str=None, currency: str=None, is_cluster_definer: bool=None, is_public: bool=None, label: str=None, lastmod: int=None, source: str=None, tagpack_uri: str=None, entity: int=None):
         """EntityTag - a model defined in OpenAPI
 
         :param abuse: The abuse of this EntityTag.
         :param active: The active of this EntityTag.
         :param category: The category of this EntityTag.
         :param currency: The currency of this EntityTag.
+        :param is_cluster_definer: The is_cluster_definer of this EntityTag.
         :param is_public: The is_public of this EntityTag.
         :param label: The label of this EntityTag.
         :param lastmod: The lastmod of this EntityTag.
@@ -35,6 +36,7 @@ class EntityTag(Model):
             'active': bool,
             'category': str,
             'currency': str,
+            'is_cluster_definer': bool,
             'is_public': bool,
             'label': str,
             'lastmod': int,
@@ -48,6 +50,7 @@ class EntityTag(Model):
             'active': 'active',
             'category': 'category',
             'currency': 'currency',
+            'is_cluster_definer': 'is_cluster_definer',
             'is_public': 'is_public',
             'label': 'label',
             'lastmod': 'lastmod',
@@ -60,6 +63,7 @@ class EntityTag(Model):
         self._active = active
         self._category = category
         self._currency = currency
+        self._is_cluster_definer = is_cluster_definer
         self._is_public = is_public
         self._label = label
         self._lastmod = lastmod
@@ -88,6 +92,7 @@ class EntityTag(Model):
             'active': self._active,
             'category': self._category,
             'currency': self._currency,
+            'is_cluster_definer': self._is_cluster_definer,
             'is_public': self._is_public,
             'label': self._label,
             'lastmod': self._lastmod,
@@ -191,6 +196,29 @@ class EntityTag(Model):
             raise ValueError("Invalid value for `currency`, must not be `None`")
 
         self._currency = currency
+
+    @property
+    def is_cluster_definer(self):
+        """Gets the is_cluster_definer of this EntityTag.
+
+        whether the address tag applies to the entity level
+
+        :return: The is_cluster_definer of this EntityTag.
+        :rtype: bool
+        """
+        return self._is_cluster_definer
+
+    @is_cluster_definer.setter
+    def is_cluster_definer(self, is_cluster_definer):
+        """Sets the is_cluster_definer of this EntityTag.
+
+        whether the address tag applies to the entity level
+
+        :param is_cluster_definer: The is_cluster_definer of this EntityTag.
+        :type is_cluster_definer: bool
+        """
+
+        self._is_cluster_definer = is_cluster_definer
 
     @property
     def is_public(self):

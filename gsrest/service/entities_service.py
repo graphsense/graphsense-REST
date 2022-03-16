@@ -66,6 +66,7 @@ async def list_entity_tags_by_entity(request, currency, entity):
                          lastmod=dt_to_int(row['lastmod']),
                          active=True,
                          is_public=row['is_public'],
+                         is_cluster_definer=row['is_cluster_definer'],
                          currency=row['currency'].upper())
     return await tagstores(
             request.app['tagstores'],
@@ -86,6 +87,7 @@ async def list_address_tags_by_entity(request, currency, address,
                           lastmod=dt_to_int(row['lastmod']),
                           active=True,
                           is_public=row['is_public'],
+                          is_cluster_definer=row['is_cluster_definer'],
                           currency=row['currency'].upper())
 
     return await tagstores_with_paging(

@@ -92,6 +92,7 @@ async def list_tags_by_address(request, currency, address,
                     lastmod=dt_to_int(row['lastmod']),
                     active=True,
                     is_public=row['is_public'],
+                    is_cluster_definer=row['is_cluster_definer'],
                     currency=row['currency'].upper()
                     ),
             'list_tags_by_address',

@@ -579,8 +579,9 @@ async def list_tags_by_address(test_case):
     result = await test_case.request(path,
                                      currency='eth',
                                      address=eth_addressWithTags.address)
-    assertEqual([tag.to_dict() for tag in eth_addressWithTags.tags],
-                result['address_tags'])
+    test_case.assertEqual([tag.to_dict()
+                           for tag in eth_addressWithTags.tags],
+                          result['address_tags'])
 
 
 async def list_address_neighbors(test_case):

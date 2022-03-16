@@ -262,6 +262,8 @@ class Tagstore:
                         t.confidence desc
                    limit 1"""
 
+        # TODO also order by frequency
+
         return self.execute(query, [currency.upper(), entity])
 
     def list_labels_for_addresses(self, currency, addresses,
