@@ -16,7 +16,7 @@ class EntityTag(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, abuse: str=None, active: bool=None, category: str=None, currency: str=None, is_cluster_definer: bool=None, is_public: bool=None, label: str=None, lastmod: int=None, source: str=None, tagpack_uri: str=None, entity: int=None):
+    def __init__(self, abuse: str=None, active: bool=None, category: str=None, currency: str=None, is_cluster_definer: bool=None, is_public: bool=None, label: str=None, lastmod: int=None, source: str=None, tagpack_uri: str=None, address: str=None, entity: int=None):
         """EntityTag - a model defined in OpenAPI
 
         :param abuse: The abuse of this EntityTag.
@@ -29,6 +29,7 @@ class EntityTag(Model):
         :param lastmod: The lastmod of this EntityTag.
         :param source: The source of this EntityTag.
         :param tagpack_uri: The tagpack_uri of this EntityTag.
+        :param address: The address of this EntityTag.
         :param entity: The entity of this EntityTag.
         """
         self.openapi_types = {
@@ -42,6 +43,7 @@ class EntityTag(Model):
             'lastmod': int,
             'source': str,
             'tagpack_uri': str,
+            'address': str,
             'entity': int
         }
 
@@ -56,6 +58,7 @@ class EntityTag(Model):
             'lastmod': 'lastmod',
             'source': 'source',
             'tagpack_uri': 'tagpack_uri',
+            'address': 'address',
             'entity': 'entity'
         }
 
@@ -69,6 +72,7 @@ class EntityTag(Model):
         self._lastmod = lastmod
         self._source = source
         self._tagpack_uri = tagpack_uri
+        self._address = address
         self._entity = entity
 
     @classmethod
@@ -98,6 +102,7 @@ class EntityTag(Model):
             'lastmod': self._lastmod,
             'source': self._source,
             'tagpack_uri': self._tagpack_uri,
+            'address': self._address,
             'entity': self._entity }
 
 
@@ -336,6 +341,29 @@ class EntityTag(Model):
         """
 
         self._tagpack_uri = tagpack_uri
+
+    @property
+    def address(self):
+        """Gets the address of this EntityTag.
+
+        Address
+
+        :return: The address of this EntityTag.
+        :rtype: str
+        """
+        return self._address
+
+    @address.setter
+    def address(self, address):
+        """Sets the address of this EntityTag.
+
+        Address
+
+        :param address: The address of this EntityTag.
+        :type address: str
+        """
+
+        self._address = address
 
     @property
     def entity(self):

@@ -96,6 +96,7 @@ etag1 = EntityTag(
     lastmod=tag1.lastmod,
     source=tag1.source,
     entity=17642138,
+    address=tag1.address,
     tagpack_uri=tag1.tagpack_uri,
     active=tag1.active,
     currency=tag1.currency,
@@ -112,6 +113,7 @@ etag2 = EntityTag(
     active=True,
     currency="BTC",
     entity=123,
+    address="addressX",
     abuse=None,
     is_public=True,
     is_cluster_definer=True
@@ -174,7 +176,6 @@ eth_tag3 = AddressTag(
 )
 
 eth_etag1 = eth_tag1.to_dict()
-eth_etag1.pop('address')
 eth_etag1['entity'] = 107925000
 eth_etag1 = EntityTag(**eth_etag1)
 
@@ -185,6 +186,7 @@ etag4 = EntityTag(
     lastmod=tag2.lastmod,
     source=tag2.source,
     entity=17642138,
+    address=tag2.address,
     tagpack_uri=tag2.tagpack_uri,
     active=tag2.active,
     currency=tag2.currency,

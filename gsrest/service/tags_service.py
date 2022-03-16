@@ -32,6 +32,7 @@ async def list_tags(request, currency, label, level, page=None,
         def to_obj(row):
             return EntityTag(
                 entity=row['gs_cluster_id'],
+                address=row['address'],
                 label=row['label'],
                 category=row['category'],
                 abuse=row['abuse'],

@@ -14,19 +14,23 @@ class EntityTagAllOf(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, entity: int=None):
+    def __init__(self, address: str=None, entity: int=None):
         """EntityTagAllOf - a model defined in OpenAPI
 
+        :param address: The address of this EntityTagAllOf.
         :param entity: The entity of this EntityTagAllOf.
         """
         self.openapi_types = {
+            'address': str,
             'entity': int
         }
 
         self.attribute_map = {
+            'address': 'address',
             'entity': 'entity'
         }
 
+        self._address = address
         self._entity = entity
 
     @classmethod
@@ -46,8 +50,32 @@ class EntityTagAllOf(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'entity': self._entity }
+        return { 'address': self._address,
+            'entity': self._entity }
 
+
+    @property
+    def address(self):
+        """Gets the address of this EntityTagAllOf.
+
+        Address
+
+        :return: The address of this EntityTagAllOf.
+        :rtype: str
+        """
+        return self._address
+
+    @address.setter
+    def address(self, address):
+        """Sets the address of this EntityTagAllOf.
+
+        Address
+
+        :param address: The address of this EntityTagAllOf.
+        :type address: str
+        """
+
+        self._address = address
 
     @property
     def entity(self):

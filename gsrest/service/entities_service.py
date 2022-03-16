@@ -60,6 +60,7 @@ async def list_entity_tags_by_entity(request, currency, entity):
     def f(row):
         return EntityTag(label=row['label'],
                          entity=row['gs_cluster_id'],
+                         address=row['address'],
                          category=row['category'],
                          abuse=row['abuse'],
                          tagpack_uri=row['tagpack'],
