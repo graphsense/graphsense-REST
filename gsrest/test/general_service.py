@@ -14,7 +14,7 @@ stats = Stats(
             timestamp=420,
             no_txs=110,
             no_labels=10,
-            no_tagged_addresses=8,
+            no_tagged_addresses=60,
             no_address_relations=1230
             ),
         CurrencyStats(
@@ -25,7 +25,7 @@ stats = Stats(
             timestamp=16,
             no_txs=10,
             no_labels=4,
-            no_tagged_addresses=2,
+            no_tagged_addresses=90,
             no_address_relations=2),
         CurrencyStats(
             name='ltc',
@@ -49,9 +49,6 @@ async def get_statistics(test_case):
     result = await test_case.request('/stats', auth='unauthenticated')
     result['currencies'] = \
         sorted(result['currencies'], key=lambda c: c['name'])
-
-    cs[0]['no_labels'] = 8
-    cs[1]['no_labels'] = 2
 
     test_case.assertEqual(cs, result['currencies'])
 
