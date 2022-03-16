@@ -2139,6 +2139,20 @@ components:
             value: 0.8008282
           value: 6
         in_degree: 0
+        no_addresses: 6
+        out_degree: 5
+        first_tx:
+          tx_hash: tx_hash
+          height: 47
+          timestamp: 123456789
+        tags:
+          entity_tags:
+          - null
+          - null
+          address_tags:
+          - null
+          - null
+        root_address: addressA
         balance:
           fiat_values:
           - code: code
@@ -2146,14 +2160,8 @@ components:
           - code: code
             value: 0.8008282
           value: 6
-        no_addresses: 6
         no_incoming_txs: 1
         no_outgoing_txs: 5
-        out_degree: 5
-        first_tx:
-          tx_hash: tx_hash
-          height: 47
-          timestamp: 123456789
         last_tx:
           tx_hash: tx_hash
           height: 47
@@ -2166,13 +2174,6 @@ components:
           - code: code
             value: 0.8008282
           value: 6
-        tags:
-          entity_tags:
-          - null
-          - null
-          address_tags:
-          - null
-          - null
       properties:
         balance:
           $ref: '#/components/schemas/values'
@@ -2207,6 +2208,11 @@ components:
           format: int32
           title: out_degree
           type: integer
+        root_address:
+          description: Address
+          example: addressA
+          title: address
+          type: string
         tags:
           $ref: '#/components/schemas/address_and_entity_tags'
         total_received:
@@ -2223,6 +2229,7 @@ components:
       - no_incoming_txs
       - no_outgoing_txs
       - out_degree
+      - root_address
       - total_received
       - total_spent
       title: entity

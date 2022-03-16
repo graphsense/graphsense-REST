@@ -90,17 +90,17 @@ eth_tag2 = AddressTag(
 )
 
 etag1 = EntityTag(
-    category="organization",
-    label="Internet, Archive",
-    abuse=None,
-    lastmod=1560290400,
-    source="https://archive.org/donate/cryptocurrency",
+    category=tag1.category,
+    label=tag1.label,
+    abuse=tag1.abuse,
+    lastmod=tag1.lastmod,
+    source=tag1.source,
     entity=17642138,
-    tagpack_uri="https://tagpack_uri",
-    active=True,
-    is_public=True,
+    tagpack_uri=tag1.tagpack_uri,
+    active=tag1.active,
+    currency=tag1.currency,
     is_cluster_definer=True,
-    currency='BTC'
+    is_public=tag1.is_public
 )
 
 etag2 = EntityTag(
@@ -177,20 +177,6 @@ eth_etag1 = eth_tag1.to_dict()
 eth_etag1.pop('address')
 eth_etag1['entity'] = 107925000
 eth_etag1 = EntityTag(**eth_etag1)
-
-etag3 = EntityTag(
-    category=tag1.category,
-    label=tag1.label,
-    abuse=tag1.abuse,
-    lastmod=tag1.lastmod,
-    source=tag1.source,
-    entity=17642138,
-    tagpack_uri=tag1.tagpack_uri,
-    active=tag1.active,
-    currency=tag1.currency,
-    is_cluster_definer=True,
-    is_public=tag1.is_public
-)
 
 etag4 = EntityTag(
     category=tag2.category,

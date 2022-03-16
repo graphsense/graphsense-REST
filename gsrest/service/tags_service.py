@@ -14,7 +14,6 @@ async def list_tags(request, currency, label, level, page=None,
         fun = 'list_address_tags'
 
         def to_obj(row):
-            print(f'row {row["is_cluster_definer"]}')
             return AddressTag(
                 address=row['address'],
                 label=row['label'],

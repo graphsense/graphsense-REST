@@ -22,6 +22,7 @@ MAX_DEPTH = 6
 def from_row(currency, row, rates, tags=None):
     return Entity(
         entity=row['cluster_id'],
+        root_address=row['root_address'],
         first_tx=TxSummary(
             row['first_tx'].height,
             row['first_tx'].timestamp,
