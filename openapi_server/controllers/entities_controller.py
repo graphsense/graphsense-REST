@@ -80,7 +80,9 @@ async def get_entity(request: web.Request, currency, entity, include_tags=None) 
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb = "\n".join(tb)
+        request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
 
 
@@ -150,7 +152,9 @@ async def list_entity_addresses(request: web.Request, currency, entity, page=Non
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb = "\n".join(tb)
+        request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
 
 
@@ -222,7 +226,9 @@ async def list_entity_links(request: web.Request, currency, entity, neighbor, pa
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb = "\n".join(tb)
+        request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
 
 
@@ -298,7 +304,9 @@ async def list_entity_neighbors(request: web.Request, currency, entity, directio
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb = "\n".join(tb)
+        request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
 
 
@@ -368,7 +376,9 @@ async def list_entity_txs(request: web.Request, currency, entity, page=None, pag
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb = "\n".join(tb)
+        request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
 
 
@@ -440,7 +450,9 @@ async def list_tags_by_entity(request: web.Request, currency, entity, level, pag
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb = "\n".join(tb)
+        request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
 
 
@@ -518,5 +530,7 @@ async def search_entity_neighbors(request: web.Request, currency, entity, direct
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb = "\n".join(tb)
+        request.app.logger.error(tb)
         raise web.HTTPInternalServerError()

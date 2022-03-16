@@ -171,6 +171,7 @@ class Cassandra:
                 params=None, paging_state=None, fetch_size=None):
         keyspace = self.get_keyspace_mapping(currency, keyspace_type)
         q = replaceFrom(keyspace, query)
+        self.logger.debug(f'{query} {params}')
         q = SimpleStatement(q, fetch_size=fetch_size)
         try:
             result = self.session.execute(q, params, paging_state=paging_state)
@@ -211,6 +212,7 @@ class Cassandra:
         keyspace = self.get_keyspace_mapping(currency, keyspace_type)
         q = replaceFrom(keyspace, query)
         q = replacePerc(q)
+        self.logger.debug(f'{query} {params}')
         prep = self.prepared_statements.get(q, None)
         if prep is None:
             self.prepared_statements[q] = prep = self.session.prepare(q)
@@ -698,7 +700,7 @@ class Cassandra:
         basequery = (f"SELECT * FROM {node_type}_{direction}_relations WHERE "
                      f"{this}_{node_type}_id_group = %s AND "
                      f"{this}_{node_type}_id = %s {sec_condition}")
-        parameters = base_parameters.copy()
+        params = base_parameters.copy()
         if has_targets:
             if len(targets) == 0:
                 return None
@@ -706,13 +708,13 @@ class Cassandra:
             query = basequery.replace('*', f'{that}_{node_type}_id')
             targets = ValueSequence(targets)
             query += f' AND {that}_{node_type}_id in %s'
-            parameters.append(targets)
+            params.append(targets)
         else:
             query = basequery
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
         paging_state = from_hex(page)
         results = await self.execute_async(currency, 'transformed', query,
-                                           parameters,
+                                           params,
                                            paging_state=paging_state,
                                            fetch_size=fetch_size)
         paging_state = results.paging_state
@@ -736,6 +738,11 @@ class Cassandra:
         if orig_node_type == 'address':
             ids = [row[that+'_address_id'] for row in results]
             addresses = await self.get_addresses_by_ids(currency, ids, False)
+
+            if len(addresses) != len(ids):
+                address_ids = [address['cluster_id'] for address in addresses]
+                self.log_missing(address_ids, ids, node_type, query, params)
+
             for (row, address) in zip(results, addresses):
                 row[f'{that}_address'] = address['address']
                 row['total_received'] = \
@@ -748,6 +755,10 @@ class Cassandra:
                                             'cluster_id',
                                             'total_received',
                                             'total_spent'])
+            if len(entities) != len(ids):
+                cluster_ids = [entity['cluster_id'] for entity in entities]
+                self.log_missing(cluster_ids, ids, node_type, query, params)
+
             for (row, entity) in zip(results, entities):
                 row[f'{that}_entity'] = entity['cluster_id']
                 row['total_received'] = entity['total_received']
@@ -1341,3 +1352,12 @@ class Cassandra:
 
     def sec_in(self, id):
         return ValueSequence(range(0, id+1))
+
+    def log_missing(self, ids1, ids2, node_type, query, params):
+        missing = []
+        for id in ids2:
+            if id not in ids1:
+                missing.append(id)
+        self.logger.critical(
+            f'nodes existing in `{query}` {params} but not '
+            f'in {node_type} table: {missing}')

@@ -3,7 +3,11 @@ import hashlib
 
 
 class Result:
-    def __init__(self, rows, columns):
+    def __init__(self, rows=None, columns=None):
+        if rows is None:
+            rows = []
+        if columns is None:
+            columns = {}
         self.rows = rows
         self.columns = columns
 
@@ -123,6 +127,7 @@ class Tagstore:
                 if pagesize:
                     query += f" limit {pagesize}"
 
+                self.logger.debug(f'{query} {params}')
                 await cur.execute(query, params)
                 return await to_result(cur, paging_key)
 
@@ -261,6 +266,8 @@ class Tagstore:
 
     def list_labels_for_addresses(self, currency, addresses,
                                   show_private=False):
+        if not addresses:
+            return Result()
         query = f"""select
                     t.address,
                     json_agg(distinct t.label) as labels
@@ -278,6 +285,8 @@ class Tagstore:
                             params=[currency.upper(), addresses])
 
     def list_labels_for_entities(self, currency, entities, show_private=False):
+        if not entities:
+            return Result()
         query = f"""select
                     acm.gs_cluster_id,
                     json_agg(distinct t.label) as labels

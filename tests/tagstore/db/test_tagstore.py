@@ -12,8 +12,6 @@ class TestTagstore(BaseTestCase):
                        (100000, "ts3")]
         composed = encode_page_handles(pagesAndIds)
 
-        print(f'composed {composed}')
-
         test_case.assertEqual(composed,
                               "dHMxfE1RPT0kdHMyfE5RPT0kdHMzfE1UQXdNREF3")
 
@@ -43,8 +41,6 @@ class TestTagstore(BaseTestCase):
                        ("xyz", "ts2")]
 
         composed = encode_page_handles(pagesAndIds)
-
-        print(f'composed {composed}')
 
         test_case.assertEqual(composed,
                               "dHMyfGVIbDY=")

@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## Unreleased
+
+### Added
+- add logging config and smtp logging
+- plugin architecture to hook into request processing
+- integrate external tagstores on top of postgresql
+- config parameter for filtering private tags by http header
+- fuzzy label search
+
+### Changed
+- improved bulk retrieval error messages
+- retrieve just one tag per entity
+- fix list_entity_links
+- catch NaNs from cassandra
+
+### Removed
+- tag retrieval from cassandra 
+
+
 ## [0.5.1] - 2021-11-30
 ### Added
 - Service for requesting data from other endpoints in bulk (CSV and JSON)

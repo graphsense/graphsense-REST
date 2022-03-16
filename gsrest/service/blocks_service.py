@@ -35,4 +35,3 @@ async def list_block_txs(request, currency, height):
 
     return [from_row(currency, tx, rates['rates'])
             for tx in txs]
-

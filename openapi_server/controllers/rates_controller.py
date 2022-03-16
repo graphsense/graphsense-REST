@@ -72,5 +72,7 @@ async def get_exchange_rates(request: web.Request, currency, height) -> web.Resp
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb = "\n".join(tb)
+        request.app.logger.error(tb)
         raise web.HTTPInternalServerError()

@@ -79,7 +79,9 @@ async def get_address(request: web.Request, currency, address, include_tags=None
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb = "\n".join(tb)
+        request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
 
 
@@ -147,7 +149,9 @@ async def get_address_entity(request: web.Request, currency, address, include_ta
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb = "\n".join(tb)
+        request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
 
 
@@ -219,7 +223,9 @@ async def list_address_links(request: web.Request, currency, address, neighbor, 
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb = "\n".join(tb)
+        request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
 
 
@@ -293,7 +299,9 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb = "\n".join(tb)
+        request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
 
 
@@ -363,7 +371,9 @@ async def list_address_txs(request: web.Request, currency, address, page=None, p
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb = "\n".join(tb)
+        request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
 
 
@@ -433,5 +443,7 @@ async def list_tags_by_address(request: web.Request, currency, address, page=Non
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb = "\n".join(tb)
+        request.app.logger.error(tb)
         raise web.HTTPInternalServerError()

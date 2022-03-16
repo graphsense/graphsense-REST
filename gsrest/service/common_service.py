@@ -128,7 +128,6 @@ async def list_neighbors(request, currency, id, direction, node_type, ids=None,
     ntype, suffix = (node_type, '') \
         if node_type == 'address' else ('cluster', '_id')
     for row in results:
-        print(f'row {row}')
         relations.append(Neighbor(
             id=str(row[f'{dst}_{ntype}{suffix}']),
             node_type=node_type,
