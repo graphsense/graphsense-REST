@@ -13,16 +13,21 @@ test: $(MARKER)
 $(CASSANDRA_MARKER): $(wildcard cassandra/data/*)
 	./cassandra/start_mock.sh $(CASSANDRA_MOCK) $(ORGANIZATION) "$?"
 	touch $(CASSANDRA_MARKER)
-	@ip=`docker exec $(CASSANDRA_MOCK) cat /etc/hosts | tail -n 1 | awk '{print $$1}'`;\
-		echo "Cassandra mock container ip is $$ip"; \
-		mkdir -p instance; \
-		sed "s/CASSANDRA_MOCK_IP/$$ip/" ./config.yaml.tmp > ./instance/config.yaml
+	make ips
 
 $(TAGSTORE_MARKER): $(wildcard tagstore/data/*)
 	./tagstore/start_mock.sh $(TAGSTORE_MOCK) $(ORGANIZATION) "$?"
 	touch $(TAGSTORE_MARKER)
+	make ips
+
+ips:
+	@ip=`docker exec $(CASSANDRA_MOCK) cat /etc/hosts | tail -n 1 | awk '{print $$1}'`;\
+		echo "Cassandra mock container ip is $$ip"; \
+		mkdir -p instance; \
+		sed "s/CASSANDRA_MOCK_IP/$$ip/" ./config.yaml.tmp > ./instance/config.yaml
 	@ip=`docker exec $(TAGSTORE_MOCK) cat /etc/hosts | tail -n 1 | awk '{print $$1}'`;\
 		echo "Tagstore mock container ip is $$ip"; \
 		sed -i "s/TAGSTORE_MOCK_IP/$$ip/" ./instance/config.yaml 
 
-.PHONY: test
+
+.PHONY: test ips
