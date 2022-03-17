@@ -12,6 +12,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - integrate external tagstores on top of postgresql
 - config parameter for filtering private tags by http header
 - fuzzy label search
+- add number of tagged addresses to statistics
+- add `is_cluster_definer` tag property
+- add `root_address` entity property
 
 ### Changed
 - improved bulk retrieval error messages
