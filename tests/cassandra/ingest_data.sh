@@ -15,6 +15,11 @@ MOCK_CMD="docker exec $CASSANDRA_MOCK cqlsh"
 
 TAG=develop
 
+if [ -z "$ORGANIZATION" ]; then
+    echo 'Please set env var $ORGANIZATION'
+    exit 1
+fi
+
 UTXO_RAW_SCHEMA="https://raw.githubusercontent.com/$ORGANIZATION/graphsense-blocksci/$TAG/scripts/"
 UTXO_TRANSFORMED_SCHEMA="https://raw.githubusercontent.com/$ORGANIZATION/graphsense-transformation/$TAG/scripts/"
 ETH_RAW_SCHEMA="https://raw.githubusercontent.com/$ORGANIZATION/graphsense-ethereum-etl/$TAG/scripts/"

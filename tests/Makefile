@@ -1,4 +1,3 @@
-include .env
 CASSANDRA_MARKER=.runcass
 TAGSTORE_MARKER=.runts
 CASSANDRA_MOCK=cassandra_mock
@@ -8,7 +7,7 @@ test: $(MARKER)
 	# start container if it's not running
 	docker ps -a | grep $(CASSANDRA_MOCK) || bash -c 'rm -f $(CASSANDRA_MARKER) && make $(CASSANDRA_MARKER)'
 	docker ps -a | grep $(TAGSTORE_MOCK) || bash -c 'rm -f $(TAGSTORE_MARKER) && make $(TAGSTORE_MARKER)'
-	tox -e py37
+	tox -e py37 -- $(ORGANIZATION)
 
 $(CASSANDRA_MARKER): $(wildcard cassandra/data/*)
 	./cassandra/start_mock.sh $(CASSANDRA_MOCK) $(ORGANIZATION) "$?"
