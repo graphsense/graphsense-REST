@@ -22,6 +22,7 @@ MAX_DEPTH = 6
 def from_row(currency, row, rates, tags=None):
     return Entity(
         entity=row['cluster_id'],
+        root_address=row['root_address'],
         first_tx=TxSummary(
             row['first_tx'].height,
             row['first_tx'].timestamp,
@@ -59,6 +60,7 @@ async def list_entity_tags_by_entity(request, currency, entity):
     def f(row):
         return EntityTag(label=row['label'],
                          entity=row['gs_cluster_id'],
+                         address=row['address'],
                          category=row['category'],
                          abuse=row['abuse'],
                          tagpack_uri=row['tagpack'],
@@ -66,6 +68,7 @@ async def list_entity_tags_by_entity(request, currency, entity):
                          lastmod=dt_to_int(row['lastmod']),
                          active=True,
                          is_public=row['is_public'],
+                         is_cluster_definer=row['is_cluster_definer'],
                          currency=row['currency'].upper())
     return await tagstores(
             request.app['tagstores'],
@@ -86,6 +89,7 @@ async def list_address_tags_by_entity(request, currency, address,
                           lastmod=dt_to_int(row['lastmod']),
                           active=True,
                           is_public=row['is_public'],
+                          is_cluster_definer=row['is_cluster_definer'],
                           currency=row['currency'].upper())
 
     return await tagstores_with_paging(

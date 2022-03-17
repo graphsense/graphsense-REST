@@ -896,7 +896,21 @@ class Cassandra:
                 ).one()
 
     async def finish_entities(self, currency, rows, with_txs=True):
-        return await self.finish_addresses(currency, rows, with_txs)
+        aws = [self.finish_entity(currency, row, with_txs=with_txs)
+               for row in rows]
+        return await asyncio.gather(*aws)
+
+    @eth
+    async def finish_entity(self, currency, row, with_txs=True):
+        a = await self.get_addresses_by_ids(currency,
+                                            [row['cluster_id']],
+                                            address_only=True)
+        row['root_address'] = a[0]['address']
+        return await self.finish_address(currency, row, with_txs)
+
+    async def finish_entity_eth(self, currency, row, with_txs=True):
+        row['root_address'] = eth_address_to_hex(row['address'])
+        return await self.finish_address(currency, row, with_txs)
 
     async def finish_addresses(self, currency, rows, with_txs=True):
         aws = [self.finish_address(currency, row, with_txs=with_txs)
@@ -1027,7 +1041,7 @@ class Cassandra:
         if not result:
             return None
 
-        entity = (await self.finish_addresses(currency, [result]))[0]
+        entity = (await self.finish_entities(currency, [result]))[0]
         entity['cluster_id'] = entity['address_id']
         entity['no_addresses'] = 1
         entity.pop('address', None)

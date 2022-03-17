@@ -305,7 +305,7 @@ addressE = Address(
    in_degree=3
 )
 
-entityWithTagsOfAddressWithTags = Entity(
+entityWithTags = Entity(
    no_outgoing_txs=280,
    last_tx=TxSummary(
       height=1,
@@ -326,6 +326,7 @@ entityWithTagsOfAddressWithTags = Entity(
    ),
    no_incoming_txs=4859,
    entity=17642138,
+   root_address="addressA",
    out_degree=176,
    first_tx=TxSummary(
       timestamp=1434554207,
@@ -336,9 +337,11 @@ entityWithTagsOfAddressWithTags = Entity(
             value=115422577,
             usd=2.31,
             eur=1.15),
-   tags=AddressAndEntityTags(entity_tags=[ts.etag1],
-                             address_tags=[ts.tag1, ts.tag2, ts.tag3, ts.tag4])
+   tags=AddressAndEntityTags(
+       entity_tags=[ts.etag1],
+       address_tags=[ts.tag1, ts.tag2, ts.tag3, ts.tag4])
 )
+
 
 eth_address = Address(
    first_tx=TxSummary(
@@ -462,6 +465,7 @@ eth_entityWithTags = Entity(
    total_received=eth_address.total_received,
    no_incoming_txs=eth_address.no_incoming_txs,
    entity=107925000,
+   root_address=eth_address.address,
    out_degree=eth_address.out_degree,
    first_tx=eth_address.first_tx,
    balance=eth_address.balance,
@@ -579,8 +583,9 @@ async def list_tags_by_address(test_case):
     result = await test_case.request(path,
                                      currency='eth',
                                      address=eth_addressWithTags.address)
-    assertEqual([tag.to_dict() for tag in eth_addressWithTags.tags],
-                result['address_tags'])
+    test_case.assertEqual([tag.to_dict()
+                           for tag in eth_addressWithTags.tags],
+                          result['address_tags'])
 
 
 async def list_address_neighbors(test_case):
@@ -625,7 +630,7 @@ async def get_address_entity(test_case):
                                      currency='btc',
                                      address=address.address,
                                      include_tags=True)
-    test_case.assertEqual(entityWithTagsOfAddressWithTags.to_dict(), result)
+    test_case.assertEqual(entityWithTags.to_dict(), result)
 
     result = await test_case.request(path,
                                      currency='eth',

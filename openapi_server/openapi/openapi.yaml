@@ -5,6 +5,8 @@ info:
   version: 0.5.2-dev
 servers:
 - url: http://graphsense-rest:9000
+security:
+- cookieAuth: []
 paths:
   /search:
     get:
@@ -80,6 +82,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/search_result'
           description: OK
+      security:
+      - api_key: []
       summary: Returns matching addresses, transactions and labels
       tags:
       - general
@@ -94,6 +98,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/stats'
           description: OK
+      security: []
       summary: Get statistics of supported currencies
       tags:
       - general
@@ -110,6 +115,8 @@ paths:
                   $ref: '#/components/schemas/taxonomy'
                 type: array
           description: OK
+      security:
+      - api_key: []
       summary: Returns the supported taxonomies
       tags:
       - tags
@@ -136,6 +143,8 @@ paths:
                   $ref: '#/components/schemas/concept'
                 type: array
           description: OK
+      security:
+      - api_key: []
       summary: Returns the supported concepts of a taxonomy
       tags:
       - tags
@@ -180,6 +189,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/address'
           description: OK
+      security:
+      - api_key: []
       summary: Get an address, optionally with tags
       tags:
       - addresses
@@ -224,6 +235,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/entity'
           description: OK
+      security:
+      - api_key: []
       summary: Get the entity of an address
       tags:
       - addresses
@@ -285,6 +298,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/links'
           description: OK
+      security:
+      - api_key: []
       summary: Get outgoing transactions between two addresses
       tags:
       - addresses
@@ -358,6 +373,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/neighbors'
           description: OK
+      security:
+      - api_key: []
       summary: Get an addresses' neighbors in the address graph
       tags:
       - addresses
@@ -410,6 +427,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/address_tags'
           description: OK
+      security:
+      - api_key: []
       summary: Get attribution tags for a given address
       tags:
       - addresses
@@ -462,6 +481,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/address_txs'
           description: OK
+      security:
+      - api_key: []
       summary: Get all transactions an address has been involved in
       tags:
       - addresses
@@ -496,6 +517,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/block'
           description: OK
+      security:
+      - api_key: []
       summary: Get a block by its height
       tags:
       - blocks
@@ -541,6 +564,8 @@ paths:
                   $ref: '#/components/schemas/tx'
                 type: array
           description: OK
+      security:
+      - api_key: []
       summary: Get block transactions
       tags:
       - blocks
@@ -615,6 +640,8 @@ paths:
               schema:
                 type: string
           description: OK
+      security:
+      - api_key: []
       summary: Get data as CSV in bulk
       tags:
       - bulk
@@ -689,6 +716,8 @@ paths:
                   type: object
                 type: array
           description: OK
+      security:
+      - api_key: []
       summary: Get data as JSON in bulk
       tags:
       - bulk
@@ -735,6 +764,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/entity'
           description: OK
+      security:
+      - api_key: []
       summary: Get an entity, optionally with tags
       tags:
       - entities
@@ -787,6 +818,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/entity_addresses'
           description: OK
+      security:
+      - api_key: []
       summary: Get an entity's addresses
       tags:
       - entities
@@ -848,6 +881,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/links'
           description: OK
+      security:
+      - api_key: []
       summary: Get transactions between two entities
       tags:
       - entities
@@ -929,6 +964,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/neighbors'
           description: OK
+      security:
+      - api_key: []
       summary: Get an entity's neighbors in the entity graph
       tags:
       - entities
@@ -1038,6 +1075,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/search_result_level1'
           description: OK
+      security:
+      - api_key: []
       summary: Search deeply for matching neighbors
       tags:
       - entities
@@ -1102,6 +1141,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/tags'
           description: OK
+      security:
+      - api_key: []
       summary: Get tags for a given entity for the given level
       tags:
       - entities
@@ -1154,6 +1195,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/address_txs'
           description: OK
+      security:
+      - api_key: []
       summary: Get all transactions an entity has been involved in
       tags:
       - entities
@@ -1188,6 +1231,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/rates'
           description: OK
+      security:
+      - api_key: []
       summary: Returns exchange rate for a given height
       tags:
       - rates
@@ -1252,6 +1297,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/tags'
           description: OK
+      security:
+      - api_key: []
       summary: Returns address or entity tags associated with a given label
       tags:
       - tags
@@ -1300,6 +1347,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/tx'
           description: OK
+      security:
+      - api_key: []
       summary: Returns details of a specific transaction identified by its hash.
       tags:
       - txs
@@ -1346,6 +1395,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/tx_values'
           description: OK
+      security:
+      - api_key: []
       summary: Returns input/output values of a specific transaction identified by
         its hash.
       tags:
@@ -2139,6 +2190,20 @@ components:
             value: 0.8008282
           value: 6
         in_degree: 0
+        no_addresses: 6
+        out_degree: 5
+        first_tx:
+          tx_hash: tx_hash
+          height: 47
+          timestamp: 123456789
+        tags:
+          entity_tags:
+          - null
+          - null
+          address_tags:
+          - null
+          - null
+        root_address: addressA
         balance:
           fiat_values:
           - code: code
@@ -2146,14 +2211,8 @@ components:
           - code: code
             value: 0.8008282
           value: 6
-        no_addresses: 6
         no_incoming_txs: 1
         no_outgoing_txs: 5
-        out_degree: 5
-        first_tx:
-          tx_hash: tx_hash
-          height: 47
-          timestamp: 123456789
         last_tx:
           tx_hash: tx_hash
           height: 47
@@ -2166,13 +2225,6 @@ components:
           - code: code
             value: 0.8008282
           value: 6
-        tags:
-          entity_tags:
-          - null
-          - null
-          address_tags:
-          - null
-          - null
       properties:
         balance:
           $ref: '#/components/schemas/values'
@@ -2207,6 +2259,11 @@ components:
           format: int32
           title: out_degree
           type: integer
+        root_address:
+          description: Address
+          example: addressA
+          title: address
+          type: string
         tags:
           $ref: '#/components/schemas/address_and_entity_tags'
         total_received:
@@ -2223,6 +2280,7 @@ components:
       - no_incoming_txs
       - no_outgoing_txs
       - out_degree
+      - root_address
       - total_received
       - total_spent
       title: entity
@@ -2782,6 +2840,10 @@ components:
           example: btc
           title: currency
           type: string
+        is_cluster_definer:
+          description: whether the address tag applies to the entity level
+          example: true
+          type: boolean
         is_public:
           description: whether the address is public
           example: true
@@ -3046,6 +3108,11 @@ components:
       type: object
     entity_tag_allOf:
       properties:
+        address:
+          description: Address
+          example: addressA
+          title: address
+          type: string
         entity:
           description: Entity id
           example: 123456
@@ -3103,3 +3170,14 @@ components:
             $ref: '#/components/schemas/search_result_leaf'
           type: array
       type: object
+  securitySchemes:
+    api_key:
+      in: header
+      name: Authorization
+      type: apiKey
+      x-apikeyInfoFunc: openapi_server.controllers.security_controller_.info_from_api_key
+    cookieAuth:
+      in: cookie
+      name: session
+      type: apiKey
+      x-apikeyInfoFunc: openapi_server.controllers.security_controller_.info_from_cookieAuth

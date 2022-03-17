@@ -43,13 +43,13 @@ INSERT INTO tag (label, address, currency, category, source, tagpack, lastmod, i
     ('TagB', '0xabcdef', 'ETH', NULL, 'sourceY', 'uriY', to_timestamp(1), false),
     ('LabelX', '0x123456', 'ETH', NULL, 'sourceX', 'uriX', to_timestamp(1), false),
     ('LabelY', '0x123456', 'ETH', NULL, 'sourceY', 'uriY', to_timestamp(1), false);
-INSERT INTO address_cluster_mapping (currency, address, gs_cluster_id, gs_cluster_def_addr) VALUES
-    ('BTC', 'addressX', 123, ''),
-    ('BTC', 'addressA', 17642138, ''),
-    ('BTC', 'addressH', 17642138, ''),
-    ('BTC', 'address2818641', 2818641, ''),
-    ('ETH', '0xabcdef', 107925000, ''),
-    ('ETH', '0x123456', 107925001, '');
+INSERT INTO address_cluster_mapping (currency, address, gs_cluster_id, gs_cluster_def_addr, gs_cluster_no_addr) VALUES
+    ('BTC', 'addressX', 123, '', 10),
+    ('BTC', 'addressA', 17642138, '', 20),
+    ('BTC', 'addressH', 17642138, '', 20),
+    ('BTC', 'address2818641', 2818641, '', 30),
+    ('ETH', '0xabcdef', 107925000, '', 40),
+    ('ETH', '0x123456', 107925001, '', 50);
 
 REFRESH MATERIALIZED VIEW label;
 REFRESH MATERIALIZED VIEW statistics;

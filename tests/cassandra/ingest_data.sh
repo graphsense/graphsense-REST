@@ -2,9 +2,10 @@
 
 datadir=`dirname $0`/data
 CASSANDRA_MOCK=$1
+ORGANIZATION=$2
 data=""
-if [ ! -z "$2" ]; then
-    for f in $2; do
+if [ ! -z "$3" ]; then
+    for f in $3; do
         case $f in cassandra/*)
             data="$data $f"
         esac
@@ -14,10 +15,15 @@ MOCK_CMD="docker exec $CASSANDRA_MOCK cqlsh"
 
 TAG=develop
 
-UTXO_RAW_SCHEMA="https://raw.githubusercontent.com/graphsense/graphsense-blocksci/$TAG/scripts/"
-UTXO_TRANSFORMED_SCHEMA="https://raw.githubusercontent.com/graphsense/graphsense-transformation/$TAG/scripts/"
-ETH_RAW_SCHEMA="https://raw.githubusercontent.com/graphsense/graphsense-ethereum-etl/$TAG/scripts/"
-ETH_TRANSFORMED_SCHEMA="https://raw.githubusercontent.com/graphsense/graphsense-ethereum-transformation/$TAG/scripts/"
+if [ -z "$ORGANIZATION" ]; then
+    echo 'Please set env var $ORGANIZATION'
+    exit 1
+fi
+
+UTXO_RAW_SCHEMA="https://raw.githubusercontent.com/$ORGANIZATION/graphsense-blocksci/$TAG/scripts/"
+UTXO_TRANSFORMED_SCHEMA="https://raw.githubusercontent.com/$ORGANIZATION/graphsense-transformation/$TAG/scripts/"
+ETH_RAW_SCHEMA="https://raw.githubusercontent.com/$ORGANIZATION/graphsense-ethereum-etl/$TAG/scripts/"
+ETH_TRANSFORMED_SCHEMA="https://raw.githubusercontent.com/$ORGANIZATION/graphsense-ethereum-transformation/$TAG/scripts/"
 
 function schema() {
   temp=`mktemp`
@@ -27,15 +33,6 @@ function schema() {
   for c in $3; do
     create $temp $2 $c
   done
-  rm $temp
-}
-
-function tagpacks() {
-  temp=`mktemp`
-  name=tagpack_schema.cql
-  echo "Fetching $name ..."
-  curl -Ls https://raw.githubusercontent.com/graphsense/graphsense-tagpack-tool/$TAG/tagpack/db/$name > $temp
-  create $temp KEYSPACE_NAME tagpacks
   rm $temp
 }
 
@@ -80,7 +77,6 @@ schema "$UTXO_RAW_SCHEMA/schema.cql" graphsense "btc_raw ltc_raw"
 schema "$UTXO_TRANSFORMED_SCHEMA/schema_transformed.cql" btc "btc ltc"
 schema "$ETH_RAW_SCHEMA/schema.cql" eth eth
 schema "$ETH_TRANSFORMED_SCHEMA/schema_transformed.cql" eth eth
-tagpacks
 
 for filename in $data; do
   insert_data $filename `basename $filename`

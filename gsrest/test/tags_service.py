@@ -15,7 +15,8 @@ tag1 = AddressTag(
     tagpack_uri="https://tagpack_uri",
     active=True,
     currency='BTC',
-    is_public=True
+    is_public=True,
+    is_cluster_definer=True
 )
 
 tag2 = AddressTag(
@@ -28,7 +29,8 @@ tag2 = AddressTag(
     tagpack_uri="https://tagpack_uri_private",
     active=True,
     currency='BTC',
-    is_public=False
+    is_public=False,
+    is_cluster_definer=True
 )
 
 tag3 = AddressTag(
@@ -41,7 +43,8 @@ tag3 = AddressTag(
     lastmod=1,
     source='https://archive.org/donate/cryptocurrency',
     tagpack_uri='https://tagpack_uri',
-    is_public=True
+    is_public=True,
+    is_cluster_definer=False
 )
 
 tag4 = AddressTag(
@@ -54,7 +57,8 @@ tag4 = AddressTag(
     lastmod=2,
     source='https://archive.org/donate/cryptocurrency',
     tagpack_uri='https://tagpack_uri',
-    is_public=True
+    is_public=True,
+    is_cluster_definer=False
 )
 
 eth_tag1 = AddressTag(
@@ -67,7 +71,8 @@ eth_tag1 = AddressTag(
     tagpack_uri="uriX",
     active=True,
     currency='ETH',
-    is_public=False
+    is_public=False,
+    is_cluster_definer=True
 )
 
 eth_tag2 = AddressTag(
@@ -80,35 +85,39 @@ eth_tag2 = AddressTag(
     tagpack_uri="uriY",
     active=True,
     currency='ETH',
-    is_public=True
+    is_public=True,
+    is_cluster_definer=False
 )
 
 etag1 = EntityTag(
-    category="organization",
-    label="Internet, Archive",
-    abuse=None,
-    lastmod=1560290400,
-    source="https://archive.org/donate/cryptocurrency",
+    category=tag1.category,
+    label=tag1.label,
+    abuse=tag1.abuse,
+    lastmod=tag1.lastmod,
+    source=tag1.source,
     entity=17642138,
-    tagpack_uri="https://tagpack_uri",
-    active=True,
-    is_public=True,
-    currency='BTC'
+    address=tag1.address,
+    tagpack_uri=tag1.tagpack_uri,
+    active=tag1.active,
+    currency=tag1.currency,
+    is_cluster_definer=True,
+    is_public=tag1.is_public
 )
 
 etag2 = EntityTag(
-    category="organization",
-    label="Internet Archive 2",
-    abuse=None,
-    lastmod=1560290400,
-    source="https://archive.org/donate/cryptocurrency",
-    entity=17642138,
-    tagpack_uri="https://tagpack_uri_private",
+    tagpack_uri="https://tagpack_uri",
+    lastmod=1,
+    label="isolinks",
+    source="Unspecified",
+    category='exchange',
     active=True,
-    is_public=False,
-    currency='BTC'
+    currency="BTC",
+    entity=123,
+    address="addressX",
+    abuse=None,
+    is_public=True,
+    is_cluster_definer=True
 )
-
 
 tag5 = AddressTag(
     tagpack_uri="https://tagpack_uri",
@@ -120,7 +129,8 @@ tag5 = AddressTag(
     currency="BTC",
     address="addressX",
     abuse=None,
-    is_public=True
+    is_public=True,
+    is_cluster_definer=True
 )
 
 tag6 = AddressTag(
@@ -133,7 +143,8 @@ tag6 = AddressTag(
     currency="BTC",
     label="cimedy",
     active=True,
-    is_public=True
+    is_public=True,
+    is_cluster_definer=False
 )
 
 tag7 = AddressTag(
@@ -146,7 +157,8 @@ tag7 = AddressTag(
     currency="LTC",
     label="cimedy",
     active=True,
-    is_public=True
+    is_public=True,
+    is_cluster_definer=False
 )
 
 eth_tag3 = AddressTag(
@@ -159,39 +171,13 @@ eth_tag3 = AddressTag(
     currency="ETH",
     label="TagA",
     active=True,
-    is_public=False
-)
-
-etag2 = EntityTag(
-    tagpack_uri="https://tagpack_uri",
-    lastmod=1,
-    label="isolinks",
-    source="Unspecified",
-    category='exchange',
-    active=True,
-    currency="BTC",
-    entity=123,
-    abuse=None,
-    is_public=True
+    is_public=False,
+    is_cluster_definer=True
 )
 
 eth_etag1 = eth_tag1.to_dict()
-eth_etag1.pop('address')
 eth_etag1['entity'] = 107925000
 eth_etag1 = EntityTag(**eth_etag1)
-
-etag3 = EntityTag(
-    category=tag1.category,
-    label=tag1.label,
-    abuse=tag1.abuse,
-    lastmod=tag1.lastmod,
-    source=tag1.source,
-    entity=17642138,
-    tagpack_uri=tag1.tagpack_uri,
-    active=tag1.active,
-    currency=tag1.currency,
-    is_public=tag1.is_public
-)
 
 etag4 = EntityTag(
     category=tag2.category,
@@ -200,9 +186,11 @@ etag4 = EntityTag(
     lastmod=tag2.lastmod,
     source=tag2.source,
     entity=17642138,
+    address=tag2.address,
     tagpack_uri=tag2.tagpack_uri,
     active=tag2.active,
     currency=tag2.currency,
+    is_cluster_definer=True,
     is_public=tag2.is_public
 )
 
