@@ -3,7 +3,7 @@ connexion[aiohttp,swagger-ui] >= 2.6.0; python_version>="3.6"
 # we must peg werkzeug versions below to fix connexion
 # https://github.com/zalando/connexion/pull/1044
 swagger-ui-bundle >= 0.0.6
-aiohttp_jinja2 >= 1.2.0
+aiohttp_jinja2 >= 1.5.0
 aiohttp_cors >= 0.7.0
 cassandra-driver==3.23.0
 aiopg==1.3.3
