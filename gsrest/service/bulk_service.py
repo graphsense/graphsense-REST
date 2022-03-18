@@ -223,11 +223,10 @@ async def to_csv(stack):
             head = ""
             has_data = True
             if not csv:
-                fieldnames = sorted(row.keys())
-                if has_info_field:
-                    fieldnames += [info_field]
-                if has_error_field:
-                    fieldnames += [error_field]
+                fieldnames = list(row.keys())
+                fieldnames += [info_field]
+                fieldnames += [error_field]
+                fieldnames = sorted(fieldnames)
                 csv = DictWriter(wr, fieldnames)
                 csv.writeheader()
                 head = wr.get()

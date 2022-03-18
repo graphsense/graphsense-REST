@@ -16,9 +16,9 @@ async def bulk_csv(test_case):
         json=body,
         headers=headers)
     result = (await response.read()).decode('utf-8')
-    expected = ('_request_height,block_hash,height,no_txs,timestamp\r\n'
-        '1,00000000839a8e6886ab5951d76f411475428afc90947ee320161bbf18eb6048,1,1,1231469665\r\n' # noqa
-        '2,000000006a625f06636b8bb6ac7b960a8d03705d1ace08b1a19da3fdcc99ddbd,2,1,1231469744\r\n') # noqa
+    expected = ('_error,_info,_request_height,block_hash,height,no_txs,timestamp\r\n'
+        ',,1,00000000839a8e6886ab5951d76f411475428afc90947ee320161bbf18eb6048,1,1,1231469665\r\n' # noqa
+        ',,2,000000006a625f06636b8bb6ac7b960a8d03705d1ace08b1a19da3fdcc99ddbd,2,1,1231469744\r\n') # noqa
     test_case.assertEqual(sorted(expected.split('\r\n')),
                           sorted(result.split('\r\n')))
 
@@ -32,9 +32,9 @@ async def bulk_csv(test_case):
         json=body,
         headers=headers)
     result = (await response.read()).decode('utf-8')
-    expected = ('_request_address,address,balance_eur,balance_usd,balance_value,entity,first_tx_height,first_tx_timestamp,first_tx_tx_hash,in_degree,last_tx_height,last_tx_timestamp,last_tx_tx_hash,no_incoming_txs,no_outgoing_txs,out_degree,tags,total_received_eur,total_received_usd,total_received_value,total_spent_eur,total_spent_usd,total_spent_value,_error\r\n' # noqa
-                '2,,,,,,,,,,,,,,,,,,,,,,,not found\r\n'
-                'a123456,a123456,1.15,2.31,115422577,123,1,1361497172,04d92601677d62a985310b61a301e74870fa942c8be0648e16b1db23b996a8cd,5013,1,1361497172,bd01b57a50bdee0fb34ce77f5c62a664cea5b94b304d438a8225850f05b45ae5,3981,267,284,,2130676.5,2543214.5,40412296129,2118309.0,2541183.0,40296873552,\r\n') # noqa
+    expected = ('_error,_info,_request_address,address,balance_eur,balance_usd,balance_value,entity,first_tx_height,first_tx_timestamp,first_tx_tx_hash,in_degree,last_tx_height,last_tx_timestamp,last_tx_tx_hash,no_incoming_txs,no_outgoing_txs,out_degree,tags,total_received_eur,total_received_usd,total_received_value,total_spent_eur,total_spent_usd,total_spent_value\r\n' # noqa
+                'not found,2,,,,,,,,,,,,,,,,,,,,,,\r\n'
+                ',,a123456,a123456,1.15,2.31,115422577,123,1,1361497172,04d92601677d62a985310b61a301e74870fa942c8be0648e16b1db23b996a8cd,5013,1,1361497172,bd01b57a50bdee0fb34ce77f5c62a664cea5b94b304d438a8225850f05b45ae5,3981,267,284,,2130676.5,2543214.5,40412296129,2118309.0,2541183.0,40296873552,\r\n') # noqa
     test_case.assertEqual(sorted(expected.split('\r\n')),
                           sorted(result.split('\r\n')))
 
