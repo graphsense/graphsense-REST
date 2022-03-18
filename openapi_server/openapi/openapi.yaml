@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   description: GraphSense API
   title: GraphSense API
-  version: 0.5.2-dev
+  version: 0.5.2
 servers:
 - url: http://graphsense-rest:9000
 security:
