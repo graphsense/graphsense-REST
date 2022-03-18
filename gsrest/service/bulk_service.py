@@ -202,8 +202,6 @@ async def to_csv(stack):
     csv = None
 
     stash = []
-    has_info_field = False
-    has_error_field = False
     has_data = False
 
     for op in stack:
@@ -212,22 +210,19 @@ async def to_csv(stack):
         for row in rows:
             if error_field in row and not csv:
                 stash.append(row)
-                has_error_field = True
                 continue
 
             if info_field in row and not csv:
                 stash.append(row)
-                has_info_field = True
                 continue
 
             head = ""
             has_data = True
             if not csv:
-                fieldnames = sorted(row.keys())
-                if has_info_field:
-                    fieldnames += [info_field]
-                if has_error_field:
-                    fieldnames += [error_field]
+                fieldnames = list(row.keys())
+                fieldnames.append(info_field)
+                fieldnames.append(error_field)
+                fieldnames = sorted(fieldnames)
                 csv = DictWriter(wr, fieldnames)
                 csv.writeheader()
                 head = wr.get()
@@ -245,11 +240,12 @@ async def to_csv(stack):
     if not has_data:
         for row in stash:
             if not csv:
-                fieldnames = sorted(row.keys())
-                if has_info_field and info_field not in fieldnames:
-                    fieldnames += [info_field]
-                if has_error_field and error_field not in fieldnames:
-                    fieldnames += [error_field]
+                fieldnames = list(row.keys())
+                if info_field not in fieldnames:
+                    fieldnames.append(info_field)
+                if error_field not in fieldnames:
+                    fieldnames.append(error_field)
+                fieldnames = sorted(fieldnames)
                 csv = DictWriter(wr, fieldnames)
                 csv.writeheader()
                 yield wr.get()

@@ -1,4 +1,4 @@
-FROM alpine:3.11
+FROM alpine:3.15
 LABEL maintainer="contact@graphsense.info"
 
 ENV FLASK_APP=gsrest
@@ -22,6 +22,7 @@ RUN apk --no-cache --update add \
         linux-headers \
         musl-dev \
         pcre-dev \
+        libpq-dev \
         python3-dev && \
     python3 -m ensurepip && \
     rm -r /usr/lib/python*/ensurepip && \
