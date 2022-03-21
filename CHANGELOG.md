@@ -4,27 +4,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## Unreleased
-
+## [0.5.2] - 2022-03-21
 ### Added
-- add logging config and smtp logging
+- add logging config and SMTP logging
 - plugin architecture to hook into request processing
-- integrate external tagstores on top of postgresql
-- config parameter for filtering private tags by http header
+- integrate external Tagstores on top of PostgreSQL
+- config parameter for filtering private tags by HTTP header
 - fuzzy label search
 - add number of tagged addresses to statistics
 - add `is_cluster_definer` tag property
 - add `root_address` entity property
-
 ### Changed
 - improved bulk retrieval error messages
 - retrieve just one tag per entity
-- fix list_entity_links
-- catch NaNs from cassandra
-
+- fix `list_entity_links`
+- catch NaNs from Cassandra
 ### Removed
-- tag retrieval from cassandra 
-
+- tag retrieval from Cassandra 
 
 ## [0.5.1] - 2021-11-30
 ### Added
