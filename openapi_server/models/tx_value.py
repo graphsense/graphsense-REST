@@ -43,6 +43,18 @@ class TxValue(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, shallow=False):
+        """Returns the model as a dict:
+
+        :return: The TxValue as a dict
+        :rtype: dict
+        """
+        if not shallow:
+            return Model.to_dict(self)
+        return { 'address': self._address,
+            'value': self._value }
+
+
     @property
     def address(self):
         """Gets the address of this TxValue.

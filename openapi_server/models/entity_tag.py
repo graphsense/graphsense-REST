@@ -16,17 +16,20 @@ class EntityTag(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, abuse: str=None, active: bool=None, category: str=None, currency: str=None, label: str=None, lastmod: int=None, source: str=None, tagpack_uri: str=None, entity: int=None):
+    def __init__(self, abuse: str=None, active: bool=None, category: str=None, currency: str=None, is_cluster_definer: bool=None, is_public: bool=None, label: str=None, lastmod: int=None, source: str=None, tagpack_uri: str=None, address: str=None, entity: int=None):
         """EntityTag - a model defined in OpenAPI
 
         :param abuse: The abuse of this EntityTag.
         :param active: The active of this EntityTag.
         :param category: The category of this EntityTag.
         :param currency: The currency of this EntityTag.
+        :param is_cluster_definer: The is_cluster_definer of this EntityTag.
+        :param is_public: The is_public of this EntityTag.
         :param label: The label of this EntityTag.
         :param lastmod: The lastmod of this EntityTag.
         :param source: The source of this EntityTag.
         :param tagpack_uri: The tagpack_uri of this EntityTag.
+        :param address: The address of this EntityTag.
         :param entity: The entity of this EntityTag.
         """
         self.openapi_types = {
@@ -34,10 +37,13 @@ class EntityTag(Model):
             'active': bool,
             'category': str,
             'currency': str,
+            'is_cluster_definer': bool,
+            'is_public': bool,
             'label': str,
             'lastmod': int,
             'source': str,
             'tagpack_uri': str,
+            'address': str,
             'entity': int
         }
 
@@ -46,10 +52,13 @@ class EntityTag(Model):
             'active': 'active',
             'category': 'category',
             'currency': 'currency',
+            'is_cluster_definer': 'is_cluster_definer',
+            'is_public': 'is_public',
             'label': 'label',
             'lastmod': 'lastmod',
             'source': 'source',
             'tagpack_uri': 'tagpack_uri',
+            'address': 'address',
             'entity': 'entity'
         }
 
@@ -57,10 +66,13 @@ class EntityTag(Model):
         self._active = active
         self._category = category
         self._currency = currency
+        self._is_cluster_definer = is_cluster_definer
+        self._is_public = is_public
         self._label = label
         self._lastmod = lastmod
         self._source = source
         self._tagpack_uri = tagpack_uri
+        self._address = address
         self._entity = entity
 
     @classmethod
@@ -71,6 +83,28 @@ class EntityTag(Model):
         :return: The entity_tag of this EntityTag.
         """
         return util.deserialize_model(dikt, cls)
+
+    def to_dict(self, shallow=False):
+        """Returns the model as a dict:
+
+        :return: The EntityTag as a dict
+        :rtype: dict
+        """
+        if not shallow:
+            return Model.to_dict(self)
+        return { 'abuse': self._abuse,
+            'active': self._active,
+            'category': self._category,
+            'currency': self._currency,
+            'is_cluster_definer': self._is_cluster_definer,
+            'is_public': self._is_public,
+            'label': self._label,
+            'lastmod': self._lastmod,
+            'source': self._source,
+            'tagpack_uri': self._tagpack_uri,
+            'address': self._address,
+            'entity': self._entity }
+
 
     @property
     def abuse(self):
@@ -169,6 +203,52 @@ class EntityTag(Model):
         self._currency = currency
 
     @property
+    def is_cluster_definer(self):
+        """Gets the is_cluster_definer of this EntityTag.
+
+        whether the address tag applies to the entity level
+
+        :return: The is_cluster_definer of this EntityTag.
+        :rtype: bool
+        """
+        return self._is_cluster_definer
+
+    @is_cluster_definer.setter
+    def is_cluster_definer(self, is_cluster_definer):
+        """Sets the is_cluster_definer of this EntityTag.
+
+        whether the address tag applies to the entity level
+
+        :param is_cluster_definer: The is_cluster_definer of this EntityTag.
+        :type is_cluster_definer: bool
+        """
+
+        self._is_cluster_definer = is_cluster_definer
+
+    @property
+    def is_public(self):
+        """Gets the is_public of this EntityTag.
+
+        whether the address is public
+
+        :return: The is_public of this EntityTag.
+        :rtype: bool
+        """
+        return self._is_public
+
+    @is_public.setter
+    def is_public(self, is_public):
+        """Sets the is_public of this EntityTag.
+
+        whether the address is public
+
+        :param is_public: The is_public of this EntityTag.
+        :type is_public: bool
+        """
+
+        self._is_public = is_public
+
+    @property
     def label(self):
         """Gets the label of this EntityTag.
 
@@ -261,6 +341,29 @@ class EntityTag(Model):
         """
 
         self._tagpack_uri = tagpack_uri
+
+    @property
+    def address(self):
+        """Gets the address of this EntityTag.
+
+        Address
+
+        :return: The address of this EntityTag.
+        :rtype: str
+        """
+        return self._address
+
+    @address.setter
+    def address(self, address):
+        """Sets the address of this EntityTag.
+
+        Address
+
+        :param address: The address of this EntityTag.
+        :type address: str
+        """
+
+        self._address = address
 
     @property
     def entity(self):

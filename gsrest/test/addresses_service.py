@@ -1,7 +1,5 @@
 from openapi_server.models.address import Address
-from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.address_and_entity_tags import AddressAndEntityTags
-from openapi_server.models.entity_tag import EntityTag
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.neighbors import Neighbors
 from openapi_server.models.neighbor import Neighbor
@@ -16,104 +14,9 @@ from gsrest.util.values import convert_value
 from gsrest.service.rates_service import list_rates
 from gsrest.test.txs_service import tx1_eth, tx2_eth, tx22_eth, tx4_eth
 from gsrest.util.values import make_values
+import gsrest.test.tags_service as ts
 import copy
 
-
-tag = AddressTag(
-           category="organization",
-           label="Internet, Archive",
-           abuse=None,
-           lastmod=1560290400,
-           source="https://archive.org/donate/cryptocurrency",
-           address="addressA",
-           tagpack_uri="http://tagpack_uri",
-           active=True,
-           currency='btc'
-        )
-
-tag2 = AddressTag(
-           category="organization",
-           label="Internet Archive 2",
-           abuse=None,
-           lastmod=1560290400,
-           source="https://archive.org/donate/cryptocurrency",
-           address="addressA",
-           tagpack_uri="http://tagpack_uri",
-           active=True,
-           currency='btc'
-        )
-
-eth_tag = AddressTag(
-           category=None,
-           label="TagA",
-           abuse=None,
-           lastmod=1,
-           source="sourceX",
-           address="0xabcdef",
-           tagpack_uri="uriX",
-           active=True,
-           currency='eth'
-        )
-
-eth_tag2 = AddressTag(
-           category=None,
-           label="TagB",
-           abuse=None,
-           lastmod=1,
-           source="sourceY",
-           address="0xabcdef",
-           tagpack_uri="uriY",
-           active=True,
-           currency='eth'
-        )
-
-etag = EntityTag(
-           category="organization",
-           label="Internet, Archive",
-           abuse=None,
-           lastmod=1560290400,
-           source="https://archive.org/donate/cryptocurrency",
-           entity=17642138,
-           tagpack_uri="http://tagpack_uri",
-           active=True,
-           currency='btc'
-        )
-
-etag2 = EntityTag(
-           category="organization",
-           label="Internet Archive 2",
-           abuse=None,
-           lastmod=1560290400,
-           source="https://archive.org/donate/cryptocurrency",
-           entity=17642138,
-           tagpack_uri="http://tagpack_uri",
-           active=True,
-           currency='btc'
-        )
-
-atag1 = AddressTag(
-    abuse=None,
-    active=True,
-    address='addressA',
-    category='organization',
-    currency='btc',
-    label='addressTag1',
-    lastmod=1,
-    source='https://archive.org/donate/cryptocurrency',
-    tagpack_uri='http://tagpack_uri'
-)
-
-atag2 = AddressTag(
-    abuse=None,
-    active=True,
-    address='addressH',
-    category='organization',
-    currency='btc',
-    label='addressTag2',
-    lastmod=2,
-    source='https://archive.org/donate/cryptocurrency',
-    tagpack_uri='http://tagpack_uri'
-)
 
 address = Address(
    first_tx=TxSummary(
@@ -150,7 +53,7 @@ address = Address(
 addressWithTags = Address(
    **address.to_dict()
    )
-addressWithTags.tags = [tag]
+addressWithTags.tags = [ts.tag1, ts.tag2, ts.tag3]
 
 
 address2 = Address(
@@ -402,7 +305,7 @@ addressE = Address(
    in_degree=3
 )
 
-entityWithTagsOfAddressWithTags = Entity(
+entityWithTags = Entity(
    no_outgoing_txs=280,
    last_tx=TxSummary(
       height=1,
@@ -423,6 +326,7 @@ entityWithTagsOfAddressWithTags = Entity(
    ),
    no_incoming_txs=4859,
    entity=17642138,
+   root_address="addressA",
    out_degree=176,
    first_tx=TxSummary(
       timestamp=1434554207,
@@ -433,9 +337,11 @@ entityWithTagsOfAddressWithTags = Entity(
             value=115422577,
             usd=2.31,
             eur=1.15),
-   tags=AddressAndEntityTags(entity_tags=[etag2, etag],
-                             address_tags=[atag2, atag1])
+   tags=AddressAndEntityTags(
+       entity_tags=[ts.etag1],
+       address_tags=[ts.tag1, ts.tag2, ts.tag3, ts.tag4])
 )
+
 
 eth_address = Address(
    first_tx=TxSummary(
@@ -470,7 +376,7 @@ eth_address = Address(
 eth_addressWithTags = Address(
    **eth_address.to_dict()
    )
-eth_addressWithTags.tags = [eth_tag, eth_tag2]
+eth_addressWithTags.tags = [ts.eth_tag1, ts.eth_tag2]
 
 
 eth_address2 = Address(
@@ -516,7 +422,7 @@ eth_addressWithTagsOutNeighbors = Neighbors(
             Neighbor(
                 id="0xabcdef",
                 node_type='address',
-                labels=[],
+                labels=['TagA', 'TagB'],
                 received=make_values(
                         value=234000000000000000000,
                         eur=10.11,
@@ -559,10 +465,13 @@ eth_entityWithTags = Entity(
    total_received=eth_address.total_received,
    no_incoming_txs=eth_address.no_incoming_txs,
    entity=107925000,
+   root_address=eth_address.address,
    out_degree=eth_address.out_degree,
    first_tx=eth_address.first_tx,
    balance=eth_address.balance,
-   tags=AddressAndEntityTags(address_tags=[eth_tag, eth_tag2], entity_tags=[])
+   tags=AddressAndEntityTags(
+       address_tags=[ts.eth_tag1, ts.eth_tag2],
+       entity_tags=[ts.eth_etag1])
 )
 
 
@@ -576,11 +485,22 @@ async def get_address(test_case):
                                      address=addressWithoutTags.address,
                                      include_tags=True)
     test_case.assertEqual(addressWithoutTags.to_dict(), result)
+
     result = await test_case.request(path,
                                      currency='btc',
                                      address=addressWithTags.address,
                                      include_tags=True)
-    test_case.assertEqual(addressWithTags.to_dict(), result)
+    awt = addressWithTags.to_dict()
+    test_case.assertEqual(awt, result)
+    awt_public = Address(**awt)
+    awt_public.tags = [ts.tag1, ts.tag3]
+    result = await test_case.request(path,
+                                     currency='btc',
+                                     auth='unauthorized',
+                                     address=addressWithTags.address,
+                                     include_tags=True)
+    test_case.assertEqual(awt_public.to_dict(), result)
+
     result = await test_case.request(basepath,
                                      currency='btc',
                                      address=addressWithTotalSpent0.address)
@@ -626,7 +546,8 @@ async def list_address_txs(test_case):
     result = await test_case.request(path,
                                      currency='btc',
                                      address=address2.address)
-    test_case.assertEqual(address_txs.to_dict(), result)
+    test_case.assertEqualWithList(address_txs.to_dict(), result, 'address_txs',
+                                  'tx_hash')
 
     def reverse(tx):
         tx_r = TxAccount.from_dict(copy.deepcopy(tx.to_dict()))
@@ -640,7 +561,8 @@ async def list_address_txs(test_case):
     result = await test_case.request(path,
                                      currency='eth',
                                      address=eth_address.address)
-    test_case.assertEqual(txs.to_dict(), result)
+    test_case.assertEqualWithList(txs.to_dict(), result, 'address_txs',
+                                  'tx_hash')
 
 
 async def list_tags_by_address(test_case):
@@ -648,14 +570,22 @@ async def list_tags_by_address(test_case):
     result = await test_case.request(path,
                                      currency='btc',
                                      address=addressWithTags.address)
-    assertEqual([tag.to_dict() for tag in addressWithTags.tags],
-                result['address_tags'])
+    tags = [tag.to_dict() for tag in addressWithTags.tags]
+    assertEqual(tags, result['address_tags'])
+
+    result = await test_case.request(path,
+                                     auth='unauthorized',
+                                     currency='btc',
+                                     address=addressWithTags.address)
+    tags = [tag for tag in tags if tag['is_public']]
+    assertEqual(tags, result['address_tags'])
 
     result = await test_case.request(path,
                                      currency='eth',
                                      address=eth_addressWithTags.address)
-    assertEqual([tag.to_dict() for tag in eth_addressWithTags.tags],
-                result['address_tags'])
+    test_case.assertEqual([tag.to_dict()
+                           for tag in eth_addressWithTags.tags],
+                          result['address_tags'])
 
 
 async def list_address_neighbors(test_case):
@@ -666,7 +596,17 @@ async def list_address_neighbors(test_case):
                                      address=address.address,
                                      include_labels=True,
                                      direction='out')
-    test_case.assertEqual(addressWithTagsOutNeighbors.to_dict(), result)
+    awton = addressWithTagsOutNeighbors.to_dict()
+    test_case.assertEqual(awton, result)
+
+    result = await test_case.request(path,
+                                     currency='btc',
+                                     auth='unauthorized',
+                                     address=address.address,
+                                     include_labels=True,
+                                     direction='out')
+    awton['neighbors'][0]['labels'] = ['labelX']
+    test_case.assertEqual(awton, result)
 
     result = await test_case.request(path,
                                      currency='btc',
@@ -690,7 +630,7 @@ async def get_address_entity(test_case):
                                      currency='btc',
                                      address=address.address,
                                      include_tags=True)
-    test_case.assertEqual(entityWithTagsOfAddressWithTags.to_dict(), result)
+    test_case.assertEqual(entityWithTags.to_dict(), result)
 
     result = await test_case.request(path,
                                      currency='eth',
@@ -715,7 +655,7 @@ async def list_address_links(test_case):
                                  timestamp=1361497172,
                                  height=2)])
 
-    test_case.assertEqual(link.to_dict(), result)
+    test_case.assertEqualWithList(link.to_dict(), result, 'links', 'tx_hash')
 
     txs = Links(links=[tx2_eth, tx22_eth])
     result = await test_case.request(path,
@@ -723,7 +663,11 @@ async def list_address_links(test_case):
                                      address=eth_address.address,
                                      neighbor='0x123456')
 
-    test_case.assertEqual(txs.to_dict(), result)
+    # remember here in which order eth links are stored in db (might change
+    # from ingest to ingest:
+    first = result['links'][0]
+    second = result['links'][1]
+    test_case.assertEqualWithList(txs.to_dict(), result, 'links', 'tx_hash')
 
     path += '&pagesize={pagesize}'
     result = await test_case.request(path,
@@ -731,7 +675,8 @@ async def list_address_links(test_case):
                                      address=eth_address.address,
                                      neighbor='0x123456',
                                      pagesize=1)
-    txs = Links(links=[tx2_eth])
+    txs = Links(links=[tx2_eth if first['tx_hash'] == tx2_eth.tx_hash else
+                       tx22_eth])
     test_case.assertEqual([li.to_dict() for li in txs.links], result['links'])
     test_case.assertNotEqual(None, result.get('next_page', None))
 
@@ -742,7 +687,8 @@ async def list_address_links(test_case):
                                      neighbor='0x123456',
                                      page=result['next_page'],
                                      pagesize=1)
-    txs = Links(links=[tx22_eth])
+    txs = Links(links=[tx22_eth if second['tx_hash'] == tx22_eth.tx_hash else
+                       tx2_eth])
     test_case.assertEqual([li.to_dict() for li in txs.links], result['links'])
     test_case.assertNotEqual(None, result.get('next_page', None))
 

@@ -1,4 +1,3 @@
-from gsrest.test.assertion import assertEqual
 from openapi_server.models.stats import Stats
 from openapi_server.models.search_result import SearchResult
 from openapi_server.models.search_result_by_currency \
@@ -14,7 +13,8 @@ stats = Stats(
             no_blocks=3,
             timestamp=420,
             no_txs=110,
-            no_labels=470,
+            no_labels=10,
+            no_tagged_addresses=60,
             no_address_relations=1230
             ),
         CurrencyStats(
@@ -24,7 +24,8 @@ stats = Stats(
             no_blocks=3,
             timestamp=16,
             no_txs=10,
-            no_labels=7,
+            no_labels=4,
+            no_tagged_addresses=90,
             no_address_relations=2),
         CurrencyStats(
             name='ltc',
@@ -33,7 +34,8 @@ stats = Stats(
             no_blocks=3,
             timestamp=42,
             no_txs=11,
-            no_labels=47,
+            no_labels=2,
+            no_tagged_addresses=2,
             no_address_relations=123)])
 
 
@@ -41,7 +43,14 @@ async def get_statistics(test_case):
     result = await test_case.request('/stats')
     result['currencies'] = \
         sorted(result['currencies'], key=lambda c: c['name'])
-    assertEqual([c.to_dict() for c in stats.currencies], result['currencies'])
+    cs = [c.to_dict() for c in stats.currencies]
+    test_case.assertEqual(cs, result['currencies'])
+
+    result = await test_case.request('/stats', auth='unauthenticated')
+    result['currencies'] = \
+        sorted(result['currencies'], key=lambda c: c['name'])
+
+    test_case.assertEqual(cs, result['currencies'])
 
 
 async def search(test_case):
@@ -110,9 +119,13 @@ async def search(test_case):
     test_case.assertEqual(expected.to_dict(), result)
 
     expected = base_search_results()
-    expected.labels = ['isolinks']
+    expected.labels = ['Internet Archive 2', 'Internet, Archive']
 
-    result = await test_case.request(path, q='iso')
+    result = await test_case.request(path, q='internet')
+    test_case.assertEqual(expected.to_dict(), result)
+
+    result = await test_case.request(path, auth='y', q='internet')
+    expected.labels = ['Internet, Archive']
     test_case.assertEqual(expected.to_dict(), result)
 
     expected = base_search_results()

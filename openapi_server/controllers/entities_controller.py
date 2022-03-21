@@ -2,6 +2,7 @@ from typing import List, Dict
 from aiohttp import web
 import traceback
 import json
+import re
 
 from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.entity import Entity
@@ -12,6 +13,7 @@ from openapi_server.models.search_result_level1 import SearchResultLevel1
 from openapi_server.models.tags import Tags
 import gsrest.service.entities_service as service
 from openapi_server import util
+
 
 
 async def get_entity(request: web.Request, currency, entity, include_tags=None) -> web.Response:
@@ -27,6 +29,25 @@ async def get_entity(request: web.Request, currency, entity, include_tags=None) 
     :type include_tags: bool
 
     """
+
+    for plugin in request.app['plugins']:
+        if hasattr(plugin, 'before_request'):
+            request = plugin.before_request(request)
+
+    show_private_tags_conf = \
+        request.app['config'].get('show_private_tags', False)
+    show_private_tags = bool(show_private_tags_conf)
+    if show_private_tags:
+        for (k,v) in show_private_tags_conf['on_header'].items():
+            hval = request.headers.get(k, None)
+            if not hval:
+                show_private_tags = False
+                break
+            show_private_tags = show_private_tags and \
+                bool(re.match(re.compile(v), hval))
+            
+    request.app['show_private_tags'] = show_private_tags
+
     try:
         if 'currency' in ['','currency','entity','include_tags']:
             if currency is not None:
@@ -34,10 +55,16 @@ async def get_entity(request: web.Request, currency, entity, include_tags=None) 
         result = service.get_entity(request
                 ,currency=currency,entity=entity,include_tags=include_tags)
         result = await result
+
+        for plugin in request.app['plugins']:
+            if hasattr(plugin, 'before_response'):
+                plugin.before_response(request, result)
+
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
+
         result = web.Response(
                     status=200,
                     text=json.dumps(result),
@@ -53,7 +80,9 @@ async def get_entity(request: web.Request, currency, entity, include_tags=None) 
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb = "\n".join(tb)
+        request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
 
 
@@ -72,6 +101,25 @@ async def list_entity_addresses(request: web.Request, currency, entity, page=Non
     :type pagesize: int
 
     """
+
+    for plugin in request.app['plugins']:
+        if hasattr(plugin, 'before_request'):
+            request = plugin.before_request(request)
+
+    show_private_tags_conf = \
+        request.app['config'].get('show_private_tags', False)
+    show_private_tags = bool(show_private_tags_conf)
+    if show_private_tags:
+        for (k,v) in show_private_tags_conf['on_header'].items():
+            hval = request.headers.get(k, None)
+            if not hval:
+                show_private_tags = False
+                break
+            show_private_tags = show_private_tags and \
+                bool(re.match(re.compile(v), hval))
+            
+    request.app['show_private_tags'] = show_private_tags
+
     try:
         if 'currency' in ['','currency','entity','page','pagesize']:
             if currency is not None:
@@ -79,10 +127,16 @@ async def list_entity_addresses(request: web.Request, currency, entity, page=Non
         result = service.list_entity_addresses(request
                 ,currency=currency,entity=entity,page=page,pagesize=pagesize)
         result = await result
+
+        for plugin in request.app['plugins']:
+            if hasattr(plugin, 'before_response'):
+                plugin.before_response(request, result)
+
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
+
         result = web.Response(
                     status=200,
                     text=json.dumps(result),
@@ -98,7 +152,9 @@ async def list_entity_addresses(request: web.Request, currency, entity, page=Non
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb = "\n".join(tb)
+        request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
 
 
@@ -119,6 +175,25 @@ async def list_entity_links(request: web.Request, currency, entity, neighbor, pa
     :type pagesize: int
 
     """
+
+    for plugin in request.app['plugins']:
+        if hasattr(plugin, 'before_request'):
+            request = plugin.before_request(request)
+
+    show_private_tags_conf = \
+        request.app['config'].get('show_private_tags', False)
+    show_private_tags = bool(show_private_tags_conf)
+    if show_private_tags:
+        for (k,v) in show_private_tags_conf['on_header'].items():
+            hval = request.headers.get(k, None)
+            if not hval:
+                show_private_tags = False
+                break
+            show_private_tags = show_private_tags and \
+                bool(re.match(re.compile(v), hval))
+            
+    request.app['show_private_tags'] = show_private_tags
+
     try:
         if 'currency' in ['','currency','entity','neighbor','page','pagesize']:
             if currency is not None:
@@ -126,10 +201,16 @@ async def list_entity_links(request: web.Request, currency, entity, neighbor, pa
         result = service.list_entity_links(request
                 ,currency=currency,entity=entity,neighbor=neighbor,page=page,pagesize=pagesize)
         result = await result
+
+        for plugin in request.app['plugins']:
+            if hasattr(plugin, 'before_response'):
+                plugin.before_response(request, result)
+
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
+
         result = web.Response(
                     status=200,
                     text=json.dumps(result),
@@ -145,7 +226,9 @@ async def list_entity_links(request: web.Request, currency, entity, neighbor, pa
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb = "\n".join(tb)
+        request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
 
 
@@ -170,6 +253,25 @@ async def list_entity_neighbors(request: web.Request, currency, entity, directio
     :type pagesize: int
 
     """
+
+    for plugin in request.app['plugins']:
+        if hasattr(plugin, 'before_request'):
+            request = plugin.before_request(request)
+
+    show_private_tags_conf = \
+        request.app['config'].get('show_private_tags', False)
+    show_private_tags = bool(show_private_tags_conf)
+    if show_private_tags:
+        for (k,v) in show_private_tags_conf['on_header'].items():
+            hval = request.headers.get(k, None)
+            if not hval:
+                show_private_tags = False
+                break
+            show_private_tags = show_private_tags and \
+                bool(re.match(re.compile(v), hval))
+            
+    request.app['show_private_tags'] = show_private_tags
+
     try:
         if 'currency' in ['','currency','entity','direction','only_ids','include_labels','page','pagesize']:
             if currency is not None:
@@ -177,10 +279,16 @@ async def list_entity_neighbors(request: web.Request, currency, entity, directio
         result = service.list_entity_neighbors(request
                 ,currency=currency,entity=entity,direction=direction,only_ids=only_ids,include_labels=include_labels,page=page,pagesize=pagesize)
         result = await result
+
+        for plugin in request.app['plugins']:
+            if hasattr(plugin, 'before_response'):
+                plugin.before_response(request, result)
+
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
+
         result = web.Response(
                     status=200,
                     text=json.dumps(result),
@@ -196,7 +304,9 @@ async def list_entity_neighbors(request: web.Request, currency, entity, directio
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb = "\n".join(tb)
+        request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
 
 
@@ -215,6 +325,25 @@ async def list_entity_txs(request: web.Request, currency, entity, page=None, pag
     :type pagesize: int
 
     """
+
+    for plugin in request.app['plugins']:
+        if hasattr(plugin, 'before_request'):
+            request = plugin.before_request(request)
+
+    show_private_tags_conf = \
+        request.app['config'].get('show_private_tags', False)
+    show_private_tags = bool(show_private_tags_conf)
+    if show_private_tags:
+        for (k,v) in show_private_tags_conf['on_header'].items():
+            hval = request.headers.get(k, None)
+            if not hval:
+                show_private_tags = False
+                break
+            show_private_tags = show_private_tags and \
+                bool(re.match(re.compile(v), hval))
+            
+    request.app['show_private_tags'] = show_private_tags
+
     try:
         if 'currency' in ['','currency','entity','page','pagesize']:
             if currency is not None:
@@ -222,10 +351,16 @@ async def list_entity_txs(request: web.Request, currency, entity, page=None, pag
         result = service.list_entity_txs(request
                 ,currency=currency,entity=entity,page=page,pagesize=pagesize)
         result = await result
+
+        for plugin in request.app['plugins']:
+            if hasattr(plugin, 'before_response'):
+                plugin.before_response(request, result)
+
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
+
         result = web.Response(
                     status=200,
                     text=json.dumps(result),
@@ -241,7 +376,9 @@ async def list_entity_txs(request: web.Request, currency, entity, page=None, pag
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb = "\n".join(tb)
+        request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
 
 
@@ -262,6 +399,25 @@ async def list_tags_by_entity(request: web.Request, currency, entity, level, pag
     :type pagesize: int
 
     """
+
+    for plugin in request.app['plugins']:
+        if hasattr(plugin, 'before_request'):
+            request = plugin.before_request(request)
+
+    show_private_tags_conf = \
+        request.app['config'].get('show_private_tags', False)
+    show_private_tags = bool(show_private_tags_conf)
+    if show_private_tags:
+        for (k,v) in show_private_tags_conf['on_header'].items():
+            hval = request.headers.get(k, None)
+            if not hval:
+                show_private_tags = False
+                break
+            show_private_tags = show_private_tags and \
+                bool(re.match(re.compile(v), hval))
+            
+    request.app['show_private_tags'] = show_private_tags
+
     try:
         if 'currency' in ['','currency','entity','level','page','pagesize']:
             if currency is not None:
@@ -269,10 +425,16 @@ async def list_tags_by_entity(request: web.Request, currency, entity, level, pag
         result = service.list_tags_by_entity(request
                 ,currency=currency,entity=entity,level=level,page=page,pagesize=pagesize)
         result = await result
+
+        for plugin in request.app['plugins']:
+            if hasattr(plugin, 'before_response'):
+                plugin.before_response(request, result)
+
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
+
         result = web.Response(
                     status=200,
                     text=json.dumps(result),
@@ -288,7 +450,9 @@ async def list_tags_by_entity(request: web.Request, currency, entity, level, pag
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb = "\n".join(tb)
+        request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
 
 
@@ -315,6 +479,25 @@ async def search_entity_neighbors(request: web.Request, currency, entity, direct
     :type skip_num_addresses: int
 
     """
+
+    for plugin in request.app['plugins']:
+        if hasattr(plugin, 'before_request'):
+            request = plugin.before_request(request)
+
+    show_private_tags_conf = \
+        request.app['config'].get('show_private_tags', False)
+    show_private_tags = bool(show_private_tags_conf)
+    if show_private_tags:
+        for (k,v) in show_private_tags_conf['on_header'].items():
+            hval = request.headers.get(k, None)
+            if not hval:
+                show_private_tags = False
+                break
+            show_private_tags = show_private_tags and \
+                bool(re.match(re.compile(v), hval))
+            
+    request.app['show_private_tags'] = show_private_tags
+
     try:
         if 'currency' in ['','currency','entity','direction','key','value','depth','breadth','skip_num_addresses']:
             if currency is not None:
@@ -322,10 +505,16 @@ async def search_entity_neighbors(request: web.Request, currency, entity, direct
         result = service.search_entity_neighbors(request
                 ,currency=currency,entity=entity,direction=direction,key=key,value=value,depth=depth,breadth=breadth,skip_num_addresses=skip_num_addresses)
         result = await result
+
+        for plugin in request.app['plugins']:
+            if hasattr(plugin, 'before_response'):
+                plugin.before_response(request, result)
+
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
+
         result = web.Response(
                     status=200,
                     text=json.dumps(result),
@@ -341,5 +530,7 @@ async def search_entity_neighbors(request: web.Request, currency, entity, direct
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb = "\n".join(tb)
+        request.app.logger.error(tb)
         raise web.HTTPInternalServerError()

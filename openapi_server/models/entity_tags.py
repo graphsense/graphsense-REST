@@ -43,6 +43,18 @@ class EntityTags(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, shallow=False):
+        """Returns the model as a dict:
+
+        :return: The EntityTags as a dict
+        :rtype: dict
+        """
+        if not shallow:
+            return Model.to_dict(self)
+        return { 'entity_tags': self._entity_tags,
+            'next_page': self._next_page }
+
+
     @property
     def entity_tags(self):
         """Gets the entity_tags of this EntityTags.

@@ -1,4 +1,0 @@
- {"address_id_group": 4317, "address_id": 107925000, "label": "TagA", "source": "sourceX", "tagpack_uri": "uriX", "abuse": null, "category": null, "lastmod": 1}
- {"address_id_group": 4317, "address_id": 107925000, "label": "TagB", "source": "sourceY", "tagpack_uri": "uriY", "abuse": null, "category": null, "lastmod": 1}
- {"address_id_group": 4317, "address_id": 107925001, "label": "LabelX", "source": "sourceX", "tagpack_uri": "uriX", "abuse": null, "category": null, "lastmod": 1}
- {"address_id_group": 4317, "address_id": 107925001, "label": "LabelY", "source": "sourceY", "tagpack_uri": "uriY", "abuse": null, "category": null, "lastmod": 1}

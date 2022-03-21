@@ -6,6 +6,7 @@ from openapi_server.models.search_result_by_currency \
     import SearchResultByCurrency
 from gsrest.service.stats_service import get_currency_statistics
 from gsrest.util.string_edit import alphanumeric_lower
+from gsrest.db.util import tagstores
 
 
 async def get_statistics(request):
@@ -52,7 +53,12 @@ async def search(request, q, currency=None, limit=10):
         return r
 
     aws1 = [s(curr) for curr in currs]
-    aws2 = [db.list_matching_labels(curr, expression_norm, limit)
+    aws2 = [tagstores(
+                request.app['tagstores'],
+                lambda row: row['label'],
+                'list_matching_labels',
+                curr, expression_norm, limit,
+                request.app['show_private_tags'])
             for curr in currs]
 
     aw1 = asyncio.gather(*aws1)

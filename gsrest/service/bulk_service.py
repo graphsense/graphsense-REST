@@ -4,6 +4,8 @@ from openapi_server.models.values import Values
 import asyncio
 import json
 from aiohttp import web
+import traceback
+import inspect
 
 
 def bulk_json(*args, **kwargs):
@@ -18,9 +20,21 @@ def bulk_csv(*args, **kwargs):
 
 apis = ['addresses', 'entities', 'blocks', 'txs', 'rates', 'tags']
 
+error_field = '_error'
+info_field = '_info'
+request_field_prefix = '_request_'
+
 
 async def bulk(request, currency, operation, body, num_pages, form='csv'):
-    the_stack = stack(request, currency, operation, body, num_pages, form)
+    try:
+        the_stack = stack(request, currency, operation, body, num_pages, form)
+    except TypeError as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        text = str(e).replace('positional ', '') \
+            .replace('()', '') \
+            .replace('keyword ', '')
+        raise web.HTTPBadRequest(text=text)
+
     if form == 'csv':
         gen = to_csv(the_stack)
         mimetype = 'text/csv'
@@ -64,7 +78,7 @@ def flatten(item, name="", flat_dict=None, format=None):
             flat_dict[name + rate.code] = rate.value
         return
     if 'to_dict' in dir(item):
-        item = item.to_dict()
+        item = item.to_dict(shallow=True)
     if isinstance(item, dict):
         for sub_item in item:
             flatten(item[sub_item], name + sub_item + "_", flat_dict, format)
@@ -87,7 +101,14 @@ async def wrap(request, operation, currency, params, keys, num_pages, format):
     params = dict(params)
     for (k, v) in keys.items():
         params[k] = v
-    result = await operation(request, currency, **params)
+    try:
+        result = await operation(request, currency, **params)
+    except RuntimeError:
+        result = {error_field: 'not found'}
+    except TypeError as e:
+        result = {error_field: str(e)}
+    except Exception:
+        result = {error_field: 'internal error'}
     if isinstance(result, list):
         rows = result
         page_state = None
@@ -95,17 +116,26 @@ async def wrap(request, operation, currency, params, keys, num_pages, format):
         rows = [result]
         page_state = None
     else:
-        result = result.to_dict()
+        result = result.to_dict(shallow=True)
         for k in result:
             if k != 'next_page':
                 rows = result[k]
                 break
         page_state = result.get('next_page', None)
     flat = []
+
+    def append_keys(fl):
+        for (k, v) in keys.items():
+            fl[request_field_prefix+k] = v
+
     for row in rows:
         fl = flatten(row, format=format)
-        for (k, v) in keys.items():
-            fl['request_'+k] = v
+        append_keys(fl)
+        flat.append(fl)
+    if not rows:
+        fl = {}
+        append_keys(fl)
+        fl[info_field] = 'no data'
         flat.append(fl)
     num_pages -= 1
     if num_pages > 0 and page_state:
@@ -134,6 +164,10 @@ def stack(request, currency, operation, body, num_pages, format):
 
     params = {}
     keys = {}
+    check = {
+        'request': None,
+        'currency': currency
+    }
     ln = 0
     for (attr, a) in body.items():
         if a is None:
@@ -142,10 +176,14 @@ def stack(request, currency, operation, body, num_pages, format):
             # filter out this param because it's also a list
             # and must not be taken as a key
             params[attr] = a
+            check[attr] = a
         else:
             keys[attr] = a
             le = len(a)
             ln = min(le, ln) if ln > 0 else le
+            check[attr] = a[0]
+
+    inspect.getcallargs(operation, **check)
 
     for i in range(0, ln):
         the_keys = {}
@@ -163,20 +201,54 @@ async def to_csv(stack):
     wr = writer()
     csv = None
 
+    stash = []
+    has_data = False
+
     for op in stack:
-        try:
-            rows = await op
-        except RuntimeError:
-            continue
+        rows = await op
 
         for row in rows:
+            if error_field in row and not csv:
+                stash.append(row)
+                continue
+
+            if info_field in row and not csv:
+                stash.append(row)
+                continue
+
             head = ""
+            has_data = True
             if not csv:
-                fieldnames = sorted(row.keys())
+                fieldnames = list(row.keys())
+                fieldnames.append(info_field)
+                fieldnames.append(error_field)
+                fieldnames = sorted(fieldnames)
                 csv = DictWriter(wr, fieldnames)
                 csv.writeheader()
                 head = wr.get()
                 yield head
+
+            for stashed_row in stash:
+                csv.writerow(stashed_row)
+                yield wr.get()
+
+            stash = []
+
+            csv.writerow(row)
+            yield wr.get()
+
+    if not has_data:
+        for row in stash:
+            if not csv:
+                fieldnames = list(row.keys())
+                if info_field not in fieldnames:
+                    fieldnames.append(info_field)
+                if error_field not in fieldnames:
+                    fieldnames.append(error_field)
+                fieldnames = sorted(fieldnames)
+                csv = DictWriter(wr, fieldnames)
+                csv.writeheader()
+                yield wr.get()
 
             csv.writerow(row)
             yield wr.get()
@@ -190,7 +262,7 @@ async def to_json(stack):
             rows = await op
         except RuntimeError:
             continue
-        if started:
+        if started and rows:
             yield ","
         else:
             started = True

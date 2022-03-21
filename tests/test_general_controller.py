@@ -14,7 +14,6 @@ import gsrest.test.general_service as test_service
 class TestGeneralController(BaseTestCase):
     """GeneralController integration test stubs"""
 
-    @unittest_run_loop
     async def test_get_statistics(self):
         """Test case for get_statistics
 
@@ -23,7 +22,6 @@ class TestGeneralController(BaseTestCase):
         await test_service.get_statistics(self)
 
 
-    @unittest_run_loop
     async def test_search(self):
         """Test case for search
 

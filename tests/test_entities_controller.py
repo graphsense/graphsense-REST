@@ -19,7 +19,6 @@ import gsrest.test.entities_service as test_service
 class TestEntitiesController(BaseTestCase):
     """EntitiesController integration test stubs"""
 
-    @unittest_run_loop
     async def test_get_entity(self):
         """Test case for get_entity
 
@@ -28,7 +27,6 @@ class TestEntitiesController(BaseTestCase):
         await test_service.get_entity(self)
 
 
-    @unittest_run_loop
     async def test_list_entity_addresses(self):
         """Test case for list_entity_addresses
 
@@ -37,7 +35,6 @@ class TestEntitiesController(BaseTestCase):
         await test_service.list_entity_addresses(self)
 
 
-    @unittest_run_loop
     async def test_list_entity_links(self):
         """Test case for list_entity_links
 
@@ -46,7 +43,6 @@ class TestEntitiesController(BaseTestCase):
         await test_service.list_entity_links(self)
 
 
-    @unittest_run_loop
     async def test_list_entity_neighbors(self):
         """Test case for list_entity_neighbors
 
@@ -55,7 +51,6 @@ class TestEntitiesController(BaseTestCase):
         await test_service.list_entity_neighbors(self)
 
 
-    @unittest_run_loop
     async def test_list_entity_txs(self):
         """Test case for list_entity_txs
 
@@ -64,7 +59,6 @@ class TestEntitiesController(BaseTestCase):
         await test_service.list_entity_txs(self)
 
 
-    @unittest_run_loop
     async def test_list_tags_by_entity(self):
         """Test case for list_tags_by_entity
 
@@ -73,7 +67,6 @@ class TestEntitiesController(BaseTestCase):
         await test_service.list_tags_by_entity(self)
 
 
-    @unittest_run_loop
     async def test_search_entity_neighbors(self):
         """Test case for search_entity_neighbors
 

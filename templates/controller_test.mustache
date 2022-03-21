@@ -25,7 +25,6 @@ class {{#operations}}Test{{classname}}(BaseTestCase):
     {{#vendorExtensions.x-skip-test}}
     @pytest.mark.skip("{{reason}}")
     {{/vendorExtensions.x-skip-test}}
-    @unittest_run_loop
     async def test_{{operationId}}(self):
         """Test case for {{{operationId}}}
 

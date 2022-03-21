@@ -2,11 +2,13 @@ from typing import List, Dict
 from aiohttp import web
 import traceback
 import json
+import re
 
 from openapi_server.models.search_result import SearchResult
 from openapi_server.models.stats import Stats
 import gsrest.service.general_service as service
 from openapi_server import util
+
 
 
 async def get_statistics(request: web.Request, ) -> web.Response:
@@ -16,6 +18,25 @@ async def get_statistics(request: web.Request, ) -> web.Response:
 
 
     """
+
+    for plugin in request.app['plugins']:
+        if hasattr(plugin, 'before_request'):
+            request = plugin.before_request(request)
+
+    show_private_tags_conf = \
+        request.app['config'].get('show_private_tags', False)
+    show_private_tags = bool(show_private_tags_conf)
+    if show_private_tags:
+        for (k,v) in show_private_tags_conf['on_header'].items():
+            hval = request.headers.get(k, None)
+            if not hval:
+                show_private_tags = False
+                break
+            show_private_tags = show_private_tags and \
+                bool(re.match(re.compile(v), hval))
+            
+    request.app['show_private_tags'] = show_private_tags
+
     try:
         if 'currency' in ['']:
             if currency is not None:
@@ -23,10 +44,16 @@ async def get_statistics(request: web.Request, ) -> web.Response:
         result = service.get_statistics(request
                 )
         result = await result
+
+        for plugin in request.app['plugins']:
+            if hasattr(plugin, 'before_response'):
+                plugin.before_response(request, result)
+
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
+
         result = web.Response(
                     status=200,
                     text=json.dumps(result),
@@ -42,7 +69,9 @@ async def get_statistics(request: web.Request, ) -> web.Response:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb = "\n".join(tb)
+        request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
 
 
@@ -59,6 +88,25 @@ async def search(request: web.Request, q, currency=None, limit=None) -> web.Resp
     :type limit: int
 
     """
+
+    for plugin in request.app['plugins']:
+        if hasattr(plugin, 'before_request'):
+            request = plugin.before_request(request)
+
+    show_private_tags_conf = \
+        request.app['config'].get('show_private_tags', False)
+    show_private_tags = bool(show_private_tags_conf)
+    if show_private_tags:
+        for (k,v) in show_private_tags_conf['on_header'].items():
+            hval = request.headers.get(k, None)
+            if not hval:
+                show_private_tags = False
+                break
+            show_private_tags = show_private_tags and \
+                bool(re.match(re.compile(v), hval))
+            
+    request.app['show_private_tags'] = show_private_tags
+
     try:
         if 'currency' in ['','q','currency','limit']:
             if currency is not None:
@@ -66,10 +114,16 @@ async def search(request: web.Request, q, currency=None, limit=None) -> web.Resp
         result = service.search(request
                 ,q=q,currency=currency,limit=limit)
         result = await result
+
+        for plugin in request.app['plugins']:
+            if hasattr(plugin, 'before_response'):
+                plugin.before_response(request, result)
+
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
+
         result = web.Response(
                     status=200,
                     text=json.dumps(result),
@@ -85,5 +139,7 @@ async def search(request: web.Request, q, currency=None, limit=None) -> web.Resp
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb = "\n".join(tb)
+        request.app.logger.error(tb)
         raise web.HTTPInternalServerError()

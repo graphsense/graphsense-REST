@@ -100,12 +100,9 @@ class Cassandra:
             raise BadConfigError('Missing config property: currencies')
         if 'nodes' not in config:
             raise BadConfigError('Missing config property: nodes')
-        if 'tagpacks' not in config:
-            raise BadConfigError('Missing config property: tagpacks')
         self.config = config
         self.prepared_statements = {}
         self.connect()
-        self.check_keyspace(config['tagpacks'])
         self.parameters = {}
         for currency in config['currencies']:
             self.check_keyspace(config['currencies'][currency]['raw'])
@@ -153,15 +150,12 @@ class Cassandra:
         p = self.parameters[currency]
         return \
             {'address': p['address_prefix_length'],
-             'tx': p['tx_prefix_length'],
-             'label': p['label_prefix_length']}
+             'tx': p['tx_prefix_length']}
 
     def get_supported_currencies(self):
         return self.config['currencies'].keys()
 
     def get_keyspace_mapping(self, currency, keyspace_type):
-        if currency is None and keyspace_type == 'tagpacks':
-            return self.config['tagpacks']
         if currency is None:
             raise ValueError('Missing currency')
         if keyspace_type not in ('raw', 'transformed'):
@@ -177,6 +171,7 @@ class Cassandra:
                 params=None, paging_state=None, fetch_size=None):
         keyspace = self.get_keyspace_mapping(currency, keyspace_type)
         q = replaceFrom(keyspace, query)
+        self.logger.debug(f'{query} {params}')
         q = SimpleStatement(q, fetch_size=fetch_size)
         try:
             result = self.session.execute(q, params, paging_state=paging_state)
@@ -217,6 +212,7 @@ class Cassandra:
         keyspace = self.get_keyspace_mapping(currency, keyspace_type)
         q = replaceFrom(keyspace, query)
         q = replacePerc(q)
+        self.logger.debug(f'{query} {params}')
         prep = self.prepared_statements.get(q, None)
         if prep is None:
             self.prepared_statements[q] = prep = self.session.prepare(q)
@@ -442,25 +438,6 @@ class Cassandra:
 
         return await self.finish_address(currency, result)
 
-    async def list_tags_by_address(self, currency, address,
-                                   page=None, pagesize=None):
-        address_id, address_id_group = \
-            await self.get_address_id_id_group(currency, address)
-
-        query = ("SELECT * FROM address_tags WHERE address_id = %s "
-                 "and address_id_group = %s")
-        paging_state = from_hex(page)
-        fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
-        results = await self.execute_async(currency, 'transformed', query,
-                                           [address_id, address_id_group],
-                                           paging_state=paging_state,
-                                           fetch_size=fetch_size)
-        if results is None:
-            return []
-        for tag in results.current_rows:
-            tag['address'] = address
-        return results.current_rows, to_hex(results.paging_state)
-
     @eth
     async def get_address_entity_id(self, currency, address):
         address_id, address_id_group = \
@@ -623,46 +600,6 @@ class Cassandra:
         return rows
 
     @eth
-    async def list_entity_tags_by_entity(self, currency, entity, page=None,
-                                         pagesize=None):
-        entity = int(entity)
-        group = self.get_id_group(currency, entity)
-        query = ("SELECT * FROM cluster_tags "
-                 "WHERE cluster_id_group = %s and cluster_id = %s")
-        fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
-        paging_state = from_hex(page)
-        results = await self.execute_async(currency, 'transformed', query,
-                                           [group, entity],
-                                           paging_state=paging_state,
-                                           fetch_size=fetch_size)
-
-        if results is None:
-            return [], None
-        return results.current_rows, to_hex(results.paging_state)
-
-    @eth
-    async def list_address_tags_by_entity(self, currency, entity, page=None,
-                                          pagesize=None):
-        entity = int(entity)
-        group = self.get_id_group(currency, entity)
-        query = ("SELECT * FROM cluster_address_tags "
-                 "WHERE cluster_id_group = %s and cluster_id = %s")
-        fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
-        paging_state = from_hex(page)
-        results = await self.execute_async(currency, 'transformed', query,
-                                           [group, entity],
-                                           paging_state=paging_state,
-                                           fetch_size=fetch_size)
-
-        if results is None:
-            return [], None
-        ids = [row['address_id'] for row in results.current_rows]
-        addresses = await self.get_addresses_by_ids(currency, ids, True)
-        for (row, address) in zip(results.current_rows, addresses):
-            row['address'] = address['address']
-        return results.current_rows, to_hex(results.paging_state)
-
-    @eth
     async def get_entity(self, currency, entity):
         entity_id_group = self.get_id_group(currency, entity)
         entity = int(entity)
@@ -731,7 +668,7 @@ class Cassandra:
             to_hex(results.paging_state)
 
     async def list_neighbors(self, currency, id, is_outgoing, node_type,
-                             targets, include_labels, page, pagesize):
+                             targets, page, pagesize):
         orig_node_type = node_type
         if node_type == 'address':
             id = await self.get_address_id(currency, id)
@@ -763,7 +700,7 @@ class Cassandra:
         basequery = (f"SELECT * FROM {node_type}_{direction}_relations WHERE "
                      f"{this}_{node_type}_id_group = %s AND "
                      f"{this}_{node_type}_id = %s {sec_condition}")
-        parameters = base_parameters.copy()
+        params = base_parameters.copy()
         if has_targets:
             if len(targets) == 0:
                 return None
@@ -771,13 +708,13 @@ class Cassandra:
             query = basequery.replace('*', f'{that}_{node_type}_id')
             targets = ValueSequence(targets)
             query += f' AND {that}_{node_type}_id in %s'
-            parameters.append(targets)
+            params.append(targets)
         else:
             query = basequery
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
         paging_state = from_hex(page)
         results = await self.execute_async(currency, 'transformed', query,
-                                           parameters,
+                                           params,
                                            paging_state=paging_state,
                                            fetch_size=fetch_size)
         paging_state = results.paging_state
@@ -801,6 +738,11 @@ class Cassandra:
         if orig_node_type == 'address':
             ids = [row[that+'_address_id'] for row in results]
             addresses = await self.get_addresses_by_ids(currency, ids, False)
+
+            if len(addresses) != len(ids):
+                address_ids = [address['cluster_id'] for address in addresses]
+                self.log_missing(address_ids, ids, node_type, query, params)
+
             for (row, address) in zip(results, addresses):
                 row[f'{that}_address'] = address['address']
                 row['total_received'] = \
@@ -813,6 +755,10 @@ class Cassandra:
                                             'cluster_id',
                                             'total_received',
                                             'total_spent'])
+            if len(entities) != len(ids):
+                cluster_ids = [entity['cluster_id'] for entity in entities]
+                self.log_missing(cluster_ids, ids, node_type, query, params)
+
             for (row, entity) in zip(results, entities):
                 row[f'{that}_entity'] = entity['cluster_id']
                 row['total_received'] = entity['total_received']
@@ -823,9 +769,6 @@ class Cassandra:
             neighbor['value'] = \
                 self.markup_currency(currency, neighbor[field])
 
-        if include_labels:
-            await self.include_labels(currency, node_type, that, results)
-
         if currency == 'eth':
             for row in results:
                 row['address_id'] = row[that + '_address_id']
@@ -834,117 +777,6 @@ class Cassandra:
         await asyncio.gather(*aws)
 
         return results, to_hex(paging_state)
-
-    @eth
-    async def include_labels(self, currency, node_type, that, nodes):
-        for node in nodes:
-            node['labels'] = []
-        if node_type == 'cluster':
-            key = f'{that}_cluster_id'
-            params = [(self.get_id_group(currency, row[key]), row[key])
-                      for row in nodes if row[f'has_{that}_labels']]
-            query = ('select cluster_id, label from cluster_tags where '
-                     'cluster_id_group = %s and cluster_id = %s')
-            results = await self.concurrent_with_args(
-                currency, 'transformed', query, params, return_one=False)
-            i = 0
-            for result in results:
-                while nodes[i][key] != result[0]['cluster_id']:
-                    i += 1
-                nodes[i]['labels'] = [row['label'] for row in result]
-        else:
-            key = f'{that}_address_id'
-            params = [[row[key], self.get_id_group(currency, row[key])]
-                      for row in nodes if row[f'has_{that}_labels']]
-            query = ('select address_id, label from address_tags where '
-                     'address_id = %s and address_id_group = %s')
-            results = await self.concurrent_with_args(
-                currency, 'transformed', query, params, return_one=False)
-            i = 0
-            for result in results:
-                while nodes[i][key] != result[0]['address_id']:
-                    i += 1
-                nodes[i]['labels'] = [row['label'] for row in result]
-
-        return nodes
-
-    async def list_address_tags(self, currency, label, page=None,
-                                pagesize=None):
-        prefix_length = self.get_prefix_lengths(currency)['label']
-        label_norm_prefix = label[:prefix_length]
-        paging_state = from_hex(page)
-        fetch_size = min(pagesize or SMALL_PAGE_SIZE * 2, SMALL_PAGE_SIZE * 2)
-        query = ("SELECT * FROM address_tag_by_label WHERE "
-                 "label_norm_prefix = %s and label_norm = %s")
-        rows = await self.execute_async(currency, 'transformed', query,
-                                        [label_norm_prefix, label],
-                                        paging_state=paging_state,
-                                        fetch_size=fetch_size)
-        if rows is None:
-            return [], None
-        if currency == 'eth':
-            for row in rows.current_rows:
-                row['active'] = row['active_address']
-                row['address'] = '0x' + row['address'].lower()
-        return rows.current_rows, to_hex(rows.paging_state)
-
-    @eth
-    async def list_entity_tags(self, currency, label, page=None,
-                               pagesize=None):
-        prefix_length = self.get_prefix_lengths(currency)['label']
-        label_norm_prefix = label[:prefix_length]
-        paging_state = from_hex(page)
-        fetch_size = min(pagesize or SMALL_PAGE_SIZE * 2, SMALL_PAGE_SIZE * 2)
-        query = ("SELECT * FROM cluster_tag_by_label WHERE "
-                 "label_norm_prefix = %s and label_norm = %s")
-        rows = await self.execute_async(currency, 'transformed', query,
-                                        [label_norm_prefix, label],
-                                        paging_state=paging_state,
-                                        fetch_size=fetch_size)
-        if rows is None:
-            return [], None
-        return rows.current_rows, to_hex(rows.paging_state)
-
-    async def list_matching_labels(self, currency, expression_norm, limit):
-        prefix_lengths = self.get_prefix_lengths(currency)
-        if len(expression_norm) < prefix_lengths['label']:
-            return []
-        expression_norm_prefix = expression_norm[:prefix_lengths['label']]
-        query = "SELECT label, label_norm FROM address_tag_by_label"\
-                " WHERE label_norm_prefix = %s"
-        labels = []
-        prev_label = None
-        page_state = True
-        while len(labels) < limit and page_state:
-            if page_state is True:
-                page_state = None
-            result = await self.execute_async(currency, 'transformed', query,
-                                              [expression_norm_prefix],
-                                              paging_state=page_state,
-                                              fetch_size=SEARCH_PAGE_SIZE)
-            for row in result.current_rows:
-                if not row['label_norm'].startswith(expression_norm):
-                    continue
-                if prev_label == row['label']:
-                    continue
-                labels.append(row['label'])
-                prev_label = row['label']
-
-        return labels
-
-    async def list_concepts(self, taxonomy):
-        query = "SELECT * FROM concept_by_taxonomy_id WHERE taxonomy = %s"
-        rows = await self.execute_async(None, 'tagpacks', query, [taxonomy])
-        if rows is None:
-            return []
-        return rows.current_rows
-
-    async def list_taxonomies(self, ):
-        query = "SELECT * FROM taxonomy_by_key LIMIT 100"
-        rows = await self.execute_async(None, 'tagpacks', query)
-        if rows is None:
-            return []
-        return rows.current_rows
 
     @eth
     async def get_tx(self, currency, tx_hash, include_io=False):
@@ -1064,7 +896,21 @@ class Cassandra:
                 ).one()
 
     async def finish_entities(self, currency, rows, with_txs=True):
-        return await self.finish_addresses(currency, rows, with_txs)
+        aws = [self.finish_entity(currency, row, with_txs=with_txs)
+               for row in rows]
+        return await asyncio.gather(*aws)
+
+    @eth
+    async def finish_entity(self, currency, row, with_txs=True):
+        a = await self.get_addresses_by_ids(currency,
+                                            [row['cluster_id']],
+                                            address_only=True)
+        row['root_address'] = a[0]['address']
+        return await self.finish_address(currency, row, with_txs)
+
+    async def finish_entity_eth(self, currency, row, with_txs=True):
+        row['root_address'] = eth_address_to_hex(row['address'])
+        return await self.finish_address(currency, row, with_txs)
 
     async def finish_addresses(self, currency, rows, with_txs=True):
         aws = [self.finish_address(currency, row, with_txs=with_txs)
@@ -1089,7 +935,8 @@ class Cassandra:
         [tx1, tx2] = await asyncio.gather(*aws)
 
         if not tx1 or not tx2:
-            raise RuntimeError(f"transactions for {row['address']} not found")
+            id = row['address'] if 'address' in row else row['cluster_id']
+            raise RuntimeError(f"transactions for {id} not found")
 
         row['first_tx'] = TxSummary(
             tx_hash=tx1['tx_hash'],
@@ -1194,7 +1041,7 @@ class Cassandra:
         if not result:
             return None
 
-        entity = (await self.finish_addresses(currency, [result]))[0]
+        entity = (await self.finish_entities(currency, [result]))[0]
         entity['cluster_id'] = entity['address_id']
         entity['no_addresses'] = 1
         entity.pop('address', None)
@@ -1232,36 +1079,6 @@ class Cassandra:
             address['cluster_id'] = address['address_id']
             address['no_addresses'] = 1
         return result, to_hex(paging_state)
-
-    async def list_entity_tags_by_entity_eth(self, currency, entity, page=None,
-                                             pagesize=None):
-        return [], None
-
-    async def list_address_tags_by_entity_eth(self, currency, entity,
-                                              page=None, pagesize=None):
-        query = ("SELECT address FROM address "
-                 "WHERE address_id_group=%s and address_id=%s")
-        id_id_group = [self.get_id_group(currency, entity), entity]
-        result = await self.execute_async(currency, 'transformed', query,
-                                          id_id_group)
-        result = one(result)
-        if result is None:
-            raise RuntimeError(f'entity {entity} not found for currency'
-                               ' {currency}')
-        fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
-        paging_state = from_hex(page)
-        address = result['address']
-        query = ("SELECT * FROM address_tags WHERE address_id_group = %s "
-                 "and address_id = %s")
-        results = await self.execute_async(currency, 'transformed', query,
-                                           id_id_group,
-                                           paging_state=paging_state,
-                                           fetch_size=fetch_size)
-        if results is None:
-            return [], None
-        for tag in results.current_rows:
-            tag['address'] = eth_address_to_hex(address)
-        return results.current_rows, to_hex(results.paging_state)
 
     def get_address_entity_id_eth(self, currency, address):
         return self.get_address_id(currency, address)
@@ -1528,32 +1345,6 @@ class Cassandra:
         addresses = await self.get_addresses_by_ids(currency, [entity])
         return await self.finish_addresses(currency, addresses), None
 
-    async def list_entity_tags_eth(self, currency, label, page=None,
-                                   pagesize=None):
-        return [], None
-
-    async def include_labels_eth(self, currency, node_type, that, nodes):
-        for node in nodes:
-            node['labels'] = []
-        if node_type == 'cluster':
-            pass
-        else:
-            key = f'{that}_address_id'
-            params = [[row[key],
-                       self.get_id_group(currency, row[key])]
-                      for row in nodes if row[f'has_{that}_labels']]
-            query = ('select address_id, label from address_tags where '
-                     'address_id=%s and address_id_group=%s')
-            results = await self.concurrent_with_args(
-                currency, 'transformed', query, params, return_one=False)
-            i = 0
-            for result in results:
-                while nodes[i][key] != result[0]['address_id']:
-                    i += 1
-                nodes[i]['labels'] = [row['label'] for row in result]
-
-        return nodes
-
     def markup_values(self, currency, fiat_values):
         values = []
         for (fiat, curr) in zip(
@@ -1575,3 +1366,12 @@ class Cassandra:
 
     def sec_in(self, id):
         return ValueSequence(range(0, id+1))
+
+    def log_missing(self, ids1, ids2, node_type, query, params):
+        missing = []
+        for id in ids2:
+            if id not in ids1:
+                missing.append(id)
+        self.logger.critical(
+            f'nodes existing in `{query}` {params} but not '
+            f'in {node_type} table: {missing}')

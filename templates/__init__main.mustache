@@ -1,8 +1,11 @@
 import os
+import logging
 import connexion
 import aiohttp_cors
 import gsrest.db
 import yaml
+import importlib
+from gsrest.plugins import get_subclass
 
 CONFIG_FILE = "./instance/config.yaml"
 
@@ -17,6 +20,32 @@ def load_config(config_file):
     return config
 
 
+def setup_logging(logger, config):
+    level = config.get('level', 'INFO').upper()
+    level = getattr(logging, level)
+    logging.basicConfig(level=level)
+    smtp = config.get('smtp', None)
+    if not smtp:
+        return
+    credentials = None
+    secure = None
+    if smtp.get('username', None) is not None:
+        credentials = (smtp.get('username'), smtp.get('password'))
+        if smtp.get('secure', None) is True:
+            secure = ()
+    handler = logging.handlers.SMTPHandler(
+        mailhost=(smtp.get('host'), smtp.get('port', None)),
+        fromaddr=smtp.get('from'),
+        toaddrs=smtp.get('to'),
+        subject=smtp.get('subject'),
+        credentials=credentials,
+        secure=secure,
+        timeout=smtp.get('timeout', None))
+
+    handler.setLevel(getattr(logging, smtp.get('level', 'CRITICAL')))
+    logger.addHandler(handler)
+
+
 def factory(config_file=None, validate_responses=False):
     if not config_file:
         config_file = CONFIG_FILE
@@ -25,8 +54,8 @@ def factory(config_file=None, validate_responses=False):
         "serve_spec": True
         }
     specification_dir = os.path.join(os.path.dirname(__file__), 'openapi')
-    app = connexion.AioHttpApp(__name__, 
-                               specification_dir=specification_dir, 
+    app = connexion.AioHttpApp(__name__,
+                               specification_dir=specification_dir,
                                only_one_api=True,
                                options=options)
     openapi_yaml = 'openapi.yaml'
@@ -37,6 +66,7 @@ def factory(config_file=None, validate_responses=False):
                 pass_context_arg_name='request')
     app.app.logger.info(f'reading config from {config_file}')
     app.app['config'] = load_config(config_file)
+    setup_logging(app.app.logger, app.app['config'].get('logging', {}))
     with open(os.path.join(specification_dir, openapi_yaml)) as yaml_file:
         app.app['openapi'] = yaml.safe_load(yaml_file)
 
@@ -63,6 +93,12 @@ def factory(config_file=None, validate_responses=False):
     # Register all routers for CORS.
     for route in list(app.app.router.routes()):
         cors.add(route)
+
+    app.app['config']['hide_private_tags'] = \
+        app.app['config'].get('hide_private_tags', False)
+
+    app.app['plugins'] = [get_subclass(importlib.import_module(name))
+                          for name in app.app['config'].get('plugins', [])]
 
     return app
 

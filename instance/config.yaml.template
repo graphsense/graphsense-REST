@@ -1,5 +1,20 @@
 # This file contains instance specific configuration options.
 
+logging:
+    level: INFO # see https://docs.python.org/3/library/logging.html#logging-levels
+    smtp:
+        level: CRITICAL
+        host: "SMTP_HOST"
+        port: SMTP_PORT # omit if standard
+        username: "SMTP_USERNAME"
+        password: "SMTP_PASSWORD"
+        from: "FROM_ADDRESS"
+        to:
+            - "TO_ADDRESS"
+        subject: "SUBJECT"
+        secure: true
+        timeout: 10
+
 # Replace Cassandra hostnames and keyspaces
 
 database:
@@ -24,10 +39,30 @@ database:
 
 # Restrict allowed origins for CORS
 #
-# The origin, or list of origins to allow requests from. The origin(s) may be regular expressions, case-sensitive strings, or else an asterisk
-# (see https://flask-cors.readthedocs.io/en/latest/api.html for further details)
+# The origin, or list of origins to allow requests from. 
 #
 # Default : ‘*’ 
 # ALLOWED_ORIGINS: 
 #   - 'https://example.com'
 
+tagstores:
+    # add postgres db configuration for each tagstore like:
+    - host: "POSTGRES_HOST" 
+    # additional properties with default values:
+    # database: "tagstore"
+    # schema: "tagstore" 
+    # username: "tagstore"
+    # password: "tagstore"
+    # query_timeout: 300
+    # max_connections: 10
+
+# configure when to include private tags in responses
+# private tags are excluded by default 
+#
+# show_private_tags:
+  # on_header:
+    # set <header name> : <regexp for matching header value>
+    # eg. Authorization: password
+
+# name plugins implementing gsrest.plugins interface
+# plugins: []

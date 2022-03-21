@@ -14,7 +14,6 @@ import gsrest.test.blocks_service as test_service
 class TestBlocksController(BaseTestCase):
     """BlocksController integration test stubs"""
 
-    @unittest_run_loop
     async def test_get_block(self):
         """Test case for get_block
 
@@ -23,7 +22,6 @@ class TestBlocksController(BaseTestCase):
         await test_service.get_block(self)
 
 
-    @unittest_run_loop
     async def test_list_block_txs(self):
         """Test case for list_block_txs
 

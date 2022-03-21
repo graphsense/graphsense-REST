@@ -43,6 +43,18 @@ class Neighbors(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, shallow=False):
+        """Returns the model as a dict:
+
+        :return: The Neighbors as a dict
+        :rtype: dict
+        """
+        if not shallow:
+            return Model.to_dict(self)
+        return { 'neighbors': self._neighbors,
+            'next_page': self._next_page }
+
+
     @property
     def neighbors(self):
         """Gets the neighbors of this Neighbors.

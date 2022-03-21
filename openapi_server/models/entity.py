@@ -17,7 +17,7 @@ class Entity(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, balance: Values=None, entity: int=None, first_tx: TxSummary=None, in_degree: int=None, last_tx: TxSummary=None, no_addresses: int=None, no_incoming_txs: int=None, no_outgoing_txs: int=None, out_degree: int=None, tags: AddressAndEntityTags=None, total_received: Values=None, total_spent: Values=None):
+    def __init__(self, balance: Values=None, entity: int=None, first_tx: TxSummary=None, in_degree: int=None, last_tx: TxSummary=None, no_addresses: int=None, no_incoming_txs: int=None, no_outgoing_txs: int=None, out_degree: int=None, root_address: str=None, tags: AddressAndEntityTags=None, total_received: Values=None, total_spent: Values=None):
         """Entity - a model defined in OpenAPI
 
         :param balance: The balance of this Entity.
@@ -29,6 +29,7 @@ class Entity(Model):
         :param no_incoming_txs: The no_incoming_txs of this Entity.
         :param no_outgoing_txs: The no_outgoing_txs of this Entity.
         :param out_degree: The out_degree of this Entity.
+        :param root_address: The root_address of this Entity.
         :param tags: The tags of this Entity.
         :param total_received: The total_received of this Entity.
         :param total_spent: The total_spent of this Entity.
@@ -43,6 +44,7 @@ class Entity(Model):
             'no_incoming_txs': int,
             'no_outgoing_txs': int,
             'out_degree': int,
+            'root_address': str,
             'tags': AddressAndEntityTags,
             'total_received': Values,
             'total_spent': Values
@@ -58,6 +60,7 @@ class Entity(Model):
             'no_incoming_txs': 'no_incoming_txs',
             'no_outgoing_txs': 'no_outgoing_txs',
             'out_degree': 'out_degree',
+            'root_address': 'root_address',
             'tags': 'tags',
             'total_received': 'total_received',
             'total_spent': 'total_spent'
@@ -72,6 +75,7 @@ class Entity(Model):
         self._no_incoming_txs = no_incoming_txs
         self._no_outgoing_txs = no_outgoing_txs
         self._out_degree = out_degree
+        self._root_address = root_address
         self._tags = tags
         self._total_received = total_received
         self._total_spent = total_spent
@@ -84,6 +88,29 @@ class Entity(Model):
         :return: The entity of this Entity.
         """
         return util.deserialize_model(dikt, cls)
+
+    def to_dict(self, shallow=False):
+        """Returns the model as a dict:
+
+        :return: The Entity as a dict
+        :rtype: dict
+        """
+        if not shallow:
+            return Model.to_dict(self)
+        return { 'balance': self._balance,
+            'entity': self._entity,
+            'first_tx': self._first_tx,
+            'in_degree': self._in_degree,
+            'last_tx': self._last_tx,
+            'no_addresses': self._no_addresses,
+            'no_incoming_txs': self._no_incoming_txs,
+            'no_outgoing_txs': self._no_outgoing_txs,
+            'out_degree': self._out_degree,
+            'root_address': self._root_address,
+            'tags': self._tags,
+            'total_received': self._total_received,
+            'total_spent': self._total_spent }
+
 
     @property
     def balance(self):
@@ -295,6 +322,31 @@ class Entity(Model):
             raise ValueError("Invalid value for `out_degree`, must not be `None`")
 
         self._out_degree = out_degree
+
+    @property
+    def root_address(self):
+        """Gets the root_address of this Entity.
+
+        Address
+
+        :return: The root_address of this Entity.
+        :rtype: str
+        """
+        return self._root_address
+
+    @root_address.setter
+    def root_address(self, root_address):
+        """Sets the root_address of this Entity.
+
+        Address
+
+        :param root_address: The root_address of this Entity.
+        :type root_address: str
+        """
+        if root_address is None:
+            raise ValueError("Invalid value for `root_address`, must not be `None`")
+
+        self._root_address = root_address
 
     @property
     def tags(self):

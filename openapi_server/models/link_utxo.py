@@ -59,6 +59,22 @@ class LinkUtxo(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, shallow=False):
+        """Returns the model as a dict:
+
+        :return: The LinkUtxo as a dict
+        :rtype: dict
+        """
+        if not shallow:
+            return Model.to_dict(self)
+        return { 'height': self._height,
+            'input_value': self._input_value,
+            'output_value': self._output_value,
+            'timestamp': self._timestamp,
+            'tx_hash': self._tx_hash,
+            'tx_type': self._tx_type }
+
+
     @property
     def height(self):
         """Gets the height of this LinkUtxo.

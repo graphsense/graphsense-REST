@@ -43,6 +43,18 @@ class EntityAddresses(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, shallow=False):
+        """Returns the model as a dict:
+
+        :return: The EntityAddresses as a dict
+        :rtype: dict
+        """
+        if not shallow:
+            return Model.to_dict(self)
+        return { 'addresses': self._addresses,
+            'next_page': self._next_page }
+
+
     @property
     def addresses(self):
         """Gets the addresses of this EntityAddresses.

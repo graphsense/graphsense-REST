@@ -11,6 +11,7 @@ from openapi_server.models.links import Links
 from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from gsrest.service.rates_service import list_rates
+from gsrest.db.util import tagstores, tagstores_with_paging, dt_to_int
 
 
 def address_from_row(currency, row, rates, tags=None):
@@ -77,25 +78,26 @@ async def get_address(request, currency, address, include_tags=False):
 
 async def list_tags_by_address(request, currency, address,
                                page=None, pagesize=None):
-    db = request.app['db']
-    results, next_page = \
-        await db.list_tags_by_address(currency, address,
-                                      page=page, pagesize=pagesize)
-
-    if results is None:
-        return []
-    address_tags = [AddressTag(
+    address_tags, next_page = \
+        await tagstores_with_paging(
+            request.app['tagstores'],
+            lambda row:
+                AddressTag(
                     label=row['label'],
                     address=row['address'],
                     category=row['category'],
                     abuse=row['abuse'],
-                    tagpack_uri=row['tagpack_uri'],
+                    tagpack_uri=row['tagpack'],
                     source=row['source'],
-                    lastmod=row['lastmod'],
+                    lastmod=dt_to_int(row['lastmod']),
                     active=True,
-                    currency=currency
-                    )
-                    for row in results]
+                    is_public=row['is_public'],
+                    is_cluster_definer=row['is_cluster_definer'],
+                    currency=row['currency'].upper()
+                    ),
+            'list_tags_by_address',
+            page, pagesize, currency, address,
+            request.app['show_private_tags'])
 
     return AddressTags(address_tags=address_tags, next_page=next_page)
 
@@ -112,10 +114,14 @@ async def list_neighbors(request, currency, id, direction, node_type, ids=None,
                                     is_outgoing,
                                     node_type,
                                     targets=ids,
-                                    include_labels=include_labels,
                                     page=page,
                                     pagesize=pagesize)
+
     dst = 'dst' if is_outgoing else 'src'
+
+    if include_labels:
+        await add_labels(request, currency, node_type, dst, results)
+
     rates = (await get_rates(request, currency))['rates']
     relations = []
     if results is None:
@@ -133,6 +139,33 @@ async def list_neighbors(request, currency, id, direction, node_type, ids=None,
             no_txs=row['no_transactions']))
     return Neighbors(next_page=paging_state,
                      neighbors=relations)
+
+
+async def add_labels(request, currency, node_type, that, nodes):
+    (field, tfield, fun) = \
+        ('address', 'address', 'list_labels_for_addresses') \
+        if node_type == 'address' else \
+        ('cluster_id', 'gs_cluster_id', 'list_labels_for_entities')
+    thatfield = that + '_' + field
+    ids = tuple((node[thatfield] for node in nodes))
+
+    result = await tagstores(request.app['tagstores'],
+                             lambda row: row, fun, currency, ids,
+                             request.app['show_private_tags'])
+    iterator = iter(result)
+    if node_type == 'address':
+        nodes = sorted(nodes, key=lambda node: node[thatfield])
+    for node in nodes:
+        try:
+            row = next(iterator)
+            if node[thatfield] != row[tfield]:
+                node['labels'] = []
+                continue
+            node['labels'] = row['labels']
+        except StopIteration:
+            node['labels'] = []
+
+    return nodes
 
 
 async def links_response(request, currency, result):

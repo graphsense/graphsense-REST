@@ -12,7 +12,6 @@ import gsrest.test.bulk_service as test_service
 class TestBulkController(BaseTestCase):
     """BulkController integration test stubs"""
 
-    @unittest_run_loop
     async def test_bulk_csv(self):
         """Test case for bulk_csv
 
@@ -21,7 +20,6 @@ class TestBulkController(BaseTestCase):
         await test_service.bulk_csv(self)
 
 
-    @unittest_run_loop
     async def test_bulk_json(self):
         """Test case for bulk_json
 

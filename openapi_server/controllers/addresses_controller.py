@@ -2,6 +2,7 @@ from typing import List, Dict
 from aiohttp import web
 import traceback
 import json
+import re
 
 from openapi_server.models.address import Address
 from openapi_server.models.address_tags import AddressTags
@@ -11,6 +12,7 @@ from openapi_server.models.links import Links
 from openapi_server.models.neighbors import Neighbors
 import gsrest.service.addresses_service as service
 from openapi_server import util
+
 
 
 async def get_address(request: web.Request, currency, address, include_tags=None) -> web.Response:
@@ -26,6 +28,25 @@ async def get_address(request: web.Request, currency, address, include_tags=None
     :type include_tags: bool
 
     """
+
+    for plugin in request.app['plugins']:
+        if hasattr(plugin, 'before_request'):
+            request = plugin.before_request(request)
+
+    show_private_tags_conf = \
+        request.app['config'].get('show_private_tags', False)
+    show_private_tags = bool(show_private_tags_conf)
+    if show_private_tags:
+        for (k,v) in show_private_tags_conf['on_header'].items():
+            hval = request.headers.get(k, None)
+            if not hval:
+                show_private_tags = False
+                break
+            show_private_tags = show_private_tags and \
+                bool(re.match(re.compile(v), hval))
+            
+    request.app['show_private_tags'] = show_private_tags
+
     try:
         if 'currency' in ['','currency','address','include_tags']:
             if currency is not None:
@@ -33,10 +54,16 @@ async def get_address(request: web.Request, currency, address, include_tags=None
         result = service.get_address(request
                 ,currency=currency,address=address,include_tags=include_tags)
         result = await result
+
+        for plugin in request.app['plugins']:
+            if hasattr(plugin, 'before_response'):
+                plugin.before_response(request, result)
+
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
+
         result = web.Response(
                     status=200,
                     text=json.dumps(result),
@@ -52,7 +79,9 @@ async def get_address(request: web.Request, currency, address, include_tags=None
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb = "\n".join(tb)
+        request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
 
 
@@ -69,6 +98,25 @@ async def get_address_entity(request: web.Request, currency, address, include_ta
     :type include_tags: bool
 
     """
+
+    for plugin in request.app['plugins']:
+        if hasattr(plugin, 'before_request'):
+            request = plugin.before_request(request)
+
+    show_private_tags_conf = \
+        request.app['config'].get('show_private_tags', False)
+    show_private_tags = bool(show_private_tags_conf)
+    if show_private_tags:
+        for (k,v) in show_private_tags_conf['on_header'].items():
+            hval = request.headers.get(k, None)
+            if not hval:
+                show_private_tags = False
+                break
+            show_private_tags = show_private_tags and \
+                bool(re.match(re.compile(v), hval))
+            
+    request.app['show_private_tags'] = show_private_tags
+
     try:
         if 'currency' in ['','currency','address','include_tags']:
             if currency is not None:
@@ -76,10 +124,16 @@ async def get_address_entity(request: web.Request, currency, address, include_ta
         result = service.get_address_entity(request
                 ,currency=currency,address=address,include_tags=include_tags)
         result = await result
+
+        for plugin in request.app['plugins']:
+            if hasattr(plugin, 'before_response'):
+                plugin.before_response(request, result)
+
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
+
         result = web.Response(
                     status=200,
                     text=json.dumps(result),
@@ -95,7 +149,9 @@ async def get_address_entity(request: web.Request, currency, address, include_ta
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb = "\n".join(tb)
+        request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
 
 
@@ -116,6 +172,25 @@ async def list_address_links(request: web.Request, currency, address, neighbor, 
     :type pagesize: int
 
     """
+
+    for plugin in request.app['plugins']:
+        if hasattr(plugin, 'before_request'):
+            request = plugin.before_request(request)
+
+    show_private_tags_conf = \
+        request.app['config'].get('show_private_tags', False)
+    show_private_tags = bool(show_private_tags_conf)
+    if show_private_tags:
+        for (k,v) in show_private_tags_conf['on_header'].items():
+            hval = request.headers.get(k, None)
+            if not hval:
+                show_private_tags = False
+                break
+            show_private_tags = show_private_tags and \
+                bool(re.match(re.compile(v), hval))
+            
+    request.app['show_private_tags'] = show_private_tags
+
     try:
         if 'currency' in ['','currency','address','neighbor','page','pagesize']:
             if currency is not None:
@@ -123,10 +198,16 @@ async def list_address_links(request: web.Request, currency, address, neighbor, 
         result = service.list_address_links(request
                 ,currency=currency,address=address,neighbor=neighbor,page=page,pagesize=pagesize)
         result = await result
+
+        for plugin in request.app['plugins']:
+            if hasattr(plugin, 'before_response'):
+                plugin.before_response(request, result)
+
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
+
         result = web.Response(
                     status=200,
                     text=json.dumps(result),
@@ -142,7 +223,9 @@ async def list_address_links(request: web.Request, currency, address, neighbor, 
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb = "\n".join(tb)
+        request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
 
 
@@ -165,6 +248,25 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
     :type pagesize: int
 
     """
+
+    for plugin in request.app['plugins']:
+        if hasattr(plugin, 'before_request'):
+            request = plugin.before_request(request)
+
+    show_private_tags_conf = \
+        request.app['config'].get('show_private_tags', False)
+    show_private_tags = bool(show_private_tags_conf)
+    if show_private_tags:
+        for (k,v) in show_private_tags_conf['on_header'].items():
+            hval = request.headers.get(k, None)
+            if not hval:
+                show_private_tags = False
+                break
+            show_private_tags = show_private_tags and \
+                bool(re.match(re.compile(v), hval))
+            
+    request.app['show_private_tags'] = show_private_tags
+
     try:
         if 'currency' in ['','currency','address','direction','include_labels','page','pagesize']:
             if currency is not None:
@@ -172,10 +274,16 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
         result = service.list_address_neighbors(request
                 ,currency=currency,address=address,direction=direction,include_labels=include_labels,page=page,pagesize=pagesize)
         result = await result
+
+        for plugin in request.app['plugins']:
+            if hasattr(plugin, 'before_response'):
+                plugin.before_response(request, result)
+
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
+
         result = web.Response(
                     status=200,
                     text=json.dumps(result),
@@ -191,7 +299,9 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb = "\n".join(tb)
+        request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
 
 
@@ -210,6 +320,25 @@ async def list_address_txs(request: web.Request, currency, address, page=None, p
     :type pagesize: int
 
     """
+
+    for plugin in request.app['plugins']:
+        if hasattr(plugin, 'before_request'):
+            request = plugin.before_request(request)
+
+    show_private_tags_conf = \
+        request.app['config'].get('show_private_tags', False)
+    show_private_tags = bool(show_private_tags_conf)
+    if show_private_tags:
+        for (k,v) in show_private_tags_conf['on_header'].items():
+            hval = request.headers.get(k, None)
+            if not hval:
+                show_private_tags = False
+                break
+            show_private_tags = show_private_tags and \
+                bool(re.match(re.compile(v), hval))
+            
+    request.app['show_private_tags'] = show_private_tags
+
     try:
         if 'currency' in ['','currency','address','page','pagesize']:
             if currency is not None:
@@ -217,10 +346,16 @@ async def list_address_txs(request: web.Request, currency, address, page=None, p
         result = service.list_address_txs(request
                 ,currency=currency,address=address,page=page,pagesize=pagesize)
         result = await result
+
+        for plugin in request.app['plugins']:
+            if hasattr(plugin, 'before_response'):
+                plugin.before_response(request, result)
+
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
+
         result = web.Response(
                     status=200,
                     text=json.dumps(result),
@@ -236,7 +371,9 @@ async def list_address_txs(request: web.Request, currency, address, page=None, p
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb = "\n".join(tb)
+        request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
 
 
@@ -255,6 +392,25 @@ async def list_tags_by_address(request: web.Request, currency, address, page=Non
     :type pagesize: int
 
     """
+
+    for plugin in request.app['plugins']:
+        if hasattr(plugin, 'before_request'):
+            request = plugin.before_request(request)
+
+    show_private_tags_conf = \
+        request.app['config'].get('show_private_tags', False)
+    show_private_tags = bool(show_private_tags_conf)
+    if show_private_tags:
+        for (k,v) in show_private_tags_conf['on_header'].items():
+            hval = request.headers.get(k, None)
+            if not hval:
+                show_private_tags = False
+                break
+            show_private_tags = show_private_tags and \
+                bool(re.match(re.compile(v), hval))
+            
+    request.app['show_private_tags'] = show_private_tags
+
     try:
         if 'currency' in ['','currency','address','page','pagesize']:
             if currency is not None:
@@ -262,10 +418,16 @@ async def list_tags_by_address(request: web.Request, currency, address, page=Non
         result = service.list_tags_by_address(request
                 ,currency=currency,address=address,page=page,pagesize=pagesize)
         result = await result
+
+        for plugin in request.app['plugins']:
+            if hasattr(plugin, 'before_response'):
+                plugin.before_response(request, result)
+
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
+
         result = web.Response(
                     status=200,
                     text=json.dumps(result),
@@ -281,5 +443,7 @@ async def list_tags_by_address(request: web.Request, currency, address, page=Non
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb = "\n".join(tb)
+        request.app.logger.error(tb)
         raise web.HTTPInternalServerError()

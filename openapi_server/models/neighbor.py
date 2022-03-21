@@ -63,6 +63,23 @@ class Neighbor(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, shallow=False):
+        """Returns the model as a dict:
+
+        :return: The Neighbor as a dict
+        :rtype: dict
+        """
+        if not shallow:
+            return Model.to_dict(self)
+        return { 'balance': self._balance,
+            'id': self._id,
+            'labels': self._labels,
+            'no_txs': self._no_txs,
+            'node_type': self._node_type,
+            'received': self._received,
+            'value': self._value }
+
+
     @property
     def balance(self):
         """Gets the balance of this Neighbor.

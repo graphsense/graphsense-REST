@@ -12,3 +12,9 @@ database:
         eth: 
             raw: eth_raw
             transformed: eth_transformed
+tagstores:
+    - host: "TAGSTORE_MOCK_IP"
+
+show_private_tags:
+    on_header:
+        Authorization: x

@@ -43,6 +43,18 @@ class AddressTags(Model):
         """
         return util.deserialize_model(dikt, cls)
 
+    def to_dict(self, shallow=False):
+        """Returns the model as a dict:
+
+        :return: The AddressTags as a dict
+        :rtype: dict
+        """
+        if not shallow:
+            return Model.to_dict(self)
+        return { 'address_tags': self._address_tags,
+            'next_page': self._next_page }
+
+
     @property
     def address_tags(self):
         """Gets the address_tags of this AddressTags.
