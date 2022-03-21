@@ -183,6 +183,8 @@ def stack(request, currency, operation, body, num_pages, format):
             ln = min(le, ln) if ln > 0 else le
             check[attr] = a[0]
 
+    if not keys:
+        raise TypeError('Keys need to be passed as list')
     inspect.getcallargs(operation, **check)
 
     for i in range(0, ln):
