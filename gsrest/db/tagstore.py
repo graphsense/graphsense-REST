@@ -230,6 +230,7 @@ class Tagstore:
                         address_cluster_mapping acm
                    where
                         acm.address=t.address
+                        and acm.currency=t.currency
                         and t.currency = %s
                         and acm.gs_cluster_id = %s
                         {hide_private_condition(show_private)}
