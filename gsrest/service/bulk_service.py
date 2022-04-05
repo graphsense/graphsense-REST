@@ -177,7 +177,7 @@ def stack(request, currency, operation, body, num_pages, format):
             # and must not be taken as a key
             params[attr] = a
             check[attr] = a
-        else:
+        elif len(a) > 0:
             keys[attr] = a
             le = len(a)
             ln = min(le, ln) if ln > 0 else le
