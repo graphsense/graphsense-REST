@@ -7,6 +7,7 @@ from openapi_server.models.search_result_by_currency \
 from gsrest.service.stats_service import get_currency_statistics
 from gsrest.util.string_edit import alphanumeric_lower
 from gsrest.db.util import tagstores
+from fuzzy_match import algorithims
 
 
 async def get_statistics(request):
@@ -71,6 +72,8 @@ async def search(request, q, currency=None, limit=10):
         if labels:
             result.labels += labels
 
-    result.labels = sorted(list(set(result.labels)), key=lambda x: x.lower())
+    result.labels = sorted(list(set(result.labels)),
+                           key=lambda x: -algorithims.trigram(x.lower(),
+                                                              expression_norm))
 
     return result
