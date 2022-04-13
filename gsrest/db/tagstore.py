@@ -76,6 +76,7 @@ class Tagstore:
         config['port'] = int(config.get('port', 5432))
         config['query_timeout'] = int(config.get('query_timeout', 300))
         config['max_connections'] = int(config.get('max_connections', 10))
+        config['pool_recycle'] = int(config.get('pool_recycle', 3600))
         dsn = f"dbname={config['database']} user={config['username']}"\
               f" password={config['password']} host={config['host']}"\
               f" port={config['port']}"
@@ -89,7 +90,8 @@ class Tagstore:
             dsn,
             maxsize=config['max_connections'],
             on_connect=on_connect,
-            timeout=config['query_timeout'])
+            timeout=config['query_timeout'],
+            pool_recycle=config['pool_recycle'])
 
     def id(self):
         h = self.config['database'] +\
@@ -107,6 +109,8 @@ class Tagstore:
         if params is None:
             params = []
         async with self.pool.acquire() as conn:
+            self.logger.debug(f'pool size {self.pool.size}, freesize'
+                              f' {self.pool.freesize}')
             async with conn.cursor() as cur:
                 if page and paging_key:
                     if "where" not in query.lower():
