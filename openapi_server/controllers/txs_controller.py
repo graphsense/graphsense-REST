@@ -76,6 +76,7 @@ async def get_tx(request: web.Request, currency, tx_hash, include_io=None) -> we
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb.append(f"Request URL: {request.url}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
@@ -146,6 +147,7 @@ async def get_tx_io(request: web.Request, currency, tx_hash, io) -> web.Response
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb.append(f"Request URL: {request.url}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()

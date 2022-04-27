@@ -70,6 +70,7 @@ async def get_statistics(request: web.Request, ) -> web.Response:
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb.append(f"Request URL: {request.url}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
@@ -140,6 +141,7 @@ async def search(request: web.Request, q, currency=None, limit=None) -> web.Resp
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb.append(f"Request URL: {request.url}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()

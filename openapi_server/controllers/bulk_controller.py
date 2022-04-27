@@ -61,6 +61,7 @@ async def bulk_csv(request: web.Request, currency, operation, num_pages, body) -
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb.append(f"Request URL: {request.url}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
@@ -118,6 +119,7 @@ async def bulk_json(request: web.Request, currency, operation, num_pages, body) 
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb.append(f"Request URL: {request.url}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()

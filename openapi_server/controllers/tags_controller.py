@@ -73,6 +73,7 @@ async def list_concepts(request: web.Request, taxonomy) -> web.Response:
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb.append(f"Request URL: {request.url}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
@@ -147,6 +148,7 @@ async def list_tags(request: web.Request, currency, label, level, page=None, pag
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb.append(f"Request URL: {request.url}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
@@ -211,6 +213,7 @@ async def list_taxonomies(request: web.Request, ) -> web.Response:
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb.append(f"Request URL: {request.url}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
