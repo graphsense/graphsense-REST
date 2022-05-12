@@ -246,8 +246,42 @@ class Tagstore:
                             page=page,
                             pagesize=pagesize)
 
-    def list_entity_tags_by_entity(self, currency, entity, show_private=False):
+    async def list_entity_tags_by_entity(self, currency, entity,
+                                         show_private=False):
         query = f"""select
+                        t.label,
+                        t.category,
+                        count(t.address) as c,
+                        max(c.level) as l,
+                        min(t.address) as address
+                    from
+                        tag t,
+                        tagpack tp,
+                        address_cluster_mapping acm,
+                        confidence c
+                    where
+                        acm.address=t.address
+                        and acm.currency=t.currency
+                        and t.currency = %s
+                        and acm.gs_cluster_id = %s
+                        and t.tagpack=tp.id
+                        and t.is_cluster_definer=true
+                        and t.confidence=c.id
+                        {hide_private_condition(show_private)}
+                    group by
+                        t.label, t.category
+                    order by
+                        l desc,
+                        c desc
+                    limit 1"""
+
+        major, _ = await self.execute(query, [currency.upper(), entity])
+        print(major)
+
+        if not len(major):
+            return [], None
+
+        query = """select
                         t.*,
                         tp.is_public,
                         acm.gs_cluster_id
@@ -257,19 +291,16 @@ class Tagstore:
                         address_cluster_mapping acm
                    where
                         acm.address=t.address
-                        and t.is_cluster_definer = true
                         and t.currency = acm.currency
-                        and t.currency = %s
-                        and acm.gs_cluster_id = %s
+                        and acm.currency = %s
+                        and acm.address = %s
                         and t.tagpack=tp.id
-                        {hide_private_condition(show_private)}
-                   order by
-                        t.confidence desc
+                        and t.label= %s
                    limit 1"""
 
-        # TODO also order by frequency
-
-        return self.execute(query, [currency.upper(), entity])
+        return await self.execute(query, [currency.upper(),
+                                          major[0]['address'],
+                                          major[0]['label']])
 
     def list_labels_for_addresses(self, currency, addresses,
                                   show_private=False):
