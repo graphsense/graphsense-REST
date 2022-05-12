@@ -288,18 +288,20 @@ class Tagstore:
                    from
                         tag t,
                         tagpack tp,
-                        address_cluster_mapping acm
+                        address_cluster_mapping acm,
+                        confidence c
                    where
                         acm.address=t.address
                         and t.currency = acm.currency
+                        and c.id = t.confidence
                         and acm.currency = %s
-                        and acm.address = %s
                         and t.tagpack=tp.id
                         and t.label= %s
+                   order by
+                        c.level desc
                    limit 1"""
 
         return await self.execute(query, [currency.upper(),
-                                          major[0]['address'],
                                           major[0]['label']])
 
     def list_labels_for_addresses(self, currency, addresses,
