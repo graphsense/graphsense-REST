@@ -1,6 +1,9 @@
 from openapi_server.models.address_txs import AddressTxs
 from gsrest.service.entities_service import get_entity
 import gsrest.service.common_service as common
+from openapi_server.models.neighbor_addresses import NeighborAddresses
+from openapi_server.models.neighbor_address import NeighborAddress
+import asyncio
 
 
 async def get_address(request, currency, address, include_tags=False):
@@ -25,10 +28,32 @@ async def list_address_txs(request, currency, address, page=None,
 async def list_address_neighbors(request, currency, address, direction,
                                  include_labels=False,
                                  page=None, pagesize=None):
-    return await common.list_neighbors(request, currency, address, direction,
+    results, paging_state = \
+           await common.list_neighbors(request, currency, address, direction,
                                        'address',
                                        include_labels=include_labels,
                                        page=page, pagesize=pagesize, ids=None)
+    is_outgoing = "out" in direction
+    dst = 'dst' if is_outgoing else 'src'
+    relations = []
+    if results is None:
+        return NeighborAddresses()
+    aws = [get_address(request, currency, row[dst+'_address'], False)
+           for row in results]
+
+    nodes = await asyncio.gather(*aws)
+
+    for row, node in zip(results, nodes):
+        print(f'row {row}')
+        nb = NeighborAddress(
+            labels=row['labels'],
+            value=row['value'],
+            no_txs=row['no_transactions'],
+            address=node)
+        relations.append(nb)
+
+    return NeighborAddresses(next_page=paging_state,
+                             neighbors=relations)
 
 
 async def list_address_links(request, currency, address, neighbor,

@@ -279,7 +279,7 @@ class Tagstore:
         print(major)
 
         if not len(major):
-            return [], None
+            return Result(), None
 
         query = """select
                         t.*,
@@ -304,10 +304,11 @@ class Tagstore:
         return await self.execute(query, [currency.upper(),
                                           major[0]['label']])
 
-    def list_labels_for_addresses(self, currency, addresses,
-                                  show_private=False):
+    async def list_labels_for_addresses(self, currency, addresses,
+                                        show_private=False):
         if not addresses:
-            return Result()
+            raise TypeError('x')
+            return Result(), None
         query = f"""select
                     t.address,
                     json_agg(distinct t.label) as labels
@@ -321,12 +322,13 @@ class Tagstore:
                     {hide_private_condition(show_private)}
                    group by address
                    order by address"""
-        return self.execute(query,
-                            params=[currency.upper(), addresses])
+        return await self.execute(query,
+                                  params=[currency.upper(), addresses])
 
-    def list_labels_for_entities(self, currency, entities, show_private=False):
+    async def list_labels_for_entities(self, currency, entities,
+                                       show_private=False):
         if not entities:
-            return Result()
+            return Result(), None
         query = f"""select
                     acm.gs_cluster_id,
                     json_agg(distinct t.label) as labels
@@ -345,8 +347,8 @@ class Tagstore:
                    group by
                     acm.gs_cluster_id
                    order by acm.gs_cluster_id"""
-        return self.execute(query,
-                            params=[currency.upper(), entities])
+        return await self.execute(query,
+                                  params=[currency.upper(), entities])
 
     def count(self, currency, show_private=False):
         query = """

@@ -2,8 +2,6 @@ from openapi_server.models.address import Address
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.address_tags import AddressTags
-from openapi_server.models.neighbors import Neighbors
-from openapi_server.models.neighbor import Neighbor
 from gsrest.util.values import convert_value, to_values
 from gsrest.service.rates_service import get_rates
 from openapi_server.models.link_utxo import LinkUtxo
@@ -12,6 +10,7 @@ from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from gsrest.service.rates_service import list_rates
 from gsrest.db.util import tagstores, tagstores_with_paging, dt_to_int
+import asyncio
 
 
 def address_from_row(currency, row, rates, tags=None):
@@ -117,28 +116,18 @@ async def list_neighbors(request, currency, id, direction, node_type, ids=None,
                                     page=page,
                                     pagesize=pagesize)
 
+    for row in results:
+        row['labels'] = row['labels'] if 'labels' in row else None
+        row['value'] = to_values(row['value'])
+
     dst = 'dst' if is_outgoing else 'src'
+
+    print(f'result {results}')
 
     if include_labels:
         await add_labels(request, currency, node_type, dst, results)
 
-    rates = (await get_rates(request, currency))['rates']
-    relations = []
-    if results is None:
-        return Neighbors()
-    ntype, suffix = (node_type, '') \
-        if node_type == 'address' else ('cluster', '_id')
-    for row in results:
-        relations.append(Neighbor(
-            id=str(row[f'{dst}_{ntype}{suffix}']),
-            node_type=node_type,
-            labels=row['labels'] if 'labels' in row else None,
-            received=to_values(row['total_received']),
-            value=to_values(row['value']),
-            balance=convert_value(currency, row['balance'], rates),
-            no_txs=row['no_transactions']))
-    return Neighbors(next_page=paging_state,
-                     neighbors=relations)
+    return results, paging_state
 
 
 async def add_labels(request, currency, node_type, that, nodes):

@@ -1,5 +1,7 @@
 from gsrest.service.common_service import get_address
 from gsrest.service.rates_service import get_rates
+from openapi_server.models.neighbor_entities import NeighborEntities
+from openapi_server.models.neighbor_entity import NeighborEntity
 from openapi_server.models.entity import Entity
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.address_txs import AddressTxs
@@ -124,10 +126,32 @@ async def get_entity(request, currency, entity, include_tags=False):
 async def list_entity_neighbors(request, currency, entity, direction,
                                 only_ids=None, include_labels=False,
                                 page=None, pagesize=None):
-    return await common.list_neighbors(request, currency, entity, direction,
+    results, paging_state = \
+           await common.list_neighbors(request, currency, entity, direction,
                                        'entity',
                                        only_ids, include_labels, page,
                                        pagesize)
+    is_outgoing = "out" in direction
+    dst = 'dst' if is_outgoing else 'src'
+    relations = []
+    if results is None:
+        return NeighborEntities()
+    aws = [get_entity(request, currency, row[dst+'_cluster_id'], False)
+           for row in results]
+
+    nodes = await asyncio.gather(*aws)
+
+    for row, node in zip(results, nodes):
+        print(f'row {row}')
+        nb = NeighborEntity(
+            labels=row['labels'],
+            value=row['value'],
+            no_txs=row['no_transactions'],
+            entity=node)
+        relations.append(nb)
+
+    return NeighborEntities(next_page=paging_state,
+                            neighbors=relations)
 
 
 async def list_entity_addresses(request, currency, entity,
