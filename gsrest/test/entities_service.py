@@ -1,8 +1,8 @@
 from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from openapi_server.models.tx_account import TxAccount
-from openapi_server.models.neighbors import Neighbors
-from openapi_server.models.neighbor import Neighbor
+from openapi_server.models.neighbor_entities import NeighborEntities
+from openapi_server.models.neighbor_entity import NeighborEntity
 from openapi_server.models.address import Address
 from openapi_server.models.entity_addresses import EntityAddresses
 from openapi_server.models.entity import Entity
@@ -42,7 +42,9 @@ eth_entityWithTags.tags = AddressAndEntityTags(
 
 eth_neighbors = []
 for n in eth_addressWithTagsOutNeighbors.neighbors:
-    nn = Neighbor(**n.to_dict())
+    d = n.to_dict()
+    d.pop('address')
+    nn = NeighborEntity(d)
     nn.node_type = 'entity'
     nn.labels = []
     eth_neighbors.append(nn)
@@ -51,14 +53,14 @@ eth_neighbors[0].id = '107925000'
 eth_neighbors[0].labels = [ts.eth_etag1.label]
 eth_neighbors[1].id = '107925001'
 
-eth_entityWithTagsOutNeighbors = Neighbors(
+eth_entityWithTagsOutNeighbors = NeighborEntities(
         next_page=None,
         neighbors=eth_neighbors)
 
-entityWithTagsOutNeighbors = Neighbors(
+entityWithTagsOutNeighbors = NeighborEntities(
     next_page=None,
     neighbors=[
-        Neighbor(
+        NeighborEntity(
           received=make_values(
              usd=2583655.0,
              eur=2162085.5,
@@ -79,7 +81,7 @@ entityWithTagsOutNeighbors = Neighbors(
              eur=1.15,
           )
         ),
-        Neighbor(
+        NeighborEntity(
           received=make_values(
              usd=2583655.0,
              eur=2162085.5,
@@ -101,10 +103,10 @@ entityWithTagsOutNeighbors = Neighbors(
           )
         )])
 
-entityWithTagsInNeighbors = Neighbors(
+entityWithTagsInNeighbors = NeighborEntities(
     next_page=None,
     neighbors=[
-        Neighbor(
+        NeighborEntity(
           received=make_values(
              usd=200.0,
              eur=100.0,
@@ -125,7 +127,7 @@ entityWithTagsInNeighbors = Neighbors(
              value=5
           )
         ),
-        Neighbor(
+        NeighborEntity(
           received=make_values(
              usd=13.41,
              eur=9.87,

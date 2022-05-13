@@ -1,8 +1,8 @@
 from openapi_server.models.address import Address
 from openapi_server.models.address_and_entity_tags import AddressAndEntityTags
 from openapi_server.models.tx_summary import TxSummary
-from openapi_server.models.neighbors import Neighbors
-from openapi_server.models.neighbor import Neighbor
+from openapi_server.models.neighbor_addresses import NeighborAddresses
+from openapi_server.models.neighbor_address import NeighborAddress
 from openapi_server.models.entity import Entity
 from openapi_server.models.link_utxo import LinkUtxo
 from openapi_server.models.links import Links
@@ -125,150 +125,6 @@ address3 = Address(
    balance=make_values(eur=0.0, usd=0.0, value=0)
 )
 
-addressWithTotalSpent0 = Address(
-   first_tx=TxSummary(
-      tx_hash="04d92601677d62a985310b61a301e74870fa942c"
-      "8be0648e16b1db23b996a8cd",
-      height=1,
-      timestamp=1361497172
-   ),
-   total_spent=make_values(
-      usd=0.0,
-      value=0,
-      eur=0.0
-   ),
-   out_degree=284,
-   no_incoming_txs=3981,
-   no_outgoing_txs=267,
-   total_received=make_values(
-      usd=0.11,
-      value=18099,
-      eur=0.1
-   ),
-   last_tx=TxSummary(
-      tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea"
-      "5b94b304d438a8225850f05b45ae5",
-      height=1,
-      timestamp=1361497172
-   ),
-   address="addressC",
-   entity=17642139,
-   in_degree=5013,
-   balance=make_values(eur=0.0, usd=0.0, value=18099)
-   )
-
-addressWithTagsOutNeighbors = Neighbors(
-        next_page=None,
-        neighbors=[
-            Neighbor(
-                id="addressE",
-                node_type='address',
-                labels=['labelX', 'labelY'],
-                received=make_values(
-                        value=87789282,
-                        usd=142.18,
-                        eur=114.86),
-                balance=make_values(
-                        value=0,
-                        usd=0.0,
-                        eur=0.0),
-                no_txs=10,
-                value=make_values(
-                    value=27789282,
-                    usd=87.24,
-                    eur=72.08)
-                ),
-            Neighbor(
-                id="addressF",
-                node_type='address',
-                labels=[],
-                received=make_values(
-                        value=40412296129,
-                        usd=2543214.5,
-                        eur=2130676.5),
-                balance=make_values(
-                        value=115422577,
-                        usd=2.31,
-                        eur=1.15),
-                no_txs=1,
-                value=make_values(
-                    value=27789282,
-                    usd=87.24,
-                    eur=72.08)
-                )])
-
-addressWithTagsInNeighbors = Neighbors(
-        next_page=None,
-        neighbors=[
-            Neighbor(
-                id="addressB",
-                node_type='address',
-                labels=[],
-                received=make_values(
-                        value=40412296129,
-                        usd=2543214.5,
-                        eur=2130676.5),
-                balance=make_values(
-                        value=115422577,
-                        usd=2.31,
-                        eur=1.15),
-                no_txs=1,
-                value=make_values(
-                    value=1091,
-                    usd=0.01,
-                    eur=0.0)
-                ),
-            Neighbor(
-                id="addressD",
-                node_type='address',
-                labels=[],
-                received=make_values(
-                        value=40412296129,
-                        usd=2543214.5,
-                        eur=2130676.5),
-                balance=make_values(
-                        value=115422577,
-                        usd=2.31,
-                        eur=1.15),
-                no_txs=1,
-                value=make_values(
-                    value=50000000,
-                    usd=404.02,
-                    eur=295.7)
-                )])
-
-addressD = Address(
-   first_tx=TxSummary(
-      tx_hash="04d92601677d62a985310b61a301e74870fa942c"
-      "8be0648e16b1db23b996a8cd",
-      height=1,
-      timestamp=1361497172
-   ),
-   total_spent=make_values(
-      usd=2541183.0,
-      value=40296873552,
-      eur=2118309.0
-   ),
-   out_degree=284,
-   no_incoming_txs=3981,
-   no_outgoing_txs=267,
-   total_received=make_values(
-      usd=2543214.5,
-      value=40412296129,
-      eur=2130676.5
-   ),
-   last_tx=TxSummary(
-      tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea"
-      "5b94b304d438a8225850f05b45ae5",
-      height=1,
-      timestamp=1361497172
-   ),
-   address="addressD",
-   entity=17642138,
-   in_degree=5013,
-   balance=make_values(eur=1.15, usd=2.31, value=115422577),
-        )
-
 addressE = Address(
    address="addressE",
    entity=17642138,
@@ -304,6 +160,179 @@ addressE = Address(
    no_incoming_txs=3,
    in_degree=3
 )
+
+addressF = Address(
+   address="addressF",
+   entity=10164852,
+   last_tx=TxSummary(
+      tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea"
+      "5b94b304d438a8225850f05b45ae5",
+      height=1,
+      timestamp=1361497172
+   ),
+   first_tx=TxSummary(
+      tx_hash="04d92601677d62a985310b61a301e74870fa942c"
+      "8be0648e16b1db23b996a8cd",
+      height=1,
+      timestamp=1361497172
+   ),
+   total_spent=make_values(
+      usd=2541183.0,
+      value=40296873552,
+      eur=2118309.0
+   ),
+   out_degree=284,
+   no_incoming_txs=3981,
+   no_outgoing_txs=267,
+   total_received=make_values(
+      usd=2543214.5,
+      value=40412296129,
+      eur=2130676.5
+   ),
+   in_degree=5013,
+   balance=make_values(eur=1.15, usd=2.31, value=115422577),
+)
+
+addressB = Address(
+   address="addressB",
+   entity=67065,
+   first_tx=TxSummary(
+      tx_hash="04d92601677d62a985310b61a301e74870fa942c"
+      "8be0648e16b1db23b996a8cd",
+      height=1,
+      timestamp=1361497172
+   ),
+   last_tx=TxSummary(
+      tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea"
+      "5b94b304d438a8225850f05b45ae5",
+      height=1,
+      timestamp=1361497172
+   ),
+   total_spent=make_values(
+      usd=2541183.0,
+      value=40296873552,
+      eur=2118309.0
+   ),
+   out_degree=284,
+   no_incoming_txs=3981,
+   no_outgoing_txs=267,
+   total_received=make_values(
+      usd=2543214.5,
+      value=40412296129,
+      eur=2130676.5
+   ),
+   in_degree=5013,
+   balance=make_values(eur=1.15, usd=2.31, value=115422577),
+        )
+
+addressD = Address(
+   address="addressD",
+   entity=17642138,
+   first_tx=TxSummary(
+      tx_hash="04d92601677d62a985310b61a301e74870fa942c"
+      "8be0648e16b1db23b996a8cd",
+      height=1,
+      timestamp=1361497172
+   ),
+   last_tx=TxSummary(
+      tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea"
+      "5b94b304d438a8225850f05b45ae5",
+      height=1,
+      timestamp=1361497172
+   ),
+   total_spent=make_values(
+      usd=2541183.0,
+      value=40296873552,
+      eur=2118309.0
+   ),
+   out_degree=284,
+   no_incoming_txs=3981,
+   no_outgoing_txs=267,
+   total_received=make_values(
+      usd=2543214.5,
+      value=40412296129,
+      eur=2130676.5
+   ),
+   in_degree=5013,
+   balance=make_values(eur=1.15, usd=2.31, value=115422577),
+        )
+
+addressWithTotalSpent0 = Address(
+   first_tx=TxSummary(
+      tx_hash="04d92601677d62a985310b61a301e74870fa942c"
+      "8be0648e16b1db23b996a8cd",
+      height=1,
+      timestamp=1361497172
+   ),
+   total_spent=make_values(
+      usd=0.0,
+      value=0,
+      eur=0.0
+   ),
+   out_degree=284,
+   no_incoming_txs=3981,
+   no_outgoing_txs=267,
+   total_received=make_values(
+      usd=0.11,
+      value=18099,
+      eur=0.1
+   ),
+   last_tx=TxSummary(
+      tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea"
+      "5b94b304d438a8225850f05b45ae5",
+      height=1,
+      timestamp=1361497172
+   ),
+   address="addressC",
+   entity=17642139,
+   in_degree=5013,
+   balance=make_values(eur=0.0, usd=0.0, value=18099)
+   )
+
+addressWithTagsOutNeighbors = NeighborAddresses(
+        next_page=None,
+        neighbors=[
+            NeighborAddress(
+                labels=['labelX', 'labelY'],
+                no_txs=10,
+                value=make_values(
+                    value=27789282,
+                    usd=87.24,
+                    eur=72.08),
+                address=addressE
+                ),
+            NeighborAddress(
+                labels=[],
+                no_txs=1,
+                value=make_values(
+                    value=27789282,
+                    usd=87.24,
+                    eur=72.08),
+                address=addressF
+                )])
+
+addressWithTagsInNeighbors = NeighborAddresses(
+        next_page=None,
+        neighbors=[
+            NeighborAddress(
+                labels=[],
+                no_txs=1,
+                value=make_values(
+                    value=1091,
+                    usd=0.01,
+                    eur=0.0),
+                address=addressB
+                ),
+            NeighborAddress(
+                labels=[],
+                no_txs=1,
+                value=make_values(
+                    value=50000000,
+                    usd=404.02,
+                    eur=295.7),
+                address=addressD
+                )])
+
 
 entityWithTags = Entity(
    no_outgoing_txs=280,
@@ -416,44 +445,26 @@ eth_address3 = Address(
 eth_address3.address = "0x234567"
 eth_address3.entity = 107925002
 
-eth_addressWithTagsOutNeighbors = Neighbors(
+eth_addressWithTagsOutNeighbors = NeighborAddresses(
         next_page=None,
         neighbors=[
-            Neighbor(
-                id="0xabcdef",
-                node_type='address',
+            NeighborAddress(
                 labels=['TagA', 'TagB'],
-                received=make_values(
-                        value=234000000000000000000,
-                        eur=10.11,
-                        usd=20.22),
-                balance=make_values(
-                        value=111000000000000000000,
-                        usd=222.0,
-                        eur=111.0),
                 no_txs=4,
                 value=make_values(
                     value=10000000000000000000,
                     usd=20.0,
-                    eur=10.0)
+                    eur=10.0),
+                address=eth_address
                 ),
-            Neighbor(
-                id="0x123456",
-                node_type='address',
+            NeighborAddress(
                 labels=['LabelX', 'LabelY'],
-                received=make_values(
-                        value=456000000000000000000,
-                        eur=40.44,
-                        usd=50.56),
-                balance=make_values(
-                        value=111000000000000000000,
-                        usd=222.0,
-                        eur=111.0),
                 no_txs=4,
                 value=make_values(
                     value=10000000000000000000,
                     usd=20.0,
-                    eur=10.0)
+                    eur=10.0),
+                address=eth_address2
                 )])
 
 eth_entityWithTags = Entity(
