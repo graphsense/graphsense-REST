@@ -1,3 +1,4 @@
+#!/bin/bash
 MOCK_DB=$1
 ORGANIZATION=$2
 

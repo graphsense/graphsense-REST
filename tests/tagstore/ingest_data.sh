@@ -2,6 +2,7 @@
 
 datadir=`dirname $0`/data
 TAGSTORE_MOCK=$1
+ORGANIZATION=${2:$ORGANIZATION}
 MOCK_CMD="docker exec $TAGSTORE_MOCK psql -U tagstore -d tagstore"
 
 TAG=develop
