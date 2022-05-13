@@ -5,8 +5,6 @@ info:
   version: 0.5.2
 servers:
 - url: http://graphsense-rest:9000
-security:
-- cookieAuth: []
 paths:
   /search:
     get:
@@ -82,8 +80,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/search_result'
           description: OK
-      security:
-      - api_key: []
       summary: Returns matching addresses, transactions and labels
       tags:
       - general
@@ -98,7 +94,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/stats'
           description: OK
-      security: []
       summary: Get statistics of supported currencies
       tags:
       - general
@@ -115,8 +110,6 @@ paths:
                   $ref: '#/components/schemas/taxonomy'
                 type: array
           description: OK
-      security:
-      - api_key: []
       summary: Returns the supported taxonomies
       tags:
       - tags
@@ -143,8 +136,6 @@ paths:
                   $ref: '#/components/schemas/concept'
                 type: array
           description: OK
-      security:
-      - api_key: []
       summary: Returns the supported concepts of a taxonomy
       tags:
       - tags
@@ -189,8 +180,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/address'
           description: OK
-      security:
-      - api_key: []
       summary: Get an address, optionally with tags
       tags:
       - addresses
@@ -235,8 +224,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/entity'
           description: OK
-      security:
-      - api_key: []
       summary: Get the entity of an address
       tags:
       - addresses
@@ -298,8 +285,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/links'
           description: OK
-      security:
-      - api_key: []
       summary: Get outgoing transactions between two addresses
       tags:
       - addresses
@@ -371,10 +356,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/neighbors'
+                $ref: '#/components/schemas/neighbor_addresses'
           description: OK
-      security:
-      - api_key: []
       summary: Get an addresses' neighbors in the address graph
       tags:
       - addresses
@@ -427,8 +410,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/address_tags'
           description: OK
-      security:
-      - api_key: []
       summary: Get attribution tags for a given address
       tags:
       - addresses
@@ -481,8 +462,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/address_txs'
           description: OK
-      security:
-      - api_key: []
       summary: Get all transactions an address has been involved in
       tags:
       - addresses
@@ -517,8 +496,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/block'
           description: OK
-      security:
-      - api_key: []
       summary: Get a block by its height
       tags:
       - blocks
@@ -564,8 +541,6 @@ paths:
                   $ref: '#/components/schemas/tx'
                 type: array
           description: OK
-      security:
-      - api_key: []
       summary: Get block transactions
       tags:
       - blocks
@@ -640,8 +615,6 @@ paths:
               schema:
                 type: string
           description: OK
-      security:
-      - api_key: []
       summary: Get data as CSV in bulk
       tags:
       - bulk
@@ -716,8 +689,6 @@ paths:
                   type: object
                 type: array
           description: OK
-      security:
-      - api_key: []
       summary: Get data as JSON in bulk
       tags:
       - bulk
@@ -764,8 +735,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/entity'
           description: OK
-      security:
-      - api_key: []
       summary: Get an entity, optionally with tags
       tags:
       - entities
@@ -818,8 +787,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/entity_addresses'
           description: OK
-      security:
-      - api_key: []
       summary: Get an entity's addresses
       tags:
       - entities
@@ -881,8 +848,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/links'
           description: OK
-      security:
-      - api_key: []
       summary: Get transactions between two entities
       tags:
       - entities
@@ -962,10 +927,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/neighbors'
+                $ref: '#/components/schemas/neighbor_entities'
           description: OK
-      security:
-      - api_key: []
       summary: Get an entity's neighbors in the entity graph
       tags:
       - entities
@@ -1075,8 +1038,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/search_result_level1'
           description: OK
-      security:
-      - api_key: []
       summary: Search deeply for matching neighbors
       tags:
       - entities
@@ -1141,8 +1102,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/tags'
           description: OK
-      security:
-      - api_key: []
       summary: Get tags for a given entity for the given level
       tags:
       - entities
@@ -1195,8 +1154,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/address_txs'
           description: OK
-      security:
-      - api_key: []
       summary: Get all transactions an entity has been involved in
       tags:
       - entities
@@ -1231,8 +1188,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/rates'
           description: OK
-      security:
-      - api_key: []
       summary: Returns exchange rate for a given height
       tags:
       - rates
@@ -1297,8 +1252,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/tags'
           description: OK
-      security:
-      - api_key: []
       summary: Returns address or entity tags associated with a given label
       tags:
       - tags
@@ -1347,8 +1300,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/tx'
           description: OK
-      security:
-      - api_key: []
       summary: Returns details of a specific transaction identified by its hash.
       tags:
       - txs
@@ -1395,8 +1346,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/tx_values'
           description: OK
-      security:
-      - api_key: []
       summary: Returns input/output values of a specific transaction identified by
         its hash.
       tags:
@@ -1831,6 +1780,14 @@ components:
           value: 6
         in_degree: 1
         address: addressA
+        out_degree: 2
+        first_tx:
+          tx_hash: tx_hash
+          height: 47
+          timestamp: 123456789
+        tags:
+        - null
+        - null
         balance:
           fiat_values:
           - code: code
@@ -1840,11 +1797,7 @@ components:
           value: 6
         no_incoming_txs: 5
         no_outgoing_txs: 5
-        out_degree: 2
-        first_tx:
-          tx_hash: tx_hash
-          height: 47
-          timestamp: 123456789
+        currency: btc
         last_tx:
           tx_hash: tx_hash
           height: 47
@@ -1857,9 +1810,6 @@ components:
           - code: code
             value: 0.8008282
           value: 6
-        tags:
-        - null
-        - null
       properties:
         address:
           description: Address
@@ -1868,6 +1818,11 @@ components:
           type: string
         balance:
           $ref: '#/components/schemas/values'
+        currency:
+          description: crypto currency code
+          example: btc
+          title: currency
+          type: string
         entity:
           description: Entity id
           example: 123456
@@ -1907,6 +1862,7 @@ components:
       required:
       - address
       - balance
+      - currency
       - entity
       - first_tx
       - in_degree
@@ -2178,6 +2134,16 @@ components:
           format: int32
           title: timestamp
           type: integer
+      required:
+      - name
+      - no_address_relations
+      - no_addresses
+      - no_blocks
+      - no_entities
+      - no_labels
+      - no_tagged_addresses
+      - no_txs
+      - timestamp
       title: statistics of a cryptocurrency
       type: object
     entity:
@@ -2213,6 +2179,7 @@ components:
           value: 6
         no_incoming_txs: 1
         no_outgoing_txs: 5
+        currency: btc
         last_tx:
           tx_hash: tx_hash
           height: 47
@@ -2228,6 +2195,11 @@ components:
       properties:
         balance:
           $ref: '#/components/schemas/values'
+        currency:
+          description: crypto currency code
+          example: btc
+          title: currency
+          type: string
         entity:
           description: Entity id
           example: 123456
@@ -2272,6 +2244,7 @@ components:
           $ref: '#/components/schemas/values'
       required:
       - balance
+      - currency
       - entity
       - first_tx
       - in_degree
@@ -2298,6 +2271,14 @@ components:
             value: 6
           in_degree: 1
           address: addressA
+          out_degree: 2
+          first_tx:
+            tx_hash: tx_hash
+            height: 47
+            timestamp: 123456789
+          tags:
+          - null
+          - null
           balance:
             fiat_values:
             - code: code
@@ -2307,11 +2288,7 @@ components:
             value: 6
           no_incoming_txs: 5
           no_outgoing_txs: 5
-          out_degree: 2
-          first_tx:
-            tx_hash: tx_hash
-            height: 47
-            timestamp: 123456789
+          currency: btc
           last_tx:
             tx_hash: tx_hash
             height: 47
@@ -2324,9 +2301,6 @@ components:
             - code: code
               value: 0.8008282
             value: 6
-          tags:
-          - null
-          - null
         - total_spent:
             fiat_values:
             - code: code
@@ -2336,6 +2310,14 @@ components:
             value: 6
           in_degree: 1
           address: addressA
+          out_degree: 2
+          first_tx:
+            tx_hash: tx_hash
+            height: 47
+            timestamp: 123456789
+          tags:
+          - null
+          - null
           balance:
             fiat_values:
             - code: code
@@ -2345,11 +2327,7 @@ components:
             value: 6
           no_incoming_txs: 5
           no_outgoing_txs: 5
-          out_degree: 2
-          first_tx:
-            tx_hash: tx_hash
-            height: 47
-            timestamp: 123456789
+          currency: btc
           last_tx:
             tx_hash: tx_hash
             height: 47
@@ -2362,9 +2340,6 @@ components:
             - code: code
               value: 0.8008282
             value: 6
-          tags:
-          - null
-          - null
       properties:
         addresses:
           items:
@@ -2476,43 +2451,9 @@ components:
       title: links
       type: object
     neighbor:
-      example:
-        node_type: address
-        balance:
-          fiat_values:
-          - code: code
-            value: 0.8008282
-          - code: code
-            value: 0.8008282
-          value: 6
-        received:
-          fiat_values:
-          - code: code
-            value: 0.8008282
-          - code: code
-            value: 0.8008282
-          value: 6
-        id: id
-        value:
-          fiat_values:
-          - code: code
-            value: 0.8008282
-          - code: code
-            value: 0.8008282
-          value: 6
-        labels:
-        - labels
-        - labels
-        no_txs: 11
       properties:
-        balance:
-          $ref: '#/components/schemas/values'
-        id:
-          description: address or entity id
-          title: id
-          type: string
         labels:
-          description: labels
+          description: The neighbor's tag labels
           items:
             type: string
           title: labels
@@ -2523,96 +2464,325 @@ components:
           format: int32
           title: no_txs
           type: integer
-        node_type:
-          description: address or entity
-          enum:
-          - address
-          - entity
-          title: node_type
-          type: string
-        received:
-          $ref: '#/components/schemas/values'
         value:
           $ref: '#/components/schemas/values'
       required:
-      - balance
-      - id
       - no_txs
-      - node_type
-      - received
       - value
       title: neighbor
       type: object
-    neighbors:
+    neighbor_address:
+      allOf:
+      - $ref: '#/components/schemas/neighbor'
+      example:
+        address:
+          total_spent:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          in_degree: 1
+          address: addressA
+          out_degree: 2
+          first_tx:
+            tx_hash: tx_hash
+            height: 47
+            timestamp: 123456789
+          tags:
+          - null
+          - null
+          balance:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          no_incoming_txs: 5
+          no_outgoing_txs: 5
+          currency: btc
+          last_tx:
+            tx_hash: tx_hash
+            height: 47
+            timestamp: 123456789
+          entity: 123456
+          total_received:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+      properties:
+        address:
+          $ref: '#/components/schemas/address'
+      required:
+      - address
+      title: neighbor_address
+      type: object
+    neighbor_addresses:
       example:
         next_page: next_page
         neighbors:
-        - node_type: address
-          balance:
-            fiat_values:
-            - code: code
-              value: 0.8008282
-            - code: code
-              value: 0.8008282
-            value: 6
-          received:
-            fiat_values:
-            - code: code
-              value: 0.8008282
-            - code: code
-              value: 0.8008282
-            value: 6
-          id: id
-          value:
-            fiat_values:
-            - code: code
-              value: 0.8008282
-            - code: code
-              value: 0.8008282
-            value: 6
-          labels:
-          - labels
-          - labels
-          no_txs: 11
-        - node_type: address
-          balance:
-            fiat_values:
-            - code: code
-              value: 0.8008282
-            - code: code
-              value: 0.8008282
-            value: 6
-          received:
-            fiat_values:
-            - code: code
-              value: 0.8008282
-            - code: code
-              value: 0.8008282
-            value: 6
-          id: id
-          value:
-            fiat_values:
-            - code: code
-              value: 0.8008282
-            - code: code
-              value: 0.8008282
-            value: 6
-          labels:
-          - labels
-          - labels
-          no_txs: 11
+        - address:
+            total_spent:
+              fiat_values:
+              - code: code
+                value: 0.8008282
+              - code: code
+                value: 0.8008282
+              value: 6
+            in_degree: 1
+            address: addressA
+            out_degree: 2
+            first_tx:
+              tx_hash: tx_hash
+              height: 47
+              timestamp: 123456789
+            tags:
+            - null
+            - null
+            balance:
+              fiat_values:
+              - code: code
+                value: 0.8008282
+              - code: code
+                value: 0.8008282
+              value: 6
+            no_incoming_txs: 5
+            no_outgoing_txs: 5
+            currency: btc
+            last_tx:
+              tx_hash: tx_hash
+              height: 47
+              timestamp: 123456789
+            entity: 123456
+            total_received:
+              fiat_values:
+              - code: code
+                value: 0.8008282
+              - code: code
+                value: 0.8008282
+              value: 6
+        - address:
+            total_spent:
+              fiat_values:
+              - code: code
+                value: 0.8008282
+              - code: code
+                value: 0.8008282
+              value: 6
+            in_degree: 1
+            address: addressA
+            out_degree: 2
+            first_tx:
+              tx_hash: tx_hash
+              height: 47
+              timestamp: 123456789
+            tags:
+            - null
+            - null
+            balance:
+              fiat_values:
+              - code: code
+                value: 0.8008282
+              - code: code
+                value: 0.8008282
+              value: 6
+            no_incoming_txs: 5
+            no_outgoing_txs: 5
+            currency: btc
+            last_tx:
+              tx_hash: tx_hash
+              height: 47
+              timestamp: 123456789
+            entity: 123456
+            total_received:
+              fiat_values:
+              - code: code
+                value: 0.8008282
+              - code: code
+                value: 0.8008282
+              value: 6
       properties:
         neighbors:
           items:
-            $ref: '#/components/schemas/neighbor'
+            $ref: '#/components/schemas/neighbor_address'
           title: neighbors
           type: array
         next_page:
           format: string
           title: next_page
           type: string
-      title: neighbors
+      required:
+      - neighbors
+      title: neighbor_addresses
       type: object
+    neighbor_entities:
+      example:
+        next_page: next_page
+        neighbors:
+        - entity:
+            total_spent:
+              fiat_values:
+              - code: code
+                value: 0.8008282
+              - code: code
+                value: 0.8008282
+              value: 6
+            in_degree: 0
+            no_addresses: 6
+            out_degree: 5
+            first_tx:
+              tx_hash: tx_hash
+              height: 47
+              timestamp: 123456789
+            tags:
+              entity_tags:
+              - null
+              - null
+              address_tags:
+              - null
+              - null
+            root_address: addressA
+            balance:
+              fiat_values:
+              - code: code
+                value: 0.8008282
+              - code: code
+                value: 0.8008282
+              value: 6
+            no_incoming_txs: 1
+            no_outgoing_txs: 5
+            currency: btc
+            last_tx:
+              tx_hash: tx_hash
+              height: 47
+              timestamp: 123456789
+            entity: 123456
+            total_received:
+              fiat_values:
+              - code: code
+                value: 0.8008282
+              - code: code
+                value: 0.8008282
+              value: 6
+        - entity:
+            total_spent:
+              fiat_values:
+              - code: code
+                value: 0.8008282
+              - code: code
+                value: 0.8008282
+              value: 6
+            in_degree: 0
+            no_addresses: 6
+            out_degree: 5
+            first_tx:
+              tx_hash: tx_hash
+              height: 47
+              timestamp: 123456789
+            tags:
+              entity_tags:
+              - null
+              - null
+              address_tags:
+              - null
+              - null
+            root_address: addressA
+            balance:
+              fiat_values:
+              - code: code
+                value: 0.8008282
+              - code: code
+                value: 0.8008282
+              value: 6
+            no_incoming_txs: 1
+            no_outgoing_txs: 5
+            currency: btc
+            last_tx:
+              tx_hash: tx_hash
+              height: 47
+              timestamp: 123456789
+            entity: 123456
+            total_received:
+              fiat_values:
+              - code: code
+                value: 0.8008282
+              - code: code
+                value: 0.8008282
+              value: 6
+      properties:
+        neighbors:
+          items:
+            $ref: '#/components/schemas/neighbor_entity'
+          title: neighbors
+          type: array
+        next_page:
+          format: string
+          title: next_page
+          type: string
+      required:
+      - neighbors
+      title: neighbor_entities
+      type: object
+    neighbor_entity:
+      allOf:
+      - $ref: '#/components/schemas/neighbor'
+      example:
+        entity:
+          total_spent:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          in_degree: 0
+          no_addresses: 6
+          out_degree: 5
+          first_tx:
+            tx_hash: tx_hash
+            height: 47
+            timestamp: 123456789
+          tags:
+            entity_tags:
+            - null
+            - null
+            address_tags:
+            - null
+            - null
+          root_address: addressA
+          balance:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          no_incoming_txs: 1
+          no_outgoing_txs: 5
+          currency: btc
+          last_tx:
+            tx_hash: tx_hash
+            height: 47
+            timestamp: 123456789
+          entity: 123456
+          total_received:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+      properties:
+        entity:
+          $ref: '#/components/schemas/entity'
+      required:
+      - entity
+      title: neighbor_entity
     next_page:
       format: string
       title: next_page
@@ -2647,6 +2817,9 @@ components:
           format: float
           title: value
           type: number
+      required:
+      - code
+      - value
       title: rate
       type: object
     rates:
@@ -2704,6 +2877,9 @@ components:
             type: string
           title: labels
           type: array
+      required:
+      - currencies
+      - labels
       title: search_result
       type: object
     search_result_by_currency:
@@ -2733,6 +2909,10 @@ components:
             type: string
           title: txs
           type: array
+      required:
+      - addresses
+      - currency
+      - txs
       title: search_result_by_currency
       type: object
     search_result_labels:
@@ -2819,6 +2999,10 @@ components:
         version:
           title: version
           type: string
+      required:
+      - currencies
+      - request_timestamp
+      - version
       title: stats
       type: object
     tag:
@@ -3094,6 +3278,9 @@ components:
           format: int64
           title: value
           type: integer
+      required:
+      - fiat_values
+      - value
       title: values
       type: object
     address_tag_allOf:
@@ -3170,14 +3357,3 @@ components:
             $ref: '#/components/schemas/search_result_leaf'
           type: array
       type: object
-  securitySchemes:
-    api_key:
-      in: header
-      name: Authorization
-      type: apiKey
-      x-apikeyInfoFunc: openapi_server.controllers.security_controller_.info_from_api_key
-    cookieAuth:
-      in: cookie
-      name: session
-      type: apiKey
-      x-apikeyInfoFunc: openapi_server.controllers.security_controller_.info_from_cookieAuth

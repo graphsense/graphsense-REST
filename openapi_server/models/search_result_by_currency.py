@@ -79,6 +79,8 @@ class SearchResultByCurrency(Model):
         :param addresses: The addresses of this SearchResultByCurrency.
         :type addresses: List[str]
         """
+        if addresses is None:
+            raise ValueError("Invalid value for `addresses`, must not be `None`")
 
         self._addresses = addresses
 
@@ -102,6 +104,8 @@ class SearchResultByCurrency(Model):
         :param currency: The currency of this SearchResultByCurrency.
         :type currency: str
         """
+        if currency is None:
+            raise ValueError("Invalid value for `currency`, must not be `None`")
 
         self._currency = currency
 
@@ -125,5 +129,7 @@ class SearchResultByCurrency(Model):
         :param txs: The txs of this SearchResultByCurrency.
         :type txs: List[str]
         """
+        if txs is None:
+            raise ValueError("Invalid value for `txs`, must not be `None`")
 
         self._txs = txs

@@ -21,7 +21,10 @@ from openapi_server.models.link import Link
 from openapi_server.models.link_utxo import LinkUtxo
 from openapi_server.models.links import Links
 from openapi_server.models.neighbor import Neighbor
-from openapi_server.models.neighbors import Neighbors
+from openapi_server.models.neighbor_address import NeighborAddress
+from openapi_server.models.neighbor_addresses import NeighborAddresses
+from openapi_server.models.neighbor_entities import NeighborEntities
+from openapi_server.models.neighbor_entity import NeighborEntity
 from openapi_server.models.rate import Rate
 from openapi_server.models.rates import Rates
 from openapi_server.models.search_result import SearchResult

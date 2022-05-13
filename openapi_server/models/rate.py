@@ -74,6 +74,8 @@ class Rate(Model):
         :param code: The code of this Rate.
         :type code: str
         """
+        if code is None:
+            raise ValueError("Invalid value for `code`, must not be `None`")
 
         self._code = code
 
@@ -97,5 +99,7 @@ class Rate(Model):
         :param value: The value of this Rate.
         :type value: float
         """
+        if value is None:
+            raise ValueError("Invalid value for `value`, must not be `None`")
 
         self._value = value

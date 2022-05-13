@@ -10,7 +10,7 @@ from openapi_server.models.address_tags import AddressTags
 from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.entity import Entity
 from openapi_server.models.links import Links
-from openapi_server.models.neighbors import Neighbors
+from openapi_server.models.neighbor_addresses import NeighborAddresses
 from tests import BaseTestCase
 import gsrest.test.addresses_service as test_service
 

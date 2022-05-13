@@ -8,7 +8,7 @@ from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.entity import Entity
 from openapi_server.models.entity_addresses import EntityAddresses
 from openapi_server.models.links import Links
-from openapi_server.models.neighbors import Neighbors
+from openapi_server.models.neighbor_entities import NeighborEntities
 from openapi_server.models.search_result_level1 import SearchResultLevel1
 from openapi_server.models.tags import Tags
 import gsrest.service.entities_service as service
@@ -74,9 +74,6 @@ async def get_entity(request: web.Request, currency, entity, include_tags=None) 
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
     except ValueError as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
-    except TypeError as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
@@ -149,9 +146,6 @@ async def list_entity_addresses(request: web.Request, currency, entity, page=Non
     except ValueError as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
-    except TypeError as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")
@@ -222,9 +216,6 @@ async def list_entity_links(request: web.Request, currency, entity, neighbor, pa
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
     except ValueError as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
-    except TypeError as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
@@ -303,9 +294,6 @@ async def list_entity_neighbors(request: web.Request, currency, entity, directio
     except ValueError as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
-    except TypeError as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")
@@ -374,9 +362,6 @@ async def list_entity_txs(request: web.Request, currency, entity, page=None, pag
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
     except ValueError as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
-    except TypeError as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
@@ -449,9 +434,6 @@ async def list_tags_by_entity(request: web.Request, currency, entity, level, pag
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
     except ValueError as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
-    except TypeError as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
@@ -530,9 +512,6 @@ async def search_entity_neighbors(request: web.Request, currency, entity, direct
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
     except ValueError as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
-    except TypeError as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:

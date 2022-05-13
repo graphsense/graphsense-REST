@@ -71,9 +71,6 @@ async def get_tx(request: web.Request, currency, tx_hash, include_io=None) -> we
     except ValueError as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
-    except TypeError as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")
@@ -140,9 +137,6 @@ async def get_tx_io(request: web.Request, currency, tx_hash, io) -> web.Response
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
     except ValueError as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
-    except TypeError as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:

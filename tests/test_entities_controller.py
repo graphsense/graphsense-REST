@@ -9,7 +9,7 @@ from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.entity import Entity
 from openapi_server.models.entity_addresses import EntityAddresses
 from openapi_server.models.links import Links
-from openapi_server.models.neighbors import Neighbors
+from openapi_server.models.neighbor_entities import NeighborEntities
 from openapi_server.models.search_result_level1 import SearchResultLevel1
 from openapi_server.models.tags import Tags
 from tests import BaseTestCase

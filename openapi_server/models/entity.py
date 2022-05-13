@@ -17,10 +17,11 @@ class Entity(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, balance: Values=None, entity: int=None, first_tx: TxSummary=None, in_degree: int=None, last_tx: TxSummary=None, no_addresses: int=None, no_incoming_txs: int=None, no_outgoing_txs: int=None, out_degree: int=None, root_address: str=None, tags: AddressAndEntityTags=None, total_received: Values=None, total_spent: Values=None):
+    def __init__(self, balance: Values=None, currency: str=None, entity: int=None, first_tx: TxSummary=None, in_degree: int=None, last_tx: TxSummary=None, no_addresses: int=None, no_incoming_txs: int=None, no_outgoing_txs: int=None, out_degree: int=None, root_address: str=None, tags: AddressAndEntityTags=None, total_received: Values=None, total_spent: Values=None):
         """Entity - a model defined in OpenAPI
 
         :param balance: The balance of this Entity.
+        :param currency: The currency of this Entity.
         :param entity: The entity of this Entity.
         :param first_tx: The first_tx of this Entity.
         :param in_degree: The in_degree of this Entity.
@@ -36,6 +37,7 @@ class Entity(Model):
         """
         self.openapi_types = {
             'balance': Values,
+            'currency': str,
             'entity': int,
             'first_tx': TxSummary,
             'in_degree': int,
@@ -52,6 +54,7 @@ class Entity(Model):
 
         self.attribute_map = {
             'balance': 'balance',
+            'currency': 'currency',
             'entity': 'entity',
             'first_tx': 'first_tx',
             'in_degree': 'in_degree',
@@ -67,6 +70,7 @@ class Entity(Model):
         }
 
         self._balance = balance
+        self._currency = currency
         self._entity = entity
         self._first_tx = first_tx
         self._in_degree = in_degree
@@ -98,6 +102,7 @@ class Entity(Model):
         if not shallow:
             return Model.to_dict(self)
         return { 'balance': self._balance,
+            'currency': self._currency,
             'entity': self._entity,
             'first_tx': self._first_tx,
             'in_degree': self._in_degree,
@@ -134,6 +139,31 @@ class Entity(Model):
             raise ValueError("Invalid value for `balance`, must not be `None`")
 
         self._balance = balance
+
+    @property
+    def currency(self):
+        """Gets the currency of this Entity.
+
+        crypto currency code
+
+        :return: The currency of this Entity.
+        :rtype: str
+        """
+        return self._currency
+
+    @currency.setter
+    def currency(self, currency):
+        """Sets the currency of this Entity.
+
+        crypto currency code
+
+        :param currency: The currency of this Entity.
+        :type currency: str
+        """
+        if currency is None:
+            raise ValueError("Invalid value for `currency`, must not be `None`")
+
+        self._currency = currency
 
     @property
     def entity(self):
