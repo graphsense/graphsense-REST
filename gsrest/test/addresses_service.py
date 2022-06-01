@@ -1,5 +1,4 @@
 from openapi_server.models.address import Address
-from openapi_server.models.address_and_entity_tags import AddressAndEntityTags
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.neighbor_addresses import NeighborAddresses
 from openapi_server.models.neighbor_address import NeighborAddress
@@ -366,9 +365,7 @@ entityWithTags = Entity(
             value=115422577,
             usd=2.31,
             eur=1.15),
-   tags=AddressAndEntityTags(
-       entity_tags=[ts.etag1],
-       address_tags=[ts.tag1, ts.tag2, ts.tag3, ts.tag4])
+   best_address_tag=ts.etag1
 )
 
 
@@ -480,9 +477,7 @@ eth_entityWithTags = Entity(
    out_degree=eth_address.out_degree,
    first_tx=eth_address.first_tx,
    balance=eth_address.balance,
-   tags=AddressAndEntityTags(
-       address_tags=[ts.eth_tag1, ts.eth_tag2],
-       entity_tags=[ts.eth_etag1])
+   best_address_tag=ts.eth_tag1
 )
 
 

@@ -65,7 +65,7 @@ async def list_address_links(request, currency, address, neighbor,
     return await common.links_response(request, currency, result)
 
 
-async def get_address_entity(request, currency, address, include_tags=False):
+async def get_address_entity(request, currency, address):
     # from address to complete entity stats
     e = RuntimeError('Entity for address {} not found'.format(address))
     db = request.app['db']
@@ -74,7 +74,7 @@ async def get_address_entity(request, currency, address, include_tags=False):
     if entity_id is None:
         raise e
 
-    result = await get_entity(request, currency, entity_id, include_tags)
+    result = await get_entity(request, currency, entity_id)
     if result is None:
         raise e
 

@@ -45,7 +45,7 @@ class TestAddressesController(BaseTestCase):
     async def test_list_address_neighbors(self):
         """Test case for list_address_neighbors
 
-        Get an addresses' neighbors in the address graph
+        Get an address's neighbors in the address graph
         """
         await test_service.list_address_neighbors(self)
 

@@ -144,7 +144,13 @@ class Tagstore:
 
     def list_address_tags(self, currency, label, show_private=False,
                           page=None, pagesize=None):
-        query = f"""select t.*, tp.is_public from
+        query = f"""select
+                        t.*,
+                        tp.uri,
+                        tp.creator,
+                        tp.title,
+                        tp.is_public
+                    from
                        tag t,
                        tagpack tp
                    where
@@ -160,10 +166,14 @@ class Tagstore:
 
     def list_entity_tags(self, currency, label, show_private=False,
                          page=None, pagesize=None):
-        query = f"""select distinct on (acm.gs_cluster_id)
-                    t.*,
-                    acm.gs_cluster_id,
-                    tp.is_public
+        query = f"""select
+                        distinct on (acm.gs_cluster_id)
+                        t.*,
+                        acm.gs_cluster_id,
+                        tp.uri,
+                        tp.creator,
+                        tp.title,
+                        tp.is_public
                    from
                     tag t,
                     tagpack tp,
@@ -210,14 +220,25 @@ class Tagstore:
     def list_tags_by_address(self, currency, address, show_private=False,
                              page=None,
                              pagesize=None):
-        query = f"""select t.*, tp.is_public from
+        query = f"""select
+                        t.*,
+                        tp.uri,
+                        tp.creator,
+                        tp.title,
+                        tp.is_public,
+                        c.level
+                    from
                         tag t,
-                        tagpack tp
-                   where
+                        tagpack tp,
+                        confidence c
+                    where
                         t.tagpack=tp.id
+                        and c.id=t.confidence
                         and t.currency = %s
                         and t.address = %s
                         {hide_private_condition(show_private)}
+                    order by
+                        c.level desc
                         """
 
         return self.execute(query,
@@ -228,17 +249,29 @@ class Tagstore:
 
     def list_address_tags_by_entity(self, currency, entity, show_private=False,
                                     page=None, pagesize=None):
-        query = f"""select t.*, tp.is_public from
+        query = f"""select
+                        t.*,
+                        tp.uri,
+                        tp.creator,
+                        tp.title,
+                        tp.is_public,
+                        c.level
+                    from
                         tag t,
                         tagpack tp,
-                        address_cluster_mapping acm
-                   where
+                        address_cluster_mapping acm,
+                        confidence c
+                    where
                         acm.address=t.address
                         and acm.currency=t.currency
+                        and c.id=t.confidence
                         and t.currency = %s
                         and acm.gs_cluster_id = %s
                         {hide_private_condition(show_private)}
-                        and t.tagpack=tp.id"""
+                        and t.tagpack=tp.id
+                    order by
+                        c.level desc
+                        """
 
         return self.execute(query,
                             params=[currency.upper(), entity],
@@ -283,8 +316,12 @@ class Tagstore:
 
         query = """select
                         t.*,
+                        tp.uri,
+                        tp.creator,
+                        tp.title,
                         tp.is_public,
-                        acm.gs_cluster_id
+                        acm.gs_cluster_id,
+                        c.level
                    from
                         tag t,
                         tagpack tp,

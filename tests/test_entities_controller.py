@@ -5,13 +5,13 @@ import json
 from aiohttp import web
 from aiohttp.test_utils import unittest_run_loop
 
+from openapi_server.models.address_tags import AddressTags
 from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.entity import Entity
 from openapi_server.models.entity_addresses import EntityAddresses
 from openapi_server.models.links import Links
 from openapi_server.models.neighbor_entities import NeighborEntities
 from openapi_server.models.search_result_level1 import SearchResultLevel1
-from openapi_server.models.tags import Tags
 from tests import BaseTestCase
 import gsrest.test.entities_service as test_service
 
@@ -25,6 +25,14 @@ class TestEntitiesController(BaseTestCase):
         Get an entity, optionally with tags
         """
         await test_service.get_entity(self)
+
+
+    async def test_list_address_tags_by_entity(self):
+        """Test case for list_address_tags_by_entity
+
+        Get tags for a given entity for the given level
+        """
+        await test_service.list_address_tags_by_entity(self)
 
 
     async def test_list_entity_addresses(self):
@@ -57,14 +65,6 @@ class TestEntitiesController(BaseTestCase):
         Get all transactions an entity has been involved in
         """
         await test_service.list_entity_txs(self)
-
-
-    async def test_list_tags_by_entity(self):
-        """Test case for list_tags_by_entity
-
-        Get tags for a given entity for the given level
-        """
-        await test_service.list_tags_by_entity(self)
 
 
     async def test_search_entity_neighbors(self):

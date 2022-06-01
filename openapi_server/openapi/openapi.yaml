@@ -163,16 +163,6 @@ paths:
         schema:
           $ref: '#/components/schemas/address_id'
         style: simple
-      - description: Whether to include the first page of tags. Use the respective
-          /tags endpoint to retrieve more if needed.
-        explode: true
-        in: query
-        name: include_tags
-        required: false
-        schema:
-          default: false
-          type: boolean
-        style: form
       responses:
         "200":
           content:
@@ -207,16 +197,6 @@ paths:
         schema:
           $ref: '#/components/schemas/address_id'
         style: simple
-      - description: Whether to include the first page of tags. Use the respective
-          /tags endpoint to retrieve more if needed.
-        explode: true
-        in: query
-        name: include_tags
-        required: false
-        schema:
-          default: false
-          type: boolean
-        style: form
       responses:
         "200":
           content:
@@ -358,7 +338,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/neighbor_addresses'
           description: OK
-      summary: Get an addresses' neighbors in the address graph
+      summary: Get an address's neighbors in the address graph
       tags:
       - addresses
       x-openapi-router-controller: openapi_server.controllers.addresses_controller
@@ -718,16 +698,6 @@ paths:
         schema:
           $ref: '#/components/schemas/entity_id'
         style: simple
-      - description: Whether to include the first page of tags. Use the respective
-          /tags endpoint to retrieve more if needed.
-        explode: true
-        in: query
-        name: include_tags
-        required: false
-        schema:
-          default: false
-          type: boolean
-        style: form
       responses:
         "200":
           content:
@@ -1044,7 +1014,7 @@ paths:
       x-openapi-router-controller: openapi_server.controllers.entities_controller
   /{currency}/entities/{entity}/tags:
     get:
-      operationId: list_tags_by_entity
+      operationId: list_address_tags_by_entity
       parameters:
       - description: The cryptocurrency code (e.g., btc)
         example: btc
@@ -1065,18 +1035,6 @@ paths:
         schema:
           $ref: '#/components/schemas/entity_id'
         style: simple
-      - description: Whether tags on the address or entity level are requested
-        example: address
-        explode: true
-        in: query
-        name: level
-        required: true
-        schema:
-          enum:
-          - address
-          - entity
-          type: string
-        style: form
       - description: Resumption token for retrieving the next page
         explode: true
         in: query
@@ -1100,7 +1058,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/tags'
+                $ref: '#/components/schemas/address_tags'
           description: OK
       summary: Get tags for a given entity for the given level
       tags:
@@ -1194,7 +1152,7 @@ paths:
       x-openapi-router-controller: openapi_server.controllers.rates_controller
   /{currency}/tags:
     get:
-      operationId: list_tags
+      operationId: list_address_tags
       parameters:
       - description: The cryptocurrency code (e.g., btc)
         example: btc
@@ -1213,18 +1171,6 @@ paths:
         name: label
         required: true
         schema:
-          type: string
-        style: form
-      - description: Whether tags on the address or entity level are requested
-        example: address
-        explode: true
-        in: query
-        name: level
-        required: true
-        schema:
-          enum:
-          - address
-          - entity
           type: string
         style: form
       - description: Resumption token for retrieving the next page
@@ -1250,9 +1196,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/tags'
+                $ref: '#/components/schemas/address_tags'
           description: OK
-      summary: Returns address or entity tags associated with a given label
+      summary: Returns address tags associated with a given label
       tags:
       - tags
       x-openapi-router-controller: openapi_server.controllers.tags_controller
@@ -1550,17 +1496,6 @@ components:
       explode: true
       in: query
       name: include_labels
-      required: false
-      schema:
-        default: false
-        type: boolean
-      style: form
-    include_tags:
-      description: Whether to include the first page of tags. Use the respective /tags
-        endpoint to retrieve more if needed.
-      explode: true
-      in: query
-      name: include_tags
       required: false
       schema:
         default: false
@@ -1874,32 +1809,6 @@ components:
       - total_spent
       title: address
       type: object
-    address_and_entity_tags:
-      example:
-        entity_tags:
-        - null
-        - null
-        address_tags:
-        - null
-        - null
-      properties:
-        address_tags:
-          description: First page of address tags of this entity
-          items:
-            $ref: '#/components/schemas/address_tag'
-          title: address_tags
-          type: array
-        entity_tags:
-          description: First page of entity tags of this entity
-          items:
-            $ref: '#/components/schemas/entity_tag'
-          title: entity_tags
-          type: array
-      required:
-      - address_tags
-      - entity_tags
-      title: address_and_entity_tags
-      type: object
     address_id:
       description: Address
       example: addressA
@@ -1991,6 +1900,8 @@ components:
           format: string
           title: next_page
           type: string
+      required:
+      - address_txs
       title: address_txs
       type: object
     block:
@@ -2162,13 +2073,6 @@ components:
           tx_hash: tx_hash
           height: 47
           timestamp: 123456789
-        tags:
-          entity_tags:
-          - null
-          - null
-          address_tags:
-          - null
-          - null
         root_address: addressA
         balance:
           fiat_values:
@@ -2195,6 +2099,8 @@ components:
       properties:
         balance:
           $ref: '#/components/schemas/values'
+        best_address_tag:
+          $ref: '#/components/schemas/address_tag'
         currency:
           description: crypto currency code
           example: btc
@@ -2236,8 +2142,6 @@ components:
           example: addressA
           title: address
           type: string
-        tags:
-          $ref: '#/components/schemas/address_and_entity_tags'
         total_received:
           $ref: '#/components/schemas/values'
         total_spent:
@@ -2350,6 +2254,8 @@ components:
           format: string
           title: next_page
           type: string
+      required:
+      - addresses
       title: entity_addresses
       type: object
     entity_id:
@@ -2358,24 +2264,6 @@ components:
       format: int32
       title: entity
       type: integer
-    entity_tag:
-      allOf:
-      - $ref: '#/components/schemas/tag'
-      - $ref: '#/components/schemas/entity_tag_allOf'
-      title: entity_tag
-    entity_tags:
-      properties:
-        entity_tags:
-          items:
-            $ref: '#/components/schemas/entity_tag'
-          type: array
-        next_page:
-          format: string
-          title: next_page
-          type: string
-      required:
-      - entity_tags
-      type: object
     height:
       description: Height
       example: 47
@@ -2639,13 +2527,6 @@ components:
               tx_hash: tx_hash
               height: 47
               timestamp: 123456789
-            tags:
-              entity_tags:
-              - null
-              - null
-              address_tags:
-              - null
-              - null
             root_address: addressA
             balance:
               fiat_values:
@@ -2684,13 +2565,6 @@ components:
               tx_hash: tx_hash
               height: 47
               timestamp: 123456789
-            tags:
-              entity_tags:
-              - null
-              - null
-              address_tags:
-              - null
-              - null
             root_address: addressA
             balance:
               fiat_values:
@@ -2747,13 +2621,6 @@ components:
             tx_hash: tx_hash
             height: 47
             timestamp: 123456789
-          tags:
-            entity_tags:
-            - null
-            - null
-            address_tags:
-            - null
-            - null
           root_address: addressA
           balance:
             fiat_values:
@@ -3011,14 +2878,19 @@ components:
           description: Abuses
           example: fraud
           type: string
-        active:
-          description: whether the address has been ever used
-          example: false
-          type: boolean
         category:
           description: Category
           example: exchange
           type: string
+        confidence:
+          description: Confidence name
+          example: web crawl
+          type: string
+        confidence_level:
+          description: Confidence level
+          example: 100
+          format: int32
+          type: integer
         currency:
           description: crypto currency code
           example: btc
@@ -3026,10 +2898,6 @@ components:
           type: string
         is_cluster_definer:
           description: whether the address tag applies to the entity level
-          example: true
-          type: boolean
-        is_public:
-          description: whether the address is public
           example: true
           type: boolean
         label:
@@ -3046,20 +2914,30 @@ components:
           description: Source
           example: https://foobar.com
           type: string
+        tagpack_creator:
+          description: Tagpack creator
+          example: "true"
+          type: string
+        tagpack_is_public:
+          description: whether the address is public
+          example: true
+          type: boolean
+        tagpack_title:
+          description: Tagpack title
+          example: "true"
+          type: string
         tagpack_uri:
           description: Tagpack URI
-          example: https://example.com/tagpacks/sample.yaml
+          example: "true"
           type: string
       required:
-      - active
       - currency
+      - is_cluster_definer
       - label
+      - tagpack_creator
+      - tagpack_is_public
+      - tagpack_title
       type: object
-    tags:
-      oneOf:
-      - $ref: '#/components/schemas/entity_tags'
-      - $ref: '#/components/schemas/address_tags'
-      title: tags
     taxonomy:
       example:
         taxonomy: abuse
@@ -3292,22 +3170,6 @@ components:
           type: string
       required:
       - address
-      type: object
-    entity_tag_allOf:
-      properties:
-        address:
-          description: Address
-          example: addressA
-          title: address
-          type: string
-        entity:
-          description: Entity id
-          example: 123456
-          format: int32
-          title: entity
-          type: integer
-      required:
-      - entity
       type: object
     search_result_level1_allOf:
       properties:

@@ -1,6 +1,5 @@
 from openapi_server.models.address import Address
 from openapi_server.models.tx_summary import TxSummary
-from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.address_tags import AddressTags
 from gsrest.util.values import convert_value, to_values
 from gsrest.service.rates_service import get_rates
@@ -9,12 +8,13 @@ from openapi_server.models.links import Links
 from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from gsrest.service.rates_service import list_rates
-from gsrest.db.util import tagstores, tagstores_with_paging, dt_to_int
-import asyncio
+from gsrest.db.util import tagstores, tagstores_with_paging
+from gsrest.service.tags_service import address_tag_from_row
 
 
 def address_from_row(currency, row, rates, tags=None):
     return Address(
+        currency=currency,
         address=row['address'],
         entity=row['cluster_id'],
         first_tx=TxSummary(
@@ -80,20 +80,7 @@ async def list_tags_by_address(request, currency, address,
     address_tags, next_page = \
         await tagstores_with_paging(
             request.app['tagstores'],
-            lambda row:
-                AddressTag(
-                    label=row['label'],
-                    address=row['address'],
-                    category=row['category'],
-                    abuse=row['abuse'],
-                    tagpack_uri=row['tagpack'],
-                    source=row['source'],
-                    lastmod=dt_to_int(row['lastmod']),
-                    active=True,
-                    is_public=row['is_public'],
-                    is_cluster_definer=row['is_cluster_definer'],
-                    currency=row['currency'].upper()
-                    ),
+            address_tag_from_row,
             'list_tags_by_address',
             page, pagesize, currency, address,
             request.app['show_private_tags'])
