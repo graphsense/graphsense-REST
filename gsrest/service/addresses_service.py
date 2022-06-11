@@ -6,8 +6,8 @@ from openapi_server.models.neighbor_address import NeighborAddress
 import asyncio
 
 
-async def get_address(request, currency, address, include_tags=False):
-    return await common.get_address(request, currency, address, include_tags)
+async def get_address(request, currency, address):
+    return await common.get_address(request, currency, address)
 
 
 async def list_tags_by_address(request, currency, address,

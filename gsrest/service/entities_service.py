@@ -168,13 +168,13 @@ async def search_entity_neighbors(request, currency, entity, direction,
     elif 'entities' in key:
         params['entities'] = value
 
-    level = 2
+    level = 1
     result = \
         await recursive_search(request, currency, entity, params,
                                breadth, depth, level, skip_num_addresses,
                                direction)
 
-    return SearchResultLevel1(paths=result)
+    return result
 
 
 async def recursive_search(request, currency, entity, params, breadth, depth,
@@ -214,12 +214,8 @@ async def recursive_search(request, currency, entity, params, breadth, depth,
 
     async def handle_neighbor(neighbor):
         match = True
-        props = \
-            await cached(int(neighbor.id), 'props',
-                         lambda: get_entity(request, currency,
-                                            int(neighbor.id)))
-        if props is None:
-            return
+        props = neighbor.entity
+        entity = neighbor.entity.entity
 
         if 'category' in params:
             match = props.best_address_tag and \
@@ -229,11 +225,11 @@ async def recursive_search(request, currency, entity, params, breadth, depth,
         matching_addresses = []
         if 'addresses' in params:
             matching_addresses = [id["address"] for id in params['addresses']
-                                  if str(id["entity"]) == neighbor.id]
+                                  if str(id["entity"]) == entity]
             match = len(matching_addresses) > 0
 
         if 'entities' in params:
-            match = neighbor.id in params['entities']
+            match = entity in params['entities']
 
         if 'field' in params:
             (field, fieldcurrency, min_value, max_value) = params['field']
@@ -258,7 +254,7 @@ async def recursive_search(request, currency, entity, params, breadth, depth,
                 (skip_num_addresses is None or
                  props.no_addresses <= skip_num_addresses):
             subpaths = await recursive_search(request,
-                                              currency, int(neighbor.id),
+                                              currency, int(entity),
                                               params, breadth,
                                               depth - 1,
                                               level + 1,
@@ -268,8 +264,7 @@ async def recursive_search(request, currency, entity, params, breadth, depth,
         if not subpaths:
             return
 
-        return {'props': props,
-                'neighbor': neighbor,
+        return {'neighbor': neighbor,
                 'subpaths': subpaths,
                 'matching_addresses': matching_addresses}
 
@@ -281,16 +276,16 @@ async def recursive_search(request, currency, entity, params, breadth, depth,
         if not result:
             continue
 
-        obj = levelClass(node=result['props'], relation=result['neighbor'],
+        obj = levelClass(neighbor=result['neighbor'],
                          matching_addresses=[])
         if result['subpaths'] is True:
-            aws = [get_address(request, currency, address, include_tags=True)
+            aws = [get_address(request, currency, address)
                    for address in result['matching_addresses']]
-            addresses_with_tags = await asyncio.gather(*aws)
+            addresses = await asyncio.gather(*aws)
             obj.matching_addresses = [address for address in
-                                      addresses_with_tags
+                                      addresses
                                       if address is not None]
-            result['subpaths'] = None
+            result['subpaths'] = []
         obj.paths = result['subpaths']
         paths.append(obj)
 

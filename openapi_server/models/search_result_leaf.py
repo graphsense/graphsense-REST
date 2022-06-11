@@ -6,8 +6,7 @@ from typing import List, Dict, Type
 
 from openapi_server.models.base_model_ import Model
 from openapi_server.models.address import Address
-from openapi_server.models.entity import Entity
-from openapi_server.models.neighbor import Neighbor
+from openapi_server.models.neighbor_entity import NeighborEntity
 from openapi_server import util
 
 
@@ -17,28 +16,24 @@ class SearchResultLeaf(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, matching_addresses: List[Address]=None, node: Entity=None, relation: Neighbor=None):
+    def __init__(self, matching_addresses: List[Address]=None, neighbor: NeighborEntity=None):
         """SearchResultLeaf - a model defined in OpenAPI
 
         :param matching_addresses: The matching_addresses of this SearchResultLeaf.
-        :param node: The node of this SearchResultLeaf.
-        :param relation: The relation of this SearchResultLeaf.
+        :param neighbor: The neighbor of this SearchResultLeaf.
         """
         self.openapi_types = {
             'matching_addresses': List[Address],
-            'node': Entity,
-            'relation': Neighbor
+            'neighbor': NeighborEntity
         }
 
         self.attribute_map = {
             'matching_addresses': 'matching_addresses',
-            'node': 'node',
-            'relation': 'relation'
+            'neighbor': 'neighbor'
         }
 
         self._matching_addresses = matching_addresses
-        self._node = node
-        self._relation = relation
+        self._neighbor = neighbor
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'SearchResultLeaf':
@@ -58,8 +53,7 @@ class SearchResultLeaf(Model):
         if not shallow:
             return Model.to_dict(self)
         return { 'matching_addresses': self._matching_addresses,
-            'node': self._node,
-            'relation': self._relation }
+            'neighbor': self._neighbor }
 
 
     @property
@@ -80,47 +74,30 @@ class SearchResultLeaf(Model):
         :param matching_addresses: The matching_addresses of this SearchResultLeaf.
         :type matching_addresses: List[Address]
         """
+        if matching_addresses is None:
+            raise ValueError("Invalid value for `matching_addresses`, must not be `None`")
 
         self._matching_addresses = matching_addresses
 
     @property
-    def node(self):
-        """Gets the node of this SearchResultLeaf.
+    def neighbor(self):
+        """Gets the neighbor of this SearchResultLeaf.
 
 
-        :return: The node of this SearchResultLeaf.
-        :rtype: Entity
+        :return: The neighbor of this SearchResultLeaf.
+        :rtype: NeighborEntity
         """
-        return self._node
+        return self._neighbor
 
-    @node.setter
-    def node(self, node):
-        """Sets the node of this SearchResultLeaf.
+    @neighbor.setter
+    def neighbor(self, neighbor):
+        """Sets the neighbor of this SearchResultLeaf.
 
 
-        :param node: The node of this SearchResultLeaf.
-        :type node: Entity
+        :param neighbor: The neighbor of this SearchResultLeaf.
+        :type neighbor: NeighborEntity
         """
+        if neighbor is None:
+            raise ValueError("Invalid value for `neighbor`, must not be `None`")
 
-        self._node = node
-
-    @property
-    def relation(self):
-        """Gets the relation of this SearchResultLeaf.
-
-
-        :return: The relation of this SearchResultLeaf.
-        :rtype: Neighbor
-        """
-        return self._relation
-
-    @relation.setter
-    def relation(self, relation):
-        """Sets the relation of this SearchResultLeaf.
-
-
-        :param relation: The relation of this SearchResultLeaf.
-        :type relation: Neighbor
-        """
-
-        self._relation = relation
+        self._neighbor = neighbor

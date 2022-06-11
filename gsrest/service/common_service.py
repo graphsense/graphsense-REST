@@ -12,7 +12,7 @@ from gsrest.db.util import tagstores, tagstores_with_paging
 from gsrest.service.tags_service import address_tag_from_row
 
 
-def address_from_row(currency, row, rates, tags=None):
+def address_from_row(currency, row, rates):
     return Address(
         currency=currency,
         address=row['address'],
@@ -31,8 +31,7 @@ def address_from_row(currency, row, rates, tags=None):
         total_spent=to_values(row['total_spent']),
         in_degree=row['in_degree'],
         out_degree=row['out_degree'],
-        balance=convert_value(currency, row['balance'], rates),
-        tags=tags
+        balance=convert_value(currency, row['balance'], rates)
         )
 
 
@@ -58,21 +57,16 @@ async def txs_from_rows(request, currency, rows):
             for row in rows]
 
 
-async def get_address(request, currency, address, include_tags=False):
+async def get_address(request, currency, address):
     db = request.app['db']
     result = await db.get_address(currency, address)
-
-    tags = None
-    if include_tags:
-        tags = (await list_tags_by_address(request, currency, address)
-                ).address_tags
 
     if not result:
         raise RuntimeError("Address {} not found in currency {}".format(
             address, currency))
     return address_from_row(currency, result,
                             (await get_rates(request, currency)
-                             )['rates'], tags)
+                             )['rates'])
 
 
 async def list_tags_by_address(request, currency, address,
