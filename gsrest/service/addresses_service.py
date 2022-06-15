@@ -38,7 +38,7 @@ async def list_address_neighbors(request, currency, address, direction,
     relations = []
     if results is None:
         return NeighborAddresses()
-    aws = [get_address(request, currency, row[dst+'_address'], False)
+    aws = [get_address(request, currency, row[dst+'_address'])
            for row in results]
 
     nodes = await asyncio.gather(*aws)
