@@ -40,6 +40,7 @@ async def txs_from_rows(request, currency, rows):
     rates = await list_rates(request, currency, heights)
     if currency == 'eth':
         return [TxAccount(
+                currency=currency,
                 height=row['height'],
                 timestamp=row['timestamp'],
                 tx_hash=row['tx_hash'].hex(),
@@ -49,6 +50,7 @@ async def txs_from_rows(request, currency, rows):
                                     rates[row['height']]))
                 for row in rows]
     return [AddressTxUtxo(
+            currency=currency,
             height=row['height'],
             timestamp=row['timestamp'],
             coinbase=row['coinbase'],

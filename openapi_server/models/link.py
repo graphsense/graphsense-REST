@@ -17,7 +17,7 @@ class Link(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, height: int=None, input_value: Values=None, output_value: Values=None, timestamp: int=None, tx_hash: str=None, tx_type: str='account', from_address: str=None, to_address: str=None, value: Values=None):
+    def __init__(self, height: int=None, input_value: Values=None, output_value: Values=None, timestamp: int=None, tx_hash: str=None, tx_type: str='account', currency: str=None, from_address: str=None, to_address: str=None, value: Values=None):
         """Link - a model defined in OpenAPI
 
         :param height: The height of this Link.
@@ -26,6 +26,7 @@ class Link(Model):
         :param timestamp: The timestamp of this Link.
         :param tx_hash: The tx_hash of this Link.
         :param tx_type: The tx_type of this Link.
+        :param currency: The currency of this Link.
         :param from_address: The from_address of this Link.
         :param to_address: The to_address of this Link.
         :param value: The value of this Link.
@@ -37,6 +38,7 @@ class Link(Model):
             'timestamp': int,
             'tx_hash': str,
             'tx_type': str,
+            'currency': str,
             'from_address': str,
             'to_address': str,
             'value': Values
@@ -49,6 +51,7 @@ class Link(Model):
             'timestamp': 'timestamp',
             'tx_hash': 'tx_hash',
             'tx_type': 'tx_type',
+            'currency': 'currency',
             'from_address': 'from_address',
             'to_address': 'to_address',
             'value': 'value'
@@ -60,6 +63,7 @@ class Link(Model):
         self._timestamp = timestamp
         self._tx_hash = tx_hash
         self._tx_type = tx_type
+        self._currency = currency
         self._from_address = from_address
         self._to_address = to_address
         self._value = value
@@ -87,6 +91,7 @@ class Link(Model):
             'timestamp': self._timestamp,
             'tx_hash': self._tx_hash,
             'tx_type': self._tx_type,
+            'currency': self._currency,
             'from_address': self._from_address,
             'to_address': self._to_address,
             'value': self._value }
@@ -237,6 +242,31 @@ class Link(Model):
             raise ValueError("Invalid value for `tx_type`, must not be `None`")
 
         self._tx_type = tx_type
+
+    @property
+    def currency(self):
+        """Gets the currency of this Link.
+
+        crypto currency code
+
+        :return: The currency of this Link.
+        :rtype: str
+        """
+        return self._currency
+
+    @currency.setter
+    def currency(self, currency):
+        """Sets the currency of this Link.
+
+        crypto currency code
+
+        :param currency: The currency of this Link.
+        :type currency: str
+        """
+        if currency is None:
+            raise ValueError("Invalid value for `currency`, must not be `None`")
+
+        self._currency = currency
 
     @property
     def from_address(self):

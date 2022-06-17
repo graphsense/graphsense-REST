@@ -15,9 +15,10 @@ class TxAccount(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, from_address: str=None, height: int=None, timestamp: int=None, to_address: str=None, tx_hash: str=None, tx_type: str='account', value: Values=None):
+    def __init__(self, currency: str=None, from_address: str=None, height: int=None, timestamp: int=None, to_address: str=None, tx_hash: str=None, tx_type: str='account', value: Values=None):
         """TxAccount - a model defined in OpenAPI
 
+        :param currency: The currency of this TxAccount.
         :param from_address: The from_address of this TxAccount.
         :param height: The height of this TxAccount.
         :param timestamp: The timestamp of this TxAccount.
@@ -27,6 +28,7 @@ class TxAccount(Model):
         :param value: The value of this TxAccount.
         """
         self.openapi_types = {
+            'currency': str,
             'from_address': str,
             'height': int,
             'timestamp': int,
@@ -37,6 +39,7 @@ class TxAccount(Model):
         }
 
         self.attribute_map = {
+            'currency': 'currency',
             'from_address': 'from_address',
             'height': 'height',
             'timestamp': 'timestamp',
@@ -46,6 +49,7 @@ class TxAccount(Model):
             'value': 'value'
         }
 
+        self._currency = currency
         self._from_address = from_address
         self._height = height
         self._timestamp = timestamp
@@ -71,7 +75,8 @@ class TxAccount(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'from_address': self._from_address,
+        return { 'currency': self._currency,
+            'from_address': self._from_address,
             'height': self._height,
             'timestamp': self._timestamp,
             'to_address': self._to_address,
@@ -79,6 +84,31 @@ class TxAccount(Model):
             'tx_type': self._tx_type,
             'value': self._value }
 
+
+    @property
+    def currency(self):
+        """Gets the currency of this TxAccount.
+
+        crypto currency code
+
+        :return: The currency of this TxAccount.
+        :rtype: str
+        """
+        return self._currency
+
+    @currency.setter
+    def currency(self, currency):
+        """Sets the currency of this TxAccount.
+
+        crypto currency code
+
+        :param currency: The currency of this TxAccount.
+        :type currency: str
+        """
+        if currency is None:
+            raise ValueError("Invalid value for `currency`, must not be `None`")
+
+        self._currency = currency
 
     @property
     def from_address(self):

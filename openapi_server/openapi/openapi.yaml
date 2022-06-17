@@ -103,6 +103,50 @@ paths:
       tags:
       - general
       x-openapi-router-controller: openapi_server.controllers.general_controller
+  /tags:
+    get:
+      operationId: list_address_tags
+      parameters:
+      - description: The label of an entity
+        example: cimedy
+        explode: true
+        in: query
+        name: label
+        required: true
+        schema:
+          type: string
+        style: form
+      - description: Resumption token for retrieving the next page
+        explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Number of items returned in a single page
+        example: 10
+        explode: true
+        in: query
+        name: pagesize
+        required: false
+        schema:
+          minimum: 1
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/address_tags'
+          description: OK
+      security:
+      - api_key: []
+      summary: Returns address tags associated with a given label
+      tags:
+      - tags
+      x-openapi-router-controller: openapi_server.controllers.tags_controller
   /tags/taxonomies:
     get:
       operationId: list_taxonomies
@@ -1197,60 +1241,6 @@ paths:
       tags:
       - rates
       x-openapi-router-controller: openapi_server.controllers.rates_controller
-  /{currency}/tags:
-    get:
-      operationId: list_address_tags
-      parameters:
-      - description: The cryptocurrency code (e.g., btc)
-        example: btc
-        explode: false
-        in: path
-        name: currency
-        required: true
-        schema:
-          format: string
-          type: string
-        style: simple
-      - description: The label of an entity
-        example: cimedy
-        explode: true
-        in: query
-        name: label
-        required: true
-        schema:
-          type: string
-        style: form
-      - description: Resumption token for retrieving the next page
-        explode: true
-        in: query
-        name: page
-        required: false
-        schema:
-          type: string
-        style: form
-      - description: Number of items returned in a single page
-        example: 10
-        explode: true
-        in: query
-        name: pagesize
-        required: false
-        schema:
-          minimum: 1
-          type: integer
-        style: form
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/address_tags'
-          description: OK
-      security:
-      - api_key: []
-      summary: Returns address tags associated with a given label
-      tags:
-      - tags
-      x-openapi-router-controller: openapi_server.controllers.tags_controller
   /{currency}/txs/{tx_hash}:
     get:
       operationId: get_tx
@@ -1907,6 +1897,11 @@ components:
         coinbase:
           description: Coinbase transaction flag
           type: boolean
+        currency:
+          description: crypto currency code
+          example: btc
+          title: currency
+          type: string
         height:
           description: Height
           example: 47
@@ -1931,6 +1926,7 @@ components:
           $ref: '#/components/schemas/values'
       required:
       - coinbase
+      - currency
       - height
       - timestamp
       - tx_hash
@@ -1960,6 +1956,7 @@ components:
     block:
       example:
         block_hash: block_hash
+        currency: btc
         height: 47
         no_txs: 11
         timestamp: 123456789
@@ -1967,6 +1964,11 @@ components:
         block_hash:
           format: string
           title: block_hash
+          type: string
+        currency:
+          description: crypto currency code
+          example: btc
+          title: currency
           type: string
         height:
           description: Height
@@ -1986,6 +1988,12 @@ components:
           format: int32
           title: timestamp
           type: integer
+      required:
+      - block_hash
+      - currency
+      - height
+      - no_txs
+      - timestamp
       title: block
       type: object
     coinbase:
@@ -3033,6 +3041,11 @@ components:
       title: tx
     tx_account:
       properties:
+        currency:
+          description: crypto currency code
+          example: btc
+          title: currency
+          type: string
         from_address:
           description: Address
           example: addressA
@@ -3066,6 +3079,7 @@ components:
         value:
           $ref: '#/components/schemas/values'
       required:
+      - currency
       - from_address
       - height
       - timestamp
@@ -3112,6 +3126,11 @@ components:
         coinbase:
           description: Coinbase transaction flag
           type: boolean
+        currency:
+          description: crypto currency code
+          example: btc
+          title: currency
+          type: string
         height:
           description: Height
           example: 47
@@ -3124,6 +3143,14 @@ components:
           items:
             $ref: '#/components/schemas/tx_value'
           type: array
+        no_inputs:
+          description: number of input addresses
+          format: int32
+          type: integer
+        no_outputs:
+          description: number of output addresses
+          format: int32
+          type: integer
         outputs:
           description: Transaction inputs/outputs
           items:
@@ -3148,7 +3175,10 @@ components:
           type: string
       required:
       - coinbase
+      - currency
       - height
+      - no_inputs
+      - no_outputs
       - timestamp
       - total_input
       - total_output

@@ -778,8 +778,7 @@ class Cassandra:
         params = [self.get_tx_id_group(currency, id), id]
         fields = ("tx_hash, coinbase, block_id, timestamp,"
                   "total_input, total_output")
-        if include_io:
-            fields += ",inputs,outputs"
+        fields += ",inputs,outputs"
         query = (f'SELECT {fields} FROM transaction WHERE '
                  'tx_id_group = %s and tx_id = %s')
         result = await self.execute_async(currency, 'raw', query, params)

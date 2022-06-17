@@ -5,9 +5,10 @@ from gsrest.service.rates_service import get_rates
 from gsrest.util.values import convert_value
 
 
-def from_row(currency, row, rates):
+def from_row(currency, row, rates, include_io=False):
     if currency == 'eth':
         return TxAccount(
+            currency=currency,
             tx_hash=row['tx_hash'].hex(),
             timestamp=row['block_timestamp'],
             height=row['block_id'],
@@ -15,17 +16,22 @@ def from_row(currency, row, rates):
             to_address=row['to_address'],
             value=convert_value(currency, row['value'], rates))
     return TxUtxo(
+            currency=currency,
             tx_hash=row['tx_hash'].hex(),
             coinbase=row['coinbase'],
             height=row['block_id'],
-            inputs=io_from_rows(currency, row, 'inputs', rates),
-            outputs=io_from_rows(currency, row, 'outputs', rates),
+            no_inputs=0 if not row['inputs'] else len(row['inputs']),
+            no_outputs=0 if not row['outputs'] else len(row['outputs']),
+            inputs=io_from_rows(currency, row, 'inputs', rates, include_io),
+            outputs=io_from_rows(currency, row, 'outputs', rates, include_io),
             timestamp=row['timestamp'],
             total_input=convert_value(currency, row['total_input'], rates),
             total_output=convert_value(currency, row['total_output'], rates))
 
 
-def io_from_rows(currency, values, key, rates):
+def io_from_rows(currency, values, key, rates, include_io):
+    if not include_io:
+        return None
     if key not in values:
         return None
     if not values[key]:
@@ -37,13 +43,13 @@ def io_from_rows(currency, values, key, rates):
 
 async def get_tx(request, currency, tx_hash, include_io=False):
     db = request.app['db']
-    result = await db.get_tx(currency, tx_hash, include_io)
+    result = await db.get_tx(currency, tx_hash)
     if result is None:
         raise RuntimeError('Transaction {} in keyspace {} not found'
                            .format(tx_hash, currency))
 
     rates = (await get_rates(request, currency, result['block_id']))['rates']
-    result = from_row(currency, result, rates)
+    result = from_row(currency, result, rates, include_io)
     return result
 
 

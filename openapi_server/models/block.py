@@ -14,16 +14,18 @@ class Block(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, block_hash: str=None, height: int=None, no_txs: int=None, timestamp: int=None):
+    def __init__(self, block_hash: str=None, currency: str=None, height: int=None, no_txs: int=None, timestamp: int=None):
         """Block - a model defined in OpenAPI
 
         :param block_hash: The block_hash of this Block.
+        :param currency: The currency of this Block.
         :param height: The height of this Block.
         :param no_txs: The no_txs of this Block.
         :param timestamp: The timestamp of this Block.
         """
         self.openapi_types = {
             'block_hash': str,
+            'currency': str,
             'height': int,
             'no_txs': int,
             'timestamp': int
@@ -31,12 +33,14 @@ class Block(Model):
 
         self.attribute_map = {
             'block_hash': 'block_hash',
+            'currency': 'currency',
             'height': 'height',
             'no_txs': 'no_txs',
             'timestamp': 'timestamp'
         }
 
         self._block_hash = block_hash
+        self._currency = currency
         self._height = height
         self._no_txs = no_txs
         self._timestamp = timestamp
@@ -59,6 +63,7 @@ class Block(Model):
         if not shallow:
             return Model.to_dict(self)
         return { 'block_hash': self._block_hash,
+            'currency': self._currency,
             'height': self._height,
             'no_txs': self._no_txs,
             'timestamp': self._timestamp }
@@ -82,8 +87,35 @@ class Block(Model):
         :param block_hash: The block_hash of this Block.
         :type block_hash: str
         """
+        if block_hash is None:
+            raise ValueError("Invalid value for `block_hash`, must not be `None`")
 
         self._block_hash = block_hash
+
+    @property
+    def currency(self):
+        """Gets the currency of this Block.
+
+        crypto currency code
+
+        :return: The currency of this Block.
+        :rtype: str
+        """
+        return self._currency
+
+    @currency.setter
+    def currency(self, currency):
+        """Sets the currency of this Block.
+
+        crypto currency code
+
+        :param currency: The currency of this Block.
+        :type currency: str
+        """
+        if currency is None:
+            raise ValueError("Invalid value for `currency`, must not be `None`")
+
+        self._currency = currency
 
     @property
     def height(self):
@@ -105,6 +137,8 @@ class Block(Model):
         :param height: The height of this Block.
         :type height: int
         """
+        if height is None:
+            raise ValueError("Invalid value for `height`, must not be `None`")
         if height is not None and height < 0:
             raise ValueError("Invalid value for `height`, must be a value greater than or equal to `0`")
 
@@ -128,6 +162,8 @@ class Block(Model):
         :param no_txs: The no_txs of this Block.
         :type no_txs: int
         """
+        if no_txs is None:
+            raise ValueError("Invalid value for `no_txs`, must not be `None`")
 
         self._no_txs = no_txs
 
@@ -151,5 +187,7 @@ class Block(Model):
         :param timestamp: The timestamp of this Block.
         :type timestamp: int
         """
+        if timestamp is None:
+            raise ValueError("Invalid value for `timestamp`, must not be `None`")
 
         self._timestamp = timestamp

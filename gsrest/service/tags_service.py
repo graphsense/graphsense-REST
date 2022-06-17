@@ -23,14 +23,18 @@ def address_tag_from_row(row):
         currency=row['currency'].upper())
 
 
-async def list_address_tags(request, currency, label, page=None,
+async def list_address_tags(request, label, page=None,
                             pagesize=None):
     fun = 'list_address_tags'
     to_obj = address_tag_from_row
 
+    if pagesize is None:
+        pagesize = 100
+    pagesize = min(pagesize, 100)
+
     tags, next_page = await tagstores_with_paging(
         request.app['tagstores'], to_obj, fun, page, pagesize,
-        currency, label, request.app['show_private_tags'])
+        label, request.app['show_private_tags'])
 
     return AddressTags(next_page=next_page, address_tags=tags)
 

@@ -12,13 +12,11 @@ from openapi_server import util
 
 
 
-async def list_address_tags(request: web.Request, currency, label, page=None, pagesize=None) -> web.Response:
+async def list_address_tags(request: web.Request, label, page=None, pagesize=None) -> web.Response:
     """Returns address tags associated with a given label
 
     
 
-    :param currency: The cryptocurrency code (e.g., btc)
-    :type currency: str
     :param label: The label of an entity
     :type label: str
     :param page: Resumption token for retrieving the next page
@@ -47,11 +45,11 @@ async def list_address_tags(request: web.Request, currency, label, page=None, pa
     request.app['show_private_tags'] = show_private_tags
 
     try:
-        if 'currency' in ['','currency','label','page','pagesize']:
+        if 'currency' in ['','label','page','pagesize']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.list_address_tags(request
-                ,currency=currency,label=label,page=page,pagesize=pagesize)
+                ,label=label,page=page,pagesize=pagesize)
         result = await result
 
         for plugin in request.app['plugins']:
