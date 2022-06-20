@@ -23,7 +23,9 @@ def load_config(config_file):
 def setup_logging(logger, config):
     level = config.get('level', 'INFO').upper()
     level = getattr(logging, level)
-    logging.basicConfig(level=level)
+    FORMAT = '%(asctime)s %(message)s'
+    logging.basicConfig(format=FORMAT)
+    logger.setLevel(level)
     smtp = config.get('smtp', None)
     if not smtp:
         return
