@@ -3,12 +3,14 @@ TAGSTORE_MARKER=.runts
 CASSANDRA_MOCK=cassandra_mock
 TAGSTORE_MOCK=tagstore_mock
 USE_DOCKER=FALSE
+DOCKER_GROUPID=999
 
 test: $(MARKER)
 	# start container if it's not running
 	docker ps -a | grep $(CASSANDRA_MOCK) || bash -c 'rm -f $(CASSANDRA_MARKER) && make $(CASSANDRA_MARKER)'
 	docker ps -a | grep $(TAGSTORE_MOCK) || bash -c 'rm -f $(TAGSTORE_MARKER) && make $(TAGSTORE_MARKER)'
 ifeq ($(USE_DOCKER), TRUE)
+	docker build -t graphsense-rest-test --build-arg USERID=${UID} --build-arg DOCKER_GROUPID=${DOCKER_GROUPID} .
 	docker run --rm --workdir /src -v ${PWD}/../:/src --link $(CASSANDRA_MOCK):$(CASSANDRA_MOCK) --link $(TAGSTORE_MOCK):$(TAGSTORE_MOCK) -v /var/run/docker.sock:/var/run/docker.sock graphsense-rest-test tox -e py37 -- $(ORGANIZATION)
 else
 	tox -e py37 -- $(ORGANIZATION)
