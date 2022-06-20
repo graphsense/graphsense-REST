@@ -15,9 +15,10 @@ class LinkUtxo(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, height: int=None, input_value: Values=None, output_value: Values=None, timestamp: int=None, tx_hash: str=None, tx_type: str='utxo'):
+    def __init__(self, currency: str=None, height: int=None, input_value: Values=None, output_value: Values=None, timestamp: int=None, tx_hash: str=None, tx_type: str='utxo'):
         """LinkUtxo - a model defined in OpenAPI
 
+        :param currency: The currency of this LinkUtxo.
         :param height: The height of this LinkUtxo.
         :param input_value: The input_value of this LinkUtxo.
         :param output_value: The output_value of this LinkUtxo.
@@ -26,6 +27,7 @@ class LinkUtxo(Model):
         :param tx_type: The tx_type of this LinkUtxo.
         """
         self.openapi_types = {
+            'currency': str,
             'height': int,
             'input_value': Values,
             'output_value': Values,
@@ -35,6 +37,7 @@ class LinkUtxo(Model):
         }
 
         self.attribute_map = {
+            'currency': 'currency',
             'height': 'height',
             'input_value': 'input_value',
             'output_value': 'output_value',
@@ -43,6 +46,7 @@ class LinkUtxo(Model):
             'tx_type': 'tx_type'
         }
 
+        self._currency = currency
         self._height = height
         self._input_value = input_value
         self._output_value = output_value
@@ -67,13 +71,39 @@ class LinkUtxo(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'height': self._height,
+        return { 'currency': self._currency,
+            'height': self._height,
             'input_value': self._input_value,
             'output_value': self._output_value,
             'timestamp': self._timestamp,
             'tx_hash': self._tx_hash,
             'tx_type': self._tx_type }
 
+
+    @property
+    def currency(self):
+        """Gets the currency of this LinkUtxo.
+
+        crypto currency code
+
+        :return: The currency of this LinkUtxo.
+        :rtype: str
+        """
+        return self._currency
+
+    @currency.setter
+    def currency(self, currency):
+        """Sets the currency of this LinkUtxo.
+
+        crypto currency code
+
+        :param currency: The currency of this LinkUtxo.
+        :type currency: str
+        """
+        if currency is None:
+            raise ValueError("Invalid value for `currency`, must not be `None`")
+
+        self._currency = currency
 
     @property
     def height(self):

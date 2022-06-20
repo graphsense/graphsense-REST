@@ -2349,6 +2349,11 @@ components:
       title: link
     link_utxo:
       properties:
+        currency:
+          description: crypto currency code
+          example: btc
+          title: currency
+          type: string
         height:
           description: Height
           example: 47
@@ -2374,6 +2379,7 @@ components:
           default: utxo
           type: string
       required:
+      - currency
       - height
       - input_value
       - output_value
@@ -2397,6 +2403,8 @@ components:
           format: string
           title: next_page
           type: string
+      required:
+      - links
       title: links
       type: object
     neighbor:

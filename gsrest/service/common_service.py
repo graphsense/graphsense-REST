@@ -147,6 +147,7 @@ async def links_response(request, currency, result):
         rates = await list_rates(request, currency, heights)
         return Links(links=[TxAccount(
                             tx_hash=row['tx_hash'].hex(),
+                            currency=currency,
                             timestamp=row['block_timestamp'],
                             height=row['block_id'],
                             from_address=row['from_address'],
@@ -162,6 +163,7 @@ async def links_response(request, currency, result):
 
     return Links(links=[LinkUtxo(tx_hash=e['tx_hash'].hex(),
                         height=e['height'],
+                        currency=currency,
                         timestamp=e['timestamp'],
                         input_value=convert_value(
                             currency, e['input_value'], rates[e['height']]),

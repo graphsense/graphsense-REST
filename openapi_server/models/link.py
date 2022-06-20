@@ -17,53 +17,53 @@ class Link(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, height: int=None, input_value: Values=None, output_value: Values=None, timestamp: int=None, tx_hash: str=None, tx_type: str='account', currency: str=None, from_address: str=None, to_address: str=None, value: Values=None):
+    def __init__(self, currency: str=None, height: int=None, input_value: Values=None, output_value: Values=None, timestamp: int=None, tx_hash: str=None, tx_type: str='account', from_address: str=None, to_address: str=None, value: Values=None):
         """Link - a model defined in OpenAPI
 
+        :param currency: The currency of this Link.
         :param height: The height of this Link.
         :param input_value: The input_value of this Link.
         :param output_value: The output_value of this Link.
         :param timestamp: The timestamp of this Link.
         :param tx_hash: The tx_hash of this Link.
         :param tx_type: The tx_type of this Link.
-        :param currency: The currency of this Link.
         :param from_address: The from_address of this Link.
         :param to_address: The to_address of this Link.
         :param value: The value of this Link.
         """
         self.openapi_types = {
+            'currency': str,
             'height': int,
             'input_value': Values,
             'output_value': Values,
             'timestamp': int,
             'tx_hash': str,
             'tx_type': str,
-            'currency': str,
             'from_address': str,
             'to_address': str,
             'value': Values
         }
 
         self.attribute_map = {
+            'currency': 'currency',
             'height': 'height',
             'input_value': 'input_value',
             'output_value': 'output_value',
             'timestamp': 'timestamp',
             'tx_hash': 'tx_hash',
             'tx_type': 'tx_type',
-            'currency': 'currency',
             'from_address': 'from_address',
             'to_address': 'to_address',
             'value': 'value'
         }
 
+        self._currency = currency
         self._height = height
         self._input_value = input_value
         self._output_value = output_value
         self._timestamp = timestamp
         self._tx_hash = tx_hash
         self._tx_type = tx_type
-        self._currency = currency
         self._from_address = from_address
         self._to_address = to_address
         self._value = value
@@ -85,17 +85,42 @@ class Link(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'height': self._height,
+        return { 'currency': self._currency,
+            'height': self._height,
             'input_value': self._input_value,
             'output_value': self._output_value,
             'timestamp': self._timestamp,
             'tx_hash': self._tx_hash,
             'tx_type': self._tx_type,
-            'currency': self._currency,
             'from_address': self._from_address,
             'to_address': self._to_address,
             'value': self._value }
 
+
+    @property
+    def currency(self):
+        """Gets the currency of this Link.
+
+        crypto currency code
+
+        :return: The currency of this Link.
+        :rtype: str
+        """
+        return self._currency
+
+    @currency.setter
+    def currency(self, currency):
+        """Sets the currency of this Link.
+
+        crypto currency code
+
+        :param currency: The currency of this Link.
+        :type currency: str
+        """
+        if currency is None:
+            raise ValueError("Invalid value for `currency`, must not be `None`")
+
+        self._currency = currency
 
     @property
     def height(self):
@@ -242,31 +267,6 @@ class Link(Model):
             raise ValueError("Invalid value for `tx_type`, must not be `None`")
 
         self._tx_type = tx_type
-
-    @property
-    def currency(self):
-        """Gets the currency of this Link.
-
-        crypto currency code
-
-        :return: The currency of this Link.
-        :rtype: str
-        """
-        return self._currency
-
-    @currency.setter
-    def currency(self, currency):
-        """Sets the currency of this Link.
-
-        crypto currency code
-
-        :param currency: The currency of this Link.
-        :type currency: str
-        """
-        if currency is None:
-            raise ValueError("Invalid value for `currency`, must not be `None`")
-
-        self._currency = currency
 
     @property
     def from_address(self):
