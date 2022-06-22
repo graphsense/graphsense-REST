@@ -305,6 +305,8 @@ class Entity(Model):
         :param no_address_tags: The no_address_tags of this Entity.
         :type no_address_tags: int
         """
+        if no_address_tags is None:
+            raise ValueError("Invalid value for `no_address_tags`, must not be `None`")
 
         self._no_address_tags = no_address_tags
 

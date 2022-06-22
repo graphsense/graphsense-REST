@@ -2220,6 +2220,7 @@ components:
       - first_tx
       - in_degree
       - last_tx
+      - no_address_tags
       - no_addresses
       - no_incoming_txs
       - no_outgoing_txs
