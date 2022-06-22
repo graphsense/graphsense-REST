@@ -17,7 +17,7 @@ class Entity(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, balance: Values=None, best_address_tag: AddressTag=None, currency: str=None, entity: int=None, first_tx: TxSummary=None, in_degree: int=None, last_tx: TxSummary=None, no_addresses: int=None, no_incoming_txs: int=None, no_outgoing_txs: int=None, out_degree: int=None, root_address: str=None, total_received: Values=None, total_spent: Values=None):
+    def __init__(self, balance: Values=None, best_address_tag: AddressTag=None, currency: str=None, entity: int=None, first_tx: TxSummary=None, in_degree: int=None, last_tx: TxSummary=None, no_address_tags: int=None, no_addresses: int=None, no_incoming_txs: int=None, no_outgoing_txs: int=None, out_degree: int=None, root_address: str=None, total_received: Values=None, total_spent: Values=None):
         """Entity - a model defined in OpenAPI
 
         :param balance: The balance of this Entity.
@@ -27,6 +27,7 @@ class Entity(Model):
         :param first_tx: The first_tx of this Entity.
         :param in_degree: The in_degree of this Entity.
         :param last_tx: The last_tx of this Entity.
+        :param no_address_tags: The no_address_tags of this Entity.
         :param no_addresses: The no_addresses of this Entity.
         :param no_incoming_txs: The no_incoming_txs of this Entity.
         :param no_outgoing_txs: The no_outgoing_txs of this Entity.
@@ -43,6 +44,7 @@ class Entity(Model):
             'first_tx': TxSummary,
             'in_degree': int,
             'last_tx': TxSummary,
+            'no_address_tags': int,
             'no_addresses': int,
             'no_incoming_txs': int,
             'no_outgoing_txs': int,
@@ -60,6 +62,7 @@ class Entity(Model):
             'first_tx': 'first_tx',
             'in_degree': 'in_degree',
             'last_tx': 'last_tx',
+            'no_address_tags': 'no_address_tags',
             'no_addresses': 'no_addresses',
             'no_incoming_txs': 'no_incoming_txs',
             'no_outgoing_txs': 'no_outgoing_txs',
@@ -76,6 +79,7 @@ class Entity(Model):
         self._first_tx = first_tx
         self._in_degree = in_degree
         self._last_tx = last_tx
+        self._no_address_tags = no_address_tags
         self._no_addresses = no_addresses
         self._no_incoming_txs = no_incoming_txs
         self._no_outgoing_txs = no_outgoing_txs
@@ -108,6 +112,7 @@ class Entity(Model):
             'first_tx': self._first_tx,
             'in_degree': self._in_degree,
             'last_tx': self._last_tx,
+            'no_address_tags': self._no_address_tags,
             'no_addresses': self._no_addresses,
             'no_incoming_txs': self._no_incoming_txs,
             'no_outgoing_txs': self._no_outgoing_txs,
@@ -279,6 +284,29 @@ class Entity(Model):
             raise ValueError("Invalid value for `last_tx`, must not be `None`")
 
         self._last_tx = last_tx
+
+    @property
+    def no_address_tags(self):
+        """Gets the no_address_tags of this Entity.
+
+        number of address tags
+
+        :return: The no_address_tags of this Entity.
+        :rtype: int
+        """
+        return self._no_address_tags
+
+    @no_address_tags.setter
+    def no_address_tags(self, no_address_tags):
+        """Sets the no_address_tags of this Entity.
+
+        number of address tags
+
+        :param no_address_tags: The no_address_tags of this Entity.
+        :type no_address_tags: int
+        """
+
+        self._no_address_tags = no_address_tags
 
     @property
     def no_addresses(self):

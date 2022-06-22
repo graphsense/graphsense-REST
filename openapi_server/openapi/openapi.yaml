@@ -2128,12 +2128,13 @@ components:
             value: 0.8008282
           value: 6
         in_degree: 0
-        no_addresses: 6
-        out_degree: 5
+        no_addresses: 1
+        out_degree: 2
         first_tx:
           tx_hash: tx_hash
           height: 47
           timestamp: 123456789
+        no_address_tags: 6
         root_address: addressA
         balance:
           fiat_values:
@@ -2142,7 +2143,7 @@ components:
           - code: code
             value: 0.8008282
           value: 6
-        no_incoming_txs: 1
+        no_incoming_txs: 5
         no_outgoing_txs: 5
         currency: btc
         last_tx:
@@ -2181,6 +2182,11 @@ components:
           type: integer
         last_tx:
           $ref: '#/components/schemas/tx_summary'
+        no_address_tags:
+          description: number of address tags
+          format: int32
+          title: no_address_tags
+          type: integer
         no_addresses:
           description: number of contained addresses
           format: int32
@@ -2588,12 +2594,13 @@ components:
                 value: 0.8008282
               value: 6
             in_degree: 0
-            no_addresses: 6
-            out_degree: 5
+            no_addresses: 1
+            out_degree: 2
             first_tx:
               tx_hash: tx_hash
               height: 47
               timestamp: 123456789
+            no_address_tags: 6
             root_address: addressA
             balance:
               fiat_values:
@@ -2602,7 +2609,7 @@ components:
               - code: code
                 value: 0.8008282
               value: 6
-            no_incoming_txs: 1
+            no_incoming_txs: 5
             no_outgoing_txs: 5
             currency: btc
             last_tx:
@@ -2626,12 +2633,13 @@ components:
                 value: 0.8008282
               value: 6
             in_degree: 0
-            no_addresses: 6
-            out_degree: 5
+            no_addresses: 1
+            out_degree: 2
             first_tx:
               tx_hash: tx_hash
               height: 47
               timestamp: 123456789
+            no_address_tags: 6
             root_address: addressA
             balance:
               fiat_values:
@@ -2640,7 +2648,7 @@ components:
               - code: code
                 value: 0.8008282
               value: 6
-            no_incoming_txs: 1
+            no_incoming_txs: 5
             no_outgoing_txs: 5
             currency: btc
             last_tx:
@@ -2682,12 +2690,13 @@ components:
               value: 0.8008282
             value: 6
           in_degree: 0
-          no_addresses: 6
-          out_degree: 5
+          no_addresses: 1
+          out_degree: 2
           first_tx:
             tx_hash: tx_hash
             height: 47
             timestamp: 123456789
+          no_address_tags: 6
           root_address: addressA
           balance:
             fiat_values:
@@ -2696,7 +2705,7 @@ components:
             - code: code
               value: 0.8008282
             value: 6
-          no_incoming_txs: 1
+          no_incoming_txs: 5
           no_outgoing_txs: 5
           currency: btc
           last_tx:
@@ -2721,6 +2730,11 @@ components:
       format: string
       title: next_page
       type: string
+    no_address_tags:
+      description: number of address tags
+      format: int32
+      title: no_address_tags
+      type: integer
     no_addresses:
       description: number of contained addresses
       format: int32

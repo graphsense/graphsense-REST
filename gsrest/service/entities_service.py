@@ -19,7 +19,7 @@ import asyncio
 MAX_DEPTH = 6
 
 
-def from_row(currency, row, rates, tags=None):
+def from_row(currency, row, rates, tags=None, count=0):
     return Entity(
         currency=currency,
         entity=row['cluster_id'],
@@ -40,7 +40,8 @@ def from_row(currency, row, rates, tags=None):
         in_degree=row['in_degree'],
         out_degree=row['out_degree'],
         balance=convert_value(currency, row['balance'], rates),
-        best_address_tag=None if not tags else tags[0]
+        best_address_tag=None if not tags else tags[0],
+        no_address_tags=count
         )
 
 
@@ -70,7 +71,18 @@ async def get_entity(request, currency, entity):
             currency, entity, request.app['show_private_tags'])
 
     rates = (await get_rates(request, currency))['rates']
-    return from_row(currency, result, rates, tags)
+
+    counts = await tagstores(
+            request.app['tagstores'],
+            lambda x: x,
+            'count_address_tags_by_entity',
+            currency, entity, request.app['show_private_tags'])
+    print(f'counts {counts}')
+    count = 0
+    for c in counts:
+        count += c['count']
+    print(f'count {count}')
+    return from_row(currency, result, rates, tags, count)
 
 
 async def list_entity_neighbors(request, currency, entity, direction,

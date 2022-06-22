@@ -249,6 +249,23 @@ class Tagstore:
                             page=page,
                             pagesize=pagesize)
 
+    async def count_address_tags_by_entity(self, currency, entity,
+                                           show_private=False):
+        query = f"""select
+                        count(*) as count
+                    from
+                        tag t,
+                        tagpack tp,
+                        address_cluster_mapping acm
+                    where
+                        acm.address=t.address
+                        and acm.currency=t.currency
+                        and t.currency = %s
+                        and acm.gs_cluster_id = %s
+                        and t.tagpack=tp.id
+                        {hide_private_condition(show_private)}"""
+        return await self.execute(query, [currency.upper(), entity])
+
     async def list_entity_tags_by_entity(self, currency, entity,
                                          show_private=False):
         query = f"""select
