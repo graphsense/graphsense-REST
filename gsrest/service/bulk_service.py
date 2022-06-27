@@ -66,6 +66,10 @@ class writer:
 
 
 def flatten(item, name="", flat_dict=None, format=None):
+    if format == 'json':
+        if isinstance(item, dict):
+            return item
+        return item.to_dict()
     if flat_dict is None:
         # going this way instead of a default argument value
         # like "..., flat_dict = {}):" because

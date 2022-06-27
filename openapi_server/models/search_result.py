@@ -73,6 +73,8 @@ class SearchResult(Model):
         :param currencies: The currencies of this SearchResult.
         :type currencies: List[SearchResultByCurrency]
         """
+        if currencies is None:
+            raise ValueError("Invalid value for `currencies`, must not be `None`")
 
         self._currencies = currencies
 
@@ -96,5 +98,7 @@ class SearchResult(Model):
         :param labels: The labels of this SearchResult.
         :type labels: List[str]
         """
+        if labels is None:
+            raise ValueError("Invalid value for `labels`, must not be `None`")
 
         self._labels = labels

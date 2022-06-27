@@ -107,6 +107,8 @@ class CurrencyStats(Model):
         :param name: The name of this CurrencyStats.
         :type name: str
         """
+        if name is None:
+            raise ValueError("Invalid value for `name`, must not be `None`")
 
         self._name = name
 
@@ -128,6 +130,8 @@ class CurrencyStats(Model):
         :param no_address_relations: The no_address_relations of this CurrencyStats.
         :type no_address_relations: int
         """
+        if no_address_relations is None:
+            raise ValueError("Invalid value for `no_address_relations`, must not be `None`")
 
         self._no_address_relations = no_address_relations
 
@@ -149,6 +153,8 @@ class CurrencyStats(Model):
         :param no_addresses: The no_addresses of this CurrencyStats.
         :type no_addresses: int
         """
+        if no_addresses is None:
+            raise ValueError("Invalid value for `no_addresses`, must not be `None`")
 
         self._no_addresses = no_addresses
 
@@ -170,6 +176,8 @@ class CurrencyStats(Model):
         :param no_blocks: The no_blocks of this CurrencyStats.
         :type no_blocks: int
         """
+        if no_blocks is None:
+            raise ValueError("Invalid value for `no_blocks`, must not be `None`")
 
         self._no_blocks = no_blocks
 
@@ -191,6 +199,8 @@ class CurrencyStats(Model):
         :param no_entities: The no_entities of this CurrencyStats.
         :type no_entities: int
         """
+        if no_entities is None:
+            raise ValueError("Invalid value for `no_entities`, must not be `None`")
 
         self._no_entities = no_entities
 
@@ -212,6 +222,8 @@ class CurrencyStats(Model):
         :param no_labels: The no_labels of this CurrencyStats.
         :type no_labels: int
         """
+        if no_labels is None:
+            raise ValueError("Invalid value for `no_labels`, must not be `None`")
 
         self._no_labels = no_labels
 
@@ -233,6 +245,8 @@ class CurrencyStats(Model):
         :param no_tagged_addresses: The no_tagged_addresses of this CurrencyStats.
         :type no_tagged_addresses: int
         """
+        if no_tagged_addresses is None:
+            raise ValueError("Invalid value for `no_tagged_addresses`, must not be `None`")
 
         self._no_tagged_addresses = no_tagged_addresses
 
@@ -256,6 +270,8 @@ class CurrencyStats(Model):
         :param no_txs: The no_txs of this CurrencyStats.
         :type no_txs: int
         """
+        if no_txs is None:
+            raise ValueError("Invalid value for `no_txs`, must not be `None`")
 
         self._no_txs = no_txs
 
@@ -279,5 +295,7 @@ class CurrencyStats(Model):
         :param timestamp: The timestamp of this CurrencyStats.
         :type timestamp: int
         """
+        if timestamp is None:
+            raise ValueError("Invalid value for `timestamp`, must not be `None`")
 
         self._timestamp = timestamp

@@ -4,19 +4,19 @@ import traceback
 import json
 import re
 
+from openapi_server.models.address_tags import AddressTags
 from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.entity import Entity
 from openapi_server.models.entity_addresses import EntityAddresses
 from openapi_server.models.links import Links
-from openapi_server.models.neighbors import Neighbors
+from openapi_server.models.neighbor_entities import NeighborEntities
 from openapi_server.models.search_result_level1 import SearchResultLevel1
-from openapi_server.models.tags import Tags
 import gsrest.service.entities_service as service
 from openapi_server import util
 
 
 
-async def get_entity(request: web.Request, currency, entity, include_tags=None) -> web.Response:
+async def get_entity(request: web.Request, currency, entity) -> web.Response:
     """Get an entity, optionally with tags
 
     
@@ -25,8 +25,6 @@ async def get_entity(request: web.Request, currency, entity, include_tags=None) 
     :type currency: str
     :param entity: The entity ID
     :type entity: int
-    :param include_tags: Whether to include the first page of tags. Use the respective /tags endpoint to retrieve more if needed.
-    :type include_tags: bool
 
     """
 
@@ -49,11 +47,11 @@ async def get_entity(request: web.Request, currency, entity, include_tags=None) 
     request.app['show_private_tags'] = show_private_tags
 
     try:
-        if 'currency' in ['','currency','entity','include_tags']:
+        if 'currency' in ['','currency','entity']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.get_entity(request
-                ,currency=currency,entity=entity,include_tags=include_tags)
+                ,currency=currency,entity=entity)
         result = await result
 
         for plugin in request.app['plugins']:
@@ -76,7 +74,74 @@ async def get_entity(request: web.Request, currency, entity, include_tags=None) 
     except ValueError as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
-    except TypeError as e:
+    except Exception as e:
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb.append(f"Request URL: {request.url}")
+        tb = "\n".join(tb)
+        request.app.logger.error(tb)
+        raise web.HTTPInternalServerError()
+
+
+async def list_address_tags_by_entity(request: web.Request, currency, entity, page=None, pagesize=None) -> web.Response:
+    """Get tags for a given entity for the given level
+
+    
+
+    :param currency: The cryptocurrency code (e.g., btc)
+    :type currency: str
+    :param entity: The entity ID
+    :type entity: int
+    :param page: Resumption token for retrieving the next page
+    :type page: str
+    :param pagesize: Number of items returned in a single page
+    :type pagesize: int
+
+    """
+
+    for plugin in request.app['plugins']:
+        if hasattr(plugin, 'before_request'):
+            request = plugin.before_request(request)
+
+    show_private_tags_conf = \
+        request.app['config'].get('show_private_tags', False)
+    show_private_tags = bool(show_private_tags_conf)
+    if show_private_tags:
+        for (k,v) in show_private_tags_conf['on_header'].items():
+            hval = request.headers.get(k, None)
+            if not hval:
+                show_private_tags = False
+                break
+            show_private_tags = show_private_tags and \
+                bool(re.match(re.compile(v), hval))
+            
+    request.app['show_private_tags'] = show_private_tags
+
+    try:
+        if 'currency' in ['','currency','entity','page','pagesize']:
+            if currency is not None:
+                currency = currency.lower() 
+        result = service.list_address_tags_by_entity(request
+                ,currency=currency,entity=entity,page=page,pagesize=pagesize)
+        result = await result
+
+        for plugin in request.app['plugins']:
+            if hasattr(plugin, 'before_response'):
+                plugin.before_response(request, result)
+
+        if isinstance(result, list):
+            result = [d.to_dict() for d in result]
+        else:
+            result = result.to_dict()
+
+        result = web.Response(
+                    status=200,
+                    text=json.dumps(result),
+                    headers={'Content-type': 'application/json'})
+        return result
+    except RuntimeError as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPNotFound(text=str(e))
+    except ValueError as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
@@ -149,9 +214,6 @@ async def list_entity_addresses(request: web.Request, currency, entity, page=Non
     except ValueError as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
-    except TypeError as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")
@@ -222,9 +284,6 @@ async def list_entity_links(request: web.Request, currency, entity, neighbor, pa
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
     except ValueError as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
-    except TypeError as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
@@ -303,9 +362,6 @@ async def list_entity_neighbors(request: web.Request, currency, entity, directio
     except ValueError as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
-    except TypeError as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")
@@ -374,84 +430,6 @@ async def list_entity_txs(request: web.Request, currency, entity, page=None, pag
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
     except ValueError as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
-    except TypeError as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
-    except Exception as e:
-        tb = traceback.format_exception(type(e), e, e.__traceback__)
-        tb.append(f"Request URL: {request.url}")
-        tb = "\n".join(tb)
-        request.app.logger.error(tb)
-        raise web.HTTPInternalServerError()
-
-
-async def list_tags_by_entity(request: web.Request, currency, entity, level, page=None, pagesize=None) -> web.Response:
-    """Get tags for a given entity for the given level
-
-    
-
-    :param currency: The cryptocurrency code (e.g., btc)
-    :type currency: str
-    :param entity: The entity ID
-    :type entity: int
-    :param level: Whether tags on the address or entity level are requested
-    :type level: str
-    :param page: Resumption token for retrieving the next page
-    :type page: str
-    :param pagesize: Number of items returned in a single page
-    :type pagesize: int
-
-    """
-
-    for plugin in request.app['plugins']:
-        if hasattr(plugin, 'before_request'):
-            request = plugin.before_request(request)
-
-    show_private_tags_conf = \
-        request.app['config'].get('show_private_tags', False)
-    show_private_tags = bool(show_private_tags_conf)
-    if show_private_tags:
-        for (k,v) in show_private_tags_conf['on_header'].items():
-            hval = request.headers.get(k, None)
-            if not hval:
-                show_private_tags = False
-                break
-            show_private_tags = show_private_tags and \
-                bool(re.match(re.compile(v), hval))
-            
-    request.app['show_private_tags'] = show_private_tags
-
-    try:
-        if 'currency' in ['','currency','entity','level','page','pagesize']:
-            if currency is not None:
-                currency = currency.lower() 
-        result = service.list_tags_by_entity(request
-                ,currency=currency,entity=entity,level=level,page=page,pagesize=pagesize)
-        result = await result
-
-        for plugin in request.app['plugins']:
-            if hasattr(plugin, 'before_response'):
-                plugin.before_response(request, result)
-
-        if isinstance(result, list):
-            result = [d.to_dict() for d in result]
-        else:
-            result = result.to_dict()
-
-        result = web.Response(
-                    status=200,
-                    text=json.dumps(result),
-                    headers={'Content-type': 'application/json'})
-        return result
-    except RuntimeError as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPNotFound(text=str(e))
-    except ValueError as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
-    except TypeError as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
@@ -530,9 +508,6 @@ async def search_entity_neighbors(request: web.Request, currency, entity, direct
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
     except ValueError as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
-    except TypeError as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:

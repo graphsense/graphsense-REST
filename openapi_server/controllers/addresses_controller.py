@@ -9,13 +9,13 @@ from openapi_server.models.address_tags import AddressTags
 from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.entity import Entity
 from openapi_server.models.links import Links
-from openapi_server.models.neighbors import Neighbors
+from openapi_server.models.neighbor_addresses import NeighborAddresses
 import gsrest.service.addresses_service as service
 from openapi_server import util
 
 
 
-async def get_address(request: web.Request, currency, address, include_tags=None) -> web.Response:
+async def get_address(request: web.Request, currency, address) -> web.Response:
     """Get an address, optionally with tags
 
     
@@ -24,8 +24,6 @@ async def get_address(request: web.Request, currency, address, include_tags=None
     :type currency: str
     :param address: The cryptocurrency address
     :type address: str
-    :param include_tags: Whether to include the first page of tags. Use the respective /tags endpoint to retrieve more if needed.
-    :type include_tags: bool
 
     """
 
@@ -48,11 +46,11 @@ async def get_address(request: web.Request, currency, address, include_tags=None
     request.app['show_private_tags'] = show_private_tags
 
     try:
-        if 'currency' in ['','currency','address','include_tags']:
+        if 'currency' in ['','currency','address']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.get_address(request
-                ,currency=currency,address=address,include_tags=include_tags)
+                ,currency=currency,address=address)
         result = await result
 
         for plugin in request.app['plugins']:
@@ -73,9 +71,6 @@ async def get_address(request: web.Request, currency, address, include_tags=None
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
     except ValueError as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
-    except TypeError as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
@@ -86,7 +81,7 @@ async def get_address(request: web.Request, currency, address, include_tags=None
         raise web.HTTPInternalServerError()
 
 
-async def get_address_entity(request: web.Request, currency, address, include_tags=None) -> web.Response:
+async def get_address_entity(request: web.Request, currency, address) -> web.Response:
     """Get the entity of an address
 
     
@@ -95,8 +90,6 @@ async def get_address_entity(request: web.Request, currency, address, include_ta
     :type currency: str
     :param address: The cryptocurrency address
     :type address: str
-    :param include_tags: Whether to include the first page of tags. Use the respective /tags endpoint to retrieve more if needed.
-    :type include_tags: bool
 
     """
 
@@ -119,11 +112,11 @@ async def get_address_entity(request: web.Request, currency, address, include_ta
     request.app['show_private_tags'] = show_private_tags
 
     try:
-        if 'currency' in ['','currency','address','include_tags']:
+        if 'currency' in ['','currency','address']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.get_address_entity(request
-                ,currency=currency,address=address,include_tags=include_tags)
+                ,currency=currency,address=address)
         result = await result
 
         for plugin in request.app['plugins']:
@@ -144,9 +137,6 @@ async def get_address_entity(request: web.Request, currency, address, include_ta
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
     except ValueError as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
-    except TypeError as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
@@ -221,9 +211,6 @@ async def list_address_links(request: web.Request, currency, address, neighbor, 
     except ValueError as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
-    except TypeError as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")
@@ -233,7 +220,7 @@ async def list_address_links(request: web.Request, currency, address, neighbor, 
 
 
 async def list_address_neighbors(request: web.Request, currency, address, direction, include_labels=None, page=None, pagesize=None) -> web.Response:
-    """Get an addresses&#39; neighbors in the address graph
+    """Get an address&#39;s neighbors in the address graph
 
     
 
@@ -296,9 +283,6 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
     except ValueError as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
-    except TypeError as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
@@ -371,9 +355,6 @@ async def list_address_txs(request: web.Request, currency, address, page=None, p
     except ValueError as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
-    except TypeError as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")
@@ -442,9 +423,6 @@ async def list_tags_by_address(request: web.Request, currency, address, page=Non
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
     except ValueError as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
-    except TypeError as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:

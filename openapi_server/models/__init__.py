@@ -2,7 +2,6 @@
 
 # import models into model package
 from openapi_server.models.address import Address
-from openapi_server.models.address_and_entity_tags import AddressAndEntityTags
 from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.address_tag_all_of import AddressTagAllOf
 from openapi_server.models.address_tags import AddressTags
@@ -14,14 +13,14 @@ from openapi_server.models.concept import Concept
 from openapi_server.models.currency_stats import CurrencyStats
 from openapi_server.models.entity import Entity
 from openapi_server.models.entity_addresses import EntityAddresses
-from openapi_server.models.entity_tag import EntityTag
-from openapi_server.models.entity_tag_all_of import EntityTagAllOf
-from openapi_server.models.entity_tags import EntityTags
 from openapi_server.models.link import Link
 from openapi_server.models.link_utxo import LinkUtxo
 from openapi_server.models.links import Links
 from openapi_server.models.neighbor import Neighbor
-from openapi_server.models.neighbors import Neighbors
+from openapi_server.models.neighbor_address import NeighborAddress
+from openapi_server.models.neighbor_addresses import NeighborAddresses
+from openapi_server.models.neighbor_entities import NeighborEntities
+from openapi_server.models.neighbor_entity import NeighborEntity
 from openapi_server.models.rate import Rate
 from openapi_server.models.rates import Rates
 from openapi_server.models.search_result import SearchResult
@@ -41,7 +40,6 @@ from openapi_server.models.search_result_level6 import SearchResultLevel6
 from openapi_server.models.search_result_level6_all_of import SearchResultLevel6AllOf
 from openapi_server.models.stats import Stats
 from openapi_server.models.tag import Tag
-from openapi_server.models.tags import Tags
 from openapi_server.models.taxonomy import Taxonomy
 from openapi_server.models.tx import Tx
 from openapi_server.models.tx_account import TxAccount

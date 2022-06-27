@@ -1,10 +1,13 @@
 from openapi_server.models.address_txs import AddressTxs
 from gsrest.service.entities_service import get_entity
 import gsrest.service.common_service as common
+from openapi_server.models.neighbor_addresses import NeighborAddresses
+from openapi_server.models.neighbor_address import NeighborAddress
+import asyncio
 
 
-async def get_address(request, currency, address, include_tags=False):
-    return await common.get_address(request, currency, address, include_tags)
+async def get_address(request, currency, address):
+    return await common.get_address(request, currency, address)
 
 
 async def list_tags_by_address(request, currency, address,
@@ -25,10 +28,32 @@ async def list_address_txs(request, currency, address, page=None,
 async def list_address_neighbors(request, currency, address, direction,
                                  include_labels=False,
                                  page=None, pagesize=None):
-    return await common.list_neighbors(request, currency, address, direction,
+    results, paging_state = \
+           await common.list_neighbors(request, currency, address, direction,
                                        'address',
                                        include_labels=include_labels,
                                        page=page, pagesize=pagesize, ids=None)
+    is_outgoing = "out" in direction
+    dst = 'dst' if is_outgoing else 'src'
+    relations = []
+    if results is None:
+        return NeighborAddresses()
+    aws = [get_address(request, currency, row[dst+'_address'])
+           for row in results]
+
+    nodes = await asyncio.gather(*aws)
+
+    for row, node in zip(results, nodes):
+        print(f'row {row}')
+        nb = NeighborAddress(
+            labels=row['labels'],
+            value=row['value'],
+            no_txs=row['no_transactions'],
+            address=node)
+        relations.append(nb)
+
+    return NeighborAddresses(next_page=paging_state,
+                             neighbors=relations)
 
 
 async def list_address_links(request, currency, address, neighbor,
@@ -40,7 +65,7 @@ async def list_address_links(request, currency, address, neighbor,
     return await common.links_response(request, currency, result)
 
 
-async def get_address_entity(request, currency, address, include_tags=False):
+async def get_address_entity(request, currency, address):
     # from address to complete entity stats
     e = RuntimeError('Entity for address {} not found'.format(address))
     db = request.app['db']
@@ -49,7 +74,7 @@ async def get_address_entity(request, currency, address, include_tags=False):
     if entity_id is None:
         raise e
 
-    result = await get_entity(request, currency, entity_id, include_tags)
+    result = await get_entity(request, currency, entity_id)
     if result is None:
         raise e
 

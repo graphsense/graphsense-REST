@@ -73,6 +73,8 @@ class EntityAddresses(Model):
         :param addresses: The addresses of this EntityAddresses.
         :type addresses: List[Address]
         """
+        if addresses is None:
+            raise ValueError("Invalid value for `addresses`, must not be `None`")
 
         self._addresses = addresses
 

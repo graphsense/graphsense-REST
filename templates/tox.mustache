@@ -18,4 +18,4 @@ deps=-r{toxinidir}/requirements.txt
 
 commands=
   bash -c "cd {toxinidir}/tests/ && make ORGANIZATION={posargs} .runcass .runts"
-  {{^useNose}}pytest -x --cov={{{pythonSrcRoot}}}{{{packageName}}}{{/useNose}}{{#useNose}}nosetests{{/useNose}}
+  {{^useNose}}pytest -k tag -x --cov={{{pythonSrcRoot}}}{{{packageName}}}{{/useNose}}{{#useNose}}nosetests{{/useNose}}

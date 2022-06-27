@@ -14,55 +14,67 @@ class Tag(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, abuse: str=None, active: bool=None, category: str=None, currency: str=None, is_cluster_definer: bool=None, is_public: bool=None, label: str=None, lastmod: int=None, source: str=None, tagpack_uri: str=None):
+    def __init__(self, abuse: str=None, category: str=None, confidence: str=None, confidence_level: int=None, currency: str=None, is_cluster_definer: bool=None, label: str=None, lastmod: int=None, source: str=None, tagpack_creator: str=None, tagpack_is_public: bool=None, tagpack_title: str=None, tagpack_uri: str=None):
         """Tag - a model defined in OpenAPI
 
         :param abuse: The abuse of this Tag.
-        :param active: The active of this Tag.
         :param category: The category of this Tag.
+        :param confidence: The confidence of this Tag.
+        :param confidence_level: The confidence_level of this Tag.
         :param currency: The currency of this Tag.
         :param is_cluster_definer: The is_cluster_definer of this Tag.
-        :param is_public: The is_public of this Tag.
         :param label: The label of this Tag.
         :param lastmod: The lastmod of this Tag.
         :param source: The source of this Tag.
+        :param tagpack_creator: The tagpack_creator of this Tag.
+        :param tagpack_is_public: The tagpack_is_public of this Tag.
+        :param tagpack_title: The tagpack_title of this Tag.
         :param tagpack_uri: The tagpack_uri of this Tag.
         """
         self.openapi_types = {
             'abuse': str,
-            'active': bool,
             'category': str,
+            'confidence': str,
+            'confidence_level': int,
             'currency': str,
             'is_cluster_definer': bool,
-            'is_public': bool,
             'label': str,
             'lastmod': int,
             'source': str,
+            'tagpack_creator': str,
+            'tagpack_is_public': bool,
+            'tagpack_title': str,
             'tagpack_uri': str
         }
 
         self.attribute_map = {
             'abuse': 'abuse',
-            'active': 'active',
             'category': 'category',
+            'confidence': 'confidence',
+            'confidence_level': 'confidence_level',
             'currency': 'currency',
             'is_cluster_definer': 'is_cluster_definer',
-            'is_public': 'is_public',
             'label': 'label',
             'lastmod': 'lastmod',
             'source': 'source',
+            'tagpack_creator': 'tagpack_creator',
+            'tagpack_is_public': 'tagpack_is_public',
+            'tagpack_title': 'tagpack_title',
             'tagpack_uri': 'tagpack_uri'
         }
 
         self._abuse = abuse
-        self._active = active
         self._category = category
+        self._confidence = confidence
+        self._confidence_level = confidence_level
         self._currency = currency
         self._is_cluster_definer = is_cluster_definer
-        self._is_public = is_public
         self._label = label
         self._lastmod = lastmod
         self._source = source
+        self._tagpack_creator = tagpack_creator
+        self._tagpack_is_public = tagpack_is_public
+        self._tagpack_title = tagpack_title
         self._tagpack_uri = tagpack_uri
 
     @classmethod
@@ -83,14 +95,17 @@ class Tag(Model):
         if not shallow:
             return Model.to_dict(self)
         return { 'abuse': self._abuse,
-            'active': self._active,
             'category': self._category,
+            'confidence': self._confidence,
+            'confidence_level': self._confidence_level,
             'currency': self._currency,
             'is_cluster_definer': self._is_cluster_definer,
-            'is_public': self._is_public,
             'label': self._label,
             'lastmod': self._lastmod,
             'source': self._source,
+            'tagpack_creator': self._tagpack_creator,
+            'tagpack_is_public': self._tagpack_is_public,
+            'tagpack_title': self._tagpack_title,
             'tagpack_uri': self._tagpack_uri }
 
 
@@ -118,31 +133,6 @@ class Tag(Model):
         self._abuse = abuse
 
     @property
-    def active(self):
-        """Gets the active of this Tag.
-
-        whether the address has been ever used
-
-        :return: The active of this Tag.
-        :rtype: bool
-        """
-        return self._active
-
-    @active.setter
-    def active(self, active):
-        """Sets the active of this Tag.
-
-        whether the address has been ever used
-
-        :param active: The active of this Tag.
-        :type active: bool
-        """
-        if active is None:
-            raise ValueError("Invalid value for `active`, must not be `None`")
-
-        self._active = active
-
-    @property
     def category(self):
         """Gets the category of this Tag.
 
@@ -164,6 +154,52 @@ class Tag(Model):
         """
 
         self._category = category
+
+    @property
+    def confidence(self):
+        """Gets the confidence of this Tag.
+
+        Confidence name
+
+        :return: The confidence of this Tag.
+        :rtype: str
+        """
+        return self._confidence
+
+    @confidence.setter
+    def confidence(self, confidence):
+        """Sets the confidence of this Tag.
+
+        Confidence name
+
+        :param confidence: The confidence of this Tag.
+        :type confidence: str
+        """
+
+        self._confidence = confidence
+
+    @property
+    def confidence_level(self):
+        """Gets the confidence_level of this Tag.
+
+        Confidence level
+
+        :return: The confidence_level of this Tag.
+        :rtype: int
+        """
+        return self._confidence_level
+
+    @confidence_level.setter
+    def confidence_level(self, confidence_level):
+        """Sets the confidence_level of this Tag.
+
+        Confidence level
+
+        :param confidence_level: The confidence_level of this Tag.
+        :type confidence_level: int
+        """
+
+        self._confidence_level = confidence_level
 
     @property
     def currency(self):
@@ -210,31 +246,10 @@ class Tag(Model):
         :param is_cluster_definer: The is_cluster_definer of this Tag.
         :type is_cluster_definer: bool
         """
+        if is_cluster_definer is None:
+            raise ValueError("Invalid value for `is_cluster_definer`, must not be `None`")
 
         self._is_cluster_definer = is_cluster_definer
-
-    @property
-    def is_public(self):
-        """Gets the is_public of this Tag.
-
-        whether the address is public
-
-        :return: The is_public of this Tag.
-        :rtype: bool
-        """
-        return self._is_public
-
-    @is_public.setter
-    def is_public(self, is_public):
-        """Sets the is_public of this Tag.
-
-        whether the address is public
-
-        :param is_public: The is_public of this Tag.
-        :type is_public: bool
-        """
-
-        self._is_public = is_public
 
     @property
     def label(self):
@@ -306,6 +321,81 @@ class Tag(Model):
         """
 
         self._source = source
+
+    @property
+    def tagpack_creator(self):
+        """Gets the tagpack_creator of this Tag.
+
+        Tagpack creator
+
+        :return: The tagpack_creator of this Tag.
+        :rtype: str
+        """
+        return self._tagpack_creator
+
+    @tagpack_creator.setter
+    def tagpack_creator(self, tagpack_creator):
+        """Sets the tagpack_creator of this Tag.
+
+        Tagpack creator
+
+        :param tagpack_creator: The tagpack_creator of this Tag.
+        :type tagpack_creator: str
+        """
+        if tagpack_creator is None:
+            raise ValueError("Invalid value for `tagpack_creator`, must not be `None`")
+
+        self._tagpack_creator = tagpack_creator
+
+    @property
+    def tagpack_is_public(self):
+        """Gets the tagpack_is_public of this Tag.
+
+        whether the address is public
+
+        :return: The tagpack_is_public of this Tag.
+        :rtype: bool
+        """
+        return self._tagpack_is_public
+
+    @tagpack_is_public.setter
+    def tagpack_is_public(self, tagpack_is_public):
+        """Sets the tagpack_is_public of this Tag.
+
+        whether the address is public
+
+        :param tagpack_is_public: The tagpack_is_public of this Tag.
+        :type tagpack_is_public: bool
+        """
+        if tagpack_is_public is None:
+            raise ValueError("Invalid value for `tagpack_is_public`, must not be `None`")
+
+        self._tagpack_is_public = tagpack_is_public
+
+    @property
+    def tagpack_title(self):
+        """Gets the tagpack_title of this Tag.
+
+        Tagpack title
+
+        :return: The tagpack_title of this Tag.
+        :rtype: str
+        """
+        return self._tagpack_title
+
+    @tagpack_title.setter
+    def tagpack_title(self, tagpack_title):
+        """Sets the tagpack_title of this Tag.
+
+        Tagpack title
+
+        :param tagpack_title: The tagpack_title of this Tag.
+        :type tagpack_title: str
+        """
+        if tagpack_title is None:
+            raise ValueError("Invalid value for `tagpack_title`, must not be `None`")
+
+        self._tagpack_title = tagpack_title
 
     @property
     def tagpack_uri(self):

@@ -70,5 +70,7 @@ class SearchResultLevel2AllOf(Model):
         :param paths: The paths of this SearchResultLevel2AllOf.
         :type paths: List[SearchResultLevel3]
         """
+        if paths is None:
+            raise ValueError("Invalid value for `paths`, must not be `None`")
 
         self._paths = paths

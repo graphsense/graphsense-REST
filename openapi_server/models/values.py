@@ -73,6 +73,8 @@ class Values(Model):
         :param fiat_values: The fiat_values of this Values.
         :type fiat_values: List[Rate]
         """
+        if fiat_values is None:
+            raise ValueError("Invalid value for `fiat_values`, must not be `None`")
 
         self._fiat_values = fiat_values
 
@@ -94,5 +96,7 @@ class Values(Model):
         :param value: The value of this Values.
         :type value: int
         """
+        if value is None:
+            raise ValueError("Invalid value for `value`, must not be `None`")
 
         self._value = value

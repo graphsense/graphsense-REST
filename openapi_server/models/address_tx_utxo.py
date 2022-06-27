@@ -15,10 +15,11 @@ class AddressTxUtxo(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, coinbase: bool=None, height: int=None, timestamp: int=None, tx_hash: str=None, tx_type: str='utxo', value: Values=None):
+    def __init__(self, coinbase: bool=None, currency: str=None, height: int=None, timestamp: int=None, tx_hash: str=None, tx_type: str='utxo', value: Values=None):
         """AddressTxUtxo - a model defined in OpenAPI
 
         :param coinbase: The coinbase of this AddressTxUtxo.
+        :param currency: The currency of this AddressTxUtxo.
         :param height: The height of this AddressTxUtxo.
         :param timestamp: The timestamp of this AddressTxUtxo.
         :param tx_hash: The tx_hash of this AddressTxUtxo.
@@ -27,6 +28,7 @@ class AddressTxUtxo(Model):
         """
         self.openapi_types = {
             'coinbase': bool,
+            'currency': str,
             'height': int,
             'timestamp': int,
             'tx_hash': str,
@@ -36,6 +38,7 @@ class AddressTxUtxo(Model):
 
         self.attribute_map = {
             'coinbase': 'coinbase',
+            'currency': 'currency',
             'height': 'height',
             'timestamp': 'timestamp',
             'tx_hash': 'tx_hash',
@@ -44,6 +47,7 @@ class AddressTxUtxo(Model):
         }
 
         self._coinbase = coinbase
+        self._currency = currency
         self._height = height
         self._timestamp = timestamp
         self._tx_hash = tx_hash
@@ -68,6 +72,7 @@ class AddressTxUtxo(Model):
         if not shallow:
             return Model.to_dict(self)
         return { 'coinbase': self._coinbase,
+            'currency': self._currency,
             'height': self._height,
             'timestamp': self._timestamp,
             'tx_hash': self._tx_hash,
@@ -99,6 +104,31 @@ class AddressTxUtxo(Model):
             raise ValueError("Invalid value for `coinbase`, must not be `None`")
 
         self._coinbase = coinbase
+
+    @property
+    def currency(self):
+        """Gets the currency of this AddressTxUtxo.
+
+        crypto currency code
+
+        :return: The currency of this AddressTxUtxo.
+        :rtype: str
+        """
+        return self._currency
+
+    @currency.setter
+    def currency(self, currency):
+        """Sets the currency of this AddressTxUtxo.
+
+        crypto currency code
+
+        :param currency: The currency of this AddressTxUtxo.
+        :type currency: str
+        """
+        if currency is None:
+            raise ValueError("Invalid value for `currency`, must not be `None`")
+
+        self._currency = currency
 
     @property
     def height(self):

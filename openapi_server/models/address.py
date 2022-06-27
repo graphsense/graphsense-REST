@@ -17,11 +17,12 @@ class Address(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, address: str=None, balance: Values=None, entity: int=None, first_tx: TxSummary=None, in_degree: int=None, last_tx: TxSummary=None, no_incoming_txs: int=None, no_outgoing_txs: int=None, out_degree: int=None, tags: List[AddressTag]=None, total_received: Values=None, total_spent: Values=None):
+    def __init__(self, address: str=None, balance: Values=None, currency: str=None, entity: int=None, first_tx: TxSummary=None, in_degree: int=None, last_tx: TxSummary=None, no_incoming_txs: int=None, no_outgoing_txs: int=None, out_degree: int=None, tags: List[AddressTag]=None, total_received: Values=None, total_spent: Values=None):
         """Address - a model defined in OpenAPI
 
         :param address: The address of this Address.
         :param balance: The balance of this Address.
+        :param currency: The currency of this Address.
         :param entity: The entity of this Address.
         :param first_tx: The first_tx of this Address.
         :param in_degree: The in_degree of this Address.
@@ -36,6 +37,7 @@ class Address(Model):
         self.openapi_types = {
             'address': str,
             'balance': Values,
+            'currency': str,
             'entity': int,
             'first_tx': TxSummary,
             'in_degree': int,
@@ -51,6 +53,7 @@ class Address(Model):
         self.attribute_map = {
             'address': 'address',
             'balance': 'balance',
+            'currency': 'currency',
             'entity': 'entity',
             'first_tx': 'first_tx',
             'in_degree': 'in_degree',
@@ -65,6 +68,7 @@ class Address(Model):
 
         self._address = address
         self._balance = balance
+        self._currency = currency
         self._entity = entity
         self._first_tx = first_tx
         self._in_degree = in_degree
@@ -95,6 +99,7 @@ class Address(Model):
             return Model.to_dict(self)
         return { 'address': self._address,
             'balance': self._balance,
+            'currency': self._currency,
             'entity': self._entity,
             'first_tx': self._first_tx,
             'in_degree': self._in_degree,
@@ -154,6 +159,31 @@ class Address(Model):
             raise ValueError("Invalid value for `balance`, must not be `None`")
 
         self._balance = balance
+
+    @property
+    def currency(self):
+        """Gets the currency of this Address.
+
+        crypto currency code
+
+        :return: The currency of this Address.
+        :rtype: str
+        """
+        return self._currency
+
+    @currency.setter
+    def currency(self, currency):
+        """Sets the currency of this Address.
+
+        crypto currency code
+
+        :param currency: The currency of this Address.
+        :type currency: str
+        """
+        if currency is None:
+            raise ValueError("Invalid value for `currency`, must not be `None`")
+
+        self._currency = currency
 
     @property
     def entity(self):

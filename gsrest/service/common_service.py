@@ -1,9 +1,6 @@
 from openapi_server.models.address import Address
 from openapi_server.models.tx_summary import TxSummary
-from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.address_tags import AddressTags
-from openapi_server.models.neighbors import Neighbors
-from openapi_server.models.neighbor import Neighbor
 from gsrest.util.values import convert_value, to_values
 from gsrest.service.rates_service import get_rates
 from openapi_server.models.link_utxo import LinkUtxo
@@ -11,11 +8,13 @@ from openapi_server.models.links import Links
 from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from gsrest.service.rates_service import list_rates
-from gsrest.db.util import tagstores, tagstores_with_paging, dt_to_int
+from gsrest.db.util import tagstores, tagstores_with_paging
+from gsrest.service.tags_service import address_tag_from_row
 
 
-def address_from_row(currency, row, rates, tags=None):
+def address_from_row(currency, row, rates):
     return Address(
+        currency=currency,
         address=row['address'],
         entity=row['cluster_id'],
         first_tx=TxSummary(
@@ -32,8 +31,7 @@ def address_from_row(currency, row, rates, tags=None):
         total_spent=to_values(row['total_spent']),
         in_degree=row['in_degree'],
         out_degree=row['out_degree'],
-        balance=convert_value(currency, row['balance'], rates),
-        tags=tags
+        balance=convert_value(currency, row['balance'], rates)
         )
 
 
@@ -42,6 +40,7 @@ async def txs_from_rows(request, currency, rows):
     rates = await list_rates(request, currency, heights)
     if currency == 'eth':
         return [TxAccount(
+                currency=currency,
                 height=row['height'],
                 timestamp=row['timestamp'],
                 tx_hash=row['tx_hash'].hex(),
@@ -51,6 +50,7 @@ async def txs_from_rows(request, currency, rows):
                                     rates[row['height']]))
                 for row in rows]
     return [AddressTxUtxo(
+            currency=currency,
             height=row['height'],
             timestamp=row['timestamp'],
             coinbase=row['coinbase'],
@@ -59,21 +59,16 @@ async def txs_from_rows(request, currency, rows):
             for row in rows]
 
 
-async def get_address(request, currency, address, include_tags=False):
+async def get_address(request, currency, address):
     db = request.app['db']
     result = await db.get_address(currency, address)
-
-    tags = None
-    if include_tags:
-        tags = (await list_tags_by_address(request, currency, address)
-                ).address_tags
 
     if not result:
         raise RuntimeError("Address {} not found in currency {}".format(
             address, currency))
     return address_from_row(currency, result,
                             (await get_rates(request, currency)
-                             )['rates'], tags)
+                             )['rates'])
 
 
 async def list_tags_by_address(request, currency, address,
@@ -81,20 +76,7 @@ async def list_tags_by_address(request, currency, address,
     address_tags, next_page = \
         await tagstores_with_paging(
             request.app['tagstores'],
-            lambda row:
-                AddressTag(
-                    label=row['label'],
-                    address=row['address'],
-                    category=row['category'],
-                    abuse=row['abuse'],
-                    tagpack_uri=row['tagpack'],
-                    source=row['source'],
-                    lastmod=dt_to_int(row['lastmod']),
-                    active=True,
-                    is_public=row['is_public'],
-                    is_cluster_definer=row['is_cluster_definer'],
-                    currency=row['currency'].upper()
-                    ),
+            address_tag_from_row,
             'list_tags_by_address',
             page, pagesize, currency, address,
             request.app['show_private_tags'])
@@ -117,28 +99,18 @@ async def list_neighbors(request, currency, id, direction, node_type, ids=None,
                                     page=page,
                                     pagesize=pagesize)
 
+    for row in results:
+        row['labels'] = row['labels'] if 'labels' in row else None
+        row['value'] = to_values(row['value'])
+
     dst = 'dst' if is_outgoing else 'src'
+
+    print(f'result {results}')
 
     if include_labels:
         await add_labels(request, currency, node_type, dst, results)
 
-    rates = (await get_rates(request, currency))['rates']
-    relations = []
-    if results is None:
-        return Neighbors()
-    ntype, suffix = (node_type, '') \
-        if node_type == 'address' else ('cluster', '_id')
-    for row in results:
-        relations.append(Neighbor(
-            id=str(row[f'{dst}_{ntype}{suffix}']),
-            node_type=node_type,
-            labels=row['labels'] if 'labels' in row else None,
-            received=to_values(row['total_received']),
-            value=to_values(row['value']),
-            balance=convert_value(currency, row['balance'], rates),
-            no_txs=row['no_transactions']))
-    return Neighbors(next_page=paging_state,
-                     neighbors=relations)
+    return results, paging_state
 
 
 async def add_labels(request, currency, node_type, that, nodes):
@@ -175,6 +147,7 @@ async def links_response(request, currency, result):
         rates = await list_rates(request, currency, heights)
         return Links(links=[TxAccount(
                             tx_hash=row['tx_hash'].hex(),
+                            currency=currency,
                             timestamp=row['block_timestamp'],
                             height=row['block_id'],
                             from_address=row['from_address'],
@@ -190,6 +163,7 @@ async def links_response(request, currency, result):
 
     return Links(links=[LinkUtxo(tx_hash=e['tx_hash'].hex(),
                         height=e['height'],
+                        currency=currency,
                         timestamp=e['timestamp'],
                         input_value=convert_value(
                             currency, e['input_value'], rates[e['height']]),

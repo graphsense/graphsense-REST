@@ -670,6 +670,7 @@ class Cassandra:
     async def list_neighbors(self, currency, id, is_outgoing, node_type,
                              targets, page, pagesize):
         orig_node_type = node_type
+        orig_id = id
         if node_type == 'address':
             id = await self.get_address_id(currency, id)
         elif node_type == 'entity':
@@ -677,6 +678,10 @@ class Cassandra:
             node_type = 'cluster'
             if currency == 'eth':
                 node_type = 'address'
+
+        if id is None:
+            raise RuntimeError("{} not found in currency {}"
+                               .format(orig_id, currency))
 
         if is_outgoing:
             direction, this, that = ('outgoing', 'src', 'dst')
@@ -737,32 +742,15 @@ class Cassandra:
 
         if orig_node_type == 'address':
             ids = [row[that+'_address_id'] for row in results]
-            addresses = await self.get_addresses_by_ids(currency, ids, False)
+            addresses = await self.get_addresses_by_ids(currency, ids,
+                                                        address_only=True)
 
             if len(addresses) != len(ids):
-                address_ids = [address['cluster_id'] for address in addresses]
+                address_ids = [address['address'] for address in addresses]
                 self.log_missing(address_ids, ids, node_type, query, params)
 
             for (row, address) in zip(results, addresses):
-                row[f'{that}_address'] = address['address']
-                row['total_received'] = \
-                    self.markup_currency(currency, address['total_received'])
-                row['total_spent'] = \
-                    self.markup_currency(currency, address['total_spent'])
-        else:
-            ids = [row[that+'_cluster_id'] for row in results]
-            entities, _ = await self.list_entities(currency, ids, fields=[
-                                            'cluster_id',
-                                            'total_received',
-                                            'total_spent'])
-            if len(entities) != len(ids):
-                cluster_ids = [entity['cluster_id'] for entity in entities]
-                self.log_missing(cluster_ids, ids, node_type, query, params)
-
-            for (row, entity) in zip(results, entities):
-                row[f'{that}_entity'] = entity['cluster_id']
-                row['total_received'] = entity['total_received']
-                row['total_spent'] = entity['total_spent']
+                row[that+'_address'] = address['address']
 
         field = 'value' if currency == 'eth' else 'estimated_value'
         for neighbor in results:
@@ -772,9 +760,6 @@ class Cassandra:
         if currency == 'eth':
             for row in results:
                 row['address_id'] = row[that + '_address_id']
-        aws = [self.add_balance(currency, row) for row in results]
-
-        await asyncio.gather(*aws)
 
         return results, to_hex(paging_state)
 
@@ -793,8 +778,7 @@ class Cassandra:
         params = [self.get_tx_id_group(currency, id), id]
         fields = ("tx_hash, coinbase, block_id, timestamp,"
                   "total_input, total_output")
-        if include_io:
-            fields += ",inputs,outputs"
+        fields += ",inputs,outputs"
         query = (f'SELECT {fields} FROM transaction WHERE '
                  'tx_id_group = %s and tx_id = %s')
         result = await self.execute_async(currency, 'raw', query, params)

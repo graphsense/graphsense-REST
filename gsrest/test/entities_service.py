@@ -1,16 +1,15 @@
 from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from openapi_server.models.tx_account import TxAccount
-from openapi_server.models.neighbors import Neighbors
-from openapi_server.models.neighbor import Neighbor
+from openapi_server.models.neighbor_entities import NeighborEntities
+from openapi_server.models.neighbor_entity import NeighborEntity
 from openapi_server.models.address import Address
 from openapi_server.models.entity_addresses import EntityAddresses
 from openapi_server.models.entity import Entity
 from openapi_server.models.search_result_level1 import SearchResultLevel1
 from openapi_server.models.links import Links
 from openapi_server.models.link_utxo import LinkUtxo
-from openapi_server.models.tags import Tags
-from openapi_server.models.address_and_entity_tags import AddressAndEntityTags
+from openapi_server.models.address_tags import AddressTags
 from gsrest.util.values import make_values
 from gsrest.test.addresses_service import addressD, addressE, eth_address, \
         entityWithTags, eth_addressWithTagsOutNeighbors
@@ -36,13 +35,13 @@ eth_entity = Entity(
 )
 
 eth_entityWithTags = Entity(**eth_entity.to_dict())
-eth_entityWithTags.tags = AddressAndEntityTags(
-    address_tags=[ts.eth_tag1, ts.eth_tag2],
-    entity_tags=[ts.eth_etag1])
+eth_entityWithTags.best_address_tag = ts.eth_tag1
 
 eth_neighbors = []
 for n in eth_addressWithTagsOutNeighbors.neighbors:
-    nn = Neighbor(**n.to_dict())
+    d = n.to_dict()
+    d.pop('address')
+    nn = NeighborEntity(d)
     nn.node_type = 'entity'
     nn.labels = []
     eth_neighbors.append(nn)
@@ -51,14 +50,14 @@ eth_neighbors[0].id = '107925000'
 eth_neighbors[0].labels = [ts.eth_etag1.label]
 eth_neighbors[1].id = '107925001'
 
-eth_entityWithTagsOutNeighbors = Neighbors(
+eth_entityWithTagsOutNeighbors = NeighborEntities(
         next_page=None,
         neighbors=eth_neighbors)
 
-entityWithTagsOutNeighbors = Neighbors(
+entityWithTagsOutNeighbors = NeighborEntities(
     next_page=None,
     neighbors=[
-        Neighbor(
+        NeighborEntity(
           received=make_values(
              usd=2583655.0,
              eur=2162085.5,
@@ -79,7 +78,7 @@ entityWithTagsOutNeighbors = Neighbors(
              eur=1.15,
           )
         ),
-        Neighbor(
+        NeighborEntity(
           received=make_values(
              usd=2583655.0,
              eur=2162085.5,
@@ -101,10 +100,10 @@ entityWithTagsOutNeighbors = Neighbors(
           )
         )])
 
-entityWithTagsInNeighbors = Neighbors(
+entityWithTagsInNeighbors = NeighborEntities(
     next_page=None,
     neighbors=[
-        Neighbor(
+        NeighborEntity(
           received=make_values(
              usd=200.0,
              eur=100.0,
@@ -125,7 +124,7 @@ entityWithTagsInNeighbors = Neighbors(
              value=5
           )
         ),
-        Neighbor(
+        NeighborEntity(
           received=make_values(
              usd=13.41,
              eur=9.87,
@@ -171,7 +170,7 @@ async def get_entity(test_case):
                                      include_tags=True)
     ewt['tags']['address_tags'] = \
         [tag for tag in ewt['tags']['address_tags'] if
-         tag['is_public']]
+         tag['tagpack_is_public']]
     test_case.assertEqual(ewt, result)
 
     result = await test_case.request(path,
@@ -182,44 +181,19 @@ async def get_entity(test_case):
     test_case.assertEqual(eth_entityWithTags.to_dict(), result)
 
 
-async def list_tags_by_entity(test_case):
+async def list_address_tags_by_entity(test_case):
     path = '/{currency}/entities/{entity}/tags?level={level}'
     result = await test_case.request(path,
                                      currency='btc',
-                                     entity=entityWithTags.entity,
-                                     level='entity')
-    expected = Tags(entity_tags=entityWithTags.tags.entity_tags)
-    test_case.assertEqual(expected.to_dict()['entity_tags'],
-                          result['entity_tags'])
-
-    result = await test_case.request(path,
-                                     currency='btc',
-                                     entity=entityWithTags.entity,
-                                     level='address')
-    expected = Tags(address_tags=entityWithTags.tags.address_tags)
+                                     entity=entityWithTags.entity)
+    expected = AddressTags(address_tags=entityWithTags.tags.address_tags)
     test_case.assertEqual(expected.to_dict()['address_tags'],
                           result['address_tags'])
 
     result = await test_case.request(path,
                                      currency='eth',
-                                     entity=eth_entityWithTags.entity,
-                                     level='entity')
-    expected = Tags(entity_tags=eth_entityWithTags.tags.entity_tags)
-    test_case.assertEqual(expected.to_dict(), result)
-
-    result = await test_case.request(path,
-                                     currency='eth',
-                                     auth='unauthorized',
-                                     entity=eth_entityWithTags.entity,
-                                     level='entity')
-    expected = Tags(entity_tags=[])
-    test_case.assertEqual(expected.to_dict(), result)
-
-    result = await test_case.request(path,
-                                     currency='eth',
-                                     entity=eth_entityWithTags.entity,
-                                     level='address')
-    expected = Tags(address_tags=eth_entityWithTags.tags.address_tags)
+                                     entity=eth_entityWithTags.entity)
+    expected = AddressTags(address_tags=eth_entityWithTags.tags.address_tags)
     test_case.assertEqual(expected.to_dict()['address_tags'],
                           result['address_tags'])
 
@@ -229,8 +203,8 @@ async def list_tags_by_entity(test_case):
                                      entity=eth_entityWithTags.entity,
                                      level='address')
     public_address_tags = [tag for tag in eth_entityWithTags.tags.address_tags
-                           if tag.is_public]
-    expected = Tags(address_tags=public_address_tags)
+                           if tag.tagpack_is_public]
+    expected = AddressTags(address_tags=public_address_tags)
     test_case.assertEqual(expected.to_dict()['address_tags'],
                           result['address_tags'])
 

@@ -5,7 +5,7 @@ from datetime import date, datetime
 from typing import List, Dict, Type
 
 from openapi_server.models.base_model_ import Model
-from openapi_server.models.address_and_entity_tags import AddressAndEntityTags
+from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.values import Values
 from openapi_server import util
@@ -17,66 +17,74 @@ class Entity(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, balance: Values=None, entity: int=None, first_tx: TxSummary=None, in_degree: int=None, last_tx: TxSummary=None, no_addresses: int=None, no_incoming_txs: int=None, no_outgoing_txs: int=None, out_degree: int=None, root_address: str=None, tags: AddressAndEntityTags=None, total_received: Values=None, total_spent: Values=None):
+    def __init__(self, balance: Values=None, best_address_tag: AddressTag=None, currency: str=None, entity: int=None, first_tx: TxSummary=None, in_degree: int=None, last_tx: TxSummary=None, no_address_tags: int=None, no_addresses: int=None, no_incoming_txs: int=None, no_outgoing_txs: int=None, out_degree: int=None, root_address: str=None, total_received: Values=None, total_spent: Values=None):
         """Entity - a model defined in OpenAPI
 
         :param balance: The balance of this Entity.
+        :param best_address_tag: The best_address_tag of this Entity.
+        :param currency: The currency of this Entity.
         :param entity: The entity of this Entity.
         :param first_tx: The first_tx of this Entity.
         :param in_degree: The in_degree of this Entity.
         :param last_tx: The last_tx of this Entity.
+        :param no_address_tags: The no_address_tags of this Entity.
         :param no_addresses: The no_addresses of this Entity.
         :param no_incoming_txs: The no_incoming_txs of this Entity.
         :param no_outgoing_txs: The no_outgoing_txs of this Entity.
         :param out_degree: The out_degree of this Entity.
         :param root_address: The root_address of this Entity.
-        :param tags: The tags of this Entity.
         :param total_received: The total_received of this Entity.
         :param total_spent: The total_spent of this Entity.
         """
         self.openapi_types = {
             'balance': Values,
+            'best_address_tag': AddressTag,
+            'currency': str,
             'entity': int,
             'first_tx': TxSummary,
             'in_degree': int,
             'last_tx': TxSummary,
+            'no_address_tags': int,
             'no_addresses': int,
             'no_incoming_txs': int,
             'no_outgoing_txs': int,
             'out_degree': int,
             'root_address': str,
-            'tags': AddressAndEntityTags,
             'total_received': Values,
             'total_spent': Values
         }
 
         self.attribute_map = {
             'balance': 'balance',
+            'best_address_tag': 'best_address_tag',
+            'currency': 'currency',
             'entity': 'entity',
             'first_tx': 'first_tx',
             'in_degree': 'in_degree',
             'last_tx': 'last_tx',
+            'no_address_tags': 'no_address_tags',
             'no_addresses': 'no_addresses',
             'no_incoming_txs': 'no_incoming_txs',
             'no_outgoing_txs': 'no_outgoing_txs',
             'out_degree': 'out_degree',
             'root_address': 'root_address',
-            'tags': 'tags',
             'total_received': 'total_received',
             'total_spent': 'total_spent'
         }
 
         self._balance = balance
+        self._best_address_tag = best_address_tag
+        self._currency = currency
         self._entity = entity
         self._first_tx = first_tx
         self._in_degree = in_degree
         self._last_tx = last_tx
+        self._no_address_tags = no_address_tags
         self._no_addresses = no_addresses
         self._no_incoming_txs = no_incoming_txs
         self._no_outgoing_txs = no_outgoing_txs
         self._out_degree = out_degree
         self._root_address = root_address
-        self._tags = tags
         self._total_received = total_received
         self._total_spent = total_spent
 
@@ -98,16 +106,18 @@ class Entity(Model):
         if not shallow:
             return Model.to_dict(self)
         return { 'balance': self._balance,
+            'best_address_tag': self._best_address_tag,
+            'currency': self._currency,
             'entity': self._entity,
             'first_tx': self._first_tx,
             'in_degree': self._in_degree,
             'last_tx': self._last_tx,
+            'no_address_tags': self._no_address_tags,
             'no_addresses': self._no_addresses,
             'no_incoming_txs': self._no_incoming_txs,
             'no_outgoing_txs': self._no_outgoing_txs,
             'out_degree': self._out_degree,
             'root_address': self._root_address,
-            'tags': self._tags,
             'total_received': self._total_received,
             'total_spent': self._total_spent }
 
@@ -134,6 +144,52 @@ class Entity(Model):
             raise ValueError("Invalid value for `balance`, must not be `None`")
 
         self._balance = balance
+
+    @property
+    def best_address_tag(self):
+        """Gets the best_address_tag of this Entity.
+
+
+        :return: The best_address_tag of this Entity.
+        :rtype: AddressTag
+        """
+        return self._best_address_tag
+
+    @best_address_tag.setter
+    def best_address_tag(self, best_address_tag):
+        """Sets the best_address_tag of this Entity.
+
+
+        :param best_address_tag: The best_address_tag of this Entity.
+        :type best_address_tag: AddressTag
+        """
+
+        self._best_address_tag = best_address_tag
+
+    @property
+    def currency(self):
+        """Gets the currency of this Entity.
+
+        crypto currency code
+
+        :return: The currency of this Entity.
+        :rtype: str
+        """
+        return self._currency
+
+    @currency.setter
+    def currency(self, currency):
+        """Sets the currency of this Entity.
+
+        crypto currency code
+
+        :param currency: The currency of this Entity.
+        :type currency: str
+        """
+        if currency is None:
+            raise ValueError("Invalid value for `currency`, must not be `None`")
+
+        self._currency = currency
 
     @property
     def entity(self):
@@ -228,6 +284,31 @@ class Entity(Model):
             raise ValueError("Invalid value for `last_tx`, must not be `None`")
 
         self._last_tx = last_tx
+
+    @property
+    def no_address_tags(self):
+        """Gets the no_address_tags of this Entity.
+
+        number of address tags
+
+        :return: The no_address_tags of this Entity.
+        :rtype: int
+        """
+        return self._no_address_tags
+
+    @no_address_tags.setter
+    def no_address_tags(self, no_address_tags):
+        """Sets the no_address_tags of this Entity.
+
+        number of address tags
+
+        :param no_address_tags: The no_address_tags of this Entity.
+        :type no_address_tags: int
+        """
+        if no_address_tags is None:
+            raise ValueError("Invalid value for `no_address_tags`, must not be `None`")
+
+        self._no_address_tags = no_address_tags
 
     @property
     def no_addresses(self):
@@ -347,27 +428,6 @@ class Entity(Model):
             raise ValueError("Invalid value for `root_address`, must not be `None`")
 
         self._root_address = root_address
-
-    @property
-    def tags(self):
-        """Gets the tags of this Entity.
-
-
-        :return: The tags of this Entity.
-        :rtype: AddressAndEntityTags
-        """
-        return self._tags
-
-    @tags.setter
-    def tags(self, tags):
-        """Sets the tags of this Entity.
-
-
-        :param tags: The tags of this Entity.
-        :type tags: AddressAndEntityTags
-        """
-
-        self._tags = tags
 
     @property
     def total_received(self):
