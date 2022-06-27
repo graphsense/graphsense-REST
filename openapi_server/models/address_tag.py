@@ -16,7 +16,7 @@ class AddressTag(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, abuse: str=None, category: str=None, confidence: str=None, confidence_level: int=None, currency: str=None, is_cluster_definer: bool=None, label: str=None, lastmod: int=None, source: str=None, tagpack_creator: str=None, tagpack_is_public: bool=None, tagpack_title: str=None, tagpack_uri: str=None, address: str=None):
+    def __init__(self, abuse: str=None, category: str=None, confidence: str=None, confidence_level: int=None, currency: str=None, is_cluster_definer: bool=None, label: str=None, lastmod: int=None, source: str=None, tagpack_creator: str=None, tagpack_is_public: bool=None, tagpack_title: str=None, tagpack_uri: str=None, address: str=None, entity: int=None):
         """AddressTag - a model defined in OpenAPI
 
         :param abuse: The abuse of this AddressTag.
@@ -33,6 +33,7 @@ class AddressTag(Model):
         :param tagpack_title: The tagpack_title of this AddressTag.
         :param tagpack_uri: The tagpack_uri of this AddressTag.
         :param address: The address of this AddressTag.
+        :param entity: The entity of this AddressTag.
         """
         self.openapi_types = {
             'abuse': str,
@@ -48,7 +49,8 @@ class AddressTag(Model):
             'tagpack_is_public': bool,
             'tagpack_title': str,
             'tagpack_uri': str,
-            'address': str
+            'address': str,
+            'entity': int
         }
 
         self.attribute_map = {
@@ -65,7 +67,8 @@ class AddressTag(Model):
             'tagpack_is_public': 'tagpack_is_public',
             'tagpack_title': 'tagpack_title',
             'tagpack_uri': 'tagpack_uri',
-            'address': 'address'
+            'address': 'address',
+            'entity': 'entity'
         }
 
         self._abuse = abuse
@@ -82,6 +85,7 @@ class AddressTag(Model):
         self._tagpack_title = tagpack_title
         self._tagpack_uri = tagpack_uri
         self._address = address
+        self._entity = entity
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'AddressTag':
@@ -113,7 +117,8 @@ class AddressTag(Model):
             'tagpack_is_public': self._tagpack_is_public,
             'tagpack_title': self._tagpack_title,
             'tagpack_uri': self._tagpack_uri,
-            'address': self._address }
+            'address': self._address,
+            'entity': self._entity }
 
 
     @property
@@ -451,3 +456,28 @@ class AddressTag(Model):
             raise ValueError("Invalid value for `address`, must not be `None`")
 
         self._address = address
+
+    @property
+    def entity(self):
+        """Gets the entity of this AddressTag.
+
+        Entity id
+
+        :return: The entity of this AddressTag.
+        :rtype: int
+        """
+        return self._entity
+
+    @entity.setter
+    def entity(self, entity):
+        """Sets the entity of this AddressTag.
+
+        Entity id
+
+        :param entity: The entity of this AddressTag.
+        :type entity: int
+        """
+        if entity is None:
+            raise ValueError("Invalid value for `entity`, must not be `None`")
+
+        self._entity = entity

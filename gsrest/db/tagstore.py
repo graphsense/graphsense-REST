@@ -150,14 +150,18 @@ class Tagstore:
                         tp.creator,
                         tp.title,
                         tp.is_public,
-                        c.level
+                        c.level,
+                        acm.gs_cluster_id
                     from
                        tag t,
                        tagpack tp,
-                       confidence c
+                       confidence c,
+                       address_cluster_mapping acm
                    where
                        t.tagpack = tp.id
                        and t.confidence = c.id
+                       and acm.address=t.address
+                       and acm.currency=t.currency
                        {hide_private_condition(show_private)}
                        and t.label = %s """
         return self.execute(query,
@@ -196,16 +200,20 @@ class Tagstore:
                         tp.creator,
                         tp.title,
                         tp.is_public,
-                        c.level
+                        c.level,
+                        acm.gs_cluster_id
                     from
                         tag t,
                         tagpack tp,
-                        confidence c
+                        confidence c,
+                        address_cluster_mapping acm
                     where
                         t.tagpack=tp.id
                         and c.id=t.confidence
                         and t.currency = %s
                         and t.address = %s
+                        and acm.address=t.address
+                        and acm.currency=t.currency
                         {hide_private_condition(show_private)}
                     order by
                         c.level desc
@@ -225,7 +233,8 @@ class Tagstore:
                         tp.creator,
                         tp.title,
                         tp.is_public,
-                        c.level
+                        c.level,
+                        acm.gs_cluster_id
                     from
                         tag t,
                         tagpack tp,

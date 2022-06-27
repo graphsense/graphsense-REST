@@ -3273,8 +3273,15 @@ components:
           example: addressA
           title: address
           type: string
+        entity:
+          description: Entity id
+          example: 123456
+          format: int32
+          title: entity
+          type: integer
       required:
       - address
+      - entity
       type: object
     search_result_level1_allOf:
       properties:

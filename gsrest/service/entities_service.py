@@ -77,11 +77,9 @@ async def get_entity(request, currency, entity):
             lambda x: x,
             'count_address_tags_by_entity',
             currency, entity, request.app['show_private_tags'])
-    print(f'counts {counts}')
     count = 0
     for c in counts:
         count += c['count']
-    print(f'count {count}')
     return from_row(currency, result, rates, tags, count)
 
 

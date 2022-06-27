@@ -8,6 +8,7 @@ from gsrest.db.util import tagstores, tagstores_with_paging, dt_to_int
 def address_tag_from_row(row):
     return AddressTag(
         address=row['address'],
+        entity=row['gs_cluster_id'],
         label=row['label'],
         category=row['category'],
         abuse=row['abuse'],
