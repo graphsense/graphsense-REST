@@ -319,6 +319,7 @@ class Tagstore:
                         and c.id = t.confidence
                         and acm.currency = %s
                         and t.tagpack=tp.id
+                        and t.is_cluster_definer=true
                         and t.label= %s
                    order by
                         c.level desc
