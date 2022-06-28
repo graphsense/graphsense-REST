@@ -229,6 +229,7 @@ async def recursive_search(request, currency, entity, params, breadth, depth,
 
         if 'category' in params:
             match = props.best_address_tag and \
+                props.best_address_tag.category and \
                 props.best_address_tag.category.lower() \
                 == params['category'].lower()
 
