@@ -102,7 +102,6 @@ async def list_entity_neighbors(request, currency, entity, direction,
     nodes = await asyncio.gather(*aws)
 
     for row, node in zip(results, nodes):
-        print(f'row {row}')
         nb = NeighborEntity(
             labels=row['labels'],
             value=row['value'],
