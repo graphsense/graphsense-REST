@@ -16,7 +16,7 @@ import gsrest.service.common_service as common
 import importlib
 import asyncio
 
-MAX_DEPTH = 6
+MAX_DEPTH = 7
 
 
 def from_row(currency, row, rates, tags=None, count=0):
