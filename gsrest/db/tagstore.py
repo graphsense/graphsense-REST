@@ -172,6 +172,8 @@ class Tagstore:
 
     def list_matching_labels(self, currency, expression, limit,
                              show_private=False):
+        currency_condition = "and t.currency = %s" if currency else ""
+        params = [currency.upper()] if currency else []
         query = f"""select
                     t.label
                    from
@@ -181,16 +183,13 @@ class Tagstore:
                    where
                     t.label = l.label
                     and tp.id = t.tagpack
-                    and t.currency = %s
+                    {currency_condition}
                     and similarity(l.label, %s) > 0.2
                     {hide_private_condition(show_private)}
                    order by l.label <-> %s
                    limit %s"""
         return self.execute(query,
-                            params=[currency.upper(),
-                                    expression,
-                                    expression,
-                                    limit])
+                            params=params+[expression, expression, limit])
 
     def list_tags_by_address(self, currency, address, show_private=False,
                              page=None, pagesize=None):

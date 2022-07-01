@@ -5,7 +5,6 @@ from datetime import date, datetime
 from typing import List, Dict, Type
 
 from openapi_server.models.base_model_ import Model
-from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.values import Values
 from openapi_server import util
@@ -17,7 +16,7 @@ class Address(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, address: str=None, balance: Values=None, currency: str=None, entity: int=None, first_tx: TxSummary=None, in_degree: int=None, last_tx: TxSummary=None, no_incoming_txs: int=None, no_outgoing_txs: int=None, out_degree: int=None, tags: List[AddressTag]=None, total_received: Values=None, total_spent: Values=None):
+    def __init__(self, address: str=None, balance: Values=None, currency: str=None, entity: int=None, first_tx: TxSummary=None, in_degree: int=None, last_tx: TxSummary=None, no_incoming_txs: int=None, no_outgoing_txs: int=None, out_degree: int=None, total_received: Values=None, total_spent: Values=None):
         """Address - a model defined in OpenAPI
 
         :param address: The address of this Address.
@@ -30,7 +29,6 @@ class Address(Model):
         :param no_incoming_txs: The no_incoming_txs of this Address.
         :param no_outgoing_txs: The no_outgoing_txs of this Address.
         :param out_degree: The out_degree of this Address.
-        :param tags: The tags of this Address.
         :param total_received: The total_received of this Address.
         :param total_spent: The total_spent of this Address.
         """
@@ -45,7 +43,6 @@ class Address(Model):
             'no_incoming_txs': int,
             'no_outgoing_txs': int,
             'out_degree': int,
-            'tags': List[AddressTag],
             'total_received': Values,
             'total_spent': Values
         }
@@ -61,7 +58,6 @@ class Address(Model):
             'no_incoming_txs': 'no_incoming_txs',
             'no_outgoing_txs': 'no_outgoing_txs',
             'out_degree': 'out_degree',
-            'tags': 'tags',
             'total_received': 'total_received',
             'total_spent': 'total_spent'
         }
@@ -76,7 +72,6 @@ class Address(Model):
         self._no_incoming_txs = no_incoming_txs
         self._no_outgoing_txs = no_outgoing_txs
         self._out_degree = out_degree
-        self._tags = tags
         self._total_received = total_received
         self._total_spent = total_spent
 
@@ -107,7 +102,6 @@ class Address(Model):
             'no_incoming_txs': self._no_incoming_txs,
             'no_outgoing_txs': self._no_outgoing_txs,
             'out_degree': self._out_degree,
-            'tags': self._tags,
             'total_received': self._total_received,
             'total_spent': self._total_spent }
 
@@ -347,29 +341,6 @@ class Address(Model):
             raise ValueError("Invalid value for `out_degree`, must not be `None`")
 
         self._out_degree = out_degree
-
-    @property
-    def tags(self):
-        """Gets the tags of this Address.
-
-        First page of tags of this address
-
-        :return: The tags of this Address.
-        :rtype: List[AddressTag]
-        """
-        return self._tags
-
-    @tags.setter
-    def tags(self, tags):
-        """Sets the tags of this Address.
-
-        First page of tags of this address
-
-        :param tags: The tags of this Address.
-        :type tags: List[AddressTag]
-        """
-
-        self._tags = tags
 
     @property
     def total_received(self):

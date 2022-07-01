@@ -590,14 +590,13 @@ class Cassandra:
                 paging_state = None
             result = await self.execute_async(
                         currency, 'transformed', query, [prefix],
-                        paging_state=paging_state,
-                        fetch_size=SEARCH_PAGE_SIZE)
+                        paging_state=paging_state)
             if result.is_empty():
                 break
             rows += [norm(row['address']) for row in result.current_rows
                      if norm(row['address']).startswith(expression)]
             paging_state = result.paging_state
-        return rows
+        return rows[0:limit]
 
     @eth
     async def get_entity(self, currency, entity):
@@ -814,8 +813,7 @@ class Cassandra:
             result = await self.execute_async(
                         currency, kind, query,
                         [prefix],
-                        paging_state=paging_state,
-                        fetch_size=SEARCH_PAGE_SIZE)
+                        paging_state=paging_state)
             if result.is_empty():
                 break
 
@@ -826,7 +824,7 @@ class Cassandra:
             rows += [tx for tx in txs if tx.startswith(expression)]
             paging_state = result.paging_state
 
-        return rows
+        return rows[0:limit]
 
     @eth
     def scrub_prefix(self, currency, expression):

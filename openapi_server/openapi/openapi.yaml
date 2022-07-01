@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   description: GraphSense API
   title: GraphSense API
-  version: 0.5.2
+  version: 1.0.0-alpha
 servers:
 - url: http://graphsense-rest:9000
 security:
@@ -1758,14 +1758,6 @@ components:
           value: 6
         in_degree: 1
         address: addressA
-        out_degree: 2
-        first_tx:
-          tx_hash: tx_hash
-          height: 47
-          timestamp: 123456789
-        tags:
-        - null
-        - null
         balance:
           fiat_values:
           - code: code
@@ -1775,7 +1767,12 @@ components:
           value: 6
         no_incoming_txs: 5
         no_outgoing_txs: 5
+        out_degree: 2
         currency: btc
+        first_tx:
+          tx_hash: tx_hash
+          height: 47
+          timestamp: 123456789
         last_tx:
           tx_hash: tx_hash
           height: 47
@@ -1827,12 +1824,6 @@ components:
           format: int32
           title: out_degree
           type: integer
-        tags:
-          description: First page of tags of this address
-          items:
-            $ref: '#/components/schemas/address_tag'
-          title: tags
-          type: array
         total_received:
           $ref: '#/components/schemas/values'
         total_spent:
@@ -2243,14 +2234,6 @@ components:
             value: 6
           in_degree: 1
           address: addressA
-          out_degree: 2
-          first_tx:
-            tx_hash: tx_hash
-            height: 47
-            timestamp: 123456789
-          tags:
-          - null
-          - null
           balance:
             fiat_values:
             - code: code
@@ -2260,7 +2243,12 @@ components:
             value: 6
           no_incoming_txs: 5
           no_outgoing_txs: 5
+          out_degree: 2
           currency: btc
+          first_tx:
+            tx_hash: tx_hash
+            height: 47
+            timestamp: 123456789
           last_tx:
             tx_hash: tx_hash
             height: 47
@@ -2282,14 +2270,6 @@ components:
             value: 6
           in_degree: 1
           address: addressA
-          out_degree: 2
-          first_tx:
-            tx_hash: tx_hash
-            height: 47
-            timestamp: 123456789
-          tags:
-          - null
-          - null
           balance:
             fiat_values:
             - code: code
@@ -2299,7 +2279,12 @@ components:
             value: 6
           no_incoming_txs: 5
           no_outgoing_txs: 5
+          out_degree: 2
           currency: btc
+          first_tx:
+            tx_hash: tx_hash
+            height: 47
+            timestamp: 123456789
           last_tx:
             tx_hash: tx_hash
             height: 47
@@ -2447,14 +2432,6 @@ components:
             value: 6
           in_degree: 1
           address: addressA
-          out_degree: 2
-          first_tx:
-            tx_hash: tx_hash
-            height: 47
-            timestamp: 123456789
-          tags:
-          - null
-          - null
           balance:
             fiat_values:
             - code: code
@@ -2464,7 +2441,12 @@ components:
             value: 6
           no_incoming_txs: 5
           no_outgoing_txs: 5
+          out_degree: 2
           currency: btc
+          first_tx:
+            tx_hash: tx_hash
+            height: 47
+            timestamp: 123456789
           last_tx:
             tx_hash: tx_hash
             height: 47
@@ -2498,14 +2480,6 @@ components:
               value: 6
             in_degree: 1
             address: addressA
-            out_degree: 2
-            first_tx:
-              tx_hash: tx_hash
-              height: 47
-              timestamp: 123456789
-            tags:
-            - null
-            - null
             balance:
               fiat_values:
               - code: code
@@ -2515,7 +2489,12 @@ components:
               value: 6
             no_incoming_txs: 5
             no_outgoing_txs: 5
+            out_degree: 2
             currency: btc
+            first_tx:
+              tx_hash: tx_hash
+              height: 47
+              timestamp: 123456789
             last_tx:
               tx_hash: tx_hash
               height: 47
@@ -2538,14 +2517,6 @@ components:
               value: 6
             in_degree: 1
             address: addressA
-            out_degree: 2
-            first_tx:
-              tx_hash: tx_hash
-              height: 47
-              timestamp: 123456789
-            tags:
-            - null
-            - null
             balance:
               fiat_values:
               - code: code
@@ -2555,7 +2526,12 @@ components:
               value: 6
             no_incoming_txs: 5
             no_outgoing_txs: 5
+            out_degree: 2
             currency: btc
+            first_tx:
+              tx_hash: tx_hash
+              height: 47
+              timestamp: 123456789
             last_tx:
               tx_hash: tx_hash
               height: 47

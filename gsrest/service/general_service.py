@@ -27,6 +27,24 @@ async def get_statistics(request):
                  request_timestamp=tstamp)
 
 
+async def search_by_currency(request, currency, q, limit=10):
+    db = request.app['db']
+
+    r = SearchResultByCurrency(currency=currency,
+                               addresses=[],
+                               txs=[])
+
+    [txs, addresses] = await asyncio.gather(
+        db.list_matching_txs(currency, q, limit),
+        db.list_matching_addresses(currency, q, limit),
+    )
+
+    r.txs = txs
+    r.addresses = addresses
+
+    return r
+
+
 async def search(request, q, currency=None, limit=10):
     db = request.app['db']
     currencies = db.get_supported_currencies()
@@ -39,28 +57,19 @@ async def search(request, q, currency=None, limit=10):
 
     expression_norm = alphanumeric_lower(q)
 
-    async def s(curr):
-        r = SearchResultByCurrency(currency=curr,
-                                   addresses=[],
-                                   txs=[])
+    def ts(curr=None):
+        return tagstores(
+                    request.app['tagstores'],
+                    lambda row: row['label'],
+                    'list_matching_labels',
+                    curr, expression_norm, limit,
+                    request.app['show_private_tags'])
 
-        [txs, addresses] = await asyncio.gather(
-            db.list_matching_txs(curr, q, limit),
-            db.list_matching_addresses(curr, q, limit),
-        )
-
-        r.txs = txs
-        r.addresses = addresses
-        return r
-
-    aws1 = [s(curr) for curr in currs]
-    aws2 = [tagstores(
-                request.app['tagstores'],
-                lambda row: row['label'],
-                'list_matching_labels',
-                curr, expression_norm, limit,
-                request.app['show_private_tags'])
-            for curr in currs]
+    aws1 = [search_by_currency(request, curr, q) for curr in currs]
+    if currency:
+        aws2 = [ts(curr) for curr in currs]
+    else:
+        aws2 = [ts()]
 
     aw1 = asyncio.gather(*aws1)
     aw2 = asyncio.gather(*aws2)
