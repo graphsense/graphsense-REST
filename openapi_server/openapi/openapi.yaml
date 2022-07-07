@@ -1,6 +1,11 @@
 openapi: 3.0.0
 info:
-  description: GraphSense API
+  contact:
+    email: contact@ikna.io
+    name: Iknaio Cryptoasset Analytics GmbH
+  description: GraphSense API provides programmatic access to various ledgers' addresses,
+    entities, blocks, transactions and tags for automated and highly efficient forensics
+    tasks.
   title: GraphSense API
   version: 1.0.0-alpha
 servers:
