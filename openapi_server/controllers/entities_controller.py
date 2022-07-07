@@ -83,7 +83,7 @@ async def get_entity(request: web.Request, currency, entity) -> web.Response:
 
 
 async def list_address_tags_by_entity(request: web.Request, currency, entity, page=None, pagesize=None) -> web.Response:
-    """Get tags for a given entity for the given level
+    """Get address tags for a given entity
 
     
 

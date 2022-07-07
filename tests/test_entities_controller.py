@@ -30,7 +30,7 @@ class TestEntitiesController(BaseTestCase):
     async def test_list_address_tags_by_entity(self):
         """Test case for list_address_tags_by_entity
 
-        Get tags for a given entity for the given level
+        Get address tags for a given entity
         """
         await test_service.list_address_tags_by_entity(self)
 

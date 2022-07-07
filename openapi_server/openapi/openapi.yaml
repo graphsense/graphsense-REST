@@ -630,7 +630,7 @@ paths:
           - get_address_entity
           - list_address_links
           - get_entity
-          - list_tags_by_entity
+          - list_address_tags_by_entity
           - list_entity_neighbors
           - list_entity_txs
           - list_entity_links
@@ -708,7 +708,7 @@ paths:
           - get_address_entity
           - list_address_links
           - get_entity
-          - list_tags_by_entity
+          - list_address_tags_by_entity
           - list_entity_neighbors
           - list_entity_txs
           - list_entity_links
@@ -1152,7 +1152,7 @@ paths:
           description: OK
       security:
       - api_key: []
-      summary: Get tags for a given entity for the given level
+      summary: Get address tags for a given entity
       tags:
       - entities
       x-openapi-router-controller: openapi_server.controllers.entities_controller
@@ -1631,7 +1631,7 @@ components:
         - get_address_entity
         - list_address_links
         - get_entity
-        - list_tags_by_entity
+        - list_address_tags_by_entity
         - list_entity_neighbors
         - list_entity_txs
         - list_entity_links
