@@ -44,7 +44,6 @@ async def list_address_neighbors(request, currency, address, direction,
     nodes = await asyncio.gather(*aws)
 
     for row, node in zip(results, nodes):
-        print(f'row {row}')
         nb = NeighborAddress(
             labels=row['labels'],
             value=row['value'],
