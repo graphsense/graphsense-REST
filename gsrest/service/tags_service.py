@@ -15,7 +15,7 @@ def address_tag_from_row(row):
         source=row['source'],
         lastmod=dt_to_int(row['lastmod']),
         tagpack_is_public=row['is_public'],
-        tagpack_uri=row['uri'],
+        tagpack_uri=row['uri'] if row['is_public'] else None,
         tagpack_creator=row['creator'],
         tagpack_title=row['title'],
         confidence=row['confidence'],
