@@ -248,6 +248,7 @@ class Tagstore:
                         {hide_private_condition(show_private)}
                         and t.tagpack=tp.id
                     order by
+                        t.is_cluster_definer asc,
                         c.level desc
                         """
 
@@ -326,6 +327,7 @@ class Tagstore:
                         and t.currency = acm.currency
                         and c.id = t.confidence
                         and acm.currency = %s
+                        and acm.gs_cluster_id = %s
                         and t.tagpack=tp.id
                         and t.is_cluster_definer=true
                         and t.label= %s
@@ -334,6 +336,7 @@ class Tagstore:
                    limit 1"""
 
         return await self.execute(query, [currency.upper(),
+                                          entity,
                                           major[0]['label']])
 
     async def list_labels_for_addresses(self, currency, addresses,
