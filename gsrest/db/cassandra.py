@@ -386,6 +386,8 @@ class Cassandra:
 
     async def get_address_id(self, currency, address):
         prefix = self.scrub_prefix(currency, address)
+        if not prefix:
+            return None
         if currency == 'eth':
             address = eth_address_from_hex(address)
             prefix = prefix.upper()
@@ -575,6 +577,8 @@ class Cassandra:
             return []
         norm = identity
         prefix = self.scrub_prefix(currency, expression)
+        if not prefix:
+            return []
         prefix = prefix[:prefix_lengths['address']]
         if currency == 'eth':
             # eth addresses are case insensitive
