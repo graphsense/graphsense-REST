@@ -248,7 +248,6 @@ class Tagstore:
                         {hide_private_condition(show_private)}
                         and t.tagpack=tp.id
                     order by
-                        t.is_cluster_definer asc,
                         c.level desc
                         """
 
