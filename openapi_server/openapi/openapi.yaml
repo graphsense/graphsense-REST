@@ -143,6 +143,9 @@ paths:
         "200":
           content:
             application/json:
+              examples:
+                internetarchive:
+                  $ref: '#/components/examples/internetarchive'
               schema:
                 $ref: '#/components/schemas/address_tags'
           description: OK
@@ -324,6 +327,9 @@ paths:
         "200":
           content:
             application/json:
+              examples:
+                links_internetarchive:
+                  $ref: '#/components/examples/links_internetarchive'
               schema:
                 $ref: '#/components/schemas/links'
           description: OK
@@ -453,6 +459,9 @@ paths:
         "200":
           content:
             application/json:
+              examples:
+                internetarchive:
+                  $ref: '#/components/examples/internetarchive_addresses'
               schema:
                 $ref: '#/components/schemas/address_tags'
           description: OK
@@ -507,6 +516,9 @@ paths:
         "200":
           content:
             application/json:
+              examples:
+                txs_internetarchive:
+                  $ref: '#/components/examples/txs_internetarchive'
               schema:
                 $ref: '#/components/schemas/address_txs'
           description: OK
@@ -581,13 +593,9 @@ paths:
             application/json:
               examples:
                 tx_account_array:
-                  summary: list of account transactions
-                  value:
-                  - $ref: '#/components/examples/tx_account/value'
+                  $ref: '#/components/examples/txs_account'
                 tx_utxo_array:
-                  summary: list of UTXO transactions
-                  value:
-                  - $ref: '#/components/examples/tx_utxo/value'
+                  $ref: '#/components/examples/txs_utxo'
               schema:
                 items:
                   $ref: '#/components/schemas/tx'
@@ -897,6 +905,9 @@ paths:
         "200":
           content:
             application/json:
+              examples:
+                links_internetarchive:
+                  $ref: '#/components/examples/links_internetarchive'
               schema:
                 $ref: '#/components/schemas/links'
           description: OK
@@ -1147,6 +1158,9 @@ paths:
         "200":
           content:
             application/json:
+              examples:
+                internetarchive:
+                  $ref: '#/components/examples/internetarchive_entitys_addresses'
               schema:
                 $ref: '#/components/schemas/address_tags'
           description: OK
@@ -1201,6 +1215,9 @@ paths:
         "200":
           content:
             application/json:
+              examples:
+                txs_internetarchive:
+                  $ref: '#/components/examples/entity_txs_internetarchive'
               schema:
                 $ref: '#/components/schemas/address_txs'
           description: OK
@@ -1237,6 +1254,9 @@ paths:
         "200":
           content:
             application/json:
+              examples:
+                rates:
+                  $ref: '#/components/examples/rates'
               schema:
                 $ref: '#/components/schemas/rates'
           description: OK
@@ -1335,6 +1355,9 @@ paths:
         "200":
           content:
             application/json:
+              examples:
+                txs_io:
+                  $ref: '#/components/examples/txs_io'
               schema:
                 $ref: '#/components/schemas/tx_values'
           description: OK
@@ -1347,6 +1370,222 @@ paths:
       x-openapi-router-controller: openapi_server.controllers.txs_controller
 components:
   examples:
+    entity_links_internetarchive:
+      summary: links between two entities
+      value:
+        links:
+        - currency: btc
+          height: 334069
+          input_value:
+            fiat_values:
+            - code: eur
+              value: -6352.06
+            - code: usd
+              value: -7916.22
+            value: -2278238097
+          output_value:
+            fiat_values:
+            - code: eur
+              value: 6630.22
+            - code: usd
+              value: 8262.87
+            value: 2378000000
+          timestamp: 1418432879
+          tx_hash: 5805ba651d6b72eda3d6e34e43d44c6df20c455f0488acecc75fd6165d6d2590
+          tx_type: utxo
+        - currency: btc
+          height: 334056
+          input_value:
+            fiat_values:
+            - code: eur
+              value: -2.84
+            - code: usd
+              value: -3.54
+            value: -1010000
+          output_value:
+            fiat_values:
+            - code: eur
+              value: 2.82
+            - code: usd
+              value: 3.51
+            value: 1000000
+          timestamp: 1418427638
+          tx_hash: fd7cc9178688e3899eb9e6c1f2c985e66cf2c60a5233b850f28c2b8805c1a056
+          tx_type: utxo
+        - currency: btc
+          height: 273056
+          input_value:
+            fiat_values:
+            - code: eur
+              value: -15312.11
+            - code: usd
+              value: -20810.81
+            value: -1813980000
+          output_value:
+            fiat_values:
+            - code: eur
+              value: 69555.24
+            - code: usd
+              value: 94533.05
+            value: 8240000000
+          timestamp: 1386179074
+          tx_hash: 5ba549b4115a8978fe206ac151277acc27ffdce01f4dfd4b5487c67202e516a9
+          tx_type: utxo
+    entity_txs_internetarchive:
+      summary: transactions of an entity
+      value:
+        address_txs:
+        - coinbase: false
+          currency: btc
+          height: 690083
+          timestamp: 1625703347
+          tx_hash: 0fa34dfc851611b747725f315ea156e2ce931674560f9750ed30be0f786e0d05
+          tx_type: utxo
+          value:
+            fiat_values:
+            - code: eur
+              value: -18.19
+            - code: usd
+              value: -21.53
+            value: -65485
+        - coinbase: false
+          currency: btc
+          height: 690076
+          timestamp: 1625697035
+          tx_hash: 9586bd883cf255aa4207a3749cad61de34b6f1001bd25cecfac3a9237d57a84d
+          tx_type: utxo
+          value:
+            fiat_values:
+            - code: eur
+              value: -171698.17
+            - code: usd
+              value: -203136.12
+            value: -600012259
+        next_page: 00110004010d329a01010800000000211a20f0f07ffffff5f07ffffff5
+    internetarchive:
+      summary: addresses with label "internet archive"
+      value:
+        address_tags:
+        - address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
+          category: organization
+          confidence: service_data
+          confidence_level: 50
+          currency: BTC
+          entity: 264711
+          is_cluster_definer: true
+          label: internet archive
+          lastmod: 1636675200
+          source: https://archive.org/donate/cryptocurrency
+          tagpack_creator: GraphSense Core Team
+          tagpack_is_public: true
+          tagpack_title: GraphSense Demo TagPack
+          tagpack_uri: https://github.com/graphsense/graphsense-tagpacks/tree/master/packs/demo.yaml
+    internetarchive_addresses:
+      summary: tags of address "1Archive1n2C579dMsAu3iC6tWzuQJz8dN"
+      value:
+        address_tags:
+        - address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
+          category: organization
+          confidence: service_data
+          confidence_level: 50
+          currency: BTC
+          entity: 264711
+          is_cluster_definer: true
+          label: internet archive
+          lastmod: 1636675200
+          source: https://archive.org/donate/cryptocurrency
+          tagpack_creator: GraphSense Core Team
+          tagpack_is_public: true
+          tagpack_title: GraphSense Demo TagPack
+          tagpack_uri: https://github.com/graphsense/graphsense-tagpacks/tree/master/packs/demo.yaml
+    internetarchive_entitys_addresses:
+      summary: tags of an entity
+      value:
+        address_tags:
+        - address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
+          category: organization
+          confidence: service_data
+          confidence_level: 50
+          currency: BTC
+          entity: 264711
+          is_cluster_definer: true
+          label: internet archive
+          lastmod: 1636675200
+          source: https://archive.org/donate/cryptocurrency
+          tagpack_creator: GraphSense Core Team
+          tagpack_is_public: true
+          tagpack_title: GraphSense Demo TagPack
+          tagpack_uri: https://github.com/graphsense/graphsense-tagpacks/tree/master/packs/demo.yaml
+    links_internetarchive:
+      summary: links between "1Archive1n2C579dMsAu3iC6tWzuQJz8dN" and "1CvwMHyAtQAywKvLAANbgLktrC7f75eoq5"
+      value:
+        links:
+        - currency: btc
+          height: 334069
+          input_value:
+            fiat_values:
+            - code: eur
+              value: -6352.06
+            - code: usd
+              value: -7916.22
+            value: -2278238097
+          output_value:
+            fiat_values:
+            - code: eur
+              value: 6630.22
+            - code: usd
+              value: 8262.87
+            value: 2378000000
+          timestamp: 1418432879
+          tx_hash: 5805ba651d6b72eda3d6e34e43d44c6df20c455f0488acecc75fd6165d6d2590
+          tx_type: utxo
+        - currency: btc
+          height: 334056
+          input_value:
+            fiat_values:
+            - code: eur
+              value: -2.84
+            - code: usd
+              value: -3.54
+            value: -1010000
+          output_value:
+            fiat_values:
+            - code: eur
+              value: 2.82
+            - code: usd
+              value: 3.51
+            value: 1000000
+          timestamp: 1418427638
+          tx_hash: fd7cc9178688e3899eb9e6c1f2c985e66cf2c60a5233b850f28c2b8805c1a056
+          tx_type: utxo
+        - currency: btc
+          height: 273056
+          input_value:
+            fiat_values:
+            - code: eur
+              value: -15312.11
+            - code: usd
+              value: -20810.81
+            value: -1813980000
+          output_value:
+            fiat_values:
+            - code: eur
+              value: 69555.24
+            - code: usd
+              value: 94533.05
+            value: 8240000000
+          timestamp: 1386179074
+          tx_hash: 5ba549b4115a8978fe206ac151277acc27ffdce01f4dfd4b5487c67202e516a9
+          tx_type: utxo
+    rates:
+      summary: example rates at block height 47
+      value:
+        height: 47
+        rates:
+        - code: eur
+          value: 0.1234
+        - code: usd
+          value: 0.2345
     tx_account:
       summary: account transaction
       value:
@@ -1367,6 +1606,130 @@ components:
       summary: UTXO transaction
       value:
         coinbase: false
+        height: 47
+        inputs:
+        - address: addressA
+          value:
+            fiat_values:
+            - code: eur
+              value: 10
+            - code: usd
+              value: 20
+            value: 5
+        - address: addressB
+          value:
+            fiat_values:
+            - code: eur
+              value: 20
+            - code: usd
+              value: 40
+            value: 10
+        outputs:
+        - address: addressC
+          value:
+            fiat_values:
+            - code: eur
+              value: 5
+            - code: usd
+              value: 10
+            value: 2.5
+        - address: addressD
+          value:
+            fiat_values:
+            - code: eur
+              value: 25
+            - code: usd
+              value: 50
+            value: 12.5
+        timestamp: 123456789
+        total_input:
+          fiat_values:
+          - code: eur
+            value: 30
+          - code: usd
+            value: 60
+          value: 15
+        total_output:
+          fiat_values:
+          - code: eur
+            value: 30
+          - code: usd
+            value: 60
+          value: 15
+        tx_hash: 04d92601677d62a985310b61a301e74870fa942c8be0648e16b1db23b996a8cd
+        tx_type: utxo
+    txs_account:
+      summary: list of account transactions
+      value:
+      - from_address: addressA
+        height: 47
+        timestamp: 123456789
+        to_address: addressB
+        tx_hash: 04d92601677d62a985310b61a301e74870fa942c8be0648e16b1db23b996a8cd
+        tx_type: account
+        value:
+          fiat_values:
+          - code: eur
+            value: 30
+          - code: usd
+            value: 60
+          value: 15
+    txs_internetarchive:
+      summary: transactions of address "1Archive1n2C579dMsAu3iC6tWzuQJz8dN"
+      value:
+        address_txs:
+        - coinbase: false
+          currency: btc
+          height: 690083
+          timestamp: 1625703347
+          tx_hash: 0fa34dfc851611b747725f315ea156e2ce931674560f9750ed30be0f786e0d05
+          tx_type: utxo
+          value:
+            fiat_values:
+            - code: eur
+              value: -18.19
+            - code: usd
+              value: -21.53
+            value: -65485
+        - coinbase: false
+          currency: btc
+          height: 690076
+          timestamp: 1625697035
+          tx_hash: 9586bd883cf255aa4207a3749cad61de34b6f1001bd25cecfac3a9237d57a84d
+          tx_type: utxo
+          value:
+            fiat_values:
+            - code: eur
+              value: -171698.17
+            - code: usd
+              value: -203136.12
+            value: -600012259
+        next_page: 00110004010d329a01010800000000211a20f0f07ffffff5f07ffffff5
+    txs_io:
+      summary: outputs of transaction "04d92601677d62a985310b61a301e74870fa942c8be0648e16b1db23b996a8cd"
+      value:
+      - address:
+        - 1GeUZK971B5Umn6JH47PbgrP9qW7RaeW95
+        value:
+          fiat_values:
+          - code: eur
+            value: 19.48
+          - code: usd
+            value: 25.55
+          value: 21200000
+      - address:
+        - 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
+        value:
+          fiat_values:
+          - code: eur
+            value: 0.92
+          - code: usd
+            value: 1.21
+          value: 1000000
+    txs_utxo:
+      summary: list of UTXO transactions
+      value:
+      - coinbase: false
         height: 47
         inputs:
         - address: addressA
