@@ -35,5 +35,5 @@ async def list_block_txs(request, currency, height):
         raise RuntimeError("Block {} not found".format(height))
     rates = await get_rates(request, currency, height)
 
-    return [from_row(currency, tx, rates['rates'])
+    return [from_row(currency, tx, rates['rates'], include_io=True)
             for tx in txs]

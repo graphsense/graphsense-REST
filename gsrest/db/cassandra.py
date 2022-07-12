@@ -768,7 +768,7 @@ class Cassandra:
         return results, to_hex(paging_state)
 
     @eth
-    async def get_tx(self, currency, tx_hash, include_io=False):
+    async def get_tx(self, currency, tx_hash):
         prefix = self.get_prefix_lengths(currency)
         query = ('SELECT tx_id from transaction_by_tx_prefix where '
                  'tx_prefix=%s and tx_hash=%s')
@@ -1323,7 +1323,7 @@ class Cassandra:
         return await self.list_txs_by_ids(currency, tx_ids), \
             to_hex(paging_state)
 
-    async def get_tx_eth(self, currency, tx_hash, include_io=False):
+    async def get_tx_eth(self, currency, tx_hash):
         return await self.get_tx_by_hash(currency,
                                          bytearray.fromhex(tx_hash))
 

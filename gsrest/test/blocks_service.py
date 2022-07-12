@@ -59,8 +59,6 @@ async def list_block_txs(test_case):
 
     path = '/{currency}/blocks/{height}/txs'
     block_txs = [tx1.to_dict()]
-    block_txs[0].pop('inputs')
-    block_txs[0].pop('outputs')
     result = await test_case.request(path, currency="btc", height=1)
     test_case.assertEqual(block_txs, result)
 
