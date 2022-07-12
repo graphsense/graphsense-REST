@@ -269,23 +269,10 @@ async def list_entity_addresses(test_case):
     result = await test_case.request(path,
                                      currency='eth',
                                      entity=eth_entity.entity)
-    expected = Address(
-            address=eth_address.address,
-            entity=eth_entity.entity,
-            first_tx=eth_address.first_tx,
-            last_tx=eth_address.last_tx,
-            no_incoming_txs=eth_address.no_incoming_txs,
-            no_outgoing_txs=eth_address.no_outgoing_txs,
-            total_received=eth_address.total_received,
-            total_spent=eth_address.total_spent,
-            in_degree=eth_address.in_degree,
-            out_degree=eth_address.out_degree,
-            balance=eth_address.balance
-            )
 
     test_case.assertEqual(EntityAddresses(
         next_page=None,
-        addresses=[expected]).to_dict(), result)
+        addresses=[eth_address]).to_dict(), result)
 
 
 async def search_entity_neighbors(test_case):

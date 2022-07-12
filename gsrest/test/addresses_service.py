@@ -698,7 +698,7 @@ async def list_tags_by_address(test_case):
     path = '/{currency}/addresses/{address}/tags'
     result = await test_case.request(path,
                                      currency='btc',
-                                     address=addressWithTags.address)   
+                                     address=addressWithTags.address)
     tags = [tag.to_dict() for tag in addressWithTags.tags]
     test_case.assertEqual(tags, result['address_tags'])
 
