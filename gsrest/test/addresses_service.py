@@ -592,6 +592,7 @@ eth_entityWithTags = Entity(
    total_spent=eth_address.total_spent,
    in_degree=eth_address.in_degree,
    no_addresses=1,
+   no_address_tags=2,
    total_received=eth_address.total_received,
    no_incoming_txs=eth_address.no_incoming_txs,
    entity=107925000,
