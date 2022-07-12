@@ -212,7 +212,6 @@ class Cassandra:
         keyspace = self.get_keyspace_mapping(currency, keyspace_type)
         q = replaceFrom(keyspace, query)
         q = replacePerc(q)
-        self.logger.debug(f'{query} {params}')
         prep = self.prepared_statements.get(q, None)
         if prep is None:
             self.prepared_statements[q] = prep = self.session.prepare(q)
@@ -231,6 +230,8 @@ class Cassandra:
                 result = Result(current_rows=result,
                                 params=params,
                                 paging_state=response_future._paging_state)
+                self.logger.debug(f'{query} {params}')
+                self.logger.debug(f'result size {len(result.current_rows)}')
                 loop.call_soon_threadsafe(future.set_result, result)
 
             def on_err(result):

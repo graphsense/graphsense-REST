@@ -7,7 +7,6 @@ from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.address_tags import AddressTags
 from gsrest.util.values import convert_value, to_values
-from openapi_server.models.search_result_level1 import SearchResultLevel1
 from openapi_server.models.address import Address
 from openapi_server.models.entity_addresses import EntityAddresses
 from gsrest.db.util import tagstores, tagstores_with_paging
@@ -235,11 +234,11 @@ async def recursive_search(request, currency, entity, params, breadth, depth,
         matching_addresses = []
         if 'addresses' in params:
             matching_addresses = [id["address"] for id in params['addresses']
-                                  if str(id["entity"]) == entity]
+                                  if id["entity"] == entity]
             match = len(matching_addresses) > 0
 
         if 'entities' in params:
-            match = entity in params['entities']
+            match = str(entity) in params['entities']
 
         if 'field' in params:
             (field, fieldcurrency, min_value, max_value) = params['field']

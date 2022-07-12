@@ -105,8 +105,6 @@ async def list_neighbors(request, currency, id, direction, node_type, ids=None,
 
     dst = 'dst' if is_outgoing else 'src'
 
-    print(f'result {results}')
-
     if include_labels:
         await add_labels(request, currency, node_type, dst, results)
 

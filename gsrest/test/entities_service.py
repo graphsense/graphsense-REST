@@ -17,6 +17,7 @@ import gsrest.test.tags_service as ts
 from gsrest.test.txs_service import tx1_eth, tx2_eth, tx22_eth, tx4_eth
 from gsrest.service.rates_service import list_rates
 from gsrest.util.values import convert_value
+import yaml
 import copy
 
 eth_entity = Entity(
@@ -292,13 +293,15 @@ async def search_entity_neighbors(test_case):
                     key='category',
                     value=','.join([category])
                     )
-    test_case.assertEqual(2818641, result['paths'][0]['node']['entity'])
-    test_case.assertEqual(123,
-                          result['paths'][0]['paths'][0]['node']['entity'])
+    test_case.assertEqual(
+        2818641,
+        result[0]['neighbor']['entity']['entity'])
+    test_case.assertEqual(
+        123,
+        result[0]['paths'][0]['neighbor']['entity']['entity'])
     test_case.assertEqual(
         category,
-        result['paths'][0]['paths'][0]['node']['tags']['entity_tags'][0]
-              ['category'])
+        result[0]['paths'][0]['neighbor']['entity']['best_address_tag']['category']) # noqa
 
     category = 'exchange'
     result = await test_case.request(
@@ -311,12 +314,13 @@ async def search_entity_neighbors(test_case):
                     key='category',
                     value=','.join([category])
                     )
-    test_case.assertEqual(67065, result['paths'][0]['node']['entity'])
-    test_case.assertEqual(123,
-                          result['paths'][0]['paths'][0]['node']['entity'])
-    test_case.assertEqual(category,
-                          result['paths'][0]['paths'][0]['node']['tags']
-                                ['entity_tags'][0]['category'])
+    test_case.assertEqual(67065, result[0]['neighbor']['entity']['entity'])
+    test_case.assertEqual(
+        123,
+        result[0]['paths'][0]['neighbor']['entity']['entity'])
+    test_case.assertEqual(
+        category,
+        result[0]['paths'][0]['neighbor']['entity']['best_address_tag']['category']) # noqa
 
     # Test addresses matching
 
@@ -331,11 +335,12 @@ async def search_entity_neighbors(test_case):
                     key='addresses',
                     value=','.join(addresses)
                     )
-    test_case.assertEqual(2818641, result['paths'][0]['node']['entity'])
-    test_case.assertEqual(456,
-                          result['paths'][0]['paths'][0]['node']['entity'])
+    test_case.assertEqual(2818641, result[0]['neighbor']['entity']['entity'])
+    test_case.assertEqual(
+        456,
+        result[0]['paths'][0]['neighbor']['entity']['entity'])
     test_case.assertEqual(addresses,
-                          [a['address'] for a in result['paths'][0]['paths'][0]
+                          [a['address'] for a in result[0]['paths'][0]
                                                        ['matching_addresses']])
 
     result = await test_case.request(
@@ -348,9 +353,10 @@ async def search_entity_neighbors(test_case):
                     key='entities',
                     value=','.join(['123'])
                     )
-    test_case.assertEqual(2818641, result['paths'][0]['node']['entity'])
-    test_case.assertEqual(123,
-                          result['paths'][0]['paths'][0]['node']['entity'])
+    test_case.assertEqual(2818641, result[0]['neighbor']['entity']['entity'])
+    test_case.assertEqual(
+        123,
+        result[0]['paths'][0]['neighbor']['entity']['entity'])
 
     addresses = ['abcdefg']
     result = await test_case.request(
@@ -363,12 +369,14 @@ async def search_entity_neighbors(test_case):
                     key='addresses',
                     value=','.join(addresses)
                     )
-    test_case.assertEqual(2818641,
-                          result['paths'][0]['node']['entity'])
-    test_case.assertEqual(456,
-                          result['paths'][0]['paths'][0]['node']['entity'])
+    test_case.assertEqual(
+        2818641,
+        result[0]['neighbor']['entity']['entity'])
+    test_case.assertEqual(
+        456,
+        result[0]['paths'][0]['neighbor']['entity']['entity'])
     test_case.assertEqual(addresses,
-                          [a['address'] for a in result['paths'][0]['paths'][0]
+                          [a['address'] for a in result[0]['paths'][0]
                                                        ['matching_addresses']])
 
     addresses = ['0x234567']
@@ -382,11 +390,12 @@ async def search_entity_neighbors(test_case):
                     key='addresses',
                     value=','.join(addresses)
                     )
-    test_case.assertEqual(107925001, result['paths'][0]['node']['entity'])
-    test_case.assertEqual(107925002,
-                          result['paths'][0]['paths'][0]['node']['entity'])
+    test_case.assertEqual(107925001, result[0]['neighbor']['entity']['entity'])
+    test_case.assertEqual(
+        107925002,
+        result[0]['paths'][0]['neighbor']['entity']['entity'])
     test_case.assertEqual(addresses,
-                          [a['address'] for a in result['paths'][0]['paths'][0]
+                          [a['address'] for a in result[0]['paths'][0]
                                                        ['matching_addresses']])
 
     # Test value matching
@@ -401,12 +410,13 @@ async def search_entity_neighbors(test_case):
                     key='total_received',
                     value=','.join(['value', '5', '150'])
                     )
-    test_case.assertEqual(2818641, result['paths'][0]['node']['entity'])
-    test_case.assertEqual(789,
-                          result['paths'][0]['paths'][0]['node']['entity'])
+    test_case.assertEqual(2818641, result[0]['neighbor']['entity']['entity'])
+    test_case.assertEqual(
+        789,
+        result[0]['paths'][0]['neighbor']['entity']['entity'])
     test_case.assertEqual(10,
-                          result['paths'][0]['paths'][0]['node']
-                                ['total_received']['value'])
+                          result[0]['paths'][0]['neighbor']
+                                ['entity']['total_received']['value'])
 
     # Test value matching
 
@@ -420,7 +430,7 @@ async def search_entity_neighbors(test_case):
                     key='total_received',
                     value=','.join(['value', '5', '8'])
                     )
-    test_case.assertEqual(SearchResultLevel1(paths=[]).to_dict(), result)
+    test_case.assertEqual([], result)
     #
     # Test value matching
 
@@ -434,11 +444,12 @@ async def search_entity_neighbors(test_case):
                     key='total_received',
                     value=','.join(['eur', '50', '100'])
                     )
-    test_case.assertEqual(2818641, result['paths'][0]['node']['entity'])
-    test_case.assertEqual(789,
-                          result['paths'][0]['paths'][0]['node']['entity'])
-    test_case.assertEqual(100.0, result['paths'][0]['paths'][0]
-                                       ['node']['total_received']
+    test_case.assertEqual(2818641, result[0]['neighbor']['entity']['entity'])
+    test_case.assertEqual(
+        789,
+        result[0]['paths'][0]['neighbor']['entity']['entity'])
+    test_case.assertEqual(100.0, result[0]['paths'][0]
+                                       ['neighbor']['entity']['total_received']
                                        ['fiat_values'][0]['value'])
 
     addresses = ['abcdefg', 'xyz1278']
@@ -452,11 +463,12 @@ async def search_entity_neighbors(test_case):
                     key='addresses',
                     value=','.join(addresses)
                     )
-    test_case.assertEqual(2818641, result['paths'][0]['node']['entity'])
-    test_case.assertEqual(456,
-                          result['paths'][0]['paths'][0]['node']['entity'])
+    test_case.assertEqual(2818641, result[0]['neighbor']['entity']['entity'])
+    test_case.assertEqual(
+        456,
+        result[0]['paths'][0]['neighbor']['entity']['entity'])
     test_case.assertEqual(addresses,
-                          [a['address'] for a in result['paths'][0]['paths'][0]
+                          [a['address'] for a in result[0]['paths'][0]
                                                        ['matching_addresses']])
 
 
