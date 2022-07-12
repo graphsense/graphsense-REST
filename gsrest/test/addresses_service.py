@@ -355,6 +355,7 @@ entityWithTags = Entity(
    ),
    in_degree=4358,
    no_addresses=110,
+   no_address_tags=4,
    total_received=make_values(
       usd=2583655.0,
       eur=2162085.5,

@@ -5,6 +5,7 @@ from gsrest.util.values import make_values
 
 tx1 = TxUtxo(
    height=1,
+   currency='btc',
    total_output=make_values(eur=0.0, usd=0.0, value=75137389),
    coinbase=False,
    outputs=[TxValue(
@@ -19,6 +20,8 @@ tx1 = TxUtxo(
            TxValue(
              address=["1MaFeRMwbk7AMk4fRd3xXpSiehoSqsvE5X"],
              value=make_values(eur=0.0, usd=0.0, value=37389))],
+   no_inputs=2,
+   no_outputs=2,
    timestamp=1434554207,
    total_input=make_values(eur=0.0, usd=0.0, value=75147389),
    tx_hash="ab1880"
@@ -26,6 +29,7 @@ tx1 = TxUtxo(
 
 tx2 = TxUtxo(
    timestamp=1373266967,
+   currency='btc',
    total_output=make_values(eur=0.1, usd=0.2, value=9950000),
    coinbase=False,
    tx_hash="ab188013",
@@ -39,10 +43,13 @@ tx2 = TxUtxo(
    inputs=[TxValue(
              address=["1H8omroLCN2578Mj6sDrWa8YueqWEckNKY"],
              value=make_values(eur=0.1, usd=0.2, value=10000000))],
+   no_inputs=1,
+   no_outputs=2,
    height=2)
 
 tx3 = TxUtxo(
    timestamp=1373266967,
+   currency='btc',
    total_output=make_values(eur=0.1, usd=0.2, value=9950000),
    coinbase=False,
    tx_hash="00ab188013",
@@ -56,10 +63,13 @@ tx3 = TxUtxo(
    inputs=[TxValue(
              address=["1H8omroLCN2578Mj6sDrWa8YueqWEckNKY"],
              value=make_values(eur=0.1, usd=0.2, value=10000000))],
+   no_inputs=1,
+   no_outputs=2,
    height=2)
 
 tx1_eth = TxAccount(
    tx_hash='af6e0000',
+   currency='eth',
    height=1,
    timestamp=15,
    from_address='0xbe370541310b13922e209515ebffe8d459e050',
@@ -68,6 +78,7 @@ tx1_eth = TxAccount(
 
 tx2_eth = TxAccount(
    tx_hash='af6e0003',
+   currency='eth',
    height=1,
    timestamp=16,
    from_address='0xea674fdde714fd979de3edf0f56aa9716b898ec8',
@@ -76,6 +87,7 @@ tx2_eth = TxAccount(
 
 tx22_eth = TxAccount(
    tx_hash='af6e0004',
+   currency='eth',
    height=1,
    timestamp=16,
    from_address='0xea674fdde714fd979de3edf0f56aa9716b898ec8',
@@ -84,6 +96,7 @@ tx22_eth = TxAccount(
 
 tx3_eth = TxAccount(
    tx_hash='ab188013',
+   currency='eth',
    height=1,
    timestamp=17,
    from_address='0xea674fdde714fd979de3edf0f56aa9716b898ec8',
@@ -92,6 +105,7 @@ tx3_eth = TxAccount(
 
 tx4_eth = TxAccount(
    tx_hash='123456',
+   currency='eth',
    height=1,
    timestamp=17,
    from_address='0xea674fdde714fd979de3edf0f56aa9716b898ec8',

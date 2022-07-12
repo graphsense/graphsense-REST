@@ -17,6 +17,7 @@ import gsrest.test.tags_service as ts
 from gsrest.test.txs_service import tx1_eth, tx2_eth, tx22_eth, tx4_eth
 from gsrest.service.rates_service import list_rates
 from gsrest.util.values import convert_value
+import yaml
 import copy
 
 eth_entity = Entity(
@@ -126,29 +127,23 @@ entityWithTagsAddresses = EntityAddresses(
 
 
 async def get_entity(test_case):
-    path = '/{currency}/entities/{entity}'\
-           '?include_tags={include_tags}'
+    path = '/{currency}/entities/{entity}'
     result = await test_case.request(path,
                                      currency='btc',
-                                     entity=entityWithTags.entity,
-                                     include_tags=True)
+                                     entity=entityWithTags.entity)
     ewt = entityWithTags.to_dict()
     test_case.assertEqual(ewt, result)
 
     result = await test_case.request(path,
                                      auth='unauthorized',
                                      currency='btc',
-                                     entity=entityWithTags.entity,
-                                     include_tags=True)
-    ewt['tags']['address_tags'] = \
-        [tag for tag in ewt['tags']['address_tags'] if
-         tag['tagpack_is_public']]
+                                     entity=entityWithTags.entity)
+    ewt['no_address_tags'] = 3
     test_case.assertEqual(ewt, result)
 
     result = await test_case.request(path,
                                      currency='eth',
-                                     entity=eth_entity.entity,
-                                     include_tags=True)
+                                     entity=eth_entity.entity)
 
     test_case.assertEqual(eth_entity.to_dict(), result)
 
@@ -552,6 +547,7 @@ async def list_entity_links(test_case):
                                      entity=144534,
                                      neighbor=10102718)
     link = Links(links=[LinkUtxo(tx_hash='abcdef',
+                                 currency='btc',
                                  input_value=make_values(
                                      eur=-0.01, usd=-0.03, value=-1260000),
                                  output_value=make_values(
@@ -565,6 +561,7 @@ async def list_entity_links(test_case):
                                      entity=10102718,
                                      neighbor=144534)
     link = Links(links=[LinkUtxo(tx_hash='123456',
+                                 currency='btc',
                                  input_value=make_values(
                                      eur=-0.01, usd=-0.03, value=-1260000),
                                  output_value=make_values(
