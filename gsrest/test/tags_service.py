@@ -44,6 +44,7 @@ tag3 = AddressTag(
     lastmod=1560290400,
     source="https://archive.org/donate/cryptocurrency",
     address="addressA",
+    tagpack_uri=None,
     currency='BTC',
     tagpack_is_public=False,
     is_cluster_definer=True,
@@ -53,8 +54,6 @@ tag3 = AddressTag(
     tagpack_title='',
     entity=17642138
 )
-
-
 
 tag4 = AddressTag(
     abuse=None,
@@ -67,6 +66,8 @@ tag4 = AddressTag(
     tagpack_uri='https://tagpack_uri',
     tagpack_is_public=True,
     is_cluster_definer=False,
+    tagpack_creator='',
+    tagpack_title='',
     confidence='ownership'
 )
 
@@ -77,6 +78,7 @@ eth_tag1 = AddressTag(
     lastmod=1,
     source="sourceX",
     address="0xabcdef",
+    tagpack_uri=None,
     currency='ETH',
     tagpack_is_public=False,
     is_cluster_definer=True,
@@ -113,6 +115,10 @@ etag1 = AddressTag(
     address=tag1.address,
     tagpack_uri=tag1.tagpack_uri,
     currency=tag1.currency,
+    confidence=tag1.confidence,
+    confidence_level=tag1.confidence_level,
+    tagpack_creator=tag1.tagpack_creator,
+    tagpack_title=tag1.tagpack_title,
     is_cluster_definer=True,
     tagpack_is_public=tag1.tagpack_is_public
 )
@@ -126,6 +132,8 @@ etag2 = AddressTag(
     currency="BTC",
     address="addressX",
     abuse=None,
+    confidence=tag1.confidence,
+    confidence_level=tag1.confidence_level,
     tagpack_is_public=True,
     is_cluster_definer=True
 )
@@ -167,6 +175,23 @@ tag7 = AddressTag(
     label="cimedy",
     tagpack_is_public=True,
     is_cluster_definer=False
+)
+
+tag8 = AddressTag(
+    category="organization",
+    label="labelX",
+    abuse=None,
+    lastmod=1560290400,
+    source="https://source",
+    address="address2818641",
+    currency='BTC',
+    tagpack_is_public=True,
+    is_cluster_definer=True,
+    confidence='ownership',
+    confidence_level=100,
+    tagpack_creator='',
+    tagpack_title='',
+    entity=2818641
 )
 
 eth_tag3 = AddressTag(

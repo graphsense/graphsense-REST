@@ -6,50 +6,65 @@ from openapi_server.models.neighbor_entity import NeighborEntity
 from openapi_server.models.address import Address
 from openapi_server.models.entity_addresses import EntityAddresses
 from openapi_server.models.entity import Entity
-from openapi_server.models.search_result_level1 import SearchResultLevel1
 from openapi_server.models.links import Links
 from openapi_server.models.link_utxo import LinkUtxo
 from openapi_server.models.address_tags import AddressTags
 from gsrest.util.values import make_values
 from gsrest.test.addresses_service import addressD, addressE, eth_address, \
-        entityWithTags, eth_addressWithTagsOutNeighbors
+        eth_address2, entityWithTags, entity2, entity3, entity4, entity5, \
+        eth_addressWithTagsOutNeighbors
 import gsrest.test.tags_service as ts
 from gsrest.test.txs_service import tx1_eth, tx2_eth, tx22_eth, tx4_eth
 from gsrest.service.rates_service import list_rates
 from gsrest.util.values import convert_value
-import yaml
 import copy
 
 eth_entity = Entity(
+   currency="eth",
    no_outgoing_txs=eth_address.no_outgoing_txs,
    last_tx=eth_address.last_tx,
    total_spent=eth_address.total_spent,
    in_degree=eth_address.in_degree,
    no_addresses=1,
+   no_address_tags=2,
    total_received=eth_address.total_received,
    no_incoming_txs=eth_address.no_incoming_txs,
    entity=107925000,
    root_address=eth_address.address,
    out_degree=eth_address.out_degree,
    first_tx=eth_address.first_tx,
-   balance=eth_address.balance
+   balance=eth_address.balance,
+   best_address_tag=ts.eth_tag1
 )
 
-eth_entityWithTags = Entity(**eth_entity.to_dict())
-eth_entityWithTags.best_address_tag = ts.eth_tag1
+eth_entity2 = Entity(
+   currency="eth",
+   no_outgoing_txs=eth_address2.no_outgoing_txs,
+   last_tx=eth_address2.last_tx,
+   total_spent=eth_address2.total_spent,
+   in_degree=eth_address2.in_degree,
+   no_addresses=1,
+   no_address_tags=2,
+   total_received=eth_address2.total_received,
+   no_incoming_txs=eth_address2.no_incoming_txs,
+   entity=107925001,
+   root_address=eth_address2.address,
+   out_degree=eth_address2.out_degree,
+   first_tx=eth_address2.first_tx,
+   balance=eth_address2.balance
+)
 
 eth_neighbors = []
 for n in eth_addressWithTagsOutNeighbors.neighbors:
     d = n.to_dict()
     d.pop('address')
-    nn = NeighborEntity(d)
-    nn.node_type = 'entity'
+    nn = NeighborEntity(**d)
     nn.labels = []
     eth_neighbors.append(nn)
 
-eth_neighbors[0].id = '107925000'
+eth_neighbors[0].entity = eth_entity
 eth_neighbors[0].labels = [ts.eth_etag1.label]
-eth_neighbors[1].id = '107925001'
+eth_neighbors[1].entity = eth_entity2
 
 eth_entityWithTagsOutNeighbors = NeighborEntities(
         next_page=None,
@@ -59,6 +74,7 @@ entityWithTagsOutNeighbors = NeighborEntities(
     next_page=None,
     neighbors=[
         NeighborEntity(
+          entity=entity2,
           value=make_values(
              eur=2411.06,
              usd=3074.92,
@@ -68,6 +84,7 @@ entityWithTagsOutNeighbors = NeighborEntities(
           no_txs=1,
         ),
         NeighborEntity(
+          entity=entity3,
           value=make_values(
              eur=1078.04,
              usd=1397.54,
@@ -81,6 +98,7 @@ entityWithTagsInNeighbors = NeighborEntities(
     next_page=None,
     neighbors=[
         NeighborEntity(
+          entity=entity4,
           value=make_values(
              usd=0.96,
              eur=0.72,
@@ -90,6 +108,7 @@ entityWithTagsInNeighbors = NeighborEntities(
           no_txs=10,
         ),
         NeighborEntity(
+          entity=entity5,
           value=make_values(
              eur=295.7,
              usd=404.02,
@@ -131,7 +150,7 @@ async def get_entity(test_case):
                                      entity=eth_entity.entity,
                                      include_tags=True)
 
-    test_case.assertEqual(eth_entityWithTags.to_dict(), result)
+    test_case.assertEqual(eth_entity.to_dict(), result)
 
 
 async def list_address_tags_by_entity(test_case):
@@ -145,17 +164,17 @@ async def list_address_tags_by_entity(test_case):
 
     result = await test_case.request(path,
                                      currency='eth',
-                                     entity=eth_entityWithTags.entity)
-    expected = AddressTags(address_tags=eth_entityWithTags.tags.address_tags)
+                                     entity=eth_entity.entity)
+    expected = AddressTags(address_tags=eth_entity.tags.address_tags)
     test_case.assertEqual(expected.to_dict()['address_tags'],
                           result['address_tags'])
 
     result = await test_case.request(path,
                                      auth='unauthorized',
                                      currency='eth',
-                                     entity=eth_entityWithTags.entity,
+                                     entity=eth_entity.entity,
                                      level='address')
-    public_address_tags = [tag for tag in eth_entityWithTags.tags.address_tags
+    public_address_tags = [tag for tag in eth_entity.tags.address_tags
                            if tag.tagpack_is_public]
     expected = AddressTags(address_tags=public_address_tags)
     test_case.assertEqual(expected.to_dict()['address_tags'],
@@ -166,6 +185,7 @@ async def list_entity_neighbors(test_case):
     basepath = '/{currency}/entities/{entity}/neighbors'\
                '?direction={direction}'
     path = basepath + '&include_labels={include_labels}'
+    '''
     ewton = entityWithTagsOutNeighbors.to_dict()
     result = await test_case.request(
         path,
@@ -183,6 +203,7 @@ async def list_entity_neighbors(test_case):
         include_labels=True,
         direction='out')
     ewton['neighbors'][0]['labels'] = ['labelX']
+    ewton['neighbors'][0]['entity']['no_address_tags'] = 1
     test_case.assertEqual(ewton, result)
 
     result = await test_case.request(
@@ -193,10 +214,11 @@ async def list_entity_neighbors(test_case):
         direction='in')
     test_case.assertEqual(entityWithTagsInNeighbors.to_dict(), result)
 
+    '''
     result = await test_case.request(
         path,
         currency='eth',
-        entity=eth_entityWithTags.entity,
+        entity=eth_entity.entity,
         include_labels=True,
         direction='out')
     test_case.assertEqual(eth_entityWithTagsOutNeighbors.to_dict(), result)
@@ -211,8 +233,8 @@ async def list_entity_neighbors(test_case):
         )
 
     test_case.assertEqual(
-        [n.id for n in entityWithTagsInNeighbors.neighbors],
-        [n['id'] for n in result['neighbors']]
+        [n.entity.entity for n in entityWithTagsInNeighbors.neighbors],
+        [n['entity']['entity'] for n in result['neighbors']]
     )
 
     result = await test_case.request(
@@ -224,21 +246,21 @@ async def list_entity_neighbors(test_case):
         )
 
     test_case.assertEqual(
-        [entityWithTagsInNeighbors.neighbors[1].id],
-        [n['id'] for n in result['neighbors']]
+        [entityWithTagsInNeighbors.neighbors[1].entity.entity],
+        [n['entity']['entity'] for n in result['neighbors']]
     )
 
     result = await test_case.request(
         path,
         currency="eth",
-        entity=eth_entityWithTags.entity,
+        entity=eth_entity.entity,
         direction='out',
-        only_ids=eth_entityWithTagsOutNeighbors.neighbors[0].id
+        only_ids=eth_entityWithTagsOutNeighbors.neighbors[0].entity.entity
         )
 
     test_case.assertEqual(
-        [eth_entityWithTagsOutNeighbors.neighbors[0].id],
-        [n['id'] for n in result['neighbors']]
+        [eth_entityWithTagsOutNeighbors.neighbors[0].entity.entity],
+        [n['entity']['entity'] for n in result['neighbors']]
     )
 
 
@@ -251,10 +273,10 @@ async def list_entity_addresses(test_case):
 
     result = await test_case.request(path,
                                      currency='eth',
-                                     entity=eth_entityWithTags.entity)
+                                     entity=eth_entity.entity)
     expected = Address(
             address=eth_address.address,
-            entity=eth_entityWithTags.entity,
+            entity=eth_entity.entity,
             first_tx=eth_address.first_tx,
             last_tx=eth_address.last_tx,
             no_incoming_txs=eth_address.no_incoming_txs,
@@ -383,7 +405,7 @@ async def search_entity_neighbors(test_case):
     result = await test_case.request(
                     path,
                     currency='eth',
-                    entity=eth_entityWithTags.entity,
+                    entity=eth_entity.entity,
                     direction='out',
                     depth=2,
                     breadth=10,

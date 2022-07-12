@@ -17,6 +17,7 @@ import copy
 
 
 address = Address(
+   currency="btc",
    first_tx=TxSummary(
       tx_hash="04d92601677d62a985310b61a301e74870fa942c"
       "8be0648e16b1db23b996a8cd",
@@ -56,6 +57,7 @@ addressWithTags.tags = [ts.tag1, ts.tag2, ts.tag3]
 
 address2 = Address(
    out_degree=1,
+   currency="btc",
    no_incoming_txs=1,
    total_spent=make_values(
       value=1260000,
@@ -104,6 +106,7 @@ address3 = Address(
       eur=0.39,
       value=6896
    ),
+   currency="btc",
    address="addressJ",
    entity=442606576,
    no_incoming_txs=1,
@@ -125,6 +128,7 @@ address3 = Address(
 
 addressE = Address(
    address="addressE",
+   currency="btc",
    entity=17642138,
    last_tx=TxSummary(
       tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea"
@@ -161,6 +165,7 @@ addressE = Address(
 
 addressF = Address(
    address="addressF",
+   currency="btc",
    entity=10164852,
    last_tx=TxSummary(
       tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea"
@@ -193,6 +198,7 @@ addressF = Address(
 
 addressB = Address(
    address="addressB",
+   currency="btc",
    entity=67065,
    first_tx=TxSummary(
       tx_hash="04d92601677d62a985310b61a301e74870fa942c"
@@ -225,6 +231,7 @@ addressB = Address(
 
 addressD = Address(
    address="addressD",
+   currency="btc",
    entity=17642138,
    first_tx=TxSummary(
       tx_hash="04d92601677d62a985310b61a301e74870fa942c"
@@ -262,6 +269,7 @@ addressWithTotalSpent0 = Address(
       height=1,
       timestamp=1361497172
    ),
+   currency="btc",
    total_spent=make_values(
       usd=0.0,
       value=0,
@@ -333,6 +341,7 @@ addressWithTagsInNeighbors = NeighborAddresses(
 
 
 entityWithTags = Entity(
+   currency='btc',
    no_outgoing_txs=280,
    last_tx=TxSummary(
       height=1,
@@ -364,11 +373,122 @@ entityWithTags = Entity(
             value=115422577,
             usd=2.31,
             eur=1.15),
-   best_address_tag=ts.etag1
+   best_address_tag=ts.tag1
 )
 
+entity2 = Entity(
+   currency='btc',
+   no_address_tags=2,
+   no_outgoing_txs=280,
+   last_tx=TxSummary(
+      height=1,
+      tx_hash="5678",
+      timestamp=1434554207
+   ),
+   total_spent=make_values(
+      eur=2291256.5,
+      value=138942266867,
+      usd=2762256.25
+   ),
+   in_degree=123,
+   no_addresses=110,
+   total_received=make_values(
+      usd=2583655.0,
+      eur=2162085.5,
+      value=139057689444
+   ),
+   no_incoming_txs=234,
+   entity=2818641,
+   root_address="address2818641",
+   out_degree=176,
+   first_tx=TxSummary(
+      timestamp=1434554207,
+      height=1,
+      tx_hash="4567"
+   ),
+   balance=make_values(
+            value=115422577,
+            usd=2.31,
+            eur=1.15),
+   best_address_tag=ts.tag8
+)
+
+entity3 = Entity(**entity2.to_dict())
+entity3.entity = 8361735
+entity3.best_address_tag = None
+entity3.no_address_tags = 0
+entity3.root_address = "address8361735"
+
+entity4 = Entity(
+   currency='btc',
+   no_address_tags=0,
+   no_outgoing_txs=280,
+   last_tx=TxSummary(
+      height=1,
+      tx_hash="5678",
+      timestamp=1434554207
+   ),
+   total_spent=make_values(
+      usd=100.0,
+      value=5,
+      eur=50.0
+   ),
+   in_degree=123,
+   no_addresses=110,
+   total_received=make_values(
+      usd=200.0,
+      value=10,
+      eur=100.0
+   ),
+   no_incoming_txs=234,
+   entity=67065,
+   root_address="addressB",
+   out_degree=176,
+   first_tx=TxSummary(
+      timestamp=1434554207,
+      height=1,
+      tx_hash="4567"
+   ),
+   balance=make_values(eur=0.0, usd=0.0, value=5),
+   best_address_tag=None
+)
+
+entity5 = Entity(
+   currency='btc',
+   no_address_tags=0,
+   no_outgoing_txs=1,
+   last_tx=TxSummary(
+      timestamp=1434554207,
+      height=1,
+      tx_hash="4567"
+   ),
+   total_spent=make_values(
+      usd=40402.43,
+      value=5000000000,
+      eur=29569.65
+   ),
+   in_degree=0,
+   no_addresses=1,
+   total_received=make_values(
+      usd=13.41,
+      value=5000000000,
+      eur=9.87
+   ),
+   no_incoming_txs=1,
+   entity=144534,
+   root_address="addressD",
+   out_degree=2,
+   first_tx=TxSummary(
+      timestamp=1434554207,
+      height=1,
+      tx_hash="4567"
+   ),
+   balance=make_values(eur=0.0, usd=0.0, value=0),
+   best_address_tag=None
+)
 
 eth_address = Address(
+   currency="eth",
    first_tx=TxSummary(
       tx_hash="af6e0000",
       height=1,
@@ -405,6 +525,7 @@ eth_addressWithTags.tags = [ts.eth_tag1, ts.eth_tag2]
 
 
 eth_address2 = Address(
+   currency="eth",
    last_tx=TxSummary(
       tx_hash="af6e0003",
       height=1,
@@ -464,6 +585,7 @@ eth_addressWithTagsOutNeighbors = NeighborAddresses(
                 )])
 
 eth_entityWithTags = Entity(
+   currency="eth",
    no_outgoing_txs=eth_address.no_outgoing_txs,
    last_tx=eth_address.last_tx,
    total_spent=eth_address.total_spent,
