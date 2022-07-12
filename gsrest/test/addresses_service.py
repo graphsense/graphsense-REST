@@ -654,18 +654,21 @@ async def list_address_txs(test_case):
                     address_txs=[
                         AddressTxUtxo(
                             tx_hash="123456",
+                            currency="btc",
                             value=convert_value('btc', 1260000, rates[2]),
                             height=2,
                             coinbase=False,
                             timestamp=1510347493),
                         AddressTxUtxo(
                             tx_hash="abcdef",
+                            currency="btc",
                             value=convert_value('btc', -1260000, rates[2]),
                             height=2,
                             coinbase=False,
                             timestamp=1511153263),
                         AddressTxUtxo(
                             tx_hash="4567",
+                            currency="btc",
                             value=convert_value('btc', -1, rates[2]),
                             height=2,
                             coinbase=False,
