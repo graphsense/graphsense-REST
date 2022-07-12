@@ -778,6 +778,7 @@ async def list_address_links(test_case):
                                      neighbor='addressE')
 
     link = Links(links=[LinkUtxo(tx_hash='123456',
+                                 currency='btc',
                                  input_value=make_values(
                                      eur=-0.1, usd=-0.2, value=-10000000),
                                  output_value=make_values(
