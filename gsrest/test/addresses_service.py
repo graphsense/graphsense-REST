@@ -574,7 +574,7 @@ async def list_tags_by_address(test_case):
     path = '/{currency}/addresses/{address}/tags'
     result = await test_case.request(path,
                                      currency='btc',
-                                     address=addressWithTags.address)
+                                     address=addressWithTags.address)   
     tags = [tag.to_dict() for tag in addressWithTags.tags]
     test_case.assertEqual(tags, result['address_tags'])
 
@@ -582,12 +582,13 @@ async def list_tags_by_address(test_case):
                                      auth='unauthorized',
                                      currency='btc',
                                      address=addressWithTags.address)
-    tags = [tag for tag in tags if tag['is_public']]
+    tags = [tag for tag in tags if tag['tagpack_is_public']]
     test_case.assertEqual(tags, result['address_tags'])
 
     result = await test_case.request(path,
                                      currency='eth',
                                      address=eth_addressWithTags.address)
+    print(result)
     test_case.assertEqual([tag.to_dict()
                            for tag in eth_addressWithTags.tags],
                           result['address_tags'])

@@ -44,12 +44,14 @@ tag3 = AddressTag(
     lastmod=1560290400,
     source="https://archive.org/donate/cryptocurrency",
     address="addressA",
-    tagpack_uri="https://tagpack_uri_private",
     currency='BTC',
     tagpack_is_public=False,
     is_cluster_definer=True,
     confidence='web_crawl',
-    confidence_level=50
+    confidence_level=20,
+    tagpack_creator='',
+    tagpack_title='',
+    entity=17642138
 )
 
 
@@ -75,10 +77,14 @@ eth_tag1 = AddressTag(
     lastmod=1,
     source="sourceX",
     address="0xabcdef",
-    tagpack_uri="uriX",
     currency='ETH',
     tagpack_is_public=False,
-    is_cluster_definer=True
+    is_cluster_definer=True,
+    confidence='ownership',
+    confidence_level=100,
+    tagpack_creator='',
+    tagpack_title='',
+    entity=107925000
 )
 
 eth_tag2 = AddressTag(
@@ -88,10 +94,14 @@ eth_tag2 = AddressTag(
     lastmod=1,
     source="sourceY",
     address="0xabcdef",
-    tagpack_uri="uriY",
     currency='ETH',
     tagpack_is_public=True,
-    is_cluster_definer=False
+    is_cluster_definer=False,
+    confidence='ownership',
+    confidence_level=100,
+    tagpack_creator='',
+    tagpack_title='',
+    entity=107925000
 )
 
 etag1 = AddressTag(
@@ -192,6 +202,7 @@ etag4 = AddressTag(
 async def list_address_tags(test_case):
     path = '/{currency}/tags?label={label}'
     result = await test_case.request(path, currency='btc', label='isolinks')
+    print(result)
     t1 = tag5.to_dict()
     t2 = {**t1}
     t2['address'] = 'addressY'
