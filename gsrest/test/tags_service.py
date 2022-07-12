@@ -10,13 +10,34 @@ tag1 = AddressTag(
     lastmod=1560290400,
     source="https://archive.org/donate/cryptocurrency",
     address="addressA",
-    tagpack_uri="https://tagpack_uri",
     currency='BTC',
     tagpack_is_public=True,
-    is_cluster_definer=True
+    is_cluster_definer=True,
+    confidence='ownership',
+    confidence_level=100,
+    tagpack_creator='',
+    tagpack_title='',
+    entity=17642138
 )
 
 tag2 = AddressTag(
+    abuse=None,
+    address='addressA',
+    category='organization',
+    currency='BTC',
+    label='addressTag1',
+    lastmod=1,
+    source='https://archive.org/donate/cryptocurrency',
+    tagpack_is_public=True,
+    is_cluster_definer=False,
+    confidence='forensic',
+    confidence_level=50,
+    tagpack_creator='',
+    tagpack_title='',
+    entity=17642138
+)
+
+tag3 = AddressTag(
     category="organization",
     label="Internet Archive 2",
     abuse=None,
@@ -26,21 +47,12 @@ tag2 = AddressTag(
     tagpack_uri="https://tagpack_uri_private",
     currency='BTC',
     tagpack_is_public=False,
-    is_cluster_definer=True
+    is_cluster_definer=True,
+    confidence='web_crawl',
+    confidence_level=50
 )
 
-tag3 = AddressTag(
-    abuse=None,
-    address='addressA',
-    category='organization',
-    currency='BTC',
-    label='addressTag1',
-    lastmod=1,
-    source='https://archive.org/donate/cryptocurrency',
-    tagpack_uri='https://tagpack_uri',
-    tagpack_is_public=True,
-    is_cluster_definer=False
-)
+
 
 tag4 = AddressTag(
     abuse=None,
@@ -52,7 +64,8 @@ tag4 = AddressTag(
     source='https://archive.org/donate/cryptocurrency',
     tagpack_uri='https://tagpack_uri',
     tagpack_is_public=True,
-    is_cluster_definer=False
+    is_cluster_definer=False,
+    confidence='ownership'
 )
 
 eth_tag1 = AddressTag(
@@ -176,7 +189,7 @@ etag4 = AddressTag(
 )
 
 
-async def list_tags(test_case):
+async def list_address_tags(test_case):
     path = '/{currency}/tags?label={label}'
     result = await test_case.request(path, currency='btc', label='isolinks')
     t1 = tag5.to_dict()

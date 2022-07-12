@@ -5,7 +5,6 @@ from openapi_server.models.neighbor_address import NeighborAddress
 from openapi_server.models.entity import Entity
 from openapi_server.models.link_utxo import LinkUtxo
 from openapi_server.models.links import Links
-from gsrest.test.assertion import assertEqual
 from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from openapi_server.models.address_txs import AddressTxs
@@ -577,14 +576,14 @@ async def list_tags_by_address(test_case):
                                      currency='btc',
                                      address=addressWithTags.address)
     tags = [tag.to_dict() for tag in addressWithTags.tags]
-    assertEqual(tags, result['address_tags'])
+    test_case.assertEqual(tags, result['address_tags'])
 
     result = await test_case.request(path,
                                      auth='unauthorized',
                                      currency='btc',
                                      address=addressWithTags.address)
     tags = [tag for tag in tags if tag['is_public']]
-    assertEqual(tags, result['address_tags'])
+    test_case.assertEqual(tags, result['address_tags'])
 
     result = await test_case.request(path,
                                      currency='eth',

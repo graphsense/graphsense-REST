@@ -58,92 +58,44 @@ entityWithTagsOutNeighbors = NeighborEntities(
     next_page=None,
     neighbors=[
         NeighborEntity(
-          received=make_values(
-             usd=2583655.0,
-             eur=2162085.5,
-             value=139057689444
-          ),
           value=make_values(
              eur=2411.06,
              usd=3074.92,
              value=48610000000
           ),
-          id='2818641',
-          node_type='entity',
           labels=['labelX', 'labelY'],
           no_txs=1,
-          balance=make_values(
-             value=115422577,
-             usd=2.31,
-             eur=1.15,
-          )
         ),
         NeighborEntity(
-          received=make_values(
-             usd=2583655.0,
-             eur=2162085.5,
-             value=139057689444
-          ),
           value=make_values(
              eur=1078.04,
              usd=1397.54,
              value=3375700000
           ),
-          id='8361735',
-          node_type='entity',
           labels=[],
           no_txs=3,
-          balance=make_values(
-             value=115422577,
-             usd=2.31,
-             eur=1.15,
-          )
         )])
 
 entityWithTagsInNeighbors = NeighborEntities(
     next_page=None,
     neighbors=[
         NeighborEntity(
-          received=make_values(
-             usd=200.0,
-             eur=100.0,
-             value=10
-          ),
           value=make_values(
              usd=0.96,
              eur=0.72,
              value=190000
           ),
-          id='67065',
-          node_type='entity',
           labels=[],
           no_txs=10,
-          balance=make_values(
-             eur=0.0,
-             usd=0.0,
-             value=5
-          )
         ),
         NeighborEntity(
-          received=make_values(
-             usd=13.41,
-             eur=9.87,
-             value=5000000000
-          ),
           value=make_values(
              eur=295.7,
              usd=404.02,
              value=50000000
           ),
-          id='144534',
-          node_type='entity',
           labels=[],
           no_txs=1,
-          balance=make_values(
-             eur=0.0,
-             usd=0.0,
-             value=0
-          )
         )])
 
 
@@ -182,11 +134,11 @@ async def get_entity(test_case):
 
 
 async def list_address_tags_by_entity(test_case):
-    path = '/{currency}/entities/{entity}/tags?level={level}'
+    path = '/{currency}/entities/{entity}/tags'
     result = await test_case.request(path,
                                      currency='btc',
                                      entity=entityWithTags.entity)
-    expected = AddressTags(address_tags=entityWithTags.tags.address_tags)
+    expected = AddressTags(address_tags=entityWithTags.best_address_tag)
     test_case.assertEqual(expected.to_dict()['address_tags'],
                           result['address_tags'])
 
