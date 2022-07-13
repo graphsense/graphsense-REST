@@ -1,4 +1,3 @@
-
 # Changelog
 All notable changes to this project will be documented in this file.
 
@@ -6,11 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [1.0.0] - 2022-07-13
 Also see the changelog of the [OpenAPI specification](https://github.com/graphsense/graphsense-openapi/blob/master/CHANGELOG.md) for any changes to the API.
-
 ### Added
 - Option to run tests in docker
 - add pool_recycle tagstore parameter
-
 ### Changed
 - make type errors run in "internal server error"
 - majority vote on entity tag selection , #75
