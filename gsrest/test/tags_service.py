@@ -152,8 +152,13 @@ tag5 = AddressTag(
     currency="BTC",
     address="addressX",
     abuse=None,
+    confidence='ownership',
+    confidence_level=100,
+    tagpack_creator='',
+    tagpack_title='',
     tagpack_is_public=True,
-    is_cluster_definer=True
+    is_cluster_definer=True,
+    entity=123
 )
 
 tag6 = AddressTag(
@@ -165,8 +170,13 @@ tag6 = AddressTag(
     tagpack_uri="https://tagpack_uri",
     currency="BTC",
     label="cimedy",
+    confidence='ownership',
+    confidence_level=100,
+    tagpack_creator='',
+    tagpack_title='',
     tagpack_is_public=True,
-    is_cluster_definer=False
+    is_cluster_definer=False,
+    entity=456
 )
 
 tag7 = AddressTag(
@@ -178,8 +188,13 @@ tag7 = AddressTag(
     tagpack_uri="https://tagpack_uri",
     currency="LTC",
     label="cimedy",
+    confidence='ownership',
+    confidence_level=100,
+    tagpack_creator='',
+    tagpack_title='',
     tagpack_is_public=True,
-    is_cluster_definer=False
+    is_cluster_definer=False,
+    entity=1234
 )
 
 tag8 = AddressTag(
@@ -205,11 +220,16 @@ eth_tag3 = AddressTag(
     abuse=None,
     address="0xabcdef",
     category=None,
-    tagpack_uri="uriX",
+    tagpack_uri=None,
     currency="ETH",
     label="TagA",
     tagpack_is_public=False,
-    is_cluster_definer=True
+    is_cluster_definer=True,
+    confidence='ownership',
+    confidence_level=100,
+    tagpack_creator='',
+    tagpack_title='',
+    entity=107925000
 )
 
 eth_etag1 = eth_tag1.to_dict()
@@ -230,32 +250,33 @@ etag4 = AddressTag(
 
 
 async def list_address_tags(test_case):
-    path = '/{currency}/tags?label={label}'
-    result = await test_case.request(path, currency='btc', label='isolinks')
-    print(result)
+    path = '/tags?label={label}'
+    result = await test_case.request(path, label='isolinks')
     t1 = tag5.to_dict()
     t2 = {**t1}
     t2['address'] = 'addressY'
     t2.pop('category')
-    t2['tagpack_uri'] = 'https://tagpack_uri_private'
+    t2.pop('tagpack_uri')
     t2['tagpack_is_public'] = False
+    t2['entity'] = 456
     test_case.assertEqual(
         [t1, t2],
         result['address_tags'])
 
-    result = await test_case.request(path, currency='btc', auth='unauthorized',
+    result = await test_case.request(path, auth='unauthorized',
                                      label='isolinks')
     test_case.assertEqual(
         [t1],
         result['address_tags'])
 
-    result = await test_case.request(path, currency='btc', label='cimedy')
-    test_case.assertEqual([tag6.to_dict()], result['address_tags'])
+    result = await test_case.request(path, label='cimedy')
+    test_case.assertEqual([tag6.to_dict(), tag7.to_dict()],
+                          result['address_tags'])
 
     # test paging
 
     path_with_page = path + '&pagesize={pagesize}'
-    result = await test_case.request(path_with_page, currency='btc',
+    result = await test_case.request(path_with_page,
                                      label='isolinks',
                                      pagesize=1,
                                      page=None)
@@ -263,26 +284,22 @@ async def list_address_tags(test_case):
         [t1],
         result['address_tags'])
     path_with_page += '&page={page}'
-    result = await test_case.request(path_with_page, currency='btc',
+    result = await test_case.request(path_with_page,
                                      label='isolinks',
                                      pagesize=1,
                                      page=result['next_page'])
     test_case.assertEqual(
         [t2],
         result['address_tags'])
-    result = await test_case.request(path_with_page, currency='btc',
+    result = await test_case.request(path_with_page,
                                      label='isolinks',
                                      pagesize=1,
                                      page=result['next_page'])
     test_case.assertEqual(AddressTags(address_tags=[]).to_dict(), result)
 
-    result = await test_case.request(path, currency='eth', label='TagA')
+    result = await test_case.request(path, label='TagA')
     test_case.assertEqual([eth_tag3.to_dict()],
                           result['address_tags'])
-
-    result = await test_case.request(path, currency='ltc', label='cimedy',
-                                     level='address')
-    test_case.assertEqual([tag7.to_dict()], result['address_tags'])
 
 
 organization = Concept(
