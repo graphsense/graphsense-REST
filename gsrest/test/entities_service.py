@@ -153,15 +153,15 @@ async def list_address_tags_by_entity(test_case):
     result = await test_case.request(path,
                                      currency='btc',
                                      entity=entityWithTags.entity)
-    expected = AddressTags(address_tags=entityWithTags.best_address_tag)
-    test_case.assertEqual(expected.to_dict()['address_tags'],
+    expected = [ts.tag1, ts.tag4, ts.tag2, ts.tag3]
+    test_case.assertEqual([e.to_dict() for e in expected],
                           result['address_tags'])
 
     result = await test_case.request(path,
                                      currency='eth',
                                      entity=eth_entity.entity)
-    expected = AddressTags(address_tags=eth_entity.tags.address_tags)
-    test_case.assertEqual(expected.to_dict()['address_tags'],
+    expected = [ts.eth_tag1, ts.eth_tag2]
+    test_case.assertEqual([e.to_dict() for e in expected],
                           result['address_tags'])
 
     result = await test_case.request(path,
@@ -169,10 +169,9 @@ async def list_address_tags_by_entity(test_case):
                                      currency='eth',
                                      entity=eth_entity.entity,
                                      level='address')
-    public_address_tags = [tag for tag in eth_entity.tags.address_tags
+    public_address_tags = [tag.to_dict() for tag in expected
                            if tag.tagpack_is_public]
-    expected = AddressTags(address_tags=public_address_tags)
-    test_case.assertEqual(expected.to_dict()['address_tags'],
+    test_case.assertEqual(public_address_tags,
                           result['address_tags'])
 
 
