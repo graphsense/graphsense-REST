@@ -149,7 +149,7 @@ You may use `tests/fetch_data.sh` to fetch live data and customize for testing.
 In order to have a reproducible test environment, tests can also be run via docker. 
 
 ```
-cd gsrest/test
+cd tests
 make test
 ```
 
