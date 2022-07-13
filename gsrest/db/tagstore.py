@@ -76,6 +76,7 @@ class Tagstore:
         config['port'] = int(config.get('port', 5432))
         config['query_timeout'] = int(config.get('query_timeout', 300))
         config['max_connections'] = int(config.get('max_connections', 10))
+        config['pool_recycle'] = int(config.get('pool_recycle', 3600))
         dsn = f"dbname={config['database']} user={config['username']}"\
               f" password={config['password']} host={config['host']}"\
               f" port={config['port']}"
@@ -89,7 +90,8 @@ class Tagstore:
             dsn,
             maxsize=config['max_connections'],
             on_connect=on_connect,
-            timeout=config['query_timeout'])
+            timeout=config['query_timeout'],
+            pool_recycle=config['pool_recycle'])
 
     def id(self):
         h = self.config['database'] +\
@@ -107,6 +109,8 @@ class Tagstore:
         if params is None:
             params = []
         async with self.pool.acquire() as conn:
+            self.logger.debug(f'pool size {self.pool.size}, freesize'
+                              f' {self.pool.freesize}')
             async with conn.cursor() as cur:
                 if page and paging_key:
                     if "where" not in query.lower():
@@ -138,51 +142,38 @@ class Tagstore:
         return self.execute("select * from concept where taxonomy = %s",
                             [taxonomy])
 
-    def list_address_tags(self, currency, label, show_private=False,
+    def list_address_tags(self, label, show_private=False,
                           page=None, pagesize=None):
-        query = f"""select t.*, tp.is_public from
+        query = f"""select
+                        t.*,
+                        tp.uri,
+                        tp.creator,
+                        tp.title,
+                        tp.is_public,
+                        c.level,
+                        acm.gs_cluster_id
+                    from
                        tag t,
-                       tagpack tp
+                       tagpack tp,
+                       confidence c,
+                       address_cluster_mapping acm
                    where
                        t.tagpack = tp.id
+                       and t.confidence = c.id
+                       and acm.address=t.address
+                       and acm.currency=t.currency
                        {hide_private_condition(show_private)}
-                       and t.currency = %s
                        and t.label = %s """
         return self.execute(query,
-                            params=[currency.upper(), label],
+                            params=[label],
                             paging_key='t.id',
-                            page=page,
-                            pagesize=pagesize)
-
-    def list_entity_tags(self, currency, label, show_private=False,
-                         page=None, pagesize=None):
-        query = f"""select distinct on (acm.gs_cluster_id)
-                    t.*,
-                    acm.gs_cluster_id,
-                    tp.is_public
-                   from
-                    tag t,
-                    tagpack tp,
-                    address_cluster_mapping acm
-                   where
-                    t.tagpack = tp.id
-                    {hide_private_condition(show_private)}
-                    and t.currency = %s
-                    and t.label = %s
-                    and t.is_cluster_definer = true
-                    and t.address = acm.address
-                    and t.currency = acm.currency
-                   order by
-                    acm.gs_cluster_id, t.confidence desc"""
-
-        return self.execute(query,
-                            params=[currency.upper(), label],
-                            paging_key='acm.gs_cluster_id',
                             page=page,
                             pagesize=pagesize)
 
     def list_matching_labels(self, currency, expression, limit,
                              show_private=False):
+        currency_condition = "and t.currency = %s" if currency else ""
+        params = [currency.upper()] if currency else []
         query = f"""select
                     t.label
                    from
@@ -192,28 +183,39 @@ class Tagstore:
                    where
                     t.label = l.label
                     and tp.id = t.tagpack
-                    and t.currency = %s
+                    {currency_condition}
                     and similarity(l.label, %s) > 0.2
                     {hide_private_condition(show_private)}
                    order by l.label <-> %s
                    limit %s"""
         return self.execute(query,
-                            params=[currency.upper(),
-                                    expression,
-                                    expression,
-                                    limit])
+                            params=params+[expression, expression, limit])
 
     def list_tags_by_address(self, currency, address, show_private=False,
-                             page=None,
-                             pagesize=None):
-        query = f"""select t.*, tp.is_public from
+                             page=None, pagesize=None):
+        query = f"""select
+                        t.*,
+                        tp.uri,
+                        tp.creator,
+                        tp.title,
+                        tp.is_public,
+                        c.level,
+                        acm.gs_cluster_id
+                    from
                         tag t,
-                        tagpack tp
-                   where
+                        tagpack tp,
+                        confidence c,
+                        address_cluster_mapping acm
+                    where
                         t.tagpack=tp.id
+                        and c.id=t.confidence
                         and t.currency = %s
                         and t.address = %s
+                        and acm.address=t.address
+                        and acm.currency=t.currency
                         {hide_private_condition(show_private)}
+                    order by
+                        c.level desc
                         """
 
         return self.execute(query,
@@ -224,16 +226,30 @@ class Tagstore:
 
     def list_address_tags_by_entity(self, currency, entity, show_private=False,
                                     page=None, pagesize=None):
-        query = f"""select t.*, tp.is_public from
+        query = f"""select
+                        t.*,
+                        tp.uri,
+                        tp.creator,
+                        tp.title,
+                        tp.is_public,
+                        c.level,
+                        acm.gs_cluster_id
+                    from
                         tag t,
                         tagpack tp,
-                        address_cluster_mapping acm
-                   where
+                        address_cluster_mapping acm,
+                        confidence c
+                    where
                         acm.address=t.address
+                        and acm.currency=t.currency
+                        and c.id=t.confidence
                         and t.currency = %s
                         and acm.gs_cluster_id = %s
                         {hide_private_condition(show_private)}
-                        and t.tagpack=tp.id"""
+                        and t.tagpack=tp.id
+                    order by
+                        c.level desc
+                        """
 
         return self.execute(query,
                             params=[currency.upper(), entity],
@@ -241,35 +257,92 @@ class Tagstore:
                             page=page,
                             pagesize=pagesize)
 
-    def list_entity_tags_by_entity(self, currency, entity, show_private=False):
+    async def count_address_tags_by_entity(self, currency, entity,
+                                           show_private=False):
         query = f"""select
-                        t.*,
-                        tp.is_public,
-                        acm.gs_cluster_id
-                   from
+                        count(*) as count
+                    from
                         tag t,
                         tagpack tp,
                         address_cluster_mapping acm
-                   where
+                    where
                         acm.address=t.address
-                        and t.is_cluster_definer = true
-                        and t.currency = acm.currency
+                        and acm.currency=t.currency
                         and t.currency = %s
                         and acm.gs_cluster_id = %s
                         and t.tagpack=tp.id
+                        {hide_private_condition(show_private)}"""
+        return await self.execute(query, [currency.upper(), entity])
+
+    async def list_entity_tags_by_entity(self, currency, entity,
+                                         show_private=False):
+        query = f"""select
+                        t.label,
+                        t.category,
+                        count(t.address) as c,
+                        max(c.level) as l,
+                        min(t.address) as address
+                    from
+                        tag t,
+                        tagpack tp,
+                        address_cluster_mapping acm,
+                        confidence c
+                    where
+                        acm.address=t.address
+                        and acm.currency=t.currency
+                        and t.currency = %s
+                        and acm.gs_cluster_id = %s
+                        and t.tagpack=tp.id
+                        and t.is_cluster_definer=true
+                        and t.confidence=c.id
                         {hide_private_condition(show_private)}
+                    group by
+                        t.label, t.category
+                    order by
+                        l desc,
+                        c desc
+                    limit 1"""
+
+        major, _ = await self.execute(query, [currency.upper(), entity])
+
+        if not len(major):
+            return Result(), None
+
+        query = """select
+                        t.*,
+                        tp.uri,
+                        tp.creator,
+                        tp.title,
+                        tp.is_public,
+                        acm.gs_cluster_id,
+                        c.level
+                   from
+                        tag t,
+                        tagpack tp,
+                        address_cluster_mapping acm,
+                        confidence c
+                   where
+                        acm.address=t.address
+                        and t.currency = acm.currency
+                        and c.id = t.confidence
+                        and acm.currency = %s
+                        and acm.gs_cluster_id = %s
+                        and t.tagpack=tp.id
+                        and t.is_cluster_definer=true
+                        and t.label= %s
                    order by
-                        t.confidence desc
+                        c.level desc
                    limit 1"""
 
-        # TODO also order by frequency
+        return await self.execute(query, [currency.upper(),
+                                          entity,
+                                          major[0]['label']])
 
-        return self.execute(query, [currency.upper(), entity])
-
-    def list_labels_for_addresses(self, currency, addresses,
-                                  show_private=False):
+    async def list_labels_for_addresses(self, currency, addresses,
+                                        show_private=False):
         if not addresses:
-            return Result()
+            raise TypeError('x')
+            return Result(), None
         query = f"""select
                     t.address,
                     json_agg(distinct t.label) as labels
@@ -283,12 +356,13 @@ class Tagstore:
                     {hide_private_condition(show_private)}
                    group by address
                    order by address"""
-        return self.execute(query,
-                            params=[currency.upper(), addresses])
+        return await self.execute(query,
+                                  params=[currency.upper(), addresses])
 
-    def list_labels_for_entities(self, currency, entities, show_private=False):
+    async def list_labels_for_entities(self, currency, entities,
+                                       show_private=False):
         if not entities:
-            return Result()
+            return Result(), None
         query = f"""select
                     acm.gs_cluster_id,
                     json_agg(distinct t.label) as labels
@@ -307,8 +381,8 @@ class Tagstore:
                    group by
                     acm.gs_cluster_id
                    order by acm.gs_cluster_id"""
-        return self.execute(query,
-                            params=[currency.upper(), entities])
+        return await self.execute(query,
+                                  params=[currency.upper(), entities])
 
     def count(self, currency, show_private=False):
         query = """

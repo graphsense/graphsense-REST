@@ -1,13 +1,26 @@
 CASSANDRA_MARKER=.runcass
 TAGSTORE_MARKER=.runts
+TESTCONTAINER_MARKER=.runtestcontainer
 CASSANDRA_MOCK=cassandra_mock
 TAGSTORE_MOCK=tagstore_mock
+USE_DOCKER=TRUE
+DOCKER_GROUPID=999
+ORGANIZATION=graphsense
+TESTCONTAINER_NAME=graphsense-rest-test 
 
-test: $(MARKER)
+test: $(CASSANDRA_MARKER) $(TAGSTORE_MARKER)
 	# start container if it's not running
 	docker ps -a | grep $(CASSANDRA_MOCK) || bash -c 'rm -f $(CASSANDRA_MARKER) && make $(CASSANDRA_MARKER)'
 	docker ps -a | grep $(TAGSTORE_MOCK) || bash -c 'rm -f $(TAGSTORE_MARKER) && make $(TAGSTORE_MARKER)'
+ifeq ($(USE_DOCKER), TRUE)
+	docker ps -a | grep $(TESTCONTAINER_NAME) || bash -c 'rm -f $(TESTCONTAINER_MARKER) && make $(TESTCONTAINER_MARKER)'
+else
 	tox -e py37 -- $(ORGANIZATION)
+endif
+
+clean: 
+	rm -f $(CASSANDRA_MARKER)
+	rm -f $(TAGSTORE_MARKER)
 
 $(CASSANDRA_MARKER): $(wildcard cassandra/data/*)
 	./cassandra/start_mock.sh $(CASSANDRA_MOCK) $(ORGANIZATION) "$?"
@@ -19,6 +32,18 @@ $(TAGSTORE_MARKER): $(wildcard tagstore/data/*)
 	touch $(TAGSTORE_MARKER)
 	make ips
 
+$(TESTCONTAINER_MARKER): Dockerfile 
+	docker build -t $(TESTCONTAINER_NAME) .
+	docker run --rm \
+		--workdir /src \
+		--name $(TESTCONTAINER_NAME) \
+		-v ${PWD}/../:/src \
+		--link $(CASSANDRA_MOCK):$(CASSANDRA_MOCK) \
+		--link $(TAGSTORE_MOCK):$(TAGSTORE_MOCK) \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		--init \
+		$(TESTCONTAINER_NAME) tox -e py37 -- $(ORGANIZATION)
+
 ips:
 	@ip=`docker exec $(CASSANDRA_MOCK) cat /etc/hosts | tail -n 1 | awk '{print $$1}'`;\
 		echo "Cassandra mock container ip is $$ip"; \
@@ -29,4 +54,4 @@ ips:
 		sed -i "s/TAGSTORE_MOCK_IP/$$ip/" ./instance/config.yaml 
 
 
-.PHONY: test ips
+.PHONY: test ips clean

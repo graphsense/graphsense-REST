@@ -14,7 +14,7 @@ stats = Stats(
             timestamp=420,
             no_txs=110,
             no_labels=10,
-            no_tagged_addresses=60,
+            no_tagged_addresses=70,
             no_address_relations=1230
             ),
         CurrencyStats(
@@ -35,7 +35,7 @@ stats = Stats(
             timestamp=42,
             no_txs=11,
             no_labels=2,
-            no_tagged_addresses=2,
+            no_tagged_addresses=20,
             no_address_relations=123)])
 
 
@@ -119,9 +119,10 @@ async def search(test_case):
     test_case.assertEqual(expected.to_dict(), result)
 
     expected = base_search_results()
-    expected.labels = ['Internet Archive 2', 'Internet, Archive']
+    expected.labels = sorted(['Internet Archive 2', 'Internet, Archive'])
 
     result = await test_case.request(path, q='internet')
+    result['labels'] = sorted(result['labels'])
     test_case.assertEqual(expected.to_dict(), result)
 
     result = await test_case.request(path, auth='y', q='internet')

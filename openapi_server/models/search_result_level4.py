@@ -6,8 +6,7 @@ from typing import List, Dict, Type
 
 from openapi_server.models.base_model_ import Model
 from openapi_server.models.address import Address
-from openapi_server.models.entity import Entity
-from openapi_server.models.neighbor import Neighbor
+from openapi_server.models.neighbor_entity import NeighborEntity
 from openapi_server.models.search_result_leaf import SearchResultLeaf
 from openapi_server.models.search_result_level4_all_of import SearchResultLevel4AllOf
 from openapi_server.models.search_result_level5 import SearchResultLevel5
@@ -20,31 +19,27 @@ class SearchResultLevel4(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, matching_addresses: List[Address]=None, node: Entity=None, relation: Neighbor=None, paths: List[SearchResultLevel5]=None):
+    def __init__(self, matching_addresses: List[Address]=None, neighbor: NeighborEntity=None, paths: List[SearchResultLevel5]=None):
         """SearchResultLevel4 - a model defined in OpenAPI
 
         :param matching_addresses: The matching_addresses of this SearchResultLevel4.
-        :param node: The node of this SearchResultLevel4.
-        :param relation: The relation of this SearchResultLevel4.
+        :param neighbor: The neighbor of this SearchResultLevel4.
         :param paths: The paths of this SearchResultLevel4.
         """
         self.openapi_types = {
             'matching_addresses': List[Address],
-            'node': Entity,
-            'relation': Neighbor,
+            'neighbor': NeighborEntity,
             'paths': List[SearchResultLevel5]
         }
 
         self.attribute_map = {
             'matching_addresses': 'matching_addresses',
-            'node': 'node',
-            'relation': 'relation',
+            'neighbor': 'neighbor',
             'paths': 'paths'
         }
 
         self._matching_addresses = matching_addresses
-        self._node = node
-        self._relation = relation
+        self._neighbor = neighbor
         self._paths = paths
 
     @classmethod
@@ -65,8 +60,7 @@ class SearchResultLevel4(Model):
         if not shallow:
             return Model.to_dict(self)
         return { 'matching_addresses': self._matching_addresses,
-            'node': self._node,
-            'relation': self._relation,
+            'neighbor': self._neighbor,
             'paths': self._paths }
 
 
@@ -88,50 +82,33 @@ class SearchResultLevel4(Model):
         :param matching_addresses: The matching_addresses of this SearchResultLevel4.
         :type matching_addresses: List[Address]
         """
+        if matching_addresses is None:
+            raise ValueError("Invalid value for `matching_addresses`, must not be `None`")
 
         self._matching_addresses = matching_addresses
 
     @property
-    def node(self):
-        """Gets the node of this SearchResultLevel4.
+    def neighbor(self):
+        """Gets the neighbor of this SearchResultLevel4.
 
 
-        :return: The node of this SearchResultLevel4.
-        :rtype: Entity
+        :return: The neighbor of this SearchResultLevel4.
+        :rtype: NeighborEntity
         """
-        return self._node
+        return self._neighbor
 
-    @node.setter
-    def node(self, node):
-        """Sets the node of this SearchResultLevel4.
+    @neighbor.setter
+    def neighbor(self, neighbor):
+        """Sets the neighbor of this SearchResultLevel4.
 
 
-        :param node: The node of this SearchResultLevel4.
-        :type node: Entity
+        :param neighbor: The neighbor of this SearchResultLevel4.
+        :type neighbor: NeighborEntity
         """
+        if neighbor is None:
+            raise ValueError("Invalid value for `neighbor`, must not be `None`")
 
-        self._node = node
-
-    @property
-    def relation(self):
-        """Gets the relation of this SearchResultLevel4.
-
-
-        :return: The relation of this SearchResultLevel4.
-        :rtype: Neighbor
-        """
-        return self._relation
-
-    @relation.setter
-    def relation(self, relation):
-        """Sets the relation of this SearchResultLevel4.
-
-
-        :param relation: The relation of this SearchResultLevel4.
-        :type relation: Neighbor
-        """
-
-        self._relation = relation
+        self._neighbor = neighbor
 
     @property
     def paths(self):
@@ -153,5 +130,7 @@ class SearchResultLevel4(Model):
         :param paths: The paths of this SearchResultLevel4.
         :type paths: List[SearchResultLevel5]
         """
+        if paths is None:
+            raise ValueError("Invalid value for `paths`, must not be `None`")
 
         self._paths = paths

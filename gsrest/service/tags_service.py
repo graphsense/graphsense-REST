@@ -1,56 +1,43 @@
 from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.address_tags import AddressTags
-from openapi_server.models.entity_tag import EntityTag
-from openapi_server.models.entity_tags import EntityTags
 from openapi_server.models.taxonomy import Taxonomy
 from openapi_server.models.concept import Concept
 from gsrest.db.util import tagstores, tagstores_with_paging, dt_to_int
 
 
-async def list_tags(request, currency, label, level, page=None,
-                    pagesize=None):
+def address_tag_from_row(row):
+    return AddressTag(
+        address=row['address'],
+        entity=row['gs_cluster_id'],
+        label=row['label'],
+        category=row['category'],
+        abuse=row['abuse'],
+        source=row['source'],
+        lastmod=dt_to_int(row['lastmod']),
+        tagpack_is_public=row['is_public'],
+        tagpack_uri=row['tagpack'] if row['is_public'] else None,
+        tagpack_creator=row['creator'],
+        tagpack_title=row['title'],
+        confidence=row['confidence'],
+        confidence_level=row['level'],
+        is_cluster_definer=bool(row['is_cluster_definer']),
+        currency=row['currency'].upper())
 
-    if level == 'address':
-        fun = 'list_address_tags'
 
-        def to_obj(row):
-            return AddressTag(
-                address=row['address'],
-                label=row['label'],
-                category=row['category'],
-                abuse=row['abuse'],
-                tagpack_uri=row['tagpack'],
-                source=row['source'],
-                lastmod=dt_to_int(row['lastmod']),
-                active=True,
-                is_public=row['is_public'],
-                is_cluster_definer=row['is_cluster_definer'],
-                currency=row['currency'].upper())
-    else:
-        fun = 'list_entity_tags'
+async def list_address_tags(request, label, page=None,
+                            pagesize=None):
+    fun = 'list_address_tags'
+    to_obj = address_tag_from_row
 
-        def to_obj(row):
-            return EntityTag(
-                entity=row['gs_cluster_id'],
-                address=row['address'],
-                label=row['label'],
-                category=row['category'],
-                abuse=row['abuse'],
-                tagpack_uri=row['tagpack'],
-                source=row['source'],
-                lastmod=dt_to_int(row['lastmod']),
-                active=True,
-                is_public=row['is_public'],
-                is_cluster_definer=row['is_cluster_definer'],
-                currency=row['currency'].upper())
+    if pagesize is None:
+        pagesize = 100
+    pagesize = min(pagesize, 100)
 
     tags, next_page = await tagstores_with_paging(
         request.app['tagstores'], to_obj, fun, page, pagesize,
-        currency, label, request.app['show_private_tags'])
+        label, request.app['show_private_tags'])
 
-    if level == 'address':
-        return AddressTags(next_page=next_page, address_tags=tags)
-    return EntityTags(next_page=next_page, entity_tags=tags)
+    return AddressTags(next_page=next_page, address_tags=tags)
 
 
 async def list_concepts(request, taxonomy):

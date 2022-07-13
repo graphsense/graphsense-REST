@@ -73,6 +73,8 @@ class Links(Model):
         :param links: The links of this Links.
         :type links: List[Link]
         """
+        if links is None:
+            raise ValueError("Invalid value for `links`, must not be `None`")
 
         self._links = links
 

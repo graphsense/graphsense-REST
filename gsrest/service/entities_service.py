@@ -1,26 +1,26 @@
 from gsrest.service.common_service import get_address
 from gsrest.service.rates_service import get_rates
+from openapi_server.models.neighbor_entities import NeighborEntities
+from openapi_server.models.neighbor_entity import NeighborEntity
 from openapi_server.models.entity import Entity
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.address_txs import AddressTxs
+from openapi_server.models.address_tags import AddressTags
 from gsrest.util.values import convert_value, to_values
-from openapi_server.models.entity_tag import EntityTag
-from openapi_server.models.address_tag import AddressTag
-from openapi_server.models.address_and_entity_tags import AddressAndEntityTags
-from openapi_server.models.tags import Tags
-from openapi_server.models.search_result_level1 import SearchResultLevel1
 from openapi_server.models.address import Address
 from openapi_server.models.entity_addresses import EntityAddresses
-from gsrest.db.util import tagstores, tagstores_with_paging, dt_to_int
+from gsrest.db.util import tagstores, tagstores_with_paging
+from gsrest.service.tags_service import address_tag_from_row
 import gsrest.service.common_service as common
 import importlib
 import asyncio
 
-MAX_DEPTH = 6
+MAX_DEPTH = 7
 
 
-def from_row(currency, row, rates, tags=None):
+def from_row(currency, row, rates, tags=None, count=0):
     return Entity(
+        currency=currency,
         entity=row['cluster_id'],
         root_address=row['root_address'],
         first_tx=TxSummary(
@@ -39,95 +39,77 @@ def from_row(currency, row, rates, tags=None):
         in_degree=row['in_degree'],
         out_degree=row['out_degree'],
         balance=convert_value(currency, row['balance'], rates),
-        tags=tags
+        best_address_tag=None if not tags else tags[0],
+        no_address_tags=count
         )
 
 
-async def list_tags_by_entity(request, currency, entity, level,
-                              page=None, pagesize=None):
-    if level == 'address':
-        address_tags, next_page = \
-            await list_address_tags_by_entity(request, currency, entity, page,
-                                              pagesize)
-        return Tags(address_tags=address_tags, next_page=next_page)
-    else:
-        entity_tags = \
-            await list_entity_tags_by_entity(request, currency, entity)
-        return Tags(entity_tags=entity_tags)
-
-
-async def list_entity_tags_by_entity(request, currency, entity):
-    def f(row):
-        return EntityTag(label=row['label'],
-                         entity=row['gs_cluster_id'],
-                         address=row['address'],
-                         category=row['category'],
-                         abuse=row['abuse'],
-                         tagpack_uri=row['tagpack'],
-                         source=row['source'],
-                         lastmod=dt_to_int(row['lastmod']),
-                         active=True,
-                         is_public=row['is_public'],
-                         is_cluster_definer=row['is_cluster_definer'],
-                         currency=row['currency'].upper())
-    return await tagstores(
-            request.app['tagstores'],
-            f,
-            'list_entity_tags_by_entity',
-            currency, entity, request.app['show_private_tags'])
-
-
-async def list_address_tags_by_entity(request, currency, address,
+async def list_address_tags_by_entity(request, currency, entity,
                                       page=None, pagesize=None):
-    def f(row):
-        return AddressTag(label=row['label'],
-                          address=row['address'],
-                          category=row['category'],
-                          abuse=row['abuse'],
-                          tagpack_uri=row['tagpack'],
-                          source=row['source'],
-                          lastmod=dt_to_int(row['lastmod']),
-                          active=True,
-                          is_public=row['is_public'],
-                          is_cluster_definer=row['is_cluster_definer'],
-                          currency=row['currency'].upper())
-
-    return await tagstores_with_paging(
-            request.app['tagstores'],
-            f,
-            'list_address_tags_by_entity',
-            page, pagesize,
-            currency, address, request.app['show_private_tags'])
+    address_tags, next_page = \
+        await tagstores_with_paging(
+                request.app['tagstores'],
+                address_tag_from_row,
+                'list_address_tags_by_entity',
+                page, pagesize,
+                currency, entity, request.app['show_private_tags'])
+    return AddressTags(address_tags=address_tags, next_page=next_page)
 
 
-async def get_entity(request, currency, entity, include_tags=False):
+async def get_entity(request, currency, entity):
     db = request.app['db']
     result = await db.get_entity(currency, entity)
 
     if result is None:
         raise RuntimeError("Entity {} not found".format(entity))
 
-    tags = None
-    if include_tags:
-        [entity_tags, (address_tags, _)] = await asyncio.gather(
-            list_entity_tags_by_entity(request, currency,
-                                       result['cluster_id']),
-            list_address_tags_by_entity(request, currency,
-                                        result['cluster_id'],
-                                        pagesize=100))
-        tags = AddressAndEntityTags(address_tags=address_tags,
-                                    entity_tags=entity_tags)
+    tags = await tagstores(
+            request.app['tagstores'],
+            address_tag_from_row,
+            'list_entity_tags_by_entity',
+            currency, entity, request.app['show_private_tags'])
+
     rates = (await get_rates(request, currency))['rates']
-    return from_row(currency, result, rates, tags)
+
+    counts = await tagstores(
+            request.app['tagstores'],
+            lambda x: x,
+            'count_address_tags_by_entity',
+            currency, entity, request.app['show_private_tags'])
+    count = 0
+    for c in counts:
+        count += c['count']
+    return from_row(currency, result, rates, tags, count)
 
 
 async def list_entity_neighbors(request, currency, entity, direction,
                                 only_ids=None, include_labels=False,
                                 page=None, pagesize=None):
-    return await common.list_neighbors(request, currency, entity, direction,
+    results, paging_state = \
+           await common.list_neighbors(request, currency, entity, direction,
                                        'entity',
                                        only_ids, include_labels, page,
                                        pagesize)
+    is_outgoing = "out" in direction
+    dst = 'dst' if is_outgoing else 'src'
+    relations = []
+    if results is None:
+        return NeighborEntities()
+    aws = [get_entity(request, currency, row[dst+'_cluster_id'])
+           for row in results]
+
+    nodes = await asyncio.gather(*aws)
+
+    for row, node in zip(results, nodes):
+        nb = NeighborEntity(
+            labels=row['labels'],
+            value=row['value'],
+            no_txs=row['no_transactions'],
+            entity=node)
+        relations.append(nb)
+
+    return NeighborEntities(next_page=paging_state,
+                            neighbors=relations)
 
 
 async def list_entity_addresses(request, currency, entity,
@@ -138,6 +120,7 @@ async def list_entity_addresses(request, currency, entity,
 
     rates = (await get_rates(request, currency))['rates']
     addresses = [Address(
+            currency=currency,
             address=row['address'],
             entity=row['cluster_id'],
             first_tx=TxSummary(
@@ -193,13 +176,13 @@ async def search_entity_neighbors(request, currency, entity, direction,
     elif 'entities' in key:
         params['entities'] = value
 
-    level = 2
+    level = 1
     result = \
         await recursive_search(request, currency, entity, params,
                                breadth, depth, level, skip_num_addresses,
                                direction)
 
-    return SearchResultLevel1(paths=result)
+    return result
 
 
 async def recursive_search(request, currency, entity, params, breadth, depth,
@@ -225,9 +208,6 @@ async def recursive_search(request, currency, entity, params, breadth, depth,
         return (await list_entity_neighbors(
             request, currency, entity, direction, pagesize=breadth)).neighbors
 
-    async def get_entity_and_tags(entity):
-        return await get_entity(request, currency, entity, include_tags=True)
-
     neighbors = await cached(entity, 'neighbors',
                              lambda: list_neighbors(entity))
 
@@ -242,27 +222,23 @@ async def recursive_search(request, currency, entity, params, breadth, depth,
 
     async def handle_neighbor(neighbor):
         match = True
-        props = \
-            await cached(int(neighbor.id), 'props',
-                         lambda: get_entity_and_tags(int(neighbor.id)))
-        if props is None:
-            return
+        props = neighbor.entity
+        entity = neighbor.entity.entity
 
         if 'category' in params:
-            # find first occurrence of category in tags
-            tags = props.tags.entity_tags
-            match = next((True for t in tags if t.category and
-                          t.category.lower() == params['category'].lower()),
-                         False)
+            match = props.best_address_tag and \
+                props.best_address_tag.category and \
+                props.best_address_tag.category.lower() \
+                == params['category'].lower()
 
         matching_addresses = []
         if 'addresses' in params:
             matching_addresses = [id["address"] for id in params['addresses']
-                                  if str(id["entity"]) == neighbor.id]
+                                  if id["entity"] == entity]
             match = len(matching_addresses) > 0
 
         if 'entities' in params:
-            match = neighbor.id in params['entities']
+            match = str(entity) in params['entities']
 
         if 'field' in params:
             (field, fieldcurrency, min_value, max_value) = params['field']
@@ -287,7 +263,7 @@ async def recursive_search(request, currency, entity, params, breadth, depth,
                 (skip_num_addresses is None or
                  props.no_addresses <= skip_num_addresses):
             subpaths = await recursive_search(request,
-                                              currency, int(neighbor.id),
+                                              currency, int(entity),
                                               params, breadth,
                                               depth - 1,
                                               level + 1,
@@ -297,8 +273,7 @@ async def recursive_search(request, currency, entity, params, breadth, depth,
         if not subpaths:
             return
 
-        return {'props': props,
-                'neighbor': neighbor,
+        return {'neighbor': neighbor,
                 'subpaths': subpaths,
                 'matching_addresses': matching_addresses}
 
@@ -310,16 +285,16 @@ async def recursive_search(request, currency, entity, params, breadth, depth,
         if not result:
             continue
 
-        obj = levelClass(node=result['props'], relation=result['neighbor'],
+        obj = levelClass(neighbor=result['neighbor'],
                          matching_addresses=[])
         if result['subpaths'] is True:
-            aws = [get_address(request, currency, address, include_tags=True)
+            aws = [get_address(request, currency, address)
                    for address in result['matching_addresses']]
-            addresses_with_tags = await asyncio.gather(*aws)
+            addresses = await asyncio.gather(*aws)
             obj.matching_addresses = [address for address in
-                                      addresses_with_tags
+                                      addresses
                                       if address is not None]
-            result['subpaths'] = None
+            result['subpaths'] = []
         obj.paths = result['subpaths']
         paths.append(obj)
 

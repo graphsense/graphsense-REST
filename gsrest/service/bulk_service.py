@@ -66,6 +66,10 @@ class writer:
 
 
 def flatten(item, name="", flat_dict=None, format=None):
+    if format == 'json':
+        if isinstance(item, dict):
+            return item
+        return item.to_dict()
     if flat_dict is None:
         # going this way instead of a default argument value
         # like "..., flat_dict = {}):" because
@@ -177,12 +181,14 @@ def stack(request, currency, operation, body, num_pages, format):
             # and must not be taken as a key
             params[attr] = a
             check[attr] = a
-        else:
+        elif len(a) > 0:
             keys[attr] = a
             le = len(a)
             ln = min(le, ln) if ln > 0 else le
             check[attr] = a[0]
 
+    if not keys:
+        raise TypeError('Keys need to be passed as list')
     inspect.getcallargs(operation, **check)
 
     for i in range(0, ln):

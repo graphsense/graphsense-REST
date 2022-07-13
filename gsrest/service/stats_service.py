@@ -6,8 +6,8 @@ async def get_currency_statistics(request, currency, version=None):
     db = request.app['db']
     result = await db.get_currency_statistics(currency)
     if result is None:
-        raise ValueError('statistics for currency {} not found'
-                         .format(currency))
+        raise SystemError('statistics for currency {} not found'
+                          .format(currency))
     counts = await tagstores(
                 request.app['tagstores'],
                 lambda row: row,

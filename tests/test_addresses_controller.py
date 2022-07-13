@@ -10,7 +10,7 @@ from openapi_server.models.address_tags import AddressTags
 from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.entity import Entity
 from openapi_server.models.links import Links
-from openapi_server.models.neighbors import Neighbors
+from openapi_server.models.neighbor_addresses import NeighborAddresses
 from tests import BaseTestCase
 import gsrest.test.addresses_service as test_service
 
@@ -45,7 +45,7 @@ class TestAddressesController(BaseTestCase):
     async def test_list_address_neighbors(self):
         """Test case for list_address_neighbors
 
-        Get an addresses' neighbors in the address graph
+        Get an address's neighbors in the address graph
         """
         await test_service.list_address_neighbors(self)
 

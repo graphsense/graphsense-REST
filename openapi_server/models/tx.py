@@ -18,12 +18,15 @@ class Tx(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, coinbase: bool=None, height: int=None, inputs: List[TxValue]=None, outputs: List[TxValue]=None, timestamp: int=None, total_input: Values=None, total_output: Values=None, tx_hash: str=None, tx_type: str='account', from_address: str=None, to_address: str=None, value: Values=None):
+    def __init__(self, coinbase: bool=None, currency: str=None, height: int=None, inputs: List[TxValue]=None, no_inputs: int=None, no_outputs: int=None, outputs: List[TxValue]=None, timestamp: int=None, total_input: Values=None, total_output: Values=None, tx_hash: str=None, tx_type: str='account', from_address: str=None, to_address: str=None, value: Values=None):
         """Tx - a model defined in OpenAPI
 
         :param coinbase: The coinbase of this Tx.
+        :param currency: The currency of this Tx.
         :param height: The height of this Tx.
         :param inputs: The inputs of this Tx.
+        :param no_inputs: The no_inputs of this Tx.
+        :param no_outputs: The no_outputs of this Tx.
         :param outputs: The outputs of this Tx.
         :param timestamp: The timestamp of this Tx.
         :param total_input: The total_input of this Tx.
@@ -36,8 +39,11 @@ class Tx(Model):
         """
         self.openapi_types = {
             'coinbase': bool,
+            'currency': str,
             'height': int,
             'inputs': List[TxValue],
+            'no_inputs': int,
+            'no_outputs': int,
             'outputs': List[TxValue],
             'timestamp': int,
             'total_input': Values,
@@ -51,8 +57,11 @@ class Tx(Model):
 
         self.attribute_map = {
             'coinbase': 'coinbase',
+            'currency': 'currency',
             'height': 'height',
             'inputs': 'inputs',
+            'no_inputs': 'no_inputs',
+            'no_outputs': 'no_outputs',
             'outputs': 'outputs',
             'timestamp': 'timestamp',
             'total_input': 'total_input',
@@ -65,8 +74,11 @@ class Tx(Model):
         }
 
         self._coinbase = coinbase
+        self._currency = currency
         self._height = height
         self._inputs = inputs
+        self._no_inputs = no_inputs
+        self._no_outputs = no_outputs
         self._outputs = outputs
         self._timestamp = timestamp
         self._total_input = total_input
@@ -95,8 +107,11 @@ class Tx(Model):
         if not shallow:
             return Model.to_dict(self)
         return { 'coinbase': self._coinbase,
+            'currency': self._currency,
             'height': self._height,
             'inputs': self._inputs,
+            'no_inputs': self._no_inputs,
+            'no_outputs': self._no_outputs,
             'outputs': self._outputs,
             'timestamp': self._timestamp,
             'total_input': self._total_input,
@@ -132,6 +147,31 @@ class Tx(Model):
             raise ValueError("Invalid value for `coinbase`, must not be `None`")
 
         self._coinbase = coinbase
+
+    @property
+    def currency(self):
+        """Gets the currency of this Tx.
+
+        crypto currency code
+
+        :return: The currency of this Tx.
+        :rtype: str
+        """
+        return self._currency
+
+    @currency.setter
+    def currency(self, currency):
+        """Sets the currency of this Tx.
+
+        crypto currency code
+
+        :param currency: The currency of this Tx.
+        :type currency: str
+        """
+        if currency is None:
+            raise ValueError("Invalid value for `currency`, must not be `None`")
+
+        self._currency = currency
 
     @property
     def height(self):
@@ -182,6 +222,56 @@ class Tx(Model):
         """
 
         self._inputs = inputs
+
+    @property
+    def no_inputs(self):
+        """Gets the no_inputs of this Tx.
+
+        number of input addresses
+
+        :return: The no_inputs of this Tx.
+        :rtype: int
+        """
+        return self._no_inputs
+
+    @no_inputs.setter
+    def no_inputs(self, no_inputs):
+        """Sets the no_inputs of this Tx.
+
+        number of input addresses
+
+        :param no_inputs: The no_inputs of this Tx.
+        :type no_inputs: int
+        """
+        if no_inputs is None:
+            raise ValueError("Invalid value for `no_inputs`, must not be `None`")
+
+        self._no_inputs = no_inputs
+
+    @property
+    def no_outputs(self):
+        """Gets the no_outputs of this Tx.
+
+        number of output addresses
+
+        :return: The no_outputs of this Tx.
+        :rtype: int
+        """
+        return self._no_outputs
+
+    @no_outputs.setter
+    def no_outputs(self, no_outputs):
+        """Sets the no_outputs of this Tx.
+
+        number of output addresses
+
+        :param no_outputs: The no_outputs of this Tx.
+        :type no_outputs: int
+        """
+        if no_outputs is None:
+            raise ValueError("Invalid value for `no_outputs`, must not be `None`")
+
+        self._no_outputs = no_outputs
 
     @property
     def outputs(self):

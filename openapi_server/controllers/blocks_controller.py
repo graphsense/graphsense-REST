@@ -69,11 +69,9 @@ async def get_block(request: web.Request, currency, height) -> web.Response:
     except ValueError as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
-    except TypeError as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb.append(f"Request URL: {request.url}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
@@ -137,11 +135,9 @@ async def list_block_txs(request: web.Request, currency, height) -> web.Response
     except ValueError as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
-    except TypeError as e:
-        traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb.append(f"Request URL: {request.url}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()

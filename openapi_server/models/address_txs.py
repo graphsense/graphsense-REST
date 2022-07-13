@@ -73,6 +73,8 @@ class AddressTxs(Model):
         :param address_txs: The address_txs of this AddressTxs.
         :type address_txs: List[AddressTx]
         """
+        if address_txs is None:
+            raise ValueError("Invalid value for `address_txs`, must not be `None`")
 
         self._address_txs = address_txs
 

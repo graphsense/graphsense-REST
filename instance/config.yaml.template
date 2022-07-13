@@ -54,7 +54,11 @@ tagstores:
     # username: "tagstore"
     # password: "tagstore"
     # query_timeout: 300
-    # max_connections: 10
+    # max. number of connections in the aiopg connection pool
+    # max_connections: 10 
+    # time in sections after which stale connections are recycled
+    # pool_recycle: 3600 
+    # see https://aiopg.readthedocs.io/en/stable/core.html#aiopg.create_pool
 
 # configure when to include private tags in responses
 # private tags are excluded by default 
