@@ -2767,28 +2767,7 @@ components:
       - links
       title: links
       type: object
-    neighbor:
-      properties:
-        labels:
-          description: The neighbor's tag labels
-          items:
-            type: string
-          type: array
-        no_txs:
-          description: number of transactions
-          example: 11
-          format: int32
-          title: no_txs
-          type: integer
-        value:
-          $ref: '#/components/schemas/values'
-      required:
-      - no_txs
-      - value
-      type: object
     neighbor_address:
-      allOf:
-      - $ref: '#/components/schemas/neighbor'
       example:
         address:
           total_spent:
@@ -2827,11 +2806,38 @@ components:
             - code: code
               value: 0.8008282
             value: 6
+        value:
+          fiat_values:
+          - code: code
+            value: 0.8008282
+          - code: code
+            value: 0.8008282
+          value: 6
+        labels:
+        - labels
+        - labels
+        no_txs: 11
       properties:
         address:
           $ref: '#/components/schemas/address'
+        labels:
+          description: The neighbor's tag labels
+          items:
+            type: string
+          title: labels
+          type: array
+        no_txs:
+          description: number of transactions
+          example: 11
+          format: int32
+          title: no_txs
+          type: integer
+        value:
+          $ref: '#/components/schemas/values'
       required:
       - address
+      - no_txs
+      - value
       title: neighbor_address
       type: object
     neighbor_addresses:
@@ -2875,6 +2881,17 @@ components:
               - code: code
                 value: 0.8008282
               value: 6
+          value:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          labels:
+          - labels
+          - labels
+          no_txs: 11
         - address:
             total_spent:
               fiat_values:
@@ -2912,6 +2929,17 @@ components:
               - code: code
                 value: 0.8008282
               value: 6
+          value:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          labels:
+          - labels
+          - labels
+          no_txs: 11
       properties:
         neighbors:
           items:
@@ -2930,7 +2958,14 @@ components:
       example:
         next_page: next_page
         neighbors:
-        - entity:
+        - value:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          entity:
             total_spent:
               fiat_values:
               - code: code
@@ -2969,7 +3004,18 @@ components:
               - code: code
                 value: 0.8008282
               value: 6
-        - entity:
+          labels:
+          - labels
+          - labels
+          no_txs: 11
+        - value:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          entity:
             total_spent:
               fiat_values:
               - code: code
@@ -3008,6 +3054,10 @@ components:
               - code: code
                 value: 0.8008282
               value: 6
+          labels:
+          - labels
+          - labels
+          no_txs: 11
       properties:
         neighbors:
           items:
@@ -3023,9 +3073,14 @@ components:
       title: neighbor_entities
       type: object
     neighbor_entity:
-      allOf:
-      - $ref: '#/components/schemas/neighbor'
       example:
+        value:
+          fiat_values:
+          - code: code
+            value: 0.8008282
+          - code: code
+            value: 0.8008282
+          value: 6
         entity:
           total_spent:
             fiat_values:
@@ -3065,12 +3120,33 @@ components:
             - code: code
               value: 0.8008282
             value: 6
+        labels:
+        - labels
+        - labels
+        no_txs: 11
       properties:
         entity:
           $ref: '#/components/schemas/entity'
+        labels:
+          description: The neighbor's tag labels
+          items:
+            type: string
+          title: labels
+          type: array
+        no_txs:
+          description: number of transactions
+          example: 11
+          format: int32
+          title: no_txs
+          type: integer
+        value:
+          $ref: '#/components/schemas/values'
       required:
       - entity
+      - no_txs
+      - value
       title: neighbor_entity
+      type: object
     next_page:
       format: string
       title: next_page

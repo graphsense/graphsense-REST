@@ -16,7 +16,6 @@ from openapi_server.models.entity_addresses import EntityAddresses
 from openapi_server.models.link import Link
 from openapi_server.models.link_utxo import LinkUtxo
 from openapi_server.models.links import Links
-from openapi_server.models.neighbor import Neighbor
 from openapi_server.models.neighbor_address import NeighborAddress
 from openapi_server.models.neighbor_addresses import NeighborAddresses
 from openapi_server.models.neighbor_entities import NeighborEntities

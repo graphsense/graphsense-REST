@@ -6,7 +6,6 @@ from typing import List, Dict, Type
 
 from openapi_server.models.base_model_ import Model
 from openapi_server.models.address import Address
-from openapi_server.models.neighbor import Neighbor
 from openapi_server.models.values import Values
 from openapi_server import util
 
