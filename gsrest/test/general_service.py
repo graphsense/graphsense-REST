@@ -14,7 +14,7 @@ stats = Stats(
             timestamp=420,
             no_txs=110,
             no_labels=10,
-            no_tagged_addresses=60,
+            no_tagged_addresses=70,
             no_address_relations=1230
             ),
         CurrencyStats(
@@ -35,7 +35,7 @@ stats = Stats(
             timestamp=42,
             no_txs=11,
             no_labels=2,
-            no_tagged_addresses=2,
+            no_tagged_addresses=20,
             no_address_relations=123)])
 
 
