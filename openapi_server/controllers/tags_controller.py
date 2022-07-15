@@ -54,7 +54,9 @@ async def list_address_tags(request: web.Request, label, page=None, pagesize=Non
 
         for plugin in request.app['plugins']:
             if hasattr(plugin, 'before_response'):
-                plugin.before_response(request, result)
+                context =\
+                    request.app['plugin_contexts'][plugin.__module__]
+                plugin.before_response(context, request, result)
 
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
@@ -118,7 +120,9 @@ async def list_concepts(request: web.Request, taxonomy) -> web.Response:
 
         for plugin in request.app['plugins']:
             if hasattr(plugin, 'before_response'):
-                plugin.before_response(request, result)
+                context =\
+                    request.app['plugin_contexts'][plugin.__module__]
+                plugin.before_response(context, request, result)
 
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
@@ -180,7 +184,9 @@ async def list_taxonomies(request: web.Request, ) -> web.Response:
 
         for plugin in request.app['plugins']:
             if hasattr(plugin, 'before_response'):
-                plugin.before_response(request, result)
+                context =\
+                    request.app['plugin_contexts'][plugin.__module__]
+                plugin.before_response(context, request, result)
 
         if isinstance(result, list):
             result = [d.to_dict() for d in result]

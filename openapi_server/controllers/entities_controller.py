@@ -56,7 +56,9 @@ async def get_entity(request: web.Request, currency, entity) -> web.Response:
 
         for plugin in request.app['plugins']:
             if hasattr(plugin, 'before_response'):
-                plugin.before_response(request, result)
+                context =\
+                    request.app['plugin_contexts'][plugin.__module__]
+                plugin.before_response(context, request, result)
 
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
@@ -126,7 +128,9 @@ async def list_address_tags_by_entity(request: web.Request, currency, entity, pa
 
         for plugin in request.app['plugins']:
             if hasattr(plugin, 'before_response'):
-                plugin.before_response(request, result)
+                context =\
+                    request.app['plugin_contexts'][plugin.__module__]
+                plugin.before_response(context, request, result)
 
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
@@ -196,7 +200,9 @@ async def list_entity_addresses(request: web.Request, currency, entity, page=Non
 
         for plugin in request.app['plugins']:
             if hasattr(plugin, 'before_response'):
-                plugin.before_response(request, result)
+                context =\
+                    request.app['plugin_contexts'][plugin.__module__]
+                plugin.before_response(context, request, result)
 
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
@@ -268,7 +274,9 @@ async def list_entity_links(request: web.Request, currency, entity, neighbor, pa
 
         for plugin in request.app['plugins']:
             if hasattr(plugin, 'before_response'):
-                plugin.before_response(request, result)
+                context =\
+                    request.app['plugin_contexts'][plugin.__module__]
+                plugin.before_response(context, request, result)
 
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
@@ -344,7 +352,9 @@ async def list_entity_neighbors(request: web.Request, currency, entity, directio
 
         for plugin in request.app['plugins']:
             if hasattr(plugin, 'before_response'):
-                plugin.before_response(request, result)
+                context =\
+                    request.app['plugin_contexts'][plugin.__module__]
+                plugin.before_response(context, request, result)
 
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
@@ -414,7 +424,9 @@ async def list_entity_txs(request: web.Request, currency, entity, page=None, pag
 
         for plugin in request.app['plugins']:
             if hasattr(plugin, 'before_response'):
-                plugin.before_response(request, result)
+                context =\
+                    request.app['plugin_contexts'][plugin.__module__]
+                plugin.before_response(context, request, result)
 
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
@@ -492,7 +504,9 @@ async def search_entity_neighbors(request: web.Request, currency, entity, direct
 
         for plugin in request.app['plugins']:
             if hasattr(plugin, 'before_response'):
-                plugin.before_response(request, result)
+                context =\
+                    request.app['plugin_contexts'][plugin.__module__]
+                plugin.before_response(context, request, result)
 
         if isinstance(result, list):
             result = [d.to_dict() for d in result]

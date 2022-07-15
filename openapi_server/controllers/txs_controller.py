@@ -53,7 +53,9 @@ async def get_tx(request: web.Request, currency, tx_hash, include_io=None) -> we
 
         for plugin in request.app['plugins']:
             if hasattr(plugin, 'before_response'):
-                plugin.before_response(request, result)
+                context =\
+                    request.app['plugin_contexts'][plugin.__module__]
+                plugin.before_response(context, request, result)
 
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
@@ -121,7 +123,9 @@ async def get_tx_io(request: web.Request, currency, tx_hash, io) -> web.Response
 
         for plugin in request.app['plugins']:
             if hasattr(plugin, 'before_response'):
-                plugin.before_response(request, result)
+                context =\
+                    request.app['plugin_contexts'][plugin.__module__]
+                plugin.before_response(context, request, result)
 
         if isinstance(result, list):
             result = [d.to_dict() for d in result]

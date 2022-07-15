@@ -50,7 +50,9 @@ async def get_exchange_rates(request: web.Request, currency, height) -> web.Resp
 
         for plugin in request.app['plugins']:
             if hasattr(plugin, 'before_response'):
-                plugin.before_response(request, result)
+                context =\
+                    request.app['plugin_contexts'][plugin.__module__]
+                plugin.before_response(context, request, result)
 
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
