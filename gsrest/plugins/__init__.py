@@ -16,7 +16,11 @@ class Plugin(abc.ABC):
 
 def get_subclass(module):
     klasses = inspect.getmembers(module, inspect.isclass)
+    print(f'module {module}')
     for (name, kls) in klasses:
+        print(f'name {name}')
+        if kls is Plugin:
+            continue
         if issubclass(kls, Plugin):
             return kls
     raise TypeError(f"{module.__name__} does not implement "
