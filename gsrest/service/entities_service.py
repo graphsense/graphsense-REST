@@ -40,7 +40,7 @@ def from_row(currency, row, rates, tags=None, count=0):
         out_degree=row['out_degree'],
         balance=convert_value(currency, row['balance'], rates),
         best_address_tag=None if not tags else tags[0],
-        no_address_tags=0 if count is None else int(count)
+        no_address_tags=count
         )
 
 
@@ -78,7 +78,7 @@ async def get_entity(request, currency, entity):
             currency, entity, request.app['show_private_tags'])
     count = 0
     for c in counts:
-        count += c['count']
+        count += 0 if c['count'] is None else int(c['count'])
     return from_row(currency, result, rates, tags, count)
 
 
