@@ -40,7 +40,7 @@ def from_row(currency, row, rates, tags=None, count=0):
         out_degree=row['out_degree'],
         balance=convert_value(currency, row['balance'], rates),
         best_address_tag=None if not tags else tags[0],
-        no_address_tags=count
+        no_address_tags=int(count)
         )
 
 

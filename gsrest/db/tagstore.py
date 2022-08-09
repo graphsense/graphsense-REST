@@ -82,6 +82,7 @@ class Tagstore:
               f" port={config['port']}"
 
         async def on_connect(conn):
+            self.logger.debug('Tagstore connect')
             async with conn.cursor() as cur:
                 await cur.execute(
                     f"set search_path to {self.config['schema']}")
@@ -259,18 +260,16 @@ class Tagstore:
 
     async def count_address_tags_by_entity(self, currency, entity,
                                            show_private=False):
+        def hide_private_condition(show_private):
+            return 'and is_public=true' \
+                if not show_private else ''
         query = f"""select
-                        count(*) as count
+                        sum(count) as count
                     from
-                        tag t,
-                        tagpack tp,
-                        address_cluster_mapping acm
+                        tag_count_by_cluster
                     where
-                        acm.address=t.address
-                        and acm.currency=t.currency
-                        and t.currency = %s
-                        and acm.gs_cluster_id = %s
-                        and t.tagpack=tp.id
+                        currency = %s
+                        and gs_cluster_id = %s
                         {hide_private_condition(show_private)}"""
         return await self.execute(query, [currency.upper(), entity])
 
