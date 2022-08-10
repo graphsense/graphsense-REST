@@ -125,15 +125,21 @@ async def add_labels(request, currency, node_type, that, nodes):
     iterator = iter(result)
     if node_type == 'address':
         nodes = sorted(nodes, key=lambda node: node[thatfield])
+
+    stop_iteration = False
+    try:
+        row = next(iterator)
+    except StopIteration:
+        stop_iteration = True
     for node in nodes:
+        if stop_iteration or node[thatfield] != row[tfield]:
+            node['labels'] = []
+            continue
+        node['labels'] = row['labels']
         try:
             row = next(iterator)
-            if node[thatfield] != row[tfield]:
-                node['labels'] = []
-                continue
-            node['labels'] = row['labels']
         except StopIteration:
-            node['labels'] = []
+            stop_iteration = True
 
     return nodes
 
