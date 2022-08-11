@@ -109,9 +109,14 @@ async def wrap(request, operation, currency, params, keys, num_pages, format):
         result = await operation(request, currency, **params)
     except RuntimeError:
         result = {error_field: 'not found'}
-    except TypeError as e:
+    except ValueError as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
         result = {error_field: str(e)}
-    except Exception:
+    except TypeError as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        result = {error_field: str(e)}
+    except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
         result = {error_field: 'internal error'}
     if isinstance(result, list):
         rows = result
