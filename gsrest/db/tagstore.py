@@ -249,8 +249,6 @@ class Tagstore:
                         and acm.gs_cluster_id = %s
                         {hide_private_condition(show_private)}
                         and t.tagpack=tp.id
-                    order by
-                        c.level desc
                         """
 
         return self.execute(query,
