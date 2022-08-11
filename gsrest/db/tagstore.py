@@ -56,8 +56,9 @@ async def to_result(cursor, paging_key=None):
     return result, next_page
 
 
-def hide_private_condition(show_private):
-    return 'and tp.is_public=true' \
+def hide_private_condition(show_private, table_alias='tp'):
+    prefix = table_alias + '.' if table_alias else ''
+    return f'and {prefix}is_public=true' \
         if not show_private else ''
 
 
@@ -260,9 +261,6 @@ class Tagstore:
 
     async def count_address_tags_by_entity(self, currency, entity,
                                            show_private=False):
-        def hide_private_condition(show_private):
-            return 'and is_public=true' \
-                if not show_private else ''
         query = f"""select
                         sum(count) as count
                     from
@@ -270,72 +268,44 @@ class Tagstore:
                     where
                         currency = %s
                         and gs_cluster_id = %s
-                        {hide_private_condition(show_private)}"""
+                        {hide_private_condition(show_private, table_alias=None)}""" # noqa
         return await self.execute(query, [currency.upper(), entity])
 
     async def list_entity_tags_by_entity(self, currency, entity,
                                          show_private=False):
         query = f"""select
-                        t.label,
-                        t.category,
-                        count(t.address) as c,
-                        max(c.level) as l,
-                        min(t.address) as address
-                    from
-                        tag t,
-                        tagpack tp,
-                        address_cluster_mapping acm,
-                        confidence c
-                    where
-                        acm.address=t.address
-                        and acm.currency=t.currency
-                        and t.currency = %s
-                        and acm.gs_cluster_id = %s
-                        and t.tagpack=tp.id
-                        and t.is_cluster_definer=true
-                        and t.confidence=c.id
-                        {hide_private_condition(show_private)}
-                    group by
-                        t.label, t.category
-                    order by
-                        l desc,
-                        c desc
-                    limit 1"""
-
-        major, _ = await self.execute(query, [currency.upper(), entity])
-
-        if not len(major):
-            return Result(), None
-
-        query = """select
                         t.*,
                         tp.uri,
                         tp.creator,
                         tp.title,
                         tp.is_public,
-                        acm.gs_cluster_id,
+                        cd.gs_cluster_id,
                         c.level
                    from
                         tag t,
                         tagpack tp,
                         address_cluster_mapping acm,
+                        cluster_defining_tags_by_frequency_and_maxconfidence cd,
                         confidence c
                    where
-                        acm.address=t.address
+                        cd.gs_cluster_id=acm.gs_cluster_id
+                        and cd.currency = acm.currency
+                        and cd.label = t.label
+                        and cd.max_level = c.level
+                        and acm.address=t.address
                         and t.currency = acm.currency
-                        and c.id = t.confidence
-                        and acm.currency = %s
-                        and acm.gs_cluster_id = %s
+                        and cd.currency = %s
+                        and cd.gs_cluster_id = %s
                         and t.tagpack=tp.id
                         and t.is_cluster_definer=true
-                        and t.label= %s
+                        and c.id = t.confidence
+                        {hide_private_condition(show_private, table_alias='cd')}
                    order by
-                        c.level desc
-                   limit 1"""
+                        cd.no_addresses desc,
+                        t.address desc
+                   limit 1""" # noqa
 
-        return await self.execute(query, [currency.upper(),
-                                          entity,
-                                          major[0]['label']])
+        return await self.execute(query, [currency.upper(), entity])
 
     async def list_labels_for_addresses(self, currency, addresses,
                                         show_private=False):
