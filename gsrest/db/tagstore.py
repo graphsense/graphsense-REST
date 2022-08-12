@@ -295,7 +295,13 @@ class Tagstore:
                         and cd.currency = %s
                         and cd.gs_cluster_id = %s
                         and t.tagpack=tp.id
-                        and t.is_cluster_definer=cd.is_cluster_definer
+                        and
+                            (cd.is_cluster_definer=true
+                                AND t.is_cluster_definer=true
+                            OR
+                            cd.is_cluster_definer=false
+                                AND t.is_cluster_definer!=true
+                        )
                         and c.id = t.confidence
                         {hide_private_condition(show_private, table_alias='cd')}
                    order by
