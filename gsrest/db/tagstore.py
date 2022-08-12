@@ -37,7 +37,7 @@ class Row:
         return self.row[self.columns[key]]
 
 
-async def to_result(cursor, paging_key=None):
+async def to_result(cursor, page=None, pagesize=None):
     rows = await cursor.fetchall()
     columns = {}
     i = 0
@@ -46,12 +46,8 @@ async def to_result(cursor, paging_key=None):
         i += 1
     result = Result(rows, columns)
     le = len(result)
-    if paging_key is None:
-        paging_key = cursor.description[0].name
-    else:
-        pos = paging_key.find('.') + 1
-        paging_key = paging_key[pos:]
-    next_page = None if le == 0 else result[le - 1][paging_key]
+    next_page = None if page is None or not pagesize or le < pagesize \
+        else int(page) + pagesize
 
     return result, next_page
 
@@ -106,7 +102,7 @@ class Tagstore:
         self.pool.terminate()
         await self.pool.wait_closed()
 
-    async def execute(self, query, params=None, paging_key=None, page=None,
+    async def execute(self, query, params=None, paging_key=None, page=0,
                       pagesize=None):
         if params is None:
             params = []
@@ -114,28 +110,17 @@ class Tagstore:
             self.logger.debug(f'pool size {self.pool.size}, freesize'
                               f' {self.pool.freesize}')
             async with conn.cursor() as cur:
-                if page and paging_key:
-                    if "where" not in query.lower():
-                        query += " where"
-                        andd = ""
-                    else:
-                        andd = "and"
-
-                    order = f" {andd} {paging_key} > %s "
-                    pos = query.lower().find("order by")
-                    if pos == -1:
-                        query += order
-                    else:
-                        query = query[0:pos] + order + query[pos:]
-                    params.append(page)
-                if "order" not in query.lower() and paging_key:
-                    query += f" order by {paging_key}"
                 if pagesize:
-                    query += f" limit {pagesize}"
+                    query += " limit %s"
+                    params.append(pagesize)
+                if not page:
+                    page = 0
+                query += " offset %s"
+                params.append(page)
 
                 self.logger.debug(f'{query} {params}')
                 await cur.execute(query, params)
-                return await to_result(cur, paging_key)
+                return await to_result(cur, page, pagesize)
 
     def list_taxonomies(self):
         return self.execute("select * from taxonomy")
@@ -249,6 +234,8 @@ class Tagstore:
                         and acm.gs_cluster_id = %s
                         {hide_private_condition(show_private)}
                         and t.tagpack=tp.id
+                    order by
+                        c.level desc
                         """
 
         return self.execute(query,

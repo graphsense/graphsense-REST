@@ -16,6 +16,7 @@ import importlib
 import asyncio
 
 MAX_DEPTH = 7
+TAGS_PAGE_SIZE = 100
 
 
 def from_row(currency, row, rates, tags=None, count=0):
@@ -46,6 +47,7 @@ def from_row(currency, row, rates, tags=None, count=0):
 
 async def list_address_tags_by_entity(request, currency, entity,
                                       page=None, pagesize=None):
+    pagesize = min(pagesize or TAGS_PAGE_SIZE, TAGS_PAGE_SIZE)
     address_tags, next_page = \
         await tagstores_with_paging(
                 request.app['tagstores'],
