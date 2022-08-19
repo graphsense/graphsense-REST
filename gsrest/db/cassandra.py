@@ -139,7 +139,7 @@ class Cassandra:
             result = self.execute(keyspace, kind, query)
             if one(result) is None:
                 raise BadConfigError(
-                    "No configuration table found for keyspace {}"
+                    f"No configuration table found for {kind} keyspace {{}}"
                     .format(keyspace))
             for key, value in result.one().items():
                 self.parameters[keyspace][key] = value
