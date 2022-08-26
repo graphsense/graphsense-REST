@@ -3,17 +3,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## Unreleased
-
+## [1.0.1] - 2022-08-26
 ### Added
 - add port to config template
-
 ### Changed
-- fix best_address_tag output in bulk
+- fix `best_address_tag` output in bulk
 - improve bulk error message
-- enforce max page size for list_address_tags_by_entity
+- enforce max page size for `list_address_tags_by_entity`
 - improve tagstore paging (by limit and offset)
-- improve search_neighbors by entities and addresses
+- improve `search_neighbors` by entities and addresses
 - fix fetching best address tag for single address clusters and multiple tags
 - fix display of labels in neighbor list
 - pass context to plugins
