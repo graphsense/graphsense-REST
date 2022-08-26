@@ -10,10 +10,8 @@ class BaseTestCase(AioHTTPTestCase):
 
     async def get_application(self):
         logging.getLogger('connexion.operation').setLevel('ERROR')
-        app = factory(os.path.join(os.getcwd(), 'tests/instance/config.yaml'),
-                      validate_responses=True).app
-        app.logger.setLevel(logging.DEBUG)
-        return app
+        return factory(os.path.join(os.getcwd(), 'tests/instance/config.yaml'),
+                       validate_responses=True).app
 
     async def requestWithCodeAndBody(self, path, code, body, **kwargs):
         headers = {
