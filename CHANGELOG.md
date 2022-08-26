@@ -3,6 +3,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## Unreleased
+
+### Added
+- add port to config template
+
+### Changed
+- fix best_address_tag output in bulk
+- improve bulk error message
+- enforce max page size for list_address_tags_by_entity
+- improve tagstore paging (by limit and offset)
+- improve search_neighbors by entities and addresses
+- fix fetching best address tag for single address clusters and multiple tags
+- fix display of labels in neighbor list
+- pass context to plugins
+- fix error wrapping multiple tagstores
+
 ## [1.0.0] - 2022-07-13
 Also see the changelog of the [OpenAPI specification](https://github.com/graphsense/graphsense-openapi/blob/master/CHANGELOG.md) for any changes to the API.
 ### Added
