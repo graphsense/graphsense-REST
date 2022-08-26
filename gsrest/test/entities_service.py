@@ -3,12 +3,10 @@ from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.neighbor_entities import NeighborEntities
 from openapi_server.models.neighbor_entity import NeighborEntity
-from openapi_server.models.address import Address
 from openapi_server.models.entity_addresses import EntityAddresses
 from openapi_server.models.entity import Entity
 from openapi_server.models.links import Links
 from openapi_server.models.link_utxo import LinkUtxo
-from openapi_server.models.address_tags import AddressTags
 from gsrest.util.values import make_values
 from gsrest.test.addresses_service import addressD, addressE, eth_address, \
         eth_address2, entityWithTags, entity2, entity3, entity4, entity5, \
@@ -17,7 +15,6 @@ import gsrest.test.tags_service as ts
 from gsrest.test.txs_service import tx1_eth, tx2_eth, tx22_eth, tx4_eth
 from gsrest.service.rates_service import list_rates
 from gsrest.util.values import convert_value
-import yaml
 import copy
 
 eth_entity = Entity(

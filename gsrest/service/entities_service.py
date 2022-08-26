@@ -16,6 +16,7 @@ import importlib
 import asyncio
 
 MAX_DEPTH = 7
+TAGS_PAGE_SIZE = 100
 
 
 def from_row(currency, row, rates, tags=None, count=0):
@@ -46,6 +47,7 @@ def from_row(currency, row, rates, tags=None, count=0):
 
 async def list_address_tags_by_entity(request, currency, entity,
                                       page=None, pagesize=None):
+    pagesize = min(pagesize or TAGS_PAGE_SIZE, TAGS_PAGE_SIZE)
     address_tags, next_page = \
         await tagstores_with_paging(
                 request.app['tagstores'],
@@ -78,13 +80,14 @@ async def get_entity(request, currency, entity):
             currency, entity, request.app['show_private_tags'])
     count = 0
     for c in counts:
-        count += c['count']
+        count += 0 if c['count'] is None else int(c['count'])
     return from_row(currency, result, rates, tags, count)
 
 
 async def list_entity_neighbors(request, currency, entity, direction,
                                 only_ids=None, include_labels=False,
-                                page=None, pagesize=None):
+                                page=None, pagesize=None,
+                                relations_only=False):
     results, paging_state = \
            await common.list_neighbors(request, currency, entity, direction,
                                        'entity',
@@ -95,10 +98,13 @@ async def list_entity_neighbors(request, currency, entity, direction,
     relations = []
     if results is None:
         return NeighborEntities()
-    aws = [get_entity(request, currency, row[dst+'_cluster_id'])
-           for row in results]
+    if not relations_only:
+        aws = [get_entity(request, currency, row[dst+'_cluster_id'])
+               for row in results]
 
-    nodes = await asyncio.gather(*aws)
+        nodes = await asyncio.gather(*aws)
+    else:
+        nodes = [r[dst+'_cluster_id'] for r in results]
 
     for row, node in zip(results, nodes):
         nb = NeighborEntity(
@@ -204,12 +210,23 @@ async def recursive_search(request, currency, entity, params, breadth, depth,
     async def cached(cl, key, get):
         return get_cached(cl, key) or set_cached(cl, key, await get())
 
-    async def list_neighbors(entity):
-        return (await list_entity_neighbors(
-            request, currency, entity, direction, pagesize=breadth)).neighbors
+    async def list_neighbors(entity, only_ids=None):
+        first = (await list_entity_neighbors(
+                request, currency, entity, direction, pagesize=breadth,
+                only_ids=only_ids)).neighbors
+        if only_ids is None or first:
+            return first
+        return await list_neighbors(entity, None)
+
+    if 'addresses' in params:
+        only_ids = [id["entity"] for id in params['addresses']]
+    elif 'entities' in params:
+        only_ids = [int(e) for e in params['entities']]
+    else:
+        only_ids = None
 
     neighbors = await cached(entity, 'neighbors',
-                             lambda: list_neighbors(entity))
+                             lambda: list_neighbors(entity, only_ids))
 
     if level < MAX_DEPTH:
         mod = importlib.import_module(
@@ -222,10 +239,11 @@ async def recursive_search(request, currency, entity, params, breadth, depth,
 
     async def handle_neighbor(neighbor):
         match = True
-        props = neighbor.entity
-        entity = neighbor.entity.entity
+        entity = neighbor.entity if isinstance(neighbor.entity, int) else\
+            neighbor.entity.entity
 
         if 'category' in params:
+            props = neighbor.entity
             match = props.best_address_tag and \
                 props.best_address_tag.category and \
                 props.best_address_tag.category.lower() \
@@ -242,7 +260,7 @@ async def recursive_search(request, currency, entity, params, breadth, depth,
 
         if 'field' in params:
             (field, fieldcurrency, min_value, max_value) = params['field']
-            values = getattr(props, field)
+            values = getattr(neighbor.entity, field)
             v = None
             if fieldcurrency == 'value':
                 v = values.value
@@ -258,10 +276,10 @@ async def recursive_search(request, currency, entity, params, breadth, depth,
         subpaths = False
         if match:
             subpaths = True
-        elif props.no_addresses is not None and \
-                level < MAX_DEPTH and \
-                (skip_num_addresses is None or
-                 props.no_addresses <= skip_num_addresses):
+        elif level < MAX_DEPTH and \
+            (skip_num_addresses is None or
+             neighbor.entity.no_addresses is not None and
+             neighbor.entity.no_addresses <= skip_num_addresses):
             subpaths = await recursive_search(request,
                                               currency, int(entity),
                                               params, breadth,

@@ -1,6 +1,8 @@
 import importlib
 from csv import DictWriter
 from openapi_server.models.values import Values
+from openapi_server.models.entity import Entity
+from openapi_server.models.address_tag import AddressTag
 import asyncio
 import json
 from aiohttp import web
@@ -76,6 +78,8 @@ def flatten(item, name="", flat_dict=None, format=None):
         # default arguments are mutable in python!
         # See https://towardsdatascience.com/python-pitfall-mutable-default-arguments-9385e8265422 # noqa
         flat_dict = {}
+    if type(item) == Entity and item.best_address_tag is None:
+        item.best_address_tag = AddressTag()
     if type(item) == Values:
         flat_dict[name + 'value'] = item.value
         for rate in item.fiat_values:
@@ -109,9 +113,14 @@ async def wrap(request, operation, currency, params, keys, num_pages, format):
         result = await operation(request, currency, **params)
     except RuntimeError:
         result = {error_field: 'not found'}
-    except TypeError as e:
+    except ValueError as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
         result = {error_field: str(e)}
-    except Exception:
+    except TypeError as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        result = {error_field: str(e)}
+    except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
         result = {error_field: 'internal error'}
     if isinstance(result, list):
         rows = result

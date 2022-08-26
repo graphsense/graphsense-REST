@@ -7,7 +7,7 @@ info:
     entities, blocks, transactions and tags for automated and highly efficient forensics
     tasks.
   title: GraphSense API
-  version: 1.0.0
+  version: 1.0.1
 servers:
 - url: /
 security:
@@ -46,6 +46,7 @@ paths:
         required: false
         schema:
           default: 10
+          format: int32
           maximum: 100
           type: integer
         style: form
@@ -136,6 +137,7 @@ paths:
         name: pagesize
         required: false
         schema:
+          format: int32
           minimum: 1
           type: integer
         style: form
@@ -320,6 +322,7 @@ paths:
         name: pagesize
         required: false
         schema:
+          format: int32
           minimum: 1
           type: integer
         style: form
@@ -398,6 +401,7 @@ paths:
         name: pagesize
         required: false
         schema:
+          format: int32
           minimum: 1
           type: integer
         style: form
@@ -452,6 +456,7 @@ paths:
         name: pagesize
         required: false
         schema:
+          format: int32
           minimum: 1
           type: integer
         style: form
@@ -509,6 +514,7 @@ paths:
         name: pagesize
         required: false
         schema:
+          format: int32
           minimum: 1
           type: integer
         style: form
@@ -655,6 +661,7 @@ paths:
         name: num_pages
         required: true
         schema:
+          format: int32
           type: integer
         style: form
       requestBody:
@@ -733,6 +740,7 @@ paths:
         name: num_pages
         required: true
         schema:
+          format: int32
           type: integer
         style: form
       requestBody:
@@ -835,6 +843,7 @@ paths:
         name: pagesize
         required: false
         schema:
+          format: int32
           minimum: 1
           type: integer
         style: form
@@ -898,6 +907,7 @@ paths:
         name: pagesize
         required: false
         schema:
+          format: int32
           minimum: 1
           type: integer
         style: form
@@ -984,6 +994,7 @@ paths:
         name: pagesize
         required: false
         schema:
+          format: int32
           minimum: 1
           type: integer
         style: form
@@ -1151,6 +1162,7 @@ paths:
         name: pagesize
         required: false
         schema:
+          format: int32
           minimum: 1
           type: integer
         style: form
@@ -1208,6 +1220,7 @@ paths:
         name: pagesize
         required: false
         schema:
+          format: int32
           minimum: 1
           type: integer
         style: form
@@ -1944,6 +1957,7 @@ components:
       required: false
       schema:
         default: 10
+        format: int32
         maximum: 100
         type: integer
       style: form
@@ -1965,6 +1979,7 @@ components:
       name: num_pages
       required: true
       schema:
+        format: int32
         type: integer
       style: form
     only_entity_ids:
@@ -2021,6 +2036,7 @@ components:
       name: pagesize
       required: false
       schema:
+        format: int32
         minimum: 1
         type: integer
       style: form

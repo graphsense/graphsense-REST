@@ -49,6 +49,7 @@ tagstores:
     # add postgres db configuration for each tagstore like:
     - host: "POSTGRES_HOST" 
     # additional properties with default values:
+    # port: 5432
     # database: "tagstore"
     # schema: "tagstore" 
     # username: "tagstore"

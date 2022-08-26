@@ -99,10 +99,26 @@ def factory(config_file=None, validate_responses=False):
     app.app['config']['hide_private_tags'] = \
         app.app['config'].get('hide_private_tags', False)
 
-    app.app['plugins'] = [get_subclass(importlib.import_module(name))
-                          for name in app.app['config'].get('plugins', [])]
+    app.app['plugins'] = []
+    app.app['plugin_contexts'] = {}
+    for name in app.app['config'].get('plugins', []):
+        app.app['plugins'].append(get_subclass(importlib.import_module(name)))
+        app.app['plugin_contexts'][name] = {}
+
+    for plugin in app.app['plugins']:
+        if hasattr(plugin, 'setup'):
+            app.app.cleanup_ctx.append(plugin_setup(plugin, name))
 
     return app
+
+
+def plugin_setup(plugin, name):
+    def setup(app):
+        a = {'config': app['config'].get(name, None),
+             'context': app['plugin_contexts'][name]
+             }
+        return plugin.setup(a)
+    return setup
 
 
 def main(args=None):

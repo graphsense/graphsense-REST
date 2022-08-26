@@ -55,7 +55,9 @@ async def get_address(request: web.Request, currency, address) -> web.Response:
 
         for plugin in request.app['plugins']:
             if hasattr(plugin, 'before_response'):
-                plugin.before_response(request, result)
+                context =\
+                    request.app['plugin_contexts'][plugin.__module__]
+                plugin.before_response(context, request, result)
 
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
@@ -121,7 +123,9 @@ async def get_address_entity(request: web.Request, currency, address) -> web.Res
 
         for plugin in request.app['plugins']:
             if hasattr(plugin, 'before_response'):
-                plugin.before_response(request, result)
+                context =\
+                    request.app['plugin_contexts'][plugin.__module__]
+                plugin.before_response(context, request, result)
 
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
@@ -193,7 +197,9 @@ async def list_address_links(request: web.Request, currency, address, neighbor, 
 
         for plugin in request.app['plugins']:
             if hasattr(plugin, 'before_response'):
-                plugin.before_response(request, result)
+                context =\
+                    request.app['plugin_contexts'][plugin.__module__]
+                plugin.before_response(context, request, result)
 
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
@@ -267,7 +273,9 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
 
         for plugin in request.app['plugins']:
             if hasattr(plugin, 'before_response'):
-                plugin.before_response(request, result)
+                context =\
+                    request.app['plugin_contexts'][plugin.__module__]
+                plugin.before_response(context, request, result)
 
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
@@ -337,7 +345,9 @@ async def list_address_txs(request: web.Request, currency, address, page=None, p
 
         for plugin in request.app['plugins']:
             if hasattr(plugin, 'before_response'):
-                plugin.before_response(request, result)
+                context =\
+                    request.app['plugin_contexts'][plugin.__module__]
+                plugin.before_response(context, request, result)
 
         if isinstance(result, list):
             result = [d.to_dict() for d in result]
@@ -407,7 +417,9 @@ async def list_tags_by_address(request: web.Request, currency, address, page=Non
 
         for plugin in request.app['plugins']:
             if hasattr(plugin, 'before_response'):
-                plugin.before_response(request, result)
+                context =\
+                    request.app['plugin_contexts'][plugin.__module__]
+                plugin.before_response(context, request, result)
 
         if isinstance(result, list):
             result = [d.to_dict() for d in result]

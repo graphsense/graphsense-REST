@@ -55,3 +55,5 @@ INSERT INTO address_cluster_mapping (currency, address, gs_cluster_id, gs_cluste
 
 REFRESH MATERIALIZED VIEW label;
 REFRESH MATERIALIZED VIEW statistics;
+REFRESH MATERIALIZED VIEW tag_count_by_cluster;
+REFRESH MATERIALIZED VIEW cluster_defining_tags_by_frequency_and_maxconfidence;

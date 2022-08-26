@@ -28,7 +28,7 @@ setup(
     description="{{appName}}",
     author_email="{{infoEmail}}",
     keywords=["OpenAPI", "{{appName}}"],
-    python_requires='>=3.7',
+    python_requires='>=3.8',
     install_requires=REQUIRES,
     packages=find_packages({{#pythonSrcRoot}}"{{{.}}}"{{/pythonSrcRoot}}),{{#pythonSrcRoot}}
     package_dir={"": "{{{.}}}"},{{/pythonSrcRoot}}

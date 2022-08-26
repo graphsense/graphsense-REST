@@ -139,7 +139,7 @@ class Cassandra:
             result = self.execute(keyspace, kind, query)
             if one(result) is None:
                 raise BadConfigError(
-                    "No configuration table found for keyspace {}"
+                    f"No configuration table found for {kind} keyspace {{}}"
                     .format(keyspace))
             for key, value in result.one().items():
                 self.parameters[keyspace][key] = value
@@ -216,7 +216,7 @@ class Cassandra:
         if prep is None:
             self.prepared_statements[q] = prep = self.session.prepare(q)
         try:
-            prep.fetch_size = fetch_size
+            prep.fetch_size = int(fetch_size) if fetch_size else None
             response_future = self.session.execute_async(
                 prep, params, timeout=None,
                 paging_state=paging_state)

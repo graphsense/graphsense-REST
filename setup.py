@@ -28,7 +28,7 @@ setup(
     description="GraphSense API",
     author_email="contact@ikna.io",
     keywords=["OpenAPI", "GraphSense API"],
-    python_requires='>=3.7',
+    python_requires='>=3.8',
     install_requires=REQUIRES,
     packages=find_packages(),
     package_data={'': ['openapi/openapi.yaml']},
