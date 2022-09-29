@@ -17,7 +17,7 @@ from openapi_server import util
 
 
 async def get_entity(request: web.Request, currency, entity) -> web.Response:
-    """Get an entity, optionally with tags
+    """Get an entity
 
     
 
@@ -303,7 +303,7 @@ async def list_entity_links(request: web.Request, currency, entity, neighbor, pa
 
 
 async def list_entity_neighbors(request: web.Request, currency, entity, direction, only_ids=None, include_labels=None, page=None, pagesize=None) -> web.Response:
-    """Get an entity&#39;s neighbors in the entity graph
+    """Get an entity&#39;s direct neighbors
 
     
 

@@ -14,6 +14,7 @@ from gsrest.test.txs_service import tx1_eth, tx2_eth, tx22_eth, tx4_eth
 from gsrest.util.values import make_values
 import gsrest.test.tags_service as ts
 import copy
+import yaml
 
 
 address = Address(
@@ -47,6 +48,7 @@ address = Address(
    entity=17642138,
    in_degree=5013,
    balance=make_values(eur=1.15, usd=2.31, value=115422577),
+   status='dirty'
         )
 
 addressWithTags = Address(
@@ -85,7 +87,8 @@ address2 = Address(
    address="bc1xyz123456789",
    entity=325790641,
    no_outgoing_txs=1,
-   balance=make_values(eur=0.0, usd=0.0, value=0)
+   balance=make_values(eur=0.0, usd=0.0, value=0),
+   status='clean'
    )
 
 addressWithoutTags = Address(
@@ -123,7 +126,8 @@ address3 = Address(
       timestamp=1361497172,
       height=1
    ),
-   balance=make_values(eur=0.0, usd=0.0, value=0)
+   balance=make_values(eur=0.0, usd=0.0, value=0),
+   status='clean'
 )
 
 addressE = Address(
@@ -160,7 +164,8 @@ addressE = Address(
       usd=142.18
    ),
    no_incoming_txs=3,
-   in_degree=3
+   in_degree=3,
+   status='clean'
 )
 
 addressF = Address(
@@ -194,6 +199,7 @@ addressF = Address(
    ),
    in_degree=5013,
    balance=make_values(eur=1.15, usd=2.31, value=115422577),
+   status='clean'
 )
 
 addressB = Address(
@@ -227,6 +233,7 @@ addressB = Address(
    ),
    in_degree=5013,
    balance=make_values(eur=1.15, usd=2.31, value=115422577),
+   status='clean'
         )
 
 addressD = Address(
@@ -260,6 +267,7 @@ addressD = Address(
    ),
    in_degree=5013,
    balance=make_values(eur=1.15, usd=2.31, value=115422577),
+   status='clean'
         )
 
 addressWithTotalSpent0 = Address(
@@ -292,7 +300,40 @@ addressWithTotalSpent0 = Address(
    address="addressC",
    entity=17642139,
    in_degree=5013,
-   balance=make_values(eur=0.0, usd=0.0, value=18099)
+   balance=make_values(eur=0.0, usd=0.0, value=18099),
+   status='clean'
+   )
+
+newAddress = Address(
+   first_tx=TxSummary(
+      tx_hash="12345678",
+      height=12,
+      timestamp=123
+   ),
+   currency="btc",
+   total_spent=make_values(
+      usd=0.0,
+      value=0,
+      eur=0.0
+   ),
+   out_degree=0,
+   no_incoming_txs=0,
+   no_outgoing_txs=0,
+   total_received=make_values(
+      usd=0.0,
+      value=0,
+      eur=0.0
+   ),
+   last_tx=TxSummary(
+      tx_hash="12345678",
+      height=12,
+      timestamp=123
+   ),
+   address="newAddress",
+   entity=68000,
+   in_degree=0,
+   balance=make_values(eur=0.0, usd=0.0, value=0),
+   status='new'
    )
 
 addressWithTagsOutNeighbors = NeighborAddresses(
@@ -516,7 +557,9 @@ eth_address = Address(
    address="0xabcdef",
    entity=107925000,
    in_degree=5,
-   balance=make_values(eur=111.0, usd=222.0, value=111000000000000000000))
+   balance=make_values(eur=111.0, usd=222.0, value=111000000000000000000),
+   status='clean'
+)
 
 
 eth_addressWithTags = Address(
@@ -554,7 +597,8 @@ eth_address2 = Address(
       height=1
    ),
    address="0x123456",
-   entity=107925001
+   entity=107925001,
+   status='clean'
 )
 
 eth_address3 = Address(
@@ -634,6 +678,11 @@ async def get_address(test_case):
                                      currency='btc',
                                      address=addressWithTotalSpent0.address)
     test_case.assertEqual(addressWithTotalSpent0.to_dict(), result)
+
+    result = await test_case.request(basepath,
+                                     currency='btc',
+                                     address=newAddress.address)
+    test_case.assertEqual(newAddress.to_dict(), result)
 
     # ETH
     result = await test_case.request(basepath,

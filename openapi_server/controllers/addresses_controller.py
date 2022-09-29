@@ -16,7 +16,7 @@ from openapi_server import util
 
 
 async def get_address(request: web.Request, currency, address) -> web.Response:
-    """Get an address, optionally with tags
+    """Get an address
 
     
 

@@ -125,27 +125,8 @@ async def list_entity_addresses(request, currency, entity,
         await db.list_entity_addresses(currency, entity, page, pagesize)
 
     rates = (await get_rates(request, currency))['rates']
-    addresses = [Address(
-            currency=currency,
-            address=row['address'],
-            entity=row['cluster_id'],
-            first_tx=TxSummary(
-                row['first_tx'].height,
-                row['first_tx'].timestamp,
-                row['first_tx'].tx_hash.hex()),
-            last_tx=TxSummary(
-                row['last_tx'].height,
-                row['last_tx'].timestamp,
-                row['last_tx'].tx_hash.hex()),
-            no_incoming_txs=row['no_incoming_txs'],
-            no_outgoing_txs=row['no_outgoing_txs'],
-            total_received=to_values(row['total_received']),
-            total_spent=to_values(row['total_spent']),
-            in_degree=row['in_degree'],
-            out_degree=row['out_degree'],
-            balance=convert_value(currency, row['balance'], rates)
-            )
-            for row in addresses]
+    addresses = [common.address_from_row(currency, row, rates)
+                 for row in addresses]
     return EntityAddresses(next_page=paging_state, addresses=addresses)
 
 

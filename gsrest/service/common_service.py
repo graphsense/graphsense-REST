@@ -31,7 +31,8 @@ def address_from_row(currency, row, rates):
         total_spent=to_values(row['total_spent']),
         in_degree=row['in_degree'],
         out_degree=row['out_degree'],
-        balance=convert_value(currency, row['balance'], rates)
+        balance=convert_value(currency, row['balance'], rates),
+        status=row['status']
         )
 
 
