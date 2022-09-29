@@ -33,7 +33,7 @@ $(TAGSTORE_MARKER): $(wildcard tagstore/data/*)
 	make ips
 
 $(TESTCONTAINER_MARKER): Dockerfile 
-	docker build -t $(TESTCONTAINER_NAME) .
+	docker build --build-arg USERID=$(UID) --build-arg DOCKER_GROUPID=$(DOCKER_GROUPID) -t $(TESTCONTAINER_NAME) .
 	docker run --rm \
 		--workdir /src \
 		--name $(TESTCONTAINER_NAME) \

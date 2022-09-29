@@ -149,6 +149,7 @@ You may use `tests/fetch_data.sh` to fetch live data and customize for testing.
 In order to have a reproducible test environment, tests can also be run via docker. 
 
 ```
+export UID  # in order to inject user id into the docker container and avoid permission issues
 cd tests
 make test
 ```
