@@ -285,13 +285,13 @@ class Cassandra:
         result = await self.execute_async(currency, 'transformed', query)
         stats = one(result)
         try:
-            query = "SELECT * FROM delta_updater_state LIMIT 1"
+            query = "SELECT * FROM delta_updater_status LIMIT 1"
             result = await self.execute_async(currency, 'transformed', query)
             result = one(result)
             if result:
                 stats['no_blocks'] = result['last_synced_block'] + 1
         except InvalidRequest as e:
-            if 'delta_updater_state' not in str(e):
+            if 'delta_updater_status' not in str(e):
                 raise e
 
         return stats
