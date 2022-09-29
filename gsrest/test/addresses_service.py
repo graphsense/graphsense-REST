@@ -336,6 +336,24 @@ newAddress = Address(
    status='new'
    )
 
+newEntity = Entity(
+   first_tx=newAddress.first_tx,
+   currency=newAddress.currency,
+   total_spent=newAddress.total_spent,
+   out_degree=newAddress.out_degree,
+   no_incoming_txs=newAddress.no_incoming_txs,
+   no_outgoing_txs=newAddress.no_outgoing_txs,
+   total_received=newAddress.total_received,
+   last_tx=newAddress.last_tx,
+   root_address=newAddress.address,
+   entity=newAddress.entity,
+   in_degree=newAddress.in_degree,
+   balance=newAddress.balance,
+   no_addresses=1,
+   no_address_tags=0,
+   best_address_tag=None
+)
+
 addressWithTagsOutNeighbors = NeighborAddresses(
         next_page=None,
         neighbors=[
@@ -812,6 +830,12 @@ async def get_address_entity(test_case):
                                      address=address.address,
                                      include_tags=True)
     test_case.assertEqual(entityWithTags.to_dict(), result)
+
+    result = await test_case.request(path,
+                                     currency='btc',
+                                     address=newAddress.address,
+                                     include_tags=True)
+    test_case.assertEqual(newEntity.to_dict(), result)
 
     result = await test_case.request(path,
                                      currency='eth',

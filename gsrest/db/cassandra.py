@@ -336,19 +336,21 @@ class Cassandra:
             self.markup_rates(currency, row)
         return result
 
-    async def list_address_txs(self, currency, address, page=None,
-                               pagesize=None):
+    async def list_address_txs(self, currency, address,
+                               page=None, pagesize=None):
         return await self.list_txs_by_node_type(
-            currency, 'address', address, page=page, pagesize=pagesize)
+            currency, 'address', address,
+            page=page, pagesize=pagesize)
 
-    async def list_entity_txs(self, currency, entity, page=None,
-                              pagesize=None):
+    async def list_entity_txs(self, currency, entity,
+                              page=None, pagesize=None):
         return await self.list_txs_by_node_type(
-            currency, 'cluster', entity, page=page, pagesize=pagesize)
+            currency, 'cluster', entity,
+            page=page, pagesize=pagesize)
 
     @eth
-    async def list_txs_by_node_type(self, currency, node_type, id, page=None,
-                                    pagesize=None):
+    async def list_txs_by_node_type(self, currency, node_type, id,
+                                    page=None, pagesize=None):
         paging_state = from_hex(page)
         if node_type == 'address':
             id, id_group, _ = \
@@ -358,6 +360,7 @@ class Cassandra:
 
         query = f"SELECT * FROM {node_type}_transactions " \
                 f"WHERE {node_type}_id = %s AND {node_type}_id_group = %s"
+
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
         results = await self.execute_async(currency, 'transformed', query,
                                            [id, id_group],
@@ -473,7 +476,7 @@ class Cassandra:
     def get_tx_id_group_eth(self, keyspace, id_):
         return self.get_id_group(keyspace, id_)
 
-    async def new_address(self, currency, address, address_id):
+    async def new_address(self, currency, address):
         data = await self.get_new_address(currency, address)
         Values = namedtuple('Values', ['value', 'fiat_values'])
         zero_values = \
@@ -485,7 +488,7 @@ class Cassandra:
             )
         return {
             'address': address,
-            'cluster_id': address_id,
+            'cluster_id': data['address_id'],
             'first_tx': TxSummary(data['block_id'], data['timestamp'],
                                   data['tx_hash']),
             'last_tx': TxSummary(data['block_id'], data['timestamp'],
@@ -500,11 +503,20 @@ class Cassandra:
             'status': 'new'
         }
 
+    async def new_entity(self, currency, address):
+        data = await self.new_address(currency, address)
+        data['no_addresses'] = 1
+        if currency == 'eth':
+            data['root_address'] = eth_address_to_hex(address)
+        else:
+            data['root_address'] = address
+        return data
+
     async def get_address(self, currency, address):
         address_id, address_id_group, status = \
             await self.get_address_id_id_group(currency, address)
         if status == 'new':
-            return await self.new_address(currency, address, address_id)
+            return await self.new_address(currency, address)
         query = ("SELECT * FROM address WHERE address_id = %s"
                  " AND address_id_group = %s")
         result = await self.execute_async(currency, 'transformed', query,
@@ -519,17 +531,19 @@ class Cassandra:
 
     @eth
     async def get_address_entity_id(self, currency, address):
-        address_id, address_id_group, _ = \
+        address_id, address_id_group, status = \
             await self.get_address_id_id_group(currency, address)
 
+        if status == "new":
+            return address_id, status
         query = "SELECT cluster_id FROM address WHERE " \
                 "address_id_group = %s AND address_id = %s "
         result = await self.execute_async(currency, 'transformed', query,
                                           [address_id_group, address_id])
         result = one(result)
         if not result:
-            return None
-        return result['cluster_id']
+            return None, None
+        return result['cluster_id'], status
 
     async def list_address_links(self, currency, address, neighbor,
                                  page=None, pagesize=None):
@@ -1185,9 +1199,8 @@ class Cassandra:
             address['no_addresses'] = 1
         return result, to_hex(paging_state)
 
-    async def get_address_entity_id_eth(self, currency, address):
-        entity_id, _ = await self.get_address_id(currency, address)
-        return entity_id
+    def get_address_entity_id_eth(self, currency, address):
+        return self.get_address_id(currency, address)
 
     async def list_block_txs_eth(self, currency, height):
         height_group = self.get_id_group(currency, height)

@@ -5,6 +5,7 @@ from datetime import date, datetime
 from typing import List, Dict, Type
 
 from openapi_server.models.base_model_ import Model
+from openapi_server.models.status import Status
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.values import Values
 from openapi_server import util
@@ -16,7 +17,7 @@ class Address(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, address: str=None, balance: Values=None, currency: str=None, entity: int=None, first_tx: TxSummary=None, in_degree: int=None, last_tx: TxSummary=None, no_incoming_txs: int=None, no_outgoing_txs: int=None, out_degree: int=None, status: str=None, total_received: Values=None, total_spent: Values=None):
+    def __init__(self, address: str=None, balance: Values=None, currency: str=None, entity: int=None, first_tx: TxSummary=None, in_degree: int=None, last_tx: TxSummary=None, no_incoming_txs: int=None, no_outgoing_txs: int=None, out_degree: int=None, status: Status=None, total_received: Values=None, total_spent: Values=None):
         """Address - a model defined in OpenAPI
 
         :param address: The address of this Address.
@@ -44,7 +45,7 @@ class Address(Model):
             'no_incoming_txs': int,
             'no_outgoing_txs': int,
             'out_degree': int,
-            'status': str,
+            'status': Status,
             'total_received': Values,
             'total_spent': Values
         }
@@ -353,7 +354,7 @@ class Address(Model):
 
 
         :return: The status of this Address.
-        :rtype: str
+        :rtype: Status
         """
         return self._status
 
@@ -363,14 +364,10 @@ class Address(Model):
 
 
         :param status: The status of this Address.
-        :type status: str
+        :type status: Status
         """
-        allowed_values = ["clean", "dirty", "new"]  # noqa: E501
-        if status not in allowed_values:
-            raise ValueError(
-                "Invalid value for `status` ({0}), must be one of {1}"
-                .format(status, allowed_values)
-            )
+        if status is None:
+            raise ValueError("Invalid value for `status`, must not be `None`")
 
         self._status = status
 

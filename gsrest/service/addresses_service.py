@@ -1,5 +1,6 @@
 from openapi_server.models.address_txs import AddressTxs
-from gsrest.service.entities_service import get_entity
+from gsrest.service.entities_service import get_entity, from_row
+from gsrest.service.rates_service import get_rates
 import gsrest.service.common_service as common
 from openapi_server.models.neighbor_addresses import NeighborAddresses
 from openapi_server.models.neighbor_address import NeighborAddress
@@ -16,8 +17,8 @@ async def list_tags_by_address(request, currency, address,
                                              page=page, pagesize=pagesize)
 
 
-async def list_address_txs(request, currency, address, page=None,
-                           pagesize=None):
+async def list_address_txs(request, currency, address,
+                           page=None, pagesize=None):
     db = request.app['db']
     results, paging_state = \
         await db.list_address_txs(currency, address, page, pagesize)
@@ -69,9 +70,14 @@ async def get_address_entity(request, currency, address):
     e = RuntimeError('Entity for address {} not found'.format(address))
     db = request.app['db']
 
-    entity_id = await db.get_address_entity_id(currency, address)
+    entity_id, status = await db.get_address_entity_id(currency, address)
     if entity_id is None:
         raise e
+
+    if status == "new":
+        aws = [get_rates(request, currency), db.new_entity(currency, address)]
+        [rates, entity] = await asyncio.gather(*aws)
+        return from_row(currency, entity, rates['rates'])
 
     result = await get_entity(request, currency, entity_id)
     if result is None:

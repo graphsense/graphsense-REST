@@ -38,6 +38,7 @@ from openapi_server.models.search_result_level5_all_of import SearchResultLevel5
 from openapi_server.models.search_result_level6 import SearchResultLevel6
 from openapi_server.models.search_result_level6_all_of import SearchResultLevel6AllOf
 from openapi_server.models.stats import Stats
+from openapi_server.models.status import Status
 from openapi_server.models.tag import Tag
 from openapi_server.models.taxonomy import Taxonomy
 from openapi_server.models.tx import Tx

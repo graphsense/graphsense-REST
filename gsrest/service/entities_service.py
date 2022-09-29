@@ -7,7 +7,6 @@ from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.address_tags import AddressTags
 from gsrest.util.values import convert_value, to_values
-from openapi_server.models.address import Address
 from openapi_server.models.entity_addresses import EntityAddresses
 from gsrest.db.util import tagstores, tagstores_with_paging
 from gsrest.service.tags_service import address_tag_from_row
@@ -300,7 +299,8 @@ async def recursive_search(request, currency, entity, params, breadth, depth,
     return paths
 
 
-async def list_entity_txs(request, currency, entity, page=None, pagesize=None):
+async def list_entity_txs(request, currency, entity,
+                          page=None, pagesize=None):
     db = request.app['db']
     results, paging_state = \
         await db.list_entity_txs(currency, entity, page, pagesize)

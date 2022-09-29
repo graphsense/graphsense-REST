@@ -2118,7 +2118,6 @@ components:
           - code: code
             value: 0.8008282
           value: 6
-        status: clean
       properties:
         address:
           description: Address
@@ -2159,12 +2158,7 @@ components:
           title: out_degree
           type: integer
         status:
-          enum:
-          - clean
-          - dirty
-          - new
-          title: status
-          type: string
+          $ref: '#/components/schemas/status'
         total_received:
           $ref: '#/components/schemas/values'
         total_spent:
@@ -2542,6 +2536,8 @@ components:
           example: addressA
           title: address
           type: string
+        status:
+          $ref: '#/components/schemas/status'
         total_received:
           $ref: '#/components/schemas/values'
         total_spent:
@@ -2559,6 +2555,7 @@ components:
       - no_outgoing_txs
       - out_degree
       - root_address
+      - status
       - total_received
       - total_spent
       title: entity
@@ -2603,7 +2600,6 @@ components:
             - code: code
               value: 0.8008282
             value: 6
-          status: clean
         - total_spent:
             fiat_values:
             - code: code
@@ -2640,7 +2636,6 @@ components:
             - code: code
               value: 0.8008282
             value: 6
-          status: clean
       properties:
         addresses:
           items:
@@ -2782,7 +2777,6 @@ components:
             - code: code
               value: 0.8008282
             value: 6
-          status: clean
         value:
           fiat_values:
           - code: code
@@ -2858,7 +2852,6 @@ components:
               - code: code
                 value: 0.8008282
               value: 6
-            status: clean
           value:
             fiat_values:
             - code: code
@@ -2907,7 +2900,6 @@ components:
               - code: code
                 value: 0.8008282
               value: 6
-            status: clean
           value:
             fiat_values:
             - code: code
@@ -3354,6 +3346,13 @@ components:
       - version
       title: stats
       type: object
+    status:
+      enum:
+      - clean
+      - dirty
+      - new
+      title: status
+      type: string
     tag:
       properties:
         abuse:
