@@ -2118,7 +2118,7 @@ components:
           - code: code
             value: 0.8008282
           value: 6
-        status: new
+        status: clean
       properties:
         address:
           description: Address
@@ -2160,9 +2160,9 @@ components:
           type: integer
         status:
           enum:
-          - new
-          - dirty
           - clean
+          - dirty
+          - new
           title: status
           type: string
         total_received:
@@ -2603,7 +2603,7 @@ components:
             - code: code
               value: 0.8008282
             value: 6
-          status: new
+          status: clean
         - total_spent:
             fiat_values:
             - code: code
@@ -2640,7 +2640,7 @@ components:
             - code: code
               value: 0.8008282
             value: 6
-          status: new
+          status: clean
       properties:
         addresses:
           items:
@@ -2782,7 +2782,7 @@ components:
             - code: code
               value: 0.8008282
             value: 6
-          status: new
+          status: clean
         value:
           fiat_values:
           - code: code
@@ -2858,7 +2858,7 @@ components:
               - code: code
                 value: 0.8008282
               value: 6
-            status: new
+            status: clean
           value:
             fiat_values:
             - code: code
@@ -2907,7 +2907,7 @@ components:
               - code: code
                 value: 0.8008282
               value: 6
-            status: new
+            status: clean
           value:
             fiat_values:
             - code: code

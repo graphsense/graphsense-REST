@@ -365,7 +365,7 @@ class Address(Model):
         :param status: The status of this Address.
         :type status: str
         """
-        allowed_values = ["new", "dirty", "clean"]  # noqa: E501
+        allowed_values = ["clean", "dirty", "new"]  # noqa: E501
         if status not in allowed_values:
             raise ValueError(
                 "Invalid value for `status` ({0}), must be one of {1}"
