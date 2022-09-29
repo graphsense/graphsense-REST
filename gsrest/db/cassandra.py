@@ -684,7 +684,11 @@ class Cassandra:
         if len(rows) < limit:
             query = "SELECT address FROM new_addresses "\
                     "WHERE address_prefix = %s"
-            await collect(query, True)
+            try:
+                await collect(query, True)
+            except InvalidRequest as e:
+                if 'new_addresses' not in str(e):
+                    raise e
             rows = sorted(rows)
         return rows[0:limit]
 
