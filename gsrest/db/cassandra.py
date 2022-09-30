@@ -279,7 +279,6 @@ class Cassandra:
                 results.append(result)
         return results
 
-    @eth
     async def get_currency_statistics(self, currency):
         query = "SELECT * FROM summary_statistics LIMIT 1"
         result = await self.execute_async(currency, 'transformed', query)
@@ -293,6 +292,9 @@ class Cassandra:
         except InvalidRequest as e:
             if 'delta_updater_status' not in str(e):
                 raise e
+
+        if currency == 'eth':
+            stats['no_clusters'] = 0
 
         return stats
 
@@ -1126,15 +1128,6 @@ class Cassandra:
 #####################
 # ETHEREUM VARIANTS #
 #####################
-
-    async def get_currency_statistics_eth(self, currency):
-        query = "SELECT * FROM summary_statistics LIMIT 1"
-        result = (await self.execute_async(currency, 'transformed', query)
-                  ).one()
-        if not result:
-            return None
-        result['no_clusters'] = 0
-        return result
 
     def scrub_prefix_eth(self, currency, expression):
         # remove 0x prefix
