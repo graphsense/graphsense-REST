@@ -360,6 +360,16 @@ paths:
           - out
           type: string
         style: form
+      - description: Restrict result to given set of comma separated addresses
+        explode: true
+        in: query
+        name: only_ids
+        required: false
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
       - description: Whether to include labels of first page of tags
         explode: true
         in: query
@@ -943,7 +953,10 @@ paths:
         name: only_ids
         required: false
         schema:
-          $ref: '#/components/schemas/only_entity_ids'
+          items:
+            format: int32
+            type: integer
+          type: array
         style: form
       - description: Whether to include labels of first page of tags
         explode: true
@@ -1779,17 +1792,6 @@ components:
       schema:
         $ref: '#/components/schemas/address_id'
       style: simple
-    address_ids:
-      description: Restrict result to given set of comma separated addresses
-      explode: true
-      in: query
-      name: ids
-      required: false
-      schema:
-        items:
-          type: string
-        type: array
-      style: form
     breadth:
       description: How many siblings of each neighbor should be tried
       explode: true
@@ -1968,6 +1970,17 @@ components:
         format: int32
         type: integer
       style: form
+    only_address_ids:
+      description: Restrict result to given set of comma separated addresses
+      explode: true
+      in: query
+      name: only_ids
+      required: false
+      schema:
+        items:
+          type: string
+        type: array
+      style: form
     only_entity_ids:
       description: Restrict result to given set of comma separated IDs
       explode: true
@@ -1975,7 +1988,10 @@ components:
       name: only_ids
       required: false
       schema:
-        $ref: '#/components/schemas/only_entity_ids'
+        items:
+          format: int32
+          type: integer
+        type: array
       style: form
     operation:
       description: The operation to execute in bulk
@@ -3183,11 +3199,6 @@ components:
       format: int32
       title: no_txs
       type: integer
-    only_entity_ids:
-      items:
-        format: int32
-        type: integer
-      type: array
     rate:
       example:
         code: code

@@ -806,6 +806,7 @@ async def list_tags_by_address(test_case):
 async def list_address_neighbors(test_case):
     path = '/{currency}/addresses/{address}/neighbors'\
            '?include_labels={include_labels}&direction={direction}'
+
     result = await test_case.request(path,
                                      currency='btc',
                                      address=address.address,
@@ -813,6 +814,16 @@ async def list_address_neighbors(test_case):
                                      direction='out')
     awton = addressWithTagsOutNeighbors.to_dict()
     test_case.assertEqual(awton, result)
+
+    result = await test_case.request(path + '&only_ids={only_ids}',
+                                     currency='btc',
+                                     address=address.address,
+                                     include_labels=True,
+                                     only_ids=addressF.address,
+                                     direction='out')
+    awton2 = addressWithTagsOutNeighbors.to_dict()
+    awton2['neighbors'] = awton2['neighbors'][1:2]
+    test_case.assertEqual(awton2, result)
 
     result = await test_case.request(path,
                                      currency='btc',

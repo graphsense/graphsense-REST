@@ -225,7 +225,7 @@ async def list_address_links(request: web.Request, currency, address, neighbor, 
         raise web.HTTPInternalServerError()
 
 
-async def list_address_neighbors(request: web.Request, currency, address, direction, include_labels=None, page=None, pagesize=None) -> web.Response:
+async def list_address_neighbors(request: web.Request, currency, address, direction, only_ids=None, include_labels=None, page=None, pagesize=None) -> web.Response:
     """Get an address&#39;s neighbors in the address graph
 
     
@@ -236,6 +236,8 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
     :type address: str
     :param direction: Incoming or outgoing neighbors
     :type direction: str
+    :param only_ids: Restrict result to given set of comma separated addresses
+    :type only_ids: List[str]
     :param include_labels: Whether to include labels of first page of tags
     :type include_labels: bool
     :param page: Resumption token for retrieving the next page
@@ -264,11 +266,11 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
     request.app['show_private_tags'] = show_private_tags
 
     try:
-        if 'currency' in ['','currency','address','direction','include_labels','page','pagesize']:
+        if 'currency' in ['','currency','address','direction','only_ids','include_labels','page','pagesize']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.list_address_neighbors(request
-                ,currency=currency,address=address,direction=direction,include_labels=include_labels,page=page,pagesize=pagesize)
+                ,currency=currency,address=address,direction=direction,only_ids=only_ids,include_labels=include_labels,page=page,pagesize=pagesize)
         result = await result
 
         for plugin in request.app['plugins']:

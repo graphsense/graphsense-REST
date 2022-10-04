@@ -27,13 +27,18 @@ async def list_address_txs(request, currency, address, direction=None,
 
 
 async def list_address_neighbors(request, currency, address, direction,
-                                 include_labels=False,
+                                 only_ids=None, include_labels=False,
                                  page=None, pagesize=None):
+    db = request.app['db']
+    if isinstance(only_ids, list):
+        aws = [db.get_address_id(currency, id) for id in only_ids]
+        only_ids = await asyncio.gather(*aws)
+
     results, paging_state = \
-           await common.list_neighbors(request, currency, address, direction,
-                                       'address',
-                                       include_labels=include_labels,
-                                       page=page, pagesize=pagesize, ids=None)
+        await common.list_neighbors(request, currency, address, direction,
+                                    'address', ids=only_ids,
+                                    include_labels=include_labels,
+                                    page=page, pagesize=pagesize)
     is_outgoing = "out" in direction
     dst = 'dst' if is_outgoing else 'src'
     relations = []

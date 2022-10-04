@@ -364,7 +364,6 @@ class Cassandra:
                 f"WHERE {node_type}_id = %s AND {node_type}_id_group = %s"
 
         params = [id, id_group]
-        print(f'direction {direction}')
         if direction:
             query += " and is_outgoing = %s"
             params.append(direction == 'out')
@@ -830,8 +829,6 @@ class Cassandra:
             query = basequery
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
         paging_state = from_hex(page)
-        print(f'query {query}')
-        print(f'params {params}')
         results = await self.execute_async(currency, 'transformed', query,
                                            params,
                                            paging_state=paging_state,
