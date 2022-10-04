@@ -529,7 +529,10 @@ class Cassandra:
                                           [address_id, address_id_group])
         result = one(result)
         if not result:
-            return None
+            if currency != 'eth':
+                return None
+            raise RuntimeError(
+                f'Address {address} has no external transactions')
 
         return await self.finish_address(currency, result)
 
