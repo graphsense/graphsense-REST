@@ -14,7 +14,6 @@ from gsrest.test.txs_service import tx1_eth, tx2_eth, tx22_eth, tx4_eth
 from gsrest.util.values import make_values
 import gsrest.test.tags_service as ts
 import copy
-import yaml
 
 
 address = Address(
@@ -716,35 +715,52 @@ async def list_address_txs(test_case):
     """
     path = '/{currency}/addresses/{address}/txs'
     rates = await list_rates(test_case, currency='btc', heights=[2])
+    txs = [AddressTxUtxo(
+                tx_hash="123456",
+                currency="btc",
+                value=convert_value('btc', 1260000, rates[2]),
+                height=2,
+                coinbase=False,
+                timestamp=1510347493),
+           AddressTxUtxo(
+                tx_hash="abcdef",
+                currency="btc",
+                value=convert_value('btc', -1260000, rates[2]),
+                height=2,
+                coinbase=False,
+                timestamp=1511153263),
+           AddressTxUtxo(
+                tx_hash="4567",
+                currency="btc",
+                value=convert_value('btc', -1, rates[2]),
+                height=2,
+                coinbase=False,
+                timestamp=1510347492)]
     address_txs = AddressTxs(
                     next_page=None,
-                    address_txs=[
-                        AddressTxUtxo(
-                            tx_hash="123456",
-                            currency="btc",
-                            value=convert_value('btc', 1260000, rates[2]),
-                            height=2,
-                            coinbase=False,
-                            timestamp=1510347493),
-                        AddressTxUtxo(
-                            tx_hash="abcdef",
-                            currency="btc",
-                            value=convert_value('btc', -1260000, rates[2]),
-                            height=2,
-                            coinbase=False,
-                            timestamp=1511153263),
-                        AddressTxUtxo(
-                            tx_hash="4567",
-                            currency="btc",
-                            value=convert_value('btc', -1, rates[2]),
-                            height=2,
-                            coinbase=False,
-                            timestamp=1510347492)
-                        ]
+                    address_txs=txs
                     )
     result = await test_case.request(path,
                                      currency='btc',
                                      address=address2.address)
+    test_case.assertEqualWithList(address_txs.to_dict(), result, 'address_txs',
+                                  'tx_hash')
+
+    path_with_direction =\
+        '/{currency}/addresses/{address}/txs?direction={direction}'
+    result = await test_case.request(path_with_direction,
+                                     currency='btc',
+                                     address=address2.address,
+                                     direction='out')
+    address_txs.address_txs = txs[1:]
+    test_case.assertEqualWithList(address_txs.to_dict(), result, 'address_txs',
+                                  'tx_hash')
+
+    result = await test_case.request(path_with_direction,
+                                     currency='btc',
+                                     address=address2.address,
+                                     direction='in')
+    address_txs.address_txs = txs[0:1]
     test_case.assertEqualWithList(address_txs.to_dict(), result, 'address_txs',
                                   'tx_hash')
 

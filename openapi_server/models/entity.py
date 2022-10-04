@@ -6,7 +6,6 @@ from typing import List, Dict, Type
 
 from openapi_server.models.base_model_ import Model
 from openapi_server.models.address_tag import AddressTag
-from openapi_server.models.status import Status
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.values import Values
 from openapi_server import util
@@ -18,7 +17,7 @@ class Entity(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, balance: Values=None, best_address_tag: AddressTag=None, currency: str=None, entity: int=None, first_tx: TxSummary=None, in_degree: int=None, last_tx: TxSummary=None, no_address_tags: int=None, no_addresses: int=None, no_incoming_txs: int=None, no_outgoing_txs: int=None, out_degree: int=None, root_address: str=None, status: Status=None, total_received: Values=None, total_spent: Values=None):
+    def __init__(self, balance: Values=None, best_address_tag: AddressTag=None, currency: str=None, entity: int=None, first_tx: TxSummary=None, in_degree: int=None, last_tx: TxSummary=None, no_address_tags: int=None, no_addresses: int=None, no_incoming_txs: int=None, no_outgoing_txs: int=None, out_degree: int=None, root_address: str=None, total_received: Values=None, total_spent: Values=None):
         """Entity - a model defined in OpenAPI
 
         :param balance: The balance of this Entity.
@@ -34,7 +33,6 @@ class Entity(Model):
         :param no_outgoing_txs: The no_outgoing_txs of this Entity.
         :param out_degree: The out_degree of this Entity.
         :param root_address: The root_address of this Entity.
-        :param status: The status of this Entity.
         :param total_received: The total_received of this Entity.
         :param total_spent: The total_spent of this Entity.
         """
@@ -52,7 +50,6 @@ class Entity(Model):
             'no_outgoing_txs': int,
             'out_degree': int,
             'root_address': str,
-            'status': Status,
             'total_received': Values,
             'total_spent': Values
         }
@@ -71,7 +68,6 @@ class Entity(Model):
             'no_outgoing_txs': 'no_outgoing_txs',
             'out_degree': 'out_degree',
             'root_address': 'root_address',
-            'status': 'status',
             'total_received': 'total_received',
             'total_spent': 'total_spent'
         }
@@ -89,7 +85,6 @@ class Entity(Model):
         self._no_outgoing_txs = no_outgoing_txs
         self._out_degree = out_degree
         self._root_address = root_address
-        self._status = status
         self._total_received = total_received
         self._total_spent = total_spent
 
@@ -123,7 +118,6 @@ class Entity(Model):
             'no_outgoing_txs': self._no_outgoing_txs,
             'out_degree': self._out_degree,
             'root_address': self._root_address,
-            'status': self._status,
             'total_received': self._total_received,
             'total_spent': self._total_spent }
 
@@ -434,29 +428,6 @@ class Entity(Model):
             raise ValueError("Invalid value for `root_address`, must not be `None`")
 
         self._root_address = root_address
-
-    @property
-    def status(self):
-        """Gets the status of this Entity.
-
-
-        :return: The status of this Entity.
-        :rtype: Status
-        """
-        return self._status
-
-    @status.setter
-    def status(self, status):
-        """Sets the status of this Entity.
-
-
-        :param status: The status of this Entity.
-        :type status: Status
-        """
-        if status is None:
-            raise ValueError("Invalid value for `status`, must not be `None`")
-
-        self._status = status
 
     @property
     def total_received(self):

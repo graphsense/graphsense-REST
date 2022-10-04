@@ -17,11 +17,11 @@ async def list_tags_by_address(request, currency, address,
                                              page=page, pagesize=pagesize)
 
 
-async def list_address_txs(request, currency, address,
+async def list_address_txs(request, currency, address, direction=None,
                            page=None, pagesize=None):
     db = request.app['db']
     results, paging_state = \
-        await db.list_address_txs(currency, address, page, pagesize)
+        await db.list_address_txs(currency, address, direction, page, pagesize)
     address_txs = await common.txs_from_rows(request, currency, results)
     return AddressTxs(next_page=paging_state, address_txs=address_txs)
 
@@ -66,21 +66,26 @@ async def list_address_links(request, currency, address, neighbor,
 
 
 async def get_address_entity(request, currency, address):
-    # from address to complete entity stats
-    e = RuntimeError('Entity for address {} not found'.format(address))
     db = request.app['db']
 
-    entity_id, status = await db.get_address_entity_id(currency, address)
-    if entity_id is None:
-        raise e
-
-    if status == "new":
-        aws = [get_rates(request, currency), db.new_entity(currency, address)]
-        [rates, entity] = await asyncio.gather(*aws)
+    notfound = RuntimeError('Entity for address {} not found'.format(address))
+    try:
+        entity_id = await db.get_address_entity_id(currency, address)
+    except RuntimeError as e:
+        if 'not found' not in str(e):
+            raise e
+        try:
+            aws = [get_rates(request, currency),
+                   db.new_entity(currency, address)]
+            [rates, entity] = await asyncio.gather(*aws)
+        except RuntimeError as e:
+            if 'not found' not in str(e):
+                raise e
+            raise notfound
         return from_row(currency, entity, rates['rates'])
 
     result = await get_entity(request, currency, entity_id)
     if result is None:
-        raise e
+        raise notfound
 
     return result

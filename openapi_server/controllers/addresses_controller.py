@@ -301,7 +301,7 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
         raise web.HTTPInternalServerError()
 
 
-async def list_address_txs(request: web.Request, currency, address, page=None, pagesize=None) -> web.Response:
+async def list_address_txs(request: web.Request, currency, address, direction=None, page=None, pagesize=None) -> web.Response:
     """Get all transactions an address has been involved in
 
     
@@ -310,6 +310,8 @@ async def list_address_txs(request: web.Request, currency, address, page=None, p
     :type currency: str
     :param address: The cryptocurrency address
     :type address: str
+    :param direction: Incoming or outgoing transactions
+    :type direction: str
     :param page: Resumption token for retrieving the next page
     :type page: str
     :param pagesize: Number of items returned in a single page
@@ -336,11 +338,11 @@ async def list_address_txs(request: web.Request, currency, address, page=None, p
     request.app['show_private_tags'] = show_private_tags
 
     try:
-        if 'currency' in ['','currency','address','page','pagesize']:
+        if 'currency' in ['','currency','address','direction','page','pagesize']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.list_address_txs(request
-                ,currency=currency,address=address,page=page,pagesize=pagesize)
+                ,currency=currency,address=address,direction=direction,page=page,pagesize=pagesize)
         result = await result
 
         for plugin in request.app['plugins']:

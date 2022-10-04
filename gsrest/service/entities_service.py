@@ -299,11 +299,11 @@ async def recursive_search(request, currency, entity, params, breadth, depth,
     return paths
 
 
-async def list_entity_txs(request, currency, entity,
+async def list_entity_txs(request, currency, entity, direction,
                           page=None, pagesize=None):
     db = request.app['db']
     results, paging_state = \
-        await db.list_entity_txs(currency, entity, page, pagesize)
+        await db.list_entity_txs(currency, entity, direction, page, pagesize)
     entity_txs = await common.txs_from_rows(request, currency, results)
     return AddressTxs(next_page=paging_state, address_txs=entity_txs)
 

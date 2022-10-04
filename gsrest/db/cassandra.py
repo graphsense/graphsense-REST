@@ -338,24 +338,24 @@ class Cassandra:
             self.markup_rates(currency, row)
         return result
 
-    async def list_address_txs(self, currency, address,
+    async def list_address_txs(self, currency, address, direction,
                                page=None, pagesize=None):
         return await self.list_txs_by_node_type(
-            currency, 'address', address,
+            currency, 'address', address, direction,
             page=page, pagesize=pagesize)
 
-    async def list_entity_txs(self, currency, entity,
+    async def list_entity_txs(self, currency, entity, direction,
                               page=None, pagesize=None):
         return await self.list_txs_by_node_type(
-            currency, 'cluster', entity,
+            currency, 'cluster', entity, direction,
             page=page, pagesize=pagesize)
 
     @eth
-    async def list_txs_by_node_type(self, currency, node_type, id,
+    async def list_txs_by_node_type(self, currency, node_type, id, direction,
                                     page=None, pagesize=None):
         paging_state = from_hex(page)
         if node_type == 'address':
-            id, id_group, _ = \
+            id, id_group = \
                 await self.get_address_id_id_group(currency, id)
         else:
             id_group = self.get_id_group(currency, id)
@@ -363,9 +363,14 @@ class Cassandra:
         query = f"SELECT * FROM {node_type}_transactions " \
                 f"WHERE {node_type}_id = %s AND {node_type}_id_group = %s"
 
+        params = [id, id_group]
+        print(f'direction {direction}')
+        if direction:
+            query += " and is_outgoing = %s"
+            params.append(direction == 'out')
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
         results = await self.execute_async(currency, 'transformed', query,
-                                           [id, id_group],
+                                           params,
                                            paging_state=paging_state,
                                            fetch_size=fetch_size)
         if results is None:
@@ -429,7 +434,6 @@ class Cassandra:
         prefix = self.scrub_prefix(currency, address)
         if not prefix:
             return None
-        orig_address = address
         if currency == 'eth':
             address = eth_address_from_hex(address)
             prefix = prefix.upper()
@@ -441,23 +445,17 @@ class Cassandra:
                               query, [prefix[:prefix_length], address])
         result = one(result)
         if not result:
-            result = await self.get_new_address(currency, orig_address)
-            status = 'new' if result else None
-            address_id = result['address_id'] if result else None
-        else:
-            address_id = result['address_id']
-            is_dirty = await self.is_address_dirty(currency, orig_address)
-            status = 'dirty' if is_dirty else 'clean'
+            return None
 
-        return address_id, status
+        return result['address_id']
 
     async def get_address_id_id_group(self, currency, address):
-        address_id, status = await self.get_address_id(currency, address)
+        address_id = await self.get_address_id(currency, address)
         if address_id is None:
             raise RuntimeError("Address {} not found in currency {}"
                                .format(address, currency))
         id_group = self.get_id_group(currency, address_id)
-        return address_id, id_group, status
+        return address_id, id_group
 
     def get_id_group(self, keyspace, id_):
         if keyspace not in self.parameters:
@@ -480,6 +478,9 @@ class Cassandra:
 
     async def new_address(self, currency, address):
         data = await self.get_new_address(currency, address)
+        if data is None:
+            raise RuntimeError("Address {} not found in currency {}"
+                               .format(address, currency))
         Values = namedtuple('Values', ['value', 'fiat_values'])
         zero_values = \
             Values(
@@ -515,9 +516,12 @@ class Cassandra:
         return data
 
     async def get_address(self, currency, address):
-        address_id, address_id_group, status = \
-            await self.get_address_id_id_group(currency, address)
-        if status == 'new':
+        try:
+            address_id, address_id_group = \
+                await self.get_address_id_id_group(currency, address)
+        except RuntimeError as e:
+            if 'not found' not in str(e):
+                raise e
             return await self.new_address(currency, address)
         query = ("SELECT * FROM address WHERE address_id = %s"
                  " AND address_id_group = %s")
@@ -527,17 +531,13 @@ class Cassandra:
         if not result:
             return None
 
-        result['status'] = status
-
         return await self.finish_address(currency, result)
 
     @eth
     async def get_address_entity_id(self, currency, address):
-        address_id, address_id_group, status = \
+        address_id, address_id_group = \
             await self.get_address_id_id_group(currency, address)
 
-        if status == "new":
-            return address_id, status
         query = "SELECT cluster_id FROM address WHERE " \
                 "address_id_group = %s AND address_id = %s "
         result = await self.execute_async(currency, 'transformed', query,
@@ -545,7 +545,7 @@ class Cassandra:
         result = one(result)
         if not result:
             return None, None
-        return result['cluster_id'], status
+        return result['cluster_id']
 
     async def list_address_links(self, currency, address, neighbor,
                                  page=None, pagesize=None):
@@ -561,9 +561,9 @@ class Cassandra:
     async def list_links(self, currency, node_type, id, neighbor,
                          page=None, pagesize=None):
         if node_type == 'address':
-            id, id_group, _ = \
+            id, id_group = \
                 await self.get_address_id_id_group(currency, id)
-            neighbor_id, neighbor_id_group, _ = \
+            neighbor_id, neighbor_id_group = \
                 await self.get_address_id_id_group(currency, neighbor)
         else:
             id_group = self.get_id_group(currency, id)
@@ -781,7 +781,7 @@ class Cassandra:
         orig_node_type = node_type
         orig_id = id
         if node_type == 'address':
-            id, _ = await self.get_address_id(currency, id)
+            id = await self.get_address_id(currency, id)
         elif node_type == 'entity':
             id = int(id)
             node_type = 'cluster'
@@ -827,6 +827,8 @@ class Cassandra:
             query = basequery
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
         paging_state = from_hex(page)
+        print(f'query {query}')
+        print(f'params {params}')
         results = await self.execute_async(currency, 'transformed', query,
                                            params,
                                            paging_state=paging_state,
@@ -1038,7 +1040,7 @@ class Cassandra:
             timestamp=tx2['timestamp'],
             height=tx2['block_id'])
 
-        if 'address' in row and 'status' not in row:
+        if 'address' in row:
             is_dirty = await self.is_address_dirty(currency, row['address'])
             row['status'] = 'dirty' if is_dirty else 'clean'
 
@@ -1075,9 +1077,8 @@ class Cassandra:
             timestamp=tx2['block_timestamp'],
             height=tx2['block_id'])
 
-        if 'status' not in row:
-            is_dirty = await self.is_address_dirty(currency, row['address'])
-            row['status'] = 'dirty' if is_dirty else 'clean'
+        is_dirty = await self.is_address_dirty(currency, row['address'])
+        row['status'] = 'dirty' if is_dirty else 'clean'
 
         return row
 
@@ -1225,10 +1226,10 @@ class Cassandra:
             result['max_secondary_id']
 
     async def list_txs_by_node_type_eth(self, currency, node_type, address,
-                                        page=None, pagesize=None):
+                                        direction, page=None, pagesize=None):
         paging_state = from_hex(page)
         if node_type == 'address':
-            address_id, id_group, _ = \
+            address_id, id_group = \
                 await self.get_address_id_id_group(currency, address)
         else:
             node_type = 'address'
@@ -1321,9 +1322,9 @@ class Cassandra:
     async def list_links_eth(self, currency, node_type, address, neighbor,
                              page=None, pagesize=None):
         if node_type == 'address':
-            address_id, address_id_group, _ = \
+            address_id, address_id_group = \
                 await self.get_address_id_id_group(currency, address)
-            neighbor_id, neighbor_id_group, _ = \
+            neighbor_id, neighbor_id_group = \
                 await self.get_address_id_id_group(currency, neighbor)
         else:
             node_type = 'address'
