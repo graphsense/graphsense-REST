@@ -6,6 +6,7 @@ from cassandra import InvalidRequest
 from cassandra.cluster import Cluster, NoHostAvailable
 from cassandra.query import SimpleStatement, dict_factory, ValueSequence
 from math import floor
+from datetime import datetime
 
 from gsrest.util.exceptions import BadConfigError
 
@@ -289,6 +290,11 @@ class Cassandra:
             result = one(result)
             if result:
                 stats['no_blocks'] = result['last_synced_block'] + 1
+                stats['timestamp'] =\
+                    result['last_synced_block_timestamp'].timestamp()\
+                    if 'last_synced_block_timestamp' in result else\
+                    stats['timestamp']
+
         except InvalidRequest as e:
             if 'delta_updater_status' not in str(e):
                 raise e
