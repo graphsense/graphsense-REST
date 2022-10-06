@@ -789,7 +789,13 @@ class Cassandra:
         orig_node_type = node_type
         orig_id = id
         if node_type == 'address':
-            id = await self.get_address_id(currency, id)
+            i = await self.get_address_id(currency, id)
+            if i is None:
+                # check if new address exists
+                if await self.get_new_address(currency, id):
+                    return [], None
+            id = i
+
         elif node_type == 'entity':
             id = int(id)
             node_type = 'cluster'
