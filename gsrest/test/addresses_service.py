@@ -14,6 +14,7 @@ from gsrest.test.txs_service import tx1_eth, tx2_eth, tx22_eth, tx4_eth
 from gsrest.util.values import make_values
 import gsrest.test.tags_service as ts
 import copy
+import yaml
 
 
 address = Address(
@@ -813,6 +814,7 @@ async def list_address_neighbors(test_case):
                                      include_labels=True,
                                      direction='out')
     awton = addressWithTagsOutNeighbors.to_dict()
+    print(yaml.dump(result))
     test_case.assertEqual(awton, result)
 
     result = await test_case.request(path + '&only_ids={only_ids}',

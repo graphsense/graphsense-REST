@@ -5,11 +5,11 @@ INSERT INTO concept (id, label, source, description, taxonomy) VALUES
     ('organization', 'An organization', 'https://organization', 'An organization is foo.', 'entity'),
     ('exchange', 'An exchange', 'https://exchange', 'An exchange is foo.', 'entity'),
     ('conceptB', 'Concept B', 'https://conceptB', 'A concept B.', 'abuse');
-INSERT INTO tagpack (id, title, description, creator, owner, is_public) VALUES
-    ('https://tagpack_uri', '', '', '', '', true),
-    ('https://tagpack_uri_private', '', '', '', '', false),
-    ('uriX', '', '', '', '', false),
-    ('uriY', '', '', '', '', true);
+INSERT INTO tagpack (id, title, description, creator, is_public) VALUES
+    ('https://tagpack_uri', '', '', 'x', true),
+    ('https://tagpack_uri_private', '', '', 'x', false),
+    ('uriX', '', '', 'x', false),
+    ('uriY', '', '', 'x', true);
 INSERT INTO address (currency, address) VALUES
     ('BTC', 'addressA'),
     ('BTC', 'a123456'),
@@ -23,6 +23,11 @@ INSERT INTO address (currency, address) VALUES
     ('LTC', 'addressB'),
     ('ETH', '0xabcdef'),
     ('ETH', '0x123456');
+INSERT INTO confidence (id, label, description, level) VALUES 
+    ('ownership', 'Proven address ownership', 'Creator controls the private key the address associated with a tag', 100),
+	('forensic', 'Forensic reports', 'Creator retrieved data attribution data from somehow trusted reports (e.g. academic papers)', 50),
+	('web_crawl', 'Web crawls', 'Attribution tags were retrieved from crawling the web or other data dumps', 20);
+
 INSERT INTO tag (label, address, currency, category, source, tagpack, lastmod, is_cluster_definer, confidence) VALUES
     ('Internet, Archive', 'addressA', 'BTC', 'organization', 'https://archive.org/donate/cryptocurrency', 'https://tagpack_uri', to_timestamp(1560290400), true, 'ownership'),
     ('Internet Archive 2', 'addressA', 'BTC', 'organization', 'https://archive.org/donate/cryptocurrency', 'https://tagpack_uri_private', to_timestamp(1560290400), true, 'web_crawl'),
