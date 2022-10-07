@@ -6,7 +6,6 @@ from cassandra import InvalidRequest
 from cassandra.cluster import Cluster, NoHostAvailable
 from cassandra.query import SimpleStatement, dict_factory, ValueSequence
 from math import floor
-from datetime import datetime
 
 from gsrest.util.exceptions import BadConfigError
 
