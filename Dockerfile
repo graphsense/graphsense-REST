@@ -1,8 +1,6 @@
 FROM alpine:3.15
-LABEL maintainer="contact@graphsense.info"
+LABEL maintainer="contact@ikna.io"
 
-ENV FLASK_APP=gsrest
-ENV FLASK_ENV=production
 ENV NUM_WORKERS=
 ENV NUM_THREADS=
 
