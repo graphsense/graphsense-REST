@@ -1,5 +1,5 @@
 FROM alpine:3.15
-LABEL maintainer="contact@graphsense.info"
+LABEL maintainer="contact@ikna.io"
 
 ENV NUM_WORKERS=
 ENV NUM_THREADS=
