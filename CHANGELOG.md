@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [22.10] - 2022-10-07
+## [22.10] - 2022-10-10
 ### Added
 - `only_ids` filter for `list_address_neighbors`
 - address status field (possible status: clean, dirty, new)
