@@ -479,36 +479,52 @@ async def list_entity_txs(test_case):
     """
     path = '/{currency}/entities/{entity}/txs'
     rates = await list_rates(test_case, currency='btc', heights=[2])
+    txs = [AddressTxUtxo(
+                tx_hash="123456",
+                currency="btc",
+                value=convert_value('btc', 1260000, rates[2]),
+                coinbase=False,
+                height=2,
+                timestamp=1510347493),
+           AddressTxUtxo(
+                tx_hash="4567",
+                currency="btc",
+                value=convert_value('btc', -1, rates[2]),
+                coinbase=False,
+                height=2,
+                timestamp=1510347492),
+           AddressTxUtxo(
+                tx_hash="abcdef",
+                currency="btc",
+                value=convert_value('btc', -1260000, rates[2]),
+                coinbase=False,
+                height=2,
+                timestamp=1511153263)]
     entity_txs = AddressTxs(
                     next_page=None,
-                    address_txs=[
-                        AddressTxUtxo(
-                            tx_hash="123456",
-                            currency="btc",
-                            value=convert_value('btc', 1260000, rates[2]),
-                            coinbase=False,
-                            height=2,
-                            timestamp=1510347493),
-                        AddressTxUtxo(
-                            tx_hash="4567",
-                            currency="btc",
-                            value=convert_value('btc', -1, rates[2]),
-                            coinbase=False,
-                            height=2,
-                            timestamp=1510347492),
-                        AddressTxUtxo(
-                            tx_hash="abcdef",
-                            currency="btc",
-                            value=convert_value('btc', -1260000, rates[2]),
-                            coinbase=False,
-                            height=2,
-                            timestamp=1511153263)
-                        ]
+                    address_txs=txs
                     )
     result = await test_case.request(path, currency='btc', entity=144534)
-    result['address_txs'] = sorted(result['address_txs'],
-                                   key=lambda t: t['tx_hash'])
-    test_case.assertEqual(entity_txs.to_dict(), result)
+    test_case.assertEqualWithList(entity_txs.to_dict(), result, 'address_txs',
+                                  'tx_hash')
+
+    path_with_direction =\
+        '/{currency}/entities/{entity}/txs?direction={direction}'
+    result = await test_case.request(path_with_direction,
+                                     currency='btc',
+                                     entity=144534,
+                                     direction='out')
+    entity_txs.address_txs = txs[1:]
+    test_case.assertEqualWithList(entity_txs.to_dict(), result, 'address_txs',
+                                  'tx_hash')
+
+    result = await test_case.request(path_with_direction,
+                                     currency='btc',
+                                     entity=144534,
+                                     direction='in')
+    entity_txs.address_txs = txs[0:1]
+    test_case.assertEqualWithList(entity_txs.to_dict(), result, 'address_txs',
+                                  'tx_hash')
 
     def reverse(tx):
         tx_r = TxAccount.from_dict(copy.deepcopy(tx.to_dict()))

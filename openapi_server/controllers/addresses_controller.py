@@ -16,7 +16,7 @@ from openapi_server import util
 
 
 async def get_address(request: web.Request, currency, address) -> web.Response:
-    """Get an address, optionally with tags
+    """Get an address
 
     
 
@@ -225,7 +225,7 @@ async def list_address_links(request: web.Request, currency, address, neighbor, 
         raise web.HTTPInternalServerError()
 
 
-async def list_address_neighbors(request: web.Request, currency, address, direction, include_labels=None, page=None, pagesize=None) -> web.Response:
+async def list_address_neighbors(request: web.Request, currency, address, direction, only_ids=None, include_labels=None, page=None, pagesize=None) -> web.Response:
     """Get an address&#39;s neighbors in the address graph
 
     
@@ -236,6 +236,8 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
     :type address: str
     :param direction: Incoming or outgoing neighbors
     :type direction: str
+    :param only_ids: Restrict result to given set of comma separated addresses
+    :type only_ids: List[str]
     :param include_labels: Whether to include labels of first page of tags
     :type include_labels: bool
     :param page: Resumption token for retrieving the next page
@@ -264,11 +266,11 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
     request.app['show_private_tags'] = show_private_tags
 
     try:
-        if 'currency' in ['','currency','address','direction','include_labels','page','pagesize']:
+        if 'currency' in ['','currency','address','direction','only_ids','include_labels','page','pagesize']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.list_address_neighbors(request
-                ,currency=currency,address=address,direction=direction,include_labels=include_labels,page=page,pagesize=pagesize)
+                ,currency=currency,address=address,direction=direction,only_ids=only_ids,include_labels=include_labels,page=page,pagesize=pagesize)
         result = await result
 
         for plugin in request.app['plugins']:
@@ -301,7 +303,7 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
         raise web.HTTPInternalServerError()
 
 
-async def list_address_txs(request: web.Request, currency, address, page=None, pagesize=None) -> web.Response:
+async def list_address_txs(request: web.Request, currency, address, direction=None, page=None, pagesize=None) -> web.Response:
     """Get all transactions an address has been involved in
 
     
@@ -310,6 +312,8 @@ async def list_address_txs(request: web.Request, currency, address, page=None, p
     :type currency: str
     :param address: The cryptocurrency address
     :type address: str
+    :param direction: Incoming or outgoing transactions
+    :type direction: str
     :param page: Resumption token for retrieving the next page
     :type page: str
     :param pagesize: Number of items returned in a single page
@@ -336,11 +340,11 @@ async def list_address_txs(request: web.Request, currency, address, page=None, p
     request.app['show_private_tags'] = show_private_tags
 
     try:
-        if 'currency' in ['','currency','address','page','pagesize']:
+        if 'currency' in ['','currency','address','direction','page','pagesize']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.list_address_txs(request
-                ,currency=currency,address=address,page=page,pagesize=pagesize)
+                ,currency=currency,address=address,direction=direction,page=page,pagesize=pagesize)
         result = await result
 
         for plugin in request.app['plugins']:

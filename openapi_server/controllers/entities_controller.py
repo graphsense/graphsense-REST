@@ -17,7 +17,7 @@ from openapi_server import util
 
 
 async def get_entity(request: web.Request, currency, entity) -> web.Response:
-    """Get an entity, optionally with tags
+    """Get an entity
 
     
 
@@ -303,7 +303,7 @@ async def list_entity_links(request: web.Request, currency, entity, neighbor, pa
 
 
 async def list_entity_neighbors(request: web.Request, currency, entity, direction, only_ids=None, include_labels=None, page=None, pagesize=None) -> web.Response:
-    """Get an entity&#39;s neighbors in the entity graph
+    """Get an entity&#39;s direct neighbors
 
     
 
@@ -380,7 +380,7 @@ async def list_entity_neighbors(request: web.Request, currency, entity, directio
         raise web.HTTPInternalServerError()
 
 
-async def list_entity_txs(request: web.Request, currency, entity, page=None, pagesize=None) -> web.Response:
+async def list_entity_txs(request: web.Request, currency, entity, direction=None, page=None, pagesize=None) -> web.Response:
     """Get all transactions an entity has been involved in
 
     
@@ -389,6 +389,8 @@ async def list_entity_txs(request: web.Request, currency, entity, page=None, pag
     :type currency: str
     :param entity: The entity ID
     :type entity: int
+    :param direction: Incoming or outgoing transactions
+    :type direction: str
     :param page: Resumption token for retrieving the next page
     :type page: str
     :param pagesize: Number of items returned in a single page
@@ -415,11 +417,11 @@ async def list_entity_txs(request: web.Request, currency, entity, page=None, pag
     request.app['show_private_tags'] = show_private_tags
 
     try:
-        if 'currency' in ['','currency','entity','page','pagesize']:
+        if 'currency' in ['','currency','entity','direction','page','pagesize']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.list_entity_txs(request
-                ,currency=currency,entity=entity,page=page,pagesize=pagesize)
+                ,currency=currency,entity=entity,direction=direction,page=page,pagesize=pagesize)
         result = await result
 
         for plugin in request.app['plugins']:

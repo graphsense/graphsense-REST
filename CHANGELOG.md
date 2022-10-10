@@ -3,6 +3,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [22.10] - 2022-10-07
+### Added
+- `only_ids` filter for `list_address_neighbors`
+- address status field (possible status: clean, dirty, new)
+- fetch address status from special delta updater tables
+- `direction` to `list_address_txs` and `list_entity_txs` to filter transactions whether they are incoming or outgoing
+### Changed
+- fetch last synced block from delta updater tables for currency statistics
+- show specific error message of eth address with no external txs
+
 ## [1.0.1] - 2022-08-26
 ### Added
 - add port to config template

@@ -22,7 +22,7 @@ class TestEntitiesController(BaseTestCase):
     async def test_get_entity(self):
         """Test case for get_entity
 
-        Get an entity, optionally with tags
+        Get an entity
         """
         await test_service.get_entity(self)
 
@@ -54,7 +54,7 @@ class TestEntitiesController(BaseTestCase):
     async def test_list_entity_neighbors(self):
         """Test case for list_entity_neighbors
 
-        Get an entity's neighbors in the entity graph
+        Get an entity's direct neighbors
         """
         await test_service.list_entity_neighbors(self)
 

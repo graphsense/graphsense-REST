@@ -75,7 +75,7 @@ async def search(test_case):
     expected.currencies[0] = \
         SearchResultByCurrency(
             currency='btc',
-            addresses=['xyz1234', 'xyz1278'],
+            addresses=['xyz120new', 'xyz1234', 'xyz1278'],
             txs=[])
 
     path = '/search?q={q}'

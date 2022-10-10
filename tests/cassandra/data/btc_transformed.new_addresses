@@ -1,0 +1,2 @@
+ {"address_id": 68000, "address_prefix": "newAd", "address": "newAddress", "block_id": 12, "tx_hash": "0x12345678", "timestamp": 123}
+ {"address_id": 68001, "address_prefix": "xyz12", "address": "xyz120new", "block_id": 12, "tx_hash": "0x12345678", "timestamp": 123}

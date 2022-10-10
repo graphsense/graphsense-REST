@@ -1,5 +1,5 @@
 [![Test REST Interface](https://github.com/graphsense/graphsense-REST/actions/workflows/test.yml/badge.svg)](https://github.com/graphsense/graphsense-REST/actions/workflows/test.yml)
-[![Coverage Status](https://coveralls.io/repos/github/graphsense/graphsense-REST/badge.svg?branch=develop)](https://coveralls.io/github/graphsense/graphsense-REST?branch=develop)
+[![Coverage Status](https://coveralls.io/repos/github/graphsense/graphsense-REST/badge.svg?branch=master)](https://coveralls.io/github/graphsense/graphsense-REST?branch=master)
 
 # GraphSense REST Interface
 
@@ -149,6 +149,7 @@ You may use `tests/fetch_data.sh` to fetch live data and customize for testing.
 In order to have a reproducible test environment, tests can also be run via docker. 
 
 ```
+export UID  # in order to inject user id into the docker container and avoid permission issues
 cd tests
 make test
 ```

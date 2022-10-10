@@ -28,7 +28,11 @@ ETH_TRANSFORMED_SCHEMA="https://raw.githubusercontent.com/$ORGANIZATION/graphsen
 function schema() {
   temp=`mktemp`
   echo "Fetching $1 ..."
-  curl -Ls $1 > $temp
+  if [ "${1:0:4}" = "http" ]; then
+      curl -Ls $1 > $temp
+  else
+      cp $1 $temp
+  fi
 
   for c in $3; do
     create $temp $2 $c
@@ -77,6 +81,8 @@ schema "$UTXO_RAW_SCHEMA/schema.cql" graphsense "btc_raw ltc_raw"
 schema "$UTXO_TRANSFORMED_SCHEMA/schema_transformed.cql" btc "btc ltc"
 schema "$ETH_RAW_SCHEMA/schema.cql" eth eth
 schema "$ETH_TRANSFORMED_SCHEMA/schema_transformed.cql" eth eth
+schema "`dirname $0`/schemas/schema.cql" btc "btc ltc"
+schema "`dirname $0`/schemas/schema_eth.cql" eth eth
 
 for filename in $data; do
   insert_data $filename `basename $filename`

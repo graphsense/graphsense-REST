@@ -14,6 +14,7 @@ from gsrest.test.txs_service import tx1_eth, tx2_eth, tx22_eth, tx4_eth
 from gsrest.util.values import make_values
 import gsrest.test.tags_service as ts
 import copy
+import yaml
 
 
 address = Address(
@@ -47,6 +48,7 @@ address = Address(
    entity=17642138,
    in_degree=5013,
    balance=make_values(eur=1.15, usd=2.31, value=115422577),
+   status='dirty'
         )
 
 addressWithTags = Address(
@@ -85,7 +87,8 @@ address2 = Address(
    address="bc1xyz123456789",
    entity=325790641,
    no_outgoing_txs=1,
-   balance=make_values(eur=0.0, usd=0.0, value=0)
+   balance=make_values(eur=0.0, usd=0.0, value=0),
+   status='clean'
    )
 
 addressWithoutTags = Address(
@@ -123,7 +126,8 @@ address3 = Address(
       timestamp=1361497172,
       height=1
    ),
-   balance=make_values(eur=0.0, usd=0.0, value=0)
+   balance=make_values(eur=0.0, usd=0.0, value=0),
+   status='clean'
 )
 
 addressE = Address(
@@ -160,7 +164,8 @@ addressE = Address(
       usd=142.18
    ),
    no_incoming_txs=3,
-   in_degree=3
+   in_degree=3,
+   status='clean'
 )
 
 addressF = Address(
@@ -194,6 +199,7 @@ addressF = Address(
    ),
    in_degree=5013,
    balance=make_values(eur=1.15, usd=2.31, value=115422577),
+   status='clean'
 )
 
 addressB = Address(
@@ -227,6 +233,7 @@ addressB = Address(
    ),
    in_degree=5013,
    balance=make_values(eur=1.15, usd=2.31, value=115422577),
+   status='clean'
         )
 
 addressD = Address(
@@ -260,6 +267,7 @@ addressD = Address(
    ),
    in_degree=5013,
    balance=make_values(eur=1.15, usd=2.31, value=115422577),
+   status='clean'
         )
 
 addressWithTotalSpent0 = Address(
@@ -292,8 +300,59 @@ addressWithTotalSpent0 = Address(
    address="addressC",
    entity=17642139,
    in_degree=5013,
-   balance=make_values(eur=0.0, usd=0.0, value=18099)
+   balance=make_values(eur=0.0, usd=0.0, value=18099),
+   status='clean'
    )
+
+newAddress = Address(
+   first_tx=TxSummary(
+      tx_hash="12345678",
+      height=12,
+      timestamp=123
+   ),
+   currency="btc",
+   total_spent=make_values(
+      usd=0.0,
+      value=0,
+      eur=0.0
+   ),
+   out_degree=0,
+   no_incoming_txs=0,
+   no_outgoing_txs=0,
+   total_received=make_values(
+      usd=0.0,
+      value=0,
+      eur=0.0
+   ),
+   last_tx=TxSummary(
+      tx_hash="12345678",
+      height=12,
+      timestamp=123
+   ),
+   address="newAddress",
+   entity=68000,
+   in_degree=0,
+   balance=make_values(eur=0.0, usd=0.0, value=0),
+   status='new'
+   )
+
+newEntity = Entity(
+   first_tx=newAddress.first_tx,
+   currency=newAddress.currency,
+   total_spent=newAddress.total_spent,
+   out_degree=newAddress.out_degree,
+   no_incoming_txs=newAddress.no_incoming_txs,
+   no_outgoing_txs=newAddress.no_outgoing_txs,
+   total_received=newAddress.total_received,
+   last_tx=newAddress.last_tx,
+   root_address=newAddress.address,
+   entity=newAddress.entity,
+   in_degree=newAddress.in_degree,
+   balance=newAddress.balance,
+   no_addresses=1,
+   no_address_tags=0,
+   best_address_tag=None
+)
 
 addressWithTagsOutNeighbors = NeighborAddresses(
         next_page=None,
@@ -516,7 +575,9 @@ eth_address = Address(
    address="0xabcdef",
    entity=107925000,
    in_degree=5,
-   balance=make_values(eur=111.0, usd=222.0, value=111000000000000000000))
+   balance=make_values(eur=111.0, usd=222.0, value=111000000000000000000),
+   status='clean'
+)
 
 
 eth_addressWithTags = Address(
@@ -554,7 +615,8 @@ eth_address2 = Address(
       height=1
    ),
    address="0x123456",
-   entity=107925001
+   entity=107925001,
+   status='clean'
 )
 
 eth_address3 = Address(
@@ -635,6 +697,11 @@ async def get_address(test_case):
                                      address=addressWithTotalSpent0.address)
     test_case.assertEqual(addressWithTotalSpent0.to_dict(), result)
 
+    result = await test_case.request(basepath,
+                                     currency='btc',
+                                     address=newAddress.address)
+    test_case.assertEqual(newAddress.to_dict(), result)
+
     # ETH
     result = await test_case.request(basepath,
                                      currency='eth',
@@ -649,35 +716,52 @@ async def list_address_txs(test_case):
     """
     path = '/{currency}/addresses/{address}/txs'
     rates = await list_rates(test_case, currency='btc', heights=[2])
+    txs = [AddressTxUtxo(
+                tx_hash="123456",
+                currency="btc",
+                value=convert_value('btc', 1260000, rates[2]),
+                height=2,
+                coinbase=False,
+                timestamp=1510347493),
+           AddressTxUtxo(
+                tx_hash="abcdef",
+                currency="btc",
+                value=convert_value('btc', -1260000, rates[2]),
+                height=2,
+                coinbase=False,
+                timestamp=1511153263),
+           AddressTxUtxo(
+                tx_hash="4567",
+                currency="btc",
+                value=convert_value('btc', -1, rates[2]),
+                height=2,
+                coinbase=False,
+                timestamp=1510347492)]
     address_txs = AddressTxs(
                     next_page=None,
-                    address_txs=[
-                        AddressTxUtxo(
-                            tx_hash="123456",
-                            currency="btc",
-                            value=convert_value('btc', 1260000, rates[2]),
-                            height=2,
-                            coinbase=False,
-                            timestamp=1510347493),
-                        AddressTxUtxo(
-                            tx_hash="abcdef",
-                            currency="btc",
-                            value=convert_value('btc', -1260000, rates[2]),
-                            height=2,
-                            coinbase=False,
-                            timestamp=1511153263),
-                        AddressTxUtxo(
-                            tx_hash="4567",
-                            currency="btc",
-                            value=convert_value('btc', -1, rates[2]),
-                            height=2,
-                            coinbase=False,
-                            timestamp=1510347492)
-                        ]
+                    address_txs=txs
                     )
     result = await test_case.request(path,
                                      currency='btc',
                                      address=address2.address)
+    test_case.assertEqualWithList(address_txs.to_dict(), result, 'address_txs',
+                                  'tx_hash')
+
+    path_with_direction =\
+        '/{currency}/addresses/{address}/txs?direction={direction}'
+    result = await test_case.request(path_with_direction,
+                                     currency='btc',
+                                     address=address2.address,
+                                     direction='out')
+    address_txs.address_txs = txs[1:]
+    test_case.assertEqualWithList(address_txs.to_dict(), result, 'address_txs',
+                                  'tx_hash')
+
+    result = await test_case.request(path_with_direction,
+                                     currency='btc',
+                                     address=address2.address,
+                                     direction='in')
+    address_txs.address_txs = txs[0:1]
     test_case.assertEqualWithList(address_txs.to_dict(), result, 'address_txs',
                                   'tx_hash')
 
@@ -723,13 +807,25 @@ async def list_tags_by_address(test_case):
 async def list_address_neighbors(test_case):
     path = '/{currency}/addresses/{address}/neighbors'\
            '?include_labels={include_labels}&direction={direction}'
+
     result = await test_case.request(path,
                                      currency='btc',
                                      address=address.address,
                                      include_labels=True,
                                      direction='out')
     awton = addressWithTagsOutNeighbors.to_dict()
+    print(yaml.dump(result))
     test_case.assertEqual(awton, result)
+
+    result = await test_case.request(path + '&only_ids={only_ids}',
+                                     currency='btc',
+                                     address=address.address,
+                                     include_labels=True,
+                                     only_ids=addressF.address,
+                                     direction='out')
+    awton2 = addressWithTagsOutNeighbors.to_dict()
+    awton2['neighbors'] = awton2['neighbors'][1:2]
+    test_case.assertEqual(awton2, result)
 
     result = await test_case.request(path,
                                      currency='btc',
@@ -763,6 +859,12 @@ async def get_address_entity(test_case):
                                      address=address.address,
                                      include_tags=True)
     test_case.assertEqual(entityWithTags.to_dict(), result)
+
+    result = await test_case.request(path,
+                                     currency='btc',
+                                     address=newAddress.address,
+                                     include_tags=True)
+    test_case.assertEqual(newEntity.to_dict(), result)
 
     result = await test_case.request(path,
                                      currency='eth',

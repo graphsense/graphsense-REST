@@ -7,7 +7,6 @@ from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.address_tags import AddressTags
 from gsrest.util.values import convert_value, to_values
-from openapi_server.models.address import Address
 from openapi_server.models.entity_addresses import EntityAddresses
 from gsrest.db.util import tagstores, tagstores_with_paging
 from gsrest.service.tags_service import address_tag_from_row
@@ -125,27 +124,8 @@ async def list_entity_addresses(request, currency, entity,
         await db.list_entity_addresses(currency, entity, page, pagesize)
 
     rates = (await get_rates(request, currency))['rates']
-    addresses = [Address(
-            currency=currency,
-            address=row['address'],
-            entity=row['cluster_id'],
-            first_tx=TxSummary(
-                row['first_tx'].height,
-                row['first_tx'].timestamp,
-                row['first_tx'].tx_hash.hex()),
-            last_tx=TxSummary(
-                row['last_tx'].height,
-                row['last_tx'].timestamp,
-                row['last_tx'].tx_hash.hex()),
-            no_incoming_txs=row['no_incoming_txs'],
-            no_outgoing_txs=row['no_outgoing_txs'],
-            total_received=to_values(row['total_received']),
-            total_spent=to_values(row['total_spent']),
-            in_degree=row['in_degree'],
-            out_degree=row['out_degree'],
-            balance=convert_value(currency, row['balance'], rates)
-            )
-            for row in addresses]
+    addresses = [common.address_from_row(currency, row, rates)
+                 for row in addresses]
     return EntityAddresses(next_page=paging_state, addresses=addresses)
 
 
@@ -319,10 +299,11 @@ async def recursive_search(request, currency, entity, params, breadth, depth,
     return paths
 
 
-async def list_entity_txs(request, currency, entity, page=None, pagesize=None):
+async def list_entity_txs(request, currency, entity, direction,
+                          page=None, pagesize=None):
     db = request.app['db']
     results, paging_state = \
-        await db.list_entity_txs(currency, entity, page, pagesize)
+        await db.list_entity_txs(currency, entity, direction, page, pagesize)
     entity_txs = await common.txs_from_rows(request, currency, results)
     return AddressTxs(next_page=paging_state, address_txs=entity_txs)
 

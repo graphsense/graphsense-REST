@@ -1,5 +1,6 @@
 from openapi_server.models.address_txs import AddressTxs
-from gsrest.service.entities_service import get_entity
+from gsrest.service.entities_service import get_entity, from_row
+from gsrest.service.rates_service import get_rates
 import gsrest.service.common_service as common
 from openapi_server.models.neighbor_addresses import NeighborAddresses
 from openapi_server.models.neighbor_address import NeighborAddress
@@ -16,23 +17,28 @@ async def list_tags_by_address(request, currency, address,
                                              page=page, pagesize=pagesize)
 
 
-async def list_address_txs(request, currency, address, page=None,
-                           pagesize=None):
+async def list_address_txs(request, currency, address, direction=None,
+                           page=None, pagesize=None):
     db = request.app['db']
     results, paging_state = \
-        await db.list_address_txs(currency, address, page, pagesize)
+        await db.list_address_txs(currency, address, direction, page, pagesize)
     address_txs = await common.txs_from_rows(request, currency, results)
     return AddressTxs(next_page=paging_state, address_txs=address_txs)
 
 
 async def list_address_neighbors(request, currency, address, direction,
-                                 include_labels=False,
+                                 only_ids=None, include_labels=False,
                                  page=None, pagesize=None):
+    db = request.app['db']
+    if isinstance(only_ids, list):
+        aws = [db.get_address_id(currency, id) for id in only_ids]
+        only_ids = await asyncio.gather(*aws)
+
     results, paging_state = \
-           await common.list_neighbors(request, currency, address, direction,
-                                       'address',
-                                       include_labels=include_labels,
-                                       page=page, pagesize=pagesize, ids=None)
+        await common.list_neighbors(request, currency, address, direction,
+                                    'address', ids=only_ids,
+                                    include_labels=include_labels,
+                                    page=page, pagesize=pagesize)
     is_outgoing = "out" in direction
     dst = 'dst' if is_outgoing else 'src'
     relations = []
@@ -65,16 +71,26 @@ async def list_address_links(request, currency, address, neighbor,
 
 
 async def get_address_entity(request, currency, address):
-    # from address to complete entity stats
-    e = RuntimeError('Entity for address {} not found'.format(address))
     db = request.app['db']
 
-    entity_id = await db.get_address_entity_id(currency, address)
-    if entity_id is None:
-        raise e
+    notfound = RuntimeError('Entity for address {} not found'.format(address))
+    try:
+        entity_id = await db.get_address_entity_id(currency, address)
+    except RuntimeError as e:
+        if 'not found' not in str(e):
+            raise e
+        try:
+            aws = [get_rates(request, currency),
+                   db.new_entity(currency, address)]
+            [rates, entity] = await asyncio.gather(*aws)
+        except RuntimeError as e:
+            if 'not found' not in str(e):
+                raise e
+            raise notfound
+        return from_row(currency, entity, rates['rates'])
 
     result = await get_entity(request, currency, entity_id)
     if result is None:
-        raise e
+        raise notfound
 
     return result

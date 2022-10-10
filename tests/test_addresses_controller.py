@@ -21,7 +21,7 @@ class TestAddressesController(BaseTestCase):
     async def test_get_address(self):
         """Test case for get_address
 
-        Get an address, optionally with tags
+        Get an address
         """
         await test_service.get_address(self)
 

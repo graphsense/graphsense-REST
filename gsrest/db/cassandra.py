@@ -2,6 +2,7 @@ import re
 import time
 import asyncio
 from collections import namedtuple
+from cassandra import InvalidRequest
 from cassandra.cluster import Cluster, NoHostAvailable
 from cassandra.query import SimpleStatement, dict_factory, ValueSequence
 from math import floor
@@ -65,6 +66,9 @@ class Result:
         if self.is_empty():
             return None
         return self.current_rows[0]
+
+
+TxSummary = namedtuple('TxSummary', ['height', 'timestamp', 'tx_hash'])
 
 
 class Cassandra:
@@ -275,11 +279,29 @@ class Cassandra:
                 results.append(result)
         return results
 
-    @eth
     async def get_currency_statistics(self, currency):
         query = "SELECT * FROM summary_statistics LIMIT 1"
         result = await self.execute_async(currency, 'transformed', query)
-        return one(result)
+        stats = one(result)
+        try:
+            query = "SELECT * FROM delta_updater_status LIMIT 1"
+            result = await self.execute_async(currency, 'transformed', query)
+            result = one(result)
+            if result:
+                stats['no_blocks'] = result['last_synced_block'] + 1
+                stats['timestamp'] =\
+                    result['last_synced_block_timestamp'].timestamp()\
+                    if 'last_synced_block_timestamp' in result else\
+                    stats['timestamp']
+
+        except InvalidRequest as e:
+            if 'delta_updater_status' not in str(e):
+                raise e
+
+        if currency == 'eth':
+            stats['no_clusters'] = 0
+
+        return stats
 
     @eth
     async def get_block(self, currency, height):
@@ -321,19 +343,21 @@ class Cassandra:
             self.markup_rates(currency, row)
         return result
 
-    async def list_address_txs(self, currency, address, page=None,
-                               pagesize=None):
+    async def list_address_txs(self, currency, address, direction,
+                               page=None, pagesize=None):
         return await self.list_txs_by_node_type(
-            currency, 'address', address, page=page, pagesize=pagesize)
+            currency, 'address', address, direction,
+            page=page, pagesize=pagesize)
 
-    async def list_entity_txs(self, currency, entity, page=None,
-                              pagesize=None):
+    async def list_entity_txs(self, currency, entity, direction,
+                              page=None, pagesize=None):
         return await self.list_txs_by_node_type(
-            currency, 'cluster', entity, page=page, pagesize=pagesize)
+            currency, 'cluster', entity, direction,
+            page=page, pagesize=pagesize)
 
     @eth
-    async def list_txs_by_node_type(self, currency, node_type, id, page=None,
-                                    pagesize=None):
+    async def list_txs_by_node_type(self, currency, node_type, id, direction,
+                                    page=None, pagesize=None):
         paging_state = from_hex(page)
         if node_type == 'address':
             id, id_group = \
@@ -343,9 +367,14 @@ class Cassandra:
 
         query = f"SELECT * FROM {node_type}_transactions " \
                 f"WHERE {node_type}_id = %s AND {node_type}_id_group = %s"
+
+        params = [id, id_group]
+        if direction:
+            query += " and is_outgoing = %s"
+            params.append(direction == 'out')
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
         results = await self.execute_async(currency, 'transformed', query,
-                                           [id, id_group],
+                                           params,
                                            paging_state=paging_state,
                                            fetch_size=fetch_size)
         if results is None:
@@ -385,6 +414,26 @@ class Cassandra:
                     eth_address_to_hex(row['address'])
         return result
 
+    async def get_new_address(self, currency, address):
+        prefix = self.scrub_prefix(currency, address)
+        if not prefix:
+            return None
+        if currency == 'eth':
+            address = eth_address_from_hex(address)
+            prefix = prefix.upper()
+        prefix_length = self.get_prefix_lengths(currency)['address']
+        query = ("SELECT * FROM new_addresses "
+                 "WHERE address_prefix = %s AND address = %s")
+        try:
+            result = await self.execute_async(
+                                  currency, 'transformed',
+                                  query, [prefix[:prefix_length], address])
+            return one(result)
+        except InvalidRequest as e:
+            if 'new_addresses' not in str(e):
+                raise e
+            return None
+
     async def get_address_id(self, currency, address):
         prefix = self.scrub_prefix(currency, address)
         if not prefix:
@@ -399,7 +448,10 @@ class Cassandra:
                               currency, 'transformed',
                               query, [prefix[:prefix_length], address])
         result = one(result)
-        return result['address_id'] if result else None
+        if not result:
+            return None
+
+        return result['address_id']
 
     async def get_address_id_id_group(self, currency, address):
         address_id = await self.get_address_id(currency, address)
@@ -428,16 +480,63 @@ class Cassandra:
     def get_tx_id_group_eth(self, keyspace, id_):
         return self.get_id_group(keyspace, id_)
 
+    async def new_address(self, currency, address):
+        data = await self.get_new_address(currency, address)
+        if data is None:
+            raise RuntimeError("Address {} not found in currency {}"
+                               .format(address, currency))
+        Values = namedtuple('Values', ['value', 'fiat_values'])
+        zero_values = \
+            Values(
+                value=0,
+                fiat_values=[
+                    {'code': c.lower(), 'value': 0.0}
+                    for c in self.parameters[currency]['fiat_currencies']]
+            )
+        return {
+            'address': address,
+            'cluster_id': data['address_id'],
+            'first_tx': TxSummary(data['block_id'], data['timestamp'],
+                                  data['tx_hash']),
+            'last_tx': TxSummary(data['block_id'], data['timestamp'],
+                                 data['tx_hash']),
+            'no_incoming_txs': 0,
+            'no_outgoing_txs': 0,
+            'total_received': zero_values,
+            'total_spent': zero_values,
+            'in_degree': 0,
+            'out_degree': 0,
+            'balance': 0,
+            'status': 'new'
+        }
+
+    async def new_entity(self, currency, address):
+        data = await self.new_address(currency, address)
+        data['no_addresses'] = 1
+        if currency == 'eth':
+            data['root_address'] = eth_address_to_hex(address)
+        else:
+            data['root_address'] = address
+        return data
+
     async def get_address(self, currency, address):
-        address_id, address_id_group = \
-            await self.get_address_id_id_group(currency, address)
+        try:
+            address_id, address_id_group = \
+                await self.get_address_id_id_group(currency, address)
+        except RuntimeError as e:
+            if 'not found' not in str(e):
+                raise e
+            return await self.new_address(currency, address)
         query = ("SELECT * FROM address WHERE address_id = %s"
                  " AND address_id_group = %s")
         result = await self.execute_async(currency, 'transformed', query,
                                           [address_id, address_id_group])
         result = one(result)
         if not result:
-            return None
+            if currency != 'eth':
+                return None
+            raise RuntimeError(
+                f'Address {address} has no external transactions')
 
         return await self.finish_address(currency, result)
 
@@ -452,7 +551,7 @@ class Cassandra:
                                           [address_id_group, address_id])
         result = one(result)
         if not result:
-            return None
+            return None, None
         return result['cluster_id']
 
     async def list_address_links(self, currency, address, neighbor,
@@ -586,21 +685,34 @@ class Cassandra:
             expression = expression.lower()
             norm = eth_address_to_hex
             prefix = prefix.upper()
+        rows = []
+
+        async def collect(query, paging_state):
+            while paging_state and len(rows) < limit:
+                if paging_state is True:
+                    paging_state = None
+                result = await self.execute_async(
+                            currency, 'transformed', query, [prefix],
+                            paging_state=paging_state)
+                if result.is_empty():
+                    break
+                rows.extend([norm(row['address'])
+                             for row in result.current_rows
+                             if norm(row['address']).startswith(expression)])
+                paging_state = result.paging_state
+
         query = "SELECT address FROM address_ids_by_address_prefix "\
                 "WHERE address_prefix = %s"
-        paging_state = True
-        rows = []
-        while paging_state and len(rows) < limit:
-            if paging_state is True:
-                paging_state = None
-            result = await self.execute_async(
-                        currency, 'transformed', query, [prefix],
-                        paging_state=paging_state)
-            if result.is_empty():
-                break
-            rows += [norm(row['address']) for row in result.current_rows
-                     if norm(row['address']).startswith(expression)]
-            paging_state = result.paging_state
+        await collect(query, True)
+        if len(rows) < limit:
+            query = "SELECT address FROM new_addresses "\
+                    "WHERE address_prefix = %s"
+            try:
+                await collect(query, True)
+            except InvalidRequest as e:
+                if 'new_addresses' not in str(e):
+                    raise e
+            rows = sorted(rows)
         return rows[0:limit]
 
     @eth
@@ -677,6 +789,11 @@ class Cassandra:
         orig_id = id
         if node_type == 'address':
             id = await self.get_address_id(currency, id)
+            if id is None:
+                # check if new address exists
+                if await self.get_new_address(currency, orig_id):
+                    return [], None
+
         elif node_type == 'entity':
             id = int(id)
             node_type = 'cluster'
@@ -712,7 +829,7 @@ class Cassandra:
         params = base_parameters.copy()
         if has_targets:
             if len(targets) == 0:
-                return None
+                return None, None
 
             query = basequery.replace('*', f'{that}_{node_type}_id')
             targets = ValueSequence(targets)
@@ -915,8 +1032,6 @@ class Cassandra:
         if not with_txs:
             return row
 
-        TxSummary = namedtuple('TxSummary', ['height', 'timestamp', 'tx_hash'])
-
         aws = [self.get_tx_by_id(currency, id)
                for id in [row['first_tx_id'], row['last_tx_id']]]
         [tx1, tx2] = await asyncio.gather(*aws)
@@ -935,6 +1050,10 @@ class Cassandra:
             timestamp=tx2['timestamp'],
             height=tx2['block_id'])
 
+        if 'address' in row:
+            is_dirty = await self.is_address_dirty(currency, row['address'])
+            row['status'] = 'dirty' if is_dirty else 'clean'
+
         return row
 
     async def finish_address_eth(self, currency, row, with_txs=True):
@@ -949,8 +1068,6 @@ class Cassandra:
 
         if not with_txs:
             return row
-
-        TxSummary = namedtuple('TxSummary', ['height', 'timestamp', 'tx_hash'])
 
         aws = [self.get_tx_by_id(currency, id)
                for id in [row['first_tx_id'], row['last_tx_id']]]
@@ -969,7 +1086,35 @@ class Cassandra:
             tx_hash=tx2['tx_hash'],
             timestamp=tx2['block_timestamp'],
             height=tx2['block_id'])
+
+        is_dirty = await self.is_address_dirty(currency, row['address'])
+        row['status'] = 'dirty' if is_dirty else 'clean'
+
         return row
+
+    async def is_address_dirty(self, currency, address):
+        prefix = self.scrub_prefix(currency, address)
+        if not prefix:
+            return None
+        if currency == 'eth':
+            address = eth_address_from_hex(address)
+            prefix = prefix.upper()
+        prefix_length = self.get_prefix_lengths(currency)['address']
+        query = ("SELECT address FROM dirty_addresses "
+                 "WHERE address_prefix = %s AND address = %s")
+        try:
+            result = await self.execute_async(
+                                  currency, 'transformed',
+                                  query, [prefix[:prefix_length], address])
+
+            result = one(result)
+            if result:
+                return True
+        except InvalidRequest as e:
+            if 'dirty_addresses' not in str(e):
+                raise e
+
+        return False
 
     @eth
     async def add_balance(self, currency, row):
@@ -994,15 +1139,6 @@ class Cassandra:
 #####################
 # ETHEREUM VARIANTS #
 #####################
-
-    async def get_currency_statistics_eth(self, currency):
-        query = "SELECT * FROM summary_statistics LIMIT 1"
-        result = (await self.execute_async(currency, 'transformed', query)
-                  ).one()
-        if not result:
-            return None
-        result['no_clusters'] = 0
-        return result
 
     def scrub_prefix_eth(self, currency, expression):
         # remove 0x prefix
@@ -1100,7 +1236,7 @@ class Cassandra:
             result['max_secondary_id']
 
     async def list_txs_by_node_type_eth(self, currency, node_type, address,
-                                        page=None, pagesize=None):
+                                        direction, page=None, pagesize=None):
         paging_state = from_hex(page)
         if node_type == 'address':
             address_id, id_group = \
