@@ -1,4 +1,5 @@
 from openapi_server.models.address_txs import AddressTxs
+from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from openapi_server.models.tx_account import TxAccount
@@ -159,6 +160,207 @@ tag_entityA = Entity(
 )
 
 
+tag_entityB = Entity(
+   currency='btc',
+   no_address_tags=2,
+   no_outgoing_txs=0,
+   last_tx=TxSummary(
+      timestamp=1434554207,
+      height=1,
+      tx_hash="4567"
+   ),
+   total_spent=make_values(
+      usd=0.0,
+      value=0,
+      eur=0.0
+   ),
+   in_degree=0,
+   no_addresses=2,
+   total_received=make_values(
+      usd=0.0,
+      value=0,
+      eur=0.0
+   ),
+   no_incoming_txs=0,
+   entity=14,
+   root_address="tag_addressC",
+   out_degree=0,
+   first_tx=TxSummary(
+      timestamp=1434554207,
+      height=1,
+      tx_hash="4567"
+   ),
+   balance=make_values(eur=0.0, usd=0.0, value=0),
+   best_address_tag=AddressTag(
+        category=None,
+        label="x",
+        abuse=None,
+        lastmod=2,
+        source="Unspecified",
+        address="tag_addressC",
+        currency='BTC',
+        tagpack_is_public=True,
+        is_cluster_definer=True,
+        confidence='ownership',
+        confidence_level=100,
+        tagpack_creator='x',
+        tagpack_title='',
+        tagpack_uri='https://tagpack_uri',
+        entity=14
+    )
+)
+
+tag_entityC = Entity(
+   currency='btc',
+   no_address_tags=3,
+   no_outgoing_txs=0,
+   last_tx=TxSummary(
+      timestamp=1434554207,
+      height=1,
+      tx_hash="4567"
+   ),
+   total_spent=make_values(
+      usd=0.0,
+      value=0,
+      eur=0.0
+   ),
+   in_degree=0,
+   no_addresses=3,
+   total_received=make_values(
+      usd=0.0,
+      value=0,
+      eur=0.0
+   ),
+   no_incoming_txs=0,
+   entity=16,
+   root_address="tag_addressE",
+   out_degree=0,
+   first_tx=TxSummary(
+      timestamp=1434554207,
+      height=1,
+      tx_hash="4567"
+   ),
+   balance=make_values(eur=0.0, usd=0.0, value=0),
+   best_address_tag=AddressTag(
+        category=None,
+        label="x",
+        abuse=None,
+        lastmod=2,
+        source="Unspecified",
+        address="tag_addressE",
+        currency='BTC',
+        tagpack_is_public=True,
+        is_cluster_definer=True,
+        confidence='ownership',
+        confidence_level=100,
+        tagpack_creator='x',
+        tagpack_title='',
+        tagpack_uri='https://tagpack_uri',
+        entity=16
+    )
+)
+
+tag_entityD = Entity(
+   currency='btc',
+   no_address_tags=1,
+   no_outgoing_txs=0,
+   last_tx=TxSummary(
+      timestamp=1434554207,
+      height=1,
+      tx_hash="4567"
+   ),
+   total_spent=make_values(
+      usd=0.0,
+      value=0,
+      eur=0.0
+   ),
+   in_degree=0,
+   no_addresses=1,
+   total_received=make_values(
+      usd=0.0,
+      value=0,
+      eur=0.0
+   ),
+   no_incoming_txs=0,
+   entity=19,
+   root_address="tag_addressH",
+   out_degree=0,
+   first_tx=TxSummary(
+      timestamp=1434554207,
+      height=1,
+      tx_hash="4567"
+   ),
+   balance=make_values(eur=0.0, usd=0.0, value=0),
+   best_address_tag=AddressTag(
+        category=None,
+        label="x",
+        abuse=None,
+        lastmod=2,
+        source="Unspecified",
+        address="tag_addressH",
+        currency='BTC',
+        tagpack_is_public=True,
+        is_cluster_definer=False,
+        confidence='ownership',
+        confidence_level=100,
+        tagpack_creator='x',
+        tagpack_title='',
+        tagpack_uri='https://tagpack_uri',
+        entity=19
+    )
+)
+
+tag_entityE = Entity(
+   currency='btc',
+   no_address_tags=3,
+   no_outgoing_txs=0,
+   last_tx=TxSummary(
+      timestamp=1434554207,
+      height=1,
+      tx_hash="4567"
+   ),
+   total_spent=make_values(
+      usd=0.0,
+      value=0,
+      eur=0.0
+   ),
+   in_degree=0,
+   no_addresses=1,
+   total_received=make_values(
+      usd=0.0,
+      value=0,
+      eur=0.0
+   ),
+   no_incoming_txs=0,
+   entity=20,
+   root_address="tag_addressI",
+   out_degree=0,
+   first_tx=TxSummary(
+      timestamp=1434554207,
+      height=1,
+      tx_hash="4567"
+   ),
+   balance=make_values(eur=0.0, usd=0.0, value=0),
+   best_address_tag=AddressTag(
+        category=None,
+        label="x",
+        abuse=None,
+        lastmod=2,
+        source="Unspecified",
+        address="tag_addressI",
+        currency='BTC',
+        tagpack_is_public=True,
+        is_cluster_definer=False,
+        confidence='ownership',
+        confidence_level=100,
+        tagpack_creator='x',
+        tagpack_title='',
+        tagpack_uri='https://tagpack_uri',
+        entity=20
+    )
+)
+
+
 async def get_entity(test_case):
     path = '/{currency}/entities/{entity}'
     result = await test_case.request(path,
@@ -191,14 +393,41 @@ async def get_entity(test_case):
 
     test_case.assertEqual(tag_entityA.to_dict(), result)
 
-    # a cluster with multiple addresses, one cluster definers
+    # a cluster with multiple addresses, one cluster definer
     #   -> this one tag is best address tag
+
+    result = await test_case.request(path,
+                                     currency='btc',
+                                     entity=tag_entityB.entity)
+
+    test_case.assertEqual(tag_entityB.to_dict(), result)
+
     # a cluster with multiple addresses, multiple cluster definers
     #   -> the one with highest confidence
+
+    result = await test_case.request(path,
+                                     currency='btc',
+                                     entity=tag_entityC.entity)
+
+    test_case.assertEqual(tag_entityC.to_dict(), result)
+
     # If cluster size = 1 and there is an address tag on that single address
     #   -> the one tag is best address tag
+
+    result = await test_case.request(path,
+                                     currency='btc',
+                                     entity=tag_entityD.entity)
+
+    test_case.assertEqual(tag_entityD.to_dict(), result)
+
     # If cluster size = 1 and there are several address tags on that address
     #   -> the one with highest confidence
+
+    result = await test_case.request(path,
+                                     currency='btc',
+                                     entity=tag_entityE.entity)
+
+    test_case.assertEqual(tag_entityE.to_dict(), result)
 
 
 async def list_address_tags_by_entity(test_case):
