@@ -292,6 +292,7 @@ class Tagstore:
                         and c.id = t.confidence
                         {hide_private_condition(show_private, table_alias='cd')}
                    order by
+                        cd.max_level desc,
                         cd.no_addresses desc,
                         t.address desc
                    limit 1""" # noqa
