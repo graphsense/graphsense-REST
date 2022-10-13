@@ -33,6 +33,7 @@ async def list_address_neighbors(request, currency, address, direction,
     if isinstance(only_ids, list):
         aws = [db.get_address_id(currency, id) for id in only_ids]
         only_ids = await asyncio.gather(*aws)
+        only_ids = [id for id in only_ids if id is not None]
 
     results, paging_state = \
         await common.list_neighbors(request, currency, address, direction,
