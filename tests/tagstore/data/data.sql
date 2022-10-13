@@ -22,7 +22,9 @@ INSERT INTO address (currency, address) VALUES
     ('LTC', 'addressA'),
     ('LTC', 'addressB'),
     ('ETH', '0xabcdef'),
-    ('ETH', '0x123456');
+    ('ETH', '0x123456'),
+    ('BTC', 'tag_addressB'),
+    ('BTC', 'tag_addressA');
 INSERT INTO confidence (id, label, description, level) VALUES 
     ('ownership', 'Proven address ownership', 'Creator controls the private key the address associated with a tag', 100),
 	('forensic', 'Forensic reports', 'Creator retrieved data attribution data from somehow trusted reports (e.g. academic papers)', 50),
@@ -42,6 +44,8 @@ INSERT INTO tag (label, address, currency, category, source, tagpack, lastmod, i
     ('isolinks', 'addressX', 'BTC', 'exchange', 'Unspecified', 'https://tagpack_uri', to_timestamp(1), true, 'ownership'),
     ('isolinks', 'addressY', 'BTC', NULL, 'Unspecified', 'https://tagpack_uri_private', to_timestamp(1), true, 'ownership'),
     ('cimedy', 'addressY', 'BTC', NULL, 'Unspecified', 'https://tagpack_uri', to_timestamp(2), false, 'ownership'),
+    ('x', 'tag_addressA', 'BTC', NULL, 'Unspecified', 'https://tagpack_uri', to_timestamp(2), false, 'ownership'),
+    ('y', 'tag_addressB', 'BTC', NULL, 'Unspecified', 'https://tagpack_uri', to_timestamp(2), false, 'ownership'),
     ('cimedy', 'addressA', 'LTC', 'exchange', 'source', 'https://tagpack_uri', to_timestamp(3), false, 'ownership'),
     ('coinbase', 'addressB', 'LTC', 'exchange', 'Team', 'https://tagpack_uri', to_timestamp(4), false, 'ownership'),
     ('TagA', '0xabcdef', 'ETH', NULL, 'sourceX', 'uriX', to_timestamp(1), true, 'ownership'),
@@ -54,6 +58,8 @@ INSERT INTO address_cluster_mapping (currency, address, gs_cluster_id, gs_cluste
     ('BTC', 'addressA', 17642138, '', 20),
     ('BTC', 'addressH', 17642138, '', 20),
     ('BTC', 'address2818641', 2818641, '', 30),
+    ('BTC', 'tag_addressA', 12, '', 2),
+    ('BTC', 'tag_addressB', 12, '', 2),
     ('LTC', 'addressA', 1234, '', 20),
     ('ETH', '0xabcdef', 107925000, '', 40),
     ('ETH', '0x123456', 107925001, '', 50);

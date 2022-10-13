@@ -1,4 +1,5 @@
 from openapi_server.models.address_txs import AddressTxs
+from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.neighbor_entities import NeighborEntities
@@ -123,6 +124,41 @@ entityWithTagsAddresses = EntityAddresses(
         )
 
 
+tag_entityA = Entity(
+   currency='btc',
+   no_address_tags=2,
+   no_outgoing_txs=0,
+   last_tx=TxSummary(
+      timestamp=1434554207,
+      height=1,
+      tx_hash="4567"
+   ),
+   total_spent=make_values(
+      usd=0.0,
+      value=0,
+      eur=0.0
+   ),
+   in_degree=0,
+   no_addresses=2,
+   total_received=make_values(
+      usd=0.0,
+      value=0,
+      eur=0.0
+   ),
+   no_incoming_txs=0,
+   entity=12,
+   root_address="tag_addressA",
+   out_degree=0,
+   first_tx=TxSummary(
+      timestamp=1434554207,
+      height=1,
+      tx_hash="4567"
+   ),
+   balance=make_values(eur=0.0, usd=0.0, value=0),
+   best_address_tag=None
+)
+
+
 async def get_entity(test_case):
     path = '/{currency}/entities/{entity}'
     result = await test_case.request(path,
@@ -143,6 +179,26 @@ async def get_entity(test_case):
                                      entity=eth_entity.entity)
 
     test_case.assertEqual(eth_entity.to_dict(), result)
+
+    # test best_address_tag:
+
+    # a cluster with multiple addresses, none cluster definer
+    #   -> no best address tag
+
+    result = await test_case.request(path,
+                                     currency='btc',
+                                     entity=tag_entityA.entity)
+
+    test_case.assertEqual(tag_entityA.to_dict(), result)
+
+    # a cluster with multiple addresses, one cluster definers
+    #   -> this one tag is best address tag
+    # a cluster with multiple addresses, multiple cluster definers
+    #   -> the one with highest confidence
+    # If cluster size = 1 and there is an address tag on that single address
+    #   -> the one tag is best address tag
+    # If cluster size = 1 and there are several address tags on that address
+    #   -> the one with highest confidence
 
 
 async def list_address_tags_by_entity(test_case):
