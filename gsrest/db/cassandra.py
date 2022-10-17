@@ -290,7 +290,7 @@ class Cassandra:
             if result:
                 stats['no_blocks'] = result['last_synced_block'] + 1
                 stats['timestamp'] =\
-                    result['last_synced_block_timestamp'].timestamp()\
+                    int(result['last_synced_block_timestamp'].timestamp())\
                     if 'last_synced_block_timestamp' in result else\
                     stats['timestamp']
 
