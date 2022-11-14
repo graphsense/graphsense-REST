@@ -8,7 +8,6 @@ from openapi_server.models.base_model_ import Model
 from openapi_server.models.address import Address
 from openapi_server.models.neighbor_entity import NeighborEntity
 from openapi_server.models.search_result_leaf import SearchResultLeaf
-from openapi_server.models.search_result_level6_all_of import SearchResultLevel6AllOf
 from openapi_server import util
 
 
