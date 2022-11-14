@@ -3,6 +3,7 @@ import time
 import asyncio
 from collections import namedtuple
 from cassandra import InvalidRequest
+from cassandra.protocol import ProtocolException
 from cassandra.cluster import Cluster, NoHostAvailable
 from cassandra.query import SimpleStatement, dict_factory, ValueSequence
 from math import floor
@@ -191,10 +192,16 @@ class Cassandra:
     async def execute_async(self, currency, keyspace_type, query,
                             params=None, paging_state=None, fetch_size=None,
                             autopaging=False):
-        result = await self.execute_async_lowlevel(
-                    currency, keyspace_type, query,
-                    params=params, paging_state=paging_state,
-                    fetch_size=fetch_size)
+        try:
+            result = await self.execute_async_lowlevel(
+                        currency, keyspace_type, query,
+                        params=params, paging_state=paging_state,
+                        fetch_size=fetch_size)
+        except ProtocolException as e:
+            if 'Invalid value for the paging state' not in str(e):
+                raise e
+            raise ValueError('Invalid value for page. Please use handle from '
+                             'previous requests.')
         if not autopaging:
             return result
 
