@@ -7,8 +7,6 @@ from typing import List, Dict, Type
 from openapi_server.models.base_model_ import Model
 from openapi_server.models.address import Address
 from openapi_server.models.neighbor_entity import NeighborEntity
-from openapi_server.models.search_result_leaf import SearchResultLeaf
-from openapi_server.models.search_result_level5_all_of import SearchResultLevel5AllOf
 from openapi_server.models.search_result_level6 import SearchResultLevel6
 from openapi_server import util
 
