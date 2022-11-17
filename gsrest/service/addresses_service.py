@@ -90,6 +90,9 @@ async def get_address_entity(request, currency, address):
             raise notfound
         return from_row(currency, entity, rates['rates'])
 
+    if entity_id is None:
+        raise notfound
+
     result = await get_entity(request, currency, entity_id)
     if result is None:
         raise notfound
