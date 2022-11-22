@@ -57,36 +57,39 @@ async def list_address_tags_by_entity(request, currency, entity,
     return AddressTags(address_tags=address_tags, next_page=next_page)
 
 
-async def get_entity(request, currency, entity):
+async def get_entity(request, currency, entity, with_tag=True):
     db = request.app['db']
     result = await db.get_entity(currency, entity)
 
     if result is None:
         raise RuntimeError("Entity {} not found".format(entity))
 
-    tags = await tagstores(
-            request.app['tagstores'],
-            address_tag_from_row,
-            'list_entity_tags_by_entity',
-            currency, entity, request.app['show_private_tags'])
+    tags = None
+    count = 0
+    if with_tag:
+        tags = await tagstores(
+                request.app['tagstores'],
+                address_tag_from_row,
+                'list_entity_tags_by_entity',
+                currency, entity, request.app['show_private_tags'])
+
+        counts = await tagstores(
+                request.app['tagstores'],
+                lambda x: x,
+                'count_address_tags_by_entity',
+                currency, entity, request.app['show_private_tags'])
+        for c in counts:
+            count += 0 if c['count'] is None else int(c['count'])
 
     rates = (await get_rates(request, currency))['rates']
-
-    counts = await tagstores(
-            request.app['tagstores'],
-            lambda x: x,
-            'count_address_tags_by_entity',
-            currency, entity, request.app['show_private_tags'])
-    count = 0
-    for c in counts:
-        count += 0 if c['count'] is None else int(c['count'])
     return from_row(currency, result, rates, tags, count)
 
 
 async def list_entity_neighbors(request, currency, entity, direction,
                                 only_ids=None, include_labels=False,
                                 page=None, pagesize=None,
-                                relations_only=False):
+                                relations_only=False,
+                                with_tag=True):
     results, paging_state = \
            await common.list_neighbors(request, currency, entity, direction,
                                        'entity',
@@ -98,7 +101,8 @@ async def list_entity_neighbors(request, currency, entity, direction,
     if results is None:
         return NeighborEntities()
     if not relations_only:
-        aws = [get_entity(request, currency, row[dst+'_cluster_id'])
+        aws = [get_entity(request, currency, row[dst+'_cluster_id'],
+                          with_tag=with_tag)
                for row in results]
 
         nodes = await asyncio.gather(*aws)
@@ -132,10 +136,20 @@ async def list_entity_addresses(request, currency, entity,
 async def search_entity_neighbors(request, currency, entity, direction,
                                   key, value,
                                   depth, breadth, skip_num_addresses=None):
-    params = dict()
-    db = request.app['db']
+    targets = None
+    with_tag = False
+    addresses = []
+
+    def stop_neighbor(neighbor):
+        return skip_num_addresses is not None \
+            and neighbor.entity.no_addresses > skip_num_addresses
+
     if 'category' in key:
-        params['category'] = value[0]
+        with_tag = True
+
+        def match_neighbor(neighbor):
+            return neighbor.entity.best_address_tag and \
+                neighbor.entity.best_address_tag.category == value[0]
 
     elif 'total_received' in key or 'balance' in key:
         [curr, min_value, *max_value] = value
@@ -143,32 +157,191 @@ async def search_entity_neighbors(request, currency, entity, direction,
         max_value = float(max_value[0]) if len(max_value) > 0 else None
         if max_value is not None and min_value > max_value:
             raise ValueError('Min must not be greater than max')
-        params['field'] = (key, curr, min_value, max_value)
+
+        def match_neighbor(neighbor):
+            values = getattr(neighbor.entity, key)
+            v = None
+            if curr == 'value':
+                v = values.value
+            else:
+                for f in values.fiat_values:
+                    if f.code == curr:
+                        v = f.value
+                        break
+            return v is not None and \
+                v >= min_value and \
+                (max_value is None or max_value >= v)
 
     elif 'addresses' in key:
-        addresses_list = []
-        aws = [db.get_address_entity_id(currency, address)
+        aws = [get_address(request, currency, address)
                for address in value]
-        for (address, e) in zip(value, await asyncio.gather(*aws)):
-            if e:
-                addresses_list.append({"address": address,
-                                       "entity": e})
-            else:
-                raise RuntimeError(
-                    "Entity of address {} not found in currency {}"
-                    .format(address, currency))
-        params['addresses'] = addresses_list
+        addresses = await asyncio.gather(*aws)
+        addresses_list = [{"address": a.address, "entity": a.entity}
+                          for a in addresses if a is not None]
+
+        targets = [id["entity"] for id in addresses_list]
+
+        request.app.logger.debug(f'addresses_list {addresses_list}')
+
+        def match_neighbor(neighbor):
+            matching_addresses = [id["address"] for id in addresses_list
+                                  if id["entity"] == neighbor.entity.entity]
+            request.app.logger.debug(
+                f'matching addresses {matching_addresses}')
+            return len(matching_addresses) > 0
 
     elif 'entities' in key:
-        params['entities'] = value
+        targets = [int(v) for v in value]
 
-    level = 1
+        def match_neighbor(neighbor):
+            return str(neighbor.entity.entity) in value
+
+    async def list_neighbors(entity):
+        pagesize = max(breadth, len(targets)) if targets else breadth
+        result = await list_entity_neighbors(
+            request,
+            currency,
+            entity,
+            direction,
+            only_ids=targets,
+            with_tag=with_tag,
+            pagesize=pagesize)
+        if not result.neighbors:
+            result = \
+                await list_entity_neighbors(
+                    request,
+                    currency,
+                    entity,
+                    direction,
+                    only_ids=None,
+                    with_tag=with_tag,
+                    pagesize=pagesize)
+
+        return result.neighbors
+
+    def key_accessor(neighbor):
+        return neighbor.entity.entity
+
     result = \
-        await recursive_search(request, currency, entity, params,
-                               breadth, depth, level, skip_num_addresses,
-                               direction)
+        await bfs(request, entity, key_accessor,
+                  list_neighbors, stop_neighbor, match_neighbor,
+                  depth)
 
-    return result
+    request.app.logger.debug(f'result {result}')
+
+    async def resolve(neighbor):
+        if not with_tag:
+            neighbor.entity = \
+                await get_entity(request, currency, neighbor.entity.entity)
+        return neighbor
+
+    async def resolve_path(path):
+        aws = [resolve(dst) for dst in path]
+        neighbors = list(enumerate(await asyncio.gather(*aws)))
+        neighbors.reverse()
+        paths = []
+        for (i, neighbor) in neighbors:
+            level = i + 1
+            if level < MAX_DEPTH:
+                mod = importlib.import_module(
+                    f'openapi_server.models.search_result_level{level}')
+                levelClass = getattr(mod, f'SearchResultLevel{level}')
+                paths = [levelClass(neighbor=neighbor,
+                                    matching_addresses=addresses if
+                                    not paths else [],
+                                    paths=paths)]
+            else:
+                mod = importlib.import_module(
+                    'openapi_server.models.search_result_leaf')
+                levelClass = getattr(mod, 'SearchResultLeaf')
+                paths = [levelClass(neighbor=neighbor,
+                                    matching_addresses=addresses,
+                                    paths=paths)]
+        return paths[0]
+
+    aws = [resolve_path(path) for path in result]
+    return await asyncio.gather(*aws)
+
+
+async def bfs(request,
+              node,
+              key_accessor,
+              list_neighbors,
+              stop_neighbor,
+              match_neighbor,
+              max_depth=3):
+
+    # collect matching paths
+    matching_paths = []
+
+    # cache matching neighbors
+    matching_neighbors = {}
+
+    # maintain a queue of paths
+    queue = []
+
+    start = True
+
+    # count number of requests
+    no_requests = 0
+
+    request.app.logger.debug(f"seed node {node}")
+
+    while(start or queue):
+
+        if not start:
+            # get first path from the queue
+            path = queue.pop(0)
+
+            # get the last node from the path
+            last = key_accessor(path[-1])
+        else:
+            path = []
+            last = node
+
+        start = False
+
+        request.app.logger.debug(f"No requests: {no_requests}, " +
+                                 f"Queue size: {len(queue)}, " +
+                                 f"path length: {len(path)}")
+
+        # retrieve neighbors
+        neighbors = matching_neighbors.get(last, None)
+        if not neighbors:
+            neighbors = await list_neighbors(last)
+        else:
+            request.app.logger.debug(f"Neighbor cache hit for {last}")
+
+        no_requests += 1
+
+        request.app.logger.debug(f'neighbors {neighbors}')
+
+        for neighbor in neighbors:
+
+            new_path = list(path)
+            new_path.append(neighbor)
+
+            # found path
+            if match_neighbor(neighbor):
+                request.app.logger.debug(f"MATCH {new_path}")
+                matching_paths.append(new_path)
+                matching_neighbors[key_accessor(neighbor)] = neighbor
+                continue
+
+            # stop if max depth is reached
+            if len(new_path) - 1 == max_depth:
+                request.app.logger.debug("STOP | max depth")
+                continue
+
+            # stop if stop criteria fulfilled
+            if(stop_neighbor(neighbor)):
+                request.app.logger.debug(f"STOP {new_path}")
+                continue
+
+            queue.append(new_path)
+
+        if len(queue) == 0:
+            return matching_paths
 
 
 async def recursive_search(request, currency, entity, params, breadth, depth,
