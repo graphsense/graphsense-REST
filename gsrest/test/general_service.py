@@ -13,8 +13,8 @@ stats = Stats(
             no_blocks=3,
             timestamp=420,
             no_txs=110,
-            no_labels=10,
-            no_tagged_addresses=70,
+            no_labels=13,
+            no_tagged_addresses=79,
             no_address_relations=1230
             ),
         CurrencyStats(

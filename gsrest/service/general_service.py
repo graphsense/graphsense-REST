@@ -17,7 +17,7 @@ async def get_statistics(request):
     version = request.app['openapi']['info']['version']
     currency_stats = list()
     db = request.app['db']
-    aws = [get_currency_statistics(request, currency, version)
+    aws = [get_currency_statistics(request, currency)
            for currency in db.get_supported_currencies()]
     currency_stats = await asyncio.gather(*aws)
 
