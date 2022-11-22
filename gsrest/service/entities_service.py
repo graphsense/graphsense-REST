@@ -329,7 +329,7 @@ async def bfs(request,
                 continue
 
             # stop if max depth is reached
-            if len(new_path) - 1 == max_depth:
+            if len(new_path) == max_depth:
                 request.app.logger.debug("STOP | max depth")
                 continue
 
