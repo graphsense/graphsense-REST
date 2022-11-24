@@ -286,60 +286,74 @@ async def bfs(request,
 
     start_time = time.time()
 
+    request.app.logger.debug(f"start_time {start_time}")
+
     request.app.logger.debug(f"seed node {node}")
+
+    pop = 100
 
     while(start or queue):
 
         if not start:
-            # get first path from the queue
-            path = queue.pop(0)
+            # get first 100 path from the queue
+            paths = queue[0:pop]
+            queue = queue[pop:]
 
             # get the last node from the path
-            last = key_accessor(path[-1])
+            lasts = [key_accessor(path[-1]) for path in paths]
         else:
-            path = []
-            last = node
+            paths = [[]]
+            lasts = [node]
 
         start = False
 
+        run_time = time.time() - start_time
+
         request.app.logger.debug(f"No requests: {no_requests}, " +
                                  f"Queue size: {len(queue)}, " +
-                                 f"path length: {len(path)}")
+                                 f"path length: {len(paths[0])}, " +
+                                 f"run time: {run_time}")
 
         # retrieve neighbors
-        neighbors = matching_neighbors.get(last, None)
-        if not neighbors:
-            neighbors = await list_neighbors(last)
-        else:
-            request.app.logger.debug(f"Neighbor cache hit for {last}")
+        async def retrieve_neighbor(last):
+            neighbors = matching_neighbors.get(last, None)
+            if not neighbors:
+                neighbors = await list_neighbors(last)
+            else:
+                request.app.logger.debug(f"Neighbor cache hit for {last}")
+            return neighbors
 
-        no_requests += 1
+        no_requests += pop
 
-        for neighbor in neighbors:
+        aws = [retrieve_neighbor(last) for last in lasts]
+        list_of_neighbors = await asyncio.gather(*aws)
 
-            new_path = list(path)
-            new_path.append(neighbor)
+        for neighbors, path in zip(list_of_neighbors, paths):
+            for neighbor in neighbors:
 
-            # found path
-            if match_neighbor(neighbor):
-                request.app.logger.debug(f"MATCH {key_accessor(neighbor)}")
-                matching_paths.append(new_path)
-                matching_neighbors[key_accessor(neighbor)] = neighbor
-                continue
+                new_path = list(path)
+                new_path.append(neighbor)
 
-            # stop if max depth is reached
-            if len(new_path) == max_depth:
-                request.app.logger.debug("STOP | max depth")
-                continue
+                # found path
+                if match_neighbor(neighbor):
+                    request.app.logger.debug(f"MATCH {key_accessor(neighbor)}")
+                    matching_paths.append(new_path)
+                    matching_neighbors[key_accessor(neighbor)] = neighbor
+                    continue
 
-            # stop if stop criteria fulfilled
-            if(stop_neighbor(neighbor)):
-                request.app.logger.debug(f"STOP {key_accessor(neighbor)}")
-                continue
+                # stop if max depth is reached
+                if len(new_path) == max_depth:
+                    request.app.logger.debug("STOP | max depth")
+                    continue
 
-            queue.append(new_path)
+                # stop if stop criteria fulfilled
+                if(stop_neighbor(neighbor)):
+                    request.app.logger.debug(f"STOP {key_accessor(neighbor)}")
+                    continue
 
-        if len(queue) == 0 or time.time() - start_time > SEARCH_TIMEOUT:
+                queue.append(new_path)
+
+        if len(queue) == 0 or run_time > SEARCH_TIMEOUT:
             return matching_paths
 
 
