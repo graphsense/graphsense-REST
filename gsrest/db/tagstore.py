@@ -236,7 +236,8 @@ class Tagstore:
                         {hide_private_condition(show_private)}
                         and t.tagpack=tp.id
                     order by
-                        c.level desc
+                        c.level desc,
+                        t.address asc
                         """
 
         return self.execute(query,
@@ -283,6 +284,7 @@ class Tagstore:
                         and cd.currency = %s
                         and cd.gs_cluster_id = %s
                         and t.tagpack=tp.id
+                        and t.address=cd.address
                         and
                             (cd.is_cluster_definer=true
                                 AND t.is_cluster_definer=true
