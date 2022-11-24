@@ -253,8 +253,7 @@ async def search_entity_neighbors(request, currency, entity, direction,
                     'openapi_server.models.search_result_leaf')
                 levelClass = getattr(mod, 'SearchResultLeaf')
                 paths = [levelClass(neighbor=neighbor,
-                                    matching_addresses=addresses,
-                                    paths=paths)]
+                                    matching_addresses=addresses)]
         return paths[0]
 
     aws = [resolve_path(path) for path in result]
