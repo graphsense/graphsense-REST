@@ -13,9 +13,11 @@ from gsrest.service.tags_service import address_tag_from_row
 import gsrest.service.common_service as common
 import importlib
 import asyncio
+import time
 
 MAX_DEPTH = 7
 TAGS_PAGE_SIZE = 100
+SEARCH_TIMEOUT = 300
 
 
 def from_row(currency, row, rates, tags=None, count=0):
@@ -206,7 +208,7 @@ async def search_entity_neighbors(request, currency, entity, direction,
             only_ids=targets,
             with_tag=with_tag,
             pagesize=pagesize)
-        if not result.neighbors:
+        if targets and not result.neighbors:
             result = \
                 await list_entity_neighbors(
                     request,
@@ -282,6 +284,8 @@ async def bfs(request,
     # count number of requests
     no_requests = 0
 
+    start_time = time.time()
+
     request.app.logger.debug(f"seed node {node}")
 
     while(start or queue):
@@ -335,7 +339,7 @@ async def bfs(request,
 
             queue.append(new_path)
 
-        if len(queue) == 0:
+        if len(queue) == 0 or time.time() - start_time > SEARCH_TIMEOUT:
             return matching_paths
 
 
