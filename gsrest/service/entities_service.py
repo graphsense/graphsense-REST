@@ -273,9 +273,6 @@ async def bfs(request,
     # collect matching paths
     matching_paths = []
 
-    # cache matching neighbors
-    matching_neighbors = {}
-
     # maintain a queue of paths
     queue = []
 
@@ -315,13 +312,8 @@ async def bfs(request,
                                  f"run time: {run_time}")
 
         # retrieve neighbors
-        async def retrieve_neighbor(last):
-            neighbors = matching_neighbors.get(last, None)
-            if not neighbors:
-                neighbors = await list_neighbors(last)
-            else:
-                request.app.logger.debug(f"Neighbor cache hit for {last}")
-            return neighbors
+        def retrieve_neighbor(last):
+            return list_neighbors(last)
 
         no_requests += pop
 
@@ -338,7 +330,6 @@ async def bfs(request,
                 if match_neighbor(neighbor):
                     request.app.logger.debug(f"MATCH {key_accessor(neighbor)}")
                     matching_paths.append(new_path)
-                    matching_neighbors[key_accessor(neighbor)] = neighbor
                     continue
 
                 # stop if max depth is reached
