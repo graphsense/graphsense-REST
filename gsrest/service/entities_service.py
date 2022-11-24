@@ -227,8 +227,6 @@ async def search_entity_neighbors(request, currency, entity, direction,
                   list_neighbors, stop_neighbor, match_neighbor,
                   depth)
 
-    request.app.logger.debug(f'result {result}')
-
     async def resolve(neighbor):
         if not with_tag:
             neighbor.entity = \
@@ -314,8 +312,6 @@ async def bfs(request,
 
         no_requests += 1
 
-        request.app.logger.debug(f'neighbors {neighbors}')
-
         for neighbor in neighbors:
 
             new_path = list(path)
@@ -323,7 +319,7 @@ async def bfs(request,
 
             # found path
             if match_neighbor(neighbor):
-                request.app.logger.debug(f"MATCH {new_path}")
+                request.app.logger.debug(f"MATCH {key_accessor(neighbor)}")
                 matching_paths.append(new_path)
                 matching_neighbors[key_accessor(neighbor)] = neighbor
                 continue
@@ -335,7 +331,7 @@ async def bfs(request,
 
             # stop if stop criteria fulfilled
             if(stop_neighbor(neighbor)):
-                request.app.logger.debug(f"STOP {new_path}")
+                request.app.logger.debug(f"STOP {key_accessor(neighbor)}")
                 continue
 
             queue.append(new_path)
