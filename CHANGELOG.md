@@ -3,6 +3,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [22.11] - 2022-11-25
+### Added
+- Entity tag tests
+- Entity neighbor search limited to max. 5 min
+### Changes
+- Fixed selection of best address tag
+- Improve error message on bad paging state value
+- Raise not found error for retrieving entity of non existing eth address
+- Performance improvements for entity neighbor search
+- Performance improvements for `get_rates`
+- Improve entity tag resolution.
+
 ## [22.10] - 2022-10-10
 ### Added
 - `only_ids` filter for `list_address_neighbors`

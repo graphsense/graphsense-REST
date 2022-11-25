@@ -1,7 +1,7 @@
 import os
 import multiprocessing
 
-timeout = 300
+timeout = 30
 capture_output = True
 accesslog = '-'
 errorlog = '-'

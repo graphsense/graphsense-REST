@@ -37,8 +37,9 @@ class Row:
         return self.row[self.columns[key]]
 
 
-async def to_result(cursor, page=None, pagesize=None):
+async def to_result(logger, cursor, page=None, pagesize=None):
     rows = await cursor.fetchall()
+    logger.debug(f'result size {len(rows)}')
     columns = {}
     i = 0
     for c in cursor.description:
@@ -120,7 +121,7 @@ class Tagstore:
 
                 self.logger.debug(f'{query} {params}')
                 await cur.execute(query, params)
-                return await to_result(cur, page, pagesize)
+                return await to_result(self.logger, cur, page, pagesize)
 
     def list_taxonomies(self):
         return self.execute("select * from taxonomy")
@@ -235,7 +236,8 @@ class Tagstore:
                         {hide_private_condition(show_private)}
                         and t.tagpack=tp.id
                     order by
-                        c.level desc
+                        c.level desc,
+                        t.address asc
                         """
 
         return self.execute(query,
@@ -282,6 +284,7 @@ class Tagstore:
                         and cd.currency = %s
                         and cd.gs_cluster_id = %s
                         and t.tagpack=tp.id
+                        and t.address=cd.address
                         and
                             (cd.is_cluster_definer=true
                                 AND t.is_cluster_definer=true

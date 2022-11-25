@@ -1,5 +1,5 @@
 from openapi_server.models.rates import Rates
-from gsrest.service.stats_service import get_currency_statistics
+from gsrest.service.stats_service import get_no_blocks
 
 
 RATES_TABLE = 'exchange_rates'
@@ -13,8 +13,8 @@ async def get_exchange_rates(request, currency, height):
 
 async def get_rates(request, currency, height=None):
     if height is None:
-        height = (await get_currency_statistics(request, currency)
-                  ).no_blocks - 1
+        height = (await get_no_blocks(request, currency)
+                  ) - 1
 
     db = request.app['db']
     r = await db.get_rates(currency, height)
