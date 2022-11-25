@@ -7,7 +7,7 @@ info:
     entities, blocks, transactions and tags for automated and highly efficient forensics
     tasks.
   title: GraphSense API
-  version: 1.1.0
+  version: 1.1.1
 servers:
 - url: http://graphsense-rest:9000
 paths:
@@ -739,6 +739,11 @@ paths:
       requestBody:
         content:
           application/json:
+            example:
+              height:
+              - 1
+              - 2
+              - 3
             schema:
               type: object
         description: Map of the operation's parameter names to (arrays of) values
