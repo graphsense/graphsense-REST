@@ -12,7 +12,7 @@ if [ -z "$ORGANIZATION" ]; then
     exit 1
 fi
 
-SCHEMA="https://raw.githubusercontent.com/$ORGANIZATION/graphsense-tagpack-tool/$TAG/tagpack/db/tagstore_schema.sql"
+SCHEMA="https://raw.githubusercontent.com/$ORGANIZATION/graphsense-tagpack-tool/$TAG/src/tagpack/db/tagstore_schema.sql"
 
 function schema() {
   temp=`mktemp`
