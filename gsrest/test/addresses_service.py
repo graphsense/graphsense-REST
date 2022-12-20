@@ -717,12 +717,12 @@ async def list_address_txs(test_case):
     path = '/{currency}/addresses/{address}/txs'
     rates = await list_rates(test_case, currency='btc', heights=[2])
     txs = [AddressTxUtxo(
-                tx_hash="123456",
+                tx_hash="4567",
                 currency="btc",
-                value=convert_value('btc', 1260000, rates[2]),
+                value=convert_value('btc', -1, rates[2]),
                 height=2,
                 coinbase=False,
-                timestamp=1510347493),
+                timestamp=1510347492),
            AddressTxUtxo(
                 tx_hash="abcdef",
                 currency="btc",
@@ -731,12 +731,13 @@ async def list_address_txs(test_case):
                 coinbase=False,
                 timestamp=1511153263),
            AddressTxUtxo(
-                tx_hash="4567",
+                tx_hash="123456",
                 currency="btc",
-                value=convert_value('btc', -1, rates[2]),
+                value=convert_value('btc', 1260000, rates[2]),
                 height=2,
                 coinbase=False,
-                timestamp=1510347492)]
+                timestamp=1510347493)
+           ]
     address_txs = AddressTxs(
                     next_page=None,
                     address_txs=txs
@@ -744,8 +745,8 @@ async def list_address_txs(test_case):
     result = await test_case.request(path,
                                      currency='btc',
                                      address=address2.address)
-    test_case.assertEqualWithList(address_txs.to_dict(), result, 'address_txs',
-                                  'tx_hash')
+    test_case.assertEqual(address_txs.to_dict()['address_txs'],
+                          result['address_txs'])
 
     path_with_direction =\
         '/{currency}/addresses/{address}/txs?direction={direction}'
@@ -753,17 +754,17 @@ async def list_address_txs(test_case):
                                      currency='btc',
                                      address=address2.address,
                                      direction='out')
-    address_txs.address_txs = txs[1:]
-    test_case.assertEqualWithList(address_txs.to_dict(), result, 'address_txs',
-                                  'tx_hash')
+    address_txs.address_txs = txs[0:2]
+    test_case.assertEqual(address_txs.to_dict()['address_txs'],
+                          result['address_txs'])
 
     result = await test_case.request(path_with_direction,
                                      currency='btc',
                                      address=address2.address,
                                      direction='in')
-    address_txs.address_txs = txs[0:1]
-    test_case.assertEqualWithList(address_txs.to_dict(), result, 'address_txs',
-                                  'tx_hash')
+    address_txs.address_txs = txs[2:]
+    test_case.assertEqual(address_txs.to_dict()['address_txs'],
+                          result['address_txs'])
 
     def reverse(tx):
         tx_r = TxAccount.from_dict(copy.deepcopy(tx.to_dict()))
@@ -773,12 +774,11 @@ async def list_address_txs(test_case):
         return tx_r
     tx2_eth_r = reverse(tx2_eth)
     tx22_eth_r = reverse(tx22_eth)
-    txs = AddressTxs(address_txs=[tx1_eth, tx4_eth, tx2_eth_r, tx22_eth_r])
+    txs = AddressTxs(address_txs=[tx22_eth_r, tx2_eth_r, tx4_eth, tx1_eth])
     result = await test_case.request(path,
                                      currency='eth',
                                      address=eth_address.address)
-    test_case.assertEqualWithList(txs.to_dict(), result, 'address_txs',
-                                  'tx_hash')
+    test_case.assertEqual(txs.to_dict()['address_txs'], result['address_txs'])
 
 
 async def list_tags_by_address(test_case):

@@ -16,7 +16,7 @@ SEARCH_PAGE_SIZE = 100
 
 
 def to_hex(paging_state):
-    return paging_state.hex() if paging_state is not None else None
+    return paging_state.hex() if paging_state else paging_state
 
 
 def from_hex(page):
@@ -365,7 +365,7 @@ class Cassandra:
     @eth
     async def list_txs_by_node_type(self, currency, node_type, id, direction,
                                     page=None, pagesize=None):
-        paging_state = from_hex(page)
+        paging_state = (page or '').split('|')
         if node_type == 'address':
             id, id_group = \
                 await self.get_address_id_id_group(currency, id)
@@ -373,27 +373,75 @@ class Cassandra:
             id_group = self.get_id_group(currency, id)
 
         query = f"SELECT * FROM {node_type}_transactions " \
-                f"WHERE {node_type}_id = %s AND {node_type}_id_group = %s"
+                f"WHERE {node_type}_id = %s AND {node_type}_id_group = %s" \
+                f" and is_outgoing = %s order by tx_id desc"
 
         params = [id, id_group]
-        if direction:
-            query += " and is_outgoing = %s"
-            params.append(direction == 'out')
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
-        results = await self.execute_async(currency, 'transformed', query,
-                                           params,
-                                           paging_state=paging_state,
-                                           fetch_size=fetch_size)
-        if results is None:
+        if direction:
+            params.append(direction == 'out')
+            results = await self.execute_async(currency, 'transformed', query,
+                                               params,
+                                               paging_state=from_hex(
+                                                   paging_state[0]),
+                                               fetch_size=fetch_size)
+            paging_state = to_hex(results.paging_state)
+            results = results.current_rows
+        else:
+            fetch_size /= 2
+            paging_state1 = paging_state[0] or None
+            paging_state2 = paging_state[1] if len(paging_state) > 1 else None
+            params1 = list(params)
+            params1.append(False)
+            aw1 = self.execute_async(currency, 'transformed',
+                                     query,
+                                     params1,
+                                     paging_state=from_hex(paging_state1),
+                                     fetch_size=fetch_size)
+            params2 = list(params)
+            params2.append(True)
+            aw2 = self.execute_async(currency, 'transformed',
+                                     query,
+                                     params2,
+                                     paging_state=from_hex(paging_state2),
+                                     fetch_size=fetch_size)
+            [results1, results2] = await asyncio.gather(aw1, aw2)
+            if results1.paging_state is None and \
+               results2.paging_state is None:
+                paging_state = None
+            else:
+                paging_state = \
+                    to_hex(results1.paging_state or '') + '|' + \
+                    to_hex(results2.paging_state or '')
+            results1 = results1.current_rows
+            results2 = results2.current_rows
+            results = []
+            i = j = 0
+            while len(results) < fetch_size and \
+                  (i < len(results1) or j < len(results2)): # noqa
+                if i >= len(results1):
+                    results.append(results2[j])
+                    j += 1
+                elif j >= len(results2):
+                    results.append(results1[i])
+                    i += 1
+                elif results1[i]['tx_id'] > results2[j]['tx_id']:
+                    results.append(results1[i])
+                    i += 1
+                else:
+                    results.append(results2[j])
+                    j += 1
+
+        if not results:
             raise RuntimeError(
                 f'{node_type} {id} not found in currency {currency}')
 
         txs = await self.list_txs_by_ids(
                 currency,
-                [row['tx_id'] for row in results.current_rows],
+                [row['tx_id'] for row in results],
                 filter_empty=False)
         rows = []
-        for (row, tx) in zip(results.current_rows, txs):
+        for (row, tx) in zip(results, txs):
             if tx is None:
                 continue
             row['tx_hash'] = tx['tx_hash']
@@ -402,7 +450,7 @@ class Cassandra:
             row['coinbase'] = tx['coinbase']
             rows.append(row)
 
-        return rows, to_hex(results.paging_state)
+        return rows, paging_state
 
     async def get_addresses_by_ids(self, currency, address_ids,
                                    address_only=False):
