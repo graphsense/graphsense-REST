@@ -14,6 +14,7 @@ fi
 MOCK_CMD="docker exec $CASSANDRA_MOCK cqlsh"
 
 TAG=develop
+ETHTAG=feature/token-flows
 
 if [ -z "$ORGANIZATION" ]; then
     echo 'Please set env var $ORGANIZATION'
@@ -23,7 +24,7 @@ fi
 UTXO_RAW_SCHEMA="https://raw.githubusercontent.com/$ORGANIZATION/graphsense-blocksci/$TAG/scripts/"
 UTXO_TRANSFORMED_SCHEMA="https://raw.githubusercontent.com/$ORGANIZATION/graphsense-transformation/$TAG/scripts/"
 ETH_RAW_SCHEMA="https://raw.githubusercontent.com/$ORGANIZATION/graphsense-ethereum-etl/$TAG/scripts/"
-ETH_TRANSFORMED_SCHEMA="https://raw.githubusercontent.com/$ORGANIZATION/graphsense-ethereum-transformation/$TAG/scripts/"
+ETH_TRANSFORMED_SCHEMA="https://raw.githubusercontent.com/$ORGANIZATION/graphsense-ethereum-transformation/$ETHTAG/scripts/"
 
 function schema() {
   temp=`mktemp`

@@ -2,10 +2,10 @@ from openapi_server.models.tx_utxo import TxUtxo
 from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.tx_value import TxValue
 from gsrest.service.rates_service import get_rates
-from gsrest.util.values import convert_value
+from gsrest.util.values import convert_value, convert_token_values_map
 
 
-def from_row(currency, row, rates, include_io=False):
+def from_row(currency, row, rates, token_config, include_io=False):
     if currency == 'eth':
         return TxAccount(
             currency=currency,
@@ -14,7 +14,9 @@ def from_row(currency, row, rates, include_io=False):
             height=row['block_id'],
             from_address=row['from_address'],
             to_address=row['to_address'],
+            token_values=convert_token_values_map(currency, row.get("token_values", None), rates, token_config),
             value=convert_value(currency, row['value'], rates))
+
     return TxUtxo(
             currency=currency,
             tx_hash=row['tx_hash'].hex(),
@@ -49,14 +51,15 @@ async def get_tx(request, currency, tx_hash, include_io=False):
                            .format(tx_hash, currency))
 
     rates = (await get_rates(request, currency, result['block_id']))['rates']
-    result = from_row(currency, result, rates, include_io)
+
+    result = from_row(currency, result, rates, db.get_token_configuration(currency), include_io)
     return result
 
 
 async def get_tx_io(request, currency, tx_hash, io):
-    result = await get_tx(request, currency, tx_hash, include_io=True)
     if currency == 'eth':
         raise RuntimeError('get_tx_io not implemented for ETH')
+    result = await get_tx(request, currency, tx_hash, include_io=True)
     return getattr(result, io)
 
 

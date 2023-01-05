@@ -22,7 +22,7 @@ async def list_address_txs(request, currency, address, direction=None,
     db = request.app['db']
     results, paging_state = \
         await db.list_address_txs(currency, address, direction, page, pagesize)
-    address_txs = await common.txs_from_rows(request, currency, results)
+    address_txs = await common.txs_from_rows(request, currency, results, db.get_token_configuration(currency))
     return AddressTxs(next_page=paging_state, address_txs=address_txs)
 
 
@@ -88,7 +88,7 @@ async def get_address_entity(request, currency, address):
             if 'not found' not in str(e):
                 raise e
             raise notfound
-        return from_row(currency, entity, rates['rates'])
+        return from_row(currency, entity, rates['rates'], db.get_token_configuration(currency))
 
     if entity_id is None:
         raise notfound

@@ -1,7 +1,7 @@
 from openapi_server.models.address import Address
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.address_tags import AddressTags
-from gsrest.util.values import convert_value, to_values
+from gsrest.util.values import convert_value, convert_token_values_map, to_values, to_values_tokens
 from gsrest.service.rates_service import get_rates
 from openapi_server.models.link_utxo import LinkUtxo
 from openapi_server.models.links import Links
@@ -12,7 +12,7 @@ from gsrest.db.util import tagstores, tagstores_with_paging
 from gsrest.service.tags_service import address_tag_from_row
 
 
-def address_from_row(currency, row, rates):
+def address_from_row(currency, row, rates, token_config):
     return Address(
         currency=currency,
         address=row['address'],
@@ -28,15 +28,18 @@ def address_from_row(currency, row, rates):
         no_incoming_txs=row['no_incoming_txs'],
         no_outgoing_txs=row['no_outgoing_txs'],
         total_received=to_values(row['total_received']),
+        total_tokens_received=to_values_tokens(row.get("total_tokens_received", None)),
         total_spent=to_values(row['total_spent']),
+        total_tokens_spent=to_values_tokens(row.get("total_tokens_spent", None)),
         in_degree=row['in_degree'],
         out_degree=row['out_degree'],
         balance=convert_value(currency, row['balance'], rates),
+        token_balances=convert_token_values_map(currency, row.get('token_balances', None), rates, token_config),
         status=row['status']
         )
 
 
-async def txs_from_rows(request, currency, rows):
+async def txs_from_rows(request, currency, rows, token_config):
     heights = [row['height'] for row in rows]
     rates = await list_rates(request, currency, heights)
     if currency == 'eth':
@@ -47,6 +50,7 @@ async def txs_from_rows(request, currency, rows):
                 tx_hash=row['tx_hash'].hex(),
                 from_address=row['from_address'],
                 to_address=row['to_address'],
+                token_values=convert_token_values_map(currency, row.get('token_values'), rates, token_config),
                 value=convert_value(currency, row['value'],
                                     rates[row['height']]))
                 for row in rows]
@@ -69,7 +73,7 @@ async def get_address(request, currency, address):
             address, currency))
     return address_from_row(currency, result,
                             (await get_rates(request, currency)
-                             )['rates'])
+                             )['rates'], db.get_token_configuration(currency))
 
 
 async def list_tags_by_address(request, currency, address,

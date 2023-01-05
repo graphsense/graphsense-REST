@@ -122,7 +122,7 @@ class Cassandra:
             if self.logger:
                 self.logger.info('Connection ready.')
         except NoHostAvailable:
-            retry = self.config['retry_interval']
+            retry = self.config.get('retry_interval', None)
             retry = 5 if retry is None else retry
             if self.logger:
                 self.logger.error(
@@ -137,6 +137,14 @@ class Cassandra:
         if one(result) is None:
             raise BadConfigError("Keyspace {} does not exist".format(keyspace))
 
+    @eth
+    def load_token_configuration(self, currency): 
+        return None
+
+    def load_token_configuration_eth(self, currency):
+        query = "SELECT * FROM token_configuration"
+        return {row["currency_ticker"]:row for row in self.execute(currency, "transformed", query)}
+
     def load_parameters(self, keyspace):
         self.parameters[keyspace] = {}
         for kind in ['raw', 'transformed']:
@@ -149,6 +157,8 @@ class Cassandra:
             for key, value in result.one().items():
                 self.parameters[keyspace][key] = value
 
+        self.parameters[keyspace]["token_config"] = self.load_token_configuration(keyspace)
+
     def get_prefix_lengths(self, currency):
         if currency not in self.parameters:
             raise RuntimeError(f'{currency} not found')
@@ -159,6 +169,13 @@ class Cassandra:
 
     def get_supported_currencies(self):
         return self.config['currencies'].keys()
+
+    @eth
+    def get_token_configuration(self, currency):
+        return None
+
+    def get_token_configuration_eth(self, currency):
+        return self.parameters[currency]["token_config"]
 
     def get_keyspace_mapping(self, currency, keyspace_type):
         if currency is None:
@@ -1082,6 +1099,7 @@ class Cassandra:
             self.markup_currency(currency, row['total_received'])
         row['total_spent'] = \
             self.markup_currency(currency, row['total_spent'])
+
         await self.add_balance(currency, row)
 
         if not with_txs:
@@ -1119,6 +1137,14 @@ class Cassandra:
             self.markup_currency(currency, row['total_received'])
         row['total_spent'] = \
             self.markup_currency(currency, row['total_spent'])
+
+        tr = row['total_tokens_received']
+        if tr is not None:
+            row['total_tokens_received'] = {k:self.markup_currency(currency, v) for k,v in tr.items()}
+        
+        ts = row['total_tokens_spent']
+        if ts is not None:
+            row['total_tokens_spent'] = {k:self.markup_currency(currency, v) for k,v in ts.items()}
         await self.add_balance(currency, row)
 
         if not with_txs:
@@ -1176,20 +1202,35 @@ class Cassandra:
         row['balance'] = row['total_received'].value - row['total_spent'].value
 
     async def add_balance_eth(self, currency, row):
+        token_config = self.get_token_configuration(currency)
+        token_currencies = list(token_config.keys())
+        balance_currencies = ["ETH"] + token_currencies
+
         if 'address_id_group' not in row:
             row['address_id_group'] = \
                 self.get_id_group(currency, row['address_id'])
         query = 'SELECT balance from balance where address_id=%s '\
-                'and address_id_group=%s'
-        result = await self.execute_async(
+                'and address_id_group=%s ' \
+                "and currency=%s"
+
+
+        results = {c: one(await self.execute_async(
                         currency, 'transformed', query,
-                        [row['address_id'], row['address_id_group']])
-        result = one(result)
-        if result is None:
-            result = {'balance':
+                        [row['address_id'], row['address_id_group'], c])) for c in balance_currencies}
+
+        # result = await self.execute_async(
+        #                 currency, 'transformed', query,
+        #                 [row['address_id'], row['address_id_group']])
+        # result = one(result)
+        if results["ETH"] is None:
+            results["ETH"]["balance"] = {'balance':
                       row['total_received'].value
                       - row['total_spent'].value}
-        row['balance'] = result['balance']
+        row['balance'] = results["ETH"]["balance"]
+        token_balances = {c:b["balance"] for c,b in results.items() if c in token_config and b is not None} 
+        row["token_balances"] = None if len(token_balances) == 0 else token_balances
+
+
 
 #####################
 # ETHEREUM VARIANTS #
@@ -1468,14 +1509,14 @@ class Cassandra:
             else (neighbor_id_group, neighbor_id, address_id_group, address_id,
                   neighbor_id_secondary_group, address_id_secondary_group)
 
-        basequery = "SELECT transaction_id FROM address_transactions WHERE " \
+        basequery = "SELECT transaction_id, currency FROM address_transactions WHERE " \
                     "address_id_group = %s AND address_id = %s " \
                     "AND is_outgoing = %s "
         first_query = basequery + \
             "AND address_id_secondary_group IN %s"
         second_query = basequery + \
             "AND address_id_secondary_group IN %s"\
-            " AND transaction_id = %s"
+            " AND currency = %s AND transaction_id = %s"
 
         fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
         paging_state = from_hex(page)
@@ -1501,6 +1542,7 @@ class Cassandra:
             params = [[second_id_group, second_id,
                        not isOutgoing,
                        second_id_secondary_group,
+                       row['currency'],
                        row['transaction_id']]
                       for row in results1.current_rows]
 

@@ -616,6 +616,7 @@ eth_address2 = Address(
    ),
    address="0x123456",
    entity=107925001,
+   total_tokens_received={'USDT': make_values(eur=450, usd=500, value=450), 'WETH': make_values(eur=50.56, usd=60.67, value=345000000000000000000)},
    status='clean'
 )
 

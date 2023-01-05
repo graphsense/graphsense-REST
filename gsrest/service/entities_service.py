@@ -6,7 +6,7 @@ from openapi_server.models.entity import Entity
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.address_tags import AddressTags
-from gsrest.util.values import convert_value, to_values
+from gsrest.util.values import convert_value, to_values, convert_token_values_map, to_values_tokens
 from openapi_server.models.entity_addresses import EntityAddresses
 from gsrest.db.util import tagstores, tagstores_with_paging
 from gsrest.service.tags_service import address_tag_from_row
@@ -20,7 +20,7 @@ TAGS_PAGE_SIZE = 100
 SEARCH_TIMEOUT = 300
 
 
-def from_row(currency, row, rates, tags=None, count=0):
+def from_row(currency, row, rates, token_config, tags=None, count=0):
     return Entity(
         currency=currency,
         entity=row['cluster_id'],
@@ -37,10 +37,13 @@ def from_row(currency, row, rates, tags=None, count=0):
         no_incoming_txs=row['no_incoming_txs'],
         no_outgoing_txs=row['no_outgoing_txs'],
         total_received=to_values(row['total_received']),
+        total_tokens_received=to_values_tokens(row.get("total_tokens_received", None)),
         total_spent=to_values(row['total_spent']),
+        total_tokens_spent=to_values_tokens(row.get("total_tokens_spent", None)),
         in_degree=row['in_degree'],
         out_degree=row['out_degree'],
         balance=convert_value(currency, row['balance'], rates),
+        token_balances=convert_token_values_map(currency, row.get('token_balances', None), rates, token_config),
         best_address_tag=None if not tags else tags[0],
         no_address_tags=count
         )
@@ -84,7 +87,7 @@ async def get_entity(request, currency, entity, with_tag=True):
             count += 0 if c['count'] is None else int(c['count'])
 
     rates = (await get_rates(request, currency))['rates']
-    return from_row(currency, result, rates, tags, count)
+    return from_row(currency, result, rates, db.get_token_configuration(currency), tags, count)
 
 
 async def list_entity_neighbors(request, currency, entity, direction,
@@ -130,7 +133,7 @@ async def list_entity_addresses(request, currency, entity,
         await db.list_entity_addresses(currency, entity, page, pagesize)
 
     rates = (await get_rates(request, currency))['rates']
-    addresses = [common.address_from_row(currency, row, rates)
+    addresses = [common.address_from_row(currency, row, rates, db.get_token_configuration(currency))
                  for row in addresses]
     return EntityAddresses(next_page=paging_state, addresses=addresses)
 
@@ -481,7 +484,7 @@ async def list_entity_txs(request, currency, entity, direction,
     db = request.app['db']
     results, paging_state = \
         await db.list_entity_txs(currency, entity, direction, page, pagesize)
-    entity_txs = await common.txs_from_rows(request, currency, results)
+    entity_txs = await common.txs_from_rows(request, currency, results, db.get_token_configuration(currency))
     return AddressTxs(next_page=paging_state, address_txs=entity_txs)
 
 

@@ -3,7 +3,7 @@ TAGSTORE_MARKER=.runts
 TESTCONTAINER_MARKER=.runtestcontainer
 CASSANDRA_MOCK=cassandra_mock
 TAGSTORE_MOCK=tagstore_mock
-USE_DOCKER=TRUE
+USE_DOCKER=FALSE
 DOCKER_GROUPID=999
 ORGANIZATION=graphsense
 TESTCONTAINER_NAME=graphsense-rest-test 
@@ -15,7 +15,7 @@ test: $(CASSANDRA_MARKER) $(TAGSTORE_MARKER)
 ifeq ($(USE_DOCKER), TRUE)
 	docker ps -a | grep $(TESTCONTAINER_NAME) || bash -c 'rm -f $(TESTCONTAINER_MARKER) && make $(TESTCONTAINER_MARKER)'
 else
-	tox -e py37 -- $(ORGANIZATION)
+	tox -- $(ORGANIZATION)
 endif
 
 clean: 

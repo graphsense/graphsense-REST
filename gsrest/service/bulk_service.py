@@ -221,8 +221,10 @@ async def to_csv(stack):
 
     for op in stack:
         rows = await op
+        
 
         for row in rows:
+
             if error_field in row and not csv:
                 stash.append(row)
                 continue

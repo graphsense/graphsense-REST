@@ -17,50 +17,54 @@ class AddressTx(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, coinbase: bool=None, currency: str=None, height: int=None, timestamp: int=None, tx_hash: str=None, tx_type: str='account', value: Values=None, from_address: str=None, to_address: str=None):
+    def __init__(self, tx_type: str='account', tx_hash: str=None, currency: str=None, coinbase: bool=None, height: int=None, timestamp: int=None, value: Values=None, token_values: Dict[str, Values]=None, from_address: str=None, to_address: str=None):
         """AddressTx - a model defined in OpenAPI
 
-        :param coinbase: The coinbase of this AddressTx.
+        :param tx_type: The tx_type of this AddressTx.
+        :param tx_hash: The tx_hash of this AddressTx.
         :param currency: The currency of this AddressTx.
+        :param coinbase: The coinbase of this AddressTx.
         :param height: The height of this AddressTx.
         :param timestamp: The timestamp of this AddressTx.
-        :param tx_hash: The tx_hash of this AddressTx.
-        :param tx_type: The tx_type of this AddressTx.
         :param value: The value of this AddressTx.
+        :param token_values: The token_values of this AddressTx.
         :param from_address: The from_address of this AddressTx.
         :param to_address: The to_address of this AddressTx.
         """
         self.openapi_types = {
-            'coinbase': bool,
+            'tx_type': str,
+            'tx_hash': str,
             'currency': str,
+            'coinbase': bool,
             'height': int,
             'timestamp': int,
-            'tx_hash': str,
-            'tx_type': str,
             'value': Values,
+            'token_values': Dict[str, Values],
             'from_address': str,
             'to_address': str
         }
 
         self.attribute_map = {
-            'coinbase': 'coinbase',
+            'tx_type': 'tx_type',
+            'tx_hash': 'tx_hash',
             'currency': 'currency',
+            'coinbase': 'coinbase',
             'height': 'height',
             'timestamp': 'timestamp',
-            'tx_hash': 'tx_hash',
-            'tx_type': 'tx_type',
             'value': 'value',
+            'token_values': 'token_values',
             'from_address': 'from_address',
             'to_address': 'to_address'
         }
 
-        self._coinbase = coinbase
+        self._tx_type = tx_type
+        self._tx_hash = tx_hash
         self._currency = currency
+        self._coinbase = coinbase
         self._height = height
         self._timestamp = timestamp
-        self._tx_hash = tx_hash
-        self._tx_type = tx_type
         self._value = value
+        self._token_values = token_values
         self._from_address = from_address
         self._to_address = to_address
 
@@ -81,41 +85,65 @@ class AddressTx(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'coinbase': self._coinbase,
+        return { 'tx_type': self._tx_type,
+            'tx_hash': self._tx_hash,
             'currency': self._currency,
+            'coinbase': self._coinbase,
             'height': self._height,
             'timestamp': self._timestamp,
-            'tx_hash': self._tx_hash,
-            'tx_type': self._tx_type,
             'value': self._value,
+            'token_values': self._token_values,
             'from_address': self._from_address,
             'to_address': self._to_address }
 
 
     @property
-    def coinbase(self):
-        """Gets the coinbase of this AddressTx.
+    def tx_type(self):
+        """Gets the tx_type of this AddressTx.
 
-        Coinbase transaction flag
 
-        :return: The coinbase of this AddressTx.
-        :rtype: bool
+        :return: The tx_type of this AddressTx.
+        :rtype: str
         """
-        return self._coinbase
+        return self._tx_type
 
-    @coinbase.setter
-    def coinbase(self, coinbase):
-        """Sets the coinbase of this AddressTx.
+    @tx_type.setter
+    def tx_type(self, tx_type):
+        """Sets the tx_type of this AddressTx.
 
-        Coinbase transaction flag
 
-        :param coinbase: The coinbase of this AddressTx.
-        :type coinbase: bool
+        :param tx_type: The tx_type of this AddressTx.
+        :type tx_type: str
         """
-        if coinbase is None:
-            raise ValueError("Invalid value for `coinbase`, must not be `None`")
+        if tx_type is None:
+            raise ValueError("Invalid value for `tx_type`, must not be `None`")
 
-        self._coinbase = coinbase
+        self._tx_type = tx_type
+
+    @property
+    def tx_hash(self):
+        """Gets the tx_hash of this AddressTx.
+
+        Transaction hash
+
+        :return: The tx_hash of this AddressTx.
+        :rtype: str
+        """
+        return self._tx_hash
+
+    @tx_hash.setter
+    def tx_hash(self, tx_hash):
+        """Sets the tx_hash of this AddressTx.
+
+        Transaction hash
+
+        :param tx_hash: The tx_hash of this AddressTx.
+        :type tx_hash: str
+        """
+        if tx_hash is None:
+            raise ValueError("Invalid value for `tx_hash`, must not be `None`")
+
+        self._tx_hash = tx_hash
 
     @property
     def currency(self):
@@ -141,6 +169,31 @@ class AddressTx(Model):
             raise ValueError("Invalid value for `currency`, must not be `None`")
 
         self._currency = currency
+
+    @property
+    def coinbase(self):
+        """Gets the coinbase of this AddressTx.
+
+        Coinbase transaction flag
+
+        :return: The coinbase of this AddressTx.
+        :rtype: bool
+        """
+        return self._coinbase
+
+    @coinbase.setter
+    def coinbase(self, coinbase):
+        """Sets the coinbase of this AddressTx.
+
+        Coinbase transaction flag
+
+        :param coinbase: The coinbase of this AddressTx.
+        :type coinbase: bool
+        """
+        if coinbase is None:
+            raise ValueError("Invalid value for `coinbase`, must not be `None`")
+
+        self._coinbase = coinbase
 
     @property
     def height(self):
@@ -195,54 +248,6 @@ class AddressTx(Model):
         self._timestamp = timestamp
 
     @property
-    def tx_hash(self):
-        """Gets the tx_hash of this AddressTx.
-
-        Transaction hash
-
-        :return: The tx_hash of this AddressTx.
-        :rtype: str
-        """
-        return self._tx_hash
-
-    @tx_hash.setter
-    def tx_hash(self, tx_hash):
-        """Sets the tx_hash of this AddressTx.
-
-        Transaction hash
-
-        :param tx_hash: The tx_hash of this AddressTx.
-        :type tx_hash: str
-        """
-        if tx_hash is None:
-            raise ValueError("Invalid value for `tx_hash`, must not be `None`")
-
-        self._tx_hash = tx_hash
-
-    @property
-    def tx_type(self):
-        """Gets the tx_type of this AddressTx.
-
-
-        :return: The tx_type of this AddressTx.
-        :rtype: str
-        """
-        return self._tx_type
-
-    @tx_type.setter
-    def tx_type(self, tx_type):
-        """Sets the tx_type of this AddressTx.
-
-
-        :param tx_type: The tx_type of this AddressTx.
-        :type tx_type: str
-        """
-        if tx_type is None:
-            raise ValueError("Invalid value for `tx_type`, must not be `None`")
-
-        self._tx_type = tx_type
-
-    @property
     def value(self):
         """Gets the value of this AddressTx.
 
@@ -264,6 +269,29 @@ class AddressTx(Model):
             raise ValueError("Invalid value for `value`, must not be `None`")
 
         self._value = value
+
+    @property
+    def token_values(self):
+        """Gets the token_values of this AddressTx.
+
+        Per token value-flow
+
+        :return: The token_values of this AddressTx.
+        :rtype: Dict[str, Values]
+        """
+        return self._token_values
+
+    @token_values.setter
+    def token_values(self, token_values):
+        """Sets the token_values of this AddressTx.
+
+        Per token value-flow
+
+        :param token_values: The token_values of this AddressTx.
+        :type token_values: Dict[str, Values]
+        """
+
+        self._token_values = token_values
 
     @property
     def from_address(self):

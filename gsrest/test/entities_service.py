@@ -51,7 +51,8 @@ eth_entity2 = Entity(
    root_address=eth_address2.address,
    out_degree=eth_address2.out_degree,
    first_tx=eth_address2.first_tx,
-   balance=eth_address2.balance
+   balance=eth_address2.balance,
+   total_tokens_received=eth_address2.total_tokens_received
 )
 
 eth_neighbors = []
@@ -497,7 +498,9 @@ async def list_entity_neighbors(test_case):
         entity=eth_entity.entity,
         include_labels=True,
         direction='out')
+    
     test_case.assertEqual(eth_entityWithTagsOutNeighbors.to_dict(), result)
+
 
     path = basepath + '&only_ids={only_ids}'
     result = await test_case.request(
@@ -525,6 +528,7 @@ async def list_entity_neighbors(test_case):
         [entityWithTagsInNeighbors.neighbors[1].entity.entity],
         [n['entity']['entity'] for n in result['neighbors']]
     )
+
 
     result = await test_case.request(
         path,

@@ -16,32 +16,32 @@ class NeighborEntity(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, entity: Entity=None, labels: List[str]=None, no_txs: int=None, value: Values=None):
+    def __init__(self, labels: List[str]=None, value: Values=None, no_txs: int=None, entity: Entity=None):
         """NeighborEntity - a model defined in OpenAPI
 
-        :param entity: The entity of this NeighborEntity.
         :param labels: The labels of this NeighborEntity.
-        :param no_txs: The no_txs of this NeighborEntity.
         :param value: The value of this NeighborEntity.
+        :param no_txs: The no_txs of this NeighborEntity.
+        :param entity: The entity of this NeighborEntity.
         """
         self.openapi_types = {
-            'entity': Entity,
             'labels': List[str],
+            'value': Values,
             'no_txs': int,
-            'value': Values
+            'entity': Entity
         }
 
         self.attribute_map = {
-            'entity': 'entity',
             'labels': 'labels',
+            'value': 'value',
             'no_txs': 'no_txs',
-            'value': 'value'
+            'entity': 'entity'
         }
 
-        self._entity = entity
         self._labels = labels
-        self._no_txs = no_txs
         self._value = value
+        self._no_txs = no_txs
+        self._entity = entity
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'NeighborEntity':
@@ -60,34 +60,11 @@ class NeighborEntity(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'entity': self._entity,
-            'labels': self._labels,
+        return { 'labels': self._labels,
+            'value': self._value,
             'no_txs': self._no_txs,
-            'value': self._value }
+            'entity': self._entity }
 
-
-    @property
-    def entity(self):
-        """Gets the entity of this NeighborEntity.
-
-
-        :return: The entity of this NeighborEntity.
-        :rtype: Entity
-        """
-        return self._entity
-
-    @entity.setter
-    def entity(self, entity):
-        """Sets the entity of this NeighborEntity.
-
-
-        :param entity: The entity of this NeighborEntity.
-        :type entity: Entity
-        """
-        if entity is None:
-            raise ValueError("Invalid value for `entity`, must not be `None`")
-
-        self._entity = entity
 
     @property
     def labels(self):
@@ -111,6 +88,29 @@ class NeighborEntity(Model):
         """
 
         self._labels = labels
+
+    @property
+    def value(self):
+        """Gets the value of this NeighborEntity.
+
+
+        :return: The value of this NeighborEntity.
+        :rtype: Values
+        """
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        """Sets the value of this NeighborEntity.
+
+
+        :param value: The value of this NeighborEntity.
+        :type value: Values
+        """
+        if value is None:
+            raise ValueError("Invalid value for `value`, must not be `None`")
+
+        self._value = value
 
     @property
     def no_txs(self):
@@ -138,24 +138,24 @@ class NeighborEntity(Model):
         self._no_txs = no_txs
 
     @property
-    def value(self):
-        """Gets the value of this NeighborEntity.
+    def entity(self):
+        """Gets the entity of this NeighborEntity.
 
 
-        :return: The value of this NeighborEntity.
-        :rtype: Values
+        :return: The entity of this NeighborEntity.
+        :rtype: Entity
         """
-        return self._value
+        return self._entity
 
-    @value.setter
-    def value(self, value):
-        """Sets the value of this NeighborEntity.
+    @entity.setter
+    def entity(self, entity):
+        """Sets the entity of this NeighborEntity.
 
 
-        :param value: The value of this NeighborEntity.
-        :type value: Values
+        :param entity: The entity of this NeighborEntity.
+        :type entity: Entity
         """
-        if value is None:
-            raise ValueError("Invalid value for `value`, must not be `None`")
+        if entity is None:
+            raise ValueError("Invalid value for `entity`, must not be `None`")
 
-        self._value = value
+        self._entity = entity
