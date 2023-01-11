@@ -17,8 +17,10 @@ async def get_statistics(request):
     version = request.app['openapi']['info']['version']
     currency_stats = list()
     db = request.app['db']
-    aws = [get_currency_statistics(request, currency)
-           for currency in db.get_supported_currencies()]
+    aws = [
+        get_currency_statistics(request, currency)
+        for currency in db.get_supported_currencies()
+    ]
     currency_stats = await asyncio.gather(*aws)
 
     tstamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -30,9 +32,7 @@ async def get_statistics(request):
 async def search_by_currency(request, currency, q, limit=10):
     db = request.app['db']
 
-    r = SearchResultByCurrency(currency=currency,
-                               addresses=[],
-                               txs=[])
+    r = SearchResultByCurrency(currency=currency, addresses=[], txs=[])
 
     [txs, addresses] = await asyncio.gather(
         db.list_matching_txs(currency, q, limit),
@@ -52,18 +52,17 @@ async def search(request, q, currency=None, limit=10):
     q = q.strip()
     result = SearchResult(currencies=[], labels=[])
 
-    currs = [curr for curr in currencies
-             if currency is None or currency.lower() == curr.lower()]
+    currs = [
+        curr for curr in currencies
+        if currency is None or currency.lower() == curr.lower()
+    ]
 
     expression_norm = alphanumeric_lower(q)
 
     def ts(curr=None):
-        return tagstores(
-                    request.app['tagstores'],
-                    lambda row: row['label'],
-                    'list_matching_labels',
-                    curr, expression_norm, limit,
-                    request.app['show_private_tags'])
+        return tagstores(request.app['tagstores'], lambda row: row['label'],
+                         'list_matching_labels', curr, expression_norm, limit,
+                         request.app['show_private_tags'])
 
     aws1 = [search_by_currency(request, curr, q) for curr in currs]
     if currency:
@@ -81,8 +80,8 @@ async def search(request, q, currency=None, limit=10):
         if labels:
             result.labels += labels
 
-    result.labels = sorted(list(set(result.labels)),
-                           key=lambda x: -algorithims.trigram(x.lower(),
-                                                              expression_norm))
+    result.labels = sorted(
+        list(set(result.labels)),
+        key=lambda x: -algorithims.trigram(x.lower(), expression_norm))
 
     return result

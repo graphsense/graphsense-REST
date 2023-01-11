@@ -5,10 +5,13 @@ from argparse import Namespace
 
 logger = logging.getLogger(__name__)
 
+
 def no_nones(lst):
     return [item for item in lst if item is not None]
 
+
 class VersionedDict(dict):
+
     def __init__(self, mapping, version):
         self.v = version
         super().__init__(mapping)
@@ -21,43 +24,98 @@ class VersionedDict(dict):
 log_signatures = {
     "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef": [
         {
-            "name": "Transfer",
+            "name":
+            "Transfer",
             "inputs": [
-                {"name": "from", "type": "address", "indexed": True},
-                {"name": "to", "type": "address", "indexed": True},
-                {"name": "value", "type": "uint256", "indexed": False},
+                {
+                    "name": "from",
+                    "type": "address",
+                    "indexed": True
+                },
+                {
+                    "name": "to",
+                    "type": "address",
+                    "indexed": True
+                },
+                {
+                    "name": "value",
+                    "type": "uint256",
+                    "indexed": False
+                },
             ],
         },
         {
-            "name": "Transfer",
+            "name":
+            "Transfer",
             "inputs": [
-                {"name": "from", "type": "address", "indexed": True},
-                {"name": "to", "type": "address", "indexed": True},
-                {"name": "value", "type": "uint256", "indexed": True},
+                {
+                    "name": "from",
+                    "type": "address",
+                    "indexed": True
+                },
+                {
+                    "name": "to",
+                    "type": "address",
+                    "indexed": True
+                },
+                {
+                    "name": "value",
+                    "type": "uint256",
+                    "indexed": True
+                },
             ],
         },
     ],
-    "0xf285329298fd841af46eb83bbe90d1ebe2951c975a65b19a02f965f842ee69c5": [
-        {
-            "name": "ChangeOwner",
-            "inputs": [{"name": "new_owner", "type": "address", "indexed": True}],
-        }
-    ],
+    "0xf285329298fd841af46eb83bbe90d1ebe2951c975a65b19a02f965f842ee69c5": [{
+        "name":
+        "ChangeOwner",
+        "inputs": [{
+            "name": "new_owner",
+            "type": "address",
+            "indexed": True
+        }],
+    }],
     "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925": [
         {
-            "name": "Approval",
+            "name":
+            "Approval",
             "inputs": [
-                {"name": "owner", "type": "address", "indexed": True},
-                {"name": "spender", "type": "address", "indexed": True},
-                {"name": "value", "type": "uint256", "indexed": False},
+                {
+                    "name": "owner",
+                    "type": "address",
+                    "indexed": True
+                },
+                {
+                    "name": "spender",
+                    "type": "address",
+                    "indexed": True
+                },
+                {
+                    "name": "value",
+                    "type": "uint256",
+                    "indexed": False
+                },
             ],
         },
         {
-            "name": "Approval",
+            "name":
+            "Approval",
             "inputs": [
-                {"name": "owner", "type": "address", "indexed": True},
-                {"name": "spender", "type": "address", "indexed": True},
-                {"name": "value", "type": "uint256", "indexed": True},
+                {
+                    "name": "owner",
+                    "type": "address",
+                    "indexed": True
+                },
+                {
+                    "name": "spender",
+                    "type": "address",
+                    "indexed": True
+                },
+                {
+                    "name": "value",
+                    "type": "uint256",
+                    "indexed": True
+                },
             ],
         },
     ],
@@ -82,7 +140,8 @@ def convert_db_log(db_log) -> dict:
 def decoded_log_to_str(decoded_log) -> str:
     name = decoded_log["name"]
     addr = decoded_log["address"].lower()
-    params = ",".join([f"{x['name']}={x['value']}" for x in decoded_log["data"]])
+    params = ",".join(
+        [f"{x['name']}={x['value']}" for x in decoded_log["data"]])
     return f"{addr}|{name}({params})"
 
 
@@ -95,13 +154,15 @@ def decode_log(log):
         logdef = log_signatures[log["topics"][0]]
         for i in range(0, len(logdef)):
             try:
-                result = eth_event.decode_log(log, VersionedDict(log_signatures, i))
+                result = eth_event.decode_log(log,
+                                              VersionedDict(log_signatures, i))
                 if "data" in result:
-                    result["data"] = {d["name"]:d for d in result["data"]}
+                    result["data"] = {d["name"]: d for d in result["data"]}
                 return result
             except (eth_event.EventError) as e:
                 if i == len(logdef) - 1:
-                    logger.info(f"Failed to decode supported log type. {e}. {log}")
+                    logger.info(
+                        f"Failed to decode supported log type. {e}. {log}")
     else:
         logger.debug("Can't decode log, not supported yet")
     return None

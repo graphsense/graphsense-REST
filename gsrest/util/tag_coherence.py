@@ -28,6 +28,6 @@ def compute_tag_coherence(labels=None):
 
     e = 0
     for count in label_count.values():
-        e += count ** 2 - count
+        e += count**2 - count
 
     return (e + sum(ratios)) / (e + len(ratios))

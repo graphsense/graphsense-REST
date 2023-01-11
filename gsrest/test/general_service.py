@@ -1,42 +1,38 @@
 from openapi_server.models.stats import Stats
 from openapi_server.models.search_result import SearchResult
 from openapi_server.models.search_result_by_currency \
-        import SearchResultByCurrency
+    import SearchResultByCurrency
 from openapi_server.models.currency_stats import CurrencyStats
 
-stats = Stats(
-    currencies=[
-        CurrencyStats(
-            name='btc',
-            no_entities=7890,
-            no_addresses=4560,
-            no_blocks=3,
-            timestamp=420,
-            no_txs=110,
-            no_labels=13,
-            no_tagged_addresses=79,
-            no_address_relations=1230
-            ),
-        CurrencyStats(
-            name='eth',
-            no_entities=0,
-            no_addresses=1,
-            no_blocks=3,
-            timestamp=16,
-            no_txs=10,
-            no_labels=4,
-            no_tagged_addresses=90,
-            no_address_relations=2),
-        CurrencyStats(
-            name='ltc',
-            no_entities=789,
-            no_addresses=456,
-            no_blocks=3,
-            timestamp=42,
-            no_txs=11,
-            no_labels=2,
-            no_tagged_addresses=20,
-            no_address_relations=123)])
+stats = Stats(currencies=[
+    CurrencyStats(name='btc',
+                  no_entities=7890,
+                  no_addresses=4560,
+                  no_blocks=3,
+                  timestamp=420,
+                  no_txs=110,
+                  no_labels=13,
+                  no_tagged_addresses=79,
+                  no_address_relations=1230),
+    CurrencyStats(name='eth',
+                  no_entities=0,
+                  no_addresses=1,
+                  no_blocks=3,
+                  timestamp=16,
+                  no_txs=10,
+                  no_labels=4,
+                  no_tagged_addresses=90,
+                  no_address_relations=2),
+    CurrencyStats(name='ltc',
+                  no_entities=789,
+                  no_addresses=456,
+                  no_blocks=3,
+                  timestamp=42,
+                  no_txs=11,
+                  no_labels=2,
+                  no_tagged_addresses=20,
+                  no_address_relations=123)
+])
 
 
 async def get_statistics(test_case):
@@ -54,22 +50,14 @@ async def get_statistics(test_case):
 
 
 async def search(test_case):
+
     def base_search_results():
-        return SearchResult(
-                currencies=[
-                    SearchResultByCurrency(
-                        currency='btc',
-                        addresses=[],
-                        txs=[]),
-                    SearchResultByCurrency(
-                        currency='ltc',
-                        addresses=[],
-                        txs=[]),
-                    SearchResultByCurrency(
-                        currency='eth',
-                        addresses=[],
-                        txs=[])],
-                labels=[])
+        return SearchResult(currencies=[
+            SearchResultByCurrency(currency='btc', addresses=[], txs=[]),
+            SearchResultByCurrency(currency='ltc', addresses=[], txs=[]),
+            SearchResultByCurrency(currency='eth', addresses=[], txs=[])
+        ],
+                            labels=[])
 
     expected = base_search_results()
     expected.currencies[0] = \

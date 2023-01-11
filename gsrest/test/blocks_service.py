@@ -1,35 +1,31 @@
 from openapi_server.models.block import Block
 from gsrest.test.txs_service import tx1, tx1_eth, tx2_eth
 
-block = Block(
-        height=1,
-        currency='btc',
-        block_hash="00000000839a8e6886ab5951d76f"
-        "411475428afc90947ee320161bbf18eb6048",
-        no_txs=1,
-        timestamp=1231469665)
+block = Block(height=1,
+              currency='btc',
+              block_hash="00000000839a8e6886ab5951d76f"
+              "411475428afc90947ee320161bbf18eb6048",
+              no_txs=1,
+              timestamp=1231469665)
 
-block2 = Block(
-        height=2,
-        currency='btc',
-        block_hash="000000006a625f06636b8bb6ac7b9"
-        "60a8d03705d1ace08b1a19da3fdcc99ddbd",
-        no_txs=1,
-        timestamp=1231469744)
+block2 = Block(height=2,
+               currency='btc',
+               block_hash="000000006a625f06636b8bb6ac7b9"
+               "60a8d03705d1ace08b1a19da3fdcc99ddbd",
+               no_txs=1,
+               timestamp=1231469744)
 
-eth_block = Block(
-        height=1,
-        currency='eth',
-        block_hash="123456",
-        no_txs=5,
-        timestamp=123)
+eth_block = Block(height=1,
+                  currency='eth',
+                  block_hash="123456",
+                  no_txs=5,
+                  timestamp=123)
 
-eth_block2 = Block(
-        height=2300001,
-        currency='eth',
-        block_hash="234567",
-        no_txs=0,
-        timestamp=234)
+eth_block2 = Block(height=2300001,
+                   currency='eth',
+                   block_hash="234567",
+                   no_txs=0,
+                   timestamp=234)
 
 
 async def get_block(test_case):
@@ -46,11 +42,17 @@ async def get_block(test_case):
     result = await test_case.request(path, currency="eth", height=2300001)
     test_case.assertEqual(eth_block2, Block.from_dict(result))
 
-    await test_case.requestWithCodeAndBody(path, 404, None,
-                                           currency="btc", height="0")
+    await test_case.requestWithCodeAndBody(path,
+                                           404,
+                                           None,
+                                           currency="btc",
+                                           height="0")
 
-    await test_case.requestWithCodeAndBody(path, 404, None,
-                                           currency="eth", height="0")
+    await test_case.requestWithCodeAndBody(path,
+                                           404,
+                                           None,
+                                           currency="eth",
+                                           height="0")
 
 
 async def list_block_txs(test_case):

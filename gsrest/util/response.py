@@ -7,7 +7,6 @@ def r(data):
         data = [d.to_dict() for d in data]
     else:
         data = data.to_dict()
-    return web.Response(
-            status=200,
-            text=json.dumps(data),
-            headers={'Content-type': 'application/json'})
+    return web.Response(status=200,
+                        text=json.dumps(data),
+                        headers={'Content-type': 'application/json'})
