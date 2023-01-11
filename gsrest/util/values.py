@@ -24,7 +24,7 @@ def map_rates_for_peged_tokens(rates, token_config):
             raise Exception(f"Rates structure is expected to be a list of length 2: {rates}")
         r = {i["code"]:i["value"] for i in rates}
 
-        return [{"code": "usd", "value": 1}, {"code": "eur", "value":r["eur"] / r["usd"]}]
+        return [ {"code": "eur", "value":r["eur"] / r["usd"]}, {"code": "usd", "value": 1}]
     elif peg == "eth":
         return rates
     else:
@@ -35,7 +35,7 @@ def convert_token_values_map(currency, value_map, rates, token_configs):
     if value_map is None:
         return None
     else:
-        return {token_currency:convert_token_value( value, rates, token_configs[token_currency]) 
+        return {token_currency:convert_token_value(value, rates, token_configs[token_currency]) 
                 for token_currency, value in value_map.items()} 
 
 def convert_value_impl(value, rates, factor):
@@ -55,8 +55,6 @@ def convert_value(currency, value, rates):
     else:
         factor = 1e-8
 
-    # def make(v):
-    #     return catchNaN()
     return convert_value_impl(value, rates, factor)
 
 

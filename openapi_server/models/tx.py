@@ -18,7 +18,7 @@ class Tx(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, tx_type: str='account', currency: str=None, tx_hash: str=None, coinbase: bool=None, height: int=None, no_inputs: int=None, no_outputs: int=None, inputs: List[TxValue]=None, outputs: List[TxValue]=None, timestamp: int=None, total_input: Values=None, total_output: Values=None, value: Values=None, token_values: Dict[str, Values]=None, from_address: str=None, to_address: str=None):
+    def __init__(self, tx_type: str='account', currency: str=None, tx_hash: str=None, coinbase: bool=None, height: int=None, no_inputs: int=None, no_outputs: int=None, inputs: List[TxValue]=None, outputs: List[TxValue]=None, timestamp: int=None, total_input: Values=None, total_output: Values=None, token_tx_id: int=None, value: Values=None, from_address: str=None, to_address: str=None):
         """Tx - a model defined in OpenAPI
 
         :param tx_type: The tx_type of this Tx.
@@ -33,8 +33,8 @@ class Tx(Model):
         :param timestamp: The timestamp of this Tx.
         :param total_input: The total_input of this Tx.
         :param total_output: The total_output of this Tx.
+        :param token_tx_id: The token_tx_id of this Tx.
         :param value: The value of this Tx.
-        :param token_values: The token_values of this Tx.
         :param from_address: The from_address of this Tx.
         :param to_address: The to_address of this Tx.
         """
@@ -51,8 +51,8 @@ class Tx(Model):
             'timestamp': int,
             'total_input': Values,
             'total_output': Values,
+            'token_tx_id': int,
             'value': Values,
-            'token_values': Dict[str, Values],
             'from_address': str,
             'to_address': str
         }
@@ -70,8 +70,8 @@ class Tx(Model):
             'timestamp': 'timestamp',
             'total_input': 'total_input',
             'total_output': 'total_output',
+            'token_tx_id': 'token_tx_id',
             'value': 'value',
-            'token_values': 'token_values',
             'from_address': 'from_address',
             'to_address': 'to_address'
         }
@@ -88,8 +88,8 @@ class Tx(Model):
         self._timestamp = timestamp
         self._total_input = total_input
         self._total_output = total_output
+        self._token_tx_id = token_tx_id
         self._value = value
-        self._token_values = token_values
         self._from_address = from_address
         self._to_address = to_address
 
@@ -122,8 +122,8 @@ class Tx(Model):
             'timestamp': self._timestamp,
             'total_input': self._total_input,
             'total_output': self._total_output,
+            'token_tx_id': self._token_tx_id,
             'value': self._value,
-            'token_values': self._token_values,
             'from_address': self._from_address,
             'to_address': self._to_address }
 
@@ -421,6 +421,27 @@ class Tx(Model):
         self._total_output = total_output
 
     @property
+    def token_tx_id(self):
+        """Gets the token_tx_id of this Tx.
+
+
+        :return: The token_tx_id of this Tx.
+        :rtype: int
+        """
+        return self._token_tx_id
+
+    @token_tx_id.setter
+    def token_tx_id(self, token_tx_id):
+        """Sets the token_tx_id of this Tx.
+
+
+        :param token_tx_id: The token_tx_id of this Tx.
+        :type token_tx_id: int
+        """
+
+        self._token_tx_id = token_tx_id
+
+    @property
     def value(self):
         """Gets the value of this Tx.
 
@@ -442,29 +463,6 @@ class Tx(Model):
             raise ValueError("Invalid value for `value`, must not be `None`")
 
         self._value = value
-
-    @property
-    def token_values(self):
-        """Gets the token_values of this Tx.
-
-        Per token value-flow
-
-        :return: The token_values of this Tx.
-        :rtype: Dict[str, Values]
-        """
-        return self._token_values
-
-    @token_values.setter
-    def token_values(self, token_values):
-        """Sets the token_values of this Tx.
-
-        Per token value-flow
-
-        :param token_values: The token_values of this Tx.
-        :type token_values: Dict[str, Values]
-        """
-
-        self._token_values = token_values
 
     @property
     def from_address(self):

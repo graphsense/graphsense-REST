@@ -55,6 +55,7 @@ async def list_address_neighbors(request, currency, address, direction,
             labels=row['labels'],
             value=row['value'],
             no_txs=row['no_transactions'],
+            token_values=row.get("token_values", None),
             address=node)
         relations.append(nb)
 

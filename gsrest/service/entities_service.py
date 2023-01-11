@@ -118,6 +118,7 @@ async def list_entity_neighbors(request, currency, entity, direction,
         nb = NeighborEntity(
             labels=row['labels'],
             value=row['value'],
+            token_values=row.get("token_values", None),
             no_txs=row['no_transactions'],
             entity=node)
         relations.append(nb)

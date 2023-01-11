@@ -17,7 +17,7 @@ class Link(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, tx_type: str='account', tx_hash: str=None, currency: str=None, height: int=None, timestamp: int=None, input_value: Values=None, output_value: Values=None, value: Values=None, token_values: Dict[str, Values]=None, from_address: str=None, to_address: str=None):
+    def __init__(self, tx_type: str='account', tx_hash: str=None, currency: str=None, height: int=None, timestamp: int=None, input_value: Values=None, output_value: Values=None, token_tx_id: int=None, value: Values=None, from_address: str=None, to_address: str=None):
         """Link - a model defined in OpenAPI
 
         :param tx_type: The tx_type of this Link.
@@ -27,8 +27,8 @@ class Link(Model):
         :param timestamp: The timestamp of this Link.
         :param input_value: The input_value of this Link.
         :param output_value: The output_value of this Link.
+        :param token_tx_id: The token_tx_id of this Link.
         :param value: The value of this Link.
-        :param token_values: The token_values of this Link.
         :param from_address: The from_address of this Link.
         :param to_address: The to_address of this Link.
         """
@@ -40,8 +40,8 @@ class Link(Model):
             'timestamp': int,
             'input_value': Values,
             'output_value': Values,
+            'token_tx_id': int,
             'value': Values,
-            'token_values': Dict[str, Values],
             'from_address': str,
             'to_address': str
         }
@@ -54,8 +54,8 @@ class Link(Model):
             'timestamp': 'timestamp',
             'input_value': 'input_value',
             'output_value': 'output_value',
+            'token_tx_id': 'token_tx_id',
             'value': 'value',
-            'token_values': 'token_values',
             'from_address': 'from_address',
             'to_address': 'to_address'
         }
@@ -67,8 +67,8 @@ class Link(Model):
         self._timestamp = timestamp
         self._input_value = input_value
         self._output_value = output_value
+        self._token_tx_id = token_tx_id
         self._value = value
-        self._token_values = token_values
         self._from_address = from_address
         self._to_address = to_address
 
@@ -96,8 +96,8 @@ class Link(Model):
             'timestamp': self._timestamp,
             'input_value': self._input_value,
             'output_value': self._output_value,
+            'token_tx_id': self._token_tx_id,
             'value': self._value,
-            'token_values': self._token_values,
             'from_address': self._from_address,
             'to_address': self._to_address }
 
@@ -274,6 +274,27 @@ class Link(Model):
         self._output_value = output_value
 
     @property
+    def token_tx_id(self):
+        """Gets the token_tx_id of this Link.
+
+
+        :return: The token_tx_id of this Link.
+        :rtype: int
+        """
+        return self._token_tx_id
+
+    @token_tx_id.setter
+    def token_tx_id(self, token_tx_id):
+        """Sets the token_tx_id of this Link.
+
+
+        :param token_tx_id: The token_tx_id of this Link.
+        :type token_tx_id: int
+        """
+
+        self._token_tx_id = token_tx_id
+
+    @property
     def value(self):
         """Gets the value of this Link.
 
@@ -295,29 +316,6 @@ class Link(Model):
             raise ValueError("Invalid value for `value`, must not be `None`")
 
         self._value = value
-
-    @property
-    def token_values(self):
-        """Gets the token_values of this Link.
-
-        Per token value-flow
-
-        :return: The token_values of this Link.
-        :rtype: Dict[str, Values]
-        """
-        return self._token_values
-
-    @token_values.setter
-    def token_values(self, token_values):
-        """Sets the token_values of this Link.
-
-        Per token value-flow
-
-        :param token_values: The token_values of this Link.
-        :type token_values: Dict[str, Values]
-        """
-
-        self._token_values = token_values
 
     @property
     def from_address(self):

@@ -35,6 +35,7 @@ def address_from_row(currency, row, rates, token_config):
         out_degree=row['out_degree'],
         balance=convert_value(currency, row['balance'], rates),
         token_balances=convert_token_values_map(currency, row.get('token_balances', None), rates, token_config),
+        is_contract=row.get("is_contract", None),
         status=row['status']
         )
 
@@ -43,17 +44,18 @@ async def txs_from_rows(request, currency, rows, token_config):
     heights = [row['height'] for row in rows]
     rates = await list_rates(request, currency, heights)
     if currency == 'eth':
+
         return [TxAccount(
-                currency=currency,
-                height=row['height'],
-                timestamp=row['timestamp'],
-                tx_hash=row['tx_hash'].hex(),
-                from_address=row['from_address'],
-                to_address=row['to_address'],
-                token_values=convert_token_values_map(currency, row.get('token_values'), rates, token_config),
-                value=convert_value(currency, row['value'],
-                                    rates[row['height']]))
-                for row in rows]
+            currency=currency if "token_tx_id" not in row else row["currency"].lower(),
+            tx_hash=row['tx_hash'].hex(),
+            timestamp=row['timestamp'],
+            height=row['height'],
+            from_address=row['from_address'],
+            to_address=row['to_address'],
+            token_tx_id=row.get("token_tx_id", None),
+            value=convert_value(currency, row['value'], rates[row['height']]) if "token_tx_id" not in row else convert_token_value(row['value'], rates[row['height']], token_config[row["currency"]]))
+            for row in rows]
+
     return [AddressTxUtxo(
             currency=currency,
             height=row['height'],
@@ -107,6 +109,7 @@ async def list_neighbors(request, currency, id, direction, node_type, ids=None,
     for row in results:
         row['labels'] = row['labels'] if 'labels' in row else None
         row['value'] = to_values(row['value'])
+        row["token_values"] = to_values_tokens(row.get("token_values", None))
 
     dst = 'dst' if is_outgoing else 'src'
 
@@ -156,14 +159,13 @@ async def links_response(request, currency, result):
         rates = await list_rates(request, currency, heights)
         return Links(links=[TxAccount(
                             tx_hash=row['tx_hash'].hex(),
-                            currency=currency,
+                            currency=currency if "token_tx_id" not in row else row["currency"].lower(),
                             timestamp=row['block_timestamp'],
                             height=row['block_id'],
+                            token_tx_id=row.get("token_tx_id", None),
                             from_address=row['from_address'],
                             to_address=row['to_address'],
-                            value=convert_value(currency,
-                                                row['value'],
-                                                rates[row['block_id']]))
+                            value=convert_value(currency, row['value'], rates[row['block_id']]) if "token_tx_id" not in row else convert_token_value(row['value'], rates[row['block_id']], token_config[row["currency"]]))
                             for row in links],
                      next_page=next_page)
 

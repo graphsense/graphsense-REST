@@ -17,7 +17,7 @@ class AddressTx(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, tx_type: str='account', tx_hash: str=None, currency: str=None, coinbase: bool=None, height: int=None, timestamp: int=None, value: Values=None, token_values: Dict[str, Values]=None, from_address: str=None, to_address: str=None):
+    def __init__(self, tx_type: str='account', tx_hash: str=None, currency: str=None, coinbase: bool=None, height: int=None, timestamp: int=None, value: Values=None, token_tx_id: int=None, from_address: str=None, to_address: str=None):
         """AddressTx - a model defined in OpenAPI
 
         :param tx_type: The tx_type of this AddressTx.
@@ -27,7 +27,7 @@ class AddressTx(Model):
         :param height: The height of this AddressTx.
         :param timestamp: The timestamp of this AddressTx.
         :param value: The value of this AddressTx.
-        :param token_values: The token_values of this AddressTx.
+        :param token_tx_id: The token_tx_id of this AddressTx.
         :param from_address: The from_address of this AddressTx.
         :param to_address: The to_address of this AddressTx.
         """
@@ -39,7 +39,7 @@ class AddressTx(Model):
             'height': int,
             'timestamp': int,
             'value': Values,
-            'token_values': Dict[str, Values],
+            'token_tx_id': int,
             'from_address': str,
             'to_address': str
         }
@@ -52,7 +52,7 @@ class AddressTx(Model):
             'height': 'height',
             'timestamp': 'timestamp',
             'value': 'value',
-            'token_values': 'token_values',
+            'token_tx_id': 'token_tx_id',
             'from_address': 'from_address',
             'to_address': 'to_address'
         }
@@ -64,7 +64,7 @@ class AddressTx(Model):
         self._height = height
         self._timestamp = timestamp
         self._value = value
-        self._token_values = token_values
+        self._token_tx_id = token_tx_id
         self._from_address = from_address
         self._to_address = to_address
 
@@ -92,7 +92,7 @@ class AddressTx(Model):
             'height': self._height,
             'timestamp': self._timestamp,
             'value': self._value,
-            'token_values': self._token_values,
+            'token_tx_id': self._token_tx_id,
             'from_address': self._from_address,
             'to_address': self._to_address }
 
@@ -271,27 +271,25 @@ class AddressTx(Model):
         self._value = value
 
     @property
-    def token_values(self):
-        """Gets the token_values of this AddressTx.
+    def token_tx_id(self):
+        """Gets the token_tx_id of this AddressTx.
 
-        Per token value-flow
 
-        :return: The token_values of this AddressTx.
-        :rtype: Dict[str, Values]
+        :return: The token_tx_id of this AddressTx.
+        :rtype: int
         """
-        return self._token_values
+        return self._token_tx_id
 
-    @token_values.setter
-    def token_values(self, token_values):
-        """Sets the token_values of this AddressTx.
+    @token_tx_id.setter
+    def token_tx_id(self, token_tx_id):
+        """Sets the token_tx_id of this AddressTx.
 
-        Per token value-flow
 
-        :param token_values: The token_values of this AddressTx.
-        :type token_values: Dict[str, Values]
+        :param token_tx_id: The token_tx_id of this AddressTx.
+        :type token_tx_id: int
         """
 
-        self._token_values = token_values
+        self._token_tx_id = token_tx_id
 
     @property
     def from_address(self):

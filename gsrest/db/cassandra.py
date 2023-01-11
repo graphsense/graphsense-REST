@@ -9,6 +9,7 @@ from cassandra.query import SimpleStatement, dict_factory, ValueSequence
 from math import floor
 
 from gsrest.util.exceptions import BadConfigError
+from gsrest.util.eth_logs import decode_db_logs
 
 SMALL_PAGE_SIZE = 1000
 BIG_PAGE_SIZE = 5000
@@ -20,6 +21,8 @@ def to_hex(paging_state):
 
 
 def from_hex(page):
+    if type(page) == str and page.startswith("0x"):
+        page = page[2:]
     return bytes.fromhex(page) if page else None
 
 
@@ -52,6 +55,20 @@ def one(result):
     if result is not None:
         return result.one()
     return None
+
+
+def build_token_tx(token_currency, tx, token_tx, log):
+    token_from = token_tx["data"].get("from", "decoding error")
+    token_to = token_tx["data"].get("to", "decoding error")
+    value = token_tx["data"].get("value", "decoding error")
+    return {"currency": token_currency,
+            "block_id": tx["block_id"],
+            "block_timestamp": tx["block_timestamp"],
+            "tx_hash": tx["tx_hash"],
+            "from_address": token_from["value"],
+            "to_address": token_to["value"],
+            "token_tx_id": log["log_index"],
+            "value": value["value"]}
 
 
 class Result:
@@ -949,6 +966,9 @@ class Cassandra:
         for neighbor in results:
             neighbor['value'] = \
                 self.markup_currency(currency, neighbor[field])
+            if "token_values" in neighbor and neighbor["token_values"] is not None:
+                neighbor['token_values'] = \
+                    {k:self.markup_currency(currency, v) for k,v in neighbor["token_values"].items()}
 
         if currency == 'eth':
             for row in results:
@@ -976,6 +996,43 @@ class Cassandra:
                  'tx_id_group = %s and tx_id = %s')
         result = await self.execute_async(currency, 'raw', query, params)
         return one(result)
+
+    @eth
+    async def get_token_txs(self, currency, tx_hash):
+        return []
+
+
+    async def get_token_txs_eth(self, currency, tx_hash, log_index=None):
+        transfer_topic = from_hex("0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef")
+        tx = await self.get_tx(currency, tx_hash)
+        if tx is None:
+            return None
+
+        token_tx_logs = await self.get_logs_in_block_eth(currency, tx["block_id"], topic=transfer_topic, log_index=log_index)
+        supported_tokens = {v["token_address"]:v for v in self.get_token_configuration(currency).values()}
+        logs_to_decode = [tt for tt in token_tx_logs.current_rows if tt["address"] in supported_tokens]
+        decoded_token_txs = zip(decode_db_logs(logs_to_decode), logs_to_decode)
+
+        return [build_token_tx(supported_tokens[log["address"]]["currency_ticker"],tx, token_tx, log) for (token_tx, log) in decoded_token_txs]
+
+
+    async def get_logs_in_block_eth(self, currency, block_id, topic=None, log_index=None):
+        block_group = self.get_block_id_group(currency, block_id)
+        query = ('SELECT * from log where '
+                 'block_id_group=%s and block_id=%s')
+        params = [block_group, block_id]
+
+        if topic is not None:
+            query += " and topic0=%s"
+            params += [topic]
+
+        if log_index is not None:
+            query += " and log_index=%s"
+            params += [log_index]
+
+        return await self.execute_async(currency, 'raw', query, params)
+
+
 
     async def list_matching_txs(self, currency, expression, limit):
         prefix_lengths = self.get_prefix_lengths(currency)
@@ -1218,10 +1275,6 @@ class Cassandra:
                         currency, 'transformed', query,
                         [row['address_id'], row['address_id_group'], c])) for c in balance_currencies}
 
-        # result = await self.execute_async(
-        #                 currency, 'transformed', query,
-        #                 [row['address_id'], row['address_id_group']])
-        # result = one(result)
         if results["ETH"] is None:
             results["ETH"]["balance"] = {'balance':
                       row['total_received'].value
@@ -1558,7 +1611,7 @@ class Cassandra:
 
     async def get_tx_eth(self, currency, tx_hash):
         return await self.get_tx_by_hash(currency,
-                                         bytearray.fromhex(tx_hash))
+                                         from_hex(tx_hash))
 
     async def list_entity_addresses_eth(self, currency, entity, page=None,
                                         pagesize=None):

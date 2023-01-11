@@ -6,6 +6,7 @@ from aiohttp import web
 from aiohttp.test_utils import unittest_run_loop
 
 from openapi_server.models.tx import Tx
+from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.tx_value import TxValue
 from tests import BaseTestCase
 import gsrest.test.txs_service as test_service
@@ -13,6 +14,14 @@ import gsrest.test.txs_service as test_service
 
 class TestTxsController(BaseTestCase):
     """TxsController integration test stubs"""
+
+    async def test_get_token_txs(self):
+        """Test case for get_token_txs
+
+        Returns all token transactions in a given transaction
+        """
+        await test_service.get_token_txs(self)
+
 
     async def test_get_tx(self):
         """Test case for get_tx

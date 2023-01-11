@@ -16,17 +16,19 @@ class NeighborAddress(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, labels: List[str]=None, value: Values=None, no_txs: int=None, address: Address=None):
+    def __init__(self, labels: List[str]=None, value: Values=None, token_values: Dict[str, Values]=None, no_txs: int=None, address: Address=None):
         """NeighborAddress - a model defined in OpenAPI
 
         :param labels: The labels of this NeighborAddress.
         :param value: The value of this NeighborAddress.
+        :param token_values: The token_values of this NeighborAddress.
         :param no_txs: The no_txs of this NeighborAddress.
         :param address: The address of this NeighborAddress.
         """
         self.openapi_types = {
             'labels': List[str],
             'value': Values,
+            'token_values': Dict[str, Values],
             'no_txs': int,
             'address': Address
         }
@@ -34,12 +36,14 @@ class NeighborAddress(Model):
         self.attribute_map = {
             'labels': 'labels',
             'value': 'value',
+            'token_values': 'token_values',
             'no_txs': 'no_txs',
             'address': 'address'
         }
 
         self._labels = labels
         self._value = value
+        self._token_values = token_values
         self._no_txs = no_txs
         self._address = address
 
@@ -62,6 +66,7 @@ class NeighborAddress(Model):
             return Model.to_dict(self)
         return { 'labels': self._labels,
             'value': self._value,
+            'token_values': self._token_values,
             'no_txs': self._no_txs,
             'address': self._address }
 
@@ -111,6 +116,29 @@ class NeighborAddress(Model):
             raise ValueError("Invalid value for `value`, must not be `None`")
 
         self._value = value
+
+    @property
+    def token_values(self):
+        """Gets the token_values of this NeighborAddress.
+
+        Per token value-flow
+
+        :return: The token_values of this NeighborAddress.
+        :rtype: Dict[str, Values]
+        """
+        return self._token_values
+
+    @token_values.setter
+    def token_values(self, token_values):
+        """Sets the token_values of this NeighborAddress.
+
+        Per token value-flow
+
+        :param token_values: The token_values of this NeighborAddress.
+        :type token_values: Dict[str, Values]
+        """
+
+        self._token_values = token_values
 
     @property
     def no_txs(self):

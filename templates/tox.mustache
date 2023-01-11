@@ -1,6 +1,6 @@
 [tox]
 skipsdist=True
-requires=tox-venv
+;requires=tox-venv
 
 [gh-actions]
 python =
@@ -11,10 +11,11 @@ python =
 asyncio_mode=auto
 
 [testenv]
+allowlist_externals=bash
 deps=-r{toxinidir}/requirements.txt
      -r{toxinidir}/test-requirements.txt
 	 {toxinidir}
 
 commands=
-  bash -c "cd {toxinidir}/tests/ && make ORGANIZATION={posargs} .runcass .runts"
+  bash -c "cd {toxinidir}/tests/ && make ORGANIZATION={posargs:graphsense} .runcass .runts"
   {{^useNose}}pytest -x --cov={{{pythonSrcRoot}}}{{{packageName}}}{{/useNose}}{{#useNose}}nosetests{{/useNose}}

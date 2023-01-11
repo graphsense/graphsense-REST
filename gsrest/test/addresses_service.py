@@ -574,6 +574,7 @@ eth_address = Address(
    ),
    address="0xabcdef",
    entity=107925000,
+   is_contract=True,
    in_degree=5,
    balance=make_values(eur=111.0, usd=222.0, value=111000000000000000000),
    status='clean'
@@ -616,15 +617,48 @@ eth_address2 = Address(
    ),
    address="0x123456",
    entity=107925001,
+   is_contract=False,
    total_tokens_received={'USDT': make_values(eur=450, usd=500, value=450), 'WETH': make_values(eur=50.56, usd=60.67, value=345000000000000000000)},
    status='clean'
 )
 
 eth_address3 = Address(
-    **eth_address2.to_dict(),
+   currency="eth",
+   last_tx=TxSummary(
+      tx_hash="af6e0003",
+      height=1,
+      timestamp=16
+   ),
+   in_degree=1,
+   no_incoming_txs=1,
+   out_degree=2,
+   total_received=make_values(
+            value=456000000000000000000,
+            eur=40.44,
+            usd=50.56),
+   balance=make_values(
+            value=111000000000000000000,
+            usd=222.0,
+            eur=111.0),
+   no_outgoing_txs=2,
+   total_spent=make_values(
+            value=345000000000000000000,
+            eur=50.0,
+            usd=100.0),
+   first_tx=TxSummary(
+      timestamp=15,
+      tx_hash="af6e0000",
+      height=1
+   ),
+   address="0x234567",
+   entity=107925002,
+   is_contract=False,
+   total_tokens_spent={'USDT': make_values(eur=450, usd=900, value=450), 'WETH': make_values(eur=50.0, usd=100.0, value=345000000000000000000)},
+   status='clean',
+   token_balances={'USDT': make_values(value=450000000, eur=225.0, usd=450.0),
+                   'WETH': make_values(value=345000000000000000000, eur=345.0, usd=690.0)
+                   }
 )
-eth_address3.address = "0x234567"
-eth_address3.entity = 107925002
 
 eth_addressWithTagsOutNeighbors = NeighborAddresses(
         next_page=None,
@@ -647,6 +681,24 @@ eth_addressWithTagsOutNeighbors = NeighborAddresses(
                     eur=10.0),
                 address=eth_address2
                 )])
+
+eth_address2WithTokenFlows = NeighborAddresses(
+        next_page=None,
+        neighbors=[
+            NeighborAddress(
+                labels=[],
+                no_txs=2,
+                value=make_values(
+                    value=0,
+                    usd=0.0,
+                    eur=0.0),
+                token_values={
+                  'USDT': make_values(value=450, eur=450.0, usd=900.0),
+                  'WETH': make_values(value=345000000000000000000, eur=50.0, usd=100.0)
+                },
+                address=eth_address3,
+                )])
+
 
 eth_entityWithTags = Entity(
    currency="eth",
@@ -850,6 +902,14 @@ async def list_address_neighbors(test_case):
                                      include_labels=True,
                                      direction='out')
     test_case.assertEqual(eth_addressWithTagsOutNeighbors.to_dict(), result)
+
+    result = await test_case.request(path,
+                                     currency='eth',
+                                     address=eth_address2.address,
+                                     include_labels=True,
+                                     direction='out')
+    test_case.assertEqual(eth_address2WithTokenFlows.to_dict(), result)
+
 
 
 async def get_address_entity(test_case):

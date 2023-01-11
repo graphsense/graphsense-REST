@@ -16,7 +16,7 @@ class Address(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, currency: str=None, address: str=None, entity: int=None, balance: Values=None, token_balances: Dict[str, Values]=None, first_tx: TxSummary=None, last_tx: TxSummary=None, in_degree: int=None, out_degree: int=None, no_incoming_txs: int=None, no_outgoing_txs: int=None, total_received: Values=None, total_spent: Values=None, total_tokens_received: Dict[str, Values]=None, total_tokens_spent: Dict[str, Values]=None, status: str=None):
+    def __init__(self, currency: str=None, address: str=None, entity: int=None, balance: Values=None, token_balances: Dict[str, Values]=None, first_tx: TxSummary=None, last_tx: TxSummary=None, in_degree: int=None, out_degree: int=None, no_incoming_txs: int=None, no_outgoing_txs: int=None, total_received: Values=None, total_spent: Values=None, total_tokens_received: Dict[str, Values]=None, total_tokens_spent: Dict[str, Values]=None, is_contract: bool=None, status: str=None):
         """Address - a model defined in OpenAPI
 
         :param currency: The currency of this Address.
@@ -34,6 +34,7 @@ class Address(Model):
         :param total_spent: The total_spent of this Address.
         :param total_tokens_received: The total_tokens_received of this Address.
         :param total_tokens_spent: The total_tokens_spent of this Address.
+        :param is_contract: The is_contract of this Address.
         :param status: The status of this Address.
         """
         self.openapi_types = {
@@ -52,6 +53,7 @@ class Address(Model):
             'total_spent': Values,
             'total_tokens_received': Dict[str, Values],
             'total_tokens_spent': Dict[str, Values],
+            'is_contract': bool,
             'status': str
         }
 
@@ -71,6 +73,7 @@ class Address(Model):
             'total_spent': 'total_spent',
             'total_tokens_received': 'total_tokens_received',
             'total_tokens_spent': 'total_tokens_spent',
+            'is_contract': 'is_contract',
             'status': 'status'
         }
 
@@ -89,6 +92,7 @@ class Address(Model):
         self._total_spent = total_spent
         self._total_tokens_received = total_tokens_received
         self._total_tokens_spent = total_tokens_spent
+        self._is_contract = is_contract
         self._status = status
 
     @classmethod
@@ -123,6 +127,7 @@ class Address(Model):
             'total_spent': self._total_spent,
             'total_tokens_received': self._total_tokens_received,
             'total_tokens_spent': self._total_tokens_spent,
+            'is_contract': self._is_contract,
             'status': self._status }
 
 
@@ -476,6 +481,27 @@ class Address(Model):
         """
 
         self._total_tokens_spent = total_tokens_spent
+
+    @property
+    def is_contract(self):
+        """Gets the is_contract of this Address.
+
+
+        :return: The is_contract of this Address.
+        :rtype: bool
+        """
+        return self._is_contract
+
+    @is_contract.setter
+    def is_contract(self, is_contract):
+        """Sets the is_contract of this Address.
+
+
+        :param is_contract: The is_contract of this Address.
+        :type is_contract: bool
+        """
+
+        self._is_contract = is_contract
 
     @property
     def status(self):
