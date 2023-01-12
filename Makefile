@@ -19,4 +19,4 @@ serve:
 drop-integration-db:
 	docker stop cassandra_mock; docker stop tagstore_mock; rm ./tests/.runcass ./tests/.runts
 
-.PHONY: format lint test test-all-env serve
+.PHONY: format lint test test-all-env serve drop-integration-db

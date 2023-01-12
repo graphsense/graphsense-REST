@@ -1125,9 +1125,11 @@ class Cassandra:
             v["token_address"]: v
             for v in self.get_token_configuration(currency).values()
         }
+
         logs_to_decode = [
             tt for tt in token_tx_logs.current_rows
             if tt["address"] in supported_tokens
+            and tt["tx_hash"] == tx["tx_hash"]
         ]
         decoded_token_txs = zip(decode_db_logs(logs_to_decode), logs_to_decode)
 
@@ -1548,11 +1550,11 @@ class Cassandra:
                                                   id_group)
 
         sec_in = self.sec_in(secondary_id_group)
-        query = (
-            "SELECT transaction_id, is_outgoing, log_index FROM address_transactions"
-            " WHERE address_id_group = %s and "
-            "address_id_secondary_group in %s"
-            " and address_id = %s")
+        query = ("SELECT transaction_id, is_outgoing, log_index "
+                 "FROM address_transactions"
+                 " WHERE address_id_group = %s and "
+                 "address_id_secondary_group in %s"
+                 " and address_id = %s")
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
         result = await self.execute_async(currency,
                                           'transformed',
@@ -1567,28 +1569,38 @@ class Cassandra:
         tx_ids = [tx['transaction_id'] for tx in txs]
 
         paging_state = result.paging_state
-        full_txs = {tx_id: tx_row for tx_id, tx_row in zip(tx_ids, await self.list_txs_by_ids(currency, tx_ids))}
+        full_txs = {
+            tx_id: tx_row
+            for tx_id, tx_row in zip(
+                tx_ids, await self.list_txs_by_ids(currency, tx_ids))
+        }
         for addr_tx in txs:
             full_tx = full_txs[addr_tx['transaction_id']]
             if addr_tx["log_index"] is not None:
                 r = await self.annotate_token_data(currency, full_tx,
                                                    addr_tx["log_index"])
                 if len(r) != 1:
-                    raise RuntimeError(
-                        f"Found {len(r)} logs for token "
-                        f"tx {addr_tx['transaction_id']}{addr_tx['log_index']}")
+                    raise RuntimeError(f"Found {len(r)} logs for token "
+                                       f"tx {addr_tx['transaction_id']}:"
+                                       f"{addr_tx['log_index']}")
                 token_tx = r[0]
 
                 addr_tx['to_address'] = token_tx['to_address']
                 addr_tx['from_address'] = token_tx['from_address']
                 addr_tx['currency'] = token_tx["currency"]
                 addr_tx['token_tx_id'] = addr_tx["log_index"]
-            else:
-                addr_tx['to_address'] = eth_address_to_hex(full_tx['to_address'])
-                addr_tx['from_address'] = eth_address_to_hex(full_tx['from_address'])
-                addr_tx['currency'] = currency
+                value = token_tx['value'] * \
+                    (-1 if addr_tx['is_outgoing'] else 1)
 
-            value = full_tx['value'] * (-1 if addr_tx['is_outgoing'] else 1)
+            else:
+                addr_tx['to_address'] = eth_address_to_hex(
+                    full_tx['to_address'])
+                addr_tx['from_address'] = eth_address_to_hex(
+                    full_tx['from_address'])
+                addr_tx['currency'] = currency
+                value = full_tx['value'] * \
+                    (-1 if addr_tx['is_outgoing'] else 1)
+
             addr_tx['tx_hash'] = full_tx['tx_hash']
             addr_tx['height'] = full_tx['block_id']
             addr_tx['timestamp'] = full_tx['block_timestamp']
@@ -1602,8 +1614,11 @@ class Cassandra:
         statement = (
             'SELECT transaction from transaction_ids_by_transaction_id_group'
             ' where transaction_id_group = %s and transaction_id = %s')
-        result = await self.concurrent_with_args(currency, 'transformed',
-                                                 statement, params, filter_empty=False)
+        result = await self.concurrent_with_args(currency,
+                                                 'transformed',
+                                                 statement,
+                                                 params,
+                                                 filter_empty=False)
 
         return await self.list_txs_by_hashes(
             currency, [row['transaction'] for row in result])

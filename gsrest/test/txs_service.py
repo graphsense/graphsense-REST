@@ -126,10 +126,10 @@ tx4_eth = TxAccount(tx_hash='123456',
 # 'from_address': '0x06729eb2424da47898f935267bd4a62940de5105',
 # 'to_address': '0xbeefbabeea323f07c59926295205d3b7a17e8638'}
 token_tx1_eth = TxAccount(
-    tx_hash='af6e0000',
+    tx_hash='af6e0003',
     currency='weth',
     height=1,
-    timestamp=15,
+    timestamp=16,
     token_tx_id=1,
     from_address='0x06729eb2424da47898f935267bd4a62940de5105',
     to_address='0xbeefbabeea323f07c59926295205d3b7a17e8638',
@@ -146,10 +146,10 @@ token_tx1_eth = TxAccount(
 # 'from_address': '0x45225d3536ac02928f16071ab05066bce95c2cd5',
 # 'to_address': '0xcaf7ce56598e8588c9bf471e08b53e8a8d9541b3'}
 token_tx2_eth = TxAccount(
-    tx_hash='af6e0000',
+    tx_hash='af6e0003',
     currency='usdt',
     height=1,
-    timestamp=15,
+    timestamp=16,
     token_tx_id=2,
     from_address='0x45225d3536ac02928f16071ab05066bce95c2cd5',
     to_address='0xcaf7ce56598e8588c9bf471e08b53e8a8d9541b3',
@@ -180,14 +180,14 @@ async def get_tx(test_case):
     path = '/{currency}/txs/{tx_hash}?token_tx_id=1'
     result = await test_case.request(path,
                                      currency='eth',
-                                     tx_hash='0xaf6e0000')
+                                     tx_hash='0xaf6e0003')
 
     test_case.assertEqual(token_tx1_eth.to_dict(), result)
 
     path = '/{currency}/txs/{tx_hash}?token_tx_id=2'
     result = await test_case.request(path,
                                      currency='eth',
-                                     tx_hash='0xaf6e0000')
+                                     tx_hash='0xaf6e0003')
 
     test_case.assertEqual(token_tx2_eth.to_dict(), result)
 
@@ -196,7 +196,7 @@ async def get_token_txs(test_case):
     path = '/{currency}/token_txs/{tx_hash}'
     results = await test_case.request(path,
                                       currency='eth',
-                                      tx_hash='0xaf6e0000')
+                                      tx_hash='0xaf6e0003')
 
     assert len(results) == 2
     test_case.assertEqual([token_tx1_eth.to_dict(),
