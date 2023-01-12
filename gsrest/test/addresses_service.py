@@ -16,6 +16,7 @@ import gsrest.test.tags_service as ts
 import copy
 import yaml
 
+
 address = Address(
     currency="btc",
     first_tx=TxSummary(tx_hash="04d92601677d62a985310b61a301e74870fa942c"
@@ -629,6 +630,12 @@ async def list_address_txs(test_case):
                                      address=eth_address.address)
     test_case.assertEqual(txs.to_dict()['address_txs'], result['address_txs'])
 
+    result = await test_case.request(path,
+                                     currency='eth',
+                                     address=eth_address2.address)
+
+    assert len(result["address_txs"]) == 5
+    assert [x['currency'] for x in result["address_txs"]] == ['weth', 'usdt','eth', 'eth', 'eth']
 
 async def list_tags_by_address(test_case):
     path = '/{currency}/addresses/{address}/tags'

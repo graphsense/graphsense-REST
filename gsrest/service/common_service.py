@@ -12,6 +12,7 @@ from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from gsrest.service.rates_service import list_rates
 from gsrest.db.util import tagstores, tagstores_with_paging
 from gsrest.service.tags_service import address_tag_from_row
+from gsrest.util import get_first_key_present
 
 
 def address_from_row(currency, row, rates, token_config):
@@ -41,24 +42,28 @@ def address_from_row(currency, row, rates, token_config):
 
 
 async def txs_from_rows(request, currency, rows, token_config):
-    heights = [row['height'] for row in rows]
+    height_keys = ["height", "block_id"]
+    timestamp_keys = ["timestamp", "block_timestamp"]
+    heights = [get_first_key_present(row, height_keys) for row in rows]
     rates = await list_rates(request, currency, heights)
     if currency == 'eth':
-
         return [
-            TxAccount(currency=currency
-                      if "token_tx_id" not in row else row["currency"].lower(),
-                      tx_hash=row['tx_hash'].hex(),
-                      timestamp=row['timestamp'],
-                      height=row['height'],
-                      from_address=row['from_address'],
-                      to_address=row['to_address'],
-                      token_tx_id=row.get("token_tx_id", None),
-                      value=convert_value(currency, row['value'],
-                                          rates[row['height']])
-                      if "token_tx_id" not in row else convert_token_value(
-                          row['value'], rates[row['height']],
-                          token_config[row["currency"]])) for row in rows
+            TxAccount(
+                currency=currency
+                if "token_tx_id" not in row else row["currency"].lower(),
+                tx_hash=row['tx_hash'].hex(),
+                timestamp=get_first_key_present(row, timestamp_keys),
+                height=get_first_key_present(row, height_keys),
+                from_address=row['from_address'],
+                to_address=row['to_address'],
+                token_tx_id=row.get("token_tx_id", None),
+                value=convert_value(
+                    currency, row['value'], rates[get_first_key_present(
+                        row, height_keys)])
+                if "token_tx_id" not in row else convert_token_value(
+                    row['value'], rates[get_first_key_present(
+                        row, height_keys)], token_config[row["currency"]]))
+            for row in rows
         ]
 
     return [

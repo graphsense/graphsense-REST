@@ -5,7 +5,7 @@
  {"address_id_group": 4317, "address_id_secondary_group": 3, "address_id": 107925001, "transaction_id": 25000, "is_outgoing": true, "currency":"ETH"}
  {"address_id_group": 4317, "address_id_secondary_group": 3, "address_id": 107925001, "transaction_id": 50000, "is_outgoing": false, "currency":"ETH"}
  {"address_id_group": 4317, "address_id_secondary_group": 3, "address_id": 107925001, "transaction_id": 55000, "is_outgoing": false, "currency":"ETH"}
- {"address_id_group": 4317, "address_id_secondary_group": 3, "address_id": 107925001, "transaction_id": 70000, "is_outgoing": false, "currency":"ETH"}
+ {"address_id_group": 4317, "address_id_secondary_group": 3, "address_id": 107925001, "transaction_id": 50000, "is_outgoing": false, "currency":"ETH"}
  {"address_id_group": 4317, "address_id_secondary_group": 3, "address_id": 107925001, "transaction_id": 50000, "is_outgoing": true, "currency":"WETH", "log_index":1}
  {"address_id_group": 4317, "address_id_secondary_group": 3, "address_id": 107925001, "transaction_id": 50000, "is_outgoing": true, "currency":"USDT", "log_index":2}
 
