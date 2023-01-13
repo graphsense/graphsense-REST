@@ -1112,9 +1112,17 @@ class Cassandra:
         if tx is None:
             return None
 
-        return await self.annotate_token_data(currency, tx, log_index)
+        return await self.fetch_token_transactions(currency, tx, log_index)
 
-    async def annotate_token_data(self, currency, tx, log_index=None):
+    async def fetch_token_transaction(self, currency, tx, log_index):
+        r = await self.fetch_token_transactions(currency, tx, log_index)
+        if len(r) != 1:
+            raise RuntimeError(f"Found {len(r)} logs for token "
+                               f"tx {tx['tx_hash']}:"
+                               f"{log_index}")
+        return r[0]
+
+    async def fetch_token_transactions(self, currency, tx, log_index=None):
         transfer_topic = from_hex("0xddf252ad1be2c89b69c2b068fc378da"
                                   "a952ba7f163c4a11628f55a4df523b3ef")
         token_tx_logs = await self.get_logs_in_block_eth(currency,
@@ -1213,7 +1221,10 @@ class Cassandra:
             else expression
 
     @eth
-    async def list_txs_by_hashes(self, currency, hashes):
+    async def list_txs_by_hashes(self,
+                                 currency,
+                                 hashes,
+                                 include_token_txs=False):
         prefix = self.get_prefix_lengths(currency)
         params = [[hash[:prefix['tx']],
                    bytearray.fromhex(hash)] for hash in hashes]
@@ -1222,7 +1233,9 @@ class Cassandra:
         result = await self.concurrent_with_args(currency, 'raw', statement,
                                                  params)
         ids = (tx['tx_id'] for tx in result)
-        return await self.list_txs_by_ids(currency, ids)
+        return await self.list_txs_by_ids(currency,
+                                          ids,
+                                          include_token_txs=include_token_txs)
 
     @eth
     async def get_tx_by_hash(self, currency, hash):
@@ -1237,7 +1250,11 @@ class Cassandra:
         return self.get_tx_by_id(currency, result['tx_id'])
 
     @eth
-    async def list_txs_by_ids(self, currency, ids, filter_empty=True):
+    async def list_txs_by_ids(self,
+                              currency,
+                              ids,
+                              filter_empty=True,
+                              include_token_txs=False):
         params = ([self.get_tx_id_group(currency, id), id] for id in ids)
         statement = ('SELECT * FROM transaction WHERE '
                      'tx_id_group = %s and tx_id = %s')
@@ -1514,7 +1531,9 @@ class Cassandra:
 
         if result['txs'] is None:
             return []
-        return await self.list_txs_by_ids(currency, result['txs'])
+        return await self.list_txs_by_ids(currency,
+                                          result['txs'],
+                                          include_token_txs=True)
 
     async def get_id_secondary_group_eth(self, table, id_group):
         column_prefix = ''
@@ -1577,13 +1596,8 @@ class Cassandra:
         for addr_tx in txs:
             full_tx = full_txs[addr_tx['transaction_id']]
             if addr_tx["log_index"] is not None:
-                r = await self.annotate_token_data(currency, full_tx,
-                                                   addr_tx["log_index"])
-                if len(r) != 1:
-                    raise RuntimeError(f"Found {len(r)} logs for token "
-                                       f"tx {addr_tx['transaction_id']}:"
-                                       f"{addr_tx['log_index']}")
-                token_tx = r[0]
+                token_tx = await self.fetch_token_transaction(
+                    currency, full_tx, addr_tx["log_index"])
 
                 addr_tx['to_address'] = token_tx['to_address']
                 addr_tx['from_address'] = token_tx['from_address']
@@ -1609,7 +1623,10 @@ class Cassandra:
 
         return result.current_rows, to_hex(paging_state)
 
-    async def list_txs_by_ids_eth(self, currency, ids):
+    async def list_txs_by_ids_eth(self,
+                                  currency,
+                                  ids,
+                                  include_token_txs=False):
         params = [[self.get_tx_id_group(currency, id), id] for id in ids]
         statement = (
             'SELECT transaction from transaction_ids_by_transaction_id_group'
@@ -1621,7 +1638,8 @@ class Cassandra:
                                                  filter_empty=False)
 
         return await self.list_txs_by_hashes(
-            currency, [row['transaction'] for row in result])
+            currency, [row['transaction'] for row in result],
+            include_token_txs=include_token_txs)
 
     async def get_tx_by_id_eth(self, currency, id):
         params = [self.get_tx_id_group(currency, id), id]
@@ -1635,7 +1653,10 @@ class Cassandra:
             return None
         return await self.get_tx_by_hash(currency, result['transaction'])
 
-    async def list_txs_by_hashes_eth(self, currency, hashes):
+    async def list_txs_by_hashes_eth(self,
+                                     currency,
+                                     hashes,
+                                     include_token_txs=False):
         prefix = self.get_prefix_lengths(currency)
         params = [[hash.hex()[:prefix['tx']], hash] for hash in hashes]
         statement = ('SELECT tx_hash, block_id, block_timestamp, value, '
@@ -1643,10 +1664,20 @@ class Cassandra:
                      'transaction where tx_hash_prefix=%s and tx_hash=%s')
         result = await self.concurrent_with_args(currency, 'raw', statement,
                                                  params)
+
+        result_with_tokens = []
         for row in result:
+
             row['from_address'] = eth_address_to_hex(row['from_address'])
             row['to_address'] = eth_address_to_hex(row['to_address'])
-        return result
+
+            result_with_tokens.append(row)
+            if include_token_txs:
+                token_txs = await self.fetch_token_transactions(currency, row)
+                for ttx in token_txs:
+                    result_with_tokens.append(ttx)
+
+        return result_with_tokens
 
     async def get_tx_by_hash_eth(self, currency, hash):
         prefix = self.get_prefix_lengths(currency)
@@ -1787,8 +1818,8 @@ class Cassandra:
                 tx_ids.append(row['transaction_id'])
                 count += 1
 
-        return await self.list_txs_by_ids(currency, tx_ids), \
-            to_hex(paging_state)
+        return await self.list_txs_by_ids(
+            currency, tx_ids, include_token_txs=False), to_hex(paging_state)
 
     async def get_tx_eth(self, currency, tx_hash):
         return await self.get_tx_by_hash(currency, from_hex(tx_hash))

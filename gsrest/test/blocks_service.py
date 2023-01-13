@@ -1,5 +1,6 @@
 from openapi_server.models.block import Block
-from gsrest.test.txs_service import tx1, tx1_eth, tx2_eth
+from gsrest.test.txs_service import (tx1, tx1_eth, tx2_eth, token_tx1_eth,
+                                     token_tx2_eth)
 
 block = Block(height=1,
               currency='btc',
@@ -69,7 +70,11 @@ async def list_block_txs(test_case):
     def s(tx):
         return tx['tx_hash']
 
-    eth_txs = [tx1_eth.to_dict(), tx2_eth.to_dict()]
+    eth_txs = [
+        tx1_eth.to_dict(),
+        tx2_eth.to_dict(),
+        token_tx1_eth.to_dict(),
+        token_tx2_eth.to_dict()
+    ]
 
-    result = sorted(result, key=s)
-    test_case.assertEqual(sorted(eth_txs, key=s), result)
+    assert eth_txs == result

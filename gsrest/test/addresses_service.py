@@ -769,6 +769,7 @@ async def list_address_links(test_case):
     # from ingest to ingest:
     first = result['links'][0]
     second = result['links'][1]
+
     test_case.assertEqualWithList(txs.to_dict(), result, 'links', 'tx_hash')
 
     path += '&pagesize={pagesize}'
