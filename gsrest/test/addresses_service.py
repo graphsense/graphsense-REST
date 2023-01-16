@@ -418,9 +418,9 @@ eth_address2 = Address(currency="eth",
                        entity=107925001,
                        is_contract=False,
                        total_tokens_received={
-                           'USDT':
+                           'usdt':
                            make_values(eur=450, usd=500, value=450),
-                           'WETH':
+                           'weth':
                            make_values(eur=50.56,
                                        usd=60.67,
                                        value=345000000000000000000)
@@ -451,18 +451,18 @@ eth_address3 = Address(currency="eth",
                        entity=107925002,
                        is_contract=False,
                        total_tokens_spent={
-                           'USDT':
+                           'usdt':
                            make_values(eur=450, usd=900, value=450),
-                           'WETH':
+                           'weth':
                            make_values(eur=50.0,
                                        usd=100.0,
                                        value=345000000000000000000)
                        },
                        status='clean',
                        token_balances={
-                           'USDT':
+                           'usdt':
                            make_values(value=450000000, eur=225.0, usd=450.0),
-                           'WETH':
+                           'weth':
                            make_values(value=345000000000000000000,
                                        eur=345.0,
                                        usd=690.0)
@@ -493,9 +493,9 @@ eth_address2WithTokenFlows = NeighborAddresses(
             no_txs=2,
             value=make_values(value=0, usd=0.0, eur=0.0),
             token_values={
-                'USDT':
+                'usdt':
                 make_values(value=450, eur=450.0, usd=900.0),
-                'WETH':
+                'weth':
                 make_values(value=345000000000000000000, eur=50.0, usd=100.0)
             },
             address=eth_address3,

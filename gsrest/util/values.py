@@ -42,7 +42,7 @@ def convert_token_values_map(currency, value_map, rates, token_configs):
         return None
     else:
         return {
-            token_currency: convert_token_value(value, rates,
+            token_currency.lower(): convert_token_value(value, rates,
                                                 token_configs[token_currency])
             for token_currency, value in value_map.items()
         }
@@ -75,7 +75,7 @@ def convert_value(currency, value, rates):
 def to_values_tokens(token_values):
     if token_values is None:
         return None
-    return {k: to_values(value) for k, value in token_values.items()}
+    return {k.lower(): to_values(value) for k, value in token_values.items()}
 
 
 def to_values(value):
