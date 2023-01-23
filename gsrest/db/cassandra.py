@@ -1355,6 +1355,7 @@ class Cassandra:
                 k: self.markup_currency(currency, v)
                 for k, v in ts.items()
             }
+        
         await self.add_balance(currency, row)
 
         if not with_txs:
@@ -1431,7 +1432,7 @@ class Cassandra:
         }
 
         if results["ETH"] is None:
-            results["ETH"]["balance"] = {
+            results["ETH"] = {
                 'balance':
                 row['total_received'].value - row['total_spent'].value
             }
