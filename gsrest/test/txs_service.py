@@ -192,7 +192,7 @@ async def get_tx(test_case):
     test_case.assertEqual(token_tx2_eth.to_dict(), result)
 
 
-async def get_token_txs(test_case):
+async def list_token_txs(test_case):
     path = '/{currency}/token_txs/{tx_hash}'
     results = await test_case.request(path,
                                       currency='eth',

@@ -1103,10 +1103,10 @@ class Cassandra:
         return one(result)
 
     @eth
-    async def get_token_txs(self, currency, tx_hash, log_index=None):
+    async def list_token_txs(self, currency, tx_hash, log_index=None):
         return []
 
-    async def get_token_txs_eth(self, currency, tx_hash, log_index=None):
+    async def list_token_txs_eth(self, currency, tx_hash, log_index=None):
 
         tx = await self.get_tx(currency, tx_hash)
         if tx is None:

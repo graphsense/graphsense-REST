@@ -10,7 +10,6 @@ import pytest
 # https://docs.pytest.org/en/stable/how-to/writing_plugins.html#assertion-rewriting
 pytest.register_assert_rewrite("gsrest")
 
-
 class BaseTestCase(AioHTTPTestCase):
 
     async def get_application(self):

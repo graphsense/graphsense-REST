@@ -15,14 +15,6 @@ import gsrest.test.txs_service as test_service
 class TestTxsController(BaseTestCase):
     """TxsController integration test stubs"""
 
-    async def test_get_token_txs(self):
-        """Test case for get_token_txs
-
-        Returns all token transactions in a given transaction
-        """
-        await test_service.get_token_txs(self)
-
-
     async def test_get_tx(self):
         """Test case for get_tx
 
@@ -37,4 +29,12 @@ class TestTxsController(BaseTestCase):
         Returns input/output values of a specific transaction identified by its hash.
         """
         await test_service.get_tx_io(self)
+
+
+    async def test_list_token_txs(self):
+        """Test case for list_token_txs
+
+        Returns all token transactions in a given transaction
+        """
+        await test_service.list_token_txs(self)
 

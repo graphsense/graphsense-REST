@@ -51,9 +51,9 @@ def io_from_rows(currency, values, key, rates, include_io):
     ]
 
 
-async def get_token_txs(request, currency, tx_hash, token_tx_id=None):
+async def list_token_txs(request, currency, tx_hash, token_tx_id=None):
     db = request.app['db']
-    results = await db.get_token_txs(currency, tx_hash, log_index=token_tx_id)
+    results = await db.list_token_txs(currency, tx_hash, log_index=token_tx_id)
     if results is None:
         raise RuntimeError('Transaction {} in keyspace {} not found'.format(
             tx_hash, currency))
@@ -76,10 +76,10 @@ async def get_tx(request,
     db = request.app['db']
     if token_tx_id is not None:
         if currency == 'eth':
-            results = await get_token_txs(request,
-                                          currency,
-                                          tx_hash,
-                                          token_tx_id=token_tx_id)
+            results = await list_token_txs(request,
+                                           currency,
+                                           tx_hash,
+                                           token_tx_id=token_tx_id)
             if len(results):
                 return results[0]
             else:
