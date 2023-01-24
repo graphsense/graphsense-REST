@@ -57,6 +57,7 @@ async def txs_from_rows(request, currency, rows, token_config):
                 from_address=row['from_address'],
                 to_address=row['to_address'],
                 token_tx_id=row.get("token_tx_id", None),
+                contract_creation=row.get("contract_creation", None),
                 value=convert_value(
                     currency, row['value'], rates[get_first_key_present(
                         row, height_keys)])

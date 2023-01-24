@@ -63343,6 +63343,7 @@ components:
       type: object
     tx_account:
       example:
+        contract_creation: true
         currency: btc
         tx_hash: tx_hash
         to_address: addressA
@@ -63400,6 +63401,11 @@ components:
           example: addressA
           title: address_id
           type: string
+        contract_creation:
+          description: Indicates if this transaction created a new contract. Recipient
+            address is the address of the new contract.
+          title: contract_creation
+          type: boolean
       required:
       - currency
       - from_address

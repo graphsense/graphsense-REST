@@ -17,7 +17,7 @@ class AddressTx(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, tx_type: str='account', tx_hash: str=None, currency: str=None, coinbase: bool=None, height: int=None, timestamp: int=None, value: Values=None, token_tx_id: int=None, from_address: str=None, to_address: str=None):
+    def __init__(self, tx_type: str='account', tx_hash: str=None, currency: str=None, coinbase: bool=None, height: int=None, timestamp: int=None, value: Values=None, token_tx_id: int=None, from_address: str=None, to_address: str=None, contract_creation: bool=None):
         """AddressTx - a model defined in OpenAPI
 
         :param tx_type: The tx_type of this AddressTx.
@@ -30,6 +30,7 @@ class AddressTx(Model):
         :param token_tx_id: The token_tx_id of this AddressTx.
         :param from_address: The from_address of this AddressTx.
         :param to_address: The to_address of this AddressTx.
+        :param contract_creation: The contract_creation of this AddressTx.
         """
         self.openapi_types = {
             'tx_type': str,
@@ -41,7 +42,8 @@ class AddressTx(Model):
             'value': Values,
             'token_tx_id': int,
             'from_address': str,
-            'to_address': str
+            'to_address': str,
+            'contract_creation': bool
         }
 
         self.attribute_map = {
@@ -54,7 +56,8 @@ class AddressTx(Model):
             'value': 'value',
             'token_tx_id': 'token_tx_id',
             'from_address': 'from_address',
-            'to_address': 'to_address'
+            'to_address': 'to_address',
+            'contract_creation': 'contract_creation'
         }
 
         self._tx_type = tx_type
@@ -67,6 +70,7 @@ class AddressTx(Model):
         self._token_tx_id = token_tx_id
         self._from_address = from_address
         self._to_address = to_address
+        self._contract_creation = contract_creation
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'AddressTx':
@@ -94,7 +98,8 @@ class AddressTx(Model):
             'value': self._value,
             'token_tx_id': self._token_tx_id,
             'from_address': self._from_address,
-            'to_address': self._to_address }
+            'to_address': self._to_address,
+            'contract_creation': self._contract_creation }
 
 
     @property
@@ -340,3 +345,26 @@ class AddressTx(Model):
             raise ValueError("Invalid value for `to_address`, must not be `None`")
 
         self._to_address = to_address
+
+    @property
+    def contract_creation(self):
+        """Gets the contract_creation of this AddressTx.
+
+        Indicates if this transaction created a new contract. Recipient address is the address of the new contract.
+
+        :return: The contract_creation of this AddressTx.
+        :rtype: bool
+        """
+        return self._contract_creation
+
+    @contract_creation.setter
+    def contract_creation(self, contract_creation):
+        """Sets the contract_creation of this AddressTx.
+
+        Indicates if this transaction created a new contract. Recipient address is the address of the new contract.
+
+        :param contract_creation: The contract_creation of this AddressTx.
+        :type contract_creation: bool
+        """
+
+        self._contract_creation = contract_creation

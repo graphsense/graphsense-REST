@@ -15,7 +15,7 @@ class TxAccount(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, tx_type: str='account', token_tx_id: int=None, currency: str=None, tx_hash: str=None, height: int=None, timestamp: int=None, value: Values=None, from_address: str=None, to_address: str=None):
+    def __init__(self, tx_type: str='account', token_tx_id: int=None, currency: str=None, tx_hash: str=None, height: int=None, timestamp: int=None, value: Values=None, from_address: str=None, to_address: str=None, contract_creation: bool=None):
         """TxAccount - a model defined in OpenAPI
 
         :param tx_type: The tx_type of this TxAccount.
@@ -27,6 +27,7 @@ class TxAccount(Model):
         :param value: The value of this TxAccount.
         :param from_address: The from_address of this TxAccount.
         :param to_address: The to_address of this TxAccount.
+        :param contract_creation: The contract_creation of this TxAccount.
         """
         self.openapi_types = {
             'tx_type': str,
@@ -37,7 +38,8 @@ class TxAccount(Model):
             'timestamp': int,
             'value': Values,
             'from_address': str,
-            'to_address': str
+            'to_address': str,
+            'contract_creation': bool
         }
 
         self.attribute_map = {
@@ -49,7 +51,8 @@ class TxAccount(Model):
             'timestamp': 'timestamp',
             'value': 'value',
             'from_address': 'from_address',
-            'to_address': 'to_address'
+            'to_address': 'to_address',
+            'contract_creation': 'contract_creation'
         }
 
         self._tx_type = tx_type
@@ -61,6 +64,7 @@ class TxAccount(Model):
         self._value = value
         self._from_address = from_address
         self._to_address = to_address
+        self._contract_creation = contract_creation
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'TxAccount':
@@ -87,7 +91,8 @@ class TxAccount(Model):
             'timestamp': self._timestamp,
             'value': self._value,
             'from_address': self._from_address,
-            'to_address': self._to_address }
+            'to_address': self._to_address,
+            'contract_creation': self._contract_creation }
 
 
     @property
@@ -308,3 +313,26 @@ class TxAccount(Model):
             raise ValueError("Invalid value for `to_address`, must not be `None`")
 
         self._to_address = to_address
+
+    @property
+    def contract_creation(self):
+        """Gets the contract_creation of this TxAccount.
+
+        Indicates if this transaction created a new contract. Recipient address is the address of the new contract.
+
+        :return: The contract_creation of this TxAccount.
+        :rtype: bool
+        """
+        return self._contract_creation
+
+    @contract_creation.setter
+    def contract_creation(self, contract_creation):
+        """Sets the contract_creation of this TxAccount.
+
+        Indicates if this transaction created a new contract. Recipient address is the address of the new contract.
+
+        :param contract_creation: The contract_creation of this TxAccount.
+        :type contract_creation: bool
+        """
+
+        self._contract_creation = contract_creation

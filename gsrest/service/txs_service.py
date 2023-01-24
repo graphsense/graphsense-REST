@@ -16,6 +16,7 @@ def from_row(currency, row, rates, token_config, include_io=False):
             from_address=row['from_address'],
             to_address=row['to_address'],
             token_tx_id=row.get("token_tx_id", None),
+            contract_creation=row.get("contract_creation", None),
             value=convert_value(currency, row['value'], rates)
             if "token_tx_id" not in row else convert_token_value(
                 row['value'], rates, token_config[row["currency"]]))

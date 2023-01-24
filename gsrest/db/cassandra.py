@@ -1661,7 +1661,7 @@ class Cassandra:
         prefix = self.get_prefix_lengths(currency)
         params = [[hash.hex()[:prefix['tx']], hash] for hash in hashes]
         statement = ('SELECT tx_hash, block_id, block_timestamp, value, '
-                     'from_address, to_address from '
+                     'from_address, to_address, receipt_contract_address from '
                      'transaction where tx_hash_prefix=%s and tx_hash=%s')
         result = await self.concurrent_with_args(currency, 'raw', statement,
                                                  params)
@@ -1671,6 +1671,8 @@ class Cassandra:
 
             row['from_address'] = eth_address_to_hex(row['from_address'])
             row['to_address'] = eth_address_to_hex(row['to_address'])
+            row['receipt_contract_address'] = eth_address_to_hex(
+                row['receipt_contract_address'])
 
             result_with_tokens.append(row)
             if include_token_txs:
@@ -1684,14 +1686,25 @@ class Cassandra:
         prefix = self.get_prefix_lengths(currency)
         params = [hash.hex()[:prefix['tx']], hash]
         statement = ('SELECT tx_hash, block_id, block_timestamp, value, '
-                     'from_address, to_address from '
+                     'from_address, to_address, receipt_contract_address from '
                      'transaction where tx_hash_prefix=%s and tx_hash=%s')
         result = await self.execute_async(currency, 'raw', statement, params)
         result = one(result)
         if not result:
             return None
+
+        to_address = result['to_address']
+        if to_address is None:
+            # this is a contract creation transaction
+            # set recipient to newly created contract and mark tx as creation
+            result['to_address'] = eth_address_to_hex(
+                result['receipt_contract_address'])
+            result['contract_creation'] = True
+        else:
+            # normal transaction
+            result['to_address'] = eth_address_to_hex(to_address)
+            # result['contract_creation'] = False
         result['from_address'] = eth_address_to_hex(result['from_address'])
-        result['to_address'] = eth_address_to_hex(result['to_address'])
         return result
 
     async def list_links_eth(self,
