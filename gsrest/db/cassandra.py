@@ -1355,7 +1355,7 @@ class Cassandra:
                 k: self.markup_currency(currency, v)
                 for k, v in ts.items()
             }
-        
+
         await self.add_balance(currency, row)
 
         if not with_txs:
