@@ -1616,6 +1616,7 @@ class Cassandra:
                 value = full_tx['value'] * \
                     (-1 if addr_tx['is_outgoing'] else 1)
 
+            addr_tx['contract_creation'] = full_tx.get('contract_creation', None)
             addr_tx['tx_hash'] = full_tx['tx_hash']
             addr_tx['height'] = full_tx['block_id']
             addr_tx['timestamp'] = full_tx['block_timestamp']
@@ -1670,9 +1671,21 @@ class Cassandra:
         for row in result:
 
             row['from_address'] = eth_address_to_hex(row['from_address'])
-            row['to_address'] = eth_address_to_hex(row['to_address'])
-            row['receipt_contract_address'] = eth_address_to_hex(
-                row['receipt_contract_address'])
+            # row['to_address'] = eth_address_to_hex(row['to_address'])
+            # row['receipt_contract_address'] = eth_address_to_hex(
+            #     row['receipt_contract_address'])
+            to_address = row['to_address']
+            if to_address is None:
+                # this is a contract creation transaction
+                # set recipient to newly created contract and mark tx as creation
+                row['to_address'] = eth_address_to_hex(
+                    row['receipt_contract_address'])
+                row['contract_creation'] = True
+            else:
+                # normal transaction
+                row['to_address'] = eth_address_to_hex(to_address)
+                # result['contract_creation'] = False
+           
 
             result_with_tokens.append(row)
             if include_token_txs:
