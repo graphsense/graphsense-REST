@@ -5,8 +5,6 @@ from datetime import date, datetime
 from typing import List, Dict, Type
 
 from openapi_server.models.base_model_ import Model
-from openapi_server.models.address_tag_all_of import AddressTagAllOf
-from openapi_server.models.tag import Tag
 from openapi_server import util
 
 
@@ -16,74 +14,74 @@ class AddressTag(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, abuse: str=None, category: str=None, confidence: str=None, confidence_level: int=None, currency: str=None, is_cluster_definer: bool=None, label: str=None, lastmod: int=None, source: str=None, tagpack_creator: str=None, tagpack_is_public: bool=None, tagpack_title: str=None, tagpack_uri: str=None, address: str=None, entity: int=None):
+    def __init__(self, label: str=None, category: str=None, abuse: str=None, tagpack_uri: str=None, source: str=None, lastmod: int=None, tagpack_title: str=None, tagpack_is_public: bool=None, tagpack_creator: str=None, is_cluster_definer: bool=None, confidence: str=None, confidence_level: int=None, currency: str=None, address: str=None, entity: int=None):
         """AddressTag - a model defined in OpenAPI
 
-        :param abuse: The abuse of this AddressTag.
+        :param label: The label of this AddressTag.
         :param category: The category of this AddressTag.
+        :param abuse: The abuse of this AddressTag.
+        :param tagpack_uri: The tagpack_uri of this AddressTag.
+        :param source: The source of this AddressTag.
+        :param lastmod: The lastmod of this AddressTag.
+        :param tagpack_title: The tagpack_title of this AddressTag.
+        :param tagpack_is_public: The tagpack_is_public of this AddressTag.
+        :param tagpack_creator: The tagpack_creator of this AddressTag.
+        :param is_cluster_definer: The is_cluster_definer of this AddressTag.
         :param confidence: The confidence of this AddressTag.
         :param confidence_level: The confidence_level of this AddressTag.
         :param currency: The currency of this AddressTag.
-        :param is_cluster_definer: The is_cluster_definer of this AddressTag.
-        :param label: The label of this AddressTag.
-        :param lastmod: The lastmod of this AddressTag.
-        :param source: The source of this AddressTag.
-        :param tagpack_creator: The tagpack_creator of this AddressTag.
-        :param tagpack_is_public: The tagpack_is_public of this AddressTag.
-        :param tagpack_title: The tagpack_title of this AddressTag.
-        :param tagpack_uri: The tagpack_uri of this AddressTag.
         :param address: The address of this AddressTag.
         :param entity: The entity of this AddressTag.
         """
         self.openapi_types = {
-            'abuse': str,
+            'label': str,
             'category': str,
+            'abuse': str,
+            'tagpack_uri': str,
+            'source': str,
+            'lastmod': int,
+            'tagpack_title': str,
+            'tagpack_is_public': bool,
+            'tagpack_creator': str,
+            'is_cluster_definer': bool,
             'confidence': str,
             'confidence_level': int,
             'currency': str,
-            'is_cluster_definer': bool,
-            'label': str,
-            'lastmod': int,
-            'source': str,
-            'tagpack_creator': str,
-            'tagpack_is_public': bool,
-            'tagpack_title': str,
-            'tagpack_uri': str,
             'address': str,
             'entity': int
         }
 
         self.attribute_map = {
-            'abuse': 'abuse',
+            'label': 'label',
             'category': 'category',
+            'abuse': 'abuse',
+            'tagpack_uri': 'tagpack_uri',
+            'source': 'source',
+            'lastmod': 'lastmod',
+            'tagpack_title': 'tagpack_title',
+            'tagpack_is_public': 'tagpack_is_public',
+            'tagpack_creator': 'tagpack_creator',
+            'is_cluster_definer': 'is_cluster_definer',
             'confidence': 'confidence',
             'confidence_level': 'confidence_level',
             'currency': 'currency',
-            'is_cluster_definer': 'is_cluster_definer',
-            'label': 'label',
-            'lastmod': 'lastmod',
-            'source': 'source',
-            'tagpack_creator': 'tagpack_creator',
-            'tagpack_is_public': 'tagpack_is_public',
-            'tagpack_title': 'tagpack_title',
-            'tagpack_uri': 'tagpack_uri',
             'address': 'address',
             'entity': 'entity'
         }
 
-        self._abuse = abuse
+        self._label = label
         self._category = category
+        self._abuse = abuse
+        self._tagpack_uri = tagpack_uri
+        self._source = source
+        self._lastmod = lastmod
+        self._tagpack_title = tagpack_title
+        self._tagpack_is_public = tagpack_is_public
+        self._tagpack_creator = tagpack_creator
+        self._is_cluster_definer = is_cluster_definer
         self._confidence = confidence
         self._confidence_level = confidence_level
         self._currency = currency
-        self._is_cluster_definer = is_cluster_definer
-        self._label = label
-        self._lastmod = lastmod
-        self._source = source
-        self._tagpack_creator = tagpack_creator
-        self._tagpack_is_public = tagpack_is_public
-        self._tagpack_title = tagpack_title
-        self._tagpack_uri = tagpack_uri
         self._address = address
         self._entity = entity
 
@@ -104,22 +102,70 @@ class AddressTag(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'abuse': self._abuse,
+        return { 'label': self._label,
             'category': self._category,
+            'abuse': self._abuse,
+            'tagpack_uri': self._tagpack_uri,
+            'source': self._source,
+            'lastmod': self._lastmod,
+            'tagpack_title': self._tagpack_title,
+            'tagpack_is_public': self._tagpack_is_public,
+            'tagpack_creator': self._tagpack_creator,
+            'is_cluster_definer': self._is_cluster_definer,
             'confidence': self._confidence,
             'confidence_level': self._confidence_level,
             'currency': self._currency,
-            'is_cluster_definer': self._is_cluster_definer,
-            'label': self._label,
-            'lastmod': self._lastmod,
-            'source': self._source,
-            'tagpack_creator': self._tagpack_creator,
-            'tagpack_is_public': self._tagpack_is_public,
-            'tagpack_title': self._tagpack_title,
-            'tagpack_uri': self._tagpack_uri,
             'address': self._address,
             'entity': self._entity }
 
+
+    @property
+    def label(self):
+        """Gets the label of this AddressTag.
+
+        Label
+
+        :return: The label of this AddressTag.
+        :rtype: str
+        """
+        return self._label
+
+    @label.setter
+    def label(self, label):
+        """Sets the label of this AddressTag.
+
+        Label
+
+        :param label: The label of this AddressTag.
+        :type label: str
+        """
+        if label is None:
+            raise ValueError("Invalid value for `label`, must not be `None`")
+
+        self._label = label
+
+    @property
+    def category(self):
+        """Gets the category of this AddressTag.
+
+        Category
+
+        :return: The category of this AddressTag.
+        :rtype: str
+        """
+        return self._category
+
+    @category.setter
+    def category(self, category):
+        """Sets the category of this AddressTag.
+
+        Category
+
+        :param category: The category of this AddressTag.
+        :type category: str
+        """
+
+        self._category = category
 
     @property
     def abuse(self):
@@ -145,27 +191,173 @@ class AddressTag(Model):
         self._abuse = abuse
 
     @property
-    def category(self):
-        """Gets the category of this AddressTag.
+    def tagpack_uri(self):
+        """Gets the tagpack_uri of this AddressTag.
 
-        Category
+        Tagpack URI
 
-        :return: The category of this AddressTag.
+        :return: The tagpack_uri of this AddressTag.
         :rtype: str
         """
-        return self._category
+        return self._tagpack_uri
 
-    @category.setter
-    def category(self, category):
-        """Sets the category of this AddressTag.
+    @tagpack_uri.setter
+    def tagpack_uri(self, tagpack_uri):
+        """Sets the tagpack_uri of this AddressTag.
 
-        Category
+        Tagpack URI
 
-        :param category: The category of this AddressTag.
-        :type category: str
+        :param tagpack_uri: The tagpack_uri of this AddressTag.
+        :type tagpack_uri: str
         """
 
-        self._category = category
+        self._tagpack_uri = tagpack_uri
+
+    @property
+    def source(self):
+        """Gets the source of this AddressTag.
+
+        Source
+
+        :return: The source of this AddressTag.
+        :rtype: str
+        """
+        return self._source
+
+    @source.setter
+    def source(self, source):
+        """Sets the source of this AddressTag.
+
+        Source
+
+        :param source: The source of this AddressTag.
+        :type source: str
+        """
+
+        self._source = source
+
+    @property
+    def lastmod(self):
+        """Gets the lastmod of this AddressTag.
+
+        Last modified
+
+        :return: The lastmod of this AddressTag.
+        :rtype: int
+        """
+        return self._lastmod
+
+    @lastmod.setter
+    def lastmod(self, lastmod):
+        """Sets the lastmod of this AddressTag.
+
+        Last modified
+
+        :param lastmod: The lastmod of this AddressTag.
+        :type lastmod: int
+        """
+
+        self._lastmod = lastmod
+
+    @property
+    def tagpack_title(self):
+        """Gets the tagpack_title of this AddressTag.
+
+        Tagpack title
+
+        :return: The tagpack_title of this AddressTag.
+        :rtype: str
+        """
+        return self._tagpack_title
+
+    @tagpack_title.setter
+    def tagpack_title(self, tagpack_title):
+        """Sets the tagpack_title of this AddressTag.
+
+        Tagpack title
+
+        :param tagpack_title: The tagpack_title of this AddressTag.
+        :type tagpack_title: str
+        """
+        if tagpack_title is None:
+            raise ValueError("Invalid value for `tagpack_title`, must not be `None`")
+
+        self._tagpack_title = tagpack_title
+
+    @property
+    def tagpack_is_public(self):
+        """Gets the tagpack_is_public of this AddressTag.
+
+        whether the address is public
+
+        :return: The tagpack_is_public of this AddressTag.
+        :rtype: bool
+        """
+        return self._tagpack_is_public
+
+    @tagpack_is_public.setter
+    def tagpack_is_public(self, tagpack_is_public):
+        """Sets the tagpack_is_public of this AddressTag.
+
+        whether the address is public
+
+        :param tagpack_is_public: The tagpack_is_public of this AddressTag.
+        :type tagpack_is_public: bool
+        """
+        if tagpack_is_public is None:
+            raise ValueError("Invalid value for `tagpack_is_public`, must not be `None`")
+
+        self._tagpack_is_public = tagpack_is_public
+
+    @property
+    def tagpack_creator(self):
+        """Gets the tagpack_creator of this AddressTag.
+
+        Tagpack creator
+
+        :return: The tagpack_creator of this AddressTag.
+        :rtype: str
+        """
+        return self._tagpack_creator
+
+    @tagpack_creator.setter
+    def tagpack_creator(self, tagpack_creator):
+        """Sets the tagpack_creator of this AddressTag.
+
+        Tagpack creator
+
+        :param tagpack_creator: The tagpack_creator of this AddressTag.
+        :type tagpack_creator: str
+        """
+        if tagpack_creator is None:
+            raise ValueError("Invalid value for `tagpack_creator`, must not be `None`")
+
+        self._tagpack_creator = tagpack_creator
+
+    @property
+    def is_cluster_definer(self):
+        """Gets the is_cluster_definer of this AddressTag.
+
+        whether the address tag applies to the entity level
+
+        :return: The is_cluster_definer of this AddressTag.
+        :rtype: bool
+        """
+        return self._is_cluster_definer
+
+    @is_cluster_definer.setter
+    def is_cluster_definer(self, is_cluster_definer):
+        """Sets the is_cluster_definer of this AddressTag.
+
+        whether the address tag applies to the entity level
+
+        :param is_cluster_definer: The is_cluster_definer of this AddressTag.
+        :type is_cluster_definer: bool
+        """
+        if is_cluster_definer is None:
+            raise ValueError("Invalid value for `is_cluster_definer`, must not be `None`")
+
+        self._is_cluster_definer = is_cluster_definer
 
     @property
     def confidence(self):
@@ -237,200 +429,6 @@ class AddressTag(Model):
             raise ValueError("Invalid value for `currency`, must not be `None`")
 
         self._currency = currency
-
-    @property
-    def is_cluster_definer(self):
-        """Gets the is_cluster_definer of this AddressTag.
-
-        whether the address tag applies to the entity level
-
-        :return: The is_cluster_definer of this AddressTag.
-        :rtype: bool
-        """
-        return self._is_cluster_definer
-
-    @is_cluster_definer.setter
-    def is_cluster_definer(self, is_cluster_definer):
-        """Sets the is_cluster_definer of this AddressTag.
-
-        whether the address tag applies to the entity level
-
-        :param is_cluster_definer: The is_cluster_definer of this AddressTag.
-        :type is_cluster_definer: bool
-        """
-        if is_cluster_definer is None:
-            raise ValueError("Invalid value for `is_cluster_definer`, must not be `None`")
-
-        self._is_cluster_definer = is_cluster_definer
-
-    @property
-    def label(self):
-        """Gets the label of this AddressTag.
-
-        Label
-
-        :return: The label of this AddressTag.
-        :rtype: str
-        """
-        return self._label
-
-    @label.setter
-    def label(self, label):
-        """Sets the label of this AddressTag.
-
-        Label
-
-        :param label: The label of this AddressTag.
-        :type label: str
-        """
-        if label is None:
-            raise ValueError("Invalid value for `label`, must not be `None`")
-
-        self._label = label
-
-    @property
-    def lastmod(self):
-        """Gets the lastmod of this AddressTag.
-
-        Last modified
-
-        :return: The lastmod of this AddressTag.
-        :rtype: int
-        """
-        return self._lastmod
-
-    @lastmod.setter
-    def lastmod(self, lastmod):
-        """Sets the lastmod of this AddressTag.
-
-        Last modified
-
-        :param lastmod: The lastmod of this AddressTag.
-        :type lastmod: int
-        """
-
-        self._lastmod = lastmod
-
-    @property
-    def source(self):
-        """Gets the source of this AddressTag.
-
-        Source
-
-        :return: The source of this AddressTag.
-        :rtype: str
-        """
-        return self._source
-
-    @source.setter
-    def source(self, source):
-        """Sets the source of this AddressTag.
-
-        Source
-
-        :param source: The source of this AddressTag.
-        :type source: str
-        """
-
-        self._source = source
-
-    @property
-    def tagpack_creator(self):
-        """Gets the tagpack_creator of this AddressTag.
-
-        Tagpack creator
-
-        :return: The tagpack_creator of this AddressTag.
-        :rtype: str
-        """
-        return self._tagpack_creator
-
-    @tagpack_creator.setter
-    def tagpack_creator(self, tagpack_creator):
-        """Sets the tagpack_creator of this AddressTag.
-
-        Tagpack creator
-
-        :param tagpack_creator: The tagpack_creator of this AddressTag.
-        :type tagpack_creator: str
-        """
-        if tagpack_creator is None:
-            raise ValueError("Invalid value for `tagpack_creator`, must not be `None`")
-
-        self._tagpack_creator = tagpack_creator
-
-    @property
-    def tagpack_is_public(self):
-        """Gets the tagpack_is_public of this AddressTag.
-
-        whether the address is public
-
-        :return: The tagpack_is_public of this AddressTag.
-        :rtype: bool
-        """
-        return self._tagpack_is_public
-
-    @tagpack_is_public.setter
-    def tagpack_is_public(self, tagpack_is_public):
-        """Sets the tagpack_is_public of this AddressTag.
-
-        whether the address is public
-
-        :param tagpack_is_public: The tagpack_is_public of this AddressTag.
-        :type tagpack_is_public: bool
-        """
-        if tagpack_is_public is None:
-            raise ValueError("Invalid value for `tagpack_is_public`, must not be `None`")
-
-        self._tagpack_is_public = tagpack_is_public
-
-    @property
-    def tagpack_title(self):
-        """Gets the tagpack_title of this AddressTag.
-
-        Tagpack title
-
-        :return: The tagpack_title of this AddressTag.
-        :rtype: str
-        """
-        return self._tagpack_title
-
-    @tagpack_title.setter
-    def tagpack_title(self, tagpack_title):
-        """Sets the tagpack_title of this AddressTag.
-
-        Tagpack title
-
-        :param tagpack_title: The tagpack_title of this AddressTag.
-        :type tagpack_title: str
-        """
-        if tagpack_title is None:
-            raise ValueError("Invalid value for `tagpack_title`, must not be `None`")
-
-        self._tagpack_title = tagpack_title
-
-    @property
-    def tagpack_uri(self):
-        """Gets the tagpack_uri of this AddressTag.
-
-        Tagpack URI
-
-        :return: The tagpack_uri of this AddressTag.
-        :rtype: str
-        """
-        return self._tagpack_uri
-
-    @tagpack_uri.setter
-    def tagpack_uri(self, tagpack_uri):
-        """Sets the tagpack_uri of this AddressTag.
-
-        Tagpack URI
-
-        :param tagpack_uri: The tagpack_uri of this AddressTag.
-        :type tagpack_uri: str
-        """
-
-        self._tagpack_uri = tagpack_uri
 
     @property
     def address(self):
