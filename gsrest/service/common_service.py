@@ -190,6 +190,7 @@ async def links_response(request, currency, result):
                       token_tx_id=row.get("token_tx_id", None),
                       from_address=row['from_address'],
                       to_address=row['to_address'],
+                      contract_creation=row.get("contract_creation", None),
                       value=convert_value(currency, row['value'],
                                           rates[row['block_id']])
                       if "token_tx_id" not in row else convert_token_value(

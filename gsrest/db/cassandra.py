@@ -682,6 +682,23 @@ class Cassandra:
             data['root_address'] = address
         return data
 
+    async def get_address_by_address_id(self, currency, address_id):
+        address_id_group = self.get_id_group(currency, address_id)
+        query = ("SELECT address FROM address WHERE address_id = %s"
+                 " AND address_id_group = %s")
+        result = await self.execute_async(currency, 'transformed', query,
+                                          [address_id, address_id_group])
+        result = one(result)
+        if not result:
+            if currency != 'eth':
+                return None
+            raise RuntimeError(
+                f'Address {address_id} has no external transactions')
+        if currency == "eth":
+            return eth_address_to_hex(result["address"])
+        else:
+            return result["address"]
+
     async def get_address(self, currency, address):
         try:
             address_id, address_id_group = \
@@ -1437,8 +1454,15 @@ class Cassandra:
                 row['total_received'].value - row['total_spent'].value
             }
         row['balance'] = results["ETH"]["balance"]
+        # TODO: Some accounts have negative balances, this does not make sense.
+        # for now we cap with 0 in case of negative
+        # Exp. for now is that we either lost some token txs somewhere or
+        # the events do not represent all transfers
+        # (e.g. the initial distribution) was hardcoded in the token contract
+        # so no events exist. Future solution to have accurate balances
+        # would be to query the node directly
         token_balances = {
-            c: b["balance"]
+            c: max(b["balance"], 0)
             for c, b in results.items() if c in token_config and b is not None
         }
         row["token_balances"] = None if len(
@@ -1733,9 +1757,13 @@ class Cassandra:
         else:
             node_type = 'address'
             address_id = address
-            address_id_group = self.get_id_group(currency, address)
+            address_id_group = self.get_id_group(currency, address_id)
+            address = (await
+                       self.get_address_by_address_id(currency, address_id))
             neighbor_id = neighbor
             neighbor_id_group = self.get_id_group(currency, neighbor_id)
+            neighbor = (await
+                        self.get_address_by_address_id(currency, neighbor_id))
 
         address_id_secondary_group = \
             await self.get_id_secondary_group_eth('address_transactions',
@@ -1843,8 +1871,17 @@ class Cassandra:
                 tx_ids.append(row['transaction_id'])
                 count += 1
 
-        return await self.list_txs_by_ids(
-            currency, tx_ids, include_token_txs=False), to_hex(paging_state)
+        # Transaction ids with token_tx_id are needed to load the token tx
+        # the underlying tx usually is not between the same entities.
+        # So we drop that if that is the case
+        all_txs = await self.list_txs_by_ids(currency,
+                                             tx_ids,
+                                             include_token_txs=True)
+        txs = [
+            tx for tx in all_txs
+            if tx["to_address"] == neighbor and tx["from_address"] == address
+        ]
+        return txs, to_hex(paging_state)
 
     async def get_tx_eth(self, currency, tx_hash):
         return await self.get_tx_by_hash(currency, from_hex(tx_hash))
