@@ -63,7 +63,6 @@ async def bulk(request, currency, operation, body, num_pages, form='csv'):
 
 
 class writer:
-
     def write(self, str):
         self.str = str
 
@@ -173,8 +172,7 @@ def stack(request, currency, operation, body, num_pages, format):
     except ModuleNotFoundError:
         raise RuntimeError(f'API {api} not found')
     except AttributeError:
-        raise RuntimeError(f'{api}.{operation}'
-                           ' not found')
+        raise RuntimeError(f'{api}.{operation}' ' not found')
     aws = []
 
     params = {}

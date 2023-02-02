@@ -3,7 +3,6 @@ import hashlib
 
 
 class Result:
-
     def __init__(self, rows=None, columns=None):
         if rows is None:
             rows = []
@@ -30,7 +29,6 @@ class Result:
 
 
 class Row:
-
     def __init__(self, row, columns):
         self.row = row
         self.columns = columns
@@ -62,7 +60,6 @@ def hide_private_condition(show_private, table_alias='tp'):
 
 
 class Tagstore:
-
     def __init__(self, config, logger):
         self.logger = logger
         self.config = config

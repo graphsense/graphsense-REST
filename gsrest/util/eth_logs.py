@@ -11,7 +11,6 @@ def no_nones(lst):
 
 
 class VersionedDict(dict):
-
     def __init__(self, mapping, version):
         self.v = version
         super().__init__(mapping)
