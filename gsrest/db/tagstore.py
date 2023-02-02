@@ -82,8 +82,8 @@ class Tagstore:
         async def on_connect(conn):
             self.logger.debug('Tagstore connect')
             async with conn.cursor() as cur:
-                await cur.execute(
-                    f"set search_path to {self.config['schema']}")
+                await cur.execute(f"set search_path to {self.config['schema']}"
+                                  )
 
         self.pool = await aiopg.create_pool(
             dsn,
@@ -94,8 +94,8 @@ class Tagstore:
 
     def id(self):
         h = self.config['database'] +\
-                    self.config['host'] +\
-                    self.config['username']
+            self.config['host'] +\
+            self.config['username']
         h = h.encode('utf-8')
         return hashlib.md5(h).hexdigest()
 
@@ -103,7 +103,11 @@ class Tagstore:
         self.pool.terminate()
         await self.pool.wait_closed()
 
-    async def execute(self, query, params=None, paging_key=None, page=0,
+    async def execute(self,
+                      query,
+                      params=None,
+                      paging_key=None,
+                      page=0,
                       pagesize=None):
         if params is None:
             params = []
@@ -130,8 +134,11 @@ class Tagstore:
         return self.execute("select * from concept where taxonomy = %s",
                             [taxonomy])
 
-    def list_address_tags(self, label, show_private=False,
-                          page=None, pagesize=None):
+    def list_address_tags(self,
+                          label,
+                          show_private=False,
+                          page=None,
+                          pagesize=None):
         query = f"""select
                         t.*,
                         tp.uri,
@@ -158,7 +165,10 @@ class Tagstore:
                             page=page,
                             pagesize=pagesize)
 
-    def list_matching_labels(self, currency, expression, limit,
+    def list_matching_labels(self,
+                             currency,
+                             expression,
+                             limit,
                              show_private=False):
         currency_condition = "and t.currency = %s" if currency else ""
         params = [currency.upper()] if currency else []
@@ -177,10 +187,14 @@ class Tagstore:
                    order by l.label <-> %s
                    limit %s"""
         return self.execute(query,
-                            params=params+[expression, expression, limit])
+                            params=params + [expression, expression, limit])
 
-    def list_tags_by_address(self, currency, address, show_private=False,
-                             page=None, pagesize=None):
+    def list_tags_by_address(self,
+                             currency,
+                             address,
+                             show_private=False,
+                             page=None,
+                             pagesize=None):
         query = f"""select
                         t.*,
                         tp.uri,
@@ -212,8 +226,12 @@ class Tagstore:
                             page=page,
                             pagesize=pagesize)
 
-    def list_address_tags_by_entity(self, currency, entity, show_private=False,
-                                    page=None, pagesize=None):
+    def list_address_tags_by_entity(self,
+                                    currency,
+                                    entity,
+                                    show_private=False,
+                                    page=None,
+                                    pagesize=None):
         query = f"""select
                         t.*,
                         tp.uri,
@@ -246,7 +264,9 @@ class Tagstore:
                             page=page,
                             pagesize=pagesize)
 
-    async def count_address_tags_by_entity(self, currency, entity,
+    async def count_address_tags_by_entity(self,
+                                           currency,
+                                           entity,
                                            show_private=False):
         query = f"""select
                         sum(count) as count
@@ -255,10 +275,12 @@ class Tagstore:
                     where
                         currency = %s
                         and gs_cluster_id = %s
-                        {hide_private_condition(show_private, table_alias=None)}""" # noqa
+                        {hide_private_condition(show_private, table_alias=None)}"""  # noqa
         return await self.execute(query, [currency.upper(), entity])
 
-    async def list_entity_tags_by_entity(self, currency, entity,
+    async def list_entity_tags_by_entity(self,
+                                         currency,
+                                         entity,
                                          show_private=False):
         query = f"""select
                         t.*,
@@ -298,11 +320,13 @@ class Tagstore:
                         cd.max_level desc,
                         cd.no_addresses desc,
                         t.address desc
-                   limit 1""" # noqa
+                   limit 1"""  # noqa
 
         return await self.execute(query, [currency.upper(), entity])
 
-    async def list_labels_for_addresses(self, currency, addresses,
+    async def list_labels_for_addresses(self,
+                                        currency,
+                                        addresses,
                                         show_private=False):
         if not addresses:
             raise TypeError('x')
@@ -320,10 +344,11 @@ class Tagstore:
                     {hide_private_condition(show_private)}
                    group by address
                    order by address"""
-        return await self.execute(query,
-                                  params=[currency.upper(), addresses])
+        return await self.execute(query, params=[currency.upper(), addresses])
 
-    async def list_labels_for_entities(self, currency, entities,
+    async def list_labels_for_entities(self,
+                                       currency,
+                                       entities,
                                        show_private=False):
         if not entities:
             return Result(), None
@@ -345,8 +370,7 @@ class Tagstore:
                    group by
                     acm.gs_cluster_id
                    order by acm.gs_cluster_id"""
-        return await self.execute(query,
-                                  params=[currency.upper(), entities])
+        return await self.execute(query, params=[currency.upper(), entities])
 
     def count(self, currency, show_private=False):
         query = """
@@ -357,5 +381,4 @@ class Tagstore:
                 statistics tp
             where
                 currency = %s"""
-        return self.execute(query,
-                            params=[currency.upper()])
+        return self.execute(query, params=[currency.upper()])

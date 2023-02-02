@@ -22,7 +22,6 @@ database:
     retry_interval: 3
     driver: cassandra
     nodes: ["CASSANDRA_HOST_1", "CASSANDRA_HOST_2"]
-    tagpacks: "TAGPACK_KEYSPACE",
     currencies:
         btc:
             raw: "BTC_RAW_KEYSPACE"

@@ -34,6 +34,8 @@ from openapi_server.models.search_result_level6 import SearchResultLevel6
 from openapi_server.models.stats import Stats
 from openapi_server.models.tag import Tag
 from openapi_server.models.taxonomy import Taxonomy
+from openapi_server.models.token_config import TokenConfig
+from openapi_server.models.token_configs import TokenConfigs
 from openapi_server.models.tx import Tx
 from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.tx_summary import TxSummary

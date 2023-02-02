@@ -3,6 +3,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [23.01] - 2023-12-30
+### Added
+- Token Support for Ethereum stable coin tokens (WETH, USDT, USDC)
+- new API Endpoints /{currency}/token_txs/{tx_hash} to receive token transactions per hash
+- new Endpoint /{currency}/supported_tokens to list supported tokens and their parameters.
+- Entity and Address txs endpoints now return token transactions
+- Entities contain token balances, and other token related aggregated statistics
+- Ethereum addresses now contain a field is_contract
+- Neighbor endpoints return aggregated token statistics
+- Rates endpoint returns rates for token currencies
+### Changes
+- Fixed handling of contract creation transactions (no to_address)
+
 ## [22.11] - 2022-11-25
 ### Added
 - Entity tag tests

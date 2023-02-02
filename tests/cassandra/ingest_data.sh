@@ -14,6 +14,7 @@ fi
 MOCK_CMD="docker exec $CASSANDRA_MOCK cqlsh"
 
 TAG=develop
+ETHTAG=develop
 
 if [ -z "$ORGANIZATION" ]; then
     echo 'Please set env var $ORGANIZATION'
@@ -23,7 +24,7 @@ fi
 UTXO_RAW_SCHEMA="https://raw.githubusercontent.com/$ORGANIZATION/graphsense-blocksci/$TAG/scripts/"
 UTXO_TRANSFORMED_SCHEMA="https://raw.githubusercontent.com/$ORGANIZATION/graphsense-transformation/$TAG/scripts/"
 ETH_RAW_SCHEMA="https://raw.githubusercontent.com/$ORGANIZATION/graphsense-ethereum-etl/$TAG/scripts/"
-ETH_TRANSFORMED_SCHEMA="https://raw.githubusercontent.com/$ORGANIZATION/graphsense-ethereum-transformation/$TAG/scripts/"
+ETH_TRANSFORMED_SCHEMA="https://raw.githubusercontent.com/$ORGANIZATION/graphsense-ethereum-transformation/$ETHTAG/scripts/"
 
 function schema() {
   temp=`mktemp`
@@ -61,8 +62,10 @@ function insert_data () {
     $MOCK_CMD -e "TRUNCATE TABLE $2;"
     while IFS= read -r line
     do
+        #echo $line
         #line=`echo "$line" | sed -e 's/^[ \t\n\s]*//' | sed -e 's/[ \t\s\n]*$//'`
         [ -z "`echo $line | xargs`" ] && continue
+        #echo "INSERT INTO $2 JSON '$line';"
         $MOCK_CMD -e "INSERT INTO $2 JSON '$line';"
         if [ $? -ne 0 ]; then
             exit 1

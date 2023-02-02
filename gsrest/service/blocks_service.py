@@ -5,18 +5,16 @@ from gsrest.service.txs_service import from_row
 
 def block_from_row(currency, row):
     if currency == 'eth':
-        return Block(
-                currency=currency,
-                height=row['block_id'],
-                block_hash=row['block_hash'].hex(),
-                no_txs=row['transaction_count'],
-                timestamp=row['timestamp'])
-    return Block(
-            currency=currency,
-            height=row['block_id'],
-            block_hash=row['block_hash'].hex(),
-            no_txs=row['no_transactions'],
-            timestamp=row['timestamp'])
+        return Block(currency=currency,
+                     height=row['block_id'],
+                     block_hash=row['block_hash'].hex(),
+                     no_txs=row['transaction_count'],
+                     timestamp=row['timestamp'])
+    return Block(currency=currency,
+                 height=row['block_id'],
+                 block_hash=row['block_hash'].hex(),
+                 no_txs=row['no_transactions'],
+                 timestamp=row['timestamp'])
 
 
 async def get_block(request, currency, height):
@@ -35,5 +33,10 @@ async def list_block_txs(request, currency, height):
         raise RuntimeError("Block {} not found".format(height))
     rates = await get_rates(request, currency, height)
 
-    return [from_row(currency, tx, rates['rates'], include_io=True)
-            for tx in txs]
+    return [
+        from_row(currency,
+                 tx,
+                 rates['rates'],
+                 db.get_token_configuration(currency),
+                 include_io=True) for tx in txs
+    ]

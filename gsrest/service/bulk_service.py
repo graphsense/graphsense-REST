@@ -44,11 +44,14 @@ async def bulk(request, currency, operation, body, num_pages, form='csv'):
         gen = to_json(the_stack)
         mimetype = 'application/json'
 
-    response = web.StreamResponse(
-        status=200,
-        reason='OK',
-        headers={'Content-Type': mimetype,
-                 'Content-Disposition': f'attachment; filename=bulk.{form}'})
+    response = web.StreamResponse(status=200,
+                                  reason='OK',
+                                  headers={
+                                      'Content-Type':
+                                      mimetype,
+                                      'Content-Disposition':
+                                      f'attachment; filename=bulk.{form}'
+                                  })
 
     response.enable_chunked_encoding()
     await response.prepare(request)
@@ -93,8 +96,7 @@ def flatten(item, name="", flat_dict=None, format=None):
     elif isinstance(item, list):
         if format == 'csv':
             name = name[:-1]
-            item = [i if isinstance(i, str) else str(i)
-                    for i in item if i]
+            item = [i if isinstance(i, str) else str(i) for i in item if i]
             flat_dict[name] = ','.join(item)
             flat_dict[f'{name}_count'] = len(item)
         else:
@@ -139,7 +141,7 @@ async def wrap(request, operation, currency, params, keys, num_pages, format):
 
     def append_keys(fl):
         for (k, v) in keys.items():
-            fl[request_field_prefix+k] = v
+            fl[request_field_prefix + k] = v
 
     for row in rows:
         fl = flatten(row, format=format)
@@ -163,24 +165,19 @@ async def wrap(request, operation, currency, params, keys, num_pages, format):
 def stack(request, currency, operation, body, num_pages, format):
     try:
         for api in apis:
-            mod = importlib.import_module(
-                f'gsrest.service.{api}_service')
+            mod = importlib.import_module(f'gsrest.service.{api}_service')
             if hasattr(mod, operation):
                 operation = getattr(mod, operation)
                 break
     except ModuleNotFoundError:
         raise RuntimeError(f'API {api} not found')
     except AttributeError:
-        raise RuntimeError(f'{api}.{operation}'
-                           ' not found')
+        raise RuntimeError(f'{api}.{operation}' ' not found')
     aws = []
 
     params = {}
     keys = {}
-    check = {
-        'request': None,
-        'currency': currency
-    }
+    check = {'request': None, 'currency': currency}
     ln = 0
     for (attr, a) in body.items():
         if a is None:
@@ -223,6 +220,7 @@ async def to_csv(stack):
         rows = await op
 
         for row in rows:
+
             if error_field in row and not csv:
                 stash.append(row)
                 continue

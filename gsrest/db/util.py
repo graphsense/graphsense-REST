@@ -2,7 +2,6 @@ import asyncio
 import base64
 from datetime import timezone
 
-
 ts_sep = '$'
 sep = '|'
 encoding = 'ascii'
@@ -20,8 +19,7 @@ def decode_page_handles(page):
         return {}
 
     def b64decode(value):
-        return str(base64.b64decode(value.encode(encoding)),
-                   encoding)
+        return str(base64.b64decode(value.encode(encoding)), encoding)
 
     page = b64decode(page)
 
@@ -37,6 +35,7 @@ def decode_page_handles(page):
 def encode_page_handles(pagesAndIds):
     def b64encode(value):
         return str(base64.b64encode(value.encode(encoding)), encoding)
+
     next_page = None
     for (page, id) in pagesAndIds:
         if page is None:

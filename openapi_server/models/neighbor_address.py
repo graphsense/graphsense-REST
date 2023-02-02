@@ -16,32 +16,36 @@ class NeighborAddress(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, address: Address=None, labels: List[str]=None, no_txs: int=None, value: Values=None):
+    def __init__(self, labels: List[str]=None, value: Values=None, token_values: Dict[str, Values]=None, no_txs: int=None, address: Address=None):
         """NeighborAddress - a model defined in OpenAPI
 
-        :param address: The address of this NeighborAddress.
         :param labels: The labels of this NeighborAddress.
-        :param no_txs: The no_txs of this NeighborAddress.
         :param value: The value of this NeighborAddress.
+        :param token_values: The token_values of this NeighborAddress.
+        :param no_txs: The no_txs of this NeighborAddress.
+        :param address: The address of this NeighborAddress.
         """
         self.openapi_types = {
-            'address': Address,
             'labels': List[str],
+            'value': Values,
+            'token_values': Dict[str, Values],
             'no_txs': int,
-            'value': Values
+            'address': Address
         }
 
         self.attribute_map = {
-            'address': 'address',
             'labels': 'labels',
+            'value': 'value',
+            'token_values': 'token_values',
             'no_txs': 'no_txs',
-            'value': 'value'
+            'address': 'address'
         }
 
-        self._address = address
         self._labels = labels
-        self._no_txs = no_txs
         self._value = value
+        self._token_values = token_values
+        self._no_txs = no_txs
+        self._address = address
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'NeighborAddress':
@@ -60,34 +64,12 @@ class NeighborAddress(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'address': self._address,
-            'labels': self._labels,
+        return { 'labels': self._labels,
+            'value': self._value,
+            'token_values': self._token_values,
             'no_txs': self._no_txs,
-            'value': self._value }
+            'address': self._address }
 
-
-    @property
-    def address(self):
-        """Gets the address of this NeighborAddress.
-
-
-        :return: The address of this NeighborAddress.
-        :rtype: Address
-        """
-        return self._address
-
-    @address.setter
-    def address(self, address):
-        """Sets the address of this NeighborAddress.
-
-
-        :param address: The address of this NeighborAddress.
-        :type address: Address
-        """
-        if address is None:
-            raise ValueError("Invalid value for `address`, must not be `None`")
-
-        self._address = address
 
     @property
     def labels(self):
@@ -111,6 +93,52 @@ class NeighborAddress(Model):
         """
 
         self._labels = labels
+
+    @property
+    def value(self):
+        """Gets the value of this NeighborAddress.
+
+
+        :return: The value of this NeighborAddress.
+        :rtype: Values
+        """
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        """Sets the value of this NeighborAddress.
+
+
+        :param value: The value of this NeighborAddress.
+        :type value: Values
+        """
+        if value is None:
+            raise ValueError("Invalid value for `value`, must not be `None`")
+
+        self._value = value
+
+    @property
+    def token_values(self):
+        """Gets the token_values of this NeighborAddress.
+
+        Per token value-flow
+
+        :return: The token_values of this NeighborAddress.
+        :rtype: Dict[str, Values]
+        """
+        return self._token_values
+
+    @token_values.setter
+    def token_values(self, token_values):
+        """Sets the token_values of this NeighborAddress.
+
+        Per token value-flow
+
+        :param token_values: The token_values of this NeighborAddress.
+        :type token_values: Dict[str, Values]
+        """
+
+        self._token_values = token_values
 
     @property
     def no_txs(self):
@@ -138,24 +166,24 @@ class NeighborAddress(Model):
         self._no_txs = no_txs
 
     @property
-    def value(self):
-        """Gets the value of this NeighborAddress.
+    def address(self):
+        """Gets the address of this NeighborAddress.
 
 
-        :return: The value of this NeighborAddress.
-        :rtype: Values
+        :return: The address of this NeighborAddress.
+        :rtype: Address
         """
-        return self._value
+        return self._address
 
-    @value.setter
-    def value(self, value):
-        """Sets the value of this NeighborAddress.
+    @address.setter
+    def address(self, address):
+        """Sets the address of this NeighborAddress.
 
 
-        :param value: The value of this NeighborAddress.
-        :type value: Values
+        :param address: The address of this NeighborAddress.
+        :type address: Address
         """
-        if value is None:
-            raise ValueError("Invalid value for `value`, must not be `None`")
+        if address is None:
+            raise ValueError("Invalid value for `address`, must not be `None`")
 
-        self._value = value
+        self._address = address

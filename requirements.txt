@@ -11,3 +11,4 @@ psycopg2==2.9.2
 openapi-schema-validator >= 0.2.3 
 fuzzy_match==0.0.1
 numpy>=1.22
+eth-event>=1.2.3

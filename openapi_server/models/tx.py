@@ -18,76 +18,84 @@ class Tx(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, coinbase: bool=None, currency: str=None, height: int=None, inputs: List[TxValue]=None, no_inputs: int=None, no_outputs: int=None, outputs: List[TxValue]=None, timestamp: int=None, total_input: Values=None, total_output: Values=None, tx_hash: str=None, tx_type: str='account', from_address: str=None, to_address: str=None, value: Values=None):
+    def __init__(self, tx_type: str='account', currency: str=None, tx_hash: str=None, coinbase: bool=None, height: int=None, no_inputs: int=None, no_outputs: int=None, inputs: List[TxValue]=None, outputs: List[TxValue]=None, timestamp: int=None, total_input: Values=None, total_output: Values=None, token_tx_id: int=None, value: Values=None, from_address: str=None, to_address: str=None, contract_creation: bool=None):
         """Tx - a model defined in OpenAPI
 
-        :param coinbase: The coinbase of this Tx.
+        :param tx_type: The tx_type of this Tx.
         :param currency: The currency of this Tx.
+        :param tx_hash: The tx_hash of this Tx.
+        :param coinbase: The coinbase of this Tx.
         :param height: The height of this Tx.
-        :param inputs: The inputs of this Tx.
         :param no_inputs: The no_inputs of this Tx.
         :param no_outputs: The no_outputs of this Tx.
+        :param inputs: The inputs of this Tx.
         :param outputs: The outputs of this Tx.
         :param timestamp: The timestamp of this Tx.
         :param total_input: The total_input of this Tx.
         :param total_output: The total_output of this Tx.
-        :param tx_hash: The tx_hash of this Tx.
-        :param tx_type: The tx_type of this Tx.
+        :param token_tx_id: The token_tx_id of this Tx.
+        :param value: The value of this Tx.
         :param from_address: The from_address of this Tx.
         :param to_address: The to_address of this Tx.
-        :param value: The value of this Tx.
+        :param contract_creation: The contract_creation of this Tx.
         """
         self.openapi_types = {
-            'coinbase': bool,
+            'tx_type': str,
             'currency': str,
+            'tx_hash': str,
+            'coinbase': bool,
             'height': int,
-            'inputs': List[TxValue],
             'no_inputs': int,
             'no_outputs': int,
+            'inputs': List[TxValue],
             'outputs': List[TxValue],
             'timestamp': int,
             'total_input': Values,
             'total_output': Values,
-            'tx_hash': str,
-            'tx_type': str,
+            'token_tx_id': int,
+            'value': Values,
             'from_address': str,
             'to_address': str,
-            'value': Values
+            'contract_creation': bool
         }
 
         self.attribute_map = {
-            'coinbase': 'coinbase',
+            'tx_type': 'tx_type',
             'currency': 'currency',
+            'tx_hash': 'tx_hash',
+            'coinbase': 'coinbase',
             'height': 'height',
-            'inputs': 'inputs',
             'no_inputs': 'no_inputs',
             'no_outputs': 'no_outputs',
+            'inputs': 'inputs',
             'outputs': 'outputs',
             'timestamp': 'timestamp',
             'total_input': 'total_input',
             'total_output': 'total_output',
-            'tx_hash': 'tx_hash',
-            'tx_type': 'tx_type',
+            'token_tx_id': 'token_tx_id',
+            'value': 'value',
             'from_address': 'from_address',
             'to_address': 'to_address',
-            'value': 'value'
+            'contract_creation': 'contract_creation'
         }
 
-        self._coinbase = coinbase
+        self._tx_type = tx_type
         self._currency = currency
+        self._tx_hash = tx_hash
+        self._coinbase = coinbase
         self._height = height
-        self._inputs = inputs
         self._no_inputs = no_inputs
         self._no_outputs = no_outputs
+        self._inputs = inputs
         self._outputs = outputs
         self._timestamp = timestamp
         self._total_input = total_input
         self._total_output = total_output
-        self._tx_hash = tx_hash
-        self._tx_type = tx_type
+        self._token_tx_id = token_tx_id
+        self._value = value
         self._from_address = from_address
         self._to_address = to_address
-        self._value = value
+        self._contract_creation = contract_creation
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'Tx':
@@ -106,47 +114,47 @@ class Tx(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'coinbase': self._coinbase,
+        return { 'tx_type': self._tx_type,
             'currency': self._currency,
+            'tx_hash': self._tx_hash,
+            'coinbase': self._coinbase,
             'height': self._height,
-            'inputs': self._inputs,
             'no_inputs': self._no_inputs,
             'no_outputs': self._no_outputs,
+            'inputs': self._inputs,
             'outputs': self._outputs,
             'timestamp': self._timestamp,
             'total_input': self._total_input,
             'total_output': self._total_output,
-            'tx_hash': self._tx_hash,
-            'tx_type': self._tx_type,
+            'token_tx_id': self._token_tx_id,
+            'value': self._value,
             'from_address': self._from_address,
             'to_address': self._to_address,
-            'value': self._value }
+            'contract_creation': self._contract_creation }
 
 
     @property
-    def coinbase(self):
-        """Gets the coinbase of this Tx.
+    def tx_type(self):
+        """Gets the tx_type of this Tx.
 
-        Coinbase transaction flag
 
-        :return: The coinbase of this Tx.
-        :rtype: bool
+        :return: The tx_type of this Tx.
+        :rtype: str
         """
-        return self._coinbase
+        return self._tx_type
 
-    @coinbase.setter
-    def coinbase(self, coinbase):
-        """Sets the coinbase of this Tx.
+    @tx_type.setter
+    def tx_type(self, tx_type):
+        """Sets the tx_type of this Tx.
 
-        Coinbase transaction flag
 
-        :param coinbase: The coinbase of this Tx.
-        :type coinbase: bool
+        :param tx_type: The tx_type of this Tx.
+        :type tx_type: str
         """
-        if coinbase is None:
-            raise ValueError("Invalid value for `coinbase`, must not be `None`")
+        if tx_type is None:
+            raise ValueError("Invalid value for `tx_type`, must not be `None`")
 
-        self._coinbase = coinbase
+        self._tx_type = tx_type
 
     @property
     def currency(self):
@@ -174,6 +182,56 @@ class Tx(Model):
         self._currency = currency
 
     @property
+    def tx_hash(self):
+        """Gets the tx_hash of this Tx.
+
+        Transaction hash
+
+        :return: The tx_hash of this Tx.
+        :rtype: str
+        """
+        return self._tx_hash
+
+    @tx_hash.setter
+    def tx_hash(self, tx_hash):
+        """Sets the tx_hash of this Tx.
+
+        Transaction hash
+
+        :param tx_hash: The tx_hash of this Tx.
+        :type tx_hash: str
+        """
+        if tx_hash is None:
+            raise ValueError("Invalid value for `tx_hash`, must not be `None`")
+
+        self._tx_hash = tx_hash
+
+    @property
+    def coinbase(self):
+        """Gets the coinbase of this Tx.
+
+        Coinbase transaction flag
+
+        :return: The coinbase of this Tx.
+        :rtype: bool
+        """
+        return self._coinbase
+
+    @coinbase.setter
+    def coinbase(self, coinbase):
+        """Sets the coinbase of this Tx.
+
+        Coinbase transaction flag
+
+        :param coinbase: The coinbase of this Tx.
+        :type coinbase: bool
+        """
+        if coinbase is None:
+            raise ValueError("Invalid value for `coinbase`, must not be `None`")
+
+        self._coinbase = coinbase
+
+    @property
     def height(self):
         """Gets the height of this Tx.
 
@@ -199,29 +257,6 @@ class Tx(Model):
             raise ValueError("Invalid value for `height`, must be a value greater than or equal to `0`")
 
         self._height = height
-
-    @property
-    def inputs(self):
-        """Gets the inputs of this Tx.
-
-        Transaction inputs/outputs
-
-        :return: The inputs of this Tx.
-        :rtype: List[TxValue]
-        """
-        return self._inputs
-
-    @inputs.setter
-    def inputs(self, inputs):
-        """Sets the inputs of this Tx.
-
-        Transaction inputs/outputs
-
-        :param inputs: The inputs of this Tx.
-        :type inputs: List[TxValue]
-        """
-
-        self._inputs = inputs
 
     @property
     def no_inputs(self):
@@ -272,6 +307,29 @@ class Tx(Model):
             raise ValueError("Invalid value for `no_outputs`, must not be `None`")
 
         self._no_outputs = no_outputs
+
+    @property
+    def inputs(self):
+        """Gets the inputs of this Tx.
+
+        Transaction inputs/outputs
+
+        :return: The inputs of this Tx.
+        :rtype: List[TxValue]
+        """
+        return self._inputs
+
+    @inputs.setter
+    def inputs(self, inputs):
+        """Sets the inputs of this Tx.
+
+        Transaction inputs/outputs
+
+        :param inputs: The inputs of this Tx.
+        :type inputs: List[TxValue]
+        """
+
+        self._inputs = inputs
 
     @property
     def outputs(self):
@@ -368,52 +426,48 @@ class Tx(Model):
         self._total_output = total_output
 
     @property
-    def tx_hash(self):
-        """Gets the tx_hash of this Tx.
+    def token_tx_id(self):
+        """Gets the token_tx_id of this Tx.
 
-        Transaction hash
 
-        :return: The tx_hash of this Tx.
-        :rtype: str
+        :return: The token_tx_id of this Tx.
+        :rtype: int
         """
-        return self._tx_hash
+        return self._token_tx_id
 
-    @tx_hash.setter
-    def tx_hash(self, tx_hash):
-        """Sets the tx_hash of this Tx.
+    @token_tx_id.setter
+    def token_tx_id(self, token_tx_id):
+        """Sets the token_tx_id of this Tx.
 
-        Transaction hash
 
-        :param tx_hash: The tx_hash of this Tx.
-        :type tx_hash: str
+        :param token_tx_id: The token_tx_id of this Tx.
+        :type token_tx_id: int
         """
-        if tx_hash is None:
-            raise ValueError("Invalid value for `tx_hash`, must not be `None`")
 
-        self._tx_hash = tx_hash
+        self._token_tx_id = token_tx_id
 
     @property
-    def tx_type(self):
-        """Gets the tx_type of this Tx.
+    def value(self):
+        """Gets the value of this Tx.
 
 
-        :return: The tx_type of this Tx.
-        :rtype: str
+        :return: The value of this Tx.
+        :rtype: Values
         """
-        return self._tx_type
+        return self._value
 
-    @tx_type.setter
-    def tx_type(self, tx_type):
-        """Sets the tx_type of this Tx.
+    @value.setter
+    def value(self, value):
+        """Sets the value of this Tx.
 
 
-        :param tx_type: The tx_type of this Tx.
-        :type tx_type: str
+        :param value: The value of this Tx.
+        :type value: Values
         """
-        if tx_type is None:
-            raise ValueError("Invalid value for `tx_type`, must not be `None`")
+        if value is None:
+            raise ValueError("Invalid value for `value`, must not be `None`")
 
-        self._tx_type = tx_type
+        self._value = value
 
     @property
     def from_address(self):
@@ -466,24 +520,24 @@ class Tx(Model):
         self._to_address = to_address
 
     @property
-    def value(self):
-        """Gets the value of this Tx.
+    def contract_creation(self):
+        """Gets the contract_creation of this Tx.
 
+        Indicates if this transaction created a new contract. Recipient address is the address of the new contract.
 
-        :return: The value of this Tx.
-        :rtype: Values
+        :return: The contract_creation of this Tx.
+        :rtype: bool
         """
-        return self._value
+        return self._contract_creation
 
-    @value.setter
-    def value(self, value):
-        """Sets the value of this Tx.
+    @contract_creation.setter
+    def contract_creation(self, contract_creation):
+        """Sets the contract_creation of this Tx.
 
+        Indicates if this transaction created a new contract. Recipient address is the address of the new contract.
 
-        :param value: The value of this Tx.
-        :type value: Values
+        :param contract_creation: The contract_creation of this Tx.
+        :type contract_creation: bool
         """
-        if value is None:
-            raise ValueError("Invalid value for `value`, must not be `None`")
 
-        self._value = value
+        self._contract_creation = contract_creation

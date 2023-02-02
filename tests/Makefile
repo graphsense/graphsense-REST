@@ -15,7 +15,7 @@ test: $(CASSANDRA_MARKER) $(TAGSTORE_MARKER)
 ifeq ($(USE_DOCKER), TRUE)
 	docker ps -a | grep $(TESTCONTAINER_NAME) || bash -c 'rm -f $(TESTCONTAINER_MARKER) && make $(TESTCONTAINER_MARKER)'
 else
-	tox -e py37 -- $(ORGANIZATION)
+	tox -- $(ORGANIZATION)
 endif
 
 clean: 
@@ -25,12 +25,16 @@ clean:
 $(CASSANDRA_MARKER): $(wildcard cassandra/data/*)
 	./cassandra/start_mock.sh $(CASSANDRA_MOCK) $(ORGANIZATION) "$?"
 	touch $(CASSANDRA_MARKER)
+ifeq ($(USE_DOCKER), TRUE)
 	make ips
+endif
 
 $(TAGSTORE_MARKER): $(wildcard tagstore/data/*)
 	./tagstore/start_mock.sh $(TAGSTORE_MOCK) $(ORGANIZATION) "$?"
 	touch $(TAGSTORE_MARKER)
+ifeq ($(USE_DOCKER), TRUE)
 	make ips
+endif
 
 $(TESTCONTAINER_MARKER): Dockerfile 
 	docker build --build-arg USERID=$(UID) --build-arg DOCKER_GROUPID=$(DOCKER_GROUPID) -t $(TESTCONTAINER_NAME) .
