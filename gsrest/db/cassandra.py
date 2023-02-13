@@ -1775,43 +1775,32 @@ class Cassandra:
                 address, neighbor))
 
         query = \
-            f"SELECT no_transactions FROM {node_type}_{{direction}}_relations"\
-            f" WHERE {{src}}_{node_type}_id_group = %s AND"\
-            f" {{src}}_{node_type}_id_secondary_group in %s AND"\
-            f" {{src}}_{node_type}_id = %s AND"\
-            f" {{dst}}_{node_type}_id = %s"
-
-        params = [
-            address_id_group, address_id_secondary_group, address_id,
-            neighbor_id
-        ]
+            f"SELECT no_{{direction}}_txs FROM {node_type}"\
+            f" WHERE {node_type}_id_group = %s AND"\
+            f" {node_type}_id = %s"
 
         no_outgoing_txs = (await self.execute_async(
-            currency, 'transformed',
-            query.format(direction='outgoing', src='src', dst='dst'),
-            params)).one()
+            currency, 'transformed', query.format(direction='outgoing'),
+            [address_id_group, address_id])).one()
 
         if no_outgoing_txs is None:
             return [], None
 
-        no_outgoing_txs = no_outgoing_txs['no_transactions']
-
-        params = [
-            neighbor_id_group, neighbor_id_secondary_group, neighbor_id,
-            address_id
-        ]
+        no_outgoing_txs = no_outgoing_txs['no_outgoing_txs']
 
         no_incoming_txs = (await self.execute_async(
-            currency, 'transformed',
-            query.format(direction='incoming', src='dst', dst='src'),
-            params)).one()
+            currency, 'transformed', query.format(direction='incoming'),
+            [neighbor_id_group, neighbor_id])).one()
 
         if no_incoming_txs is None:
             return [], None
 
-        no_incoming_txs = no_incoming_txs['no_transactions']
+        no_incoming_txs = no_incoming_txs['no_incoming_txs']
 
         isOutgoing = no_outgoing_txs < no_incoming_txs
+        print(
+            f'no_outgoing_txs {no_outgoing_txs}, no_incoming_txs {no_incoming_txs}, isOutgoing {isOutgoing}'
+        )
 
         first_id_group, first_id, second_id_group, second_id, \
             first_id_secondary_group, second_id_secondary_group = \
