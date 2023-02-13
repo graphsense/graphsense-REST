@@ -1798,9 +1798,6 @@ class Cassandra:
         no_incoming_txs = no_incoming_txs['no_incoming_txs']
 
         isOutgoing = no_outgoing_txs < no_incoming_txs
-        print(
-            f'no_outgoing_txs {no_outgoing_txs}, no_incoming_txs {no_incoming_txs}, isOutgoing {isOutgoing}'
-        )
 
         first_id_group, first_id, second_id_group, second_id, \
             first_id_secondary_group, second_id_secondary_group = \
