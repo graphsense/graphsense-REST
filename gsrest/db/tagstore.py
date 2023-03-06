@@ -189,12 +189,24 @@ class Tagstore:
         return self.execute(query,
                             params=params + [expression, expression, limit])
 
-    def list_tags_by_address(self,
-                             currency,
-                             address,
-                             show_private=False,
-                             page=None,
-                             pagesize=None):
+    def list_matching_actors(self, expression, limit,
+                             show_private=False):
+        query = f"""select
+                    a.label
+                   from
+                    actor a,
+                    actorpack ap
+                   where
+                    ap.id = a.actorpack
+                    and similarity(a.label, %s) > 0.2
+                    {hide_private_condition(show_private, 'ap')}
+                   order by a.label <-> %s
+                   limit %s"""
+        return self.execute(query,
+                            params=[expression, expression, limit])
+
+    def list_tags_by_address(self, currency, address, show_private=False,
+                             page=None, pagesize=None):
         query = f"""select
                         t.*,
                         tp.uri,

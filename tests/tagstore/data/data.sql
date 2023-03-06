@@ -87,6 +87,15 @@ INSERT INTO address_cluster_mapping (currency, address, gs_cluster_id, gs_cluste
     ('ETH', '0xabcdef', 107925000, '', 40),
     ('ETH', '0x123456', 107925001, '', 50);
 
+INSERT INTO actorpack (id, title, creator, description, is_public, uri, lastmod) VALUES
+    ('actorpack', 'ActorPack', '', '', true, '', to_timestamp(0)),
+    ('actorpackprivate', 'ActorPack private', '', '', false, '', to_timestamp(0));
+
+INSERT INTO actor (id, uri, label, lastmod, actorpack) VALUES
+    ('actorX', 'http://actorX', 'Actor X', to_timestamp(0), 'actorpack'),
+    ('actorY', 'http://actorY', 'Actor Y', to_timestamp(0), 'actorpackprivate'),
+    ('anotherActor', 'http://anotherActor', 'Another Actor Y', to_timestamp(0), 'actorpackprivate');
+
 REFRESH MATERIALIZED VIEW label;
 REFRESH MATERIALIZED VIEW statistics;
 REFRESH MATERIALIZED VIEW tag_count_by_cluster;

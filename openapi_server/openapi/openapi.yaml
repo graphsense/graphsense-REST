@@ -3881,6 +3881,9 @@ components:
       type: object
     search_result:
       example:
+        actors:
+        - actors
+        - actors
         currencies:
         - addresses:
           - addresses
@@ -3900,6 +3903,12 @@ components:
         - labels
         - labels
       properties:
+        actors:
+          description: The list of matching actors
+          items:
+            type: string
+          title: actors
+          type: array
         currencies:
           items:
             $ref: '#/components/schemas/search_result_by_currency'
@@ -3916,6 +3925,12 @@ components:
       - labels
       title: search_result
       type: object
+    search_result_actors:
+      description: The list of matching actors
+      items:
+        type: string
+      title: actors
+      type: array
     search_result_by_currency:
       example:
         addresses:
