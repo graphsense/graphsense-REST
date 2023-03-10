@@ -74,6 +74,7 @@ def build_token_tx(token_currency, tx, token_tx, log):
 
 
 class Result:
+
     def __init__(self, current_rows, params, paging_state):
         self.current_rows = current_rows
         self.params = params
@@ -92,7 +93,9 @@ TxSummary = namedtuple('TxSummary', ['height', 'timestamp', 'tx_hash'])
 
 
 class Cassandra:
+
     def eth(func):
+
         def check(*args, **kwargs):
             self = args[0]
             currency = args[1]
@@ -107,6 +110,7 @@ class Cassandra:
         return check
 
     def new(func):
+
         def check(*args, **kwargs):
             self = args[0]
             currency = args[1]

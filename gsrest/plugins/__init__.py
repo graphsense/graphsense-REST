@@ -4,6 +4,7 @@ import inspect
 
 
 class Plugin(abc.ABC):
+
     @abc.abstractclassmethod
     def before_request(cls, request: web.Request):
         return request

@@ -220,6 +220,73 @@ etag4 = AddressTag(category=tag2.category,
                    is_cluster_definer=True,
                    tagpack_is_public=tag2.tagpack_is_public)
 
+eth_tag_actor = AddressTag(confidence_level=100,
+                           label='LabelX',
+                           confidence='ownership',
+                           tagpack_title='',
+                           tagpack_creator='x',
+                           lastmod=1,
+                           source='sourceX',
+                           address='0x123456',
+                           entity=107925001,
+                           currency='ETH',
+                           is_cluster_definer=False,
+                           tagpack_is_public=False)
+
+
+async def get_actor_tags(test_case):
+    result = await test_case.request('/tags/actor/actorX/tags')
+    # breakpoint()
+    test_case.assertEqual([eth_tag_actor.to_dict()], result["address_tags"])
+
+    result = await test_case.request('/tags/actor/actorY/tags')
+
+    expexted_result = [{
+        'address': '0x123456',
+        'confidence': 'ownership',
+        'confidence_level': 100,
+        'currency': 'ETH',
+        'entity': 107925001,
+        'is_cluster_definer': False,
+        'label': 'LabelY',
+        'lastmod': 1,
+        'source': 'sourceY',
+        'tagpack_creator': 'x',
+        'tagpack_is_public': True,
+        'tagpack_title': '',
+        'tagpack_uri': 'uriY'
+    }]
+    test_case.assertEqual(expexted_result, result["address_tags"])
+
+    result = await test_case.request('/tags/actor/actorZ/tags')
+    test_case.assertEqual([], result["address_tags"])
+
+
+async def get_actor(test_case):
+    result = await test_case.request('/tags/actor/actorX')
+    test_case.assertEqual(
+        {
+            'categories': ["exchange", "organization"],
+            'id': 'actorX',
+            'jurisdictions': ["VU", "SC"],
+            'label': 'Actor X',
+            'uri': 'http://actorX'
+        }, result)
+
+    result = await test_case.request('/tags/actor/actorY')
+    test_case.assertEqual(
+        {
+            'categories': ["conceptB"],
+            'id': 'actorY',
+            'jurisdictions': ["AT"],
+            'label': 'Actor Y',
+            'uri': 'http://actorY'
+        }, result)
+
+    result = await test_case.requestWithCodeAndBody('/tags/actor/actorZ', 404,
+                                                    None)
+    test_case.assertEqual(None, result)
+
 
 async def list_address_tags(test_case):
     path = '/tags?label={label}'
@@ -286,7 +353,8 @@ conceptB = Concept(uri="https://conceptB",
 
 taxonomies = [
     Taxonomy(taxonomy="entity", uri="http://entity"),
-    Taxonomy(taxonomy="abuse", uri="http://abuse")
+    Taxonomy(taxonomy="abuse", uri="http://abuse"),
+    Taxonomy(taxonomy="country", uri="http://country")
 ]
 
 

@@ -50,23 +50,15 @@ async def get_statistics(test_case):
 
 
 async def search(test_case):
+
     def base_search_results():
-        return SearchResult(
-                currencies=[
-                    SearchResultByCurrency(
-                        currency='btc',
-                        addresses=[],
-                        txs=[]),
-                    SearchResultByCurrency(
-                        currency='ltc',
-                        addresses=[],
-                        txs=[]),
-                    SearchResultByCurrency(
-                        currency='eth',
-                        addresses=[],
-                        txs=[])],
-                labels=[],
-                actors=[])
+        return SearchResult(currencies=[
+            SearchResultByCurrency(currency='btc', addresses=[], txs=[]),
+            SearchResultByCurrency(currency='ltc', addresses=[], txs=[]),
+            SearchResultByCurrency(currency='eth', addresses=[], txs=[])
+        ],
+                            labels=[],
+                            actors=[])
 
     expected = base_search_results()
     expected.currencies[0] = \
@@ -127,14 +119,23 @@ async def search(test_case):
     test_case.assertEqual(expected.to_dict(), result)
 
     expected = base_search_results()
-    expected.actors = sorted(['Actor X', 'Actor Y', 'Another Actor Y'])
+    expected.actors = [{
+        'id': 'actorX',
+        'label': 'Actor X'
+    }, {
+        'id': 'actorY',
+        'label': 'Actor Y'
+    }, {
+        'id': 'anotherActor',
+        'label': 'Another Actor Y'
+    }]
 
     result = await test_case.request(path, q='actor')
     result['labels'] = sorted(result['labels'])
     test_case.assertEqual(expected.to_dict(), result)
 
     result = await test_case.request(path, auth='y', q='actor')
-    expected.actors = ['Actor X']
+    expected.actors = [{'id': 'actorX', 'label': 'Actor X'}]
     test_case.assertEqual(expected.to_dict(), result)
 
     expected = base_search_results()

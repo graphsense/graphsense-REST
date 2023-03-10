@@ -1,6 +1,8 @@
 # coding: utf-8
 
 # import models into model package
+from openapi_server.models.actor import Actor
+from openapi_server.models.actor_context import ActorContext
 from openapi_server.models.address import Address
 from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.address_tag_all_of import AddressTagAllOf
@@ -23,6 +25,7 @@ from openapi_server.models.neighbor_entity import NeighborEntity
 from openapi_server.models.rate import Rate
 from openapi_server.models.rates import Rates
 from openapi_server.models.search_result import SearchResult
+from openapi_server.models.search_result_actor import SearchResultActor
 from openapi_server.models.search_result_by_currency import SearchResultByCurrency
 from openapi_server.models.search_result_leaf import SearchResultLeaf
 from openapi_server.models.search_result_level1 import SearchResultLevel1
