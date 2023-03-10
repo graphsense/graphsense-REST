@@ -29,7 +29,9 @@ async def get_address(request: web.Request, currency, address) -> web.Response:
 
     for plugin in request.app['plugins']:
         if hasattr(plugin, 'before_request'):
-            request = plugin.before_request(request)
+            context =\
+                request.app['plugin_contexts'][plugin.__module__]
+            request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
         request.app['config'].get('show_private_tags', False)
@@ -97,7 +99,9 @@ async def get_address_entity(request: web.Request, currency, address) -> web.Res
 
     for plugin in request.app['plugins']:
         if hasattr(plugin, 'before_request'):
-            request = plugin.before_request(request)
+            context =\
+                request.app['plugin_contexts'][plugin.__module__]
+            request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
         request.app['config'].get('show_private_tags', False)
@@ -171,7 +175,9 @@ async def list_address_links(request: web.Request, currency, address, neighbor, 
 
     for plugin in request.app['plugins']:
         if hasattr(plugin, 'before_request'):
-            request = plugin.before_request(request)
+            context =\
+                request.app['plugin_contexts'][plugin.__module__]
+            request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
         request.app['config'].get('show_private_tags', False)
@@ -249,7 +255,9 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
 
     for plugin in request.app['plugins']:
         if hasattr(plugin, 'before_request'):
-            request = plugin.before_request(request)
+            context =\
+                request.app['plugin_contexts'][plugin.__module__]
+            request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
         request.app['config'].get('show_private_tags', False)
@@ -323,7 +331,9 @@ async def list_address_txs(request: web.Request, currency, address, direction=No
 
     for plugin in request.app['plugins']:
         if hasattr(plugin, 'before_request'):
-            request = plugin.before_request(request)
+            context =\
+                request.app['plugin_contexts'][plugin.__module__]
+            request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
         request.app['config'].get('show_private_tags', False)
@@ -395,7 +405,9 @@ async def list_tags_by_address(request: web.Request, currency, address, page=Non
 
     for plugin in request.app['plugins']:
         if hasattr(plugin, 'before_request'):
-            request = plugin.before_request(request)
+            context =\
+                request.app['plugin_contexts'][plugin.__module__]
+            request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
         request.app['config'].get('show_private_tags', False)
