@@ -227,6 +227,7 @@ eth_tag_actor = AddressTag(confidence_level=100,
                            tagpack_creator='x',
                            lastmod=1,
                            source='sourceX',
+                           actor='actorX',
                            address='0x123456',
                            entity=107925001,
                            currency='ETH',
@@ -236,7 +237,6 @@ eth_tag_actor = AddressTag(confidence_level=100,
 
 async def get_actor_tags(test_case):
     result = await test_case.request('/tags/actor/actorX/tags')
-    # breakpoint()
     test_case.assertEqual([eth_tag_actor.to_dict()], result["address_tags"])
 
     result = await test_case.request('/tags/actor/actorY/tags')
@@ -249,6 +249,7 @@ async def get_actor_tags(test_case):
         'entity': 107925001,
         'is_cluster_definer': False,
         'label': 'LabelY',
+        'actor': 'actorY',
         'lastmod': 1,
         'source': 'sourceY',
         'tagpack_creator': 'x',

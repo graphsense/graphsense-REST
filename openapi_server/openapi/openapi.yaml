@@ -2935,6 +2935,11 @@ components:
           example: exchange
           title: category
           type: string
+        actor:
+          description: id of the actor that controlls the address
+          example: binance
+          title: actor
+          type: string
         abuse:
           description: Abuses
           example: fraud

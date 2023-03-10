@@ -14,11 +14,12 @@ class AddressTag(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, label: str=None, category: str=None, abuse: str=None, tagpack_uri: str=None, source: str=None, lastmod: int=None, tagpack_title: str=None, tagpack_is_public: bool=None, tagpack_creator: str=None, is_cluster_definer: bool=None, confidence: str=None, confidence_level: int=None, currency: str=None, address: str=None, entity: int=None):
+    def __init__(self, label: str=None, category: str=None, actor: str=None, abuse: str=None, tagpack_uri: str=None, source: str=None, lastmod: int=None, tagpack_title: str=None, tagpack_is_public: bool=None, tagpack_creator: str=None, is_cluster_definer: bool=None, confidence: str=None, confidence_level: int=None, currency: str=None, address: str=None, entity: int=None):
         """AddressTag - a model defined in OpenAPI
 
         :param label: The label of this AddressTag.
         :param category: The category of this AddressTag.
+        :param actor: The actor of this AddressTag.
         :param abuse: The abuse of this AddressTag.
         :param tagpack_uri: The tagpack_uri of this AddressTag.
         :param source: The source of this AddressTag.
@@ -36,6 +37,7 @@ class AddressTag(Model):
         self.openapi_types = {
             'label': str,
             'category': str,
+            'actor': str,
             'abuse': str,
             'tagpack_uri': str,
             'source': str,
@@ -54,6 +56,7 @@ class AddressTag(Model):
         self.attribute_map = {
             'label': 'label',
             'category': 'category',
+            'actor': 'actor',
             'abuse': 'abuse',
             'tagpack_uri': 'tagpack_uri',
             'source': 'source',
@@ -71,6 +74,7 @@ class AddressTag(Model):
 
         self._label = label
         self._category = category
+        self._actor = actor
         self._abuse = abuse
         self._tagpack_uri = tagpack_uri
         self._source = source
@@ -104,6 +108,7 @@ class AddressTag(Model):
             return Model.to_dict(self)
         return { 'label': self._label,
             'category': self._category,
+            'actor': self._actor,
             'abuse': self._abuse,
             'tagpack_uri': self._tagpack_uri,
             'source': self._source,
@@ -166,6 +171,29 @@ class AddressTag(Model):
         """
 
         self._category = category
+
+    @property
+    def actor(self):
+        """Gets the actor of this AddressTag.
+
+        id of the actor that controlls the address
+
+        :return: The actor of this AddressTag.
+        :rtype: str
+        """
+        return self._actor
+
+    @actor.setter
+    def actor(self, actor):
+        """Sets the actor of this AddressTag.
+
+        id of the actor that controlls the address
+
+        :param actor: The actor of this AddressTag.
+        :type actor: str
+        """
+
+        self._actor = actor
 
     @property
     def abuse(self):

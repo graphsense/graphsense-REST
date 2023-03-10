@@ -145,6 +145,7 @@ class Tagstore:
         query = f"""select
                         t.*,
                         tp.uri,
+                        tp.uri,
                         tp.creator,
                         tp.title,
                         tp.is_public,
