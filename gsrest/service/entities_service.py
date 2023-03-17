@@ -6,6 +6,7 @@ from openapi_server.models.entity import Entity
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.address_tags import AddressTags
+from openapi_server.models.actor_ref import ActorRef
 from gsrest.util.values import (convert_value, to_values,
                                 convert_token_values_map, to_values_tokens)
 from openapi_server.models.entity_addresses import EntityAddresses
@@ -21,7 +22,13 @@ TAGS_PAGE_SIZE = 100
 SEARCH_TIMEOUT = 300
 
 
-def from_row(currency, row, rates, token_config, tags=None, count=0):
+def from_row(currency,
+             row,
+             rates,
+             token_config,
+             tags=None,
+             count=0,
+             actors=None):
     return Entity(
         currency=currency,
         entity=row['cluster_id'],
@@ -45,7 +52,8 @@ def from_row(currency, row, rates, token_config, tags=None, count=0):
         token_balances=convert_token_values_map(
             currency, row.get('token_balances', None), rates, token_config),
         best_address_tag=None if not tags else tags[0],
-        no_address_tags=count)
+        no_address_tags=count,
+        actors=actors if actors else None)
 
 
 async def list_address_tags_by_entity(request,
@@ -84,9 +92,15 @@ async def get_entity(request, currency, entity, with_tag=True):
         for c in counts:
             count += 0 if c['count'] is None else int(c['count'])
 
+    actors = tagstores(request.app['tagstores'],
+                       lambda row: ActorRef(id=row["id"], label=row["label"]),
+                       'list_actors_entity', currency, entity,
+                       request.app['show_private_tags'])
+
     rates = (await get_rates(request, currency))['rates']
     return from_row(currency, result, rates,
-                    db.get_token_configuration(currency), tags, count)
+                    db.get_token_configuration(currency), tags, count, await
+                    actors)
 
 
 async def list_entity_neighbors(request,
@@ -143,9 +157,12 @@ async def list_entity_addresses(request,
 
     rates = (await get_rates(request, currency))['rates']
     addresses = [
-        common.address_from_row(currency, row, rates,
-                                db.get_token_configuration(currency))
-        for row in addresses
+        common.address_from_row(
+            currency, row, rates, db.get_token_configuration(currency), await
+            tagstores(request.app['tagstores'],
+                      lambda row: ActorRef(id=row["id"], label=row["label"]),
+                      'list_actors_address', currency, row["address"],
+                      request.app['show_private_tags'])) for row in addresses
     ]
     return EntityAddresses(next_page=paging_state, addresses=addresses)
 

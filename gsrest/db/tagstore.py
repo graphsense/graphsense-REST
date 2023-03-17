@@ -365,6 +365,25 @@ class Tagstore:
                    order by address"""
         return await self.execute(query, params=[currency.upper(), addresses])
 
+    async def list_actors_address(self, currency, address, show_private=False):
+        if not address:
+            raise TypeError('x')
+            return Result(), None
+        query = f"""select
+                    distinct t.actor as id, ac.label as label
+                   from
+                    tag t,
+                    actor ac,
+                    tagpack tp
+                   where
+                    t.actor = ac.id
+                    and t.tagpack = tp.id
+                    and t.currency = %s
+                    and t.address = %s
+                    {hide_private_condition(show_private)}
+                    order by label"""
+        return await self.execute(query, params=[currency.upper(), address])
+
     async def list_labels_for_entities(self,
                                        currency,
                                        entities,
@@ -391,16 +410,48 @@ class Tagstore:
                    order by acm.gs_cluster_id"""
         return await self.execute(query, params=[currency.upper(), entities])
 
+    async def list_actors_entity(self, currency, entity, show_private=False):
+        if not entity:
+            return Result(), None
+        query = f"""select
+                    distinct t.actor as id, ac.label as label
+                   from
+                    tag t,
+                    actor ac,
+                    address_cluster_mapping acm,
+                    tagpack tp
+                   where
+                    t.address = acm.address
+                    and t.tagpack = tp.id
+                    and t.currency = acm.currency
+                    and acm.currency = %s
+                    and acm.gs_cluster_id = %s
+                    and ac.id = t.actor
+                    {hide_private_condition(show_private)}
+                    order by label"""
+        return await self.execute(query, params=[currency.upper(), entity])
+
     async def get_actor(self, actor_id):
         query = "SELECT * FROM actor WHERE id=%s"
         return await self.execute(query, params=[actor_id])
 
     async def get_actor_categories(self, actor_id):
-        query = "SELECT * FROM actor_categories WHERE actor_id=%s"
+        query = (
+            "SELECT actor_categories.*,concept.label FROM "
+            "actor_categories, concept "
+            "WHERE actor_categories.category_id = concept.id and actor_id=%s")
         return await self.execute(query, params=[actor_id])
 
     async def get_actor_jurisdictions(self, actor_id):
-        query = "SELECT * FROM actor_jurisdictions WHERE actor_id=%s"
+        query = (
+            "SELECT actor_jurisdictions.*,concept.label FROM "
+            "actor_jurisdictions, concept "
+            "WHERE actor_jurisdictions.country_id = concept.id and actor_id=%s"
+        )
+        return await self.execute(query, params=[actor_id])
+
+    async def get_nr_of_tags_by_actor(self, actor_id):
+        query = "SELECT count(*) FROM tag WHERE actor=%s"
         return await self.execute(query, params=[actor_id])
 
     def list_address_tags_for_actor(self,

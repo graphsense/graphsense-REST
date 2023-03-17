@@ -8,6 +8,7 @@ from openapi_server.models.links import Links
 from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from openapi_server.models.address_txs import AddressTxs
+from openapi_server.models.actor_ref import ActorRef
 from gsrest.util.values import convert_value
 from gsrest.service.rates_service import list_rates
 from gsrest.test.txs_service import tx1_eth, tx2_eth, tx22_eth, tx4_eth
@@ -113,6 +114,7 @@ addressE = Address(address="addressE",
                                            usd=142.18),
                    no_incoming_txs=3,
                    in_degree=3,
+                   actors=[ActorRef(id="actorY", label="Actor Y")],
                    status='clean')
 
 addressF = Address(
@@ -419,12 +421,16 @@ eth_address2 = Address(currency="eth",
                        is_contract=False,
                        total_tokens_received={
                            'usdt':
-                           make_values(eur=450, usd=500, value=450),
+                           make_values(eur=450.0, usd=500.0, value=450),
                            'weth':
                            make_values(eur=50.56,
                                        usd=60.67,
                                        value=345000000000000000000)
                        },
+                       actors=[
+                           ActorRef(id="actorX", label="Actor X"),
+                           ActorRef(id="actorY", label="Actor Y")
+                       ],
                        status='clean')
 
 eth_address3 = Address(currency="eth",
@@ -452,7 +458,7 @@ eth_address3 = Address(currency="eth",
                        is_contract=False,
                        total_tokens_spent={
                            'usdt':
-                           make_values(eur=450, usd=900, value=450),
+                           make_values(eur=450, usd=900.0, value=450),
                            'weth':
                            make_values(eur=50.0,
                                        usd=100.0,
@@ -708,6 +714,7 @@ async def list_address_neighbors(test_case):
                                      address=eth_address.address,
                                      include_labels=True,
                                      direction='out')
+
     test_case.assertEqual(eth_addressWithTagsOutNeighbors.to_dict(), result)
 
     result = await test_case.request(path,

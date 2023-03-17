@@ -33,23 +33,24 @@ def actor_context_from_row(context_str):
         return None
     ctx = json.loads(context_str)
     return ActorContext(
-        uris=ctx.get("uris", None),
-        images=ctx.get("images", None),
-        refs=ctx.get("refs", None),
-        coingecko_ids=ctx.get("coingecko_ids", None),
-        defilama_ids=ctx.get("defilama_ids", None),
+        uris=ctx.get("uris", []),
+        images=ctx.get("images", []),
+        refs=ctx.get("refs", []),
+        coingecko_ids=ctx.get("coingecko_ids", []),
+        defilama_ids=ctx.get("defilama_ids", []),
         twitter_handle=ctx.get("twitter_handle", None),
         github_organisation=ctx.get("github_organisation", None),
         legal_name=ctx.get("legal_name", None),
     )
 
 
-def actor_from_row(row, jurisdictions, categories):
+def actor_from_row(row, jurisdictions, categories, nr_tags):
     return Actor(id=row["id"],
                  uri=row["uri"],
                  label=row["label"],
-                 jurisdictions=[x["country_id"] for x in jurisdictions],
-                 categories=[x["category_id"] for x in categories],
+                 jurisdictions=[x["label"] for x in jurisdictions],
+                 categories=[x["label"] for x in categories],
+                 nr_tags=nr_tags,
                  context=actor_context_from_row(row["context"]))
 
 
@@ -63,12 +64,15 @@ async def get_actor(request, actor):
     jurisdictions = await tagstores(request.app['tagstores'], lambda x: x,
                                     'get_actor_jurisdictions', actor)
 
+    nr_tags = (await tagstores(request.app['tagstores'], lambda x: x["count"],
+                               'get_nr_of_tags_by_actor', actor))[0]
+
     actor_row = actor_cr
 
     if len(actor_row) == 0:
         raise RuntimeError(f"Actor {actor} not found.")
     else:
-        return actor_from_row(actor_row[0], jurisdictions, categories)
+        return actor_from_row(actor_row[0], jurisdictions, categories, nr_tags)
 
 
 async def get_actor_tags(request, actor, page=None, pagesize=None):

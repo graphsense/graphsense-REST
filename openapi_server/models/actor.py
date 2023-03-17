@@ -15,12 +15,13 @@ class Actor(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, label: str=None, uri: str=None, categories: List[str]=None, jurisdictions: List[str]=None, context: ActorContext=None):
+    def __init__(self, id: str=None, label: str=None, uri: str=None, nr_tags: int=None, categories: List[str]=None, jurisdictions: List[str]=None, context: ActorContext=None):
         """Actor - a model defined in OpenAPI
 
         :param id: The id of this Actor.
         :param label: The label of this Actor.
         :param uri: The uri of this Actor.
+        :param nr_tags: The nr_tags of this Actor.
         :param categories: The categories of this Actor.
         :param jurisdictions: The jurisdictions of this Actor.
         :param context: The context of this Actor.
@@ -29,6 +30,7 @@ class Actor(Model):
             'id': str,
             'label': str,
             'uri': str,
+            'nr_tags': int,
             'categories': List[str],
             'jurisdictions': List[str],
             'context': ActorContext
@@ -38,6 +40,7 @@ class Actor(Model):
             'id': 'id',
             'label': 'label',
             'uri': 'uri',
+            'nr_tags': 'nr_tags',
             'categories': 'categories',
             'jurisdictions': 'jurisdictions',
             'context': 'context'
@@ -46,6 +49,7 @@ class Actor(Model):
         self._id = id
         self._label = label
         self._uri = uri
+        self._nr_tags = nr_tags
         self._categories = categories
         self._jurisdictions = jurisdictions
         self._context = context
@@ -70,6 +74,7 @@ class Actor(Model):
         return { 'id': self._id,
             'label': self._label,
             'uri': self._uri,
+            'nr_tags': self._nr_tags,
             'categories': self._categories,
             'jurisdictions': self._jurisdictions,
             'context': self._context }
@@ -149,6 +154,29 @@ class Actor(Model):
             raise ValueError("Invalid value for `uri`, must not be `None`")
 
         self._uri = uri
+
+    @property
+    def nr_tags(self):
+        """Gets the nr_tags of this Actor.
+
+        number of address tags of the actor
+
+        :return: The nr_tags of this Actor.
+        :rtype: int
+        """
+        return self._nr_tags
+
+    @nr_tags.setter
+    def nr_tags(self, nr_tags):
+        """Sets the nr_tags of this Actor.
+
+        number of address tags of the actor
+
+        :param nr_tags: The nr_tags of this Actor.
+        :type nr_tags: int
+        """
+
+        self._nr_tags = nr_tags
 
     @property
     def categories(self):

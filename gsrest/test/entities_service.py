@@ -6,6 +6,7 @@ from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.neighbor_entities import NeighborEntities
 from openapi_server.models.neighbor_entity import NeighborEntity
 from openapi_server.models.entity_addresses import EntityAddresses
+from openapi_server.models.actor_ref import ActorRef
 from openapi_server.models.entity import Entity
 from openapi_server.models.links import Links
 from openapi_server.models.link_utxo import LinkUtxo
@@ -36,6 +37,10 @@ eth_entity = Entity(currency="eth",
                     best_address_tag=ts.eth_tag1)
 
 eth_entity2 = Entity(currency="eth",
+                     actors=[
+                         ActorRef(id='actorX', label="Actor X"),
+                         ActorRef(id='actorY', label="Actor Y")
+                     ],
                      no_outgoing_txs=eth_address2.no_outgoing_txs,
                      last_tx=eth_address2.last_tx,
                      total_spent=eth_address2.total_spent,
@@ -270,6 +275,7 @@ async def get_entity(test_case):
                                      currency='btc',
                                      entity=entityWithTags.entity)
     ewt = entityWithTags.to_dict()
+
     test_case.assertEqual(ewt, result)
 
     result = await test_case.request(path,
@@ -440,6 +446,7 @@ async def list_entity_addresses(test_case):
     result = await test_case.request(path,
                                      currency='btc',
                                      entity=entityWithTags.entity)
+
     test_case.assertEqual(entityWithTagsAddresses.to_dict(), result)
 
     result = await test_case.request(path,

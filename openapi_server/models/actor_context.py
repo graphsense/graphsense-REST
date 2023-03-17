@@ -104,6 +104,8 @@ class ActorContext(Model):
         :param uris: The uris of this ActorContext.
         :type uris: List[str]
         """
+        if uris is None:
+            raise ValueError("Invalid value for `uris`, must not be `None`")
 
         self._uris = uris
 
@@ -127,6 +129,8 @@ class ActorContext(Model):
         :param images: The images of this ActorContext.
         :type images: List[str]
         """
+        if images is None:
+            raise ValueError("Invalid value for `images`, must not be `None`")
 
         self._images = images
 
@@ -150,6 +154,8 @@ class ActorContext(Model):
         :param refs: The refs of this ActorContext.
         :type refs: List[str]
         """
+        if refs is None:
+            raise ValueError("Invalid value for `refs`, must not be `None`")
 
         self._refs = refs
 
@@ -219,6 +225,8 @@ class ActorContext(Model):
         :param twitter_handle: The twitter_handle of this ActorContext.
         :type twitter_handle: str
         """
+        if twitter_handle is None:
+            raise ValueError("Invalid value for `twitter_handle`, must not be `None`")
 
         self._twitter_handle = twitter_handle
 
@@ -242,6 +250,8 @@ class ActorContext(Model):
         :param github_organisation: The github_organisation of this ActorContext.
         :type github_organisation: str
         """
+        if github_organisation is None:
+            raise ValueError("Invalid value for `github_organisation`, must not be `None`")
 
         self._github_organisation = github_organisation
 

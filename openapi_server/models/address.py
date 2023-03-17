@@ -5,6 +5,7 @@ from datetime import date, datetime
 from typing import List, Dict, Type
 
 from openapi_server.models.base_model_ import Model
+from openapi_server.models.actor_ref import ActorRef
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.values import Values
 from openapi_server import util
@@ -16,7 +17,7 @@ class Address(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, currency: str=None, address: str=None, entity: int=None, balance: Values=None, token_balances: Dict[str, Values]=None, first_tx: TxSummary=None, last_tx: TxSummary=None, in_degree: int=None, out_degree: int=None, no_incoming_txs: int=None, no_outgoing_txs: int=None, total_received: Values=None, total_spent: Values=None, total_tokens_received: Dict[str, Values]=None, total_tokens_spent: Dict[str, Values]=None, is_contract: bool=None, status: str=None):
+    def __init__(self, currency: str=None, address: str=None, entity: int=None, balance: Values=None, token_balances: Dict[str, Values]=None, first_tx: TxSummary=None, last_tx: TxSummary=None, in_degree: int=None, out_degree: int=None, no_incoming_txs: int=None, no_outgoing_txs: int=None, total_received: Values=None, total_spent: Values=None, total_tokens_received: Dict[str, Values]=None, total_tokens_spent: Dict[str, Values]=None, actors: List[ActorRef]=None, is_contract: bool=None, status: str=None):
         """Address - a model defined in OpenAPI
 
         :param currency: The currency of this Address.
@@ -34,6 +35,7 @@ class Address(Model):
         :param total_spent: The total_spent of this Address.
         :param total_tokens_received: The total_tokens_received of this Address.
         :param total_tokens_spent: The total_tokens_spent of this Address.
+        :param actors: The actors of this Address.
         :param is_contract: The is_contract of this Address.
         :param status: The status of this Address.
         """
@@ -53,6 +55,7 @@ class Address(Model):
             'total_spent': Values,
             'total_tokens_received': Dict[str, Values],
             'total_tokens_spent': Dict[str, Values],
+            'actors': List[ActorRef],
             'is_contract': bool,
             'status': str
         }
@@ -73,6 +76,7 @@ class Address(Model):
             'total_spent': 'total_spent',
             'total_tokens_received': 'total_tokens_received',
             'total_tokens_spent': 'total_tokens_spent',
+            'actors': 'actors',
             'is_contract': 'is_contract',
             'status': 'status'
         }
@@ -92,6 +96,7 @@ class Address(Model):
         self._total_spent = total_spent
         self._total_tokens_received = total_tokens_received
         self._total_tokens_spent = total_tokens_spent
+        self._actors = actors
         self._is_contract = is_contract
         self._status = status
 
@@ -127,6 +132,7 @@ class Address(Model):
             'total_spent': self._total_spent,
             'total_tokens_received': self._total_tokens_received,
             'total_tokens_spent': self._total_tokens_spent,
+            'actors': self._actors,
             'is_contract': self._is_contract,
             'status': self._status }
 
@@ -481,6 +487,29 @@ class Address(Model):
         """
 
         self._total_tokens_spent = total_tokens_spent
+
+    @property
+    def actors(self):
+        """Gets the actors of this Address.
+
+        The list of matching actors
+
+        :return: The actors of this Address.
+        :rtype: List[ActorRef]
+        """
+        return self._actors
+
+    @actors.setter
+    def actors(self, actors):
+        """Sets the actors of this Address.
+
+        The list of matching actors
+
+        :param actors: The actors of this Address.
+        :type actors: List[ActorRef]
+        """
+
+        self._actors = actors
 
     @property
     def is_contract(self):
