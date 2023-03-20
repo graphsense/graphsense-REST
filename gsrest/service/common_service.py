@@ -9,7 +9,7 @@ from openapi_server.models.link_utxo import LinkUtxo
 from openapi_server.models.links import Links
 from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.address_tx_utxo import AddressTxUtxo
-from openapi_server.models.actor_ref import ActorRef
+from openapi_server.models.labeled_item_ref import LabeledItemRef
 from gsrest.service.rates_service import list_rates
 from gsrest.db.util import tagstores, tagstores_with_paging
 from gsrest.service.tags_service import address_tag_from_row
@@ -89,10 +89,11 @@ async def get_address(request, currency, address):
         raise RuntimeError("Address {} not found in currency {}".format(
             address, currency))
 
-    actors = tagstores(request.app['tagstores'],
-                       lambda row: ActorRef(id=row["id"], label=row["label"]),
-                       'list_actors_address', currency, address,
-                       request.app['show_private_tags'])
+    actors = tagstores(
+        request.app['tagstores'],
+        lambda row: LabeledItemRef(id=row["id"], label=row["label"]),
+        'list_actors_address', currency, address,
+        request.app['show_private_tags'])
 
     return address_from_row(currency, result,
                             (await get_rates(request, currency))['rates'],

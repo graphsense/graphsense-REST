@@ -2,7 +2,7 @@ import asyncio
 from datetime import datetime
 from openapi_server.models.stats import Stats
 from openapi_server.models.search_result import SearchResult
-from openapi_server.models.actor_ref import ActorRef
+from openapi_server.models.labeled_item_ref import LabeledItemRef
 from openapi_server.models.search_result_by_currency \
     import SearchResultByCurrency
 from gsrest.service.stats_service import get_currency_statistics
@@ -71,10 +71,11 @@ async def search(request, q, currency=None, limit=10):
     else:
         aws2 = [ts()]
 
-    aw3 = tagstores(request.app['tagstores'],
-                    lambda row: ActorRef(id=row["id"], label=row["label"]),
-                    'list_matching_actors', expression_norm, limit,
-                    request.app['show_private_tags'])
+    aw3 = tagstores(
+        request.app['tagstores'],
+        lambda row: LabeledItemRef(id=row["id"], label=row["label"]),
+        'list_matching_actors', expression_norm, limit,
+        request.app['show_private_tags'])
 
     aw1 = asyncio.gather(*aws1)
     aw2 = asyncio.gather(*aws2)

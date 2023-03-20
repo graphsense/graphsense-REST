@@ -2659,7 +2659,7 @@ components:
         actors:
           description: The list of matching actors
           items:
-            $ref: '#/components/schemas/actor_ref'
+            $ref: '#/components/schemas/labeled_item_ref'
           title: actors
           type: array
         is_contract:
@@ -2869,7 +2869,7 @@ components:
         actors:
           description: The list of matching actors
           items:
-            $ref: '#/components/schemas/actor_ref'
+            $ref: '#/components/schemas/labeled_item_ref'
           title: actors
           type: array
         best_address_tag:
@@ -3062,12 +3062,16 @@ components:
         id: binance
         label: example
         categories:
-        - categories
-        - categories
+        - id: id
+          label: example
+        - id: id
+          label: example
         uri: https://example.com
         jurisdictions:
-        - US
-        - US
+        - id: id
+          label: example
+        - id: id
+          label: example
       properties:
         id:
           description: Id of the actor
@@ -3092,13 +3096,13 @@ components:
         categories:
           description: A list actor categories
           items:
-            type: string
+            $ref: '#/components/schemas/labeled_item_ref'
           title: categories
           type: array
         jurisdictions:
           description: A list jurisdictions
           items:
-            $ref: '#/components/schemas/country'
+            $ref: '#/components/schemas/labeled_item_ref'
           title: jurisdictions
           type: array
         context:
@@ -3176,10 +3180,10 @@ components:
           title: legal_name
           type: string
       required:
-      - github_organisation
+      - coingecko_ids
+      - defilama_ids
       - images
       - refs
-      - twitter_handle
       - uris
       title: actor_context
       type: object
@@ -67623,11 +67627,6 @@ components:
       example: example
       title: label
       type: string
-    country:
-      description: 2-letter ISO 3166 country codes
-      example: US
-      title: country
-      type: string
     uri:
       description: URI
       example: https://example.com
@@ -67673,7 +67672,7 @@ components:
         actors:
           description: The list of matching actors
           items:
-            $ref: '#/components/schemas/actor_ref'
+            $ref: '#/components/schemas/labeled_item_ref'
           title: actors
           type: array
       required:
@@ -67720,19 +67719,19 @@ components:
         type: string
       title: labels
       type: array
-    actor_refs:
+    labeled_item_refs:
       description: The list of matching actors
       items:
-        $ref: '#/components/schemas/actor_ref'
+        $ref: '#/components/schemas/labeled_item_ref'
       title: actors
       type: array
-    actor_ref:
+    labeled_item_ref:
       example:
         id: id
         label: example
       properties:
         id:
-          description: id of the actor
+          description: identifier of the item
           title: id
           type: string
         label:
@@ -67743,7 +67742,7 @@ components:
       required:
       - id
       - label
-      title: actor_ref
+      title: labeled_item_ref
       type: object
     token_config:
       example:

@@ -6,6 +6,7 @@ from typing import List, Dict, Type
 
 from openapi_server.models.base_model_ import Model
 from openapi_server.models.actor_context import ActorContext
+from openapi_server.models.labeled_item_ref import LabeledItemRef
 from openapi_server import util
 
 
@@ -15,7 +16,7 @@ class Actor(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, label: str=None, uri: str=None, nr_tags: int=None, categories: List[str]=None, jurisdictions: List[str]=None, context: ActorContext=None):
+    def __init__(self, id: str=None, label: str=None, uri: str=None, nr_tags: int=None, categories: List[LabeledItemRef]=None, jurisdictions: List[LabeledItemRef]=None, context: ActorContext=None):
         """Actor - a model defined in OpenAPI
 
         :param id: The id of this Actor.
@@ -31,8 +32,8 @@ class Actor(Model):
             'label': str,
             'uri': str,
             'nr_tags': int,
-            'categories': List[str],
-            'jurisdictions': List[str],
+            'categories': List[LabeledItemRef],
+            'jurisdictions': List[LabeledItemRef],
             'context': ActorContext
         }
 
@@ -185,7 +186,7 @@ class Actor(Model):
         A list actor categories
 
         :return: The categories of this Actor.
-        :rtype: List[str]
+        :rtype: List[LabeledItemRef]
         """
         return self._categories
 
@@ -196,7 +197,7 @@ class Actor(Model):
         A list actor categories
 
         :param categories: The categories of this Actor.
-        :type categories: List[str]
+        :type categories: List[LabeledItemRef]
         """
         if categories is None:
             raise ValueError("Invalid value for `categories`, must not be `None`")
@@ -210,7 +211,7 @@ class Actor(Model):
         A list jurisdictions
 
         :return: The jurisdictions of this Actor.
-        :rtype: List[str]
+        :rtype: List[LabeledItemRef]
         """
         return self._jurisdictions
 
@@ -221,7 +222,7 @@ class Actor(Model):
         A list jurisdictions
 
         :param jurisdictions: The jurisdictions of this Actor.
-        :type jurisdictions: List[str]
+        :type jurisdictions: List[LabeledItemRef]
         """
         if jurisdictions is None:
             raise ValueError("Invalid value for `jurisdictions`, must not be `None`")

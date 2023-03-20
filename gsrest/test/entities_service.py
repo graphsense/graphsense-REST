@@ -6,7 +6,7 @@ from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.neighbor_entities import NeighborEntities
 from openapi_server.models.neighbor_entity import NeighborEntity
 from openapi_server.models.entity_addresses import EntityAddresses
-from openapi_server.models.actor_ref import ActorRef
+from openapi_server.models.labeled_item_ref import LabeledItemRef
 from openapi_server.models.entity import Entity
 from openapi_server.models.links import Links
 from openapi_server.models.link_utxo import LinkUtxo
@@ -38,8 +38,8 @@ eth_entity = Entity(currency="eth",
 
 eth_entity2 = Entity(currency="eth",
                      actors=[
-                         ActorRef(id='actorX', label="Actor X"),
-                         ActorRef(id='actorY', label="Actor Y")
+                         LabeledItemRef(id='actorX', label="Actor X"),
+                         LabeledItemRef(id='actorY', label="Actor Y")
                      ],
                      no_outgoing_txs=eth_address2.no_outgoing_txs,
                      last_tx=eth_address2.last_tx,

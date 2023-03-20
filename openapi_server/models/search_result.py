@@ -5,7 +5,7 @@ from datetime import date, datetime
 from typing import List, Dict, Type
 
 from openapi_server.models.base_model_ import Model
-from openapi_server.models.actor_ref import ActorRef
+from openapi_server.models.labeled_item_ref import LabeledItemRef
 from openapi_server.models.search_result_by_currency import SearchResultByCurrency
 from openapi_server import util
 
@@ -16,7 +16,7 @@ class SearchResult(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, currencies: List[SearchResultByCurrency]=None, labels: List[str]=None, actors: List[ActorRef]=None):
+    def __init__(self, currencies: List[SearchResultByCurrency]=None, labels: List[str]=None, actors: List[LabeledItemRef]=None):
         """SearchResult - a model defined in OpenAPI
 
         :param currencies: The currencies of this SearchResult.
@@ -26,7 +26,7 @@ class SearchResult(Model):
         self.openapi_types = {
             'currencies': List[SearchResultByCurrency],
             'labels': List[str],
-            'actors': List[ActorRef]
+            'actors': List[LabeledItemRef]
         }
 
         self.attribute_map = {
@@ -116,7 +116,7 @@ class SearchResult(Model):
         The list of matching actors
 
         :return: The actors of this SearchResult.
-        :rtype: List[ActorRef]
+        :rtype: List[LabeledItemRef]
         """
         return self._actors
 
@@ -127,7 +127,7 @@ class SearchResult(Model):
         The list of matching actors
 
         :param actors: The actors of this SearchResult.
-        :type actors: List[ActorRef]
+        :type actors: List[LabeledItemRef]
         """
 
         self._actors = actors

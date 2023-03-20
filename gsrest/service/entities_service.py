@@ -6,7 +6,7 @@ from openapi_server.models.entity import Entity
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.address_tags import AddressTags
-from openapi_server.models.actor_ref import ActorRef
+from openapi_server.models.labeled_item_ref import LabeledItemRef
 from gsrest.util.values import (convert_value, to_values,
                                 convert_token_values_map, to_values_tokens)
 from openapi_server.models.entity_addresses import EntityAddresses
@@ -92,10 +92,11 @@ async def get_entity(request, currency, entity, with_tag=True):
         for c in counts:
             count += 0 if c['count'] is None else int(c['count'])
 
-    actors = tagstores(request.app['tagstores'],
-                       lambda row: ActorRef(id=row["id"], label=row["label"]),
-                       'list_actors_entity', currency, entity,
-                       request.app['show_private_tags'])
+    actors = tagstores(
+        request.app['tagstores'],
+        lambda row: LabeledItemRef(id=row["id"], label=row["label"]),
+        'list_actors_entity', currency, entity,
+        request.app['show_private_tags'])
 
     rates = (await get_rates(request, currency))['rates']
     return from_row(currency, result, rates,
@@ -159,10 +160,11 @@ async def list_entity_addresses(request,
     addresses = [
         common.address_from_row(
             currency, row, rates, db.get_token_configuration(currency), await
-            tagstores(request.app['tagstores'],
-                      lambda row: ActorRef(id=row["id"], label=row["label"]),
-                      'list_actors_address', currency, row["address"],
-                      request.app['show_private_tags'])) for row in addresses
+            tagstores(
+                request.app['tagstores'],
+                lambda row: LabeledItemRef(id=row["id"], label=row["label"]),
+                'list_actors_address', currency, row["address"],
+                request.app['show_private_tags'])) for row in addresses
     ]
     return EntityAddresses(next_page=paging_state, addresses=addresses)
 

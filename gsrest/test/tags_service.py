@@ -267,20 +267,42 @@ async def get_actor(test_case):
     result = await test_case.request('/tags/actor/actorX')
     test_case.assertEqual(
         {
-            'categories': ["An organization", "An exchange"],
-            'id': 'actorX',
-            'jurisdictions': ["Singapore", "Vanuatu"],
-            'label': 'Actor X',
-            'nr_tags': 2,
-            'uri': 'http://actorX'
+            'categories': [{
+                "id": "organization",
+                "label": "An organization"
+            }, {
+                "id": "exchange",
+                "label": "An exchange"
+            }],
+            'id':
+            'actorX',
+            'jurisdictions': [{
+                "id": "SC",
+                "label": "Singapore"
+            }, {
+                "id": "VU",
+                "label": "Vanuatu"
+            }],
+            'label':
+            'Actor X',
+            'nr_tags':
+            2,
+            'uri':
+            'http://actorX'
         }, result)
 
     result = await test_case.request('/tags/actor/actorY')
     test_case.assertEqual(
         {
-            'categories': ["Concept B"],
+            'categories': [{
+                "id": "conceptB",
+                "label": "Concept B"
+            }],
             'id': 'actorY',
-            'jurisdictions': ["Austria"],
+            'jurisdictions': [{
+                "id": "AT",
+                "label": "Austria"
+            }],
             'label': 'Actor Y',
             'nr_tags': 2,
             'uri': 'http://actorY'

@@ -6,6 +6,7 @@ from openapi_server.models.concept import Concept
 
 from openapi_server.models.actor import Actor
 from openapi_server.models.actor_context import ActorContext
+from openapi_server.models.labeled_item_ref import LabeledItemRef
 from gsrest.db.util import tagstores, tagstores_with_paging, dt_to_int
 
 
@@ -48,8 +49,14 @@ def actor_from_row(row, jurisdictions, categories, nr_tags):
     return Actor(id=row["id"],
                  uri=row["uri"],
                  label=row["label"],
-                 jurisdictions=[x["label"] for x in jurisdictions],
-                 categories=[x["label"] for x in categories],
+                 jurisdictions=[
+                     LabeledItemRef(id=x["country_id"], label=x["label"])
+                     for x in jurisdictions
+                 ],
+                 categories=[
+                     LabeledItemRef(id=x["category_id"], label=x["label"])
+                     for x in categories
+                 ],
                  nr_tags=nr_tags,
                  context=actor_context_from_row(row["context"]))
 

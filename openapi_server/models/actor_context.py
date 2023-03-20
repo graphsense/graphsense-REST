@@ -179,6 +179,8 @@ class ActorContext(Model):
         :param coingecko_ids: The coingecko_ids of this ActorContext.
         :type coingecko_ids: List[str]
         """
+        if coingecko_ids is None:
+            raise ValueError("Invalid value for `coingecko_ids`, must not be `None`")
 
         self._coingecko_ids = coingecko_ids
 
@@ -202,6 +204,8 @@ class ActorContext(Model):
         :param defilama_ids: The defilama_ids of this ActorContext.
         :type defilama_ids: List[str]
         """
+        if defilama_ids is None:
+            raise ValueError("Invalid value for `defilama_ids`, must not be `None`")
 
         self._defilama_ids = defilama_ids
 
@@ -225,8 +229,6 @@ class ActorContext(Model):
         :param twitter_handle: The twitter_handle of this ActorContext.
         :type twitter_handle: str
         """
-        if twitter_handle is None:
-            raise ValueError("Invalid value for `twitter_handle`, must not be `None`")
 
         self._twitter_handle = twitter_handle
 
@@ -250,8 +252,6 @@ class ActorContext(Model):
         :param github_organisation: The github_organisation of this ActorContext.
         :type github_organisation: str
         """
-        if github_organisation is None:
-            raise ValueError("Invalid value for `github_organisation`, must not be `None`")
 
         self._github_organisation = github_organisation
 
