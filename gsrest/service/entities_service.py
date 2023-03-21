@@ -83,7 +83,7 @@ async def get_entity(request, currency, entity, with_tag=True):
     count = 0
     if with_tag:
         tags = await tagstores(request.app['tagstores'], address_tag_from_row,
-                               'list_entity_tags_by_entity', currency, entity,
+                               'get_best_entity_tag', currency, entity,
                                request.app['show_private_tags'])
 
         counts = await tagstores(request.app['tagstores'], lambda x: x,

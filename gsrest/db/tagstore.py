@@ -297,10 +297,7 @@ class Tagstore:
                         {hide_private_condition(show_private, table_alias=None)}"""  # noqa
         return await self.execute(query, [currency.upper(), entity])
 
-    async def list_entity_tags_by_entity(self,
-                                         currency,
-                                         entity,
-                                         show_private=False):
+    async def get_best_entity_tag(self, currency, entity, show_private=False):
         query = f"""select
                         t.*,
                         tp.uri,
@@ -338,6 +335,7 @@ class Tagstore:
                    order by
                         cd.max_level desc,
                         cd.no_addresses desc,
+                        cd.is_cluster_definer desc,
                         t.address desc
                    limit 1"""  # noqa
 
