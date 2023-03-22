@@ -30,7 +30,9 @@ async def get_entity(request: web.Request, currency, entity) -> web.Response:
 
     for plugin in request.app['plugins']:
         if hasattr(plugin, 'before_request'):
-            request = plugin.before_request(request)
+            context =\
+                request.app['plugin_contexts'][plugin.__module__]
+            request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
         request.app['config'].get('show_private_tags', False)
@@ -102,7 +104,9 @@ async def list_address_tags_by_entity(request: web.Request, currency, entity, pa
 
     for plugin in request.app['plugins']:
         if hasattr(plugin, 'before_request'):
-            request = plugin.before_request(request)
+            context =\
+                request.app['plugin_contexts'][plugin.__module__]
+            request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
         request.app['config'].get('show_private_tags', False)
@@ -174,7 +178,9 @@ async def list_entity_addresses(request: web.Request, currency, entity, page=Non
 
     for plugin in request.app['plugins']:
         if hasattr(plugin, 'before_request'):
-            request = plugin.before_request(request)
+            context =\
+                request.app['plugin_contexts'][plugin.__module__]
+            request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
         request.app['config'].get('show_private_tags', False)
@@ -248,7 +254,9 @@ async def list_entity_links(request: web.Request, currency, entity, neighbor, pa
 
     for plugin in request.app['plugins']:
         if hasattr(plugin, 'before_request'):
-            request = plugin.before_request(request)
+            context =\
+                request.app['plugin_contexts'][plugin.__module__]
+            request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
         request.app['config'].get('show_private_tags', False)
@@ -326,7 +334,9 @@ async def list_entity_neighbors(request: web.Request, currency, entity, directio
 
     for plugin in request.app['plugins']:
         if hasattr(plugin, 'before_request'):
-            request = plugin.before_request(request)
+            context =\
+                request.app['plugin_contexts'][plugin.__module__]
+            request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
         request.app['config'].get('show_private_tags', False)
@@ -400,7 +410,9 @@ async def list_entity_txs(request: web.Request, currency, entity, direction=None
 
     for plugin in request.app['plugins']:
         if hasattr(plugin, 'before_request'):
-            request = plugin.before_request(request)
+            context =\
+                request.app['plugin_contexts'][plugin.__module__]
+            request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
         request.app['config'].get('show_private_tags', False)
@@ -480,7 +492,9 @@ async def search_entity_neighbors(request: web.Request, currency, entity, direct
 
     for plugin in request.app['plugins']:
         if hasattr(plugin, 'before_request'):
-            request = plugin.before_request(request)
+            context =\
+                request.app['plugin_contexts'][plugin.__module__]
+            request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
         request.app['config'].get('show_private_tags', False)

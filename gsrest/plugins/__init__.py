@@ -6,11 +6,11 @@ import inspect
 class Plugin(abc.ABC):
 
     @abc.abstractclassmethod
-    def before_request(cls, request: web.Request):
+    def before_request(cls, context, request: web.Request):
         return request
 
     @abc.abstractclassmethod
-    def before_response(cls, request: web.Request, result):
+    def before_response(cls, context, request: web.Request, result):
         return
 
 
