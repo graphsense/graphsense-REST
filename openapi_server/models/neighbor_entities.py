@@ -15,24 +15,24 @@ class NeighborEntities(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, next_page: str=None, neighbors: List[NeighborEntity]=None):
+    def __init__(self, neighbors: List[NeighborEntity]=None, next_page: str=None):
         """NeighborEntities - a model defined in OpenAPI
 
-        :param next_page: The next_page of this NeighborEntities.
         :param neighbors: The neighbors of this NeighborEntities.
+        :param next_page: The next_page of this NeighborEntities.
         """
         self.openapi_types = {
-            'next_page': str,
-            'neighbors': List[NeighborEntity]
+            'neighbors': List[NeighborEntity],
+            'next_page': str
         }
 
         self.attribute_map = {
-            'next_page': 'next_page',
-            'neighbors': 'neighbors'
+            'neighbors': 'neighbors',
+            'next_page': 'next_page'
         }
 
-        self._next_page = next_page
         self._neighbors = neighbors
+        self._next_page = next_page
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'NeighborEntities':
@@ -51,30 +51,9 @@ class NeighborEntities(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'next_page': self._next_page,
-            'neighbors': self._neighbors }
+        return { 'neighbors': self._neighbors,
+            'next_page': self._next_page }
 
-
-    @property
-    def next_page(self):
-        """Gets the next_page of this NeighborEntities.
-
-
-        :return: The next_page of this NeighborEntities.
-        :rtype: str
-        """
-        return self._next_page
-
-    @next_page.setter
-    def next_page(self, next_page):
-        """Sets the next_page of this NeighborEntities.
-
-
-        :param next_page: The next_page of this NeighborEntities.
-        :type next_page: str
-        """
-
-        self._next_page = next_page
 
     @property
     def neighbors(self):
@@ -98,3 +77,24 @@ class NeighborEntities(Model):
             raise ValueError("Invalid value for `neighbors`, must not be `None`")
 
         self._neighbors = neighbors
+
+    @property
+    def next_page(self):
+        """Gets the next_page of this NeighborEntities.
+
+
+        :return: The next_page of this NeighborEntities.
+        :rtype: str
+        """
+        return self._next_page
+
+    @next_page.setter
+    def next_page(self, next_page):
+        """Sets the next_page of this NeighborEntities.
+
+
+        :param next_page: The next_page of this NeighborEntities.
+        :type next_page: str
+        """
+
+        self._next_page = next_page

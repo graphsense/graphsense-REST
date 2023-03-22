@@ -573,7 +573,7 @@ async def list_address_txs(test_case):
         AddressTxUtxo(tx_hash="4567",
                       currency="btc",
                       value=convert_value('btc', -1, rates[2]),
-                      height=2,
+                      height=1,
                       coinbase=False,
                       timestamp=1510347492),
         AddressTxUtxo(tx_hash="abcdef",
@@ -585,7 +585,7 @@ async def list_address_txs(test_case):
         AddressTxUtxo(tx_hash="123456",
                       currency="btc",
                       value=convert_value('btc', 1260000, rates[2]),
-                      height=2,
+                      height=3,
                       coinbase=False,
                       timestamp=1510347493)
     ]
@@ -593,16 +593,38 @@ async def list_address_txs(test_case):
     result = await test_case.request(path,
                                      currency='btc',
                                      address=address2.address)
+    print(yaml.dump(result['address_txs']))
     test_case.assertEqual(address_txs.to_dict()['address_txs'],
                           result['address_txs'])
 
-    path_with_direction =\
-        '/{currency}/addresses/{address}/txs?direction={direction}'
+    path_with_direction = path + '?direction={direction}'
     result = await test_case.request(path_with_direction,
                                      currency='btc',
                                      address=address2.address,
                                      direction='out')
     address_txs.address_txs = txs[0:2]
+    test_case.assertEqual(address_txs.to_dict()['address_txs'],
+                          result['address_txs'])
+
+    path_with_range = path_with_direction + \
+        '&from_height={from_height}&to_height={to_height}'
+    result = await test_case.request(path_with_range,
+                                     currency='btc',
+                                     address=address2.address,
+                                     direction='out',
+                                     from_height=1,
+                                     to_height=1)
+    address_txs.address_txs = txs[0:1]
+    test_case.assertEqual(address_txs.to_dict()['address_txs'],
+                          result['address_txs'])
+
+    result = await test_case.request(path_with_range,
+                                     currency='btc',
+                                     address=address2.address,
+                                     direction='out',
+                                     from_height=2,
+                                     to_height=2)
+    address_txs.address_txs = txs[1:1]
     test_case.assertEqual(address_txs.to_dict()['address_txs'],
                           result['address_txs'])
 

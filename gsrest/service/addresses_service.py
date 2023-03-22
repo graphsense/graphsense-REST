@@ -26,12 +26,16 @@ async def list_tags_by_address(request,
 async def list_address_txs(request,
                            currency,
                            address,
+                           from_height=None,
+                           to_height=None,
                            direction=None,
                            page=None,
                            pagesize=None):
+    request.app.logger.debug(f'from_height {from_height}')
     db = request.app['db']
     results, paging_state = \
-        await db.list_address_txs(currency, address, direction, page, pagesize)
+        await db.list_address_txs(currency, address, direction, from_height,
+                                  to_height, page, pagesize)
     address_txs = await common.txs_from_rows(
         request, currency, results, db.get_token_configuration(currency))
     return AddressTxs(next_page=paging_state, address_txs=address_txs)

@@ -9,7 +9,7 @@ from openapi_server import util
 
 
 
-async def bulk_csv(request: web.Request, currency, operation, num_pages, body) -> web.Response:
+async def bulk_csv(request: web.Request, currency, operation, num_pages, body, ck=None) -> web.Response:
     """Get data as CSV in bulk
 
     
@@ -22,6 +22,8 @@ async def bulk_csv(request: web.Request, currency, operation, num_pages, body) -
     :type num_pages: int
     :param body: Map of the operation&#39;s parameter names to (arrays of) values
     :type body: 
+    :param ck: 
+    :type ck: str
 
     """
 
@@ -46,11 +48,11 @@ async def bulk_csv(request: web.Request, currency, operation, num_pages, body) -
     request.app['show_private_tags'] = show_private_tags
 
     try:
-        if 'currency' in ['','currency','operation','num_pages','body']:
+        if 'currency' in ['','currency','operation','num_pages','body','ck']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.bulk_csv(request
-                ,currency=currency,operation=operation,num_pages=num_pages,body=body)
+                ,currency=currency,operation=operation,num_pages=num_pages,body=body,ck=ck)
         return result
     except RuntimeError as e:
         traceback.print_exception(type(e), e, e.__traceback__)
