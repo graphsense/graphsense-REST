@@ -14,7 +14,7 @@ format:
 	yapf --in-place --recursive gsrest
 
 serve:
-	python -m aiohttp.web -H localhost -P 5000 openapi_server:main
+	python -m aiohttp.web -H localhost -P 9000 openapi_server:main
 
 drop-integration-db:
 	docker stop cassandra_mock; docker stop tagstore_mock; rm ./tests/.runcass ./tests/.runts
