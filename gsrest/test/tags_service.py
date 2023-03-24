@@ -236,10 +236,10 @@ eth_tag_actor = AddressTag(confidence_level=100,
 
 
 async def get_actor_tags(test_case):
-    result = await test_case.request('/tags/actor/actorX/tags')
+    result = await test_case.request('/tags/actors/actorX/tags')
     test_case.assertEqual([eth_tag_actor.to_dict()], result["address_tags"])
 
-    result = await test_case.request('/tags/actor/actorY/tags')
+    result = await test_case.request('/tags/actors/actorY/tags')
 
     expexted_result = [{
         'address': '0x123456',
@@ -259,12 +259,12 @@ async def get_actor_tags(test_case):
     }]
     test_case.assertEqual(expexted_result, result["address_tags"])
 
-    result = await test_case.request('/tags/actor/actorZ/tags')
+    result = await test_case.request('/tags/actors/actorZ/tags')
     test_case.assertEqual([], result["address_tags"])
 
 
 async def get_actor(test_case):
-    result = await test_case.request('/tags/actor/actorX')
+    result = await test_case.request('/tags/actors/actorX')
     test_case.assertEqual(
         {
             'categories': [{
@@ -291,7 +291,7 @@ async def get_actor(test_case):
             'http://actorX'
         }, result)
 
-    result = await test_case.request('/tags/actor/actorY')
+    result = await test_case.request('/tags/actors/actorY')
     test_case.assertEqual(
         {
             'categories': [{
@@ -308,7 +308,7 @@ async def get_actor(test_case):
             'uri': 'http://actorY'
         }, result)
 
-    result = await test_case.requestWithCodeAndBody('/tags/actor/actorZ', 404,
+    result = await test_case.requestWithCodeAndBody('/tags/actors/actorZ', 404,
                                                     None)
     test_case.assertEqual(None, result)
 

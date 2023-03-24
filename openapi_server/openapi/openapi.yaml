@@ -151,7 +151,7 @@ paths:
       tags:
       - tags
       x-openapi-router-controller: openapi_server.controllers.tags_controller
-  /tags/actor/{actor}:
+  /tags/actors/{actor}:
     get:
       operationId: get_actor
       parameters:
@@ -176,7 +176,7 @@ paths:
       tags:
       - tags
       x-openapi-router-controller: openapi_server.controllers.tags_controller
-  /tags/actor/{actor}/tags:
+  /tags/actors/{actor}/tags:
     get:
       operationId: get_actor_tags
       parameters:
