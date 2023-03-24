@@ -298,6 +298,20 @@ class Tagstore:
         return await self.execute(query, [currency.upper(), entity])
 
     async def get_best_entity_tag(self, currency, entity, show_private=False):
+        if currency == 'eth':
+            # in case of eth we want to propagate the best address tag
+            # regardless of if the tagpack is a defines it as cluster definer
+            # since cluster == entity in eth
+            cluster_definer_condition = ""
+        else:
+            cluster_definer_condition = """and
+                            (cd.is_cluster_definer=true
+                                AND t.is_cluster_definer=true
+                            OR
+                            cd.is_cluster_definer=false
+                                AND t.is_cluster_definer!=true
+                        )"""
+
         query = f"""select
                         t.*,
                         tp.uri,
@@ -323,13 +337,7 @@ class Tagstore:
                         and cd.gs_cluster_id = %s
                         and t.tagpack=tp.id
                         and t.address=cd.address
-                        and
-                            (cd.is_cluster_definer=true
-                                AND t.is_cluster_definer=true
-                            OR
-                            cd.is_cluster_definer=false
-                                AND t.is_cluster_definer!=true
-                        )
+                        {cluster_definer_condition}
                         and c.id = t.confidence
                         {hide_private_condition(show_private, table_alias='cd')}
                    order by
