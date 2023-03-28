@@ -27,7 +27,7 @@ info_field = '_info'
 request_field_prefix = '_request_'
 
 
-async def bulk(request, currency, operation, body, num_pages, ck, form='csv'):
+async def bulk(request, currency, operation, body, num_pages, form='csv'):
     try:
         the_stack = stack(request, currency, operation, body, num_pages, form)
     except TypeError as e:

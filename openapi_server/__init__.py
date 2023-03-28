@@ -23,9 +23,11 @@ def load_config(config_file):
 def setup_logging(logger, config):
     level = config.get('level', 'INFO').upper()
     level = getattr(logging, level)
-    FORMAT = '%(asctime)s %(message)s'
-    logging.basicConfig(format=FORMAT)
     logger.setLevel(level)
+    for handler in logging.root.handlers:
+        handler.setFormatter(
+            logging.Formatter("%(levelname)-8s %(asctime)s "
+                              "%(name)s:%(filename)s:%(lineno)d %(message)s"))
     smtp = config.get('smtp', None)
     if not smtp:
         return

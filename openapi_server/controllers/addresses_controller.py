@@ -311,7 +311,7 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
         raise web.HTTPInternalServerError()
 
 
-async def list_address_txs(request: web.Request, currency, address, direction=None, from_height=None, to_height=None, page=None, pagesize=None) -> web.Response:
+async def list_address_txs(request: web.Request, currency, address, direction=None, min_height=None, max_height=None, token_currency=None, page=None, pagesize=None) -> web.Response:
     """Get all transactions an address has been involved in
 
     
@@ -322,10 +322,12 @@ async def list_address_txs(request: web.Request, currency, address, direction=No
     :type address: str
     :param direction: Incoming or outgoing transactions
     :type direction: str
-    :param from_height: Return transactions starting from given height
-    :type from_height: int
-    :param to_height: Return transactions up to (including) given height
-    :type to_height: int
+    :param min_height: Return transactions starting from given height
+    :type min_height: int
+    :param max_height: Return transactions up to (including) given height
+    :type max_height: int
+    :param token_currency: Return transactions of given token currency
+    :type token_currency: str
     :param page: Resumption token for retrieving the next page
     :type page: str
     :param pagesize: Number of items returned in a single page
@@ -354,11 +356,11 @@ async def list_address_txs(request: web.Request, currency, address, direction=No
     request.app['show_private_tags'] = show_private_tags
 
     try:
-        if 'currency' in ['','currency','address','direction','from_height','to_height','page','pagesize']:
+        if 'currency' in ['','currency','address','direction','min_height','max_height','token_currency','page','pagesize']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.list_address_txs(request
-                ,currency=currency,address=address,direction=direction,from_height=from_height,to_height=to_height,page=page,pagesize=pagesize)
+                ,currency=currency,address=address,direction=direction,min_height=min_height,max_height=max_height,token_currency=token_currency,page=page,pagesize=pagesize)
         result = await result
 
         for plugin in request.app['plugins']:
