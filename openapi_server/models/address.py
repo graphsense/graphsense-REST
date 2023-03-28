@@ -5,7 +5,6 @@ from datetime import date, datetime
 from typing import List, Dict, Type
 
 from openapi_server.models.base_model_ import Model
-from openapi_server.models.labeled_item_ref import LabeledItemRef
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.values import Values
 from openapi_server import util
@@ -17,88 +16,84 @@ class Address(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, currency: str=None, address: str=None, entity: int=None, balance: Values=None, token_balances: Dict[str, Values]=None, first_tx: TxSummary=None, last_tx: TxSummary=None, in_degree: int=None, out_degree: int=None, no_incoming_txs: int=None, no_outgoing_txs: int=None, total_received: Values=None, total_spent: Values=None, total_tokens_received: Dict[str, Values]=None, total_tokens_spent: Dict[str, Values]=None, actors: List[LabeledItemRef]=None, is_contract: bool=None, status: str=None):
+    def __init__(self, address: str=None, balance: Values=None, currency: str=None, entity: int=None, first_tx: TxSummary=None, in_degree: int=None, is_contract: bool=None, last_tx: TxSummary=None, no_incoming_txs: int=None, no_outgoing_txs: int=None, out_degree: int=None, status: str=None, token_balances: Dict[str, Values]=None, total_received: Values=None, total_spent: Values=None, total_tokens_received: Dict[str, Values]=None, total_tokens_spent: Dict[str, Values]=None):
         """Address - a model defined in OpenAPI
 
-        :param currency: The currency of this Address.
         :param address: The address of this Address.
-        :param entity: The entity of this Address.
         :param balance: The balance of this Address.
-        :param token_balances: The token_balances of this Address.
+        :param currency: The currency of this Address.
+        :param entity: The entity of this Address.
         :param first_tx: The first_tx of this Address.
-        :param last_tx: The last_tx of this Address.
         :param in_degree: The in_degree of this Address.
-        :param out_degree: The out_degree of this Address.
+        :param is_contract: The is_contract of this Address.
+        :param last_tx: The last_tx of this Address.
         :param no_incoming_txs: The no_incoming_txs of this Address.
         :param no_outgoing_txs: The no_outgoing_txs of this Address.
+        :param out_degree: The out_degree of this Address.
+        :param status: The status of this Address.
+        :param token_balances: The token_balances of this Address.
         :param total_received: The total_received of this Address.
         :param total_spent: The total_spent of this Address.
         :param total_tokens_received: The total_tokens_received of this Address.
         :param total_tokens_spent: The total_tokens_spent of this Address.
-        :param actors: The actors of this Address.
-        :param is_contract: The is_contract of this Address.
-        :param status: The status of this Address.
         """
         self.openapi_types = {
-            'currency': str,
             'address': str,
-            'entity': int,
             'balance': Values,
-            'token_balances': Dict[str, Values],
+            'currency': str,
+            'entity': int,
             'first_tx': TxSummary,
-            'last_tx': TxSummary,
             'in_degree': int,
-            'out_degree': int,
+            'is_contract': bool,
+            'last_tx': TxSummary,
             'no_incoming_txs': int,
             'no_outgoing_txs': int,
+            'out_degree': int,
+            'status': str,
+            'token_balances': Dict[str, Values],
             'total_received': Values,
             'total_spent': Values,
             'total_tokens_received': Dict[str, Values],
-            'total_tokens_spent': Dict[str, Values],
-            'actors': List[LabeledItemRef],
-            'is_contract': bool,
-            'status': str
+            'total_tokens_spent': Dict[str, Values]
         }
 
         self.attribute_map = {
-            'currency': 'currency',
             'address': 'address',
-            'entity': 'entity',
             'balance': 'balance',
-            'token_balances': 'token_balances',
+            'currency': 'currency',
+            'entity': 'entity',
             'first_tx': 'first_tx',
-            'last_tx': 'last_tx',
             'in_degree': 'in_degree',
-            'out_degree': 'out_degree',
+            'is_contract': 'is_contract',
+            'last_tx': 'last_tx',
             'no_incoming_txs': 'no_incoming_txs',
             'no_outgoing_txs': 'no_outgoing_txs',
+            'out_degree': 'out_degree',
+            'status': 'status',
+            'token_balances': 'token_balances',
             'total_received': 'total_received',
             'total_spent': 'total_spent',
             'total_tokens_received': 'total_tokens_received',
-            'total_tokens_spent': 'total_tokens_spent',
-            'actors': 'actors',
-            'is_contract': 'is_contract',
-            'status': 'status'
+            'total_tokens_spent': 'total_tokens_spent'
         }
 
-        self._currency = currency
         self._address = address
-        self._entity = entity
         self._balance = balance
-        self._token_balances = token_balances
+        self._currency = currency
+        self._entity = entity
         self._first_tx = first_tx
-        self._last_tx = last_tx
         self._in_degree = in_degree
-        self._out_degree = out_degree
+        self._is_contract = is_contract
+        self._last_tx = last_tx
         self._no_incoming_txs = no_incoming_txs
         self._no_outgoing_txs = no_outgoing_txs
+        self._out_degree = out_degree
+        self._status = status
+        self._token_balances = token_balances
         self._total_received = total_received
         self._total_spent = total_spent
         self._total_tokens_received = total_tokens_received
         self._total_tokens_spent = total_tokens_spent
-        self._actors = actors
-        self._is_contract = is_contract
-        self._status = status
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'Address':
@@ -117,50 +112,24 @@ class Address(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'currency': self._currency,
-            'address': self._address,
-            'entity': self._entity,
+        return { 'address': self._address,
             'balance': self._balance,
-            'token_balances': self._token_balances,
+            'currency': self._currency,
+            'entity': self._entity,
             'first_tx': self._first_tx,
-            'last_tx': self._last_tx,
             'in_degree': self._in_degree,
-            'out_degree': self._out_degree,
+            'is_contract': self._is_contract,
+            'last_tx': self._last_tx,
             'no_incoming_txs': self._no_incoming_txs,
             'no_outgoing_txs': self._no_outgoing_txs,
+            'out_degree': self._out_degree,
+            'status': self._status,
+            'token_balances': self._token_balances,
             'total_received': self._total_received,
             'total_spent': self._total_spent,
             'total_tokens_received': self._total_tokens_received,
-            'total_tokens_spent': self._total_tokens_spent,
-            'actors': self._actors,
-            'is_contract': self._is_contract,
-            'status': self._status }
+            'total_tokens_spent': self._total_tokens_spent }
 
-
-    @property
-    def currency(self):
-        """Gets the currency of this Address.
-
-        crypto currency code
-
-        :return: The currency of this Address.
-        :rtype: str
-        """
-        return self._currency
-
-    @currency.setter
-    def currency(self, currency):
-        """Sets the currency of this Address.
-
-        crypto currency code
-
-        :param currency: The currency of this Address.
-        :type currency: str
-        """
-        if currency is None:
-            raise ValueError("Invalid value for `currency`, must not be `None`")
-
-        self._currency = currency
 
     @property
     def address(self):
@@ -188,6 +157,54 @@ class Address(Model):
         self._address = address
 
     @property
+    def balance(self):
+        """Gets the balance of this Address.
+
+
+        :return: The balance of this Address.
+        :rtype: Values
+        """
+        return self._balance
+
+    @balance.setter
+    def balance(self, balance):
+        """Sets the balance of this Address.
+
+
+        :param balance: The balance of this Address.
+        :type balance: Values
+        """
+        if balance is None:
+            raise ValueError("Invalid value for `balance`, must not be `None`")
+
+        self._balance = balance
+
+    @property
+    def currency(self):
+        """Gets the currency of this Address.
+
+        crypto currency code
+
+        :return: The currency of this Address.
+        :rtype: str
+        """
+        return self._currency
+
+    @currency.setter
+    def currency(self, currency):
+        """Sets the currency of this Address.
+
+        crypto currency code
+
+        :param currency: The currency of this Address.
+        :type currency: str
+        """
+        if currency is None:
+            raise ValueError("Invalid value for `currency`, must not be `None`")
+
+        self._currency = currency
+
+    @property
     def entity(self):
         """Gets the entity of this Address.
 
@@ -213,52 +230,6 @@ class Address(Model):
         self._entity = entity
 
     @property
-    def balance(self):
-        """Gets the balance of this Address.
-
-
-        :return: The balance of this Address.
-        :rtype: Values
-        """
-        return self._balance
-
-    @balance.setter
-    def balance(self, balance):
-        """Sets the balance of this Address.
-
-
-        :param balance: The balance of this Address.
-        :type balance: Values
-        """
-        if balance is None:
-            raise ValueError("Invalid value for `balance`, must not be `None`")
-
-        self._balance = balance
-
-    @property
-    def token_balances(self):
-        """Gets the token_balances of this Address.
-
-        Per token value-flow
-
-        :return: The token_balances of this Address.
-        :rtype: Dict[str, Values]
-        """
-        return self._token_balances
-
-    @token_balances.setter
-    def token_balances(self, token_balances):
-        """Sets the token_balances of this Address.
-
-        Per token value-flow
-
-        :param token_balances: The token_balances of this Address.
-        :type token_balances: Dict[str, Values]
-        """
-
-        self._token_balances = token_balances
-
-    @property
     def first_tx(self):
         """Gets the first_tx of this Address.
 
@@ -280,29 +251,6 @@ class Address(Model):
             raise ValueError("Invalid value for `first_tx`, must not be `None`")
 
         self._first_tx = first_tx
-
-    @property
-    def last_tx(self):
-        """Gets the last_tx of this Address.
-
-
-        :return: The last_tx of this Address.
-        :rtype: TxSummary
-        """
-        return self._last_tx
-
-    @last_tx.setter
-    def last_tx(self, last_tx):
-        """Sets the last_tx of this Address.
-
-
-        :param last_tx: The last_tx of this Address.
-        :type last_tx: TxSummary
-        """
-        if last_tx is None:
-            raise ValueError("Invalid value for `last_tx`, must not be `None`")
-
-        self._last_tx = last_tx
 
     @property
     def in_degree(self):
@@ -328,27 +276,48 @@ class Address(Model):
         self._in_degree = in_degree
 
     @property
-    def out_degree(self):
-        """Gets the out_degree of this Address.
+    def is_contract(self):
+        """Gets the is_contract of this Address.
 
 
-        :return: The out_degree of this Address.
-        :rtype: int
+        :return: The is_contract of this Address.
+        :rtype: bool
         """
-        return self._out_degree
+        return self._is_contract
 
-    @out_degree.setter
-    def out_degree(self, out_degree):
-        """Sets the out_degree of this Address.
+    @is_contract.setter
+    def is_contract(self, is_contract):
+        """Sets the is_contract of this Address.
 
 
-        :param out_degree: The out_degree of this Address.
-        :type out_degree: int
+        :param is_contract: The is_contract of this Address.
+        :type is_contract: bool
         """
-        if out_degree is None:
-            raise ValueError("Invalid value for `out_degree`, must not be `None`")
 
-        self._out_degree = out_degree
+        self._is_contract = is_contract
+
+    @property
+    def last_tx(self):
+        """Gets the last_tx of this Address.
+
+
+        :return: The last_tx of this Address.
+        :rtype: TxSummary
+        """
+        return self._last_tx
+
+    @last_tx.setter
+    def last_tx(self, last_tx):
+        """Sets the last_tx of this Address.
+
+
+        :param last_tx: The last_tx of this Address.
+        :type last_tx: TxSummary
+        """
+        if last_tx is None:
+            raise ValueError("Invalid value for `last_tx`, must not be `None`")
+
+        self._last_tx = last_tx
 
     @property
     def no_incoming_txs(self):
@@ -395,6 +364,79 @@ class Address(Model):
             raise ValueError("Invalid value for `no_outgoing_txs`, must not be `None`")
 
         self._no_outgoing_txs = no_outgoing_txs
+
+    @property
+    def out_degree(self):
+        """Gets the out_degree of this Address.
+
+
+        :return: The out_degree of this Address.
+        :rtype: int
+        """
+        return self._out_degree
+
+    @out_degree.setter
+    def out_degree(self, out_degree):
+        """Sets the out_degree of this Address.
+
+
+        :param out_degree: The out_degree of this Address.
+        :type out_degree: int
+        """
+        if out_degree is None:
+            raise ValueError("Invalid value for `out_degree`, must not be `None`")
+
+        self._out_degree = out_degree
+
+    @property
+    def status(self):
+        """Gets the status of this Address.
+
+
+        :return: The status of this Address.
+        :rtype: str
+        """
+        return self._status
+
+    @status.setter
+    def status(self, status):
+        """Sets the status of this Address.
+
+
+        :param status: The status of this Address.
+        :type status: str
+        """
+        allowed_values = ["clean", "dirty", "new"]  # noqa: E501
+        if status not in allowed_values:
+            raise ValueError(
+                "Invalid value for `status` ({0}), must be one of {1}"
+                .format(status, allowed_values)
+            )
+
+        self._status = status
+
+    @property
+    def token_balances(self):
+        """Gets the token_balances of this Address.
+
+        Per token value-flow
+
+        :return: The token_balances of this Address.
+        :rtype: Dict[str, Values]
+        """
+        return self._token_balances
+
+    @token_balances.setter
+    def token_balances(self, token_balances):
+        """Sets the token_balances of this Address.
+
+        Per token value-flow
+
+        :param token_balances: The token_balances of this Address.
+        :type token_balances: Dict[str, Values]
+        """
+
+        self._token_balances = token_balances
 
     @property
     def total_received(self):
@@ -487,74 +529,3 @@ class Address(Model):
         """
 
         self._total_tokens_spent = total_tokens_spent
-
-    @property
-    def actors(self):
-        """Gets the actors of this Address.
-
-        The list of matching actors
-
-        :return: The actors of this Address.
-        :rtype: List[LabeledItemRef]
-        """
-        return self._actors
-
-    @actors.setter
-    def actors(self, actors):
-        """Sets the actors of this Address.
-
-        The list of matching actors
-
-        :param actors: The actors of this Address.
-        :type actors: List[LabeledItemRef]
-        """
-
-        self._actors = actors
-
-    @property
-    def is_contract(self):
-        """Gets the is_contract of this Address.
-
-
-        :return: The is_contract of this Address.
-        :rtype: bool
-        """
-        return self._is_contract
-
-    @is_contract.setter
-    def is_contract(self, is_contract):
-        """Sets the is_contract of this Address.
-
-
-        :param is_contract: The is_contract of this Address.
-        :type is_contract: bool
-        """
-
-        self._is_contract = is_contract
-
-    @property
-    def status(self):
-        """Gets the status of this Address.
-
-
-        :return: The status of this Address.
-        :rtype: str
-        """
-        return self._status
-
-    @status.setter
-    def status(self, status):
-        """Sets the status of this Address.
-
-
-        :param status: The status of this Address.
-        :type status: str
-        """
-        allowed_values = ["clean", "dirty", "new"]  # noqa: E501
-        if status not in allowed_values:
-            raise ValueError(
-                "Invalid value for `status` ({0}), must be one of {1}"
-                .format(status, allowed_values)
-            )
-
-        self._status = status

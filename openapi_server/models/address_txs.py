@@ -15,24 +15,24 @@ class AddressTxs(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, next_page: str=None, address_txs: List[AddressTx]=None):
+    def __init__(self, address_txs: List[AddressTx]=None, next_page: str=None):
         """AddressTxs - a model defined in OpenAPI
 
-        :param next_page: The next_page of this AddressTxs.
         :param address_txs: The address_txs of this AddressTxs.
+        :param next_page: The next_page of this AddressTxs.
         """
         self.openapi_types = {
-            'next_page': str,
-            'address_txs': List[AddressTx]
+            'address_txs': List[AddressTx],
+            'next_page': str
         }
 
         self.attribute_map = {
-            'next_page': 'next_page',
-            'address_txs': 'address_txs'
+            'address_txs': 'address_txs',
+            'next_page': 'next_page'
         }
 
-        self._next_page = next_page
         self._address_txs = address_txs
+        self._next_page = next_page
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'AddressTxs':
@@ -51,30 +51,9 @@ class AddressTxs(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'next_page': self._next_page,
-            'address_txs': self._address_txs }
+        return { 'address_txs': self._address_txs,
+            'next_page': self._next_page }
 
-
-    @property
-    def next_page(self):
-        """Gets the next_page of this AddressTxs.
-
-
-        :return: The next_page of this AddressTxs.
-        :rtype: str
-        """
-        return self._next_page
-
-    @next_page.setter
-    def next_page(self, next_page):
-        """Sets the next_page of this AddressTxs.
-
-
-        :param next_page: The next_page of this AddressTxs.
-        :type next_page: str
-        """
-
-        self._next_page = next_page
 
     @property
     def address_txs(self):
@@ -98,3 +77,24 @@ class AddressTxs(Model):
             raise ValueError("Invalid value for `address_txs`, must not be `None`")
 
         self._address_txs = address_txs
+
+    @property
+    def next_page(self):
+        """Gets the next_page of this AddressTxs.
+
+
+        :return: The next_page of this AddressTxs.
+        :rtype: str
+        """
+        return self._next_page
+
+    @next_page.setter
+    def next_page(self, next_page):
+        """Sets the next_page of this AddressTxs.
+
+
+        :param next_page: The next_page of this AddressTxs.
+        :type next_page: str
+        """
+
+        self._next_page = next_page

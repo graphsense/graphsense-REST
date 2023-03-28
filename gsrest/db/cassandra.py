@@ -395,17 +395,14 @@ class Cassandra:
             currency, 'raw', query,
             [self.get_block_id_group(currency, height), height])).one()
 
-    @eth
     async def list_block_txs(self, currency, height):
-        height_group = self.get_block_id_group(currency, height)
-        query = ("SELECT txs FROM block_transactions WHERE "
-                 "block_id_group = %s and block_id = %s")
-        result = await self.execute_async(currency, 'raw', query,
-                                          [height_group, height])
-        if one(result) is None:
-            return None
-        txs = [tx.tx_id for tx in result.one()['txs']]
-        return await self.list_txs_by_ids(currency, txs)
+        tx_ids = await self.list_block_txs_ids(currency, height)
+        if tx_ids is None:
+            raise RuntimeError(
+                f'Block {height} not found in currency {currency}')
+        return await self.list_txs_by_ids(currency,
+                                          tx_ids,
+                                          include_token_txs=True)
 
     async def get_rates(self, currency, height):
         query = "SELECT * FROM exchange_rates WHERE block_id = %s"
@@ -429,12 +426,18 @@ class Cassandra:
                                currency,
                                address,
                                direction,
+                               min_height=None,
+                               max_height=None,
+                               token_currency=None,
                                page=None,
                                pagesize=None):
         return await self.list_txs_by_node_type(currency,
                                                 'address',
                                                 address,
                                                 direction,
+                                                min_height=min_height,
+                                                max_height=max_height,
+                                                token_currency=token_currency,
                                                 page=page,
                                                 pagesize=pagesize)
 
@@ -442,12 +445,18 @@ class Cassandra:
                               currency,
                               entity,
                               direction,
+                              min_height=None,
+                              max_height=None,
+                              token_currency=None,
                               page=None,
                               pagesize=None):
         return await self.list_txs_by_node_type(currency,
                                                 'cluster',
                                                 entity,
                                                 direction,
+                                                min_height=min_height,
+                                                max_height=max_height,
+                                                token_currency=token_currency,
                                                 page=page,
                                                 pagesize=pagesize)
 
@@ -457,82 +466,51 @@ class Cassandra:
                                     node_type,
                                     id,
                                     direction,
+                                    min_height=None,
+                                    max_height=None,
+                                    token_currency=None,
                                     page=None,
                                     pagesize=None):
-        paging_state = (page or '').split('|')
         if node_type == 'address':
             id, id_group = \
                 await self.get_address_id_id_group(currency, id)
+            query = ("SELECT * FROM address WHERE address_id = %s"
+                     " AND address_id_group = %s")
+            result = await self.execute_async(currency, 'transformed', query,
+                                              [id, id_group])
         else:
             id_group = self.get_id_group(currency, id)
+            query = ("SELECT * FROM cluster "
+                     "WHERE cluster_id_group = %s AND cluster_id = %s ")
+            result = await self.execute_async(currency, 'transformed', query,
+                                              [id_group, id])
 
-        query = f"SELECT * FROM {node_type}_transactions " \
-                f"WHERE {node_type}_id = %s AND {node_type}_id_group = %s" \
-                f" and is_outgoing = %s order by tx_id desc"
-
-        params = [id, id_group]
-        fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
-        if direction:
-            params.append(direction == 'out')
-            results = await self.execute_async(currency,
-                                               'transformed',
-                                               query,
-                                               params,
-                                               paging_state=from_hex(
-                                                   paging_state[0]),
-                                               fetch_size=fetch_size)
-            paging_state = to_hex(results.paging_state)
-            results = results.current_rows
-        else:
-            fetch_size /= 2
-            paging_state1 = paging_state[0] or None
-            paging_state2 = paging_state[1] if len(paging_state) > 1 else None
-            params1 = list(params)
-            params1.append(False)
-            aw1 = self.execute_async(currency,
-                                     'transformed',
-                                     query,
-                                     params1,
-                                     paging_state=from_hex(paging_state1),
-                                     fetch_size=fetch_size)
-            params2 = list(params)
-            params2.append(True)
-            aw2 = self.execute_async(currency,
-                                     'transformed',
-                                     query,
-                                     params2,
-                                     paging_state=from_hex(paging_state2),
-                                     fetch_size=fetch_size)
-            [results1, results2] = await asyncio.gather(aw1, aw2)
-            if results1.paging_state is None and \
-               results2.paging_state is None:
-                paging_state = None
-            else:
-                paging_state = \
-                    to_hex(results1.paging_state or '') + '|' + \
-                    to_hex(results2.paging_state or '')
-            results1 = results1.current_rows
-            results2 = results2.current_rows
-            results = []
-            i = j = 0
-            while len(results) < fetch_size and \
-                  (i < len(results1) or j < len(results2)):  # noqa
-                if i >= len(results1):
-                    results.append(results2[j])
-                    j += 1
-                elif j >= len(results2):
-                    results.append(results1[i])
-                    i += 1
-                elif results1[i]['tx_id'] > results2[j]['tx_id']:
-                    results.append(results1[i])
-                    i += 1
-                else:
-                    results.append(results2[j])
-                    j += 1
-
-        if not results:
+        if not result:
             raise RuntimeError(
                 f'{node_type} {id} not found in currency {currency}')
+
+        params = [id, id_group]
+        min_height_q = max_height_q = ""
+        if min_height or max_height:
+            first_tx_id, last_tx_id = \
+                await self.resolve_tx_id_range_by_block(currency,
+                                                        min_height,
+                                                        max_height)
+            if min_height:
+                min_height_q = "AND tx_id >= %s"
+                params.append(first_tx_id)
+            if max_height:
+                max_height_q = "AND tx_id <= %s"
+                params.append(last_tx_id)
+
+        query = (f"SELECT * FROM {node_type}_transactions "
+                 f"WHERE {node_type}_id = %s AND {node_type}_id_group = %s"
+                 f" {min_height_q} {max_height_q} and is_outgoing = %s "
+                 "order by tx_id desc")
+
+        fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
+        results, paging_state = await self.list_txs_ordered(
+            currency, query, params, direction, page, fetch_size)
 
         txs = await self.list_txs_by_ids(currency,
                                          [row['tx_id'] for row in results],
@@ -548,6 +526,40 @@ class Cassandra:
             rows.append(row)
 
         return rows, paging_state
+
+    async def resolve_tx_id_range_by_block(self, currency, min_height,
+                                           max_height):
+        former_txs = await self.list_block_txs_ids(currency, min_height)
+        first_tx_id = min(former_txs) if former_txs is not None else None
+        latter_txs = await self.list_block_txs_ids(currency, max_height)
+        last_tx_id = max(latter_txs) if latter_txs is not None else None
+        return first_tx_id, last_tx_id
+
+    @eth
+    async def list_block_txs_ids(self, currency, height):
+        if height is None:
+            return None
+        height_group = self.get_block_id_group(currency, height)
+        query = ("SELECT txs FROM block_transactions "
+                 "WHERE block_id_group=%s and block_id=%s")
+        result = await self.execute_async(
+            currency, 'raw', query, [height_group, int(height)])
+        if one(result) is None:
+            return None
+        return [tx.tx_id for tx in result.one()['txs']]
+
+    async def list_block_txs_ids_eth(self, currency, height):
+        if height is None:
+            return None
+        height_group = self.get_block_id_group(currency, height)
+        query = ("SELECT txs FROM block_transactions "
+                 "WHERE block_id_group=%s and block_id=%s")
+        result = await self.execute_async(
+            currency, 'transformed', query,
+            [height_group, int(height)])
+        if one(result) is None:
+            return None
+        return result.one()['txs']
 
     async def get_addresses_by_ids(self,
                                    currency,
@@ -1540,23 +1552,6 @@ class Cassandra:
     def get_address_entity_id_eth(self, currency, address):
         return self.get_address_id(currency, address)
 
-    async def list_block_txs_eth(self, currency, height):
-        height_group = self.get_id_group(currency, height)
-        query = ("SELECT txs FROM block_transactions WHERE "
-                 "block_id_group = %s and block_id = %s")
-        result = await self.execute_async(currency, 'transformed', query,
-                                          [height_group, height])
-        result = one(result)
-        if result is None:
-            raise RuntimeError(
-                f'Block {height} not found in currency {currency}')
-
-        if result['txs'] is None:
-            return []
-        return await self.list_txs_by_ids(currency,
-                                          result['txs'],
-                                          include_token_txs=True)
-
     async def get_id_secondary_group_eth(self, table, id_group):
         column_prefix = ''
         if table == 'address_incoming_relations':
@@ -1571,14 +1566,104 @@ class Cassandra:
         return 0 if result is None else \
             result['max_secondary_id']
 
+    async def list_txs_ordered(self,
+                               currency,
+                               query,
+                               params,
+                               direction,
+                               page=None,
+                               fetch_size=None):
+        paging_state = (page or '').split('|')
+        if direction:
+            params.append(direction == 'out')
+            results = await self.execute_async(currency,
+                                               'transformed',
+                                               query,
+                                               params,
+                                               paging_state=from_hex(
+                                                   paging_state[0]),
+                                               fetch_size=fetch_size)
+            paging_state = to_hex(results.paging_state)
+            results = results.current_rows
+        else:
+            fetch_size /= 2
+            paging_state1 = paging_state[0] or None
+            paging_state2 = paging_state[1] if len(paging_state) > 1 else None
+
+            async def empty():
+                return Result(current_rows=[], params=None, paging_state=None)
+
+            if paging_state1 == 'eol':
+                aw1 = empty()
+            else:
+                params1 = list(params)
+                params1.append(False)
+                aw1 = self.execute_async(currency,
+                                         'transformed',
+                                         query,
+                                         params1,
+                                         paging_state=from_hex(paging_state1),
+                                         fetch_size=fetch_size)
+
+            if paging_state2 == 'eol':
+                aw2 = empty()
+            else:
+                params2 = list(params)
+                params2.append(True)
+                aw2 = self.execute_async(currency,
+                                         'transformed',
+                                         query,
+                                         params2,
+                                         paging_state=from_hex(paging_state2),
+                                         fetch_size=fetch_size)
+            [results1, results2] = await asyncio.gather(aw1, aw2)
+            if results1.paging_state is None and \
+               results2.paging_state is None:
+                paging_state = None
+            else:
+                paging_state1 = 'eol' \
+                    if not results1.current_rows \
+                    and not results1.paging_state \
+                    else \
+                    to_hex(results1.paging_state)
+                paging_state2 = 'eol' \
+                    if not results2.current_rows \
+                    and not results2.paging_state \
+                    else \
+                    to_hex(results2.paging_state)
+                paging_state = paging_state1 + '|' + paging_state2
+
+            results1 = results1.current_rows
+            results2 = results2.current_rows
+            results = []
+            i = j = 0
+            key = 'transaction_id' if currency == 'eth' else 'tx_id'
+            while len(results) <= fetch_size and \
+                  (i < len(results1) or j < len(results2)):  # noqa
+                if i >= len(results1):
+                    results.append(results2[j])
+                    j += 1
+                elif j >= len(results2):
+                    results.append(results1[i])
+                    i += 1
+                elif results1[i][key] > results2[j][key]:
+                    results.append(results1[i])
+                    i += 1
+                else:
+                    results.append(results2[j])
+                    j += 1
+        return results, paging_state
+
     async def list_txs_by_node_type_eth(self,
                                         currency,
                                         node_type,
                                         address,
                                         direction,
+                                        min_height=None,
+                                        max_height=None,
+                                        token_currency=None,
                                         page=None,
                                         pagesize=None):
-        paging_state = from_hex(page)
         if node_type == 'address':
             address_id, id_group = \
                 await self.get_address_id_id_group(currency, address)
@@ -1589,27 +1674,45 @@ class Cassandra:
         secondary_id_group = \
             await self.get_id_secondary_group_eth('address_transactions',
                                                   id_group)
-
         sec_in = self.sec_in(secondary_id_group)
+        params = [id_group, sec_in, address_id]
+
+        min_height_q = max_height_q = token_currency_q = ""
+        if min_height or max_height:
+            if not token_currency:
+                token_currency = currency
+
+            token_currency_q = "AND currency=%s"
+            params.append(token_currency.upper())
+
+            first_tx_id, last_tx_id = \
+                await self.resolve_tx_id_range_by_block(currency,
+                                                        min_height,
+                                                        max_height)
+            if min_height:
+                min_height_q = "AND transaction_id >= %s"
+                params.append(first_tx_id)
+            if max_height:
+                max_height_q = "AND transaction_id <= %s"
+                params.append(last_tx_id)
+
         query = ("SELECT transaction_id, is_outgoing, log_index "
                  "FROM address_transactions"
                  " WHERE address_id_group = %s and "
                  "address_id_secondary_group in %s"
-                 " and address_id = %s")
+                 " and address_id = %s"
+                 f" {token_currency_q} {min_height_q} {max_height_q}"
+                 " and is_outgoing = %s")
+
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
-        result = await self.execute_async(currency,
-                                          'transformed',
-                                          query,
-                                          [id_group, sec_in, address_id],
-                                          paging_state=paging_state,
-                                          fetch_size=fetch_size)
-        if result is None:
+        results, paging_state = await self.list_txs_ordered(
+            currency, query, params, direction, page, fetch_size)
+        if not results:
             raise RuntimeError(
-                f'address {address} not found in currency {currency}')
-        txs = [row for row in result.current_rows]
+                f'no transactions found for address {address} in {currency}')
+        txs = [row for row in results]
         tx_ids = [tx['transaction_id'] for tx in txs]
 
-        paging_state = result.paging_state
         full_txs = {
             tx_id: tx_row
             for tx_id, tx_row in zip(
@@ -1645,7 +1748,7 @@ class Cassandra:
             addr_tx['value'] = value
             addr_tx.pop("log_index")
 
-        return result.current_rows, to_hex(paging_state)
+        return results, to_hex(paging_state)
 
     async def list_txs_by_ids_eth(self,
                                   currency,

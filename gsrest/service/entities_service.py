@@ -545,11 +545,18 @@ async def list_entity_txs(request,
                           currency,
                           entity,
                           direction,
+                          min_height=None,
+                          max_height=None,
+                          token_currency=None,
                           page=None,
                           pagesize=None):
     db = request.app['db']
     results, paging_state = \
-        await db.list_entity_txs(currency, entity, direction, page, pagesize)
+        await db.list_entity_txs(currency, entity, direction,
+                                 min_height, max_height,
+                                 token_currency,
+                                 page, pagesize
+                                 )
     entity_txs = await common.txs_from_rows(
         request, currency, results, db.get_token_configuration(currency))
     return AddressTxs(next_page=paging_state, address_txs=entity_txs)

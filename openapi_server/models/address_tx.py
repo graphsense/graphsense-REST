@@ -17,60 +17,60 @@ class AddressTx(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, tx_type: str='account', tx_hash: str=None, currency: str=None, coinbase: bool=None, height: int=None, timestamp: int=None, value: Values=None, token_tx_id: int=None, from_address: str=None, to_address: str=None, contract_creation: bool=None):
+    def __init__(self, coinbase: bool=None, currency: str=None, height: int=None, timestamp: int=None, tx_hash: str=None, tx_type: str='account', value: Values=None, contract_creation: bool=None, from_address: str=None, to_address: str=None, token_tx_id: int=None):
         """AddressTx - a model defined in OpenAPI
 
-        :param tx_type: The tx_type of this AddressTx.
-        :param tx_hash: The tx_hash of this AddressTx.
-        :param currency: The currency of this AddressTx.
         :param coinbase: The coinbase of this AddressTx.
+        :param currency: The currency of this AddressTx.
         :param height: The height of this AddressTx.
         :param timestamp: The timestamp of this AddressTx.
+        :param tx_hash: The tx_hash of this AddressTx.
+        :param tx_type: The tx_type of this AddressTx.
         :param value: The value of this AddressTx.
-        :param token_tx_id: The token_tx_id of this AddressTx.
+        :param contract_creation: The contract_creation of this AddressTx.
         :param from_address: The from_address of this AddressTx.
         :param to_address: The to_address of this AddressTx.
-        :param contract_creation: The contract_creation of this AddressTx.
+        :param token_tx_id: The token_tx_id of this AddressTx.
         """
         self.openapi_types = {
-            'tx_type': str,
-            'tx_hash': str,
-            'currency': str,
             'coinbase': bool,
+            'currency': str,
             'height': int,
             'timestamp': int,
+            'tx_hash': str,
+            'tx_type': str,
             'value': Values,
-            'token_tx_id': int,
+            'contract_creation': bool,
             'from_address': str,
             'to_address': str,
-            'contract_creation': bool
+            'token_tx_id': int
         }
 
         self.attribute_map = {
-            'tx_type': 'tx_type',
-            'tx_hash': 'tx_hash',
-            'currency': 'currency',
             'coinbase': 'coinbase',
+            'currency': 'currency',
             'height': 'height',
             'timestamp': 'timestamp',
+            'tx_hash': 'tx_hash',
+            'tx_type': 'tx_type',
             'value': 'value',
-            'token_tx_id': 'token_tx_id',
+            'contract_creation': 'contract_creation',
             'from_address': 'from_address',
             'to_address': 'to_address',
-            'contract_creation': 'contract_creation'
+            'token_tx_id': 'token_tx_id'
         }
 
-        self._tx_type = tx_type
-        self._tx_hash = tx_hash
-        self._currency = currency
         self._coinbase = coinbase
+        self._currency = currency
         self._height = height
         self._timestamp = timestamp
+        self._tx_hash = tx_hash
+        self._tx_type = tx_type
         self._value = value
-        self._token_tx_id = token_tx_id
+        self._contract_creation = contract_creation
         self._from_address = from_address
         self._to_address = to_address
-        self._contract_creation = contract_creation
+        self._token_tx_id = token_tx_id
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'AddressTx':
@@ -89,91 +89,18 @@ class AddressTx(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'tx_type': self._tx_type,
-            'tx_hash': self._tx_hash,
+        return { 'coinbase': self._coinbase,
             'currency': self._currency,
-            'coinbase': self._coinbase,
             'height': self._height,
             'timestamp': self._timestamp,
+            'tx_hash': self._tx_hash,
+            'tx_type': self._tx_type,
             'value': self._value,
-            'token_tx_id': self._token_tx_id,
+            'contract_creation': self._contract_creation,
             'from_address': self._from_address,
             'to_address': self._to_address,
-            'contract_creation': self._contract_creation }
+            'token_tx_id': self._token_tx_id }
 
-
-    @property
-    def tx_type(self):
-        """Gets the tx_type of this AddressTx.
-
-
-        :return: The tx_type of this AddressTx.
-        :rtype: str
-        """
-        return self._tx_type
-
-    @tx_type.setter
-    def tx_type(self, tx_type):
-        """Sets the tx_type of this AddressTx.
-
-
-        :param tx_type: The tx_type of this AddressTx.
-        :type tx_type: str
-        """
-        if tx_type is None:
-            raise ValueError("Invalid value for `tx_type`, must not be `None`")
-
-        self._tx_type = tx_type
-
-    @property
-    def tx_hash(self):
-        """Gets the tx_hash of this AddressTx.
-
-        Transaction hash
-
-        :return: The tx_hash of this AddressTx.
-        :rtype: str
-        """
-        return self._tx_hash
-
-    @tx_hash.setter
-    def tx_hash(self, tx_hash):
-        """Sets the tx_hash of this AddressTx.
-
-        Transaction hash
-
-        :param tx_hash: The tx_hash of this AddressTx.
-        :type tx_hash: str
-        """
-        if tx_hash is None:
-            raise ValueError("Invalid value for `tx_hash`, must not be `None`")
-
-        self._tx_hash = tx_hash
-
-    @property
-    def currency(self):
-        """Gets the currency of this AddressTx.
-
-        crypto currency code
-
-        :return: The currency of this AddressTx.
-        :rtype: str
-        """
-        return self._currency
-
-    @currency.setter
-    def currency(self, currency):
-        """Sets the currency of this AddressTx.
-
-        crypto currency code
-
-        :param currency: The currency of this AddressTx.
-        :type currency: str
-        """
-        if currency is None:
-            raise ValueError("Invalid value for `currency`, must not be `None`")
-
-        self._currency = currency
 
     @property
     def coinbase(self):
@@ -199,6 +126,31 @@ class AddressTx(Model):
             raise ValueError("Invalid value for `coinbase`, must not be `None`")
 
         self._coinbase = coinbase
+
+    @property
+    def currency(self):
+        """Gets the currency of this AddressTx.
+
+        crypto currency code
+
+        :return: The currency of this AddressTx.
+        :rtype: str
+        """
+        return self._currency
+
+    @currency.setter
+    def currency(self, currency):
+        """Sets the currency of this AddressTx.
+
+        crypto currency code
+
+        :param currency: The currency of this AddressTx.
+        :type currency: str
+        """
+        if currency is None:
+            raise ValueError("Invalid value for `currency`, must not be `None`")
+
+        self._currency = currency
 
     @property
     def height(self):
@@ -253,6 +205,54 @@ class AddressTx(Model):
         self._timestamp = timestamp
 
     @property
+    def tx_hash(self):
+        """Gets the tx_hash of this AddressTx.
+
+        Transaction hash
+
+        :return: The tx_hash of this AddressTx.
+        :rtype: str
+        """
+        return self._tx_hash
+
+    @tx_hash.setter
+    def tx_hash(self, tx_hash):
+        """Sets the tx_hash of this AddressTx.
+
+        Transaction hash
+
+        :param tx_hash: The tx_hash of this AddressTx.
+        :type tx_hash: str
+        """
+        if tx_hash is None:
+            raise ValueError("Invalid value for `tx_hash`, must not be `None`")
+
+        self._tx_hash = tx_hash
+
+    @property
+    def tx_type(self):
+        """Gets the tx_type of this AddressTx.
+
+
+        :return: The tx_type of this AddressTx.
+        :rtype: str
+        """
+        return self._tx_type
+
+    @tx_type.setter
+    def tx_type(self, tx_type):
+        """Sets the tx_type of this AddressTx.
+
+
+        :param tx_type: The tx_type of this AddressTx.
+        :type tx_type: str
+        """
+        if tx_type is None:
+            raise ValueError("Invalid value for `tx_type`, must not be `None`")
+
+        self._tx_type = tx_type
+
+    @property
     def value(self):
         """Gets the value of this AddressTx.
 
@@ -276,25 +276,27 @@ class AddressTx(Model):
         self._value = value
 
     @property
-    def token_tx_id(self):
-        """Gets the token_tx_id of this AddressTx.
+    def contract_creation(self):
+        """Gets the contract_creation of this AddressTx.
 
+        Indicates if this transaction created a new contract. Recipient address is the address of the new contract.
 
-        :return: The token_tx_id of this AddressTx.
-        :rtype: int
+        :return: The contract_creation of this AddressTx.
+        :rtype: bool
         """
-        return self._token_tx_id
+        return self._contract_creation
 
-    @token_tx_id.setter
-    def token_tx_id(self, token_tx_id):
-        """Sets the token_tx_id of this AddressTx.
+    @contract_creation.setter
+    def contract_creation(self, contract_creation):
+        """Sets the contract_creation of this AddressTx.
 
+        Indicates if this transaction created a new contract. Recipient address is the address of the new contract.
 
-        :param token_tx_id: The token_tx_id of this AddressTx.
-        :type token_tx_id: int
+        :param contract_creation: The contract_creation of this AddressTx.
+        :type contract_creation: bool
         """
 
-        self._token_tx_id = token_tx_id
+        self._contract_creation = contract_creation
 
     @property
     def from_address(self):
@@ -347,24 +349,22 @@ class AddressTx(Model):
         self._to_address = to_address
 
     @property
-    def contract_creation(self):
-        """Gets the contract_creation of this AddressTx.
+    def token_tx_id(self):
+        """Gets the token_tx_id of this AddressTx.
 
-        Indicates if this transaction created a new contract. Recipient address is the address of the new contract.
 
-        :return: The contract_creation of this AddressTx.
-        :rtype: bool
+        :return: The token_tx_id of this AddressTx.
+        :rtype: int
         """
-        return self._contract_creation
+        return self._token_tx_id
 
-    @contract_creation.setter
-    def contract_creation(self, contract_creation):
-        """Sets the contract_creation of this AddressTx.
+    @token_tx_id.setter
+    def token_tx_id(self, token_tx_id):
+        """Sets the token_tx_id of this AddressTx.
 
-        Indicates if this transaction created a new contract. Recipient address is the address of the new contract.
 
-        :param contract_creation: The contract_creation of this AddressTx.
-        :type contract_creation: bool
+        :param token_tx_id: The token_tx_id of this AddressTx.
+        :type token_tx_id: int
         """
 
-        self._contract_creation = contract_creation
+        self._token_tx_id = token_tx_id
