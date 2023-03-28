@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Support for actors to collect tags under the umbrella of their real world controller
 - new endpoints /tags/actors/{actor_id} - get actor by id
 - new endpoint /tags/actors/{actor_id}/tags - list of tags belonging to the actor
+- support search for any category neighbor [#329](https://github.com/graphsense/graphsense-dashboard/issues/329)
 
 ## [23.01] - 2023-12-30
 ### Added

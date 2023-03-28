@@ -1468,10 +1468,7 @@ class Cassandra:
         row["token_balances"] = None if len(
             token_balances) == 0 else token_balances
 
-
-#####################
-# ETHEREUM VARIANTS #
-#####################
+    # ETH Variants
 
     def scrub_prefix_eth(self, currency, expression):
         # remove 0x prefix

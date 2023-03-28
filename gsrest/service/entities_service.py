@@ -181,17 +181,24 @@ async def search_entity_neighbors(request,
     targets = None
     with_tag = False
     addresses = []
+    MAGIC_VALUE_ANY_CATEGORY = '--'
 
     def stop_neighbor(neighbor):
         return skip_num_addresses is not None \
             and neighbor.entity.no_addresses > skip_num_addresses
 
-    if 'category' in key:
+    if 'category' in key and value[0] != MAGIC_VALUE_ANY_CATEGORY:
         with_tag = True
 
         def match_neighbor(neighbor):
             return neighbor.entity.best_address_tag and \
                 neighbor.entity.best_address_tag.category == value[0]
+
+    elif 'category' in key and value[0] == MAGIC_VALUE_ANY_CATEGORY:
+        with_tag = True
+
+        def match_neighbor(neighbor):
+            return neighbor.entity.best_address_tag
 
     elif 'total_received' in key or 'balance' in key:
         [curr, min_value, *max_value] = value
