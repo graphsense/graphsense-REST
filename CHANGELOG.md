@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - new endpoint /tags/actors/{actor_id}/tags - list of tags belonging to the actor
 - support search for any category neighbor [#329](https://github.com/graphsense/graphsense-dashboard/issues/329)
 - added parameters `min_height`/`max_height` to /addresses/{address}/txs and /entities/{entity}/txs endpoints to allow for range queries
+- added flag `include_actors` to /entities/{entity} and /entities/{entity}/neighbors endpoints
+- added flag `exclude_best_address_tag` to /entities/{entity} and /entities/{entity}/neighbors endpoints to omit fetching the best address tag
 
 ## [23.01] - 2023-12-30
 ### Added
