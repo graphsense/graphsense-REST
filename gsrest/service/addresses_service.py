@@ -124,7 +124,10 @@ async def get_address_entity(request, currency, address):
     if entity_id is None:
         raise notfound
 
-    result = await get_entity(request, currency, entity_id)
+    result = await get_entity(request,
+                              currency,
+                              entity_id,
+                              include_actors=True)
     if result is None:
         raise notfound
 
