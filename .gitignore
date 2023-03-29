@@ -68,15 +68,22 @@ target/
 #Vim
 .*.sw?
 tags
+.tags
+.ctags_ignore
 
 #generated files by OpenAPI Generator (see templates for editing these)
 .openapi-generator*
 
 #Flask
-instance/config.yaml
+instance/config.*yaml
 tests/instance/config.yaml
 
 #Flask tests
 .runcass
 .runts
+
+#Config
 .env
+
+#Plugins
+gsrest/plugins
