@@ -1,6 +1,6 @@
 from openapi_server.models.address_txs import AddressTxs
-from openapi_server.models.address_tag import AddressTag
 import yaml
+from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from openapi_server.models.tx_account import TxAccount
@@ -401,36 +401,32 @@ async def list_entity_neighbors(test_case):
                '?direction={direction}'
     path = basepath + '&include_labels={include_labels}'
     path_actors = path + '&include_actors={include_actors}'
-    '''
     ewton = entityWithTagsOutNeighbors.to_dict()
-    result = await test_case.request(
-        path,
-        currency='btc',
-        entity=entityWithTags.entity,
-        include_labels=True,
-        direction='out')
+    result = await test_case.request(path,
+                                     currency='btc',
+                                     entity=entityWithTags.entity,
+                                     include_labels=True,
+                                     direction='out')
+    print(yaml.dump(result))
     test_case.assertEqual(ewton, result)
 
-    result = await test_case.request(
-        path,
-        auth='unauthorized',
-        currency='btc',
-        entity=entityWithTags.entity,
-        include_labels=True,
-        direction='out')
+    result = await test_case.request(path,
+                                     auth='unauthorized',
+                                     currency='btc',
+                                     entity=entityWithTags.entity,
+                                     include_labels=True,
+                                     direction='out')
     ewton['neighbors'][0]['labels'] = ['labelX']
     ewton['neighbors'][0]['entity']['no_address_tags'] = 1
     test_case.assertEqual(ewton, result)
 
-    result = await test_case.request(
-        path,
-        currency='btc',
-        entity=entityWithTags.entity,
-        include_labels=True,
-        direction='in')
+    result = await test_case.request(path,
+                                     currency='btc',
+                                     entity=entityWithTags.entity,
+                                     include_labels=True,
+                                     direction='in')
     test_case.assertEqual(entityWithTagsInNeighbors.to_dict(), result)
 
-    '''
     result = await test_case.request(path_actors,
                                      currency='eth',
                                      entity=eth_entity.entity,
