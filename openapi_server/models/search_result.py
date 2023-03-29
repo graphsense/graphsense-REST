@@ -5,6 +5,7 @@ from datetime import date, datetime
 from typing import List, Dict, Type
 
 from openapi_server.models.base_model_ import Model
+from openapi_server.models.labeled_item_ref import LabeledItemRef
 from openapi_server.models.search_result_by_currency import SearchResultByCurrency
 from openapi_server import util
 
@@ -15,22 +16,26 @@ class SearchResult(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, currencies: List[SearchResultByCurrency]=None, labels: List[str]=None):
+    def __init__(self, actors: List[LabeledItemRef]=None, currencies: List[SearchResultByCurrency]=None, labels: List[str]=None):
         """SearchResult - a model defined in OpenAPI
 
+        :param actors: The actors of this SearchResult.
         :param currencies: The currencies of this SearchResult.
         :param labels: The labels of this SearchResult.
         """
         self.openapi_types = {
+            'actors': List[LabeledItemRef],
             'currencies': List[SearchResultByCurrency],
             'labels': List[str]
         }
 
         self.attribute_map = {
+            'actors': 'actors',
             'currencies': 'currencies',
             'labels': 'labels'
         }
 
+        self._actors = actors
         self._currencies = currencies
         self._labels = labels
 
@@ -51,9 +56,33 @@ class SearchResult(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'currencies': self._currencies,
+        return { 'actors': self._actors,
+            'currencies': self._currencies,
             'labels': self._labels }
 
+
+    @property
+    def actors(self):
+        """Gets the actors of this SearchResult.
+
+        The list of matching actors
+
+        :return: The actors of this SearchResult.
+        :rtype: List[LabeledItemRef]
+        """
+        return self._actors
+
+    @actors.setter
+    def actors(self, actors):
+        """Sets the actors of this SearchResult.
+
+        The list of matching actors
+
+        :param actors: The actors of this SearchResult.
+        :type actors: List[LabeledItemRef]
+        """
+
+        self._actors = actors
 
     @property
     def currencies(self):

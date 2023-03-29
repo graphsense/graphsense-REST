@@ -14,10 +14,11 @@ class Tag(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, abuse: str=None, category: str=None, confidence: str=None, confidence_level: int=None, currency: str=None, is_cluster_definer: bool=None, label: str=None, lastmod: int=None, source: str=None, tagpack_creator: str=None, tagpack_is_public: bool=None, tagpack_title: str=None, tagpack_uri: str=None):
+    def __init__(self, abuse: str=None, actor: str=None, category: str=None, confidence: str=None, confidence_level: int=None, currency: str=None, is_cluster_definer: bool=None, label: str=None, lastmod: int=None, source: str=None, tagpack_creator: str=None, tagpack_is_public: bool=None, tagpack_title: str=None, tagpack_uri: str=None):
         """Tag - a model defined in OpenAPI
 
         :param abuse: The abuse of this Tag.
+        :param actor: The actor of this Tag.
         :param category: The category of this Tag.
         :param confidence: The confidence of this Tag.
         :param confidence_level: The confidence_level of this Tag.
@@ -33,6 +34,7 @@ class Tag(Model):
         """
         self.openapi_types = {
             'abuse': str,
+            'actor': str,
             'category': str,
             'confidence': str,
             'confidence_level': int,
@@ -49,6 +51,7 @@ class Tag(Model):
 
         self.attribute_map = {
             'abuse': 'abuse',
+            'actor': 'actor',
             'category': 'category',
             'confidence': 'confidence',
             'confidence_level': 'confidence_level',
@@ -64,6 +67,7 @@ class Tag(Model):
         }
 
         self._abuse = abuse
+        self._actor = actor
         self._category = category
         self._confidence = confidence
         self._confidence_level = confidence_level
@@ -95,6 +99,7 @@ class Tag(Model):
         if not shallow:
             return Model.to_dict(self)
         return { 'abuse': self._abuse,
+            'actor': self._actor,
             'category': self._category,
             'confidence': self._confidence,
             'confidence_level': self._confidence_level,
@@ -131,6 +136,29 @@ class Tag(Model):
         """
 
         self._abuse = abuse
+
+    @property
+    def actor(self):
+        """Gets the actor of this Tag.
+
+        id of the actor that controlls the address
+
+        :return: The actor of this Tag.
+        :rtype: str
+        """
+        return self._actor
+
+    @actor.setter
+    def actor(self, actor):
+        """Sets the actor of this Tag.
+
+        id of the actor that controlls the address
+
+        :param actor: The actor of this Tag.
+        :type actor: str
+        """
+
+        self._actor = actor
 
     @property
     def category(self):

@@ -16,10 +16,11 @@ class AddressTag(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, abuse: str=None, category: str=None, confidence: str=None, confidence_level: int=None, currency: str=None, is_cluster_definer: bool=None, label: str=None, lastmod: int=None, source: str=None, tagpack_creator: str=None, tagpack_is_public: bool=None, tagpack_title: str=None, tagpack_uri: str=None, address: str=None, entity: int=None):
+    def __init__(self, abuse: str=None, actor: str=None, category: str=None, confidence: str=None, confidence_level: int=None, currency: str=None, is_cluster_definer: bool=None, label: str=None, lastmod: int=None, source: str=None, tagpack_creator: str=None, tagpack_is_public: bool=None, tagpack_title: str=None, tagpack_uri: str=None, address: str=None, entity: int=None):
         """AddressTag - a model defined in OpenAPI
 
         :param abuse: The abuse of this AddressTag.
+        :param actor: The actor of this AddressTag.
         :param category: The category of this AddressTag.
         :param confidence: The confidence of this AddressTag.
         :param confidence_level: The confidence_level of this AddressTag.
@@ -37,6 +38,7 @@ class AddressTag(Model):
         """
         self.openapi_types = {
             'abuse': str,
+            'actor': str,
             'category': str,
             'confidence': str,
             'confidence_level': int,
@@ -55,6 +57,7 @@ class AddressTag(Model):
 
         self.attribute_map = {
             'abuse': 'abuse',
+            'actor': 'actor',
             'category': 'category',
             'confidence': 'confidence',
             'confidence_level': 'confidence_level',
@@ -72,6 +75,7 @@ class AddressTag(Model):
         }
 
         self._abuse = abuse
+        self._actor = actor
         self._category = category
         self._confidence = confidence
         self._confidence_level = confidence_level
@@ -105,6 +109,7 @@ class AddressTag(Model):
         if not shallow:
             return Model.to_dict(self)
         return { 'abuse': self._abuse,
+            'actor': self._actor,
             'category': self._category,
             'confidence': self._confidence,
             'confidence_level': self._confidence_level,
@@ -143,6 +148,29 @@ class AddressTag(Model):
         """
 
         self._abuse = abuse
+
+    @property
+    def actor(self):
+        """Gets the actor of this AddressTag.
+
+        id of the actor that controlls the address
+
+        :return: The actor of this AddressTag.
+        :rtype: str
+        """
+        return self._actor
+
+    @actor.setter
+    def actor(self, actor):
+        """Sets the actor of this AddressTag.
+
+        id of the actor that controlls the address
+
+        :param actor: The actor of this AddressTag.
+        :type actor: str
+        """
+
+        self._actor = actor
 
     @property
     def category(self):

@@ -6,6 +6,7 @@ from typing import List, Dict, Type
 
 from openapi_server.models.base_model_ import Model
 from openapi_server.models.address_tag import AddressTag
+from openapi_server.models.labeled_item_ref import LabeledItemRef
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.values import Values
 from openapi_server import util
@@ -17,9 +18,10 @@ class Entity(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, balance: Values=None, best_address_tag: AddressTag=None, currency: str=None, entity: int=None, first_tx: TxSummary=None, in_degree: int=None, last_tx: TxSummary=None, no_address_tags: int=None, no_addresses: int=None, no_incoming_txs: int=None, no_outgoing_txs: int=None, out_degree: int=None, root_address: str=None, token_balances: Dict[str, Values]=None, total_received: Values=None, total_spent: Values=None, total_tokens_received: Dict[str, Values]=None, total_tokens_spent: Dict[str, Values]=None):
+    def __init__(self, actors: List[LabeledItemRef]=None, balance: Values=None, best_address_tag: AddressTag=None, currency: str=None, entity: int=None, first_tx: TxSummary=None, in_degree: int=None, last_tx: TxSummary=None, no_address_tags: int=None, no_addresses: int=None, no_incoming_txs: int=None, no_outgoing_txs: int=None, out_degree: int=None, root_address: str=None, token_balances: Dict[str, Values]=None, total_received: Values=None, total_spent: Values=None, total_tokens_received: Dict[str, Values]=None, total_tokens_spent: Dict[str, Values]=None):
         """Entity - a model defined in OpenAPI
 
+        :param actors: The actors of this Entity.
         :param balance: The balance of this Entity.
         :param best_address_tag: The best_address_tag of this Entity.
         :param currency: The currency of this Entity.
@@ -40,6 +42,7 @@ class Entity(Model):
         :param total_tokens_spent: The total_tokens_spent of this Entity.
         """
         self.openapi_types = {
+            'actors': List[LabeledItemRef],
             'balance': Values,
             'best_address_tag': AddressTag,
             'currency': str,
@@ -61,6 +64,7 @@ class Entity(Model):
         }
 
         self.attribute_map = {
+            'actors': 'actors',
             'balance': 'balance',
             'best_address_tag': 'best_address_tag',
             'currency': 'currency',
@@ -81,6 +85,7 @@ class Entity(Model):
             'total_tokens_spent': 'total_tokens_spent'
         }
 
+        self._actors = actors
         self._balance = balance
         self._best_address_tag = best_address_tag
         self._currency = currency
@@ -117,7 +122,8 @@ class Entity(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'balance': self._balance,
+        return { 'actors': self._actors,
+            'balance': self._balance,
             'best_address_tag': self._best_address_tag,
             'currency': self._currency,
             'entity': self._entity,
@@ -136,6 +142,29 @@ class Entity(Model):
             'total_tokens_received': self._total_tokens_received,
             'total_tokens_spent': self._total_tokens_spent }
 
+
+    @property
+    def actors(self):
+        """Gets the actors of this Entity.
+
+        The list of matching actors
+
+        :return: The actors of this Entity.
+        :rtype: List[LabeledItemRef]
+        """
+        return self._actors
+
+    @actors.setter
+    def actors(self, actors):
+        """Sets the actors of this Entity.
+
+        The list of matching actors
+
+        :param actors: The actors of this Entity.
+        :type actors: List[LabeledItemRef]
+        """
+
+        self._actors = actors
 
     @property
     def balance(self):

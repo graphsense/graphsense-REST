@@ -5,6 +5,7 @@ import json
 from aiohttp import web
 from aiohttp.test_utils import unittest_run_loop
 
+from openapi_server.models.actor import Actor
 from openapi_server.models.address_tags import AddressTags
 from openapi_server.models.concept import Concept
 from openapi_server.models.taxonomy import Taxonomy
@@ -14,6 +15,22 @@ import gsrest.test.tags_service as test_service
 
 class TestTagsController(BaseTestCase):
     """TagsController integration test stubs"""
+
+    async def test_get_actor(self):
+        """Test case for get_actor
+
+        Returns an actor given its unique id or (unique) label
+        """
+        await test_service.get_actor(self)
+
+
+    async def test_get_actor_tags(self):
+        """Test case for get_actor_tags
+
+        Returns the address tags for a given actor
+        """
+        await test_service.get_actor_tags(self)
+
 
     async def test_list_address_tags(self):
         """Test case for list_address_tags
