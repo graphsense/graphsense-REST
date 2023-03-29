@@ -1,5 +1,6 @@
 from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.address_tag import AddressTag
+import yaml
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from openapi_server.models.tx_account import TxAccount
@@ -291,6 +292,23 @@ async def get_entity(test_case):
 
     test_case.assertEqual(eth_entity.to_dict(), result)
 
+    path_actors = path + '?include_actors={include_actors}'
+    result = await test_case.request(path_actors,
+                                     currency='eth',
+                                     entity=eth_entity2.entity,
+                                     include_actors=True)
+
+    test_case.assertEqual(eth_entity2.to_dict(), result)
+
+    result = await test_case.request(path,
+                                     currency='eth',
+                                     entity=eth_entity2.entity,
+                                     include_actors=False)
+
+    ee = eth_entity2.to_dict()
+    ee.pop('actors')
+    test_case.assertEqual(ee, result)
+
     # test best_address_tag:
 
     # a cluster with multiple addresses, none cluster definer
@@ -338,6 +356,18 @@ async def get_entity(test_case):
 
     test_case.assertEqual(tag_entityE.to_dict(), result)
 
+    # omit best_address_tag
+
+    path_excl = path + '?exclude_best_address_tag={exclude_best_address_tag}'
+    result = await test_case.request(path_excl,
+                                     currency='btc',
+                                     entity=tag_entityE.entity,
+                                     exclude_best_address_tag=True)
+
+    t = tag_entityE.to_dict()
+    t.pop('best_address_tag')
+    test_case.assertEqual(t, result)
+
 
 async def list_address_tags_by_entity(test_case):
     path = '/{currency}/entities/{entity}/tags'
@@ -370,6 +400,7 @@ async def list_entity_neighbors(test_case):
     basepath = '/{currency}/entities/{entity}/neighbors'\
                '?direction={direction}'
     path = basepath + '&include_labels={include_labels}'
+    path_actors = path + '&include_actors={include_actors}'
     '''
     ewton = entityWithTagsOutNeighbors.to_dict()
     result = await test_case.request(
@@ -400,13 +431,27 @@ async def list_entity_neighbors(test_case):
     test_case.assertEqual(entityWithTagsInNeighbors.to_dict(), result)
 
     '''
-    result = await test_case.request(path,
+    result = await test_case.request(path_actors,
                                      currency='eth',
                                      entity=eth_entity.entity,
                                      include_labels=True,
+                                     include_actors=True,
                                      direction='out')
 
     test_case.assertEqual(eth_entityWithTagsOutNeighbors.to_dict(), result)
+
+    result = await test_case.request(path_actors,
+                                     currency='eth',
+                                     entity=eth_entity.entity,
+                                     include_labels=False,
+                                     include_actors=False,
+                                     direction='out')
+
+    ewton = eth_entityWithTagsOutNeighbors.to_dict()
+    for n in ewton['neighbors']:
+        n.pop('labels', None)
+        n['entity'].pop('actors', None)
+    test_case.assertEqual(ewton, result)
 
     path = basepath + '&only_ids={only_ids}'
     result = await test_case.request(path,

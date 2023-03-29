@@ -244,7 +244,7 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
     :type direction: str
     :param only_ids: Restrict result to given set of comma separated addresses
     :type only_ids: List[str]
-    :param include_labels: Whether to include labels of first page of tags
+    :param include_labels: Whether to include labels of first page of address tags
     :type include_labels: bool
     :param page: Resumption token for retrieving the next page
     :type page: str

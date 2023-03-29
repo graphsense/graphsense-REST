@@ -72,7 +72,11 @@ async def list_address_tags_by_entity(request,
     return AddressTags(address_tags=address_tags, next_page=next_page)
 
 
-async def get_entity(request, currency, entity, with_tag=True):
+async def get_entity(request,
+                     currency,
+                     entity,
+                     exclude_best_address_tag=False,
+                     include_actors=False):
     db = request.app['db']
     result = await db.get_entity(currency, entity)
 
@@ -81,27 +85,28 @@ async def get_entity(request, currency, entity, with_tag=True):
 
     tags = None
     count = 0
-    if with_tag:
+    if not exclude_best_address_tag:
         tags = await tagstores(request.app['tagstores'], address_tag_from_row,
                                'get_best_entity_tag', currency, entity,
                                request.app['show_private_tags'])
 
-        counts = await tagstores(request.app['tagstores'], lambda x: x,
-                                 'count_address_tags_by_entity', currency,
-                                 entity, request.app['show_private_tags'])
-        for c in counts:
-            count += 0 if c['count'] is None else int(c['count'])
+    counts = await tagstores(request.app['tagstores'], lambda x: x,
+                             'count_address_tags_by_entity', currency, entity,
+                             request.app['show_private_tags'])
+    for c in counts:
+        count += 0 if c['count'] is None else int(c['count'])
 
-    actors = tagstores(
-        request.app['tagstores'],
-        lambda row: LabeledItemRef(id=row["id"], label=row["label"]),
-        'list_actors_entity', currency, entity,
-        request.app['show_private_tags'])
+    actors = None
+    if include_actors:
+        actors = await tagstores(
+            request.app['tagstores'],
+            lambda row: LabeledItemRef(id=row["id"], label=row["label"]),
+            'list_actors_entity', currency, entity,
+            request.app['show_private_tags'])
 
     rates = (await get_rates(request, currency))['rates']
     return from_row(currency, result, rates,
-                    db.get_token_configuration(currency), tags, count, await
-                    actors)
+                    db.get_token_configuration(currency), tags, count, actors)
 
 
 async def list_entity_neighbors(request,
@@ -113,7 +118,8 @@ async def list_entity_neighbors(request,
                                 page=None,
                                 pagesize=None,
                                 relations_only=False,
-                                with_tag=True):
+                                exclude_best_address_tag=False,
+                                include_actors=False):
     results, paging_state = \
         await common.list_neighbors(request, currency, entity, direction,
                                     'entity',
@@ -129,7 +135,8 @@ async def list_entity_neighbors(request,
             get_entity(request,
                        currency,
                        row[dst + '_cluster_id'],
-                       with_tag=with_tag) for row in results
+                       exclude_best_address_tag=exclude_best_address_tag,
+                       include_actors=include_actors) for row in results
         ]
 
         nodes = await asyncio.gather(*aws)
@@ -250,13 +257,14 @@ async def search_entity_neighbors(request,
 
     async def list_neighbors(entity):
         pagesize = max(breadth, len(targets)) if targets else breadth
-        result = await list_entity_neighbors(request,
-                                             currency,
-                                             entity,
-                                             direction,
-                                             only_ids=targets,
-                                             with_tag=with_tag,
-                                             pagesize=pagesize)
+        result = await list_entity_neighbors(
+            request,
+            currency,
+            entity,
+            direction,
+            only_ids=targets,
+            exclude_best_address_tag=not with_tag,
+            pagesize=pagesize)
         if targets and not result.neighbors:
             result = \
                 await list_entity_neighbors(
@@ -265,7 +273,7 @@ async def search_entity_neighbors(request,
                     entity,
                     direction,
                     only_ids=None,
-                    with_tag=with_tag,
+                    exclude_best_address_tag=not with_tag,
                     pagesize=pagesize)
 
         return result.neighbors
