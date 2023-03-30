@@ -12,8 +12,7 @@ CONFIG_FILE = "./instance/config.yaml"
 
 def load_config(config_file):
     if not os.path.exists(config_file):
-        raise ValueError("Config file {} not found."
-                         .format(config_file))
+        raise ValueError("Config file {} not found.".format(config_file))
 
     with open(config_file, 'r') as input_file:
         config = yaml.safe_load(input_file)
@@ -24,10 +23,8 @@ def setup_logging(logger, config):
     level = config.get('level', 'INFO').upper()
     level = getattr(logging, level)
     logger.setLevel(level)
-    for handler in logging.root.handlers:
-        handler.setFormatter(
-            logging.Formatter("%(levelname)-8s %(asctime)s "
-                              "%(name)s:%(filename)s:%(lineno)d %(message)s"))
+    logger.info('info')
+    logger.debug('test')
     smtp = config.get('smtp', None)
     if not smtp:
         return
@@ -37,14 +34,14 @@ def setup_logging(logger, config):
         credentials = (smtp.get('username'), smtp.get('password'))
         if smtp.get('secure', None) is True:
             secure = ()
-    handler = logging.handlers.SMTPHandler(
-        mailhost=(smtp.get('host'), smtp.get('port', None)),
-        fromaddr=smtp.get('from'),
-        toaddrs=smtp.get('to'),
-        subject=smtp.get('subject'),
-        credentials=credentials,
-        secure=secure,
-        timeout=smtp.get('timeout', None))
+    handler = logging.handlers.SMTPHandler(mailhost=(smtp.get('host'),
+                                                     smtp.get('port', None)),
+                                           fromaddr=smtp.get('from'),
+                                           toaddrs=smtp.get('to'),
+                                           subject=smtp.get('subject'),
+                                           credentials=credentials,
+                                           secure=secure,
+                                           timeout=smtp.get('timeout', None))
 
     handler.setLevel(getattr(logging, smtp.get('level', 'CRITICAL')))
     logger.addHandler(handler)
@@ -53,10 +50,7 @@ def setup_logging(logger, config):
 def factory(config_file=None, validate_responses=False):
     if not config_file:
         config_file = CONFIG_FILE
-    options = {
-        "swagger_ui": True,
-        "serve_spec": True
-        }
+    options = {"swagger_ui": True, "serve_spec": True}
     specification_dir = os.path.join(os.path.dirname(__file__), 'openapi')
     app = connexion.AioHttpApp(__name__,
                                specification_dir=specification_dir,
@@ -104,22 +98,23 @@ def factory(config_file=None, validate_responses=False):
     app.app['plugins'] = []
     app.app['plugin_contexts'] = {}
     for name in app.app['config'].get('plugins', []):
-        app.app['plugins'].append(get_subclass(importlib.import_module(name)))
+        subcl = get_subclass(importlib.import_module(name))
+        app.app['plugins'].append(subcl)
         app.app['plugin_contexts'][name] = {}
-
-    for plugin in app.app['plugins']:
-        if hasattr(plugin, 'setup'):
-            app.app.cleanup_ctx.append(plugin_setup(plugin, name))
+        if hasattr(subcl, 'setup'):
+            app.app.cleanup_ctx.append(plugin_setup(subcl, name))
 
     return app
 
 
 def plugin_setup(plugin, name):
     def setup(app):
-        a = {'config': app['config'].get(name, None),
-             'context': app['plugin_contexts'][name]
-             }
+        a = {
+            'config': app['config'].get(name, None),
+            'context': app['plugin_contexts'][name]
+        }
         return plugin.setup(a)
+
     return setup
 
 
