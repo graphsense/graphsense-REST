@@ -74,7 +74,6 @@ def build_token_tx(token_currency, tx, token_tx, log):
 
 
 class Result:
-
     def __init__(self, current_rows, params, paging_state):
         self.current_rows = current_rows
         self.params = params
@@ -93,9 +92,7 @@ TxSummary = namedtuple('TxSummary', ['height', 'timestamp', 'tx_hash'])
 
 
 class Cassandra:
-
     def eth(func):
-
         def check(*args, **kwargs):
             self = args[0]
             currency = args[1]
@@ -110,7 +107,6 @@ class Cassandra:
         return check
 
     def new(func):
-
         def check(*args, **kwargs):
             self = args[0]
             currency = args[1]
@@ -471,6 +467,7 @@ class Cassandra:
                                     token_currency=None,
                                     page=None,
                                     pagesize=None):
+        self.logger.debug(f'page {page}')
         if node_type == 'address':
             id, id_group = \
                 await self.get_address_id_id_group(currency, id)
@@ -1622,23 +1619,22 @@ class Cassandra:
                 paging_state = None
             else:
                 paging_state1 = 'eol' \
-                    if not results1.current_rows \
-                    and not results1.paging_state \
+                    if not results1.paging_state \
                     else \
                     to_hex(results1.paging_state)
                 paging_state2 = 'eol' \
-                    if not results2.current_rows \
-                    and not results2.paging_state \
+                    if not results2.paging_state \
                     else \
                     to_hex(results2.paging_state)
-                paging_state = paging_state1 + '|' + paging_state2
+                paging_state = (paging_state1 or '') \
+                    + '|' + (paging_state2 or '')
 
             results1 = results1.current_rows
             results2 = results2.current_rows
             results = []
             i = j = 0
             key = 'transaction_id' if currency == 'eth' else 'tx_id'
-            while len(results) <= fetch_size and \
+            while len(results) <= fetch_size * 2 and \
                   (i < len(results1) or j < len(results2)):  # noqa
                 if i >= len(results1):
                     results.append(results2[j])
