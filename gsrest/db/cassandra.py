@@ -1744,7 +1744,7 @@ class Cassandra:
             addr_tx['value'] = value
             addr_tx.pop("log_index")
 
-        return results, to_hex(paging_state)
+        return results, paging_state
 
     async def list_txs_by_ids_eth(self,
                                   currency,
