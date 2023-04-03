@@ -1,7 +1,7 @@
 CASSANDRA_MOCK=$1
 ORGANIZATION=$2
 
-docker run --rm --name $CASSANDRA_MOCK -p 9042:9042/tcp -d cassandra 
+docker run --rm --name $CASSANDRA_MOCK -p 9042:9042/tcp -d cassandra:4.0 
 testcmd="docker exec $CASSANDRA_MOCK cqlsh -e 'describe keyspaces'"
 echo "Waiting for DB ..."
 bash -c "$testcmd" > /dev/null 2>&1 

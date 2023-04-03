@@ -16,7 +16,7 @@ from openapi_server import util
 
 
 
-async def get_entity(request: web.Request, currency, entity) -> web.Response:
+async def get_entity(request: web.Request, currency, entity, exclude_best_address_tag=None, include_actors=None) -> web.Response:
     """Get an entity
 
     
@@ -25,12 +25,18 @@ async def get_entity(request: web.Request, currency, entity) -> web.Response:
     :type currency: str
     :param entity: The entity ID
     :type entity: int
+    :param exclude_best_address_tag: Whether to exclude the best address tag
+    :type exclude_best_address_tag: bool
+    :param include_actors: Whether to include the actors
+    :type include_actors: bool
 
     """
 
     for plugin in request.app['plugins']:
         if hasattr(plugin, 'before_request'):
-            request = plugin.before_request(request)
+            context =\
+                request.app['plugin_contexts'][plugin.__module__]
+            request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
         request.app['config'].get('show_private_tags', False)
@@ -47,11 +53,11 @@ async def get_entity(request: web.Request, currency, entity) -> web.Response:
     request.app['show_private_tags'] = show_private_tags
 
     try:
-        if 'currency' in ['','currency','entity']:
+        if 'currency' in ['','currency','entity','exclude_best_address_tag','include_actors']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.get_entity(request
-                ,currency=currency,entity=entity)
+                ,currency=currency,entity=entity,exclude_best_address_tag=exclude_best_address_tag,include_actors=include_actors)
         result = await result
 
         for plugin in request.app['plugins']:
@@ -102,7 +108,9 @@ async def list_address_tags_by_entity(request: web.Request, currency, entity, pa
 
     for plugin in request.app['plugins']:
         if hasattr(plugin, 'before_request'):
-            request = plugin.before_request(request)
+            context =\
+                request.app['plugin_contexts'][plugin.__module__]
+            request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
         request.app['config'].get('show_private_tags', False)
@@ -174,7 +182,9 @@ async def list_entity_addresses(request: web.Request, currency, entity, page=Non
 
     for plugin in request.app['plugins']:
         if hasattr(plugin, 'before_request'):
-            request = plugin.before_request(request)
+            context =\
+                request.app['plugin_contexts'][plugin.__module__]
+            request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
         request.app['config'].get('show_private_tags', False)
@@ -248,7 +258,9 @@ async def list_entity_links(request: web.Request, currency, entity, neighbor, pa
 
     for plugin in request.app['plugins']:
         if hasattr(plugin, 'before_request'):
-            request = plugin.before_request(request)
+            context =\
+                request.app['plugin_contexts'][plugin.__module__]
+            request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
         request.app['config'].get('show_private_tags', False)
@@ -302,7 +314,7 @@ async def list_entity_links(request: web.Request, currency, entity, neighbor, pa
         raise web.HTTPInternalServerError()
 
 
-async def list_entity_neighbors(request: web.Request, currency, entity, direction, only_ids=None, include_labels=None, page=None, pagesize=None) -> web.Response:
+async def list_entity_neighbors(request: web.Request, currency, entity, direction, only_ids=None, include_labels=None, exclude_best_address_tag=None, include_actors=None, page=None, pagesize=None) -> web.Response:
     """Get an entity&#39;s direct neighbors
 
     
@@ -315,8 +327,12 @@ async def list_entity_neighbors(request: web.Request, currency, entity, directio
     :type direction: str
     :param only_ids: Restrict result to given set of comma separated IDs
     :type only_ids: List[int]
-    :param include_labels: Whether to include labels of first page of tags
+    :param include_labels: Whether to include labels of first page of address tags
     :type include_labels: bool
+    :param exclude_best_address_tag: Whether to exclude the best address tag
+    :type exclude_best_address_tag: bool
+    :param include_actors: Whether to include the actors
+    :type include_actors: bool
     :param page: Resumption token for retrieving the next page
     :type page: str
     :param pagesize: Number of items returned in a single page
@@ -326,7 +342,9 @@ async def list_entity_neighbors(request: web.Request, currency, entity, directio
 
     for plugin in request.app['plugins']:
         if hasattr(plugin, 'before_request'):
-            request = plugin.before_request(request)
+            context =\
+                request.app['plugin_contexts'][plugin.__module__]
+            request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
         request.app['config'].get('show_private_tags', False)
@@ -343,11 +361,11 @@ async def list_entity_neighbors(request: web.Request, currency, entity, directio
     request.app['show_private_tags'] = show_private_tags
 
     try:
-        if 'currency' in ['','currency','entity','direction','only_ids','include_labels','page','pagesize']:
+        if 'currency' in ['','currency','entity','direction','only_ids','include_labels','exclude_best_address_tag','include_actors','page','pagesize']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.list_entity_neighbors(request
-                ,currency=currency,entity=entity,direction=direction,only_ids=only_ids,include_labels=include_labels,page=page,pagesize=pagesize)
+                ,currency=currency,entity=entity,direction=direction,only_ids=only_ids,include_labels=include_labels,exclude_best_address_tag=exclude_best_address_tag,include_actors=include_actors,page=page,pagesize=pagesize)
         result = await result
 
         for plugin in request.app['plugins']:
@@ -380,7 +398,7 @@ async def list_entity_neighbors(request: web.Request, currency, entity, directio
         raise web.HTTPInternalServerError()
 
 
-async def list_entity_txs(request: web.Request, currency, entity, direction=None, page=None, pagesize=None) -> web.Response:
+async def list_entity_txs(request: web.Request, currency, entity, direction=None, min_height=None, max_height=None, token_currency=None, page=None, pagesize=None) -> web.Response:
     """Get all transactions an entity has been involved in
 
     
@@ -391,6 +409,12 @@ async def list_entity_txs(request: web.Request, currency, entity, direction=None
     :type entity: int
     :param direction: Incoming or outgoing transactions
     :type direction: str
+    :param min_height: Return transactions starting from given height
+    :type min_height: int
+    :param max_height: Return transactions up to (including) given height
+    :type max_height: int
+    :param token_currency: Return transactions of given token currency
+    :type token_currency: str
     :param page: Resumption token for retrieving the next page
     :type page: str
     :param pagesize: Number of items returned in a single page
@@ -400,7 +424,9 @@ async def list_entity_txs(request: web.Request, currency, entity, direction=None
 
     for plugin in request.app['plugins']:
         if hasattr(plugin, 'before_request'):
-            request = plugin.before_request(request)
+            context =\
+                request.app['plugin_contexts'][plugin.__module__]
+            request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
         request.app['config'].get('show_private_tags', False)
@@ -417,11 +443,11 @@ async def list_entity_txs(request: web.Request, currency, entity, direction=None
     request.app['show_private_tags'] = show_private_tags
 
     try:
-        if 'currency' in ['','currency','entity','direction','page','pagesize']:
+        if 'currency' in ['','currency','entity','direction','min_height','max_height','token_currency','page','pagesize']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.list_entity_txs(request
-                ,currency=currency,entity=entity,direction=direction,page=page,pagesize=pagesize)
+                ,currency=currency,entity=entity,direction=direction,min_height=min_height,max_height=max_height,token_currency=token_currency,page=page,pagesize=pagesize)
         result = await result
 
         for plugin in request.app['plugins']:
@@ -480,7 +506,9 @@ async def search_entity_neighbors(request: web.Request, currency, entity, direct
 
     for plugin in request.app['plugins']:
         if hasattr(plugin, 'before_request'):
-            request = plugin.before_request(request)
+            context =\
+                request.app['plugin_contexts'][plugin.__module__]
+            request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
         request.app['config'].get('show_private_tags', False)

@@ -6,6 +6,7 @@ from typing import List, Dict, Type
 
 from openapi_server.models.base_model_ import Model
 from openapi_server.models.address_tag import AddressTag
+from openapi_server.models.labeled_item_ref import LabeledItemRef
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.values import Values
 from openapi_server import util
@@ -17,88 +18,92 @@ class Entity(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, currency: str=None, entity: int=None, root_address: str=None, balance: Values=None, token_balances: Dict[str, Values]=None, first_tx: TxSummary=None, last_tx: TxSummary=None, in_degree: int=None, out_degree: int=None, no_addresses: int=None, no_incoming_txs: int=None, no_outgoing_txs: int=None, total_received: Values=None, total_spent: Values=None, total_tokens_received: Dict[str, Values]=None, total_tokens_spent: Dict[str, Values]=None, best_address_tag: AddressTag=None, no_address_tags: int=None):
+    def __init__(self, actors: List[LabeledItemRef]=None, balance: Values=None, best_address_tag: AddressTag=None, currency: str=None, entity: int=None, first_tx: TxSummary=None, in_degree: int=None, last_tx: TxSummary=None, no_address_tags: int=None, no_addresses: int=None, no_incoming_txs: int=None, no_outgoing_txs: int=None, out_degree: int=None, root_address: str=None, token_balances: Dict[str, Values]=None, total_received: Values=None, total_spent: Values=None, total_tokens_received: Dict[str, Values]=None, total_tokens_spent: Dict[str, Values]=None):
         """Entity - a model defined in OpenAPI
 
+        :param actors: The actors of this Entity.
+        :param balance: The balance of this Entity.
+        :param best_address_tag: The best_address_tag of this Entity.
         :param currency: The currency of this Entity.
         :param entity: The entity of this Entity.
-        :param root_address: The root_address of this Entity.
-        :param balance: The balance of this Entity.
-        :param token_balances: The token_balances of this Entity.
         :param first_tx: The first_tx of this Entity.
-        :param last_tx: The last_tx of this Entity.
         :param in_degree: The in_degree of this Entity.
-        :param out_degree: The out_degree of this Entity.
+        :param last_tx: The last_tx of this Entity.
+        :param no_address_tags: The no_address_tags of this Entity.
         :param no_addresses: The no_addresses of this Entity.
         :param no_incoming_txs: The no_incoming_txs of this Entity.
         :param no_outgoing_txs: The no_outgoing_txs of this Entity.
+        :param out_degree: The out_degree of this Entity.
+        :param root_address: The root_address of this Entity.
+        :param token_balances: The token_balances of this Entity.
         :param total_received: The total_received of this Entity.
         :param total_spent: The total_spent of this Entity.
         :param total_tokens_received: The total_tokens_received of this Entity.
         :param total_tokens_spent: The total_tokens_spent of this Entity.
-        :param best_address_tag: The best_address_tag of this Entity.
-        :param no_address_tags: The no_address_tags of this Entity.
         """
         self.openapi_types = {
+            'actors': List[LabeledItemRef],
+            'balance': Values,
+            'best_address_tag': AddressTag,
             'currency': str,
             'entity': int,
-            'root_address': str,
-            'balance': Values,
-            'token_balances': Dict[str, Values],
             'first_tx': TxSummary,
-            'last_tx': TxSummary,
             'in_degree': int,
-            'out_degree': int,
+            'last_tx': TxSummary,
+            'no_address_tags': int,
             'no_addresses': int,
             'no_incoming_txs': int,
             'no_outgoing_txs': int,
+            'out_degree': int,
+            'root_address': str,
+            'token_balances': Dict[str, Values],
             'total_received': Values,
             'total_spent': Values,
             'total_tokens_received': Dict[str, Values],
-            'total_tokens_spent': Dict[str, Values],
-            'best_address_tag': AddressTag,
-            'no_address_tags': int
+            'total_tokens_spent': Dict[str, Values]
         }
 
         self.attribute_map = {
+            'actors': 'actors',
+            'balance': 'balance',
+            'best_address_tag': 'best_address_tag',
             'currency': 'currency',
             'entity': 'entity',
-            'root_address': 'root_address',
-            'balance': 'balance',
-            'token_balances': 'token_balances',
             'first_tx': 'first_tx',
-            'last_tx': 'last_tx',
             'in_degree': 'in_degree',
-            'out_degree': 'out_degree',
+            'last_tx': 'last_tx',
+            'no_address_tags': 'no_address_tags',
             'no_addresses': 'no_addresses',
             'no_incoming_txs': 'no_incoming_txs',
             'no_outgoing_txs': 'no_outgoing_txs',
+            'out_degree': 'out_degree',
+            'root_address': 'root_address',
+            'token_balances': 'token_balances',
             'total_received': 'total_received',
             'total_spent': 'total_spent',
             'total_tokens_received': 'total_tokens_received',
-            'total_tokens_spent': 'total_tokens_spent',
-            'best_address_tag': 'best_address_tag',
-            'no_address_tags': 'no_address_tags'
+            'total_tokens_spent': 'total_tokens_spent'
         }
 
+        self._actors = actors
+        self._balance = balance
+        self._best_address_tag = best_address_tag
         self._currency = currency
         self._entity = entity
-        self._root_address = root_address
-        self._balance = balance
-        self._token_balances = token_balances
         self._first_tx = first_tx
-        self._last_tx = last_tx
         self._in_degree = in_degree
-        self._out_degree = out_degree
+        self._last_tx = last_tx
+        self._no_address_tags = no_address_tags
         self._no_addresses = no_addresses
         self._no_incoming_txs = no_incoming_txs
         self._no_outgoing_txs = no_outgoing_txs
+        self._out_degree = out_degree
+        self._root_address = root_address
+        self._token_balances = token_balances
         self._total_received = total_received
         self._total_spent = total_spent
         self._total_tokens_received = total_tokens_received
         self._total_tokens_spent = total_tokens_spent
-        self._best_address_tag = best_address_tag
-        self._no_address_tags = no_address_tags
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'Entity':
@@ -117,25 +122,93 @@ class Entity(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'currency': self._currency,
-            'entity': self._entity,
-            'root_address': self._root_address,
+        return { 'actors': self._actors,
             'balance': self._balance,
-            'token_balances': self._token_balances,
+            'best_address_tag': self._best_address_tag,
+            'currency': self._currency,
+            'entity': self._entity,
             'first_tx': self._first_tx,
-            'last_tx': self._last_tx,
             'in_degree': self._in_degree,
-            'out_degree': self._out_degree,
+            'last_tx': self._last_tx,
+            'no_address_tags': self._no_address_tags,
             'no_addresses': self._no_addresses,
             'no_incoming_txs': self._no_incoming_txs,
             'no_outgoing_txs': self._no_outgoing_txs,
+            'out_degree': self._out_degree,
+            'root_address': self._root_address,
+            'token_balances': self._token_balances,
             'total_received': self._total_received,
             'total_spent': self._total_spent,
             'total_tokens_received': self._total_tokens_received,
-            'total_tokens_spent': self._total_tokens_spent,
-            'best_address_tag': self._best_address_tag,
-            'no_address_tags': self._no_address_tags }
+            'total_tokens_spent': self._total_tokens_spent }
 
+
+    @property
+    def actors(self):
+        """Gets the actors of this Entity.
+
+        The list of matching actors
+
+        :return: The actors of this Entity.
+        :rtype: List[LabeledItemRef]
+        """
+        return self._actors
+
+    @actors.setter
+    def actors(self, actors):
+        """Sets the actors of this Entity.
+
+        The list of matching actors
+
+        :param actors: The actors of this Entity.
+        :type actors: List[LabeledItemRef]
+        """
+
+        self._actors = actors
+
+    @property
+    def balance(self):
+        """Gets the balance of this Entity.
+
+
+        :return: The balance of this Entity.
+        :rtype: Values
+        """
+        return self._balance
+
+    @balance.setter
+    def balance(self, balance):
+        """Sets the balance of this Entity.
+
+
+        :param balance: The balance of this Entity.
+        :type balance: Values
+        """
+        if balance is None:
+            raise ValueError("Invalid value for `balance`, must not be `None`")
+
+        self._balance = balance
+
+    @property
+    def best_address_tag(self):
+        """Gets the best_address_tag of this Entity.
+
+
+        :return: The best_address_tag of this Entity.
+        :rtype: AddressTag
+        """
+        return self._best_address_tag
+
+    @best_address_tag.setter
+    def best_address_tag(self, best_address_tag):
+        """Sets the best_address_tag of this Entity.
+
+
+        :param best_address_tag: The best_address_tag of this Entity.
+        :type best_address_tag: AddressTag
+        """
+
+        self._best_address_tag = best_address_tag
 
     @property
     def currency(self):
@@ -188,77 +261,6 @@ class Entity(Model):
         self._entity = entity
 
     @property
-    def root_address(self):
-        """Gets the root_address of this Entity.
-
-        Address
-
-        :return: The root_address of this Entity.
-        :rtype: str
-        """
-        return self._root_address
-
-    @root_address.setter
-    def root_address(self, root_address):
-        """Sets the root_address of this Entity.
-
-        Address
-
-        :param root_address: The root_address of this Entity.
-        :type root_address: str
-        """
-        if root_address is None:
-            raise ValueError("Invalid value for `root_address`, must not be `None`")
-
-        self._root_address = root_address
-
-    @property
-    def balance(self):
-        """Gets the balance of this Entity.
-
-
-        :return: The balance of this Entity.
-        :rtype: Values
-        """
-        return self._balance
-
-    @balance.setter
-    def balance(self, balance):
-        """Sets the balance of this Entity.
-
-
-        :param balance: The balance of this Entity.
-        :type balance: Values
-        """
-        if balance is None:
-            raise ValueError("Invalid value for `balance`, must not be `None`")
-
-        self._balance = balance
-
-    @property
-    def token_balances(self):
-        """Gets the token_balances of this Entity.
-
-        Per token value-flow
-
-        :return: The token_balances of this Entity.
-        :rtype: Dict[str, Values]
-        """
-        return self._token_balances
-
-    @token_balances.setter
-    def token_balances(self, token_balances):
-        """Sets the token_balances of this Entity.
-
-        Per token value-flow
-
-        :param token_balances: The token_balances of this Entity.
-        :type token_balances: Dict[str, Values]
-        """
-
-        self._token_balances = token_balances
-
-    @property
     def first_tx(self):
         """Gets the first_tx of this Entity.
 
@@ -280,29 +282,6 @@ class Entity(Model):
             raise ValueError("Invalid value for `first_tx`, must not be `None`")
 
         self._first_tx = first_tx
-
-    @property
-    def last_tx(self):
-        """Gets the last_tx of this Entity.
-
-
-        :return: The last_tx of this Entity.
-        :rtype: TxSummary
-        """
-        return self._last_tx
-
-    @last_tx.setter
-    def last_tx(self, last_tx):
-        """Sets the last_tx of this Entity.
-
-
-        :param last_tx: The last_tx of this Entity.
-        :type last_tx: TxSummary
-        """
-        if last_tx is None:
-            raise ValueError("Invalid value for `last_tx`, must not be `None`")
-
-        self._last_tx = last_tx
 
     @property
     def in_degree(self):
@@ -328,27 +307,52 @@ class Entity(Model):
         self._in_degree = in_degree
 
     @property
-    def out_degree(self):
-        """Gets the out_degree of this Entity.
+    def last_tx(self):
+        """Gets the last_tx of this Entity.
 
 
-        :return: The out_degree of this Entity.
+        :return: The last_tx of this Entity.
+        :rtype: TxSummary
+        """
+        return self._last_tx
+
+    @last_tx.setter
+    def last_tx(self, last_tx):
+        """Sets the last_tx of this Entity.
+
+
+        :param last_tx: The last_tx of this Entity.
+        :type last_tx: TxSummary
+        """
+        if last_tx is None:
+            raise ValueError("Invalid value for `last_tx`, must not be `None`")
+
+        self._last_tx = last_tx
+
+    @property
+    def no_address_tags(self):
+        """Gets the no_address_tags of this Entity.
+
+        number of address tags
+
+        :return: The no_address_tags of this Entity.
         :rtype: int
         """
-        return self._out_degree
+        return self._no_address_tags
 
-    @out_degree.setter
-    def out_degree(self, out_degree):
-        """Sets the out_degree of this Entity.
+    @no_address_tags.setter
+    def no_address_tags(self, no_address_tags):
+        """Sets the no_address_tags of this Entity.
 
+        number of address tags
 
-        :param out_degree: The out_degree of this Entity.
-        :type out_degree: int
+        :param no_address_tags: The no_address_tags of this Entity.
+        :type no_address_tags: int
         """
-        if out_degree is None:
-            raise ValueError("Invalid value for `out_degree`, must not be `None`")
+        if no_address_tags is None:
+            raise ValueError("Invalid value for `no_address_tags`, must not be `None`")
 
-        self._out_degree = out_degree
+        self._no_address_tags = no_address_tags
 
     @property
     def no_addresses(self):
@@ -420,6 +424,77 @@ class Entity(Model):
             raise ValueError("Invalid value for `no_outgoing_txs`, must not be `None`")
 
         self._no_outgoing_txs = no_outgoing_txs
+
+    @property
+    def out_degree(self):
+        """Gets the out_degree of this Entity.
+
+
+        :return: The out_degree of this Entity.
+        :rtype: int
+        """
+        return self._out_degree
+
+    @out_degree.setter
+    def out_degree(self, out_degree):
+        """Sets the out_degree of this Entity.
+
+
+        :param out_degree: The out_degree of this Entity.
+        :type out_degree: int
+        """
+        if out_degree is None:
+            raise ValueError("Invalid value for `out_degree`, must not be `None`")
+
+        self._out_degree = out_degree
+
+    @property
+    def root_address(self):
+        """Gets the root_address of this Entity.
+
+        Address
+
+        :return: The root_address of this Entity.
+        :rtype: str
+        """
+        return self._root_address
+
+    @root_address.setter
+    def root_address(self, root_address):
+        """Sets the root_address of this Entity.
+
+        Address
+
+        :param root_address: The root_address of this Entity.
+        :type root_address: str
+        """
+        if root_address is None:
+            raise ValueError("Invalid value for `root_address`, must not be `None`")
+
+        self._root_address = root_address
+
+    @property
+    def token_balances(self):
+        """Gets the token_balances of this Entity.
+
+        Per token value-flow
+
+        :return: The token_balances of this Entity.
+        :rtype: Dict[str, Values]
+        """
+        return self._token_balances
+
+    @token_balances.setter
+    def token_balances(self, token_balances):
+        """Sets the token_balances of this Entity.
+
+        Per token value-flow
+
+        :param token_balances: The token_balances of this Entity.
+        :type token_balances: Dict[str, Values]
+        """
+
+        self._token_balances = token_balances
 
     @property
     def total_received(self):
@@ -512,49 +587,3 @@ class Entity(Model):
         """
 
         self._total_tokens_spent = total_tokens_spent
-
-    @property
-    def best_address_tag(self):
-        """Gets the best_address_tag of this Entity.
-
-
-        :return: The best_address_tag of this Entity.
-        :rtype: AddressTag
-        """
-        return self._best_address_tag
-
-    @best_address_tag.setter
-    def best_address_tag(self, best_address_tag):
-        """Sets the best_address_tag of this Entity.
-
-
-        :param best_address_tag: The best_address_tag of this Entity.
-        :type best_address_tag: AddressTag
-        """
-
-        self._best_address_tag = best_address_tag
-
-    @property
-    def no_address_tags(self):
-        """Gets the no_address_tags of this Entity.
-
-        number of address tags
-
-        :return: The no_address_tags of this Entity.
-        :rtype: int
-        """
-        return self._no_address_tags
-
-    @no_address_tags.setter
-    def no_address_tags(self, no_address_tags):
-        """Sets the no_address_tags of this Entity.
-
-        number of address tags
-
-        :param no_address_tags: The no_address_tags of this Entity.
-        :type no_address_tags: int
-        """
-        if no_address_tags is None:
-            raise ValueError("Invalid value for `no_address_tags`, must not be `None`")
-
-        self._no_address_tags = no_address_tags

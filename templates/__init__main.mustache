@@ -23,9 +23,11 @@ def load_config(config_file):
 def setup_logging(logger, config):
     level = config.get('level', 'INFO').upper()
     level = getattr(logging, level)
-    FORMAT = '%(asctime)s %(message)s'
-    logging.basicConfig(format=FORMAT)
     logger.setLevel(level)
+    for handler in logging.root.handlers:
+        handler.setFormatter(
+            logging.Formatter("%(levelname)-8s %(asctime)s "
+                              "%(name)s:%(filename)s:%(lineno)d %(message)s"))
     smtp = config.get('smtp', None)
     if not smtp:
         return
@@ -104,10 +106,11 @@ def factory(config_file=None, validate_responses=False):
     for name in app.app['config'].get('plugins', []):
         app.app['plugins'].append(get_subclass(importlib.import_module(name)))
         app.app['plugin_contexts'][name] = {}
-
-    for plugin in app.app['plugins']:
-        if hasattr(plugin, 'setup'):
-            app.app.cleanup_ctx.append(plugin_setup(plugin, name))
+        subcl = get_subclass(importlib.import_module(name))
+        app.app['plugins'].append(subcl)
+        app.app['plugin_contexts'][name] = {}
+        if hasattr(subcl, 'setup'):
+            app.app.cleanup_ctx.append(plugin_setup(subcl, name))
 
     return app
 

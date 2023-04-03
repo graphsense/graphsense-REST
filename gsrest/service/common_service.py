@@ -9,13 +9,14 @@ from openapi_server.models.link_utxo import LinkUtxo
 from openapi_server.models.links import Links
 from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.address_tx_utxo import AddressTxUtxo
+from openapi_server.models.labeled_item_ref import LabeledItemRef
 from gsrest.service.rates_service import list_rates
 from gsrest.db.util import tagstores, tagstores_with_paging
 from gsrest.service.tags_service import address_tag_from_row
 from gsrest.util import get_first_key_present
 
 
-def address_from_row(currency, row, rates, token_config):
+def address_from_row(currency, row, rates, token_config, actors):
     return Address(
         currency=currency,
         address=row['address'],
@@ -38,6 +39,7 @@ def address_from_row(currency, row, rates, token_config):
         token_balances=convert_token_values_map(
             currency, row.get('token_balances', None), rates, token_config),
         is_contract=row.get("is_contract", None),
+        actors=actors if actors else None,
         status=row['status'])
 
 
@@ -86,9 +88,16 @@ async def get_address(request, currency, address):
     if not result:
         raise RuntimeError("Address {} not found in currency {}".format(
             address, currency))
+
+    actors = tagstores(
+        request.app['tagstores'],
+        lambda row: LabeledItemRef(id=row["id"], label=row["label"]),
+        'list_actors_address', currency, address,
+        request.app['show_private_tags'])
+
     return address_from_row(currency, result,
                             (await get_rates(request, currency))['rates'],
-                            db.get_token_configuration(currency))
+                            db.get_token_configuration(currency), await actors)
 
 
 async def list_tags_by_address(request,

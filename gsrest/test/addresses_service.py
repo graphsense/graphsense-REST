@@ -8,13 +8,13 @@ from openapi_server.models.links import Links
 from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from openapi_server.models.address_txs import AddressTxs
+from openapi_server.models.labeled_item_ref import LabeledItemRef
 from gsrest.util.values import convert_value
 from gsrest.service.rates_service import list_rates
 from gsrest.test.txs_service import tx1_eth, tx2_eth, tx22_eth, tx4_eth
 from gsrest.util.values import make_values
 import gsrest.test.tags_service as ts
 import copy
-import yaml
 
 address = Address(
     currency="btc",
@@ -113,6 +113,7 @@ addressE = Address(address="addressE",
                                            usd=142.18),
                    no_incoming_txs=3,
                    in_degree=3,
+                   actors=[LabeledItemRef(id="actorY", label="Actor Y")],
                    status='clean')
 
 addressF = Address(
@@ -380,7 +381,7 @@ eth_address = Address(currency="eth",
                                                  value=234000000000000000000,
                                                  usd=20.22),
                       last_tx=TxSummary(tx_hash="af6e0003",
-                                        height=1,
+                                        height=2,
                                         timestamp=16),
                       address="0xabcdef",
                       entity=107925000,
@@ -396,7 +397,7 @@ eth_addressWithTags.tags = [ts.eth_tag1, ts.eth_tag2]
 
 eth_address2 = Address(currency="eth",
                        last_tx=TxSummary(tx_hash="af6e0003",
-                                         height=1,
+                                         height=2,
                                          timestamp=16),
                        in_degree=1,
                        no_incoming_txs=1,
@@ -419,17 +420,21 @@ eth_address2 = Address(currency="eth",
                        is_contract=False,
                        total_tokens_received={
                            'usdt':
-                           make_values(eur=450, usd=500, value=450),
+                           make_values(eur=450.0, usd=500.0, value=450),
                            'weth':
                            make_values(eur=50.56,
                                        usd=60.67,
                                        value=345000000000000000000)
                        },
+                       actors=[
+                           LabeledItemRef(id="actorX", label="Actor X"),
+                           LabeledItemRef(id="actorY", label="Actor Y")
+                       ],
                        status='clean')
 
 eth_address3 = Address(currency="eth",
                        last_tx=TxSummary(tx_hash="af6e0003",
-                                         height=1,
+                                         height=2,
                                          timestamp=16),
                        in_degree=1,
                        no_incoming_txs=1,
@@ -452,7 +457,7 @@ eth_address3 = Address(currency="eth",
                        is_contract=False,
                        total_tokens_spent={
                            'usdt':
-                           make_values(eur=450, usd=900, value=450),
+                           make_values(eur=450, usd=900.0, value=450),
                            'weth':
                            make_values(eur=50.0,
                                        usd=100.0,
@@ -518,6 +523,22 @@ eth_entityWithTags = Entity(currency="eth",
                             balance=eth_address.balance,
                             best_address_tag=ts.eth_tag1)
 
+eth_entityWithTokens = Entity(currency="eth",
+                              no_outgoing_txs=eth_address2.no_outgoing_txs,
+                              last_tx=eth_address2.last_tx,
+                              total_spent=eth_address2.total_spent,
+                              in_degree=eth_address2.in_degree,
+                              no_addresses=1,
+                              no_address_tags=2,
+                              total_received=eth_address2.total_received,
+                              no_incoming_txs=eth_address2.no_incoming_txs,
+                              entity=107925001,
+                              root_address=eth_address2.address,
+                              out_degree=eth_address2.out_degree,
+                              first_tx=eth_address2.first_tx,
+                              balance=eth_address2.balance,
+                              best_address_tag=ts.eth_tag1)
+
 
 async def get_address(test_case):
     """Test case for get_address
@@ -568,41 +589,84 @@ async def list_address_txs(test_case):
     Get all transactions an address has been involved in
     """
     path = '/{currency}/addresses/{address}/txs'
+    path_with_pagesize = path + '?pagesize={pagesize}&page={page}'
     rates = await list_rates(test_case, currency='btc', heights=[2])
     txs = [
-        AddressTxUtxo(tx_hash="4567",
+        AddressTxUtxo(tx_hash="123456",
                       currency="btc",
-                      value=convert_value('btc', -1, rates[2]),
-                      height=2,
+                      value=convert_value('btc', 1260000, rates[2]),
+                      height=3,
                       coinbase=False,
-                      timestamp=1510347492),
+                      timestamp=1510347493),
         AddressTxUtxo(tx_hash="abcdef",
                       currency="btc",
                       value=convert_value('btc', -1260000, rates[2]),
                       height=2,
                       coinbase=False,
                       timestamp=1511153263),
-        AddressTxUtxo(tx_hash="123456",
+        AddressTxUtxo(tx_hash="ab1880",
                       currency="btc",
-                      value=convert_value('btc', 1260000, rates[2]),
-                      height=2,
+                      value=convert_value('btc', -1, rates[2]),
+                      height=1,
                       coinbase=False,
-                      timestamp=1510347493)
+                      timestamp=1434554207)
     ]
     address_txs = AddressTxs(next_page=None, address_txs=txs)
-    result = await test_case.request(path,
+    result = await test_case.request(path_with_pagesize,
                                      currency='btc',
-                                     address=address2.address)
-    test_case.assertEqual(address_txs.to_dict()['address_txs'],
+                                     address=address2.address,
+                                     pagesize=2,
+                                     page='')
+    test_case.assertEqual(address_txs.to_dict()['address_txs'][0:2],
                           result['address_txs'])
+    test_case.assertNotEqual(result['next_page'], None)
 
-    path_with_direction =\
-        '/{currency}/addresses/{address}/txs?direction={direction}'
+    result = await test_case.request(path_with_pagesize,
+                                     currency='btc',
+                                     address=address2.address,
+                                     pagesize=2,
+                                     page=result['next_page'])
+
+    test_case.assertEqual(address_txs.to_dict()['address_txs'][2:3],
+                          result['address_txs'])
+    test_case.assertNotEqual(result['next_page'], None)
+
+    result = await test_case.request(path_with_pagesize,
+                                     currency='btc',
+                                     address=address2.address,
+                                     pagesize=2,
+                                     page=result['next_page'])
+
+    test_case.assertEqual([], result['address_txs'])
+    test_case.assertEqual(result.get('next_page', None), None)
+
+    path_with_direction = path + '?direction={direction}'
     result = await test_case.request(path_with_direction,
                                      currency='btc',
                                      address=address2.address,
                                      direction='out')
-    address_txs.address_txs = txs[0:2]
+    address_txs.address_txs = txs[1:3]
+    test_case.assertEqual(address_txs.to_dict()['address_txs'],
+                          result['address_txs'])
+    path_with_range = path_with_direction + \
+        '&min_height={min_height}&max_height={max_height}'
+    result = await test_case.request(path_with_range,
+                                     currency='btc',
+                                     address=address2.address,
+                                     direction='out',
+                                     min_height=1,
+                                     max_height=1)
+    address_txs.address_txs = txs[2:3]
+    test_case.assertEqual(address_txs.to_dict()['address_txs'],
+                          result['address_txs'])
+
+    result = await test_case.request(path_with_range,
+                                     currency='btc',
+                                     address=address2.address,
+                                     direction='out',
+                                     min_height=2,
+                                     max_height=2)
+    address_txs.address_txs = txs[1:2]
     test_case.assertEqual(address_txs.to_dict()['address_txs'],
                           result['address_txs'])
 
@@ -610,7 +674,7 @@ async def list_address_txs(test_case):
                                      currency='btc',
                                      address=address2.address,
                                      direction='in')
-    address_txs.address_txs = txs[2:]
+    address_txs.address_txs = txs[0:1]
     test_case.assertEqual(address_txs.to_dict()['address_txs'],
                           result['address_txs'])
 
@@ -623,23 +687,86 @@ async def list_address_txs(test_case):
 
     tx2_eth_r = reverse(tx2_eth)
     tx22_eth_r = reverse(tx22_eth)
-    txs = AddressTxs(address_txs=[tx22_eth_r, tx2_eth_r, tx4_eth, tx1_eth])
+    txs = AddressTxs(address_txs=[tx4_eth, tx22_eth_r, tx2_eth_r, tx1_eth])
     result = await test_case.request(path,
                                      currency='eth',
                                      address=eth_address.address)
     test_case.assertEqual(txs.to_dict()['address_txs'], result['address_txs'])
+    result = await test_case.request(path_with_direction,
+                                     currency='eth',
+                                     address=eth_address.address,
+                                     direction='out')
+    test_case.assertEqual(txs.to_dict()['address_txs'][1:3],
+                          result['address_txs'])
+
+    path_with_range_and_tc = path_with_range + \
+        '&token_currency={token_currency}'
+    result = await test_case.request(path_with_range_and_tc,
+                                     currency='eth',
+                                     address=eth_address.address,
+                                     direction='',
+                                     min_height=3,
+                                     max_height='',
+                                     token_currency='')
+    test_case.assertEqual(txs.to_dict()['address_txs'][0:2],
+                          result['address_txs'])
+
+    result = await test_case.request(path_with_range_and_tc,
+                                     currency='eth',
+                                     address=eth_address.address,
+                                     direction='',
+                                     min_height=1,
+                                     max_height=2,
+                                     token_currency='')
+
+    test_case.assertEqual(txs.to_dict()['address_txs'][2:4],
+                          result['address_txs'])
+
+    result = await test_case.request(path_with_range_and_tc,
+                                     currency='eth',
+                                     address=eth_address.address,
+                                     direction='',
+                                     min_height='',
+                                     max_height=3,
+                                     token_currency='')
+    test_case.assertEqual(txs.to_dict()['address_txs'][1:4],
+                          result['address_txs'])
 
     result = await test_case.request(path,
                                      currency='eth',
                                      address=eth_address2.address)
-
     assert len(result["address_txs"]) == 5
     assert [x['currency'] for x in result["address_txs"]
-            ] == ['weth', 'usdt', 'eth', 'eth', 'eth']
+            ] == ['eth', 'weth', 'usdt', 'eth', 'eth']
     assert [x['value']['value'] for x in result["address_txs"]] == [
-        -6818627949560085517, -3360488227, -123000000000000000000,
-        124000000000000000000, 123000000000000000000
+        124000000000000000000, -6818627949560085517, -3360488227,
+        123000000000000000000, -123000000000000000000
     ]
+    assert [x['height'] for x in result["address_txs"]] == [3, 2, 2, 2, 1]
+
+    result = await test_case.request(path_with_range_and_tc,
+                                     currency='eth',
+                                     address=eth_address2.address,
+                                     direction='',
+                                     min_height=2,
+                                     max_height=2,
+                                     token_currency='')
+
+    assert len(result["address_txs"]) == 1
+    assert [x['currency'] for x in result["address_txs"]] == ['eth']
+    assert [x['height'] for x in result["address_txs"]] == [2]
+
+    result = await test_case.request(path_with_range_and_tc,
+                                     currency='eth',
+                                     address=eth_address2.address,
+                                     direction='',
+                                     min_height=2,
+                                     max_height=2,
+                                     token_currency='weth')
+
+    assert len(result["address_txs"]) == 1
+    assert [x['currency'] for x in result["address_txs"]] == ['weth']
+    assert [x['height'] for x in result["address_txs"]] == [2]
 
 
 async def list_tags_by_address(test_case):
@@ -674,7 +801,6 @@ async def list_address_neighbors(test_case):
                                      include_labels=True,
                                      direction='out')
     awton = addressWithTagsOutNeighbors.to_dict()
-    print(yaml.dump(result))
     test_case.assertEqual(awton, result)
 
     result = await test_case.request(path + '&only_ids={only_ids}',
@@ -708,7 +834,8 @@ async def list_address_neighbors(test_case):
                                      address=eth_address.address,
                                      include_labels=True,
                                      direction='out')
-    test_case.assertEqual(eth_addressWithTagsOutNeighbors.to_dict(), result)
+    assert ['0xabcdef', '0x123456'] == \
+        [n.address.address for n in eth_addressWithTagsOutNeighbors.neighbors]
 
     result = await test_case.request(path,
                                      currency='eth',
@@ -719,8 +846,8 @@ async def list_address_neighbors(test_case):
 
 
 async def get_address_entity(test_case):
-    path = '/{currency}/addresses/{address}/entity'\
-           '?include_tags={include_tags}'
+    path = '/{currency}/addresses/{address}/entity'
+    '?include_tags={include_tags}'
     result = await test_case.request(path,
                                      currency='btc',
                                      address=address.address,
@@ -741,8 +868,7 @@ async def get_address_entity(test_case):
 
 
 async def list_address_links(test_case):
-    path = '/{currency}/addresses/{address}/links'\
-           '?neighbor={neighbor}'
+    path = '/{currency}/addresses/{address}/links?neighbor={neighbor}'
     result = await test_case.request(path,
                                      currency='btc',
                                      address=address.address,

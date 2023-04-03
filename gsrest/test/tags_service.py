@@ -182,12 +182,13 @@ tag8 = AddressTag(category="organization",
                   source="https://source",
                   address="address2818641",
                   currency='BTC',
-                  tagpack_is_public=True,
                   is_cluster_definer=True,
                   confidence='ownership',
                   confidence_level=100,
                   tagpack_creator='x',
+                  tagpack_is_public=True,
                   tagpack_title='',
+                  tagpack_uri='https://tagpack_uri',
                   entity=2818641)
 
 eth_tag3 = AddressTag(lastmod=1,
@@ -219,6 +220,98 @@ etag4 = AddressTag(category=tag2.category,
                    currency=tag2.currency,
                    is_cluster_definer=True,
                    tagpack_is_public=tag2.tagpack_is_public)
+
+eth_tag_actor = AddressTag(confidence_level=100,
+                           label='LabelX',
+                           confidence='ownership',
+                           tagpack_title='',
+                           tagpack_creator='x',
+                           lastmod=1,
+                           source='sourceX',
+                           actor='actorX',
+                           address='0x123456',
+                           entity=107925001,
+                           currency='ETH',
+                           is_cluster_definer=False,
+                           tagpack_is_public=False)
+
+
+async def get_actor_tags(test_case):
+    result = await test_case.request('/tags/actors/actorX/tags')
+    test_case.assertEqual([eth_tag_actor.to_dict()], result["address_tags"])
+
+    result = await test_case.request('/tags/actors/actorY/tags')
+
+    expexted_result = [{
+        'address': '0x123456',
+        'confidence': 'ownership',
+        'confidence_level': 100,
+        'currency': 'ETH',
+        'entity': 107925001,
+        'is_cluster_definer': False,
+        'label': 'LabelY',
+        'actor': 'actorY',
+        'lastmod': 1,
+        'source': 'sourceY',
+        'tagpack_creator': 'x',
+        'tagpack_is_public': True,
+        'tagpack_title': '',
+        'tagpack_uri': 'uriY'
+    }]
+    test_case.assertEqual(expexted_result, result["address_tags"])
+
+    result = await test_case.request('/tags/actors/actorZ/tags')
+    test_case.assertEqual([], result["address_tags"])
+
+
+async def get_actor(test_case):
+    result = await test_case.request('/tags/actors/actorX')
+    test_case.assertEqual(
+        {
+            'categories': [{
+                "id": "organization",
+                "label": "An organization"
+            }, {
+                "id": "exchange",
+                "label": "An exchange"
+            }],
+            'id':
+            'actorX',
+            'jurisdictions': [{
+                "id": "SC",
+                "label": "Singapore"
+            }, {
+                "id": "VU",
+                "label": "Vanuatu"
+            }],
+            'label':
+            'Actor X',
+            'nr_tags':
+            2,
+            'uri':
+            'http://actorX'
+        }, result)
+
+    result = await test_case.request('/tags/actors/actorY')
+    test_case.assertEqual(
+        {
+            'categories': [{
+                "id": "conceptB",
+                "label": "Concept B"
+            }],
+            'id': 'actorY',
+            'jurisdictions': [{
+                "id": "AT",
+                "label": "Austria"
+            }],
+            'label': 'Actor Y',
+            'nr_tags': 2,
+            'uri': 'http://actorY'
+        }, result)
+
+    result = await test_case.requestWithCodeAndBody('/tags/actors/actorZ', 404,
+                                                    None)
+    test_case.assertEqual(None, result)
 
 
 async def list_address_tags(test_case):
@@ -286,7 +379,8 @@ conceptB = Concept(uri="https://conceptB",
 
 taxonomies = [
     Taxonomy(taxonomy="entity", uri="http://entity"),
-    Taxonomy(taxonomy="abuse", uri="http://abuse")
+    Taxonomy(taxonomy="abuse", uri="http://abuse"),
+    Taxonomy(taxonomy="country", uri="http://country")
 ]
 
 

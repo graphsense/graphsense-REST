@@ -29,7 +29,9 @@ async def get_address(request: web.Request, currency, address) -> web.Response:
 
     for plugin in request.app['plugins']:
         if hasattr(plugin, 'before_request'):
-            request = plugin.before_request(request)
+            context =\
+                request.app['plugin_contexts'][plugin.__module__]
+            request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
         request.app['config'].get('show_private_tags', False)
@@ -97,7 +99,9 @@ async def get_address_entity(request: web.Request, currency, address) -> web.Res
 
     for plugin in request.app['plugins']:
         if hasattr(plugin, 'before_request'):
-            request = plugin.before_request(request)
+            context =\
+                request.app['plugin_contexts'][plugin.__module__]
+            request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
         request.app['config'].get('show_private_tags', False)
@@ -171,7 +175,9 @@ async def list_address_links(request: web.Request, currency, address, neighbor, 
 
     for plugin in request.app['plugins']:
         if hasattr(plugin, 'before_request'):
-            request = plugin.before_request(request)
+            context =\
+                request.app['plugin_contexts'][plugin.__module__]
+            request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
         request.app['config'].get('show_private_tags', False)
@@ -238,7 +244,7 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
     :type direction: str
     :param only_ids: Restrict result to given set of comma separated addresses
     :type only_ids: List[str]
-    :param include_labels: Whether to include labels of first page of tags
+    :param include_labels: Whether to include labels of first page of address tags
     :type include_labels: bool
     :param page: Resumption token for retrieving the next page
     :type page: str
@@ -249,7 +255,9 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
 
     for plugin in request.app['plugins']:
         if hasattr(plugin, 'before_request'):
-            request = plugin.before_request(request)
+            context =\
+                request.app['plugin_contexts'][plugin.__module__]
+            request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
         request.app['config'].get('show_private_tags', False)
@@ -303,7 +311,7 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
         raise web.HTTPInternalServerError()
 
 
-async def list_address_txs(request: web.Request, currency, address, direction=None, page=None, pagesize=None) -> web.Response:
+async def list_address_txs(request: web.Request, currency, address, direction=None, min_height=None, max_height=None, token_currency=None, page=None, pagesize=None) -> web.Response:
     """Get all transactions an address has been involved in
 
     
@@ -314,6 +322,12 @@ async def list_address_txs(request: web.Request, currency, address, direction=No
     :type address: str
     :param direction: Incoming or outgoing transactions
     :type direction: str
+    :param min_height: Return transactions starting from given height
+    :type min_height: int
+    :param max_height: Return transactions up to (including) given height
+    :type max_height: int
+    :param token_currency: Return transactions of given token currency
+    :type token_currency: str
     :param page: Resumption token for retrieving the next page
     :type page: str
     :param pagesize: Number of items returned in a single page
@@ -323,7 +337,9 @@ async def list_address_txs(request: web.Request, currency, address, direction=No
 
     for plugin in request.app['plugins']:
         if hasattr(plugin, 'before_request'):
-            request = plugin.before_request(request)
+            context =\
+                request.app['plugin_contexts'][plugin.__module__]
+            request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
         request.app['config'].get('show_private_tags', False)
@@ -340,11 +356,11 @@ async def list_address_txs(request: web.Request, currency, address, direction=No
     request.app['show_private_tags'] = show_private_tags
 
     try:
-        if 'currency' in ['','currency','address','direction','page','pagesize']:
+        if 'currency' in ['','currency','address','direction','min_height','max_height','token_currency','page','pagesize']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.list_address_txs(request
-                ,currency=currency,address=address,direction=direction,page=page,pagesize=pagesize)
+                ,currency=currency,address=address,direction=direction,min_height=min_height,max_height=max_height,token_currency=token_currency,page=page,pagesize=pagesize)
         result = await result
 
         for plugin in request.app['plugins']:
@@ -395,7 +411,9 @@ async def list_tags_by_address(request: web.Request, currency, address, page=Non
 
     for plugin in request.app['plugins']:
         if hasattr(plugin, 'before_request'):
-            request = plugin.before_request(request)
+            context =\
+                request.app['plugin_contexts'][plugin.__module__]
+            request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
         request.app['config'].get('show_private_tags', False)

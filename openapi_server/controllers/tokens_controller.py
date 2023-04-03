@@ -22,7 +22,9 @@ async def list_supported_tokens(request: web.Request, currency) -> web.Response:
 
     for plugin in request.app['plugins']:
         if hasattr(plugin, 'before_request'):
-            request = plugin.before_request(request)
+            context =\
+                request.app['plugin_contexts'][plugin.__module__]
+            request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
         request.app['config'].get('show_private_tags', False)

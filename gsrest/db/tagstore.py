@@ -3,6 +3,7 @@ import hashlib
 
 
 class Result:
+
     def __init__(self, rows=None, columns=None):
         if rows is None:
             rows = []
@@ -29,6 +30,7 @@ class Result:
 
 
 class Row:
+
     def __init__(self, row, columns):
         self.row = row
         self.columns = columns
@@ -60,6 +62,7 @@ def hide_private_condition(show_private, table_alias='tp'):
 
 
 class Tagstore:
+
     def __init__(self, config, logger):
         self.logger = logger
         self.config = config
@@ -142,6 +145,7 @@ class Tagstore:
         query = f"""select
                         t.*,
                         tp.uri,
+                        tp.uri,
                         tp.creator,
                         tp.title,
                         tp.is_public,
@@ -188,6 +192,21 @@ class Tagstore:
                    limit %s"""
         return self.execute(query,
                             params=params + [expression, expression, limit])
+
+    def list_matching_actors(self, expression, limit, show_private=False):
+        query = f"""select
+                    a.id,
+                    a.label
+                   from
+                    actor a,
+                    actorpack ap
+                   where
+                    ap.id = a.actorpack
+                    and similarity(a.label, %s) > 0.2
+                    {hide_private_condition(show_private, 'ap')}
+                   order by a.label <-> %s
+                   limit %s"""
+        return self.execute(query, params=[expression, expression, limit])
 
     def list_tags_by_address(self,
                              currency,
@@ -278,10 +297,21 @@ class Tagstore:
                         {hide_private_condition(show_private, table_alias=None)}"""  # noqa
         return await self.execute(query, [currency.upper(), entity])
 
-    async def list_entity_tags_by_entity(self,
-                                         currency,
-                                         entity,
-                                         show_private=False):
+    async def get_best_entity_tag(self, currency, entity, show_private=False):
+        if currency == 'eth':
+            # in case of eth we want to propagate the best address tag
+            # regardless of if the tagpack is a defines it as cluster definer
+            # since cluster == entity in eth
+            cluster_definer_condition = ""
+        else:
+            cluster_definer_condition = """and
+                            (cd.is_cluster_definer=true
+                                AND t.is_cluster_definer=true
+                            OR
+                            cd.is_cluster_definer=false
+                                AND t.is_cluster_definer!=true
+                        )"""
+
         query = f"""select
                         t.*,
                         tp.uri,
@@ -307,18 +337,13 @@ class Tagstore:
                         and cd.gs_cluster_id = %s
                         and t.tagpack=tp.id
                         and t.address=cd.address
-                        and
-                            (cd.is_cluster_definer=true
-                                AND t.is_cluster_definer=true
-                            OR
-                            cd.is_cluster_definer=false
-                                AND t.is_cluster_definer!=true
-                        )
+                        {cluster_definer_condition}
                         and c.id = t.confidence
                         {hide_private_condition(show_private, table_alias='cd')}
                    order by
                         cd.max_level desc,
                         cd.no_addresses desc,
+                        cd.is_cluster_definer desc,
                         t.address desc
                    limit 1"""  # noqa
 
@@ -346,6 +371,25 @@ class Tagstore:
                    order by address"""
         return await self.execute(query, params=[currency.upper(), addresses])
 
+    async def list_actors_address(self, currency, address, show_private=False):
+        if not address:
+            raise TypeError('x')
+            return Result(), None
+        query = f"""select
+                    distinct t.actor as id, ac.label as label
+                   from
+                    tag t,
+                    actor ac,
+                    tagpack tp
+                   where
+                    t.actor = ac.id
+                    and t.tagpack = tp.id
+                    and t.currency = %s
+                    and t.address = %s
+                    {hide_private_condition(show_private)}
+                    order by label"""
+        return await self.execute(query, params=[currency.upper(), address])
+
     async def list_labels_for_entities(self,
                                        currency,
                                        entities,
@@ -371,6 +415,81 @@ class Tagstore:
                     acm.gs_cluster_id
                    order by acm.gs_cluster_id"""
         return await self.execute(query, params=[currency.upper(), entities])
+
+    async def list_actors_entity(self, currency, entity, show_private=False):
+        if not entity:
+            return Result(), None
+        query = f"""select
+                    distinct t.actor as id, ac.label as label
+                   from
+                    tag t,
+                    actor ac,
+                    address_cluster_mapping acm,
+                    tagpack tp
+                   where
+                    t.address = acm.address
+                    and t.tagpack = tp.id
+                    and t.currency = acm.currency
+                    and acm.currency = %s
+                    and acm.gs_cluster_id = %s
+                    and ac.id = t.actor
+                    {hide_private_condition(show_private)}
+                    order by label"""
+        return await self.execute(query, params=[currency.upper(), entity])
+
+    async def get_actor(self, actor_id):
+        query = "SELECT * FROM actor WHERE id=%s"
+        return await self.execute(query, params=[actor_id])
+
+    async def get_actor_categories(self, actor_id):
+        query = (
+            "SELECT actor_categories.*,concept.label FROM "
+            "actor_categories, concept "
+            "WHERE actor_categories.category_id = concept.id and actor_id=%s")
+        return await self.execute(query, params=[actor_id])
+
+    async def get_actor_jurisdictions(self, actor_id):
+        query = (
+            "SELECT actor_jurisdictions.*,concept.label FROM "
+            "actor_jurisdictions, concept "
+            "WHERE actor_jurisdictions.country_id = concept.id and actor_id=%s"
+        )
+        return await self.execute(query, params=[actor_id])
+
+    async def get_nr_of_tags_by_actor(self, actor_id):
+        query = "SELECT count(*) FROM tag WHERE actor=%s"
+        return await self.execute(query, params=[actor_id])
+
+    def list_address_tags_for_actor(self,
+                                    actor_id,
+                                    show_private=False,
+                                    page=None,
+                                    pagesize=None):
+        query = f"""select
+                        t.*,
+                        tp.uri,
+                        tp.creator,
+                        tp.title,
+                        tp.is_public,
+                        c.level,
+                        acm.gs_cluster_id
+                    from
+                       tag t,
+                       tagpack tp,
+                       confidence c,
+                       address_cluster_mapping acm
+                   where
+                       t.tagpack = tp.id
+                       and t.confidence = c.id
+                       and acm.address=t.address
+                       and acm.currency=t.currency
+                       {hide_private_condition(show_private)}
+                       and t.actor = %s """
+        return self.execute(query,
+                            params=[actor_id],
+                            paging_key='t.id',
+                            page=page,
+                            pagesize=pagesize)
 
     def count(self, currency, show_private=False):
         query = """
