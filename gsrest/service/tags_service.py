@@ -35,7 +35,7 @@ def actor_context_from_row(context_str):
     ctx = json.loads(context_str)
     return ActorContext(
         uris=ctx.get("uris", []),
-        images=ctx.get("images", []),
+        images=[],  # ctx.get("images", []),
         refs=ctx.get("refs", []),
         coingecko_ids=ctx.get("coingecko_ids", []),
         defilama_ids=ctx.get("defilama_ids", []),
