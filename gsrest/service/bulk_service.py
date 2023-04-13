@@ -99,7 +99,8 @@ def flatten(item, name="", flat_dict=None, format=None):
             name = name[:-1]
             item = [i if isinstance(i, str) else str(i) for i in item if i]
             flat_dict[name] = ','.join(item)
-            flat_dict[f'{name}_count'] = len(item)
+            if not name == 'actors':
+                flat_dict[f'{name}_count'] = len(item)
         else:
             flat_dict[name[:-1]] = \
                 [flatten(sub_item, format=format) for sub_item in item]
