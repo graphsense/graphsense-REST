@@ -1,5 +1,5 @@
 import importlib
-from csv import DictWriter
+from csv import DictWriter, Error as CSVError
 from openapi_server.models.values import Values
 from openapi_server.models.entity import Entity
 from openapi_server.models.address_tag import AddressTag
@@ -38,10 +38,10 @@ async def bulk(request, currency, operation, body, num_pages, form='csv'):
         raise web.HTTPBadRequest(text=text)
 
     if form == 'csv':
-        gen = to_csv(the_stack)
+        gen = to_csv(the_stack, request.app.logger)
         mimetype = 'text/csv'
     else:
-        gen = to_json(the_stack)
+        gen = to_json(the_stack, request.app.logger)
         mimetype = 'application/json'
 
     response = web.StreamResponse(status=200,
@@ -99,8 +99,7 @@ def flatten(item, name="", flat_dict=None, format=None):
             name = name[:-1]
             item = [i if isinstance(i, str) else str(i) for i in item if i]
             flat_dict[name] = ','.join(item)
-            if not name == 'actors':
-                flat_dict[f'{name}_count'] = len(item)
+            flat_dict[f'{name}_count'] = len(item)
         else:
             flat_dict[name[:-1]] = \
                 [flatten(sub_item, format=format) for sub_item in item]
@@ -212,12 +211,43 @@ def stack(request, currency, operation, body, num_pages, format):
     return asyncio.as_completed(aws)
 
 
-async def to_csv(stack):
+async def to_csv(stack, logger):
     wr = writer()
     csv = None
 
     stash = []
     has_data = False
+
+    def write_csv_row(csvwriter, buffer_writer, row, header_columns):
+        try:
+            # Filter rows not in header rows (otherswise we get an error, unexpected keys)
+            # This error is easy to go unnoticed. One situation where such an
+            # error is triggered are optional list (lets call it A) fields,
+            # since the first row the function flatten adds an A_count field for
+            # every list if the list field is optional it can be none,
+            # if the first row has a none value for that optional field the type
+            # is not list thus no A_count field is added. Because the first row is
+            # used to create the headerline for the csv the A_count is not part of the header
+            # but if another row has a value set for A (eg. type(A)==list) a count field
+            # is added. This causes problems since we write the data into a stream
+            # thus the header is already out. Also the DictWriter raises a value error
+            # on unexpected fields
+            out_row = {k: v for k, v in row.items() if k in header_columns}
+            csvwriter.writerow(out_row)
+        except (ValueError, CSVError) as e:
+            logger.error(f"Error writing bulk row {row}: ({type(e)}) {e}")
+            request_fields = {
+                k: v
+                for k, v in row.items() if k.startswith(request_field_prefix)
+            }
+            error_and_request_fields = {
+                **{
+                    error_field: "internal error - can't produce csv"
+                },
+                **request_fields
+            }
+            csvwriter.writerow(error_and_request_fields)
+        return buffer_writer.get()
 
     for op in stack:
         rows = await op
@@ -245,13 +275,11 @@ async def to_csv(stack):
                 yield head
 
             for stashed_row in stash:
-                csv.writerow(stashed_row)
-                yield wr.get()
+                yield write_csv_row(csv, wr, stashed_row, fieldnames)
 
             stash = []
 
-            csv.writerow(row)
-            yield wr.get()
+            yield write_csv_row(csv, wr, row, fieldnames)
 
     if not has_data:
         for row in stash:
@@ -266,11 +294,10 @@ async def to_csv(stack):
                 csv.writeheader()
                 yield wr.get()
 
-            csv.writerow(row)
-            yield wr.get()
+            yield write_csv_row(csv, wr, row, fieldnames)
 
 
-async def to_json(stack):
+async def to_json(stack, logger):
     started = False
     yield "["
     for op in stack:
