@@ -1199,6 +1199,11 @@ class Cassandra:
 
     async def list_matching_txs(self, currency, expression, limit):
         prefix_lengths = self.get_prefix_lengths(currency)
+
+        if currency == "eth":
+            if expression.startswith("0x"):
+                expression = expression[2:]
+
         if len(expression) < prefix_lengths['tx']:
             return []
         leading_zeros = 0
@@ -1207,14 +1212,15 @@ class Cassandra:
         while expression[pos] == "0":
             pos += 1
             leading_zeros += 1
-        prefix = expression[:prefix_lengths['tx']]
+
         if currency == 'eth':
-            prefix = prefix.upper()
+            prefix = expression[:prefix_lengths['tx']].upper()
             kind = 'transformed'
             key = 'transaction'
             query = ('SELECT transaction from transaction_ids_by_transaction_'
                      'prefix where transaction_prefix = %s')
         else:
+            prefix = expression[:prefix_lengths['tx']]
             kind = 'raw'
             key = 'tx_hash'
             query = ('SELECT tx_hash from transaction_by_tx_prefix where '
