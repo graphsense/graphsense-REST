@@ -218,9 +218,14 @@ async def to_csv(stack, logger):
     stash = []
     has_data = False
 
+    def is_count_column(row, key):
+        postfix = "_count"
+        return key.endswith(postfix) and key[:-len(postfix)] in row and type(
+            row.get(key, None)) == int
+
     def write_csv_row(csvwriter, buffer_writer, row, header_columns):
         try:
-            # Filter rows not in header rows (otherswise we get an error, unexpected keys)
+            # Filter rows not in header rows (otherwise we get an error, unexpected keys)
             # This error is easy to go unnoticed. One situation where such an
             # error is triggered are optional list (lets call it A) fields,
             # since the first row the function flatten adds an A_count field for
@@ -228,11 +233,15 @@ async def to_csv(stack, logger):
             # if the first row has a none value for that optional field the type
             # is not list thus no A_count field is added. Because the first row is
             # used to create the headerline for the csv the A_count is not part of the header
-            # but if another row has a value set for A (eg. type(A)==list) a count field
+            # but if another row has a value set for A (e.g. type(A)==list) a count field
             # is added. This causes problems since we write the data into a stream
             # thus the header is already out. Also the DictWriter raises a value error
-            # on unexpected fields
-            out_row = {k: v for k, v in row.items() if k in header_columns}
+            # on unexpected fields (only count_columns)
+            out_row = {
+                k: v
+                for k, v in row.items()
+                if (k in header_columns or not is_count_column(row, k))
+            }
             csvwriter.writerow(out_row)
         except (ValueError, CSVError) as e:
             logger.error(f"Error writing bulk row {row}: ({type(e)}) {e}")
