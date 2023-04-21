@@ -1583,7 +1583,6 @@ class Cassandra:
             paging_state = to_hex(results.paging_state)
             results = results.current_rows
         else:
-            fetch_size /= 2
             paging_state1 = paging_state[0] or None
             paging_state2 = paging_state[1] if len(paging_state) > 1 else None
 
@@ -1593,6 +1592,8 @@ class Cassandra:
             if paging_state1 == 'eol':
                 aw1 = empty()
             else:
+                # if fetch_size is odd, get 1 more from incoming
+                half_fetch_size = int(fetch_size / 2) + fetch_size % 2
                 params1 = list(params)
                 params1.append(False)
                 aw1 = self.execute_async(currency,
@@ -1600,11 +1601,12 @@ class Cassandra:
                                          query,
                                          params1,
                                          paging_state=from_hex(paging_state1),
-                                         fetch_size=fetch_size)
+                                         fetch_size=half_fetch_size)
 
             if paging_state2 == 'eol':
                 aw2 = empty()
             else:
+                half_fetch_size = int(fetch_size / 2)
                 params2 = list(params)
                 params2.append(True)
                 aw2 = self.execute_async(currency,
@@ -1612,7 +1614,7 @@ class Cassandra:
                                          query,
                                          params2,
                                          paging_state=from_hex(paging_state2),
-                                         fetch_size=fetch_size)
+                                         fetch_size=half_fetch_size)
             [results1, results2] = await asyncio.gather(aw1, aw2)
             if results1.paging_state is None and \
                results2.paging_state is None:
@@ -1634,7 +1636,7 @@ class Cassandra:
             results = []
             i = j = 0
             key = 'transaction_id' if currency == 'eth' else 'tx_id'
-            while len(results) <= fetch_size * 2 and \
+            while len(results) < fetch_size and \
                   (i < len(results1) or j < len(results2)):  # noqa
                 if i >= len(results1):
                     results.append(results2[j])
