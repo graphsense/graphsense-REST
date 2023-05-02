@@ -75,12 +75,14 @@ async def get_tx(request,
                  token_tx_id=None,
                  include_io=False):
     db = request.app['db']
+
     if token_tx_id is not None:
         if currency == 'eth':
             results = await list_token_txs(request,
                                            currency,
                                            tx_hash,
                                            token_tx_id=token_tx_id)
+
             if len(results):
                 return results[0]
             else:

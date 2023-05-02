@@ -1704,7 +1704,7 @@ class Cassandra:
                 max_height_q = "AND transaction_id <= %s"
                 params.append(last_tx_id)
 
-        query = ("SELECT transaction_id, is_outgoing, log_index "
+        query = ("SELECT transaction_id, is_outgoing, tx_reference "
                  "FROM address_transactions"
                  " WHERE address_id_group = %s and "
                  "address_id_secondary_group in %s"
@@ -1727,6 +1727,9 @@ class Cassandra:
                 tx_ids, await self.list_txs_by_ids(currency, tx_ids))
         }
         for addr_tx in txs:
+            # fix log index field with new tx_refstruct
+            addr_tx["log_index"] = addr_tx["tx_reference"].log_index
+
             full_tx = full_txs[addr_tx['transaction_id']]
             if addr_tx["log_index"] is not None:
                 token_tx = await self.fetch_token_transaction(
@@ -1828,6 +1831,7 @@ class Cassandra:
     async def get_tx_by_hash_eth(self, currency, hash):
         prefix = self.get_prefix_lengths(currency)
         params = [hash.hex()[:prefix['tx']], hash]
+
         statement = ('SELECT tx_hash, block_id, block_timestamp, value, '
                      'from_address, to_address, receipt_contract_address from '
                      'transaction where tx_hash_prefix=%s and tx_hash=%s')
@@ -1971,6 +1975,7 @@ class Cassandra:
         all_txs = await self.list_txs_by_ids(currency,
                                              tx_ids,
                                              include_token_txs=True)
+
         txs = [
             tx for tx in all_txs
             if tx["to_address"] == neighbor and tx["from_address"] == address
