@@ -1200,18 +1200,14 @@ class Cassandra:
     async def list_matching_txs(self, currency, expression, limit):
         prefix_lengths = self.get_prefix_lengths(currency)
 
-        if currency == "eth":
-            if expression.startswith("0x"):
-                expression = expression[2:]
+        # should be safe for btc txs too. They are hex encoded.
+        # so 0x should never be content. For base58 encoded btc adresses
+        # there also no 0 character used.
+        if expression.startswith("0x"):
+            expression = expression[2:]
 
         if len(expression) < prefix_lengths['tx']:
             return []
-        leading_zeros = 0
-        pos = 0
-        # leading zeros will be lost when casting to int
-        while expression[pos] == "0":
-            pos += 1
-            leading_zeros += 1
 
         if currency == 'eth':
             prefix = expression[:prefix_lengths['tx']].upper()
@@ -1225,6 +1221,7 @@ class Cassandra:
             key = 'tx_hash'
             query = ('SELECT tx_hash from transaction_by_tx_prefix where '
                      'tx_prefix=%s')
+
         paging_state = True
         rows = []
         while paging_state and len(rows) < limit:
@@ -1237,12 +1234,18 @@ class Cassandra:
             if result.is_empty():
                 break
 
+            # fix leading zero handling, assumption all tx hashes are 32 bytes
+            # which is true for btc-like currencies and ethereum
             txs = [
-                "0" * leading_zeros +
-                str(hex(int.from_bytes(row[key], byteorder="big")))[2:]
+                row[key].rjust(32, b'\x00').hex()
                 for row in result.current_rows
             ]
-            rows += [tx for tx in txs if tx.startswith(expression)]
+
+            rows += [
+                tx for tx in txs if tx.startswith(expression)
+                or tx.lstrip('0').startswith(expression.lstrip('0'))
+            ]
+
             paging_state = result.paging_state
 
         return rows[0:limit]
