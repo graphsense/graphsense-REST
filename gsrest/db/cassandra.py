@@ -140,6 +140,9 @@ class Cassandra:
             self.cluster = Cluster(self.config['nodes'])
             self.session = self.cluster.connect()
             self.session.row_factory = dict_factory
+            gclimit = self.config.get('concurrency_limit', None)
+            gclimit = 1000 if gclimit is None else gclimit
+            self.global_concurrency_limit_semaphore =  asyncio.Semaphore(gclimit)
             if self.logger:
                 self.logger.info('Connection ready.')
         except NoHostAvailable:
@@ -247,13 +250,14 @@ class Cassandra:
                             fetch_size=None,
                             autopaging=False):
         try:
-            result = await self.execute_async_lowlevel(
-                currency,
-                keyspace_type,
-                query,
-                params=params,
-                paging_state=paging_state,
-                fetch_size=fetch_size)
+            async with self.global_concurrency_limit_semaphore:
+                result = await self.execute_async_lowlevel(
+                    currency,
+                    keyspace_type,
+                    query,
+                    params=params,
+                    paging_state=paging_state,
+                    fetch_size=fetch_size)
         except ProtocolException as e:
             if 'Invalid value for the paging state' not in str(e):
                 raise e
