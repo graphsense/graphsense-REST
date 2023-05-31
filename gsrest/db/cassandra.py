@@ -174,6 +174,7 @@ class Cassandra:
         }
 
     def load_parameters(self, keyspace):
+        currency = keyspace
         self.parameters[keyspace] = {}
         for kind in ['raw', 'transformed']:
             query = "SELECT * FROM configuration"
@@ -187,6 +188,23 @@ class Cassandra:
 
         self.parameters[keyspace][
             "token_config"] = self.load_token_configuration(keyspace)
+
+        # check schema for compatibility and set parameter flags
+        query = (
+            "SELECT column_name FROM system_schema.columns "
+            "WHERE keyspace_name = %s AND table_name = 'address_transactions';"
+        )
+        keyspace_name = self.get_keyspace_mapping(keyspace, "transformed")
+        result = self.session.execute(query, (keyspace_name, ))
+        self.parameters[currency]["use_legacy_log_index"] = ("log_index" in [
+            x["column_name"] for x in result
+        ]) and keyspace == "eth"
+
+        query = ("SELECT table_name FROM system_schema.tables "
+                 "WHERE keyspace_name = %s ;")
+        result = self.session.execute(query, (keyspace_name, ))
+        self.parameters[currency]["use_delta_updater_v1"] = (
+            "new_addresses" in [x["table_name"] for x in result])
 
     def get_prefix_lengths(self, currency):
         if currency not in self.parameters:
@@ -367,20 +385,22 @@ class Cassandra:
         query = "SELECT * FROM summary_statistics LIMIT 1"
         result = await self.execute_async(currency, 'transformed', query)
         stats = one(result)
-        try:
-            query = "SELECT * FROM delta_updater_status LIMIT 1"
-            result = await self.execute_async(currency, 'transformed', query)
-            result = one(result)
-            if result:
-                stats['no_blocks'] = result['last_synced_block'] + 1
-                stats['timestamp'] =\
-                    int(result['last_synced_block_timestamp'].timestamp())\
-                    if 'last_synced_block_timestamp' in result else\
-                    stats['timestamp']
+        if self.parameters[currency]["use_delta_updater_v1"]:
+            try:
+                query = "SELECT * FROM delta_updater_status LIMIT 1"
+                result = await self.execute_async(currency, 'transformed',
+                                                  query)
+                result = one(result)
+                if result:
+                    stats['no_blocks'] = result['last_synced_block'] + 1
+                    stats['timestamp'] =\
+                        int(result['last_synced_block_timestamp'].timestamp())\
+                        if 'last_synced_block_timestamp' in result else\
+                        stats['timestamp']
 
-        except InvalidRequest as e:
-            if 'delta_updater_status' not in str(e):
-                raise e
+            except InvalidRequest as e:
+                if 'delta_updater_status' not in str(e):
+                    raise e
 
         if currency == 'eth':
             stats['no_clusters'] = 0
@@ -582,6 +602,8 @@ class Cassandra:
         return result
 
     async def get_new_address(self, currency, address):
+        if not self.parameters[currency]["use_delta_updater_v1"]:
+            return None
         prefix = self.scrub_prefix(currency, address)
         if not prefix:
             return None
@@ -917,11 +939,12 @@ class Cassandra:
         if len(rows) < limit:
             query = "SELECT address FROM new_addresses "\
                     "WHERE address_prefix = %s"
-            try:
-                await collect(query, True)
-            except InvalidRequest as e:
-                if 'new_addresses' not in str(e):
-                    raise e
+            if self.parameters[currency]["use_delta_updater_v1"]:
+                try:
+                    await collect(query, True)
+                except InvalidRequest as e:
+                    if 'new_addresses' not in str(e):
+                        raise e
             rows = sorted(rows)
         return rows[0:limit]
 
@@ -1424,6 +1447,9 @@ class Cassandra:
         return row
 
     async def is_address_dirty(self, currency, address):
+        if not self.parameters[currency]["use_delta_updater_v1"]:
+            return False
+
         prefix = self.scrub_prefix(currency, address)
         if not prefix:
             return None
@@ -1707,7 +1733,14 @@ class Cassandra:
                 max_height_q = "AND transaction_id <= %s"
                 params.append(last_tx_id)
 
-        query = ("SELECT transaction_id, is_outgoing, log_index "
+        use_legacy_log_index = self.parameters[currency][
+            "use_legacy_log_index"]
+        if use_legacy_log_index:
+            ref_field = "log_index"
+        else:
+            ref_field = "tx_reference"
+
+        query = (f"SELECT transaction_id, is_outgoing, {ref_field} "
                  "FROM address_transactions"
                  " WHERE address_id_group = %s and "
                  "address_id_secondary_group in %s"
@@ -1730,6 +1763,10 @@ class Cassandra:
                 tx_ids, await self.list_txs_by_ids(currency, tx_ids))
         }
         for addr_tx in txs:
+            # fix log index field with new tx_refstruct
+            if not use_legacy_log_index:
+                addr_tx["log_index"] = addr_tx["tx_reference"].log_index
+
             full_tx = full_txs[addr_tx['transaction_id']]
             if addr_tx["log_index"] is not None:
                 token_tx = await self.fetch_token_transaction(
@@ -1831,6 +1868,7 @@ class Cassandra:
     async def get_tx_by_hash_eth(self, currency, hash):
         prefix = self.get_prefix_lengths(currency)
         params = [hash.hex()[:prefix['tx']], hash]
+
         statement = ('SELECT tx_hash, block_id, block_timestamp, value, '
                      'from_address, to_address, receipt_contract_address from '
                      'transaction where tx_hash_prefix=%s and tx_hash=%s')
@@ -1974,6 +2012,7 @@ class Cassandra:
         all_txs = await self.list_txs_by_ids(currency,
                                              tx_ids,
                                              include_token_txs=True)
+
         txs = [
             tx for tx in all_txs
             if tx["to_address"] == neighbor and tx["from_address"] == address
