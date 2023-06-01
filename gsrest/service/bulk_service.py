@@ -9,6 +9,8 @@ from aiohttp import web
 import traceback
 import inspect
 
+list_entity_txs_concurrency_limit_semaphore = asyncio.Semaphore(30)
+
 
 def bulk_json(*args, **kwargs):
     kwargs['form'] = 'json'
@@ -113,7 +115,11 @@ async def wrap(request, operation, currency, params, keys, num_pages, format):
     for (k, v) in keys.items():
         params[k] = v
     try:
-        result = await operation(request, currency, **params)
+        if operation.__name__ == "list_entity_txs":
+            async with list_entity_txs_concurrency_limit_semaphore:
+                result = await operation(request, currency, **params)
+        else:
+            result = await operation(request, currency, **params)
     except RuntimeError:
         result = {error_field: 'not found'}
     except ValueError as e:

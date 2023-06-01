@@ -74,6 +74,7 @@ def build_token_tx(token_currency, tx, token_tx, log):
 
 
 class Result:
+
     def __init__(self, current_rows, params, paging_state):
         self.current_rows = current_rows
         self.params = params
@@ -92,7 +93,9 @@ TxSummary = namedtuple('TxSummary', ['height', 'timestamp', 'tx_hash'])
 
 
 class Cassandra:
+
     def eth(func):
+
         def check(*args, **kwargs):
             self = args[0]
             currency = args[1]
@@ -107,6 +110,7 @@ class Cassandra:
         return check
 
     def new(func):
+
         def check(*args, **kwargs):
             self = args[0]
             currency = args[1]
@@ -140,9 +144,6 @@ class Cassandra:
             self.cluster = Cluster(self.config['nodes'])
             self.session = self.cluster.connect()
             self.session.row_factory = dict_factory
-            gclimit = self.config.get('concurrency_limit', None)
-            gclimit = 1000 if gclimit is None else gclimit
-            self.global_concurrency_limit_semaphore =  asyncio.Semaphore(gclimit)
             if self.logger:
                 self.logger.info('Connection ready.')
         except NoHostAvailable:
@@ -250,14 +251,13 @@ class Cassandra:
                             fetch_size=None,
                             autopaging=False):
         try:
-            async with self.global_concurrency_limit_semaphore:
-                result = await self.execute_async_lowlevel(
-                    currency,
-                    keyspace_type,
-                    query,
-                    params=params,
-                    paging_state=paging_state,
-                    fetch_size=fetch_size)
+            result = await self.execute_async_lowlevel(
+                currency,
+                keyspace_type,
+                query,
+                params=params,
+                paging_state=paging_state,
+                fetch_size=fetch_size)
         except ProtocolException as e:
             if 'Invalid value for the paging state' not in str(e):
                 raise e
