@@ -246,7 +246,7 @@ class Cassandra:
                 fetch_size=None):
         keyspace = self.get_keyspace_mapping(currency, keyspace_type)
         q = replaceFrom(keyspace, query)
-        self.logger.debug(f'{query} {params}')
+        # self.logger.debug(f'{query} {params}')
         q = SimpleStatement(q, fetch_size=fetch_size)
         try:
             result = self.session.execute(q, params, paging_state=paging_state)
@@ -327,8 +327,8 @@ class Cassandra:
                 result = Result(current_rows=result,
                                 params=params,
                                 paging_state=response_future._paging_state)
-                self.logger.debug(f'{query} {params}')
-                self.logger.debug(f'result size {len(result.current_rows)}')
+                # self.logger.debug(f'{query} {params}')
+                # self.logger.debug(f'result size {len(result.current_rows)}')
                 loop.call_soon_threadsafe(future.set_result, result)
 
             def on_err(result):
@@ -492,7 +492,7 @@ class Cassandra:
                                     token_currency=None,
                                     page=None,
                                     pagesize=None):
-        self.logger.debug(f'page {page}')
+        # self.logger.debug(f'page {page}')
         if node_type == 'address':
             id, id_group = \
                 await self.get_address_id_id_group(currency, id)
