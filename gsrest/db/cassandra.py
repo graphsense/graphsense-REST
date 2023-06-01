@@ -5,6 +5,7 @@ from collections import namedtuple
 from cassandra import InvalidRequest
 from cassandra.protocol import ProtocolException
 from cassandra.cluster import Cluster, NoHostAvailable
+from cassandra.policies import RoundRobinPolicy, TokenAwarePolicy
 from cassandra.query import SimpleStatement, dict_factory, ValueSequence
 from math import floor
 
@@ -141,7 +142,7 @@ class Cassandra:
 
     def connect(self):
         try:
-            self.cluster = Cluster(self.config['nodes'])
+            self.cluster = Cluster(self.config['nodes'], protocol_version=5, load_balancing_policy=TokenAwarePolicy(RoundRobinPolicy()))
             self.session = self.cluster.connect()
             self.session.row_factory = dict_factory
             if self.logger:
