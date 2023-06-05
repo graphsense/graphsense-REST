@@ -14,7 +14,7 @@ fi
 MOCK_CMD="docker exec $CASSANDRA_MOCK cqlsh"
 
 TAG=develop
-ETHTAG=feature/internal-txs
+ETHTAG=develop
 
 if [ -z "$ORGANIZATION" ]; then
     echo 'Please set env var $ORGANIZATION'
