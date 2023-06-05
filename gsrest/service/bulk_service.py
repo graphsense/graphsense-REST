@@ -8,6 +8,12 @@ import json
 from aiohttp import web
 import traceback
 import inspect
+import contextlib
+
+
+@contextlib.asynccontextmanager
+async def asyncnullcontext():
+    yield None
 
 
 def bulk_json(*args, **kwargs):
@@ -109,12 +115,14 @@ def flatten(item, name="", flat_dict=None, format=None):
     return flat_dict
 
 
-async def wrap(request, operation, currency, params, keys, num_pages, format):
+async def wrap(request, operation, currency, params, keys, num_pages, format,
+               max_concurrency_sem_context):
     params = dict(params)
     for (k, v) in keys.items():
         params[k] = v
     try:
-        result = await operation(request, currency, **params)
+        async with max_concurrency_sem_context:
+            result = await operation(request, currency, **params)
     except RuntimeError:
         result = {error_field: 'not found'}
     except ValueError as e:
@@ -158,7 +166,7 @@ async def wrap(request, operation, currency, params, keys, num_pages, format):
     if num_pages > 0 and page_state:
         params['page'] = page_state
         more = await wrap(request, operation, currency, params, keys,
-                          num_pages, format)
+                          num_pages, format, max_concurrency_sem_context)
         for row in more:
             flat.append(row)
     return flat
@@ -169,6 +177,7 @@ def stack(request, currency, operation, body, num_pages, format):
         for api in apis:
             mod = importlib.import_module(f'gsrest.service.{api}_service')
             if hasattr(mod, operation):
+                operation_name = operation
                 operation = getattr(mod, operation)
                 break
     except ModuleNotFoundError:
@@ -177,6 +186,9 @@ def stack(request, currency, operation, body, num_pages, format):
         raise RuntimeError(f'{api}.{operation}'
                            ' not found')
     aws = []
+
+    max_concurrency_bulk_operation = request.app['config']['database'].get(
+        f"max_concurrency_bulk_{operation_name}", 10)
 
     params = {}
     keys = {}
@@ -200,12 +212,20 @@ def stack(request, currency, operation, body, num_pages, format):
         raise TypeError('Keys need to be passed as list')
     inspect.getcallargs(operation, **check)
 
+    if operation_name in ["list_entity_txs", "list_entity_addresses"]:
+        context = asyncio.Semaphore(max_concurrency_bulk_operation)
+    else:
+        # async null context, does nothing
+        # https://stackoverflow.com/questions/61479059
+        # /it-there-any-default-asynchronious-null-context-manager-in-python3-7
+        context = contextlib.AsyncExitStack()
+
     for i in range(0, ln):
         the_keys = {}
         for (k, v) in keys.items():
             the_keys[k] = v[i]
         aw = wrap(request, operation, currency, params, the_keys, num_pages,
-                  format)
+                  format, context)
 
         aws.append(aw)
 
