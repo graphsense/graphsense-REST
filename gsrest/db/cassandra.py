@@ -142,7 +142,10 @@ class Cassandra:
 
     def connect(self):
         try:
-            self.cluster = Cluster(self.config['nodes'], protocol_version=5, load_balancing_policy=TokenAwarePolicy(RoundRobinPolicy()))
+            self.cluster = Cluster(self.config['nodes'],
+                                   protocol_version=5,
+                                   load_balancing_policy=TokenAwarePolicy(
+                                       RoundRobinPolicy()))
             self.session = self.cluster.connect()
             self.session.row_factory = dict_factory
             if self.logger:
