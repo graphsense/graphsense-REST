@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [23.05] - 2023-06-??
+## [23.06] - 2023-06-12
 ### Changed
 - fix new du v1 address not found in /address/{addr}/entity endpoint
 - reenabled returning logos from coingecko
