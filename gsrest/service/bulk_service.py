@@ -9,6 +9,7 @@ from aiohttp import web
 import traceback
 import inspect
 import contextlib
+from functools import reduce
 
 
 @contextlib.asynccontextmanager
@@ -111,6 +112,7 @@ def flatten(item, name="", flat_dict=None, format=None):
             flat_dict[name[:-1]] = \
                 [flatten(sub_item, format=format) for sub_item in item]
     else:
+        # if item is not None:
         flat_dict[name[:-1]] = item
     return flat_dict
 
@@ -234,10 +236,6 @@ def stack(request, currency, operation, body, num_pages, format):
 
 async def to_csv(stack, logger):
     wr = writer()
-    csv = None
-
-    stash = []
-    has_data = False
 
     def is_count_column(row, key):
         postfix = "_count"
@@ -274,6 +272,7 @@ async def to_csv(stack, logger):
                 for k, v in row.items()
                 if (k in header_columns or not is_count_column(row, k))
             }
+
             csvwriter.writerow(out_row)
         except (ValueError, CSVError) as e:
             logger.error(f"Error writing bulk row {row}: ({type(e)}) {e}")
@@ -290,52 +289,42 @@ async def to_csv(stack, logger):
             csvwriter.writerow(error_and_request_fields)
         return buffer_writer.get()
 
+    NR_REGULAR_ROWS_USED_TO_INFER_HEADER = 100
+    rows_to_infer_header = []
+    regular_rows = 0
+    ops_rest = []
     for op in stack:
+        if regular_rows < NR_REGULAR_ROWS_USED_TO_INFER_HEADER:
+            rows = await op
+            rows_to_infer_header.extend(rows)
+            regular_rows += sum(
+                1 for r in rows
+                if info_field not in r and error_field not in r)
+        else:
+            ops_rest.append(op)
+
+    # Infer header
+    headerfields = sorted(
+        list(
+            reduce(set.union, [set(r.keys()) for r in rows_to_infer_header],
+                   set()).union(set([error_field, info_field]))))
+
+    csv = DictWriter(wr, headerfields, restval='', extrasaction='ignore')
+
+    # write header
+    csv.writeheader()
+    head = wr.get()
+    yield head
+
+    # write header infer rows
+    for row in rows_to_infer_header:
+        yield write_csv_row(csv, wr, row, headerfields)
+
+    # write the rest
+    for op in ops_rest:
         rows = await op
-
         for row in rows:
-
-            if error_field in row and not csv:
-                stash.append(row)
-                continue
-
-            if info_field in row and not csv:
-                stash.append(row)
-                continue
-
-            head = ""
-            has_data = True
-            if not csv:
-                fieldnames = list(row.keys())
-                fieldnames.append(info_field)
-                fieldnames.append(error_field)
-                fieldnames = sorted(fieldnames)
-                csv = DictWriter(wr, fieldnames)
-                csv.writeheader()
-                head = wr.get()
-                yield head
-
-            for stashed_row in stash:
-                yield write_csv_row(csv, wr, stashed_row, fieldnames)
-
-            stash = []
-
-            yield write_csv_row(csv, wr, row, fieldnames)
-
-    if not has_data:
-        for row in stash:
-            if not csv:
-                fieldnames = list(row.keys())
-                if info_field not in fieldnames:
-                    fieldnames.append(info_field)
-                if error_field not in fieldnames:
-                    fieldnames.append(error_field)
-                fieldnames = sorted(fieldnames)
-                csv = DictWriter(wr, fieldnames)
-                csv.writeheader()
-                yield wr.get()
-
-            yield write_csv_row(csv, wr, row, fieldnames)
+            yield write_csv_row(csv, wr, row, headerfields)
 
 
 async def to_json(stack, logger):
