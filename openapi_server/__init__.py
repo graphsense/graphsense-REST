@@ -6,6 +6,7 @@ import gsrest.db
 import yaml
 import importlib
 from gsrest.plugins import get_subclass
+import logging.handlers
 
 CONFIG_FILE = "./instance/config.yaml"
 
