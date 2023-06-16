@@ -5,10 +5,11 @@ connexion[aiohttp,swagger-ui] >= 2.6.0; python_version>="3.6"
 swagger-ui-bundle >= 0.0.9
 aiohttp_jinja2 >= 1.5.0
 aiohttp_cors >= 0.7.0
-cassandra-driver==3.25.0
+cassandra-driver==3.27.0
 aiopg==1.3.3
 psycopg2==2.9.2
 openapi-schema-validator >= 0.2.3 
 fuzzy_match==0.0.1
 numpy>=1.22
 eth-event>=1.2.3
+lz4~=4.3.2

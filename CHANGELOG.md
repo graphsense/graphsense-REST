@@ -3,6 +3,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [23.06] - 2023-06-12
+### Changed
+- fix new du v1 address not found in /address/{addr}/entity endpoint
+- reenabled returning logos from coingecko
+- fix search for tx hashes with 0x prefix (closes [#4](https://github.com/graphsense/graphsense-ethereum-etl/issues/4))
+- fix search of all zero tx hashes or addresses
+- add compatibilty to new tx_reference field in eth-like keyspaces [#8](https://github.com/graphsense/graphsense-ethereum-transformation/issues/8)
+- concurrency limit for some bulk requests to avoid overloading db
+
+
 ## [23.03] - 2023-03-28
 ### Added
 - Support for actors to collect tags under the umbrella of their real world controller

@@ -6,6 +6,7 @@ import gsrest.db
 import yaml
 import importlib
 from gsrest.plugins import get_subclass
+import logging.handlers
 
 CONFIG_FILE = "./instance/config.yaml"
 
@@ -25,6 +26,11 @@ def setup_logging(logger, config):
     FORMAT = '%(asctime)s %(message)s'
     logging.basicConfig(format=FORMAT)
     logger.setLevel(level)
+
+    logging.getLogger('asyncio').setLevel(logging.WARNING)
+    logging.getLogger('connexion').setLevel(logging.WARNING)
+    logging.getLogger('cassandra').setLevel(logging.INFO)
+
     for handler in logging.root.handlers:
         handler.setFormatter(
             logging.Formatter("%(levelname)-8s %(asctime)s "

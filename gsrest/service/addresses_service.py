@@ -99,6 +99,20 @@ async def list_address_links(request,
     return await common.links_response(request, currency, result)
 
 
+async def try_get_delta_update_entity_dummy(request, currency, address,
+                                            notfound):
+    db = request.app['db']
+    try:
+        aws = [get_rates(request, currency), db.new_entity(currency, address)]
+        [rates, entity] = await asyncio.gather(*aws)
+    except RuntimeError as e:
+        if 'not found' not in str(e):
+            raise e
+        raise notfound
+    return from_row(currency, entity, rates['rates'],
+                    db.get_token_configuration(currency))
+
+
 async def get_address_entity(request, currency, address):
     db = request.app['db']
 
@@ -108,21 +122,12 @@ async def get_address_entity(request, currency, address):
     except RuntimeError as e:
         if 'not found' not in str(e):
             raise e
-        try:
-            aws = [
-                get_rates(request, currency),
-                db.new_entity(currency, address)
-            ]
-            [rates, entity] = await asyncio.gather(*aws)
-        except RuntimeError as e:
-            if 'not found' not in str(e):
-                raise e
-            raise notfound
-        return from_row(currency, entity, rates['rates'],
-                        db.get_token_configuration(currency))
+        return await try_get_delta_update_entity_dummy(request, currency,
+                                                       address, notfound)
 
     if entity_id is None:
-        raise notfound
+        return await try_get_delta_update_entity_dummy(request, currency,
+                                                       address, notfound)
 
     result = await get_entity(request,
                               currency,

@@ -33,9 +33,14 @@ def actor_context_from_row(context_str):
     if context_str is None:
         return None
     ctx = json.loads(context_str)
+
+    # currently we only have a license for coingecko images
+    # so we filter here.
+    image_urls = [img for img in ctx.get("images", []) if "coingecko."]
+
     return ActorContext(
         uris=ctx.get("uris", []),
-        images=ctx.get("images", []),
+        images=image_urls,
         refs=ctx.get("refs", []),
         coingecko_ids=ctx.get("coingecko_ids", []),
         defilama_ids=ctx.get("defilama_ids", []),

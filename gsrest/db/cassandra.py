@@ -5,6 +5,7 @@ from collections import namedtuple
 from cassandra import InvalidRequest
 from cassandra.protocol import ProtocolException
 from cassandra.cluster import Cluster, NoHostAvailable
+from cassandra.policies import RoundRobinPolicy, TokenAwarePolicy
 from cassandra.query import SimpleStatement, dict_factory, ValueSequence
 from math import floor
 
@@ -74,6 +75,7 @@ def build_token_tx(token_currency, tx, token_tx, log):
 
 
 class Result:
+
     def __init__(self, current_rows, params, paging_state):
         self.current_rows = current_rows
         self.params = params
@@ -92,7 +94,9 @@ TxSummary = namedtuple('TxSummary', ['height', 'timestamp', 'tx_hash'])
 
 
 class Cassandra:
+
     def eth(func):
+
         def check(*args, **kwargs):
             self = args[0]
             currency = args[1]
@@ -107,6 +111,7 @@ class Cassandra:
         return check
 
     def new(func):
+
         def check(*args, **kwargs):
             self = args[0]
             currency = args[1]
@@ -137,7 +142,10 @@ class Cassandra:
 
     def connect(self):
         try:
-            self.cluster = Cluster(self.config['nodes'])
+            self.cluster = Cluster(self.config['nodes'],
+                                   protocol_version=5,
+                                   load_balancing_policy=TokenAwarePolicy(
+                                       RoundRobinPolicy()))
             self.session = self.cluster.connect()
             self.session.row_factory = dict_factory
             if self.logger:
@@ -170,6 +178,7 @@ class Cassandra:
         }
 
     def load_parameters(self, keyspace):
+        currency = keyspace
         self.parameters[keyspace] = {}
         for kind in ['raw', 'transformed']:
             query = "SELECT * FROM configuration"
@@ -183,6 +192,23 @@ class Cassandra:
 
         self.parameters[keyspace][
             "token_config"] = self.load_token_configuration(keyspace)
+
+        # check schema for compatibility and set parameter flags
+        query = (
+            "SELECT column_name FROM system_schema.columns "
+            "WHERE keyspace_name = %s AND table_name = 'address_transactions';"
+        )
+        keyspace_name = self.get_keyspace_mapping(keyspace, "transformed")
+        result = self.session.execute(query, (keyspace_name, ))
+        self.parameters[currency]["use_legacy_log_index"] = ("log_index" in [
+            x["column_name"] for x in result
+        ]) and keyspace == "eth"
+
+        query = ("SELECT table_name FROM system_schema.tables "
+                 "WHERE keyspace_name = %s ;")
+        result = self.session.execute(query, (keyspace_name, ))
+        self.parameters[currency]["use_delta_updater_v1"] = (
+            "new_addresses" in [x["table_name"] for x in result])
 
     def get_prefix_lengths(self, currency):
         if currency not in self.parameters:
@@ -223,7 +249,7 @@ class Cassandra:
                 fetch_size=None):
         keyspace = self.get_keyspace_mapping(currency, keyspace_type)
         q = replaceFrom(keyspace, query)
-        self.logger.debug(f'{query} {params}')
+        # self.logger.debug(f'{query} {params}')
         q = SimpleStatement(q, fetch_size=fetch_size)
         try:
             result = self.session.execute(q, params, paging_state=paging_state)
@@ -304,8 +330,8 @@ class Cassandra:
                 result = Result(current_rows=result,
                                 params=params,
                                 paging_state=response_future._paging_state)
-                self.logger.debug(f'{query} {params}')
-                self.logger.debug(f'result size {len(result.current_rows)}')
+                # self.logger.debug(f'{query} {params}')
+                # self.logger.debug(f'result size {len(result.current_rows)}')
                 loop.call_soon_threadsafe(future.set_result, result)
 
             def on_err(result):
@@ -363,20 +389,22 @@ class Cassandra:
         query = "SELECT * FROM summary_statistics LIMIT 1"
         result = await self.execute_async(currency, 'transformed', query)
         stats = one(result)
-        try:
-            query = "SELECT * FROM delta_updater_status LIMIT 1"
-            result = await self.execute_async(currency, 'transformed', query)
-            result = one(result)
-            if result:
-                stats['no_blocks'] = result['last_synced_block'] + 1
-                stats['timestamp'] =\
-                    int(result['last_synced_block_timestamp'].timestamp())\
-                    if 'last_synced_block_timestamp' in result else\
-                    stats['timestamp']
+        if self.parameters[currency]["use_delta_updater_v1"]:
+            try:
+                query = "SELECT * FROM delta_updater_status LIMIT 1"
+                result = await self.execute_async(currency, 'transformed',
+                                                  query)
+                result = one(result)
+                if result:
+                    stats['no_blocks'] = result['last_synced_block'] + 1
+                    stats['timestamp'] =\
+                        int(result['last_synced_block_timestamp'].timestamp())\
+                        if 'last_synced_block_timestamp' in result else\
+                        stats['timestamp']
 
-        except InvalidRequest as e:
-            if 'delta_updater_status' not in str(e):
-                raise e
+            except InvalidRequest as e:
+                if 'delta_updater_status' not in str(e):
+                    raise e
 
         if currency == 'eth':
             stats['no_clusters'] = 0
@@ -467,7 +495,7 @@ class Cassandra:
                                     token_currency=None,
                                     page=None,
                                     pagesize=None):
-        self.logger.debug(f'page {page}')
+        # self.logger.debug(f'page {page}')
         if node_type == 'address':
             id, id_group = \
                 await self.get_address_id_id_group(currency, id)
@@ -578,6 +606,8 @@ class Cassandra:
         return result
 
     async def get_new_address(self, currency, address):
+        if not self.parameters[currency]["use_delta_updater_v1"]:
+            return None
         prefix = self.scrub_prefix(currency, address)
         if not prefix:
             return None
@@ -913,11 +943,12 @@ class Cassandra:
         if len(rows) < limit:
             query = "SELECT address FROM new_addresses "\
                     "WHERE address_prefix = %s"
-            try:
-                await collect(query, True)
-            except InvalidRequest as e:
-                if 'new_addresses' not in str(e):
-                    raise e
+            if self.parameters[currency]["use_delta_updater_v1"]:
+                try:
+                    await collect(query, True)
+                except InvalidRequest as e:
+                    if 'new_addresses' not in str(e):
+                        raise e
             rows = sorted(rows)
         return rows[0:limit]
 
@@ -1195,26 +1226,29 @@ class Cassandra:
 
     async def list_matching_txs(self, currency, expression, limit):
         prefix_lengths = self.get_prefix_lengths(currency)
+
+        # should be safe for btc txs too. They are hex encoded.
+        # so 0x should never be content. For base58 encoded btc adresses
+        # there also no 0 character used.
+        if expression.startswith("0x"):
+            expression = expression[2:]
+
         if len(expression) < prefix_lengths['tx']:
             return []
-        leading_zeros = 0
-        pos = 0
-        # leading zeros will be lost when casting to int
-        while expression[pos] == "0":
-            pos += 1
-            leading_zeros += 1
-        prefix = expression[:prefix_lengths['tx']]
+
         if currency == 'eth':
-            prefix = prefix.upper()
+            prefix = expression[:prefix_lengths['tx']].upper()
             kind = 'transformed'
             key = 'transaction'
             query = ('SELECT transaction from transaction_ids_by_transaction_'
                      'prefix where transaction_prefix = %s')
         else:
+            prefix = expression[:prefix_lengths['tx']]
             kind = 'raw'
             key = 'tx_hash'
             query = ('SELECT tx_hash from transaction_by_tx_prefix where '
                      'tx_prefix=%s')
+
         paging_state = True
         rows = []
         while paging_state and len(rows) < limit:
@@ -1227,12 +1261,18 @@ class Cassandra:
             if result.is_empty():
                 break
 
+            # fix leading zero handling, assumption all tx hashes are 32 bytes
+            # which is true for btc-like currencies and ethereum
             txs = [
-                "0" * leading_zeros +
-                str(hex(int.from_bytes(row[key], byteorder="big")))[2:]
+                row[key].rjust(32, b'\x00').hex()
                 for row in result.current_rows
             ]
-            rows += [tx for tx in txs if tx.startswith(expression)]
+
+            rows += [
+                tx for tx in txs if tx.startswith(expression)
+                or tx.lstrip('0').startswith(expression.lstrip('0'))
+            ]
+
             paging_state = result.paging_state
 
         return rows[0:limit]
@@ -1411,6 +1451,9 @@ class Cassandra:
         return row
 
     async def is_address_dirty(self, currency, address):
+        if not self.parameters[currency]["use_delta_updater_v1"]:
+            return False
+
         prefix = self.scrub_prefix(currency, address)
         if not prefix:
             return None
@@ -1694,7 +1737,14 @@ class Cassandra:
                 max_height_q = "AND transaction_id <= %s"
                 params.append(last_tx_id)
 
-        query = ("SELECT transaction_id, is_outgoing, log_index "
+        use_legacy_log_index = self.parameters[currency][
+            "use_legacy_log_index"]
+        if use_legacy_log_index:
+            ref_field = "log_index"
+        else:
+            ref_field = "tx_reference"
+
+        query = (f"SELECT transaction_id, is_outgoing, {ref_field} "
                  "FROM address_transactions"
                  " WHERE address_id_group = %s and "
                  "address_id_secondary_group in %s"
@@ -1717,6 +1767,10 @@ class Cassandra:
                 tx_ids, await self.list_txs_by_ids(currency, tx_ids))
         }
         for addr_tx in txs:
+            # fix log index field with new tx_refstruct
+            if not use_legacy_log_index:
+                addr_tx["log_index"] = addr_tx["tx_reference"].log_index
+
             full_tx = full_txs[addr_tx['transaction_id']]
             if addr_tx["log_index"] is not None:
                 token_tx = await self.fetch_token_transaction(
@@ -1818,6 +1872,7 @@ class Cassandra:
     async def get_tx_by_hash_eth(self, currency, hash):
         prefix = self.get_prefix_lengths(currency)
         params = [hash.hex()[:prefix['tx']], hash]
+
         statement = ('SELECT tx_hash, block_id, block_timestamp, value, '
                      'from_address, to_address, receipt_contract_address from '
                      'transaction where tx_hash_prefix=%s and tx_hash=%s')
@@ -1961,6 +2016,7 @@ class Cassandra:
         all_txs = await self.list_txs_by_ids(currency,
                                              tx_ids,
                                              include_token_txs=True)
+
         txs = [
             tx for tx in all_txs
             if tx["to_address"] == neighbor and tx["from_address"] == address

@@ -83,7 +83,7 @@ async def search(test_case):
     expected.currencies[0] = \
         SearchResultByCurrency(
             currency='btc',
-            txs=['ab1880', 'ab188013'],
+            txs=['ab1880'.rjust(64, "0"), 'ab188013'.rjust(64, "0")],
             addresses=[])
 
     result = await test_case.request(path, q='ab188')
@@ -92,7 +92,7 @@ async def search(test_case):
     expected.currencies[0] = \
         SearchResultByCurrency(
             currency='btc',
-            txs=['ab188013'],
+            txs=['ab188013'.rjust(64, "0")],
             addresses=[])
 
     result = await test_case.request(path, q='ab18801')
@@ -101,7 +101,7 @@ async def search(test_case):
     expected.currencies[0] = \
         SearchResultByCurrency(
             currency='btc',
-            txs=['00ab188013'],
+            txs=['00ab188013'.rjust(64, "0")],
             addresses=[])
 
     result = await test_case.request(path, q='00ab1')
@@ -142,7 +142,7 @@ async def search(test_case):
     expected.currencies[2] = \
         SearchResultByCurrency(
             currency='eth',
-            txs=['af6e0000', 'af6e0003'],
+            txs=['af6e0000'.rjust(64, "0"), 'af6e0003'.rjust(64, "0")],
             addresses=[])
 
     result = await test_case.request(path, q='af6e')
