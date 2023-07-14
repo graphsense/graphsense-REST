@@ -14,6 +14,7 @@ from gsrest.service.rates_service import list_rates
 from gsrest.db.util import tagstores, tagstores_with_paging
 from gsrest.service.tags_service import address_tag_from_row
 from gsrest.util import get_first_key_present
+from psycopg2.errors import InvalidTextRepresentation
 
 
 def address_from_row(currency, row, rates, token_config, actors):
@@ -105,13 +106,20 @@ async def list_tags_by_address(request,
                                address,
                                page=None,
                                pagesize=None):
-    address_tags, next_page = \
-        await tagstores_with_paging(
-            request.app['tagstores'],
-            address_tag_from_row,
-            'list_tags_by_address',
-            page, pagesize, currency, address,
-            request.app['show_private_tags'])
+
+    try:
+        address_tags, next_page = \
+            await tagstores_with_paging(
+                request.app['tagstores'],
+                address_tag_from_row,
+                'list_tags_by_address',
+                page, pagesize, currency, address,
+                request.app['show_private_tags'])
+    except InvalidTextRepresentation as e:
+        if currency.upper() in str(e):
+            raise ValueError(f"Currency {currency} currently not supported")
+        else:
+            raise e
 
     return AddressTags(address_tags=address_tags, next_page=next_page)
 

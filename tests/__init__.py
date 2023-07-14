@@ -17,6 +17,18 @@ class BaseTestCase(AioHTTPTestCase):
         return factory(os.path.join(os.getcwd(), 'tests/instance/config.yaml'),
                        validate_responses=True).app
 
+    async def requestOnly(self, path, body, **kwargs):
+        headers = {
+            'Accept': 'application/json',
+            'Authorization': kwargs.get('auth', 'x')
+        }
+        response =  await self.client.request(
+            path=path.format(**kwargs),
+            method='GET' if body is None else 'POST',
+            json=body,
+            headers=headers)
+        return (response, (await response.read()).decode('utf-8'))
+
     async def requestWithCodeAndBody(self, path, code, body, **kwargs):
         headers = {
             'Accept': 'application/json',
