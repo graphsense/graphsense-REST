@@ -790,6 +790,25 @@ async def list_tags_by_address(test_case):
     test_case.assertEqual([tag.to_dict() for tag in eth_addressWithTags.tags],
                           result['address_tags'])
 
+    # Casing of the address does not matter for ethereum
+    result = await test_case.request(
+        path, currency='eth', address=eth_addressWithTags.address.upper())
+    test_case.assertEqual([tag.to_dict() for tag in eth_addressWithTags.tags],
+                          result['address_tags'])
+
+    # Adding trailing whitespace is handled gracefully
+    result = await test_case.request(
+        path,
+        currency='eth',
+        address=eth_addressWithTags.address.upper() + "   ")
+    test_case.assertEqual([tag.to_dict() for tag in eth_addressWithTags.tags],
+                          result['address_tags'])
+
+    result, content = await test_case.requestOnly(
+        path, None, currency='abcd', address=eth_addressWithTags.address)
+    assert result.status == 400
+    assert "Currency abcd currently not supported" in content
+
 
 async def list_address_neighbors(test_case):
     path = '/{currency}/addresses/{address}/neighbors'\

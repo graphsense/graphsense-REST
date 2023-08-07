@@ -239,6 +239,10 @@ class Tagstore:
                         c.level desc
                         """
 
+        address = address.strip()
+        if currency == 'eth':
+            address = address.lower()
+
         return self.execute(query,
                             params=[currency.upper(), address],
                             paging_key='t.id',
@@ -356,6 +360,12 @@ class Tagstore:
         if not addresses:
             raise TypeError('x')
             return Result(), None
+
+        if currency == 'eth':
+            addresses = tuple(addr.lower().strip() for addr in addresses)
+        else:
+            addresses = tuple(addr.strip() for addr in addresses)
+
         query = f"""select
                     t.address,
                     json_agg(distinct t.label) as labels
