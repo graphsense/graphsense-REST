@@ -29,7 +29,7 @@ def to_csv(query_function):
             raise ValueError('nothing found')
 
         def flatten(item, name=""):
-            if type(item) == Values:
+            if isinstance(item, Values):
                 flat_dict[name + 'value'] = item.value
                 for rate in item.fiat_values:
                     flat_dict[name + rate.code] = rate.value
