@@ -22,13 +22,13 @@ def to_hex(paging_state):
 
 
 def from_hex(page):
-    if type(page) == str and page.startswith("0x"):
+    if isinstance(page, str) and page.startswith("0x"):
         page = page[2:]
     return bytes.fromhex(page) if page else None
 
 
 def eth_address_to_hex(address):
-    if type(address) != bytes:
+    if not isinstance(address, bytes):
         return address
     return '0x' + address.hex()
 
@@ -209,6 +209,12 @@ class Cassandra:
         result = self.session.execute(query, (keyspace_name, ))
         self.parameters[currency]["use_delta_updater_v1"] = (
             "new_addresses" in [x["table_name"] for x in result])
+
+        keyspace_name = self.get_keyspace_mapping(keyspace, "raw")
+        result = self.session.execute(query, (keyspace_name, ))
+
+        self.parameters[currency]["tx_graph_available"] = (
+            "transaction_spending" in [x["table_name"] for x in result])
 
     def get_prefix_lengths(self, currency):
         if currency not in self.parameters:
@@ -995,7 +1001,7 @@ class Cassandra:
         with_txs = '*' in fields \
             or 'first_tx_id' in fields \
             or 'last_tx_id' in fields
-        return await self.finish_entities(currency, result, with_txs),\
+        return await self.finish_entities(currency, result, with_txs), \
             to_hex(paging_state)
 
     @eth
@@ -1026,7 +1032,7 @@ class Cassandra:
         result = await self.concurrent_with_args(currency, 'transformed',
                                                  query, params)
 
-        return await self.finish_addresses(currency, result),\
+        return await self.finish_addresses(currency, result), \
             to_hex(results.paging_state)
 
     async def list_neighbors(self, currency, id, is_outgoing, node_type,
@@ -1137,6 +1143,62 @@ class Cassandra:
                 row['address_id'] = row[that + '_address_id']
 
         return results, to_hex(paging_state)
+
+    @eth
+    async def get_spending_txs(self, currency, tx_hash, io_index):
+        if not self.parameters[currency]["tx_graph_available"]:
+            # for value err msg is visible to the user.
+            raise ValueError(f"{currency} does not yet support transaction linking.")
+        prefix = self.get_prefix_lengths(currency)
+        if isinstance(io_index, int):
+            query = ('SELECT * from transaction_spending where '
+                     'spending_tx_prefix=%s and spending_tx_hash=%s '
+                     'and spending_input_index=%s')
+            params = [
+                tx_hash[:prefix['tx']],
+                bytearray.fromhex(tx_hash), io_index
+            ]
+        else:
+            query = ('SELECT * from transaction_spending where '
+                     'spending_tx_prefix=%s and spending_tx_hash=%s')
+            params = [tx_hash[:prefix['tx']], bytearray.fromhex(tx_hash)]
+
+        result = await self.execute_async(currency, 'raw', query, params)
+        return result
+
+    async def get_spending_txs_eth(self, currency, tx_hash, io_index):
+        # we raise a value error here,
+        # that makes the error msg visible to the user.
+        raise ValueError(
+            f"Currency {currency} does not support transaction level linking")
+
+    @eth
+    async def get_spent_in_txs(self, currency, tx_hash, io_index):
+        if not self.parameters[currency]["tx_graph_available"]:
+            # for value err msg is visible to the user.
+            raise ValueError(f"{currency} does not yet support transaction linking.")
+        prefix = self.get_prefix_lengths(currency)
+        if isinstance(io_index, int):
+            query = ('SELECT * from transaction_spent_in where '
+                     'spent_tx_prefix=%s and spent_tx_hash=%s '
+                     'and spent_input_index=%s')
+            params = [
+                tx_hash[:prefix['tx']],
+                bytearray.fromhex(tx_hash), io_index
+            ]
+        else:
+            query = ('SELECT * from transaction_spent_in where '
+                     'spent_tx_prefix=%s and spent_tx_hash=%s')
+            params = [tx_hash[:prefix['tx']], bytearray.fromhex(tx_hash)]
+
+        result = await self.execute_async(currency, 'raw', query, params)
+        return result
+
+    async def get_spent_in_txs_eth(self, currency, tx_hash, io_index):
+        # we raise a value error here,
+        # that makes the error msg visible to the user.
+        raise ValueError(
+            f"Currency {currency} does not support transaction level linking")
 
     @eth
     async def get_tx(self, currency, tx_hash):

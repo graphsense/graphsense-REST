@@ -127,7 +127,7 @@ def is_supported_log(log) -> bool:
 
 
 def convert_db_log(db_log) -> dict:
-    if type(db_log) == dict:
+    if isinstance(db_log, dict):
         db_log = Namespace(**db_log)
     data_str = db_log.data.hex()
     return {

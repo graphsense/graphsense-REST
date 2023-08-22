@@ -216,3 +216,59 @@ async def get_tx_io(test_case):
                                      tx_hash='ab1880',
                                      io='outputs')
     test_case.assertEqual(tx1.to_dict()['outputs'], result)
+
+
+async def get_spending_txs(test_case):
+    path = '/{currency}/txs/{tx_hash}/spending'
+    result = await test_case.request(path,
+                                     currency='btc',
+                                     tx_hash='ab1880')
+
+    test_case.assertEqual([{'input_index': 0, 'output_index': 0, 'tx_hash': 'ab'}], result)
+
+    result = await test_case.request(path,
+                                     currency='btc',
+                                     tx_hash='ab188013')
+
+    test_case.assertEqual([{'input_index': 0, 'output_index': 0, 'tx_hash': 'ab1880'}], result)
+
+    result = await test_case.request(path,
+                                     currency='btc',
+                                     tx_hash='00ab188013')
+
+    test_case.assertEqual([{'input_index': 0, 'output_index': 0, 'tx_hash': 'ab188013'}], result)
+
+    result, body = await test_case.requestOnly(path, None,
+                                     currency='eth',
+                                     tx_hash='ab')
+    assert result.status == 400
+    assert "does not support transaction level linking" in body
+
+
+
+async def get_spent_in_txs(test_case):
+    path = '/{currency}/txs/{tx_hash}/spent_in'
+
+    result = await test_case.request(path,
+                                     currency='btc',
+                                     tx_hash='ab1880')
+
+    test_case.assertEqual([{'input_index': 0, 'output_index': 0, 'tx_hash': 'ab188013'}], result)
+
+    result = await test_case.request(path,
+                                     currency='btc',
+                                     tx_hash='ab188013')
+
+    test_case.assertEqual([{'input_index': 0, 'output_index': 0, 'tx_hash': '00ab188013'}], result)
+
+    result = await test_case.request(path,
+                                     currency='btc',
+                                     tx_hash='00ab188013')
+
+    test_case.assertEqual([{'input_index': 0, 'output_index': 0, 'tx_hash': '000000'}], result)
+
+    result, body = await test_case.requestOnly(path, None,
+                                     currency='eth',
+                                     tx_hash='ab')
+    assert result.status == 400
+    assert "does not support transaction level linking" in body

@@ -7,6 +7,7 @@ from aiohttp.test_utils import unittest_run_loop
 
 from openapi_server.models.tx import Tx
 from openapi_server.models.tx_account import TxAccount
+from openapi_server.models.tx_ref import TxRef
 from openapi_server.models.tx_value import TxValue
 from tests import BaseTestCase
 import gsrest.test.txs_service as test_service
@@ -14,6 +15,22 @@ import gsrest.test.txs_service as test_service
 
 class TestTxsController(BaseTestCase):
     """TxsController integration test stubs"""
+
+    async def test_get_spending_txs(self):
+        """Test case for get_spending_txs
+
+        Returns in which other transaction's outputs the asked transaction spent. Think backwards references is the transaction graph. This endpoint is only available for utxo like currencies.
+        """
+        await test_service.get_spending_txs(self)
+
+
+    async def test_get_spent_in_txs(self):
+        """Test case for get_spent_in_txs
+
+        Returns in which other transactions, outputs from the asked transaction are spent. Think forward references in the transaction graph. This endpoint is only available for utxo like currencies.
+        """
+        await test_service.get_spent_in_txs(self)
+
 
     async def test_get_tx(self):
         """Test case for get_tx
