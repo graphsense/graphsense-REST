@@ -101,12 +101,12 @@ REST log messages can be delivered via mail. See `instance/config.yaml.template`
 
 ```sh
 BRANCH=master
-URL=https://github.com/graphsense/graphsense-openapi/blob/$BRANCH/graphsense.yaml
 docker run --rm \
   -v "${PWD}:/build" \
   -v "${PWD}/templates:/templates" \
   openapitools/openapi-generator-cli \
-  generate -i "$URL" -g python-aiohttp -o /build -t /templates
+  generate -i "https://raw.githubusercontent.com/graphsense/graphsense-openapi/${BRANCH}/graphsense.yaml" \
+  -g python-aiohttp -o /build -t /templates
 ```
 
 The service implementation (`gsrest/service`) should use the generated models
