@@ -3,19 +3,19 @@ info:
   contact:
     email: contact@ikna.io
     name: Iknaio Cryptoasset Analytics GmbH
-  description: GraphSense API provides programmatic access to various ledgers' addresses,
-    entities, blocks, transactions and tags for automated and highly efficient forensics
-    tasks.
+  description: "GraphSense API provides programmatic access to various ledgers' addresses,\
+    \ entities, blocks, transactions and tags for automated and highly efficient forensics\
+    \ tasks."
   title: GraphSense API
-  version: 1.3.0
+  version: 1.4.0
 servers:
-- url: http://graphsense-rest:9000
+- url: https://api.ikna.io
 paths:
   /search:
     get:
       operationId: search
       parameters:
-      - description: The cryptocurrency (e.g., btc)
+      - description: "The cryptocurrency (e.g., btc)"
         example: btc
         explode: true
         in: query
@@ -25,7 +25,8 @@ paths:
           format: string
           type: string
         style: form
-      - description: It can be (the beginning of) an address, a transaction or a label
+      - description: "It can be (the beginning of) an address, a transaction or a\
+          \ label"
         example: foo
         explode: true
         in: query
@@ -52,16 +53,6 @@ paths:
           content:
             application/json:
               examples:
-                search_result_04d9200:
-                  summary: search result for '04d9200'
-                  value:
-                    currencies:
-                      addresses: []
-                      currency: btc
-                      txs:
-                      - 04d920038d78be339694fe28116789dc49509cc9f47724d4ebcf574261caee8c,
-                      - 04d920094700443cab848544411a9a6d6628ab0d8502a796fbc70989b7991ccf
-                    labels: []
                 search_result_1Archive:
                   summary: search result for '1Archive'
                   value:
@@ -72,6 +63,16 @@ paths:
                       - 1ArchiveiskxdThieferHRHi1592TqsV4c
                       currency: btc
                       txs: []
+                    labels: []
+                search_result_04d9200:
+                  summary: search result for '04d9200'
+                  value:
+                    currencies:
+                      addresses: []
+                      currency: btc
+                      txs:
+                      - "04d920038d78be339694fe28116789dc49509cc9f47724d4ebcf574261caee8c,"
+                      - 04d920094700443cab848544411a9a6d6628ab0d8502a796fbc70989b7991ccf
                     labels: []
                 search_result_internet:
                   summary: search result for 'internet'
@@ -85,7 +86,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/search_result'
           description: OK
-      summary: Returns matching addresses, transactions and labels
+      summary: "Returns matching addresses, transactions and labels"
       tags:
       - general
       x-openapi-router-controller: openapi_server.controllers.general_controller
@@ -264,7 +265,7 @@ paths:
     get:
       operationId: get_address
       parameters:
-      - description: The cryptocurrency code (e.g., btc)
+      - description: "The cryptocurrency code (e.g., btc)"
         example: btc
         explode: false
         in: path
@@ -298,7 +299,7 @@ paths:
     get:
       operationId: get_address_entity
       parameters:
-      - description: The cryptocurrency code (e.g., btc)
+      - description: "The cryptocurrency code (e.g., btc)"
         example: btc
         explode: false
         in: path
@@ -332,7 +333,7 @@ paths:
     get:
       operationId: list_address_links
       parameters:
-      - description: The cryptocurrency code (e.g., btc)
+      - description: "The cryptocurrency code (e.g., btc)"
         example: btc
         explode: false
         in: path
@@ -397,7 +398,7 @@ paths:
     get:
       operationId: list_address_neighbors
       parameters:
-      - description: The cryptocurrency code (e.g., btc)
+      - description: "The cryptocurrency code (e.g., btc)"
         example: btc
         explode: false
         in: path
@@ -481,7 +482,7 @@ paths:
     get:
       operationId: list_tags_by_address
       parameters:
-      - description: The cryptocurrency code (e.g., btc)
+      - description: "The cryptocurrency code (e.g., btc)"
         example: btc
         explode: false
         in: path
@@ -537,7 +538,7 @@ paths:
     get:
       operationId: list_address_txs
       parameters:
-      - description: The cryptocurrency code (e.g., btc)
+      - description: "The cryptocurrency code (e.g., btc)"
         example: btc
         explode: false
         in: path
@@ -632,7 +633,7 @@ paths:
     get:
       operationId: get_block
       parameters:
-      - description: The cryptocurrency code (e.g., btc)
+      - description: "The cryptocurrency code (e.g., btc)"
         example: btc
         explode: false
         in: path
@@ -666,7 +667,7 @@ paths:
     get:
       operationId: list_block_txs
       parameters:
-      - description: The cryptocurrency code (e.g., btc)
+      - description: "The cryptocurrency code (e.g., btc)"
         example: btc
         explode: false
         in: path
@@ -690,10 +691,10 @@ paths:
           content:
             application/json:
               examples:
-                tx_account_array:
-                  $ref: '#/components/examples/txs_account'
                 tx_utxo_array:
                   $ref: '#/components/examples/txs_utxo'
+                tx_account_array:
+                  $ref: '#/components/examples/txs_account'
               schema:
                 items:
                   $ref: '#/components/schemas/tx'
@@ -707,7 +708,7 @@ paths:
     post:
       operationId: bulk_csv
       parameters:
-      - description: The cryptocurrency code (e.g., btc)
+      - description: "The cryptocurrency code (e.g., btc)"
         example: btc
         explode: false
         in: path
@@ -784,7 +785,7 @@ paths:
     post:
       operationId: bulk_json
       parameters:
-      - description: The cryptocurrency code (e.g., btc)
+      - description: "The cryptocurrency code (e.g., btc)"
         example: btc
         explode: false
         in: path
@@ -864,7 +865,7 @@ paths:
     get:
       operationId: get_entity
       parameters:
-      - description: The cryptocurrency code (e.g., btc)
+      - description: "The cryptocurrency code (e.g., btc)"
         example: btc
         explode: false
         in: path
@@ -916,7 +917,7 @@ paths:
     get:
       operationId: list_entity_addresses
       parameters:
-      - description: The cryptocurrency code (e.g., btc)
+      - description: "The cryptocurrency code (e.g., btc)"
         example: btc
         explode: false
         in: path
@@ -969,7 +970,7 @@ paths:
     get:
       operationId: list_entity_links
       parameters:
-      - description: The cryptocurrency code (e.g., btc)
+      - description: "The cryptocurrency code (e.g., btc)"
         example: btc
         explode: false
         in: path
@@ -1034,7 +1035,7 @@ paths:
     get:
       operationId: list_entity_neighbors
       parameters:
-      - description: The cryptocurrency code (e.g., btc)
+      - description: "The cryptocurrency code (e.g., btc)"
         example: btc
         explode: false
         in: path
@@ -1137,7 +1138,7 @@ paths:
     get:
       operationId: search_entity_neighbors
       parameters:
-      - description: The cryptocurrency code (e.g., btc)
+      - description: "The cryptocurrency code (e.g., btc)"
         example: btc
         explode: false
         in: path
@@ -1168,10 +1169,10 @@ paths:
           - out
           type: string
         style: form
-      - description: 'Match neighbors against one and only one of these properties:
-          - the category the entity belongs to - addresses the entity contains - entity
-          ids - total_received: amount the entity received in total - balance: amount
-          the entity holds finally'
+      - description: "Match neighbors against one and only one of these properties:\
+          \ - the category the entity belongs to - addresses the entity contains -\
+          \ entity ids - total_received: amount the entity received in total - balance:\
+          \ amount the entity holds finally"
         example: category
         explode: true
         in: query
@@ -1186,11 +1187,11 @@ paths:
           - balance
           type: string
         style: form
-      - description: 'If key is - category: comma separated list of category names
-          - addresses: comma separated list of address IDs - entities: comma separated
-          list of entity IDs - total_received/balance: comma separated tuple of (currency,
-          min, max) where currency is ''value'' for the cryptocurrency value or an
-          ISO currency code'
+      - description: "If key is - category: comma separated list of category names\
+          \ - addresses: comma separated list of address IDs - entities: comma separated\
+          \ list of entity IDs - total_received/balance: comma separated tuple of\
+          \ (currency, min, max) where currency is 'value' for the cryptocurrency\
+          \ value or an ISO currency code"
         example: Miner
         explode: true
         in: query
@@ -1248,7 +1249,7 @@ paths:
     get:
       operationId: list_address_tags_by_entity
       parameters:
-      - description: The cryptocurrency code (e.g., btc)
+      - description: "The cryptocurrency code (e.g., btc)"
         example: btc
         explode: false
         in: path
@@ -1304,7 +1305,7 @@ paths:
     get:
       operationId: list_entity_txs
       parameters:
-      - description: The cryptocurrency code (e.g., btc)
+      - description: "The cryptocurrency code (e.g., btc)"
         example: btc
         explode: false
         in: path
@@ -1399,7 +1400,7 @@ paths:
     get:
       operationId: get_exchange_rates
       parameters:
-      - description: The cryptocurrency code (e.g., btc)
+      - description: "The cryptocurrency code (e.g., btc)"
         example: btc
         explode: false
         in: path
@@ -1436,7 +1437,7 @@ paths:
     get:
       operationId: list_supported_tokens
       parameters:
-      - description: The cryptocurrency code (e.g., btc)
+      - description: "The cryptocurrency code (e.g., btc)"
         example: btc
         explode: false
         in: path
@@ -1464,7 +1465,7 @@ paths:
     get:
       operationId: list_token_txs
       parameters:
-      - description: The cryptocurrency code (e.g., btc)
+      - description: "The cryptocurrency code (e.g., btc)"
         example: btc
         explode: false
         in: path
@@ -1475,7 +1476,7 @@ paths:
           type: string
         style: simple
       - description: The transaction hash
-        example: ab188013
+        example: 04d92601677d62a985310b61a301e74870fa942c8be0648e16b1db23b996a8cd
         explode: false
         in: path
         name: tx_hash
@@ -1501,7 +1502,7 @@ paths:
     get:
       operationId: get_tx
       parameters:
-      - description: The cryptocurrency code (e.g., btc)
+      - description: "The cryptocurrency code (e.g., btc)"
         example: btc
         explode: false
         in: path
@@ -1512,7 +1513,7 @@ paths:
           type: string
         style: simple
       - description: The transaction hash
-        example: ab188013
+        example: 04d92601677d62a985310b61a301e74870fa942c8be0648e16b1db23b996a8cd
         explode: false
         in: path
         name: tx_hash
@@ -1542,10 +1543,10 @@ paths:
           content:
             application/json:
               examples:
-                tx_account:
-                  $ref: '#/components/examples/tx_account'
                 tx_utxo:
                   $ref: '#/components/examples/tx_utxo'
+                tx_account:
+                  $ref: '#/components/examples/tx_account'
               schema:
                 $ref: '#/components/schemas/tx'
           description: OK
@@ -1553,11 +1554,11 @@ paths:
       tags:
       - txs
       x-openapi-router-controller: openapi_server.controllers.txs_controller
-  /{currency}/txs/{tx_hash}/{io}:
+  /{currency}/txs/{tx_hash}/spending:
     get:
-      operationId: get_tx_io
+      operationId: get_spending_txs
       parameters:
-      - description: The cryptocurrency code (e.g., btc)
+      - description: "The cryptocurrency code (e.g., btc)"
         example: btc
         explode: false
         in: path
@@ -1568,7 +1569,107 @@ paths:
           type: string
         style: simple
       - description: The transaction hash
-        example: ab188013
+        example: 04d92601677d62a985310b61a301e74870fa942c8be0648e16b1db23b996a8cd
+        explode: false
+        in: path
+        name: tx_hash
+        required: true
+        schema:
+          $ref: '#/components/schemas/tx_hash'
+        style: simple
+      - description: index of the input or output in question
+        example: 0
+        explode: true
+        in: query
+        name: io_index
+        required: false
+        schema:
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                txs_account:
+                  $ref: '#/components/examples/tx_refs'
+              schema:
+                items:
+                  $ref: '#/components/schemas/tx_ref'
+                type: array
+          description: OK
+      summary: Returns in which other transaction's outputs the asked transaction
+        spent. Think backwards references is the transaction graph. This endpoint
+        is only available for utxo like currencies.
+      tags:
+      - txs
+      x-openapi-router-controller: openapi_server.controllers.txs_controller
+  /{currency}/txs/{tx_hash}/spent_in:
+    get:
+      operationId: get_spent_in_txs
+      parameters:
+      - description: "The cryptocurrency code (e.g., btc)"
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The transaction hash
+        example: 04d92601677d62a985310b61a301e74870fa942c8be0648e16b1db23b996a8cd
+        explode: false
+        in: path
+        name: tx_hash
+        required: true
+        schema:
+          $ref: '#/components/schemas/tx_hash'
+        style: simple
+      - description: index of the input or output in question
+        example: 0
+        explode: true
+        in: query
+        name: io_index
+        required: false
+        schema:
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                txs_account:
+                  $ref: '#/components/examples/tx_refs'
+              schema:
+                items:
+                  $ref: '#/components/schemas/tx_ref'
+                type: array
+          description: OK
+      summary: "Returns in which other transactions, outputs from the asked transaction\
+        \ are spent. Think forward references in the transaction graph. This endpoint\
+        \ is only available for utxo like currencies."
+      tags:
+      - txs
+      x-openapi-router-controller: openapi_server.controllers.txs_controller
+  /{currency}/txs/{tx_hash}/{io}:
+    get:
+      operationId: get_tx_io
+      parameters:
+      - description: "The cryptocurrency code (e.g., btc)"
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The transaction hash
+        example: 04d92601677d62a985310b61a301e74870fa942c8be0648e16b1db23b996a8cd
         explode: false
         in: path
         name: tx_hash
@@ -1605,8 +1706,286 @@ paths:
       x-openapi-router-controller: openapi_server.controllers.txs_controller
 components:
   examples:
-    entity_links_internetarchive:
-      summary: links between two entities
+    token_configs:
+      summary: Example token config
+      value:
+        token_configs:
+        - ticker: USDT
+          decimals: 6
+          peg_currency: USD
+        - ticker: WETH
+          decimals: 18
+          peg_currency: ETH
+    tx_utxo:
+      summary: UTXO transaction
+      value:
+        tx_type: utxo
+        tx_hash: 04d92601677d62a985310b61a301e74870fa942c8be0648e16b1db23b996a8cd
+        coinbase: false
+        height: 47
+        inputs:
+        - address: addressA
+          value:
+            fiat_values:
+            - code: eur
+              value: 10
+            - code: usd
+              value: 20
+            value: 5
+        - address: addressB
+          value:
+            fiat_values:
+            - code: eur
+              value: 20
+            - code: usd
+              value: 40
+            value: 10
+        outputs:
+        - address: addressC
+          value:
+            fiat_values:
+            - code: eur
+              value: 5
+            - code: usd
+              value: 10
+            value: 2.5
+        - address: addressD
+          value:
+            fiat_values:
+            - code: eur
+              value: 25
+            - code: usd
+              value: 50
+            value: 12.5
+        timestamp: 123456789
+        total_input:
+          fiat_values:
+          - code: eur
+            value: 30
+          - code: usd
+            value: 60
+          value: 15
+        total_output:
+          fiat_values:
+          - code: eur
+            value: 30
+          - code: usd
+            value: 60
+          value: 15
+    txs_utxo:
+      summary: list of UTXO transactions
+      value:
+      - tx_type: utxo
+        tx_hash: 04d92601677d62a985310b61a301e74870fa942c8be0648e16b1db23b996a8cd
+        coinbase: false
+        height: 47
+        inputs:
+        - address: addressA
+          value:
+            fiat_values:
+            - code: eur
+              value: 10
+            - code: usd
+              value: 20
+            value: 5
+        - address: addressB
+          value:
+            fiat_values:
+            - code: eur
+              value: 20
+            - code: usd
+              value: 40
+            value: 10
+        outputs:
+        - address: addressC
+          value:
+            fiat_values:
+            - code: eur
+              value: 5
+            - code: usd
+              value: 10
+            value: 2.5
+        - address: addressD
+          value:
+            fiat_values:
+            - code: eur
+              value: 25
+            - code: usd
+              value: 50
+            value: 12.5
+        timestamp: 123456789
+        total_input:
+          fiat_values:
+          - code: eur
+            value: 30
+          - code: usd
+            value: 60
+          value: 15
+        total_output:
+          fiat_values:
+          - code: eur
+            value: 30
+          - code: usd
+            value: 60
+          value: 15
+    tx_account:
+      summary: account transaction
+      value:
+        tx_type: account
+        currency: ETH
+        tx_hash: 04d92601677d62a985310b61a301e74870fa942c8be0648e16b1db23b996a8cd
+        height: 47
+        timestamp: 123456789
+        value:
+          fiat_values:
+          - code: eur
+            value: 30
+          - code: usd
+            value: 60
+          value: 15
+        from_address: addressA
+        to_address: addressB
+    tx_refs:
+      summary: references to inputs or outputs of another tx
+      value:
+      - output_index: 0
+        input_index: 0
+        tx_hash: 120439699b10bac37c5316834644acfa8eae6f17b370231e79a2d71ce90f0ebf
+    txs_account:
+      summary: list of account transactions
+      value:
+      - tx_type: account
+        currency: ETH
+        tx_hash: 04d92601677d62a985310b61a301e74870fa942c8be0648e16b1db23b996a8cd
+        height: 47
+        timestamp: 123456789
+        value:
+          fiat_values:
+          - code: eur
+            value: 30
+          - code: usd
+            value: 60
+          value: 15
+        from_address: addressA
+        to_address: addressB
+    internetarchive:
+      summary: addresses with label "internet archive"
+      value:
+        address_tags:
+        - category: organization
+          confidence: service_data
+          confidence_level: 50
+          currency: BTC
+          is_cluster_definer: true
+          label: internet archive
+          lastmod: 1636675200
+          source: https://archive.org/donate/cryptocurrency
+          tagpack_creator: GraphSense Core Team
+          tagpack_is_public: true
+          tagpack_title: GraphSense Demo TagPack
+          tagpack_uri: https://github.com/graphsense/graphsense-tagpacks/tree/master/packs/demo.yaml
+          address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
+          entity: 264711
+    internetarchive_addresses:
+      summary: tags of address "1Archive1n2C579dMsAu3iC6tWzuQJz8dN"
+      value:
+        address_tags:
+        - category: organization
+          confidence: service_data
+          confidence_level: 50
+          currency: BTC
+          is_cluster_definer: true
+          label: internet archive
+          lastmod: 1636675200
+          source: https://archive.org/donate/cryptocurrency
+          tagpack_creator: GraphSense Core Team
+          tagpack_is_public: true
+          tagpack_title: GraphSense Demo TagPack
+          tagpack_uri: https://github.com/graphsense/graphsense-tagpacks/tree/master/packs/demo.yaml
+          address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
+          entity: 264711
+    internetarchive_entitys_addresses:
+      summary: tags of an entity
+      value:
+        address_tags:
+        - category: organization
+          confidence: service_data
+          confidence_level: 50
+          currency: BTC
+          is_cluster_definer: true
+          label: internet archive
+          lastmod: 1636675200
+          source: https://archive.org/donate/cryptocurrency
+          tagpack_creator: GraphSense Core Team
+          tagpack_is_public: true
+          tagpack_title: GraphSense Demo TagPack
+          tagpack_uri: https://github.com/graphsense/graphsense-tagpacks/tree/master/packs/demo.yaml
+          address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
+          entity: 264711
+    txs_internetarchive:
+      summary: transactions of address "1Archive1n2C579dMsAu3iC6tWzuQJz8dN"
+      value:
+        address_txs:
+        - coinbase: false
+          currency: btc
+          height: 690083
+          timestamp: 1625703347
+          tx_hash: 0fa34dfc851611b747725f315ea156e2ce931674560f9750ed30be0f786e0d05
+          tx_type: utxo
+          value:
+            fiat_values:
+            - code: eur
+              value: -18.19
+            - code: usd
+              value: -21.53
+            value: -65485
+        - coinbase: false
+          currency: btc
+          height: 690076
+          timestamp: 1625697035
+          tx_hash: 9586bd883cf255aa4207a3749cad61de34b6f1001bd25cecfac3a9237d57a84d
+          tx_type: utxo
+          value:
+            fiat_values:
+            - code: eur
+              value: -171698.17
+            - code: usd
+              value: -203136.12
+            value: -600012259
+        next_page: 00110004010d329a01010800000000211a20f0f07ffffff5f07ffffff5
+    entity_txs_internetarchive:
+      summary: transactions of an entity
+      value:
+        address_txs:
+        - coinbase: false
+          currency: btc
+          height: 690083
+          timestamp: 1625703347
+          tx_hash: 0fa34dfc851611b747725f315ea156e2ce931674560f9750ed30be0f786e0d05
+          tx_type: utxo
+          value:
+            fiat_values:
+            - code: eur
+              value: -18.19
+            - code: usd
+              value: -21.53
+            value: -65485
+        - coinbase: false
+          currency: btc
+          height: 690076
+          timestamp: 1625697035
+          tx_hash: 9586bd883cf255aa4207a3749cad61de34b6f1001bd25cecfac3a9237d57a84d
+          tx_type: utxo
+          value:
+            fiat_values:
+            - code: eur
+              value: -171698.17
+            - code: usd
+              value: -203136.12
+            value: -600012259
+        next_page: 00110004010d329a01010800000000211a20f0f07ffffff5f07ffffff5
+    links_internetarchive:
+      summary: links between "1Archive1n2C579dMsAu3iC6tWzuQJz8dN" and "1CvwMHyAtQAywKvLAANbgLktrC7f75eoq5"
       value:
         links:
         - currency: btc
@@ -1666,93 +2045,8 @@ components:
           timestamp: 1386179074
           tx_hash: 5ba549b4115a8978fe206ac151277acc27ffdce01f4dfd4b5487c67202e516a9
           tx_type: utxo
-    entity_txs_internetarchive:
-      summary: transactions of an entity
-      value:
-        address_txs:
-        - coinbase: false
-          currency: btc
-          height: 690083
-          timestamp: 1625703347
-          tx_hash: 0fa34dfc851611b747725f315ea156e2ce931674560f9750ed30be0f786e0d05
-          tx_type: utxo
-          value:
-            fiat_values:
-            - code: eur
-              value: -18.19
-            - code: usd
-              value: -21.53
-            value: -65485
-        - coinbase: false
-          currency: btc
-          height: 690076
-          timestamp: 1625697035
-          tx_hash: 9586bd883cf255aa4207a3749cad61de34b6f1001bd25cecfac3a9237d57a84d
-          tx_type: utxo
-          value:
-            fiat_values:
-            - code: eur
-              value: -171698.17
-            - code: usd
-              value: -203136.12
-            value: -600012259
-        next_page: 00110004010d329a01010800000000211a20f0f07ffffff5f07ffffff5
-    internetarchive:
-      summary: addresses with label "internet archive"
-      value:
-        address_tags:
-        - address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
-          category: organization
-          confidence: service_data
-          confidence_level: 50
-          currency: BTC
-          entity: 264711
-          is_cluster_definer: true
-          label: internet archive
-          lastmod: 1636675200
-          source: https://archive.org/donate/cryptocurrency
-          tagpack_creator: GraphSense Core Team
-          tagpack_is_public: true
-          tagpack_title: GraphSense Demo TagPack
-          tagpack_uri: https://github.com/graphsense/graphsense-tagpacks/tree/master/packs/demo.yaml
-    internetarchive_addresses:
-      summary: tags of address "1Archive1n2C579dMsAu3iC6tWzuQJz8dN"
-      value:
-        address_tags:
-        - address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
-          category: organization
-          confidence: service_data
-          confidence_level: 50
-          currency: BTC
-          entity: 264711
-          is_cluster_definer: true
-          label: internet archive
-          lastmod: 1636675200
-          source: https://archive.org/donate/cryptocurrency
-          tagpack_creator: GraphSense Core Team
-          tagpack_is_public: true
-          tagpack_title: GraphSense Demo TagPack
-          tagpack_uri: https://github.com/graphsense/graphsense-tagpacks/tree/master/packs/demo.yaml
-    internetarchive_entitys_addresses:
-      summary: tags of an entity
-      value:
-        address_tags:
-        - address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
-          category: organization
-          confidence: service_data
-          confidence_level: 50
-          currency: BTC
-          entity: 264711
-          is_cluster_definer: true
-          label: internet archive
-          lastmod: 1636675200
-          source: https://archive.org/donate/cryptocurrency
-          tagpack_creator: GraphSense Core Team
-          tagpack_is_public: true
-          tagpack_title: GraphSense Demo TagPack
-          tagpack_uri: https://github.com/graphsense/graphsense-tagpacks/tree/master/packs/demo.yaml
-    links_internetarchive:
-      summary: links between "1Archive1n2C579dMsAu3iC6tWzuQJz8dN" and "1CvwMHyAtQAywKvLAANbgLktrC7f75eoq5"
+    entity_links_internetarchive:
+      summary: links between two entities
       value:
         links:
         - currency: btc
@@ -1815,143 +2109,12 @@ components:
     rates:
       summary: example rates at block height 47
       value:
-        height: 47
         rates:
         - code: eur
           value: 0.1234
         - code: usd
           value: 0.2345
-    token_configs:
-      summary: Example token config
-      value:
-        token_configs:
-        - decimals: 6
-          peg_currency: USD
-          ticker: USDT
-        - decimals: 18
-          peg_currency: ETH
-          ticker: WETH
-    tx_account:
-      summary: account transaction
-      value:
-        currency: ETH
-        from_address: addressA
         height: 47
-        timestamp: 123456789
-        to_address: addressB
-        tx_hash: 04d92601677d62a985310b61a301e74870fa942c8be0648e16b1db23b996a8cd
-        tx_type: account
-        value:
-          fiat_values:
-          - code: eur
-            value: 30
-          - code: usd
-            value: 60
-          value: 15
-    tx_utxo:
-      summary: UTXO transaction
-      value:
-        coinbase: false
-        height: 47
-        inputs:
-        - address: addressA
-          value:
-            fiat_values:
-            - code: eur
-              value: 10
-            - code: usd
-              value: 20
-            value: 5
-        - address: addressB
-          value:
-            fiat_values:
-            - code: eur
-              value: 20
-            - code: usd
-              value: 40
-            value: 10
-        outputs:
-        - address: addressC
-          value:
-            fiat_values:
-            - code: eur
-              value: 5
-            - code: usd
-              value: 10
-            value: 2.5
-        - address: addressD
-          value:
-            fiat_values:
-            - code: eur
-              value: 25
-            - code: usd
-              value: 50
-            value: 12.5
-        timestamp: 123456789
-        total_input:
-          fiat_values:
-          - code: eur
-            value: 30
-          - code: usd
-            value: 60
-          value: 15
-        total_output:
-          fiat_values:
-          - code: eur
-            value: 30
-          - code: usd
-            value: 60
-          value: 15
-        tx_hash: 04d92601677d62a985310b61a301e74870fa942c8be0648e16b1db23b996a8cd
-        tx_type: utxo
-    txs_account:
-      summary: list of account transactions
-      value:
-      - currency: ETH
-        from_address: addressA
-        height: 47
-        timestamp: 123456789
-        to_address: addressB
-        tx_hash: 04d92601677d62a985310b61a301e74870fa942c8be0648e16b1db23b996a8cd
-        tx_type: account
-        value:
-          fiat_values:
-          - code: eur
-            value: 30
-          - code: usd
-            value: 60
-          value: 15
-    txs_internetarchive:
-      summary: transactions of address "1Archive1n2C579dMsAu3iC6tWzuQJz8dN"
-      value:
-        address_txs:
-        - coinbase: false
-          currency: btc
-          height: 690083
-          timestamp: 1625703347
-          tx_hash: 0fa34dfc851611b747725f315ea156e2ce931674560f9750ed30be0f786e0d05
-          tx_type: utxo
-          value:
-            fiat_values:
-            - code: eur
-              value: -18.19
-            - code: usd
-              value: -21.53
-            value: -65485
-        - coinbase: false
-          currency: btc
-          height: 690076
-          timestamp: 1625697035
-          tx_hash: 9586bd883cf255aa4207a3749cad61de34b6f1001bd25cecfac3a9237d57a84d
-          tx_type: utxo
-          value:
-            fiat_values:
-            - code: eur
-              value: -171698.17
-            - code: usd
-              value: -203136.12
-            value: -600012259
-        next_page: 00110004010d329a01010800000000211a20f0f07ffffff5f07ffffff5
     txs_io:
       summary: outputs of transaction "04d92601677d62a985310b61a301e74870fa942c8be0648e16b1db23b996a8cd"
       value:
@@ -1973,62 +2136,6 @@ components:
           - code: usd
             value: 1.21
           value: 1000000
-    txs_utxo:
-      summary: list of UTXO transactions
-      value:
-      - coinbase: false
-        height: 47
-        inputs:
-        - address: addressA
-          value:
-            fiat_values:
-            - code: eur
-              value: 10
-            - code: usd
-              value: 20
-            value: 5
-        - address: addressB
-          value:
-            fiat_values:
-            - code: eur
-              value: 20
-            - code: usd
-              value: 40
-            value: 10
-        outputs:
-        - address: addressC
-          value:
-            fiat_values:
-            - code: eur
-              value: 5
-            - code: usd
-              value: 10
-            value: 2.5
-        - address: addressD
-          value:
-            fiat_values:
-            - code: eur
-              value: 25
-            - code: usd
-              value: 50
-            value: 12.5
-        timestamp: 123456789
-        total_input:
-          fiat_values:
-          - code: eur
-            value: 30
-          - code: usd
-            value: 60
-          value: 15
-        total_output:
-          fiat_values:
-          - code: eur
-            value: 30
-          - code: usd
-            value: 60
-          value: 15
-        tx_hash: 04d92601677d62a985310b61a301e74870fa942c8be0648e16b1db23b996a8cd
-        tx_type: utxo
   parameters:
     actor:
       description: actor id
@@ -2041,29 +2148,8 @@ components:
         format: string
         type: string
       style: simple
-    address:
-      description: The cryptocurrency address
-      example: addressA
-      explode: false
-      in: path
-      name: address
-      required: true
-      schema:
-        $ref: '#/components/schemas/address_id'
-      style: simple
-    breadth:
-      description: How many siblings of each neighbor should be tried
-      explode: true
-      in: query
-      name: breadth
-      required: false
-      schema:
-        default: 16
-        format: int32
-        type: integer
-      style: form
     currency:
-      description: The cryptocurrency code (e.g., btc)
+      description: "The cryptocurrency code (e.g., btc)"
       example: btc
       explode: false
       in: path
@@ -2074,7 +2160,7 @@ components:
         type: string
       style: simple
     currency_query:
-      description: The cryptocurrency (e.g., btc)
+      description: "The cryptocurrency (e.g., btc)"
       example: btc
       explode: true
       in: query
@@ -2084,16 +2170,35 @@ components:
         format: string
         type: string
       style: form
-    depth:
-      description: How many hops should the transaction graph be searched
-      example: 2
-      explode: true
-      in: query
-      name: depth
+    height:
+      description: The block height
+      example: 1
+      explode: false
+      in: path
+      name: height
       required: true
       schema:
+        $ref: '#/components/schemas/height'
+      style: simple
+    page:
+      description: Resumption token for retrieving the next page
+      explode: true
+      in: query
+      name: page
+      required: false
+      schema:
+        type: string
+      style: form
+    pagesize:
+      description: Number of items returned in a single page
+      example: 10
+      explode: true
+      in: query
+      name: pagesize
+      required: false
+      schema:
         format: int32
-        maximum: 7
+        minimum: 1
         type: integer
       style: form
     direction:
@@ -2122,75 +2227,35 @@ components:
         - out
         type: string
       style: form
-    entity:
-      description: The entity ID
-      example: 67065
-      explode: false
-      in: path
-      name: entity
-      required: true
-      schema:
-        $ref: '#/components/schemas/entity_id'
-      style: simple
-    entity_neighbor:
-      description: Neighbor entity
-      example: 123456
-      explode: true
-      in: query
-      name: neighbor
-      required: true
-      schema:
-        $ref: '#/components/schemas/entity_id'
-      style: form
-    exclude_best_address_tag:
-      description: Whether to exclude the best address tag
-      explode: true
-      in: query
-      name: exclude_best_address_tag
-      required: false
-      schema:
-        default: false
-        type: boolean
-      style: form
-    height:
-      description: The block height
+    min_height:
+      description: Return transactions starting from given height
       example: 1
-      explode: false
-      in: path
-      name: height
-      required: true
+      explode: true
+      in: query
+      name: min_height
+      required: false
       schema:
         $ref: '#/components/schemas/height'
-      style: simple
-    include_actors:
-      description: Whether to include the actors
-      explode: true
-      in: query
-      name: include_actors
-      required: false
-      schema:
-        default: false
-        type: boolean
       style: form
-    include_io:
-      description: Whether to include inputs/outputs of a transaction (UTXO only)
+    max_height:
+      description: Return transactions up to (including) given height
+      example: 2
       explode: true
       in: query
-      name: include_io
+      name: max_height
       required: false
       schema:
-        default: false
-        type: boolean
+        $ref: '#/components/schemas/height'
       style: form
-    include_labels:
-      description: Whether to include labels of first page of address tags
+    token_currency:
+      description: Return transactions of given token currency
+      example: WETH
       explode: true
       in: query
-      name: include_labels
+      name: token_currency
       required: false
       schema:
-        default: false
-        type: boolean
+        type: string
       style: form
     io:
       description: Input or outpus values of a transaction
@@ -2205,49 +2270,16 @@ components:
         - outputs
         type: string
       style: simple
-    label:
-      description: The label of an entity
-      example: cimedy
-      explode: true
-      in: query
-      name: label
+    address:
+      description: The cryptocurrency address
+      example: addressA
+      explode: false
+      in: path
+      name: address
       required: true
       schema:
-        type: string
-      style: form
-    limit:
-      description: Maximum number of search results
-      example: 10
-      explode: true
-      in: query
-      name: limit
-      required: false
-      schema:
-        default: 10
-        format: int32
-        maximum: 100
-        type: integer
-      style: form
-    max_height:
-      description: Return transactions up to (including) given height
-      example: 2
-      explode: true
-      in: query
-      name: max_height
-      required: false
-      schema:
-        $ref: '#/components/schemas/height'
-      style: form
-    min_height:
-      description: Return transactions starting from given height
-      example: 1
-      explode: true
-      in: query
-      name: min_height
-      required: false
-      schema:
-        $ref: '#/components/schemas/height'
-      style: form
+        $ref: '#/components/schemas/address_id'
+      style: simple
     neighbor:
       description: Neighbor address
       example: addressE
@@ -2258,15 +2290,44 @@ components:
       schema:
         $ref: '#/components/schemas/address_id'
       style: form
-    num_pages:
-      description: Number of pages to retrieve for operations with list response
-      example: 1
+    entity_neighbor:
+      description: Neighbor entity
+      example: 123456
       explode: true
       in: query
-      name: num_pages
+      name: neighbor
       required: true
       schema:
-        format: int32
+        $ref: '#/components/schemas/entity_id'
+      style: form
+    entity:
+      description: The entity ID
+      example: 67065
+      explode: false
+      in: path
+      name: entity
+      required: true
+      schema:
+        $ref: '#/components/schemas/entity_id'
+      style: simple
+    tx_hash:
+      description: The transaction hash
+      example: 04d92601677d62a985310b61a301e74870fa942c8be0648e16b1db23b996a8cd
+      explode: false
+      in: path
+      name: tx_hash
+      required: true
+      schema:
+        $ref: '#/components/schemas/tx_hash'
+      style: simple
+    io_index:
+      description: index of the input or output in question
+      example: 0
+      explode: true
+      in: query
+      name: io_index
+      required: false
+      schema:
         type: integer
       style: form
     only_address_ids:
@@ -2291,6 +2352,180 @@ components:
           format: int32
           type: integer
         type: array
+      style: form
+    include_labels:
+      description: Whether to include labels of first page of address tags
+      explode: true
+      in: query
+      name: include_labels
+      required: false
+      schema:
+        default: false
+        type: boolean
+      style: form
+    exclude_best_address_tag:
+      description: Whether to exclude the best address tag
+      explode: true
+      in: query
+      name: exclude_best_address_tag
+      required: false
+      schema:
+        default: false
+        type: boolean
+      style: form
+    include_actors:
+      description: Whether to include the actors
+      explode: true
+      in: query
+      name: include_actors
+      required: false
+      schema:
+        default: false
+        type: boolean
+      style: form
+    include_io:
+      description: Whether to include inputs/outputs of a transaction (UTXO only)
+      explode: true
+      in: query
+      name: include_io
+      required: false
+      schema:
+        default: false
+        type: boolean
+      style: form
+    token_tx_id:
+      description: Select a specific token_transaction (Account model only)
+      explode: true
+      in: query
+      name: token_tx_id
+      required: false
+      schema:
+        type: integer
+      style: form
+    tag_level:
+      description: Whether tags on the address or entity level are requested
+      example: address
+      explode: true
+      in: query
+      name: level
+      required: true
+      schema:
+        enum:
+        - address
+        - entity
+        type: string
+      style: form
+    search_key:
+      description: "Match neighbors against one and only one of these properties:\
+        \ - the category the entity belongs to - addresses the entity contains - entity\
+        \ ids - total_received: amount the entity received in total - balance: amount\
+        \ the entity holds finally"
+      example: category
+      explode: true
+      in: query
+      name: key
+      required: true
+      schema:
+        enum:
+        - category
+        - addresses
+        - entities
+        - total_received
+        - balance
+        type: string
+      style: form
+    search_value:
+      description: "If key is - category: comma separated list of category names -\
+        \ addresses: comma separated list of address IDs - entities: comma separated\
+        \ list of entity IDs - total_received/balance: comma separated tuple of (currency,\
+        \ min, max) where currency is 'value' for the cryptocurrency value or an ISO\
+        \ currency code"
+      example: Miner
+      explode: true
+      in: query
+      name: value
+      required: true
+      schema:
+        items:
+          type: string
+        type: array
+      style: form
+    depth:
+      description: How many hops should the transaction graph be searched
+      example: 2
+      explode: true
+      in: query
+      name: depth
+      required: true
+      schema:
+        format: int32
+        maximum: 7
+        type: integer
+      style: form
+    breadth:
+      description: How many siblings of each neighbor should be tried
+      explode: true
+      in: query
+      name: breadth
+      required: false
+      schema:
+        default: 16
+        format: int32
+        type: integer
+      style: form
+    skip_num_addresses:
+      description: Skip entities containing more addresses
+      explode: true
+      in: query
+      name: skip_num_addresses
+      required: false
+      schema:
+        format: int32
+        type: integer
+      style: form
+    label:
+      description: The label of an entity
+      example: cimedy
+      explode: true
+      in: query
+      name: label
+      required: true
+      schema:
+        type: string
+      style: form
+    taxonomy:
+      description: The taxonomy
+      example: foo
+      explode: false
+      in: path
+      name: taxonomy
+      required: true
+      schema:
+        type: string
+      style: simple
+    search_query:
+      description: "It can be (the beginning of) an address, a transaction or a label"
+      example: foo
+      explode: true
+      in: query
+      name: q
+      required: true
+      schema:
+        minLength: 3
+        type: string
+      style: form
+    limit:
+      description: Maximum number of search results
+      example: 10
+      explode: true
+      in: query
+      name: limit
+      required: false
+      schema:
+        default: 10
+        format: int32
+        maximum: 100
+        type: integer
       style: form
     operation:
       description: The operation to execute in bulk
@@ -2320,550 +2555,135 @@ components:
         - get_exchange_rates
         type: string
       style: simple
-    page:
-      description: Resumption token for retrieving the next page
+    num_pages:
+      description: Number of pages to retrieve for operations with list response
+      example: 1
       explode: true
       in: query
-      name: page
-      required: false
-      schema:
-        type: string
-      style: form
-    pagesize:
-      description: Number of items returned in a single page
-      example: 10
-      explode: true
-      in: query
-      name: pagesize
-      required: false
-      schema:
-        format: int32
-        minimum: 1
-        type: integer
-      style: form
-    search_key:
-      description: 'Match neighbors against one and only one of these properties:
-        - the category the entity belongs to - addresses the entity contains - entity
-        ids - total_received: amount the entity received in total - balance: amount
-        the entity holds finally'
-      example: category
-      explode: true
-      in: query
-      name: key
+      name: num_pages
       required: true
-      schema:
-        enum:
-        - category
-        - addresses
-        - entities
-        - total_received
-        - balance
-        type: string
-      style: form
-    search_query:
-      description: It can be (the beginning of) an address, a transaction or a label
-      example: foo
-      explode: true
-      in: query
-      name: q
-      required: true
-      schema:
-        minLength: 3
-        type: string
-      style: form
-    search_value:
-      description: 'If key is - category: comma separated list of category names -
-        addresses: comma separated list of address IDs - entities: comma separated
-        list of entity IDs - total_received/balance: comma separated tuple of (currency,
-        min, max) where currency is ''value'' for the cryptocurrency value or an ISO
-        currency code'
-      example: Miner
-      explode: true
-      in: query
-      name: value
-      required: true
-      schema:
-        items:
-          type: string
-        type: array
-      style: form
-    skip_num_addresses:
-      description: Skip entities containing more addresses
-      explode: true
-      in: query
-      name: skip_num_addresses
-      required: false
       schema:
         format: int32
         type: integer
       style: form
-    tag_level:
-      description: Whether tags on the address or entity level are requested
-      example: address
-      explode: true
-      in: query
-      name: level
-      required: true
-      schema:
-        enum:
-        - address
-        - entity
-        type: string
-      style: form
-    taxonomy:
-      description: The taxonomy
-      example: foo
-      explode: false
-      in: path
-      name: taxonomy
-      required: true
-      schema:
-        type: string
-      style: simple
-    token_currency:
-      description: Return transactions of given token currency
-      example: WETH
-      explode: true
-      in: query
-      name: token_currency
-      required: false
-      schema:
-        type: string
-      style: form
-    token_tx_id:
-      description: Select a specific token_transaction (Account model only)
-      explode: true
-      in: query
-      name: token_tx_id
-      required: false
-      schema:
-        type: integer
-      style: form
-    tx_hash:
-      description: The transaction hash
-      example: ab188013
-      explode: false
-      in: path
-      name: tx_hash
-      required: true
-      schema:
-        $ref: '#/components/schemas/tx_hash'
-      style: simple
   schemas:
-    actor:
-      example:
-        nr_tags: 100
-        context:
-          twitter_handle: twitter_handle
-          uris:
-          - https://example.com
-          - https://example.com
-          images:
-          - https://example.com
-          - https://example.com
-          coingecko_ids:
-          - coingecko_ids
-          - coingecko_ids
-          defilama_ids:
-          - defilama_ids
-          - defilama_ids
-          refs:
-          - https://example.com
-          - https://example.com
-          github_organisation: github_organisation
-          legal_name: legal_name
-        categories:
-        - id: id
-          label: example
-        - id: id
-          label: example
-        id: binance
-        label: example
-        uri: https://example.com
-        jurisdictions:
-        - id: id
-          label: example
-        - id: id
-          label: example
-      properties:
-        categories:
-          description: A list actor categories
-          items:
-            $ref: '#/components/schemas/labeled_item_ref'
-          title: categories
-          type: array
-        context:
-          $ref: '#/components/schemas/actor_context'
-        id:
-          description: Id of the actor
-          example: binance
-          title: id
-          type: string
-        jurisdictions:
-          description: A list jurisdictions
-          items:
-            $ref: '#/components/schemas/labeled_item_ref'
-          title: jurisdictions
-          type: array
-        label:
-          description: Label
-          example: example
-          title: label
-          type: string
-        nr_tags:
-          description: number of address tags of the actor
-          example: 100
-          title: nr_tags
-          type: integer
-        uri:
-          description: URI
-          example: https://example.com
-          title: uri
-          type: string
-      required:
-      - categories
-      - id
-      - jurisdictions
-      - label
-      - uri
-      title: actor
-      type: object
-    actor_context:
-      example:
-        twitter_handle: twitter_handle
-        uris:
-        - https://example.com
-        - https://example.com
-        images:
-        - https://example.com
-        - https://example.com
-        coingecko_ids:
-        - coingecko_ids
-        - coingecko_ids
-        defilama_ids:
-        - defilama_ids
-        - defilama_ids
-        refs:
-        - https://example.com
-        - https://example.com
-        github_organisation: github_organisation
-        legal_name: legal_name
-      properties:
-        coingecko_ids:
-          description: list of references to coingecko exchanges or coins
-          items:
-            type: string
-          title: coingecko_ids
-          type: array
-        defilama_ids:
-          description: list of references to defilama
-          items:
-            type: string
-          title: defilama_ids
-          type: array
-        github_organisation:
-          description: semi-colon separated list of github organisations used by the
-            actor
-          title: github_organisation
-          type: string
-        images:
-          description: list of uris to logos of the actor
-          items:
-            $ref: '#/components/schemas/uri'
-          title: images
-          type: array
-        legal_name:
-          description: Name of the legal entity registerd by the actor.
-          title: legal_name
-          type: string
-        refs:
-          description: list of uris to further information of the actors.
-          items:
-            $ref: '#/components/schemas/uri'
-          title: refs
-          type: array
-        twitter_handle:
-          description: semi-colon separated list of twitter handles used by the actor
-          title: twitter_handle
-          type: string
-        uris:
-          description: list of additonal uris identifying the actor
-          items:
-            $ref: '#/components/schemas/uri'
-          title: uris
-          type: array
-      required:
-      - coingecko_ids
-      - defilama_ids
-      - images
-      - refs
-      - uris
-      title: actor_context
-      type: object
-    actors:
-      items:
-        $ref: '#/components/schemas/actor'
-      type: array
-    address:
-      example:
-        total_spent:
-          fiat_values:
-          - code: code
-            value: 0.8008282
-          - code: code
-            value: 0.8008282
-          value: 6
-        in_degree: 1
-        is_contract: true
-        address: addressA
-        out_degree: 2
-        first_tx:
-          tx_hash: tx_hash
-          height: 47
-          timestamp: 123456789
-        total_tokens_received:
-          usdt:
-            fiat_values:
-            - 0.2
-            - 0.3
-            value: 0.2
-          weth:
-            fiat_values:
-            - 0.2
-            - 0.3
-            value: 200000000000000
-        actors:
-        - id: id
-          label: example
-        - id: id
-          label: example
-        balance:
-          fiat_values:
-          - code: code
-            value: 0.8008282
-          - code: code
-            value: 0.8008282
-          value: 6
-        no_incoming_txs: 5
-        no_outgoing_txs: 5
-        currency: btc
-        last_tx:
-          tx_hash: tx_hash
-          height: 47
-          timestamp: 123456789
-        entity: 123456
-        token_balances:
-          usdt:
-            fiat_values:
-            - 0.2
-            - 0.3
-            value: 0.2
-          weth:
-            fiat_values:
-            - 0.2
-            - 0.3
-            value: 200000000000000
-        total_received:
-          fiat_values:
-          - code: code
-            value: 0.8008282
-          - code: code
-            value: 0.8008282
-          value: 6
-        status: clean
-        total_tokens_spent:
-          usdt:
-            fiat_values:
-            - 0.2
-            - 0.3
-            value: 0.2
-          weth:
-            fiat_values:
-            - 0.2
-            - 0.3
-            value: 200000000000000
-      properties:
-        actors:
-          description: The list of matching actors
-          items:
-            $ref: '#/components/schemas/labeled_item_ref'
-          title: actors
-          type: array
-        address:
-          description: Address
-          example: addressA
-          title: address
-          type: string
-        balance:
-          $ref: '#/components/schemas/values'
-        currency:
-          description: crypto currency code
-          example: btc
-          title: currency
-          type: string
-        entity:
-          description: Entity id
-          example: 123456
-          format: int32
-          title: entity
-          type: integer
-        first_tx:
-          $ref: '#/components/schemas/tx_summary'
-        in_degree:
-          format: int32
-          title: in_degree
-          type: integer
-        is_contract:
-          title: is_contract
-          type: boolean
-        last_tx:
-          $ref: '#/components/schemas/tx_summary'
-        no_incoming_txs:
-          format: int32
-          title: no_incoming_txs
-          type: integer
-        no_outgoing_txs:
-          format: int32
-          title: no_outgoing_txs
-          type: integer
-        out_degree:
-          format: int32
-          title: out_degree
-          type: integer
-        status:
-          enum:
-          - clean
-          - dirty
-          - new
-          title: status
-          type: string
-        token_balances:
-          additionalProperties:
-            $ref: '#/components/schemas/values'
-          description: Per token value-flow
-          example:
-            usdt:
-              fiat_values:
-              - 0.2
-              - 0.3
-              value: 0.2
-            weth:
-              fiat_values:
-              - 0.2
-              - 0.3
-              value: 200000000000000
-          title: token_balances
-          type: object
-        total_received:
-          $ref: '#/components/schemas/values'
-        total_spent:
-          $ref: '#/components/schemas/values'
-        total_tokens_received:
-          additionalProperties:
-            $ref: '#/components/schemas/values'
-          description: Per token value-flow
-          example:
-            usdt:
-              fiat_values:
-              - 0.2
-              - 0.3
-              value: 0.2
-            weth:
-              fiat_values:
-              - 0.2
-              - 0.3
-              value: 200000000000000
-          title: token_balances
-          type: object
-        total_tokens_spent:
-          additionalProperties:
-            $ref: '#/components/schemas/values'
-          description: Per token value-flow
-          example:
-            usdt:
-              fiat_values:
-              - 0.2
-              - 0.3
-              value: 0.2
-            weth:
-              fiat_values:
-              - 0.2
-              - 0.3
-              value: 200000000000000
-          title: token_balances
-          type: object
-      required:
-      - address
-      - balance
-      - currency
-      - entity
-      - first_tx
-      - in_degree
-      - last_tx
-      - no_incoming_txs
-      - no_outgoing_txs
-      - out_degree
-      - status
-      - total_received
-      - total_spent
-      title: address
-      type: object
-    address_id:
-      description: Address
-      example: addressA
-      title: address
+    currency:
+      description: crypto currency code
+      example: btc
+      title: currency
       type: string
-    address_tag:
-      allOf:
-      - $ref: '#/components/schemas/tag'
-      - $ref: '#/components/schemas/address_tag_allOf'
-      title: address_tag
-    address_tags:
+    stats:
       example:
-        next_page: next_page
-        address_tags:
-        - null
-        - null
+        request_timestamp: request_timestamp
+        version: version
+        currencies:
+        - no_tagged_addresses: 123
+          no_addresses: 12345
+          no_labels: 123
+          name: name
+          no_entities: 123
+          no_address_relations: 1234567
+          no_blocks: 12345
+          no_txs: 11
+          timestamp: 123456789
+        - no_tagged_addresses: 123
+          no_addresses: 12345
+          no_labels: 123
+          name: name
+          no_entities: 123
+          no_address_relations: 1234567
+          no_blocks: 12345
+          no_txs: 11
+          timestamp: 123456789
       properties:
-        address_tags:
+        currencies:
           items:
-            $ref: '#/components/schemas/address_tag'
-          title: address_tags
+            $ref: '#/components/schemas/currency_stats'
+          title: currencies
           type: array
-        next_page:
-          format: string
-          title: next_page
+        version:
+          title: version
+          type: string
+        request_timestamp:
+          title: request_timestamp
           type: string
       required:
-      - address_tags
-      title: address_tags
+      - currencies
+      - request_timestamp
+      - version
+      title: stats
       type: object
-    address_tx:
-      discriminator:
-        mapping:
-          account: '#/components/schemas/tx_account'
-          utxo: '#/components/schemas/address_tx_utxo'
-        propertyName: tx_type
-      oneOf:
-      - $ref: '#/components/schemas/address_tx_utxo'
-      - $ref: '#/components/schemas/tx_account'
-      title: address_tx
-    address_tx_utxo:
+    tx_ref:
+      example:
+        tx_hash: tx_hash
+        output_index: 6
+        input_index: 0
       properties:
-        coinbase:
-          description: Coinbase transaction flag
-          type: boolean
-        currency:
-          description: crypto currency code
-          example: btc
-          title: currency
+        input_index:
+          title: input_index
+          type: integer
+        output_index:
+          title: output_index
+          type: integer
+        tx_hash:
+          title: tx_hash
           type: string
-        height:
-          description: Height
-          example: 47
+      required:
+      - input_index
+      - output_index
+      - tx_hash
+      title: tx_ref
+      type: object
+    currency_stats:
+      example:
+        no_tagged_addresses: 123
+        no_addresses: 12345
+        no_labels: 123
+        name: name
+        no_entities: 123
+        no_address_relations: 1234567
+        no_blocks: 12345
+        no_txs: 11
+        timestamp: 123456789
+      properties:
+        name:
+          title: name
+          type: string
+        no_blocks:
+          example: 12345
           format: int32
-          minimum: 0
-          title: height
+          title: no_blocks
+          type: integer
+        no_address_relations:
+          example: 1234567
+          format: int32
+          title: no_address_relations
+          type: integer
+        no_addresses:
+          example: 12345
+          format: int32
+          title: no_addresses
+          type: integer
+        no_entities:
+          example: 123
+          format: int32
+          title: no_entities
+          type: integer
+        no_txs:
+          description: number of transactions
+          example: 11
+          format: int32
+          title: no_txs
+          type: integer
+        no_labels:
+          example: 123
+          format: int32
+          title: no_labels
+          type: integer
+        no_tagged_addresses:
+          example: 123
+          format: int32
+          title: no_tagged_addresses
           type: integer
         timestamp:
           description: Timestamp
@@ -2871,43 +2691,17 @@ components:
           format: int32
           title: timestamp
           type: integer
-        tx_hash:
-          description: Transaction hash
-          title: tx_hash
-          type: string
-        tx_type:
-          default: utxo
-          type: string
-        value:
-          $ref: '#/components/schemas/values'
       required:
-      - coinbase
-      - currency
-      - height
+      - name
+      - no_address_relations
+      - no_addresses
+      - no_blocks
+      - no_entities
+      - no_labels
+      - no_tagged_addresses
+      - no_txs
       - timestamp
-      - tx_hash
-      - tx_type
-      - value
-      type: object
-    address_txs:
-      example:
-        next_page: next_page
-        address_txs:
-        - null
-        - null
-      properties:
-        address_txs:
-          items:
-            $ref: '#/components/schemas/address_tx'
-          title: address_txs
-          type: array
-        next_page:
-          format: string
-          title: next_page
-          type: string
-      required:
-      - address_txs
-      title: address_txs
+      title: statistics of a cryptocurrency
       type: object
     block:
       example:
@@ -2952,129 +2746,7 @@ components:
       - timestamp
       title: block
       type: object
-    coinbase:
-      description: Coinbase transaction flag
-      type: boolean
-    concept:
-      example:
-        description: A cryptocurrency exchange or a digital currency exchange (DCE)
-          is a business that allows customers to trade cryptocurrencies or digital
-          currencies for other assets.
-        id: exchange
-        label: example
-        taxonomy: abuse
-        uri: https://example.com
-      properties:
-        description:
-          description: Description
-          example: A cryptocurrency exchange or a digital currency exchange (DCE)
-            is a business that allows customers to trade cryptocurrencies or digital
-            currencies for other assets.
-          title: description
-          type: string
-        id:
-          description: ID
-          example: exchange
-          title: id
-          type: string
-        label:
-          description: Label
-          example: example
-          title: label
-          type: string
-        taxonomy:
-          description: Taxonomy
-          example: abuse
-          title: taxonomy
-          type: string
-        uri:
-          description: URI
-          example: https://example.com
-          title: uri
-          type: string
-      required:
-      - description
-      - id
-      - label
-      - taxonomy
-      - uri
-      title: concept
-      type: object
-    currency:
-      description: crypto currency code
-      example: btc
-      title: currency
-      type: string
-    currency_stats:
-      example:
-        no_tagged_addresses: 123
-        no_addresses: 12345
-        no_labels: 123
-        name: name
-        no_entities: 123
-        no_address_relations: 1234567
-        no_blocks: 12345
-        no_txs: 11
-        timestamp: 123456789
-      properties:
-        name:
-          title: name
-          type: string
-        no_address_relations:
-          example: 1234567
-          format: int32
-          title: no_address_relations
-          type: integer
-        no_addresses:
-          example: 12345
-          format: int32
-          title: no_addresses
-          type: integer
-        no_blocks:
-          example: 12345
-          format: int32
-          title: no_blocks
-          type: integer
-        no_entities:
-          example: 123
-          format: int32
-          title: no_entities
-          type: integer
-        no_labels:
-          example: 123
-          format: int32
-          title: no_labels
-          type: integer
-        no_tagged_addresses:
-          example: 123
-          format: int32
-          title: no_tagged_addresses
-          type: integer
-        no_txs:
-          description: number of transactions
-          example: 11
-          format: int32
-          title: no_txs
-          type: integer
-        timestamp:
-          description: Timestamp
-          example: 123456789
-          format: int32
-          title: timestamp
-          type: integer
-      required:
-      - name
-      - no_address_relations
-      - no_addresses
-      - no_blocks
-      - no_entities
-      - no_labels
-      - no_tagged_addresses
-      - no_txs
-      - timestamp
-      title: statistics of a cryptocurrency
-      type: object
-    entity:
+    address:
       example:
         total_spent:
           fiat_values:
@@ -3083,11 +2755,12 @@ components:
           - code: code
             value: 0.8008282
           value: 6
-        in_degree: 0
-        no_addresses: 1
-        out_degree: 2
+        in_degree: 1
+        is_contract: true
+        address: addressA
+        out_degree: 5
         first_tx:
-          tx_hash: tx_hash
+          tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
           height: 47
           timestamp: 123456789
         total_tokens_received:
@@ -3101,13 +2774,216 @@ components:
             - 0.2
             - 0.3
             value: 200000000000000
-        no_address_tags: 6
         actors:
         - id: id
           label: example
         - id: id
           label: example
+        balance:
+          fiat_values:
+          - code: code
+            value: 0.8008282
+          - code: code
+            value: 0.8008282
+          value: 6
+        no_incoming_txs: 5
+        no_outgoing_txs: 2
+        currency: btc
+        last_tx:
+          tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
+          height: 47
+          timestamp: 123456789
+        entity: 123456
+        token_balances:
+          usdt:
+            fiat_values:
+            - 0.2
+            - 0.3
+            value: 0.2
+          weth:
+            fiat_values:
+            - 0.2
+            - 0.3
+            value: 200000000000000
+        total_received:
+          fiat_values:
+          - code: code
+            value: 0.8008282
+          - code: code
+            value: 0.8008282
+          value: 6
+        total_tokens_spent:
+          usdt:
+            fiat_values:
+            - 0.2
+            - 0.3
+            value: 0.2
+          weth:
+            fiat_values:
+            - 0.2
+            - 0.3
+            value: 200000000000000
+        status: clean
+      properties:
+        currency:
+          description: crypto currency code
+          example: btc
+          title: currency
+          type: string
+        address:
+          description: Address
+          example: addressA
+          title: address
+          type: string
+        entity:
+          description: Entity id
+          example: 123456
+          format: int32
+          title: entity
+          type: integer
+        balance:
+          $ref: '#/components/schemas/values'
+        token_balances:
+          additionalProperties:
+            $ref: '#/components/schemas/values'
+          description: Per token value-flow
+          example:
+            usdt:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 0.2
+            weth:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 200000000000000
+          title: token_values
+          type: object
+        first_tx:
+          $ref: '#/components/schemas/tx_summary'
+        last_tx:
+          $ref: '#/components/schemas/tx_summary'
+        in_degree:
+          format: int32
+          title: in_degree
+          type: integer
+        out_degree:
+          format: int32
+          title: out_degree
+          type: integer
+        no_incoming_txs:
+          format: int32
+          title: no_incoming_txs
+          type: integer
+        no_outgoing_txs:
+          format: int32
+          title: no_outgoing_txs
+          type: integer
+        total_received:
+          $ref: '#/components/schemas/values'
+        total_spent:
+          $ref: '#/components/schemas/values'
+        total_tokens_received:
+          additionalProperties:
+            $ref: '#/components/schemas/values'
+          description: Per token value-flow
+          example:
+            usdt:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 0.2
+            weth:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 200000000000000
+          title: token_values
+          type: object
+        total_tokens_spent:
+          additionalProperties:
+            $ref: '#/components/schemas/values'
+          description: Per token value-flow
+          example:
+            usdt:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 0.2
+            weth:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 200000000000000
+          title: token_values
+          type: object
+        actors:
+          description: The list of matching actors
+          items:
+            $ref: '#/components/schemas/labeled_item_ref'
+          title: actors
+          type: array
+        is_contract:
+          title: is_contract
+          type: boolean
+        status:
+          enum:
+          - clean
+          - dirty
+          - new
+          title: status
+          type: string
+      required:
+      - address
+      - balance
+      - currency
+      - entity
+      - first_tx
+      - in_degree
+      - last_tx
+      - no_incoming_txs
+      - no_outgoing_txs
+      - out_degree
+      - status
+      - total_received
+      - total_spent
+      title: address
+      type: object
+    entity:
+      example:
+        total_spent:
+          fiat_values:
+          - code: code
+            value: 0.8008282
+          - code: code
+            value: 0.8008282
+          value: 6
+        in_degree: 0
+        no_addresses: 1
+        out_degree: 6
+        first_tx:
+          tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
+          height: 47
+          timestamp: 123456789
+        total_tokens_received:
+          usdt:
+            fiat_values:
+            - 0.2
+            - 0.3
+            value: 0.2
+          weth:
+            fiat_values:
+            - 0.2
+            - 0.3
+            value: 200000000000000
+        no_address_tags: 2
         root_address: addressA
+        actors:
+        - id: id
+          label: example
+        - id: id
+          label: example
         balance:
           fiat_values:
           - code: code
@@ -3117,9 +2993,10 @@ components:
           value: 6
         no_incoming_txs: 5
         no_outgoing_txs: 5
+        best_address_tag: null
         currency: btc
         last_tx:
-          tx_hash: tx_hash
+          tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
           height: 47
           timestamp: 123456789
         entity: 123456
@@ -3153,16 +3030,6 @@ components:
             - 0.3
             value: 200000000000000
       properties:
-        actors:
-          description: The list of matching actors
-          items:
-            $ref: '#/components/schemas/labeled_item_ref'
-          title: actors
-          type: array
-        balance:
-          $ref: '#/components/schemas/values'
-        best_address_tag:
-          $ref: '#/components/schemas/address_tag'
         currency:
           description: crypto currency code
           example: btc
@@ -3174,41 +3041,13 @@ components:
           format: int32
           title: entity
           type: integer
-        first_tx:
-          $ref: '#/components/schemas/tx_summary'
-        in_degree:
-          format: int32
-          title: in_degree
-          type: integer
-        last_tx:
-          $ref: '#/components/schemas/tx_summary'
-        no_address_tags:
-          description: number of address tags
-          format: int32
-          title: no_address_tags
-          type: integer
-        no_addresses:
-          description: number of contained addresses
-          format: int32
-          title: no_addresses
-          type: integer
-        no_incoming_txs:
-          format: int32
-          title: no_incoming_txs
-          type: integer
-        no_outgoing_txs:
-          format: int32
-          title: no_outgoing_txs
-          type: integer
-        out_degree:
-          format: int32
-          title: out_degree
-          type: integer
         root_address:
           description: Address
           example: addressA
           title: address
           type: string
+        balance:
+          $ref: '#/components/schemas/values'
         token_balances:
           additionalProperties:
             $ref: '#/components/schemas/values'
@@ -3224,8 +3063,33 @@ components:
               - 0.2
               - 0.3
               value: 200000000000000
-          title: token_balances
+          title: token_values
           type: object
+        first_tx:
+          $ref: '#/components/schemas/tx_summary'
+        last_tx:
+          $ref: '#/components/schemas/tx_summary'
+        in_degree:
+          format: int32
+          title: in_degree
+          type: integer
+        out_degree:
+          format: int32
+          title: out_degree
+          type: integer
+        no_addresses:
+          description: number of contained addresses
+          format: int32
+          title: no_addresses
+          type: integer
+        no_incoming_txs:
+          format: int32
+          title: no_incoming_txs
+          type: integer
+        no_outgoing_txs:
+          format: int32
+          title: no_outgoing_txs
+          type: integer
         total_received:
           $ref: '#/components/schemas/values'
         total_spent:
@@ -3245,7 +3109,7 @@ components:
               - 0.2
               - 0.3
               value: 200000000000000
-          title: token_balances
+          title: token_values
           type: object
         total_tokens_spent:
           additionalProperties:
@@ -3262,8 +3126,21 @@ components:
               - 0.2
               - 0.3
               value: 200000000000000
-          title: token_balances
+          title: token_values
           type: object
+        actors:
+          description: The list of matching actors
+          items:
+            $ref: '#/components/schemas/labeled_item_ref'
+          title: actors
+          type: array
+        best_address_tag:
+          $ref: '#/components/schemas/address_tag'
+        no_address_tags:
+          description: number of address tags
+          format: int32
+          title: no_address_tags
+          type: integer
       required:
       - balance
       - currency
@@ -3281,176 +3158,355 @@ components:
       - total_spent
       title: entity
       type: object
-    entity_addresses:
+    address_tags:
       example:
         next_page: next_page
-        addresses:
-        - total_spent:
-            fiat_values:
-            - code: code
-              value: 0.8008282
-            - code: code
-              value: 0.8008282
-            value: 6
-          in_degree: 1
-          is_contract: true
-          address: addressA
-          out_degree: 2
-          first_tx:
-            tx_hash: tx_hash
-            height: 47
-            timestamp: 123456789
-          total_tokens_received:
-            usdt:
-              fiat_values:
-              - 0.2
-              - 0.3
-              value: 0.2
-            weth:
-              fiat_values:
-              - 0.2
-              - 0.3
-              value: 200000000000000
-          actors:
-          - id: id
-            label: example
-          - id: id
-            label: example
-          balance:
-            fiat_values:
-            - code: code
-              value: 0.8008282
-            - code: code
-              value: 0.8008282
-            value: 6
-          no_incoming_txs: 5
-          no_outgoing_txs: 5
-          currency: btc
-          last_tx:
-            tx_hash: tx_hash
-            height: 47
-            timestamp: 123456789
-          entity: 123456
-          token_balances:
-            usdt:
-              fiat_values:
-              - 0.2
-              - 0.3
-              value: 0.2
-            weth:
-              fiat_values:
-              - 0.2
-              - 0.3
-              value: 200000000000000
-          total_received:
-            fiat_values:
-            - code: code
-              value: 0.8008282
-            - code: code
-              value: 0.8008282
-            value: 6
-          status: clean
-          total_tokens_spent:
-            usdt:
-              fiat_values:
-              - 0.2
-              - 0.3
-              value: 0.2
-            weth:
-              fiat_values:
-              - 0.2
-              - 0.3
-              value: 200000000000000
-        - total_spent:
-            fiat_values:
-            - code: code
-              value: 0.8008282
-            - code: code
-              value: 0.8008282
-            value: 6
-          in_degree: 1
-          is_contract: true
-          address: addressA
-          out_degree: 2
-          first_tx:
-            tx_hash: tx_hash
-            height: 47
-            timestamp: 123456789
-          total_tokens_received:
-            usdt:
-              fiat_values:
-              - 0.2
-              - 0.3
-              value: 0.2
-            weth:
-              fiat_values:
-              - 0.2
-              - 0.3
-              value: 200000000000000
-          actors:
-          - id: id
-            label: example
-          - id: id
-            label: example
-          balance:
-            fiat_values:
-            - code: code
-              value: 0.8008282
-            - code: code
-              value: 0.8008282
-            value: 6
-          no_incoming_txs: 5
-          no_outgoing_txs: 5
-          currency: btc
-          last_tx:
-            tx_hash: tx_hash
-            height: 47
-            timestamp: 123456789
-          entity: 123456
-          token_balances:
-            usdt:
-              fiat_values:
-              - 0.2
-              - 0.3
-              value: 0.2
-            weth:
-              fiat_values:
-              - 0.2
-              - 0.3
-              value: 200000000000000
-          total_received:
-            fiat_values:
-            - code: code
-              value: 0.8008282
-            - code: code
-              value: 0.8008282
-            value: 6
-          status: clean
-          total_tokens_spent:
-            usdt:
-              fiat_values:
-              - 0.2
-              - 0.3
-              value: 0.2
-            weth:
-              fiat_values:
-              - 0.2
-              - 0.3
-              value: 200000000000000
+        address_tags:
+        - null
+        - null
       properties:
-        addresses:
+        address_tags:
           items:
-            $ref: '#/components/schemas/address'
-          title: addresses
+            $ref: '#/components/schemas/address_tag'
+          title: address_tags
           type: array
         next_page:
           format: string
           title: next_page
           type: string
       required:
-      - addresses
-      title: entity_addresses
+      - address_tags
+      title: address_tags
       type: object
+    tx_summary:
+      example:
+        tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
+        height: 47
+        timestamp: 123456789
+      properties:
+        height:
+          description: Height
+          example: 47
+          format: int32
+          minimum: 0
+          title: height
+          type: integer
+        timestamp:
+          description: Timestamp
+          example: 123456789
+          format: int32
+          title: timestamp
+          type: integer
+        tx_hash:
+          description: Transaction hash
+          example: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
+          title: tx_hash
+          type: string
+      required:
+      - height
+      - timestamp
+      - tx_hash
+      title: tx_summary
+      type: object
+    tag:
+      properties:
+        label:
+          description: Label
+          example: example
+          title: label
+          type: string
+        category:
+          description: Category
+          example: exchange
+          title: category
+          type: string
+        actor:
+          description: id of the actor that controlls the address
+          example: binance
+          title: actor
+          type: string
+        abuse:
+          description: Abuses
+          example: fraud
+          title: abuse
+          type: string
+        tagpack_uri:
+          description: Tagpack URI
+          example: https://example.com/tagpacks/sample.yaml
+          title: tagpack_uri
+          type: string
+        source:
+          description: Source
+          example: https://foobar.com
+          title: source
+          type: string
+        lastmod:
+          description: Last modified
+          example: 123456789
+          format: int32
+          title: lastmod
+          type: integer
+        tagpack_title:
+          description: Tagpack title
+          example: "true"
+          title: tagpack_title
+          type: string
+        tagpack_is_public:
+          description: whether the address is public
+          example: true
+          title: tagpack_is_public
+          type: boolean
+        tagpack_creator:
+          description: Tagpack creator
+          example: "true"
+          title: tagpack_creator
+          type: string
+        is_cluster_definer:
+          description: whether the address tag applies to the entity level
+          example: true
+          title: is_cluster_definer
+          type: boolean
+        confidence:
+          description: Confidence name
+          example: web crawl
+          title: confidence
+          type: string
+        confidence_level:
+          description: Confidence level
+          example: 100
+          format: int32
+          title: confidence_level
+          type: integer
+        currency:
+          description: crypto currency code
+          example: btc
+          title: currency
+          type: string
+      required:
+      - currency
+      - is_cluster_definer
+      - label
+      - tagpack_creator
+      - tagpack_is_public
+      - tagpack_title
+      title: tag
+      type: object
+    address_tag:
+      allOf:
+      - $ref: '#/components/schemas/tag'
+      - properties:
+          address:
+            $ref: '#/components/schemas/address_id'
+          entity:
+            $ref: '#/components/schemas/entity_id'
+        required:
+        - address
+        - entity
+        type: object
+      title: address_tag
+    actors:
+      items:
+        $ref: '#/components/schemas/actor'
+      type: array
+    actor:
+      example:
+        nr_tags: 100
+        context:
+          twitter_handle: twitter_handle
+          uris:
+          - https://example.com
+          - https://example.com
+          images:
+          - https://example.com
+          - https://example.com
+          coingecko_ids:
+          - coingecko_ids
+          - coingecko_ids
+          refs:
+          - https://example.com
+          - https://example.com
+          defilama_ids:
+          - defilama_ids
+          - defilama_ids
+          github_organisation: github_organisation
+          legal_name: legal_name
+        id: binance
+        label: example
+        categories:
+        - id: id
+          label: example
+        - id: id
+          label: example
+        uri: https://example.com
+        jurisdictions:
+        - id: id
+          label: example
+        - id: id
+          label: example
+      properties:
+        id:
+          description: Id of the actor
+          example: binance
+          title: id
+          type: string
+        label:
+          description: Label
+          example: example
+          title: label
+          type: string
+        uri:
+          description: URI
+          example: https://example.com
+          title: uri
+          type: string
+        nr_tags:
+          description: number of address tags of the actor
+          example: 100
+          title: nr_tags
+          type: integer
+        categories:
+          description: A list actor categories
+          items:
+            $ref: '#/components/schemas/labeled_item_ref'
+          title: categories
+          type: array
+        jurisdictions:
+          description: A list jurisdictions
+          items:
+            $ref: '#/components/schemas/labeled_item_ref'
+          title: jurisdictions
+          type: array
+        context:
+          $ref: '#/components/schemas/actor_context'
+      required:
+      - categories
+      - id
+      - jurisdictions
+      - label
+      - uri
+      title: actor
+      type: object
+    actor_context:
+      example:
+        twitter_handle: twitter_handle
+        uris:
+        - https://example.com
+        - https://example.com
+        images:
+        - https://example.com
+        - https://example.com
+        coingecko_ids:
+        - coingecko_ids
+        - coingecko_ids
+        refs:
+        - https://example.com
+        - https://example.com
+        defilama_ids:
+        - defilama_ids
+        - defilama_ids
+        github_organisation: github_organisation
+        legal_name: legal_name
+      properties:
+        uris:
+          description: list of additonal uris identifying the actor
+          items:
+            $ref: '#/components/schemas/uri'
+          title: uris
+          type: array
+        images:
+          description: list of uris to logos of the actor
+          items:
+            $ref: '#/components/schemas/uri'
+          title: images
+          type: array
+        refs:
+          description: list of uris to further information of the actors.
+          items:
+            $ref: '#/components/schemas/uri'
+          title: refs
+          type: array
+        coingecko_ids:
+          description: list of references to coingecko exchanges or coins
+          items:
+            type: string
+          title: coingecko_ids
+          type: array
+        defilama_ids:
+          description: list of references to defilama
+          items:
+            type: string
+          title: defilama_ids
+          type: array
+        twitter_handle:
+          description: semi-colon separated list of twitter handles used by the actor
+          title: twitter_handle
+          type: string
+        github_organisation:
+          description: semi-colon separated list of github organisations used by the
+            actor
+          title: github_organisation
+          type: string
+        legal_name:
+          description: Name of the legal entity registerd by the actor.
+          title: legal_name
+          type: string
+      required:
+      - coingecko_ids
+      - defilama_ids
+      - images
+      - refs
+      - uris
+      title: actor_context
+      type: object
+    token_values:
+      additionalProperties:
+        $ref: '#/components/schemas/values'
+      description: Per token value-flow
+      example:
+        usdt:
+          fiat_values:
+          - 0.2
+          - 0.3
+          value: 0.2
+        weth:
+          fiat_values:
+          - 0.2
+          - 0.3
+          value: 200000000000000
+      title: token_values
+      type: object
+    values:
+      example:
+        fiat_values:
+        - code: code
+          value: 0.8008282
+        - code: code
+          value: 0.8008282
+        value: 6
+      properties:
+        fiat_values:
+          items:
+            $ref: '#/components/schemas/rate'
+          title: fiat_values
+          type: array
+        value:
+          format: int64
+          title: value
+          type: integer
+      required:
+      - fiat_values
+      - value
+      title: values
+      type: object
+    next_page:
+      format: string
+      title: next_page
+      type: string
+    address_id:
+      description: Address
+      example: addressA
+      title: address
+      type: string
     entity_id:
       description: Entity id
       example: 123456
@@ -3464,247 +3520,37 @@ components:
       minimum: 0
       title: height
       type: integer
-    label:
-      description: Label
-      example: example
-      title: label
+    timestamp:
+      description: Timestamp
+      example: 123456789
+      format: int32
+      title: timestamp
+      type: integer
+    tx_hash:
+      description: Transaction hash
+      example: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
+      title: tx_hash
       type: string
-    labeled_item_ref:
-      example:
-        id: id
-        label: example
-      properties:
-        id:
-          description: identifier of the item
-          title: id
-          type: string
-        label:
-          description: Label
-          example: example
-          title: label
-          type: string
-      required:
-      - id
-      - label
-      title: labeled_item_ref
-      type: object
-    labeled_item_refs:
-      description: The list of matching actors
-      items:
-        $ref: '#/components/schemas/labeled_item_ref'
-      title: actors
-      type: array
-    link:
-      discriminator:
-        mapping:
-          account: '#/components/schemas/tx_account'
-          utxo: '#/components/schemas/link_utxo'
-        propertyName: tx_type
-      oneOf:
-      - $ref: '#/components/schemas/link_utxo'
-      - $ref: '#/components/schemas/tx_account'
-      title: link
-    link_utxo:
-      properties:
-        currency:
-          description: crypto currency code
-          example: btc
-          title: currency
-          type: string
-        height:
-          description: Height
-          example: 47
-          format: int32
-          minimum: 0
-          title: height
-          type: integer
-        input_value:
-          $ref: '#/components/schemas/values'
-        output_value:
-          $ref: '#/components/schemas/values'
-        timestamp:
-          description: Timestamp
-          example: 123456789
-          format: int32
-          title: timestamp
-          type: integer
-        tx_hash:
-          description: Transaction hash
-          title: tx_hash
-          type: string
-        tx_type:
-          default: utxo
-          type: string
-      required:
-      - currency
-      - height
-      - input_value
-      - output_value
-      - timestamp
-      - tx_hash
-      - tx_type
-      type: object
-    links:
-      example:
-        next_page: next_page
-        links:
-        - null
-        - null
-      properties:
-        links:
-          items:
-            $ref: '#/components/schemas/link'
-          title: links
-          type: array
-        next_page:
-          format: string
-          title: next_page
-          type: string
-      required:
-      - links
-      title: links
-      type: object
-    neighbor_address:
-      example:
-        address:
-          total_spent:
-            fiat_values:
-            - code: code
-              value: 0.8008282
-            - code: code
-              value: 0.8008282
-            value: 6
-          in_degree: 1
-          is_contract: true
-          address: addressA
-          out_degree: 2
-          first_tx:
-            tx_hash: tx_hash
-            height: 47
-            timestamp: 123456789
-          total_tokens_received:
-            usdt:
-              fiat_values:
-              - 0.2
-              - 0.3
-              value: 0.2
-            weth:
-              fiat_values:
-              - 0.2
-              - 0.3
-              value: 200000000000000
-          actors:
-          - id: id
-            label: example
-          - id: id
-            label: example
-          balance:
-            fiat_values:
-            - code: code
-              value: 0.8008282
-            - code: code
-              value: 0.8008282
-            value: 6
-          no_incoming_txs: 5
-          no_outgoing_txs: 5
-          currency: btc
-          last_tx:
-            tx_hash: tx_hash
-            height: 47
-            timestamp: 123456789
-          entity: 123456
-          token_balances:
-            usdt:
-              fiat_values:
-              - 0.2
-              - 0.3
-              value: 0.2
-            weth:
-              fiat_values:
-              - 0.2
-              - 0.3
-              value: 200000000000000
-          total_received:
-            fiat_values:
-            - code: code
-              value: 0.8008282
-            - code: code
-              value: 0.8008282
-            value: 6
-          status: clean
-          total_tokens_spent:
-            usdt:
-              fiat_values:
-              - 0.2
-              - 0.3
-              value: 0.2
-            weth:
-              fiat_values:
-              - 0.2
-              - 0.3
-              value: 200000000000000
-        token_values:
-          usdt:
-            fiat_values:
-            - 0.2
-            - 0.3
-            value: 0.2
-          weth:
-            fiat_values:
-            - 0.2
-            - 0.3
-            value: 200000000000000
-        value:
-          fiat_values:
-          - code: code
-            value: 0.8008282
-          - code: code
-            value: 0.8008282
-          value: 6
-        labels:
-        - labels
-        - labels
-        no_txs: 11
-      properties:
-        address:
-          $ref: '#/components/schemas/address'
-        labels:
-          description: The neighbor's tag labels
-          items:
-            type: string
-          title: labels
-          type: array
-        no_txs:
-          description: number of transactions
-          example: 11
-          format: int32
-          title: no_txs
-          type: integer
-        token_values:
-          additionalProperties:
-            $ref: '#/components/schemas/values'
-          description: Per token value-flow
-          example:
-            usdt:
-              fiat_values:
-              - 0.2
-              - 0.3
-              value: 0.2
-            weth:
-              fiat_values:
-              - 0.2
-              - 0.3
-              value: 200000000000000
-          title: token_balances
-          type: object
-        value:
-          $ref: '#/components/schemas/values'
-      required:
-      - address
-      - no_txs
-      - value
-      title: neighbor_address
-      type: object
+    coinbase:
+      description: Coinbase transaction flag
+      title: coinbase
+      type: boolean
+    no_addresses:
+      description: number of contained addresses
+      format: int32
+      title: no_addresses
+      type: integer
+    no_address_tags:
+      description: number of address tags
+      format: int32
+      title: no_address_tags
+      type: integer
+    no_txs:
+      description: number of transactions
+      example: 11
+      format: int32
+      title: no_txs
+      type: integer
     neighbor_addresses:
       example:
         next_page: next_page
@@ -3720,9 +3566,9 @@ components:
             in_degree: 1
             is_contract: true
             address: addressA
-            out_degree: 2
+            out_degree: 5
             first_tx:
-              tx_hash: tx_hash
+              tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
               height: 47
               timestamp: 123456789
             total_tokens_received:
@@ -3749,10 +3595,10 @@ components:
                 value: 0.8008282
               value: 6
             no_incoming_txs: 5
-            no_outgoing_txs: 5
+            no_outgoing_txs: 2
             currency: btc
             last_tx:
-              tx_hash: tx_hash
+              tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
               height: 47
               timestamp: 123456789
             entity: 123456
@@ -3774,7 +3620,6 @@ components:
               - code: code
                 value: 0.8008282
               value: 6
-            status: clean
             total_tokens_spent:
               usdt:
                 fiat_values:
@@ -3786,6 +3631,7 @@ components:
                 - 0.2
                 - 0.3
                 value: 200000000000000
+            status: clean
           token_values:
             usdt:
               fiat_values:
@@ -3819,9 +3665,9 @@ components:
             in_degree: 1
             is_contract: true
             address: addressA
-            out_degree: 2
+            out_degree: 5
             first_tx:
-              tx_hash: tx_hash
+              tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
               height: 47
               timestamp: 123456789
             total_tokens_received:
@@ -3848,10 +3694,10 @@ components:
                 value: 0.8008282
               value: 6
             no_incoming_txs: 5
-            no_outgoing_txs: 5
+            no_outgoing_txs: 2
             currency: btc
             last_tx:
-              tx_hash: tx_hash
+              tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
               height: 47
               timestamp: 123456789
             entity: 123456
@@ -3873,7 +3719,6 @@ components:
               - code: code
                 value: 0.8008282
               value: 6
-            status: clean
             total_tokens_spent:
               usdt:
                 fiat_values:
@@ -3885,6 +3730,7 @@ components:
                 - 0.2
                 - 0.3
                 value: 200000000000000
+            status: clean
           token_values:
             usdt:
               fiat_values:
@@ -3908,15 +3754,15 @@ components:
           - labels
           no_txs: 11
       properties:
+        next_page:
+          format: string
+          title: next_page
+          type: string
         neighbors:
           items:
             $ref: '#/components/schemas/neighbor_address'
           title: neighbors
           type: array
-        next_page:
-          format: string
-          title: next_page
-          type: string
       required:
       - neighbors
       title: neighbor_addresses
@@ -3953,9 +3799,9 @@ components:
               value: 6
             in_degree: 0
             no_addresses: 1
-            out_degree: 2
+            out_degree: 6
             first_tx:
-              tx_hash: tx_hash
+              tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
               height: 47
               timestamp: 123456789
             total_tokens_received:
@@ -3969,13 +3815,13 @@ components:
                 - 0.2
                 - 0.3
                 value: 200000000000000
-            no_address_tags: 6
+            no_address_tags: 2
+            root_address: addressA
             actors:
             - id: id
               label: example
             - id: id
               label: example
-            root_address: addressA
             balance:
               fiat_values:
               - code: code
@@ -3985,9 +3831,10 @@ components:
               value: 6
             no_incoming_txs: 5
             no_outgoing_txs: 5
+            best_address_tag: null
             currency: btc
             last_tx:
-              tx_hash: tx_hash
+              tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
               height: 47
               timestamp: 123456789
             entity: 123456
@@ -4052,9 +3899,9 @@ components:
               value: 6
             in_degree: 0
             no_addresses: 1
-            out_degree: 2
+            out_degree: 6
             first_tx:
-              tx_hash: tx_hash
+              tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
               height: 47
               timestamp: 123456789
             total_tokens_received:
@@ -4068,13 +3915,13 @@ components:
                 - 0.2
                 - 0.3
                 value: 200000000000000
-            no_address_tags: 6
+            no_address_tags: 2
+            root_address: addressA
             actors:
             - id: id
               label: example
             - id: id
               label: example
-            root_address: addressA
             balance:
               fiat_values:
               - code: code
@@ -4084,9 +3931,10 @@ components:
               value: 6
             no_incoming_txs: 5
             no_outgoing_txs: 5
+            best_address_tag: null
             currency: btc
             last_tx:
-              tx_hash: tx_hash
+              tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
               height: 47
               timestamp: 123456789
             entity: 123456
@@ -4124,18 +3972,159 @@ components:
           - labels
           no_txs: 11
       properties:
+        next_page:
+          format: string
+          title: next_page
+          type: string
         neighbors:
           items:
             $ref: '#/components/schemas/neighbor_entity'
           title: neighbors
           type: array
-        next_page:
-          format: string
-          title: next_page
-          type: string
       required:
       - neighbors
       title: neighbor_entities
+      type: object
+    neighbor_address:
+      example:
+        address:
+          total_spent:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          in_degree: 1
+          is_contract: true
+          address: addressA
+          out_degree: 5
+          first_tx:
+            tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
+            height: 47
+            timestamp: 123456789
+          total_tokens_received:
+            usdt:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 0.2
+            weth:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 200000000000000
+          actors:
+          - id: id
+            label: example
+          - id: id
+            label: example
+          balance:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          no_incoming_txs: 5
+          no_outgoing_txs: 2
+          currency: btc
+          last_tx:
+            tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
+            height: 47
+            timestamp: 123456789
+          entity: 123456
+          token_balances:
+            usdt:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 0.2
+            weth:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 200000000000000
+          total_received:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          total_tokens_spent:
+            usdt:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 0.2
+            weth:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 200000000000000
+          status: clean
+        token_values:
+          usdt:
+            fiat_values:
+            - 0.2
+            - 0.3
+            value: 0.2
+          weth:
+            fiat_values:
+            - 0.2
+            - 0.3
+            value: 200000000000000
+        value:
+          fiat_values:
+          - code: code
+            value: 0.8008282
+          - code: code
+            value: 0.8008282
+          value: 6
+        labels:
+        - labels
+        - labels
+        no_txs: 11
+      properties:
+        labels:
+          description: The neighbor's tag labels
+          items:
+            type: string
+          title: labels
+          type: array
+        value:
+          $ref: '#/components/schemas/values'
+        token_values:
+          additionalProperties:
+            $ref: '#/components/schemas/values'
+          description: Per token value-flow
+          example:
+            usdt:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 0.2
+            weth:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 200000000000000
+          title: token_values
+          type: object
+        no_txs:
+          description: number of transactions
+          example: 11
+          format: int32
+          title: no_txs
+          type: integer
+        address:
+          $ref: '#/components/schemas/address'
+      required:
+      - address
+      - no_txs
+      - value
+      title: neighbor_address
       type: object
     neighbor_entity:
       example:
@@ -4167,9 +4156,9 @@ components:
             value: 6
           in_degree: 0
           no_addresses: 1
-          out_degree: 2
+          out_degree: 6
           first_tx:
-            tx_hash: tx_hash
+            tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
             height: 47
             timestamp: 123456789
           total_tokens_received:
@@ -4183,13 +4172,13 @@ components:
               - 0.2
               - 0.3
               value: 200000000000000
-          no_address_tags: 6
+          no_address_tags: 2
+          root_address: addressA
           actors:
           - id: id
             label: example
           - id: id
             label: example
-          root_address: addressA
           balance:
             fiat_values:
             - code: code
@@ -4199,9 +4188,10 @@ components:
             value: 6
           no_incoming_txs: 5
           no_outgoing_txs: 5
+          best_address_tag: null
           currency: btc
           last_tx:
-            tx_hash: tx_hash
+            tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
             height: 47
             timestamp: 123456789
           entity: 123456
@@ -4239,20 +4229,14 @@ components:
         - labels
         no_txs: 11
       properties:
-        entity:
-          $ref: '#/components/schemas/entity'
         labels:
           description: The neighbor's tag labels
           items:
             type: string
           title: labels
           type: array
-        no_txs:
-          description: number of transactions
-          example: 11
-          format: int32
-          title: no_txs
-          type: integer
+        value:
+          $ref: '#/components/schemas/values'
         token_values:
           additionalProperties:
             $ref: '#/components/schemas/values'
@@ -4268,55 +4252,930 @@ components:
               - 0.2
               - 0.3
               value: 200000000000000
-          title: token_balances
+          title: token_values
           type: object
-        value:
-          $ref: '#/components/schemas/values'
+        no_txs:
+          description: number of transactions
+          example: 11
+          format: int32
+          title: no_txs
+          type: integer
+        entity:
+          $ref: '#/components/schemas/entity'
       required:
       - entity
       - no_txs
       - value
       title: neighbor_entity
       type: object
-    next_page:
-      format: string
-      title: next_page
-      type: string
-    no_address_tags:
-      description: number of address tags
-      format: int32
-      title: no_address_tags
-      type: integer
-    no_addresses:
-      description: number of contained addresses
-      format: int32
-      title: no_addresses
-      type: integer
-    no_txs:
-      description: number of transactions
-      example: 11
-      format: int32
-      title: no_txs
-      type: integer
-    rate:
+    links:
       example:
-        code: code
-        value: 0.8008282
+        next_page: next_page
+        links:
+        - null
+        - null
       properties:
-        code:
-          description: iso currency code
-          title: code
+        next_page:
+          format: string
+          title: next_page
           type: string
-        value:
-          description: exchange rate
-          format: float
-          title: value
-          type: number
+        links:
+          items:
+            $ref: '#/components/schemas/link'
+          title: links
+          type: array
       required:
-      - code
-      - value
-      title: rate
+      - links
+      title: links
       type: object
+    link:
+      discriminator:
+        mapping:
+          utxo: '#/components/schemas/link_utxo'
+          account: '#/components/schemas/tx_account'
+        propertyName: tx_type
+      oneOf:
+      - $ref: '#/components/schemas/link_utxo'
+      - $ref: '#/components/schemas/tx_account'
+      title: link
+    link_utxo:
+      properties:
+        tx_type:
+          default: utxo
+          title: tx_type
+          type: string
+        tx_hash:
+          description: Transaction hash
+          example: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
+          title: tx_hash
+          type: string
+        currency:
+          description: crypto currency code
+          example: btc
+          title: currency
+          type: string
+        height:
+          description: Height
+          example: 47
+          format: int32
+          minimum: 0
+          title: height
+          type: integer
+        timestamp:
+          description: Timestamp
+          example: 123456789
+          format: int32
+          title: timestamp
+          type: integer
+        input_value:
+          $ref: '#/components/schemas/values'
+        output_value:
+          $ref: '#/components/schemas/values'
+      required:
+      - currency
+      - height
+      - input_value
+      - output_value
+      - timestamp
+      - tx_hash
+      - tx_type
+      title: link_utxo
+      type: object
+    entity_addresses:
+      example:
+        next_page: next_page
+        addresses:
+        - total_spent:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          in_degree: 1
+          is_contract: true
+          address: addressA
+          out_degree: 5
+          first_tx:
+            tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
+            height: 47
+            timestamp: 123456789
+          total_tokens_received:
+            usdt:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 0.2
+            weth:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 200000000000000
+          actors:
+          - id: id
+            label: example
+          - id: id
+            label: example
+          balance:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          no_incoming_txs: 5
+          no_outgoing_txs: 2
+          currency: btc
+          last_tx:
+            tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
+            height: 47
+            timestamp: 123456789
+          entity: 123456
+          token_balances:
+            usdt:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 0.2
+            weth:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 200000000000000
+          total_received:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          total_tokens_spent:
+            usdt:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 0.2
+            weth:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 200000000000000
+          status: clean
+        - total_spent:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          in_degree: 1
+          is_contract: true
+          address: addressA
+          out_degree: 5
+          first_tx:
+            tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
+            height: 47
+            timestamp: 123456789
+          total_tokens_received:
+            usdt:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 0.2
+            weth:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 200000000000000
+          actors:
+          - id: id
+            label: example
+          - id: id
+            label: example
+          balance:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          no_incoming_txs: 5
+          no_outgoing_txs: 2
+          currency: btc
+          last_tx:
+            tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
+            height: 47
+            timestamp: 123456789
+          entity: 123456
+          token_balances:
+            usdt:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 0.2
+            weth:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 200000000000000
+          total_received:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          total_tokens_spent:
+            usdt:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 0.2
+            weth:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 200000000000000
+          status: clean
+      properties:
+        next_page:
+          format: string
+          title: next_page
+          type: string
+        addresses:
+          items:
+            $ref: '#/components/schemas/address'
+          title: addresses
+          type: array
+      required:
+      - addresses
+      title: entity_addresses
+      type: object
+    search_result_level1:
+      properties:
+        neighbor:
+          $ref: '#/components/schemas/neighbor_entity'
+        matching_addresses:
+          items:
+            $ref: '#/components/schemas/address'
+          title: matching_addresses
+          type: array
+        paths:
+          description: Branches to matching entities
+          items:
+            $ref: '#/components/schemas/search_result_level2'
+          title: paths
+          type: array
+      required:
+      - matching_addresses
+      - neighbor
+      - paths
+      title: search_result_level1
+      type: object
+    search_result_level2:
+      properties:
+        neighbor:
+          $ref: '#/components/schemas/neighbor_entity'
+        matching_addresses:
+          items:
+            $ref: '#/components/schemas/address'
+          title: matching_addresses
+          type: array
+        paths:
+          description: Branches to matching entities
+          items:
+            $ref: '#/components/schemas/search_result_level3'
+          title: paths
+          type: array
+      required:
+      - matching_addresses
+      - neighbor
+      - paths
+      title: search_result_level2
+      type: object
+    search_result_level3:
+      properties:
+        neighbor:
+          $ref: '#/components/schemas/neighbor_entity'
+        matching_addresses:
+          items:
+            $ref: '#/components/schemas/address'
+          title: matching_addresses
+          type: array
+        paths:
+          description: Branches to matching entities
+          items:
+            $ref: '#/components/schemas/search_result_level4'
+          title: paths
+          type: array
+      required:
+      - matching_addresses
+      - neighbor
+      - paths
+      title: search_result_level3
+      type: object
+    search_result_level4:
+      properties:
+        neighbor:
+          $ref: '#/components/schemas/neighbor_entity'
+        matching_addresses:
+          items:
+            $ref: '#/components/schemas/address'
+          title: matching_addresses
+          type: array
+        paths:
+          description: Branches to matching entities
+          items:
+            $ref: '#/components/schemas/search_result_level5'
+          title: paths
+          type: array
+      required:
+      - matching_addresses
+      - neighbor
+      - paths
+      title: search_result_level4
+      type: object
+    search_result_level5:
+      properties:
+        neighbor:
+          $ref: '#/components/schemas/neighbor_entity'
+        matching_addresses:
+          items:
+            $ref: '#/components/schemas/address'
+          title: matching_addresses
+          type: array
+        paths:
+          description: Branches to matching entities
+          items:
+            $ref: '#/components/schemas/search_result_level6'
+          title: paths
+          type: array
+      required:
+      - matching_addresses
+      - neighbor
+      - paths
+      title: search_result_level5
+      type: object
+    search_result_level6:
+      properties:
+        neighbor:
+          $ref: '#/components/schemas/neighbor_entity'
+        matching_addresses:
+          items:
+            $ref: '#/components/schemas/address'
+          title: matching_addresses
+          type: array
+        paths:
+          description: Branches to matching entities
+          items:
+            $ref: '#/components/schemas/search_result_leaf'
+          title: paths
+          type: array
+      required:
+      - matching_addresses
+      - neighbor
+      - paths
+      title: search_result_level6
+      type: object
+    search_result_leaf:
+      example:
+        neighbor:
+          token_values:
+            usdt:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 0.2
+            weth:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 200000000000000
+          value:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          entity:
+            total_spent:
+              fiat_values:
+              - code: code
+                value: 0.8008282
+              - code: code
+                value: 0.8008282
+              value: 6
+            in_degree: 0
+            no_addresses: 1
+            out_degree: 6
+            first_tx:
+              tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
+              height: 47
+              timestamp: 123456789
+            total_tokens_received:
+              usdt:
+                fiat_values:
+                - 0.2
+                - 0.3
+                value: 0.2
+              weth:
+                fiat_values:
+                - 0.2
+                - 0.3
+                value: 200000000000000
+            no_address_tags: 2
+            root_address: addressA
+            actors:
+            - id: id
+              label: example
+            - id: id
+              label: example
+            balance:
+              fiat_values:
+              - code: code
+                value: 0.8008282
+              - code: code
+                value: 0.8008282
+              value: 6
+            no_incoming_txs: 5
+            no_outgoing_txs: 5
+            best_address_tag: null
+            currency: btc
+            last_tx:
+              tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
+              height: 47
+              timestamp: 123456789
+            entity: 123456
+            token_balances:
+              usdt:
+                fiat_values:
+                - 0.2
+                - 0.3
+                value: 0.2
+              weth:
+                fiat_values:
+                - 0.2
+                - 0.3
+                value: 200000000000000
+            total_received:
+              fiat_values:
+              - code: code
+                value: 0.8008282
+              - code: code
+                value: 0.8008282
+              value: 6
+            total_tokens_spent:
+              usdt:
+                fiat_values:
+                - 0.2
+                - 0.3
+                value: 0.2
+              weth:
+                fiat_values:
+                - 0.2
+                - 0.3
+                value: 200000000000000
+          labels:
+          - labels
+          - labels
+          no_txs: 11
+        matching_addresses:
+        - total_spent:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          in_degree: 1
+          is_contract: true
+          address: addressA
+          out_degree: 5
+          first_tx:
+            tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
+            height: 47
+            timestamp: 123456789
+          total_tokens_received:
+            usdt:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 0.2
+            weth:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 200000000000000
+          actors:
+          - id: id
+            label: example
+          - id: id
+            label: example
+          balance:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          no_incoming_txs: 5
+          no_outgoing_txs: 2
+          currency: btc
+          last_tx:
+            tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
+            height: 47
+            timestamp: 123456789
+          entity: 123456
+          token_balances:
+            usdt:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 0.2
+            weth:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 200000000000000
+          total_received:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          total_tokens_spent:
+            usdt:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 0.2
+            weth:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 200000000000000
+          status: clean
+        - total_spent:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          in_degree: 1
+          is_contract: true
+          address: addressA
+          out_degree: 5
+          first_tx:
+            tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
+            height: 47
+            timestamp: 123456789
+          total_tokens_received:
+            usdt:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 0.2
+            weth:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 200000000000000
+          actors:
+          - id: id
+            label: example
+          - id: id
+            label: example
+          balance:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          no_incoming_txs: 5
+          no_outgoing_txs: 2
+          currency: btc
+          last_tx:
+            tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
+            height: 47
+            timestamp: 123456789
+          entity: 123456
+          token_balances:
+            usdt:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 0.2
+            weth:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 200000000000000
+          total_received:
+            fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+            value: 6
+          total_tokens_spent:
+            usdt:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 0.2
+            weth:
+              fiat_values:
+              - 0.2
+              - 0.3
+              value: 200000000000000
+          status: clean
+      properties:
+        neighbor:
+          $ref: '#/components/schemas/neighbor_entity'
+        matching_addresses:
+          items:
+            $ref: '#/components/schemas/address'
+          title: matching_addresses
+          type: array
+      required:
+      - matching_addresses
+      - neighbor
+      title: search_result_leaf
+      type: object
+    tx_utxo:
+      properties:
+        tx_type:
+          default: utxo
+          title: tx_type
+          type: string
+        currency:
+          description: crypto currency code
+          example: btc
+          title: currency
+          type: string
+        tx_hash:
+          description: Transaction hash
+          example: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
+          title: tx_hash
+          type: string
+        coinbase:
+          description: Coinbase transaction flag
+          title: coinbase
+          type: boolean
+        height:
+          description: Height
+          example: 47
+          format: int32
+          minimum: 0
+          title: height
+          type: integer
+        no_inputs:
+          description: number of input addresses
+          format: int32
+          title: no_inputs
+          type: integer
+        no_outputs:
+          description: number of output addresses
+          format: int32
+          title: no_outputs
+          type: integer
+        inputs:
+          description: Transaction inputs/outputs
+          items:
+            $ref: '#/components/schemas/tx_value'
+          title: inputs
+          type: array
+        outputs:
+          description: Transaction inputs/outputs
+          items:
+            $ref: '#/components/schemas/tx_value'
+          title: inputs
+          type: array
+        timestamp:
+          description: Timestamp
+          example: 123456789
+          format: int32
+          title: timestamp
+          type: integer
+        total_input:
+          $ref: '#/components/schemas/values'
+        total_output:
+          $ref: '#/components/schemas/values'
+      required:
+      - coinbase
+      - currency
+      - height
+      - no_inputs
+      - no_outputs
+      - timestamp
+      - total_input
+      - total_output
+      - tx_hash
+      - tx_type
+      title: tx_utxo
+      type: object
+    tx_values:
+      description: Transaction inputs/outputs
+      items:
+        $ref: '#/components/schemas/tx_value'
+      title: inputs
+      type: array
+    tx_value:
+      example:
+        address:
+        - addressA
+        - addressA
+        value:
+          fiat_values:
+          - code: code
+            value: 0.8008282
+          - code: code
+            value: 0.8008282
+          value: 6
+      properties:
+        address:
+          items:
+            $ref: '#/components/schemas/address_id'
+          title: address
+          type: array
+        value:
+          $ref: '#/components/schemas/values'
+      required:
+      - address
+      - value
+      title: tx_value
+      type: object
+    tx_account:
+      example:
+        contract_creation: true
+        currency: btc
+        tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
+        to_address: addressA
+        tx_type: account
+        value:
+          fiat_values:
+          - code: code
+            value: 0.8008282
+          - code: code
+            value: 0.8008282
+          value: 6
+        from_address: addressA
+        token_tx_id: 0
+        height: 47
+        timestamp: 123456789
+      properties:
+        tx_type:
+          default: account
+          title: tx_type
+          type: string
+        token_tx_id:
+          title: token_tx_id
+          type: integer
+        currency:
+          description: crypto currency code
+          example: btc
+          title: currency
+          type: string
+        tx_hash:
+          description: Transaction hash
+          example: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
+          title: tx_hash
+          type: string
+        height:
+          description: Height
+          example: 47
+          format: int32
+          minimum: 0
+          title: height
+          type: integer
+        timestamp:
+          description: Timestamp
+          example: 123456789
+          format: int32
+          title: timestamp
+          type: integer
+        value:
+          $ref: '#/components/schemas/values'
+        from_address:
+          description: Address
+          example: addressA
+          title: address
+          type: string
+        to_address:
+          description: Address
+          example: addressA
+          title: address
+          type: string
+        contract_creation:
+          description: Indicates if this transaction created a new contract. Recipient
+            address is the address of the new contract.
+          title: contract_creation
+          type: boolean
+      required:
+      - currency
+      - from_address
+      - height
+      - timestamp
+      - to_address
+      - tx_hash
+      - tx_type
+      - value
+      title: tx_account
+      type: object
+    txs_account:
+      description: A list of account model transactions
+      items:
+        $ref: '#/components/schemas/tx_account'
+      type: array
+    address_txs:
+      example:
+        next_page: next_page
+        address_txs:
+        - null
+        - null
+      properties:
+        next_page:
+          format: string
+          title: next_page
+          type: string
+        address_txs:
+          items:
+            $ref: '#/components/schemas/address_tx'
+          title: address_txs
+          type: array
+      required:
+      - address_txs
+      title: address_txs
+      type: object
+    address_tx_utxo:
+      properties:
+        tx_type:
+          default: utxo
+          title: tx_type
+          type: string
+        tx_hash:
+          description: Transaction hash
+          example: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
+          title: tx_hash
+          type: string
+        currency:
+          description: crypto currency code
+          example: btc
+          title: currency
+          type: string
+        coinbase:
+          description: Coinbase transaction flag
+          title: coinbase
+          type: boolean
+        height:
+          description: Height
+          example: 47
+          format: int32
+          minimum: 0
+          title: height
+          type: integer
+        timestamp:
+          description: Timestamp
+          example: 123456789
+          format: int32
+          title: timestamp
+          type: integer
+        value:
+          $ref: '#/components/schemas/values'
+      required:
+      - coinbase
+      - currency
+      - height
+      - timestamp
+      - tx_hash
+      - tx_type
+      - value
+      title: address_tx_utxo
+      type: object
+    address_tx:
+      discriminator:
+        mapping:
+          utxo: '#/components/schemas/address_tx_utxo'
+          account: '#/components/schemas/tx_account'
+        propertyName: tx_type
+      oneOf:
+      - $ref: '#/components/schemas/address_tx_utxo'
+      - $ref: '#/components/schemas/tx_account'
+      title: address_tx
+    tx:
+      discriminator:
+        mapping:
+          utxo: '#/components/schemas/tx_utxo'
+          account: '#/components/schemas/tx_account'
+        propertyName: tx_type
+      oneOf:
+      - $ref: '#/components/schemas/tx_utxo'
+      - $ref: '#/components/schemas/tx_account'
+      title: tx
     rates:
       example:
         rates:
@@ -4340,6 +5199,105 @@ components:
           type: array
       title: rates
       type: object
+    rate:
+      example:
+        code: code
+        value: 0.8008282
+      properties:
+        code:
+          description: iso currency code
+          title: code
+          type: string
+        value:
+          description: exchange rate
+          format: float
+          title: value
+          type: number
+      required:
+      - code
+      - value
+      title: rate
+      type: object
+    taxonomy:
+      example:
+        taxonomy: abuse
+        uri: https://example.com
+      properties:
+        taxonomy:
+          description: Taxonomy
+          example: abuse
+          title: taxonomy
+          type: string
+        uri:
+          description: URI
+          example: https://example.com
+          title: uri
+          type: string
+      required:
+      - taxonomy
+      - uri
+      title: taxonomy
+      type: object
+    concept:
+      example:
+        description: A cryptocurrency exchange or a digital currency exchange (DCE)
+          is a business that allows customers to trade cryptocurrencies or digital
+          currencies for other assets.
+        label: example
+        taxonomy: abuse
+        id: exchange
+        uri: https://example.com
+      properties:
+        label:
+          description: Label
+          example: example
+          title: label
+          type: string
+        taxonomy:
+          description: Taxonomy
+          example: abuse
+          title: taxonomy
+          type: string
+        uri:
+          description: URI
+          example: https://example.com
+          title: uri
+          type: string
+        description:
+          description: Description
+          example: A cryptocurrency exchange or a digital currency exchange (DCE)
+            is a business that allows customers to trade cryptocurrencies or digital
+            currencies for other assets.
+          title: description
+          type: string
+        id:
+          description: ID
+          example: exchange
+          title: id
+          type: string
+      required:
+      - description
+      - id
+      - label
+      - taxonomy
+      - uri
+      title: concept
+      type: object
+    taxonomy_key:
+      description: Taxonomy
+      example: abuse
+      title: taxonomy
+      type: string
+    label:
+      description: Label
+      example: example
+      title: label
+      type: string
+    uri:
+      description: URI
+      example: https://example.com
+      title: uri
+      type: string
     search_result:
       example:
         actors:
@@ -4366,12 +5324,6 @@ components:
         - labels
         - labels
       properties:
-        actors:
-          description: The list of matching actors
-          items:
-            $ref: '#/components/schemas/labeled_item_ref'
-          title: actors
-          type: array
         currencies:
           items:
             $ref: '#/components/schemas/search_result_by_currency'
@@ -4382,6 +5334,12 @@ components:
           items:
             type: string
           title: labels
+          type: array
+        actors:
+          description: The list of matching actors
+          items:
+            $ref: '#/components/schemas/labeled_item_ref'
+          title: actors
           type: array
       required:
       - currencies
@@ -4398,17 +5356,17 @@ components:
         - txs
         - txs
       properties:
+        currency:
+          description: crypto currency code
+          example: btc
+          title: currency
+          type: string
         addresses:
           description: The list of found addresses
           items:
             type: string
           title: addresses
           type: array
-        currency:
-          description: crypto currency code
-          example: btc
-          title: currency
-          type: string
         txs:
           description: The list of found transaction ids
           items:
@@ -4427,294 +5385,41 @@ components:
         type: string
       title: labels
       type: array
-    search_result_leaf:
-      properties:
-        matching_addresses:
-          items:
-            $ref: '#/components/schemas/address'
-          title: matching_addresses
-          type: array
-        neighbor:
-          $ref: '#/components/schemas/neighbor_entity'
-      required:
-      - matching_addresses
-      - neighbor
-      title: search_result_leaf
-      type: object
-    search_result_level1:
-      properties:
-        matching_addresses:
-          items:
-            $ref: '#/components/schemas/address'
-          title: matching_addresses
-          type: array
-        neighbor:
-          $ref: '#/components/schemas/neighbor_entity'
-        paths:
-          description: Branches to matching entities
-          items:
-            $ref: '#/components/schemas/search_result_level2'
-          title: paths
-          type: array
-      required:
-      - matching_addresses
-      - neighbor
-      - paths
-      title: search_result_level1
-      type: object
-    search_result_level2:
-      properties:
-        matching_addresses:
-          items:
-            $ref: '#/components/schemas/address'
-          title: matching_addresses
-          type: array
-        neighbor:
-          $ref: '#/components/schemas/neighbor_entity'
-        paths:
-          description: Branches to matching entities
-          items:
-            $ref: '#/components/schemas/search_result_level3'
-          title: paths
-          type: array
-      required:
-      - matching_addresses
-      - neighbor
-      - paths
-      title: search_result_level2
-      type: object
-    search_result_level3:
-      properties:
-        matching_addresses:
-          items:
-            $ref: '#/components/schemas/address'
-          title: matching_addresses
-          type: array
-        neighbor:
-          $ref: '#/components/schemas/neighbor_entity'
-        paths:
-          description: Branches to matching entities
-          items:
-            $ref: '#/components/schemas/search_result_level4'
-          title: paths
-          type: array
-      required:
-      - matching_addresses
-      - neighbor
-      - paths
-      title: search_result_level3
-      type: object
-    search_result_level4:
-      properties:
-        matching_addresses:
-          items:
-            $ref: '#/components/schemas/address'
-          title: matching_addresses
-          type: array
-        neighbor:
-          $ref: '#/components/schemas/neighbor_entity'
-        paths:
-          description: Branches to matching entities
-          items:
-            $ref: '#/components/schemas/search_result_level5'
-          title: paths
-          type: array
-      required:
-      - matching_addresses
-      - neighbor
-      - paths
-      title: search_result_level4
-      type: object
-    search_result_level5:
-      properties:
-        matching_addresses:
-          items:
-            $ref: '#/components/schemas/address'
-          title: matching_addresses
-          type: array
-        neighbor:
-          $ref: '#/components/schemas/neighbor_entity'
-        paths:
-          description: Branches to matching entities
-          items:
-            $ref: '#/components/schemas/search_result_level6'
-          title: paths
-          type: array
-      required:
-      - matching_addresses
-      - neighbor
-      - paths
-      title: search_result_level5
-      type: object
-    search_result_level6:
-      properties:
-        matching_addresses:
-          items:
-            $ref: '#/components/schemas/address'
-          title: matching_addresses
-          type: array
-        neighbor:
-          $ref: '#/components/schemas/neighbor_entity'
-        paths:
-          description: Branches to matching entities
-          items:
-            $ref: '#/components/schemas/search_result_leaf'
-          title: paths
-          type: array
-      required:
-      - matching_addresses
-      - neighbor
-      - paths
-      title: search_result_level6
-      type: object
-    stats:
+    labeled_item_refs:
+      description: The list of matching actors
+      items:
+        $ref: '#/components/schemas/labeled_item_ref'
+      title: actors
+      type: array
+    labeled_item_ref:
       example:
-        request_timestamp: request_timestamp
-        version: version
-        currencies:
-        - no_tagged_addresses: 123
-          no_addresses: 12345
-          no_labels: 123
-          name: name
-          no_entities: 123
-          no_address_relations: 1234567
-          no_blocks: 12345
-          no_txs: 11
-          timestamp: 123456789
-        - no_tagged_addresses: 123
-          no_addresses: 12345
-          no_labels: 123
-          name: name
-          no_entities: 123
-          no_address_relations: 1234567
-          no_blocks: 12345
-          no_txs: 11
-          timestamp: 123456789
+        id: id
+        label: example
       properties:
-        currencies:
-          items:
-            $ref: '#/components/schemas/currency_stats'
-          title: currencies
-          type: array
-        request_timestamp:
-          title: request_timestamp
+        id:
+          description: identifier of the item
+          title: id
           type: string
-        version:
-          title: version
-          type: string
-      required:
-      - currencies
-      - request_timestamp
-      - version
-      title: stats
-      type: object
-    tag:
-      properties:
-        abuse:
-          description: Abuses
-          example: fraud
-          type: string
-        actor:
-          description: id of the actor that controlls the address
-          example: binance
-          type: string
-        category:
-          description: Category
-          example: exchange
-          type: string
-        confidence:
-          description: Confidence name
-          example: web crawl
-          type: string
-        confidence_level:
-          description: Confidence level
-          example: 100
-          format: int32
-          type: integer
-        currency:
-          description: crypto currency code
-          example: btc
-          title: currency
-          type: string
-        is_cluster_definer:
-          description: whether the address tag applies to the entity level
-          example: true
-          type: boolean
         label:
           description: Label
           example: example
           title: label
           type: string
-        lastmod:
-          description: Last modified
-          example: 123456789
-          format: int32
-          type: integer
-        source:
-          description: Source
-          example: https://foobar.com
-          type: string
-        tagpack_creator:
-          description: Tagpack creator
-          example: "true"
-          type: string
-        tagpack_is_public:
-          description: whether the address is public
-          example: true
-          type: boolean
-        tagpack_title:
-          description: Tagpack title
-          example: "true"
-          type: string
-        tagpack_uri:
-          description: Tagpack URI
-          example: https://example.com/tagpacks/sample.yaml
-          type: string
       required:
-      - currency
-      - is_cluster_definer
+      - id
       - label
-      - tagpack_creator
-      - tagpack_is_public
-      - tagpack_title
+      title: labeled_item_ref
       type: object
-    taxonomy:
-      example:
-        taxonomy: abuse
-        uri: https://example.com
-      properties:
-        taxonomy:
-          description: Taxonomy
-          example: abuse
-          title: taxonomy
-          type: string
-        uri:
-          description: URI
-          example: https://example.com
-          title: uri
-          type: string
-      required:
-      - taxonomy
-      - uri
-      title: taxonomy
-      type: object
-    taxonomy_key:
-      description: Taxonomy
-      example: abuse
-      title: taxonomy
-      type: string
-    timestamp:
-      description: Timestamp
-      example: 123456789
-      format: int32
-      title: timestamp
-      type: integer
     token_config:
       example:
         ticker: ticker
         decimals: 0
         peg_currency: peg_currency
       properties:
+        ticker:
+          description: ticker symbol of the currency e.g. USDT
+          title: ticker
+          type: string
         decimals:
           description: the number of digits after the comma. Values are always delivered
             as integers. This value can be used to set the decimal point at the right
@@ -4725,10 +5430,6 @@ components:
           description: is set if token is a stablecoin. It holds the thicker symbol
             of the currency the tokens is pegged to.
           title: peg_currency
-          type: string
-        ticker:
-          description: ticker symbol of the currency e.g. USDT
-          title: ticker
           type: string
       required:
       - decimals
@@ -4754,284 +5455,4 @@ components:
       required:
       - token_configs
       title: token_configs
-      type: object
-    token_values:
-      additionalProperties:
-        $ref: '#/components/schemas/values'
-      description: Per token value-flow
-      example:
-        usdt:
-          fiat_values:
-          - 0.2
-          - 0.3
-          value: 0.2
-        weth:
-          fiat_values:
-          - 0.2
-          - 0.3
-          value: 200000000000000
-      title: token_balances
-      type: object
-    tx:
-      discriminator:
-        mapping:
-          account: '#/components/schemas/tx_account'
-          utxo: '#/components/schemas/tx_utxo'
-        propertyName: tx_type
-      oneOf:
-      - $ref: '#/components/schemas/tx_utxo'
-      - $ref: '#/components/schemas/tx_account'
-      title: tx
-    tx_account:
-      example:
-        contract_creation: true
-        currency: btc
-        to_address: addressA
-        tx_hash: tx_hash
-        tx_type: account
-        from_address: addressA
-        value:
-          fiat_values:
-          - code: code
-            value: 0.8008282
-          - code: code
-            value: 0.8008282
-          value: 6
-        token_tx_id: 0
-        height: 47
-        timestamp: 123456789
-      properties:
-        contract_creation:
-          description: Indicates if this transaction created a new contract. Recipient
-            address is the address of the new contract.
-          title: contract_creation
-          type: boolean
-        currency:
-          description: crypto currency code
-          example: btc
-          title: currency
-          type: string
-        from_address:
-          description: Address
-          example: addressA
-          title: address
-          type: string
-        height:
-          description: Height
-          example: 47
-          format: int32
-          minimum: 0
-          title: height
-          type: integer
-        timestamp:
-          description: Timestamp
-          example: 123456789
-          format: int32
-          title: timestamp
-          type: integer
-        to_address:
-          description: Address
-          example: addressA
-          title: address
-          type: string
-        token_tx_id:
-          title: token_tx_id
-          type: integer
-        tx_hash:
-          description: Transaction hash
-          title: tx_hash
-          type: string
-        tx_type:
-          default: account
-          title: tx_type
-          type: string
-        value:
-          $ref: '#/components/schemas/values'
-      required:
-      - currency
-      - from_address
-      - height
-      - timestamp
-      - to_address
-      - tx_hash
-      - tx_type
-      - value
-      title: tx_account
-      type: object
-    tx_hash:
-      description: Transaction hash
-      title: tx_hash
-      type: string
-    tx_summary:
-      example:
-        tx_hash: tx_hash
-        height: 47
-        timestamp: 123456789
-      properties:
-        height:
-          description: Height
-          example: 47
-          format: int32
-          minimum: 0
-          title: height
-          type: integer
-        timestamp:
-          description: Timestamp
-          example: 123456789
-          format: int32
-          title: timestamp
-          type: integer
-        tx_hash:
-          description: Transaction hash
-          title: tx_hash
-          type: string
-      required:
-      - height
-      - timestamp
-      - tx_hash
-      title: tx_summary
-      type: object
-    tx_utxo:
-      properties:
-        coinbase:
-          description: Coinbase transaction flag
-          type: boolean
-        currency:
-          description: crypto currency code
-          example: btc
-          title: currency
-          type: string
-        height:
-          description: Height
-          example: 47
-          format: int32
-          minimum: 0
-          title: height
-          type: integer
-        inputs:
-          description: Transaction inputs/outputs
-          items:
-            $ref: '#/components/schemas/tx_value'
-          type: array
-        no_inputs:
-          description: number of input addresses
-          format: int32
-          type: integer
-        no_outputs:
-          description: number of output addresses
-          format: int32
-          type: integer
-        outputs:
-          description: Transaction inputs/outputs
-          items:
-            $ref: '#/components/schemas/tx_value'
-          type: array
-        timestamp:
-          description: Timestamp
-          example: 123456789
-          format: int32
-          title: timestamp
-          type: integer
-        total_input:
-          $ref: '#/components/schemas/values'
-        total_output:
-          $ref: '#/components/schemas/values'
-        tx_hash:
-          description: Transaction hash
-          title: tx_hash
-          type: string
-        tx_type:
-          default: utxo
-          type: string
-      required:
-      - coinbase
-      - currency
-      - height
-      - no_inputs
-      - no_outputs
-      - timestamp
-      - total_input
-      - total_output
-      - tx_hash
-      - tx_type
-      type: object
-    tx_value:
-      example:
-        address:
-        - addressA
-        - addressA
-        value:
-          fiat_values:
-          - code: code
-            value: 0.8008282
-          - code: code
-            value: 0.8008282
-          value: 6
-      properties:
-        address:
-          items:
-            $ref: '#/components/schemas/address_id'
-          title: address
-          type: array
-        value:
-          $ref: '#/components/schemas/values'
-      required:
-      - address
-      - value
-      title: tx_value
-      type: object
-    tx_values:
-      description: Transaction inputs/outputs
-      items:
-        $ref: '#/components/schemas/tx_value'
-      type: array
-    txs_account:
-      description: A list of account model transactions
-      items:
-        $ref: '#/components/schemas/tx_account'
-      type: array
-    uri:
-      description: URI
-      example: https://example.com
-      title: uri
-      type: string
-    values:
-      example:
-        fiat_values:
-        - code: code
-          value: 0.8008282
-        - code: code
-          value: 0.8008282
-        value: 6
-      properties:
-        fiat_values:
-          items:
-            $ref: '#/components/schemas/rate'
-          title: fiat_values
-          type: array
-        value:
-          format: int64
-          title: value
-          type: integer
-      required:
-      - fiat_values
-      - value
-      title: values
-      type: object
-    address_tag_allOf:
-      properties:
-        address:
-          description: Address
-          example: addressA
-          title: address
-          type: string
-        entity:
-          description: Entity id
-          example: 123456
-          format: int32
-          title: entity
-          type: integer
-      required:
-      - address
-      - entity
       type: object

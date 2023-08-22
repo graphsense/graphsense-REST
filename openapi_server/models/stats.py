@@ -15,28 +15,28 @@ class Stats(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, currencies: List[CurrencyStats]=None, request_timestamp: str=None, version: str=None):
+    def __init__(self, currencies: List[CurrencyStats]=None, version: str=None, request_timestamp: str=None):
         """Stats - a model defined in OpenAPI
 
         :param currencies: The currencies of this Stats.
-        :param request_timestamp: The request_timestamp of this Stats.
         :param version: The version of this Stats.
+        :param request_timestamp: The request_timestamp of this Stats.
         """
         self.openapi_types = {
             'currencies': List[CurrencyStats],
-            'request_timestamp': str,
-            'version': str
+            'version': str,
+            'request_timestamp': str
         }
 
         self.attribute_map = {
             'currencies': 'currencies',
-            'request_timestamp': 'request_timestamp',
-            'version': 'version'
+            'version': 'version',
+            'request_timestamp': 'request_timestamp'
         }
 
         self._currencies = currencies
-        self._request_timestamp = request_timestamp
         self._version = version
+        self._request_timestamp = request_timestamp
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'Stats':
@@ -56,8 +56,8 @@ class Stats(Model):
         if not shallow:
             return Model.to_dict(self)
         return { 'currencies': self._currencies,
-            'request_timestamp': self._request_timestamp,
-            'version': self._version }
+            'version': self._version,
+            'request_timestamp': self._request_timestamp }
 
 
     @property
@@ -84,29 +84,6 @@ class Stats(Model):
         self._currencies = currencies
 
     @property
-    def request_timestamp(self):
-        """Gets the request_timestamp of this Stats.
-
-
-        :return: The request_timestamp of this Stats.
-        :rtype: str
-        """
-        return self._request_timestamp
-
-    @request_timestamp.setter
-    def request_timestamp(self, request_timestamp):
-        """Sets the request_timestamp of this Stats.
-
-
-        :param request_timestamp: The request_timestamp of this Stats.
-        :type request_timestamp: str
-        """
-        if request_timestamp is None:
-            raise ValueError("Invalid value for `request_timestamp`, must not be `None`")
-
-        self._request_timestamp = request_timestamp
-
-    @property
     def version(self):
         """Gets the version of this Stats.
 
@@ -128,3 +105,26 @@ class Stats(Model):
             raise ValueError("Invalid value for `version`, must not be `None`")
 
         self._version = version
+
+    @property
+    def request_timestamp(self):
+        """Gets the request_timestamp of this Stats.
+
+
+        :return: The request_timestamp of this Stats.
+        :rtype: str
+        """
+        return self._request_timestamp
+
+    @request_timestamp.setter
+    def request_timestamp(self, request_timestamp):
+        """Sets the request_timestamp of this Stats.
+
+
+        :param request_timestamp: The request_timestamp of this Stats.
+        :type request_timestamp: str
+        """
+        if request_timestamp is None:
+            raise ValueError("Invalid value for `request_timestamp`, must not be `None`")
+
+        self._request_timestamp = request_timestamp
