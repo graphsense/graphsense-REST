@@ -145,10 +145,11 @@ async def list_neighbors(request,
                                                     page=page,
                                                     pagesize=pagesize)
 
-    for row in results:
-        row['labels'] = row['labels'] if 'labels' in row else None
-        row['value'] = to_values(row['value'])
-        row["token_values"] = to_values_tokens(row.get("token_values", None))
+    if results is not None:
+        for row in results:
+            row['labels'] = row['labels'] if 'labels' in row else None
+            row['value'] = to_values(row['value'])
+            row["token_values"] = to_values_tokens(row.get("token_values", None))
 
     dst = 'dst' if is_outgoing else 'src'
 
