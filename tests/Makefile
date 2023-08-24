@@ -1,12 +1,17 @@
-CASSANDRA_MARKER=.runcass
-TAGSTORE_MARKER=.runts
-TESTCONTAINER_MARKER=.runtestcontainer
-CASSANDRA_MOCK=cassandra_mock
-TAGSTORE_MOCK=tagstore_mock
-USE_DOCKER=TRUE
-DOCKER_GROUPID=999
-ORGANIZATION=graphsense
-TESTCONTAINER_NAME=graphsense-rest-test 
+#env file allows to override the variables below. ?= means only assign if not set
+ifneq (,$(wildcard ./.env)) 
+	include .env
+endif
+
+CASSANDRA_MARKER?=.runcass
+TAGSTORE_MARKER?=.runts
+TESTCONTAINER_MARKER?=.runtestcontainer
+CASSANDRA_MOCK?=cassandra_mock
+TAGSTORE_MOCK?=tagstore_mock
+USE_DOCKER?=TRUE
+DOCKER_GROUPID?=999
+ORGANIZATION?=graphsense
+TESTCONTAINER_NAME?=graphsense-rest-test 
 
 test: $(CASSANDRA_MARKER) $(TAGSTORE_MARKER)
 	# start container if it's not running
