@@ -1,3 +1,5 @@
+from gsrest.errors import *
+
 from typing import List, Dict
 from aiohttp import web
 import traceback
@@ -44,7 +46,7 @@ async def get_spending_txs(request: web.Request, currency, tx_hash, io_index=Non
                 break
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
-            
+
     request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
@@ -71,10 +73,10 @@ async def get_spending_txs(request: web.Request, currency, tx_hash, io_index=Non
                     text=json.dumps(result),
                     headers={'Content-type': 'application/json'})
         return result
-    except RuntimeError as e:
+    except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
-    except ValueError as e:
+    except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
@@ -116,7 +118,7 @@ async def get_spent_in_txs(request: web.Request, currency, tx_hash, io_index=Non
                 break
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
-            
+
     request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
@@ -143,10 +145,10 @@ async def get_spent_in_txs(request: web.Request, currency, tx_hash, io_index=Non
                     text=json.dumps(result),
                     headers={'Content-type': 'application/json'})
         return result
-    except RuntimeError as e:
+    except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
-    except ValueError as e:
+    except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
@@ -190,7 +192,7 @@ async def get_tx(request: web.Request, currency, tx_hash, include_io=None, token
                 break
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
-            
+
     request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
@@ -217,10 +219,10 @@ async def get_tx(request: web.Request, currency, tx_hash, include_io=None, token
                     text=json.dumps(result),
                     headers={'Content-type': 'application/json'})
         return result
-    except RuntimeError as e:
+    except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
-    except ValueError as e:
+    except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
@@ -262,7 +264,7 @@ async def get_tx_io(request: web.Request, currency, tx_hash, io) -> web.Response
                 break
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
-            
+
     request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
@@ -289,10 +291,10 @@ async def get_tx_io(request: web.Request, currency, tx_hash, io) -> web.Response
                     text=json.dumps(result),
                     headers={'Content-type': 'application/json'})
         return result
-    except RuntimeError as e:
+    except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
-    except ValueError as e:
+    except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
@@ -332,7 +334,7 @@ async def list_token_txs(request: web.Request, currency, tx_hash) -> web.Respons
                 break
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
-            
+
     request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
@@ -359,10 +361,10 @@ async def list_token_txs(request: web.Request, currency, tx_hash) -> web.Respons
                     text=json.dumps(result),
                     headers={'Content-type': 'application/json'})
         return result
-    except RuntimeError as e:
+    except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
-    except ValueError as e:
+    except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:

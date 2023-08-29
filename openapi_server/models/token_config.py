@@ -1,5 +1,5 @@
 # coding: utf-8
-
+from gsrest.errors import *
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -80,7 +80,7 @@ class TokenConfig(Model):
         :type ticker: str
         """
         if ticker is None:
-            raise ValueError("Invalid value for `ticker`, must not be `None`")
+            raise BadUserInputException("Invalid value for `ticker`, must not be `None`")
 
         self._ticker = ticker
 
@@ -105,7 +105,7 @@ class TokenConfig(Model):
         :type decimals: int
         """
         if decimals is None:
-            raise ValueError("Invalid value for `decimals`, must not be `None`")
+            raise BadUserInputException("Invalid value for `decimals`, must not be `None`")
 
         self._decimals = decimals
 

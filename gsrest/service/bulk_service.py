@@ -10,6 +10,7 @@ import traceback
 import inspect
 import contextlib
 from functools import reduce
+from gsrest.errors import NotFoundException, BadUserInputException
 
 
 @contextlib.asynccontextmanager
@@ -125,9 +126,9 @@ async def wrap(request, operation, currency, params, keys, num_pages, format,
     try:
         async with max_concurrency_sem_context:
             result = await operation(request, currency, **params)
-    except RuntimeError:
+    except NotFoundException:
         result = {error_field: 'not found'}
-    except ValueError as e:
+    except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         result = {error_field: str(e)}
     except TypeError as e:
@@ -183,10 +184,10 @@ def stack(request, currency, operation, body, num_pages, format):
                 operation = getattr(mod, operation)
                 break
     except ModuleNotFoundError:
-        raise RuntimeError(f'API {api} not found')
+        raise NotFoundException(f'API {api} not found')
     except AttributeError:
-        raise RuntimeError(f'{api}.{operation}'
-                           ' not found')
+        raise NotFoundException(f'{api}.{operation}'
+                                ' not found')
     aws = []
 
     max_concurrency_bulk_operation = request.app['config']['database'].get(
@@ -274,7 +275,7 @@ async def to_csv(stack, logger):
             }
 
             csvwriter.writerow(out_row)
-        except (ValueError, CSVError) as e:
+        except (BadUserInputException, CSVError) as e:
             logger.error(f"Error writing bulk row {row}: ({type(e)}) {e}")
             request_fields = {
                 k: v
@@ -333,7 +334,7 @@ async def to_json(stack, logger):
     for op in stack:
         try:
             rows = await op
-        except RuntimeError:
+        except NotFoundException:
             continue
         if started and rows:
             yield ","

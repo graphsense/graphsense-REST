@@ -1,5 +1,5 @@
 # coding: utf-8
-
+from gsrest.errors import *
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -76,7 +76,7 @@ class Rates(Model):
         :type height: int
         """
         if height is not None and height < 0:
-            raise ValueError("Invalid value for `height`, must be a value greater than or equal to `0`")
+            raise BadUserInputException("Invalid value for `height`, must be a value greater than or equal to `0`")
 
         self._height = height
 

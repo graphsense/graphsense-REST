@@ -108,7 +108,7 @@ def factory(config_file=None, validate_responses=False):
     app.app['plugins'] = []
     app.app['plugin_contexts'] = {}
     app.app['request_config'] = {}
-
+    
     for name in app.app['config'].get('plugins', []):
         subcl = get_subclass(importlib.import_module(name))
         app.app['plugins'].append(subcl)

@@ -1,5 +1,5 @@
 # coding: utf-8
-
+from gsrest.errors import *
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -74,7 +74,7 @@ class Values(Model):
         :type fiat_values: List[Rate]
         """
         if fiat_values is None:
-            raise ValueError("Invalid value for `fiat_values`, must not be `None`")
+            raise BadUserInputException("Invalid value for `fiat_values`, must not be `None`")
 
         self._fiat_values = fiat_values
 
@@ -97,6 +97,6 @@ class Values(Model):
         :type value: int
         """
         if value is None:
-            raise ValueError("Invalid value for `value`, must not be `None`")
+            raise BadUserInputException("Invalid value for `value`, must not be `None`")
 
         self._value = value

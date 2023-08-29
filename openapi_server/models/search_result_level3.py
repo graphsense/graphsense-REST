@@ -1,5 +1,5 @@
 # coding: utf-8
-
+from gsrest.errors import *
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -81,7 +81,7 @@ class SearchResultLevel3(Model):
         :type neighbor: NeighborEntity
         """
         if neighbor is None:
-            raise ValueError("Invalid value for `neighbor`, must not be `None`")
+            raise BadUserInputException("Invalid value for `neighbor`, must not be `None`")
 
         self._neighbor = neighbor
 
@@ -104,7 +104,7 @@ class SearchResultLevel3(Model):
         :type matching_addresses: List[Address]
         """
         if matching_addresses is None:
-            raise ValueError("Invalid value for `matching_addresses`, must not be `None`")
+            raise BadUserInputException("Invalid value for `matching_addresses`, must not be `None`")
 
         self._matching_addresses = matching_addresses
 
@@ -129,6 +129,6 @@ class SearchResultLevel3(Model):
         :type paths: List[SearchResultLevel4]
         """
         if paths is None:
-            raise ValueError("Invalid value for `paths`, must not be `None`")
+            raise BadUserInputException("Invalid value for `paths`, must not be `None`")
 
         self._paths = paths

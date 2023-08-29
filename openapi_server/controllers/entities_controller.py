@@ -1,3 +1,5 @@
+from gsrest.errors import *
+
 from typing import List, Dict
 from aiohttp import web
 import traceback
@@ -49,7 +51,7 @@ async def get_entity(request: web.Request, currency, entity, exclude_best_addres
                 break
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
-            
+
     request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
@@ -76,10 +78,10 @@ async def get_entity(request: web.Request, currency, entity, exclude_best_addres
                     text=json.dumps(result),
                     headers={'Content-type': 'application/json'})
         return result
-    except RuntimeError as e:
+    except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
-    except ValueError as e:
+    except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
@@ -123,7 +125,7 @@ async def list_address_tags_by_entity(request: web.Request, currency, entity, pa
                 break
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
-            
+
     request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
@@ -150,10 +152,10 @@ async def list_address_tags_by_entity(request: web.Request, currency, entity, pa
                     text=json.dumps(result),
                     headers={'Content-type': 'application/json'})
         return result
-    except RuntimeError as e:
+    except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
-    except ValueError as e:
+    except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
@@ -197,7 +199,7 @@ async def list_entity_addresses(request: web.Request, currency, entity, page=Non
                 break
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
-            
+
     request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
@@ -224,10 +226,10 @@ async def list_entity_addresses(request: web.Request, currency, entity, page=Non
                     text=json.dumps(result),
                     headers={'Content-type': 'application/json'})
         return result
-    except RuntimeError as e:
+    except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
-    except ValueError as e:
+    except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
@@ -273,7 +275,7 @@ async def list_entity_links(request: web.Request, currency, entity, neighbor, pa
                 break
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
-            
+
     request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
@@ -300,10 +302,10 @@ async def list_entity_links(request: web.Request, currency, entity, neighbor, pa
                     text=json.dumps(result),
                     headers={'Content-type': 'application/json'})
         return result
-    except RuntimeError as e:
+    except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
-    except ValueError as e:
+    except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
@@ -357,7 +359,7 @@ async def list_entity_neighbors(request: web.Request, currency, entity, directio
                 break
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
-            
+
     request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
@@ -384,10 +386,10 @@ async def list_entity_neighbors(request: web.Request, currency, entity, directio
                     text=json.dumps(result),
                     headers={'Content-type': 'application/json'})
         return result
-    except RuntimeError as e:
+    except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
-    except ValueError as e:
+    except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
@@ -439,7 +441,7 @@ async def list_entity_txs(request: web.Request, currency, entity, direction=None
                 break
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
-            
+
     request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
@@ -466,10 +468,10 @@ async def list_entity_txs(request: web.Request, currency, entity, direction=None
                     text=json.dumps(result),
                     headers={'Content-type': 'application/json'})
         return result
-    except RuntimeError as e:
+    except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
-    except ValueError as e:
+    except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
@@ -521,7 +523,7 @@ async def search_entity_neighbors(request: web.Request, currency, entity, direct
                 break
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
-            
+
     request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
@@ -548,10 +550,10 @@ async def search_entity_neighbors(request: web.Request, currency, entity, direct
                     text=json.dumps(result),
                     headers={'Content-type': 'application/json'})
         return result
-    except RuntimeError as e:
+    except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
-    except ValueError as e:
+    except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:

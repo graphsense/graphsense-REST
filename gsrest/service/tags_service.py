@@ -8,6 +8,7 @@ from openapi_server.models.actor import Actor
 from openapi_server.models.actor_context import ActorContext
 from openapi_server.models.labeled_item_ref import LabeledItemRef
 from gsrest.db.util import tagstores, tagstores_with_paging, dt_to_int
+from gsrest.errors import NotFoundException
 
 
 def address_tag_from_row(row):
@@ -82,7 +83,7 @@ async def get_actor(request, actor):
     actor_row = actor_cr
 
     if len(actor_row) == 0:
-        raise RuntimeError(f"Actor {actor} not found.")
+        raise NotFoundException(f"Actor {actor} not found.")
     else:
         return actor_from_row(actor_row[0], jurisdictions, categories, nr_tags)
 

@@ -1,3 +1,5 @@
+from gsrest.errors import *
+
 from typing import List, Dict
 from aiohttp import web
 import traceback
@@ -40,7 +42,7 @@ async def get_block(request: web.Request, currency, height) -> web.Response:
                 break
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
-            
+
     request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
@@ -67,10 +69,10 @@ async def get_block(request: web.Request, currency, height) -> web.Response:
                     text=json.dumps(result),
                     headers={'Content-type': 'application/json'})
         return result
-    except RuntimeError as e:
+    except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
-    except ValueError as e:
+    except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
@@ -110,7 +112,7 @@ async def list_block_txs(request: web.Request, currency, height) -> web.Response
                 break
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
-            
+
     request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
@@ -137,10 +139,10 @@ async def list_block_txs(request: web.Request, currency, height) -> web.Response
                     text=json.dumps(result),
                     headers={'Content-type': 'application/json'})
         return result
-    except RuntimeError as e:
+    except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
-    except ValueError as e:
+    except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:

@@ -5,6 +5,7 @@ from openapi_server.models.tx_value import TxValue
 from openapi_server.models.tx_ref import TxRef
 from gsrest.service.rates_service import get_rates
 from gsrest.util.values import convert_value, convert_token_value
+from gsrest.errors import NotFoundException
 
 
 def from_row(currency, row, rates, token_config, include_io=False):
@@ -83,8 +84,9 @@ async def list_token_txs(request, currency, tx_hash, token_tx_id=None):
     db = request.app['db']
     results = await db.list_token_txs(currency, tx_hash, log_index=token_tx_id)
     if results is None:
-        raise RuntimeError('Transaction {} in keyspace {} not found'.format(
-            tx_hash, currency))
+        raise NotFoundException(
+            'Transaction {} in keyspace {} not found'.format(
+                tx_hash, currency))
 
     results = [
         from_row(currency, result, (await
@@ -113,16 +115,16 @@ async def get_tx(request,
             if len(results):
                 return results[0]
             else:
-                raise RuntimeError(
+                raise NotFoundException(
                     'Token transaction {}:{} in keyspace {} not found'.format(
                         tx_hash, token_tx_id, currency))
         else:
-            raise RuntimeError(
+            raise NotFoundException(
                 f'{currency} does not support token transactions.')
     else:
         result = await db.get_tx(currency, tx_hash)
         if result is None:
-            raise RuntimeError(
+            raise NotFoundException(
                 'Transaction {} in keyspace {} not found'.format(
                     tx_hash, currency))
 
@@ -136,7 +138,7 @@ async def get_tx(request,
 
 async def get_tx_io(request, currency, tx_hash, io):
     if currency == 'eth':
-        raise RuntimeError('get_tx_io not implemented for ETH')
+        raise NotFoundException('get_tx_io not implemented for ETH')
     result = await get_tx(request, currency, tx_hash, include_io=True)
     return getattr(result, io)
 

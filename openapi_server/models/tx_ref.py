@@ -1,5 +1,5 @@
 # coding: utf-8
-
+from gsrest.errors import *
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -78,7 +78,7 @@ class TxRef(Model):
         :type input_index: int
         """
         if input_index is None:
-            raise ValueError("Invalid value for `input_index`, must not be `None`")
+            raise BadUserInputException("Invalid value for `input_index`, must not be `None`")
 
         self._input_index = input_index
 
@@ -101,7 +101,7 @@ class TxRef(Model):
         :type output_index: int
         """
         if output_index is None:
-            raise ValueError("Invalid value for `output_index`, must not be `None`")
+            raise BadUserInputException("Invalid value for `output_index`, must not be `None`")
 
         self._output_index = output_index
 
@@ -124,6 +124,6 @@ class TxRef(Model):
         :type tx_hash: str
         """
         if tx_hash is None:
-            raise ValueError("Invalid value for `tx_hash`, must not be `None`")
+            raise BadUserInputException("Invalid value for `tx_hash`, must not be `None`")
 
         self._tx_hash = tx_hash

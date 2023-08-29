@@ -14,6 +14,7 @@ from gsrest.service.rates_service import list_rates
 from gsrest.db.util import tagstores, tagstores_with_paging
 from gsrest.service.tags_service import address_tag_from_row
 from gsrest.util import get_first_key_present
+from gsrest.errors import NotFoundException, BadUserInputException
 from psycopg2.errors import InvalidTextRepresentation
 
 
@@ -87,7 +88,7 @@ async def get_address(request, currency, address):
     result = await db.get_address(currency, address)
 
     if not result:
-        raise RuntimeError("Address {} not found in currency {}".format(
+        raise NotFoundException("Address {} not found in currency {}".format(
             address, currency))
 
     actors = tagstores(
@@ -117,7 +118,8 @@ async def list_tags_by_address(request,
                 request.app['request_config']['show_private_tags'])
     except InvalidTextRepresentation as e:
         if currency.upper() in str(e):
-            raise ValueError(f"Currency {currency} currently not supported")
+            raise BadUserInputException(
+                f"Currency {currency} currently not supported")
         else:
             raise e
 
@@ -134,7 +136,7 @@ async def list_neighbors(request,
                          page=None,
                          pagesize=None):
     if node_type not in ['address', 'entity']:
-        raise RuntimeError(f'Unknown node type {node_type}')
+        raise NotFoundException(f'Unknown node type {node_type}')
     is_outgoing = "out" in direction
     db = request.app['db']
     results, paging_state = await db.list_neighbors(currency,

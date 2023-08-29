@@ -1,5 +1,5 @@
 # coding: utf-8
-
+from gsrest.errors import *
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -105,7 +105,7 @@ class ActorContext(Model):
         :type uris: List[str]
         """
         if uris is None:
-            raise ValueError("Invalid value for `uris`, must not be `None`")
+            raise BadUserInputException("Invalid value for `uris`, must not be `None`")
 
         self._uris = uris
 
@@ -130,7 +130,7 @@ class ActorContext(Model):
         :type images: List[str]
         """
         if images is None:
-            raise ValueError("Invalid value for `images`, must not be `None`")
+            raise BadUserInputException("Invalid value for `images`, must not be `None`")
 
         self._images = images
 
@@ -155,7 +155,7 @@ class ActorContext(Model):
         :type refs: List[str]
         """
         if refs is None:
-            raise ValueError("Invalid value for `refs`, must not be `None`")
+            raise BadUserInputException("Invalid value for `refs`, must not be `None`")
 
         self._refs = refs
 
@@ -180,7 +180,7 @@ class ActorContext(Model):
         :type coingecko_ids: List[str]
         """
         if coingecko_ids is None:
-            raise ValueError("Invalid value for `coingecko_ids`, must not be `None`")
+            raise BadUserInputException("Invalid value for `coingecko_ids`, must not be `None`")
 
         self._coingecko_ids = coingecko_ids
 
@@ -205,7 +205,7 @@ class ActorContext(Model):
         :type defilama_ids: List[str]
         """
         if defilama_ids is None:
-            raise ValueError("Invalid value for `defilama_ids`, must not be `None`")
+            raise BadUserInputException("Invalid value for `defilama_ids`, must not be `None`")
 
         self._defilama_ids = defilama_ids
 

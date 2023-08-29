@@ -1,5 +1,5 @@
 # coding: utf-8
-
+from gsrest.errors import *
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -75,7 +75,7 @@ class LabeledItemRef(Model):
         :type id: str
         """
         if id is None:
-            raise ValueError("Invalid value for `id`, must not be `None`")
+            raise BadUserInputException("Invalid value for `id`, must not be `None`")
 
         self._id = id
 
@@ -100,6 +100,6 @@ class LabeledItemRef(Model):
         :type label: str
         """
         if label is None:
-            raise ValueError("Invalid value for `label`, must not be `None`")
+            raise BadUserInputException("Invalid value for `label`, must not be `None`")
 
         self._label = label

@@ -1,5 +1,5 @@
 # coding: utf-8
-
+from gsrest.errors import *
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -95,6 +95,6 @@ class NeighborEntities(Model):
         :type neighbors: List[NeighborEntity]
         """
         if neighbors is None:
-            raise ValueError("Invalid value for `neighbors`, must not be `None`")
+            raise BadUserInputException("Invalid value for `neighbors`, must not be `None`")
 
         self._neighbors = neighbors

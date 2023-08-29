@@ -1,5 +1,5 @@
 # coding: utf-8
-
+from gsrest.errors import *
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -80,7 +80,7 @@ class SearchResult(Model):
         :type currencies: List[SearchResultByCurrency]
         """
         if currencies is None:
-            raise ValueError("Invalid value for `currencies`, must not be `None`")
+            raise BadUserInputException("Invalid value for `currencies`, must not be `None`")
 
         self._currencies = currencies
 
@@ -105,7 +105,7 @@ class SearchResult(Model):
         :type labels: List[str]
         """
         if labels is None:
-            raise ValueError("Invalid value for `labels`, must not be `None`")
+            raise BadUserInputException("Invalid value for `labels`, must not be `None`")
 
         self._labels = labels
 

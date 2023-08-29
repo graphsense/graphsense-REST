@@ -12,6 +12,7 @@ from gsrest.util.values import (convert_value, to_values,
 from openapi_server.models.entity_addresses import EntityAddresses
 from gsrest.db.util import tagstores, tagstores_with_paging
 from gsrest.service.tags_service import address_tag_from_row
+from gsrest.errors import NotFoundException, BadUserInputException
 import gsrest.service.common_service as common
 import importlib
 import asyncio
@@ -82,7 +83,7 @@ async def get_entity(request,
     result = await db.get_entity(currency, entity)
 
     if result is None:
-        raise RuntimeError("Entity {} not found".format(entity))
+        raise NotFoundException("Entity {} not found".format(entity))
 
     tags = None
     count = 0
@@ -215,7 +216,7 @@ async def search_entity_neighbors(request,
         min_value = float(min_value)
         max_value = float(max_value[0]) if len(max_value) > 0 else None
         if max_value is not None and min_value > max_value:
-            raise ValueError('Min must not be greater than max')
+            raise BadUserInputException('Min must not be greater than max')
 
         def match_neighbor(neighbor):
             values = getattr(neighbor.entity, key)

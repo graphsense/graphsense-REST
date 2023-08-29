@@ -1,5 +1,5 @@
 # coding: utf-8
-
+from gsrest.errors import *
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -88,7 +88,7 @@ class Block(Model):
         :type block_hash: str
         """
         if block_hash is None:
-            raise ValueError("Invalid value for `block_hash`, must not be `None`")
+            raise BadUserInputException("Invalid value for `block_hash`, must not be `None`")
 
         self._block_hash = block_hash
 
@@ -113,7 +113,7 @@ class Block(Model):
         :type currency: str
         """
         if currency is None:
-            raise ValueError("Invalid value for `currency`, must not be `None`")
+            raise BadUserInputException("Invalid value for `currency`, must not be `None`")
 
         self._currency = currency
 
@@ -138,9 +138,9 @@ class Block(Model):
         :type height: int
         """
         if height is None:
-            raise ValueError("Invalid value for `height`, must not be `None`")
+            raise BadUserInputException("Invalid value for `height`, must not be `None`")
         if height is not None and height < 0:
-            raise ValueError("Invalid value for `height`, must be a value greater than or equal to `0`")
+            raise BadUserInputException("Invalid value for `height`, must be a value greater than or equal to `0`")
 
         self._height = height
 
@@ -163,7 +163,7 @@ class Block(Model):
         :type no_txs: int
         """
         if no_txs is None:
-            raise ValueError("Invalid value for `no_txs`, must not be `None`")
+            raise BadUserInputException("Invalid value for `no_txs`, must not be `None`")
 
         self._no_txs = no_txs
 
@@ -188,6 +188,6 @@ class Block(Model):
         :type timestamp: int
         """
         if timestamp is None:
-            raise ValueError("Invalid value for `timestamp`, must not be `None`")
+            raise BadUserInputException("Invalid value for `timestamp`, must not be `None`")
 
         self._timestamp = timestamp

@@ -1,5 +1,5 @@
 # coding: utf-8
-
+from gsrest.errors import *
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -90,7 +90,7 @@ class Concept(Model):
         :type label: str
         """
         if label is None:
-            raise ValueError("Invalid value for `label`, must not be `None`")
+            raise BadUserInputException("Invalid value for `label`, must not be `None`")
 
         self._label = label
 
@@ -115,7 +115,7 @@ class Concept(Model):
         :type taxonomy: str
         """
         if taxonomy is None:
-            raise ValueError("Invalid value for `taxonomy`, must not be `None`")
+            raise BadUserInputException("Invalid value for `taxonomy`, must not be `None`")
 
         self._taxonomy = taxonomy
 
@@ -140,7 +140,7 @@ class Concept(Model):
         :type uri: str
         """
         if uri is None:
-            raise ValueError("Invalid value for `uri`, must not be `None`")
+            raise BadUserInputException("Invalid value for `uri`, must not be `None`")
 
         self._uri = uri
 
@@ -165,7 +165,7 @@ class Concept(Model):
         :type description: str
         """
         if description is None:
-            raise ValueError("Invalid value for `description`, must not be `None`")
+            raise BadUserInputException("Invalid value for `description`, must not be `None`")
 
         self._description = description
 
@@ -190,6 +190,6 @@ class Concept(Model):
         :type id: str
         """
         if id is None:
-            raise ValueError("Invalid value for `id`, must not be `None`")
+            raise BadUserInputException("Invalid value for `id`, must not be `None`")
 
         self._id = id
