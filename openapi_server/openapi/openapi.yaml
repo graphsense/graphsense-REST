@@ -33,7 +33,7 @@ paths:
         name: q
         required: true
         schema:
-          minLength: 3
+          minLength: 2
           type: string
         style: form
       - description: Maximum number of search results
