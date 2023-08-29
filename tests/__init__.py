@@ -2,13 +2,14 @@ import logging
 import os
 import json
 from aiohttp.test_utils import AioHTTPTestCase
-
-from openapi_server import factory
 import pytest
 
 # Register assert rewriting for nice diffs in tests
 # https://docs.pytest.org/en/stable/how-to/writing_plugins.html#assertion-rewriting
 pytest.register_assert_rewrite("gsrest")
+
+from openapi_server import factory
+
 
 class BaseTestCase(AioHTTPTestCase):
 

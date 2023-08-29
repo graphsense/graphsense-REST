@@ -97,7 +97,7 @@ async def get_actor_tags(request, actor, page=None, pagesize=None):
 
     tags, next_page = await tagstores_with_paging(
         request.app['tagstores'], to_obj, fun, page, pagesize, actor,
-        request.app['show_private_tags'])
+        request.app['request_config']['show_private_tags'])
 
     return AddressTags(next_page=next_page, address_tags=tags)
 
@@ -112,7 +112,7 @@ async def list_address_tags(request, label, page=None, pagesize=None):
 
     tags, next_page = await tagstores_with_paging(
         request.app['tagstores'], to_obj, fun, page, pagesize, label,
-        request.app['show_private_tags'])
+        request.app['request_config']['show_private_tags'])
 
     return AddressTags(next_page=next_page, address_tags=tags)
 

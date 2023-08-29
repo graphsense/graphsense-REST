@@ -50,7 +50,7 @@ async def get_entity(request: web.Request, currency, entity, exclude_best_addres
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
             
-    request.app['show_private_tags'] = show_private_tags
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','currency','entity','exclude_best_address_tag','include_actors']:
@@ -124,7 +124,7 @@ async def list_address_tags_by_entity(request: web.Request, currency, entity, pa
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
             
-    request.app['show_private_tags'] = show_private_tags
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','currency','entity','page','pagesize']:
@@ -198,7 +198,7 @@ async def list_entity_addresses(request: web.Request, currency, entity, page=Non
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
             
-    request.app['show_private_tags'] = show_private_tags
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','currency','entity','page','pagesize']:
@@ -274,7 +274,7 @@ async def list_entity_links(request: web.Request, currency, entity, neighbor, pa
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
             
-    request.app['show_private_tags'] = show_private_tags
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','currency','entity','neighbor','page','pagesize']:
@@ -358,7 +358,7 @@ async def list_entity_neighbors(request: web.Request, currency, entity, directio
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
             
-    request.app['show_private_tags'] = show_private_tags
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','currency','entity','direction','only_ids','include_labels','exclude_best_address_tag','include_actors','page','pagesize']:
@@ -440,7 +440,7 @@ async def list_entity_txs(request: web.Request, currency, entity, direction=None
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
             
-    request.app['show_private_tags'] = show_private_tags
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','currency','entity','direction','min_height','max_height','token_currency','page','pagesize']:
@@ -522,7 +522,7 @@ async def search_entity_neighbors(request: web.Request, currency, entity, direct
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
             
-    request.app['show_private_tags'] = show_private_tags
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','currency','entity','direction','key','value','depth','breadth','skip_num_addresses']:

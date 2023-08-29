@@ -94,7 +94,7 @@ async def get_address(request, currency, address):
         request.app['tagstores'],
         lambda row: LabeledItemRef(id=row["id"], label=row["label"]),
         'list_actors_address', currency, address,
-        request.app['show_private_tags'])
+        request.app['request_config']['show_private_tags'])
 
     return address_from_row(currency, result,
                             (await get_rates(request, currency))['rates'],
@@ -114,7 +114,7 @@ async def list_tags_by_address(request,
                 address_tag_from_row,
                 'list_tags_by_address',
                 page, pagesize, currency, address,
-                request.app['show_private_tags'])
+                request.app['request_config']['show_private_tags'])
     except InvalidTextRepresentation as e:
         if currency.upper() in str(e):
             raise ValueError(f"Currency {currency} currently not supported")
@@ -168,8 +168,9 @@ async def add_labels(request, currency, node_type, that, nodes):
     thatfield = that + '_' + field
     ids = tuple((node[thatfield] for node in nodes))
 
-    result = await tagstores(request.app['tagstores'], lambda row: row, fun,
-                             currency, ids, request.app['show_private_tags'])
+    result = await tagstores(
+        request.app['tagstores'], lambda row: row, fun, currency, ids,
+        request.app['request_config']['show_private_tags'])
     iterator = iter(result)
     if node_type == 'address':
         nodes = sorted(nodes, key=lambda node: node[thatfield])

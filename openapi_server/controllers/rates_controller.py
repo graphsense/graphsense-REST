@@ -40,7 +40,7 @@ async def get_exchange_rates(request: web.Request, currency, height) -> web.Resp
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
             
-    request.app['show_private_tags'] = show_private_tags
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','currency','height']:

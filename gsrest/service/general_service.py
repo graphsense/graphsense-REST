@@ -63,7 +63,7 @@ async def search(request, q, currency=None, limit=10):
     def ts(curr=None):
         return tagstores(request.app['tagstores'], lambda row: row['label'],
                          'list_matching_labels', curr, expression_norm, limit,
-                         request.app['show_private_tags'])
+                         request.app['request_config']['show_private_tags'])
 
     aws1 = [search_by_currency(request, curr, q) for curr in currs]
     if currency:
@@ -75,7 +75,7 @@ async def search(request, q, currency=None, limit=10):
         request.app['tagstores'],
         lambda row: LabeledItemRef(id=row["id"], label=row["label"]),
         'list_matching_actors', expression_norm, limit,
-        request.app['show_private_tags'])
+        request.app['request_config']['show_private_tags'])
 
     aw1 = asyncio.gather(*aws1)
     aw2 = asyncio.gather(*aws2)

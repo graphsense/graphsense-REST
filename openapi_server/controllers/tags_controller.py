@@ -41,7 +41,7 @@ async def get_actor(request: web.Request, actor) -> web.Response:
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
             
-    request.app['show_private_tags'] = show_private_tags
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','actor']:
@@ -113,7 +113,7 @@ async def get_actor_tags(request: web.Request, actor, page=None, pagesize=None) 
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
             
-    request.app['show_private_tags'] = show_private_tags
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','actor','page','pagesize']:
@@ -185,7 +185,7 @@ async def list_address_tags(request: web.Request, label, page=None, pagesize=Non
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
             
-    request.app['show_private_tags'] = show_private_tags
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','label','page','pagesize']:
@@ -253,7 +253,7 @@ async def list_concepts(request: web.Request, taxonomy) -> web.Response:
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
             
-    request.app['show_private_tags'] = show_private_tags
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','taxonomy']:
@@ -319,7 +319,7 @@ async def list_taxonomies(request: web.Request, ) -> web.Response:
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
             
-    request.app['show_private_tags'] = show_private_tags
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['']:

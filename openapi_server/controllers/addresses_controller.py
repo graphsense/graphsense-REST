@@ -45,7 +45,7 @@ async def get_address(request: web.Request, currency, address) -> web.Response:
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
             
-    request.app['show_private_tags'] = show_private_tags
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','currency','address']:
@@ -115,7 +115,7 @@ async def get_address_entity(request: web.Request, currency, address) -> web.Res
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
             
-    request.app['show_private_tags'] = show_private_tags
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','currency','address']:
@@ -191,7 +191,7 @@ async def list_address_links(request: web.Request, currency, address, neighbor, 
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
             
-    request.app['show_private_tags'] = show_private_tags
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','currency','address','neighbor','page','pagesize']:
@@ -271,7 +271,7 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
             
-    request.app['show_private_tags'] = show_private_tags
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','currency','address','direction','only_ids','include_labels','page','pagesize']:
@@ -353,7 +353,7 @@ async def list_address_txs(request: web.Request, currency, address, direction=No
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
             
-    request.app['show_private_tags'] = show_private_tags
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','currency','address','direction','min_height','max_height','token_currency','page','pagesize']:
@@ -427,7 +427,7 @@ async def list_tags_by_address(request: web.Request, currency, address, page=Non
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
             
-    request.app['show_private_tags'] = show_private_tags
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','currency','address','page','pagesize']:

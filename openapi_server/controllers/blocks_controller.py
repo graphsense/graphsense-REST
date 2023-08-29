@@ -41,7 +41,7 @@ async def get_block(request: web.Request, currency, height) -> web.Response:
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
             
-    request.app['show_private_tags'] = show_private_tags
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','currency','height']:
@@ -111,7 +111,7 @@ async def list_block_txs(request: web.Request, currency, height) -> web.Response
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
             
-    request.app['show_private_tags'] = show_private_tags
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','currency','height']:

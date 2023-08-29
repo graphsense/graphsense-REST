@@ -38,7 +38,7 @@ async def list_supported_tokens(request: web.Request, currency) -> web.Response:
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
             
-    request.app['show_private_tags'] = show_private_tags
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','currency']:

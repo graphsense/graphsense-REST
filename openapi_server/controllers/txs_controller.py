@@ -45,7 +45,7 @@ async def get_spending_txs(request: web.Request, currency, tx_hash, io_index=Non
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
             
-    request.app['show_private_tags'] = show_private_tags
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','currency','tx_hash','io_index']:
@@ -117,7 +117,7 @@ async def get_spent_in_txs(request: web.Request, currency, tx_hash, io_index=Non
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
             
-    request.app['show_private_tags'] = show_private_tags
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','currency','tx_hash','io_index']:
@@ -191,7 +191,7 @@ async def get_tx(request: web.Request, currency, tx_hash, include_io=None, token
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
             
-    request.app['show_private_tags'] = show_private_tags
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','currency','tx_hash','include_io','token_tx_id']:
@@ -263,7 +263,7 @@ async def get_tx_io(request: web.Request, currency, tx_hash, io) -> web.Response
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
             
-    request.app['show_private_tags'] = show_private_tags
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','currency','tx_hash','io']:
@@ -333,7 +333,7 @@ async def list_token_txs(request: web.Request, currency, tx_hash) -> web.Respons
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
             
-    request.app['show_private_tags'] = show_private_tags
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','currency','tx_hash']:
