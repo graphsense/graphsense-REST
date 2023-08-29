@@ -1183,7 +1183,7 @@ class Cassandra:
         if isinstance(io_index, int):
             query = ('SELECT * from transaction_spent_in where '
                      'spent_tx_prefix=%s and spent_tx_hash=%s '
-                     'and spent_input_index=%s')
+                     'and spent_output_index=%s')
             params = [
                 tx_hash[:prefix['tx']],
                 bytearray.fromhex(tx_hash), io_index
