@@ -17,27 +17,27 @@ class SearchResultLevel4(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, matching_addresses: List[Address]=None, neighbor: NeighborEntity=None, paths: List[SearchResultLevel5]=None):
+    def __init__(self, neighbor: NeighborEntity=None, matching_addresses: List[Address]=None, paths: List[SearchResultLevel5]=None):
         """SearchResultLevel4 - a model defined in OpenAPI
 
-        :param matching_addresses: The matching_addresses of this SearchResultLevel4.
         :param neighbor: The neighbor of this SearchResultLevel4.
+        :param matching_addresses: The matching_addresses of this SearchResultLevel4.
         :param paths: The paths of this SearchResultLevel4.
         """
         self.openapi_types = {
-            'matching_addresses': List[Address],
             'neighbor': NeighborEntity,
+            'matching_addresses': List[Address],
             'paths': List[SearchResultLevel5]
         }
 
         self.attribute_map = {
-            'matching_addresses': 'matching_addresses',
             'neighbor': 'neighbor',
+            'matching_addresses': 'matching_addresses',
             'paths': 'paths'
         }
 
-        self._matching_addresses = matching_addresses
         self._neighbor = neighbor
+        self._matching_addresses = matching_addresses
         self._paths = paths
 
     @classmethod
@@ -57,33 +57,10 @@ class SearchResultLevel4(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'matching_addresses': self._matching_addresses,
-            'neighbor': self._neighbor,
+        return { 'neighbor': self._neighbor,
+            'matching_addresses': self._matching_addresses,
             'paths': self._paths }
 
-
-    @property
-    def matching_addresses(self):
-        """Gets the matching_addresses of this SearchResultLevel4.
-
-
-        :return: The matching_addresses of this SearchResultLevel4.
-        :rtype: List[Address]
-        """
-        return self._matching_addresses
-
-    @matching_addresses.setter
-    def matching_addresses(self, matching_addresses):
-        """Sets the matching_addresses of this SearchResultLevel4.
-
-
-        :param matching_addresses: The matching_addresses of this SearchResultLevel4.
-        :type matching_addresses: List[Address]
-        """
-        if matching_addresses is None:
-            raise ValueError("Invalid value for `matching_addresses`, must not be `None`")
-
-        self._matching_addresses = matching_addresses
 
     @property
     def neighbor(self):
@@ -107,6 +84,29 @@ class SearchResultLevel4(Model):
             raise ValueError("Invalid value for `neighbor`, must not be `None`")
 
         self._neighbor = neighbor
+
+    @property
+    def matching_addresses(self):
+        """Gets the matching_addresses of this SearchResultLevel4.
+
+
+        :return: The matching_addresses of this SearchResultLevel4.
+        :rtype: List[Address]
+        """
+        return self._matching_addresses
+
+    @matching_addresses.setter
+    def matching_addresses(self, matching_addresses):
+        """Sets the matching_addresses of this SearchResultLevel4.
+
+
+        :param matching_addresses: The matching_addresses of this SearchResultLevel4.
+        :type matching_addresses: List[Address]
+        """
+        if matching_addresses is None:
+            raise ValueError("Invalid value for `matching_addresses`, must not be `None`")
+
+        self._matching_addresses = matching_addresses
 
     @property
     def paths(self):

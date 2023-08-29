@@ -5,7 +5,6 @@ from openapi_server.models.actor import Actor
 from openapi_server.models.actor_context import ActorContext
 from openapi_server.models.address import Address
 from openapi_server.models.address_tag import AddressTag
-from openapi_server.models.address_tag_all_of import AddressTagAllOf
 from openapi_server.models.address_tags import AddressTags
 from openapi_server.models.address_tx import AddressTx
 from openapi_server.models.address_tx_utxo import AddressTxUtxo
@@ -41,6 +40,7 @@ from openapi_server.models.token_config import TokenConfig
 from openapi_server.models.token_configs import TokenConfigs
 from openapi_server.models.tx import Tx
 from openapi_server.models.tx_account import TxAccount
+from openapi_server.models.tx_ref import TxRef
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.tx_utxo import TxUtxo
 from openapi_server.models.tx_value import TxValue

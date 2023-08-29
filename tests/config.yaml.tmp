@@ -6,14 +6,14 @@ database:
     tagpacks: tagpacks
     currencies: 
         btc: 
-            raw: btc_raw
-            transformed: btc_transformed
+            raw: resttest_btc_raw
+            transformed: resttest_btc_transformed
         ltc: 
-            raw: ltc_raw
-            transformed: ltc_transformed
+            raw: resttest_ltc_raw
+            transformed: resttest_ltc_transformed
         eth: 
-            raw: eth_raw
-            transformed: eth_transformed
+            raw: resttest_eth_raw
+            transformed: resttest_eth_transformed
 tagstores:
     - host: "TAGSTORE_MOCK_IP"
 

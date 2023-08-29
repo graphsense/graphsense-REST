@@ -89,9 +89,9 @@ def flatten(item, name="", flat_dict=None, format=None):
         # default arguments are mutable in python!
         # See https://towardsdatascience.com/python-pitfall-mutable-default-arguments-9385e8265422 # noqa
         flat_dict = {}
-    if type(item) == Entity and item.best_address_tag is None:
+    if isinstance(item, Entity) and item.best_address_tag is None:
         item.best_address_tag = AddressTag()
-    if type(item) == Values:
+    if isinstance(item, Values):
         flat_dict[name + 'value'] = item.value
         for rate in item.fiat_values:
             flat_dict[name + rate.code] = rate.value
