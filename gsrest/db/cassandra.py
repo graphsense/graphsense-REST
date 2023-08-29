@@ -1148,7 +1148,8 @@ class Cassandra:
     async def get_spending_txs(self, currency, tx_hash, io_index):
         if not self.parameters[currency]["tx_graph_available"]:
             # for value err msg is visible to the user.
-            raise ValueError(f"{currency} does not yet support transaction linking.")
+            raise ValueError(
+                f"{currency} does not yet support transaction linking.")
         prefix = self.get_prefix_lengths(currency)
         if isinstance(io_index, int):
             query = ('SELECT * from transaction_spending where '
@@ -1176,7 +1177,8 @@ class Cassandra:
     async def get_spent_in_txs(self, currency, tx_hash, io_index):
         if not self.parameters[currency]["tx_graph_available"]:
             # for value err msg is visible to the user.
-            raise ValueError(f"{currency} does not yet support transaction linking.")
+            raise ValueError(
+                f"{currency} does not yet support transaction linking.")
         prefix = self.get_prefix_lengths(currency)
         if isinstance(io_index, int):
             query = ('SELECT * from transaction_spent_in where '
