@@ -234,7 +234,7 @@ class Cassandra:
 
     def get_token_configuration_eth(self, currency):
         eth_config = self.parameters.get(currency, None)
-        return  eth_config["token_config"] if eth_config is not None else {}
+        return eth_config["token_config"] if eth_config is not None else {}
 
     def get_keyspace_mapping(self, currency, keyspace_type):
         if currency is None:
@@ -2113,8 +2113,7 @@ class Cassandra:
         if fiat_values is None:
             fiat_values = [0.0 for _ in fcurs]
 
-        for (fiat, curr) in zip(fiat_values,
-                                fcurs):
+        for (fiat, curr) in zip(fiat_values, fcurs):
             values.append({'code': curr.lower(), 'value': fiat})
         return values
 
