@@ -3,6 +3,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [23.09] - 2023-09-20
+
+### Added
+- added new endpoints to query tx-graph (dependencies between transactions in utxo currencies /{currency}/txs/{tx_hash}/spent_in and /{currency}/txs/{tx_hash}/spending)
+- added support for missing current exchange rates (for sync states before exchange rates where avail.)
+### Changed
+- changed minimal search key length to 2 (only searches tags and actors)
+- changed keyspaces names for testing to avoid conflicts
+- fixed propagating unknown exception to the user ([#92](https://github.com/graphsense/graphsense-REST/issues/92))
+- fixed linting in github action ([94](https://github.com/graphsense/graphsense-REST/issues/94))
+- fixed exception on unknown currency  ([93](https://github.com/graphsense/graphsense-REST/issues/93))
+
+
 ## [23.06] - 2023-06-12
 ### Changed
 - fix new du v1 address not found in /address/{addr}/entity endpoint
