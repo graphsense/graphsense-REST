@@ -1,5 +1,5 @@
 # coding: utf-8
-from gsrest.errors import *
+from gsrest.errors import BadUserInputException
 from datetime import date, datetime
 
 from typing import List, Dict, Type

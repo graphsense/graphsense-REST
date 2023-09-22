@@ -5,6 +5,7 @@ from openapi_server.models.actor import Actor
 from openapi_server.models.actor_context import ActorContext
 from openapi_server.models.address import Address
 from openapi_server.models.address_tag import AddressTag
+from openapi_server.models.address_tag_all_of import AddressTagAllOf
 from openapi_server.models.address_tags import AddressTags
 from openapi_server.models.address_tx import AddressTx
 from openapi_server.models.address_tx_utxo import AddressTxUtxo

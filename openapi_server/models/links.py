@@ -1,5 +1,5 @@
 # coding: utf-8
-from gsrest.errors import *
+from gsrest.errors import BadUserInputException
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -15,24 +15,24 @@ class Links(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, next_page: str=None, links: List[Link]=None):
+    def __init__(self, links: List[Link]=None, next_page: str=None):
         """Links - a model defined in OpenAPI
 
-        :param next_page: The next_page of this Links.
         :param links: The links of this Links.
+        :param next_page: The next_page of this Links.
         """
         self.openapi_types = {
-            'next_page': str,
-            'links': List[Link]
+            'links': List[Link],
+            'next_page': str
         }
 
         self.attribute_map = {
-            'next_page': 'next_page',
-            'links': 'links'
+            'links': 'links',
+            'next_page': 'next_page'
         }
 
-        self._next_page = next_page
         self._links = links
+        self._next_page = next_page
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'Links':
@@ -51,30 +51,9 @@ class Links(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'next_page': self._next_page,
-            'links': self._links }
+        return { 'links': self._links,
+            'next_page': self._next_page }
 
-
-    @property
-    def next_page(self):
-        """Gets the next_page of this Links.
-
-
-        :return: The next_page of this Links.
-        :rtype: str
-        """
-        return self._next_page
-
-    @next_page.setter
-    def next_page(self, next_page):
-        """Sets the next_page of this Links.
-
-
-        :param next_page: The next_page of this Links.
-        :type next_page: str
-        """
-
-        self._next_page = next_page
 
     @property
     def links(self):
@@ -98,3 +77,24 @@ class Links(Model):
             raise BadUserInputException("Invalid value for `links`, must not be `None`")
 
         self._links = links
+
+    @property
+    def next_page(self):
+        """Gets the next_page of this Links.
+
+
+        :return: The next_page of this Links.
+        :rtype: str
+        """
+        return self._next_page
+
+    @next_page.setter
+    def next_page(self, next_page):
+        """Sets the next_page of this Links.
+
+
+        :param next_page: The next_page of this Links.
+        :type next_page: str
+        """
+
+        self._next_page = next_page

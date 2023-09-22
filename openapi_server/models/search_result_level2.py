@@ -1,5 +1,5 @@
 # coding: utf-8
-from gsrest.errors import *
+from gsrest.errors import BadUserInputException
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -17,27 +17,27 @@ class SearchResultLevel2(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, neighbor: NeighborEntity=None, matching_addresses: List[Address]=None, paths: List[SearchResultLevel3]=None):
+    def __init__(self, matching_addresses: List[Address]=None, neighbor: NeighborEntity=None, paths: List[SearchResultLevel3]=None):
         """SearchResultLevel2 - a model defined in OpenAPI
 
-        :param neighbor: The neighbor of this SearchResultLevel2.
         :param matching_addresses: The matching_addresses of this SearchResultLevel2.
+        :param neighbor: The neighbor of this SearchResultLevel2.
         :param paths: The paths of this SearchResultLevel2.
         """
         self.openapi_types = {
-            'neighbor': NeighborEntity,
             'matching_addresses': List[Address],
+            'neighbor': NeighborEntity,
             'paths': List[SearchResultLevel3]
         }
 
         self.attribute_map = {
-            'neighbor': 'neighbor',
             'matching_addresses': 'matching_addresses',
+            'neighbor': 'neighbor',
             'paths': 'paths'
         }
 
-        self._neighbor = neighbor
         self._matching_addresses = matching_addresses
+        self._neighbor = neighbor
         self._paths = paths
 
     @classmethod
@@ -57,33 +57,10 @@ class SearchResultLevel2(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'neighbor': self._neighbor,
-            'matching_addresses': self._matching_addresses,
+        return { 'matching_addresses': self._matching_addresses,
+            'neighbor': self._neighbor,
             'paths': self._paths }
 
-
-    @property
-    def neighbor(self):
-        """Gets the neighbor of this SearchResultLevel2.
-
-
-        :return: The neighbor of this SearchResultLevel2.
-        :rtype: NeighborEntity
-        """
-        return self._neighbor
-
-    @neighbor.setter
-    def neighbor(self, neighbor):
-        """Sets the neighbor of this SearchResultLevel2.
-
-
-        :param neighbor: The neighbor of this SearchResultLevel2.
-        :type neighbor: NeighborEntity
-        """
-        if neighbor is None:
-            raise BadUserInputException("Invalid value for `neighbor`, must not be `None`")
-
-        self._neighbor = neighbor
 
     @property
     def matching_addresses(self):
@@ -107,6 +84,29 @@ class SearchResultLevel2(Model):
             raise BadUserInputException("Invalid value for `matching_addresses`, must not be `None`")
 
         self._matching_addresses = matching_addresses
+
+    @property
+    def neighbor(self):
+        """Gets the neighbor of this SearchResultLevel2.
+
+
+        :return: The neighbor of this SearchResultLevel2.
+        :rtype: NeighborEntity
+        """
+        return self._neighbor
+
+    @neighbor.setter
+    def neighbor(self, neighbor):
+        """Sets the neighbor of this SearchResultLevel2.
+
+
+        :param neighbor: The neighbor of this SearchResultLevel2.
+        :type neighbor: NeighborEntity
+        """
+        if neighbor is None:
+            raise BadUserInputException("Invalid value for `neighbor`, must not be `None`")
+
+        self._neighbor = neighbor
 
     @property
     def paths(self):

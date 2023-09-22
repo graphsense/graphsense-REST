@@ -1,5 +1,5 @@
 # coding: utf-8
-from gsrest.errors import *
+from gsrest.errors import BadUserInputException
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -16,64 +16,64 @@ class TxUtxo(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, tx_type: str='utxo', currency: str=None, tx_hash: str=None, coinbase: bool=None, height: int=None, no_inputs: int=None, no_outputs: int=None, inputs: List[TxValue]=None, outputs: List[TxValue]=None, timestamp: int=None, total_input: Values=None, total_output: Values=None):
+    def __init__(self, coinbase: bool=None, currency: str=None, height: int=None, inputs: List[TxValue]=None, no_inputs: int=None, no_outputs: int=None, outputs: List[TxValue]=None, timestamp: int=None, total_input: Values=None, total_output: Values=None, tx_hash: str=None, tx_type: str='utxo'):
         """TxUtxo - a model defined in OpenAPI
 
-        :param tx_type: The tx_type of this TxUtxo.
-        :param currency: The currency of this TxUtxo.
-        :param tx_hash: The tx_hash of this TxUtxo.
         :param coinbase: The coinbase of this TxUtxo.
+        :param currency: The currency of this TxUtxo.
         :param height: The height of this TxUtxo.
+        :param inputs: The inputs of this TxUtxo.
         :param no_inputs: The no_inputs of this TxUtxo.
         :param no_outputs: The no_outputs of this TxUtxo.
-        :param inputs: The inputs of this TxUtxo.
         :param outputs: The outputs of this TxUtxo.
         :param timestamp: The timestamp of this TxUtxo.
         :param total_input: The total_input of this TxUtxo.
         :param total_output: The total_output of this TxUtxo.
+        :param tx_hash: The tx_hash of this TxUtxo.
+        :param tx_type: The tx_type of this TxUtxo.
         """
         self.openapi_types = {
-            'tx_type': str,
-            'currency': str,
-            'tx_hash': str,
             'coinbase': bool,
+            'currency': str,
             'height': int,
+            'inputs': List[TxValue],
             'no_inputs': int,
             'no_outputs': int,
-            'inputs': List[TxValue],
             'outputs': List[TxValue],
             'timestamp': int,
             'total_input': Values,
-            'total_output': Values
+            'total_output': Values,
+            'tx_hash': str,
+            'tx_type': str
         }
 
         self.attribute_map = {
-            'tx_type': 'tx_type',
-            'currency': 'currency',
-            'tx_hash': 'tx_hash',
             'coinbase': 'coinbase',
+            'currency': 'currency',
             'height': 'height',
+            'inputs': 'inputs',
             'no_inputs': 'no_inputs',
             'no_outputs': 'no_outputs',
-            'inputs': 'inputs',
             'outputs': 'outputs',
             'timestamp': 'timestamp',
             'total_input': 'total_input',
-            'total_output': 'total_output'
+            'total_output': 'total_output',
+            'tx_hash': 'tx_hash',
+            'tx_type': 'tx_type'
         }
 
-        self._tx_type = tx_type
-        self._currency = currency
-        self._tx_hash = tx_hash
         self._coinbase = coinbase
+        self._currency = currency
         self._height = height
+        self._inputs = inputs
         self._no_inputs = no_inputs
         self._no_outputs = no_outputs
-        self._inputs = inputs
         self._outputs = outputs
         self._timestamp = timestamp
         self._total_input = total_input
         self._total_output = total_output
+        self._tx_hash = tx_hash
+        self._tx_type = tx_type
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'TxUtxo':
@@ -92,92 +92,19 @@ class TxUtxo(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'tx_type': self._tx_type,
+        return { 'coinbase': self._coinbase,
             'currency': self._currency,
-            'tx_hash': self._tx_hash,
-            'coinbase': self._coinbase,
             'height': self._height,
+            'inputs': self._inputs,
             'no_inputs': self._no_inputs,
             'no_outputs': self._no_outputs,
-            'inputs': self._inputs,
             'outputs': self._outputs,
             'timestamp': self._timestamp,
             'total_input': self._total_input,
-            'total_output': self._total_output }
+            'total_output': self._total_output,
+            'tx_hash': self._tx_hash,
+            'tx_type': self._tx_type }
 
-
-    @property
-    def tx_type(self):
-        """Gets the tx_type of this TxUtxo.
-
-
-        :return: The tx_type of this TxUtxo.
-        :rtype: str
-        """
-        return self._tx_type
-
-    @tx_type.setter
-    def tx_type(self, tx_type):
-        """Sets the tx_type of this TxUtxo.
-
-
-        :param tx_type: The tx_type of this TxUtxo.
-        :type tx_type: str
-        """
-        if tx_type is None:
-            raise BadUserInputException("Invalid value for `tx_type`, must not be `None`")
-
-        self._tx_type = tx_type
-
-    @property
-    def currency(self):
-        """Gets the currency of this TxUtxo.
-
-        crypto currency code
-
-        :return: The currency of this TxUtxo.
-        :rtype: str
-        """
-        return self._currency
-
-    @currency.setter
-    def currency(self, currency):
-        """Sets the currency of this TxUtxo.
-
-        crypto currency code
-
-        :param currency: The currency of this TxUtxo.
-        :type currency: str
-        """
-        if currency is None:
-            raise BadUserInputException("Invalid value for `currency`, must not be `None`")
-
-        self._currency = currency
-
-    @property
-    def tx_hash(self):
-        """Gets the tx_hash of this TxUtxo.
-
-        Transaction hash
-
-        :return: The tx_hash of this TxUtxo.
-        :rtype: str
-        """
-        return self._tx_hash
-
-    @tx_hash.setter
-    def tx_hash(self, tx_hash):
-        """Sets the tx_hash of this TxUtxo.
-
-        Transaction hash
-
-        :param tx_hash: The tx_hash of this TxUtxo.
-        :type tx_hash: str
-        """
-        if tx_hash is None:
-            raise BadUserInputException("Invalid value for `tx_hash`, must not be `None`")
-
-        self._tx_hash = tx_hash
 
     @property
     def coinbase(self):
@@ -205,6 +132,31 @@ class TxUtxo(Model):
         self._coinbase = coinbase
 
     @property
+    def currency(self):
+        """Gets the currency of this TxUtxo.
+
+        crypto currency code
+
+        :return: The currency of this TxUtxo.
+        :rtype: str
+        """
+        return self._currency
+
+    @currency.setter
+    def currency(self, currency):
+        """Sets the currency of this TxUtxo.
+
+        crypto currency code
+
+        :param currency: The currency of this TxUtxo.
+        :type currency: str
+        """
+        if currency is None:
+            raise BadUserInputException("Invalid value for `currency`, must not be `None`")
+
+        self._currency = currency
+
+    @property
     def height(self):
         """Gets the height of this TxUtxo.
 
@@ -230,6 +182,29 @@ class TxUtxo(Model):
             raise BadUserInputException("Invalid value for `height`, must be a value greater than or equal to `0`")
 
         self._height = height
+
+    @property
+    def inputs(self):
+        """Gets the inputs of this TxUtxo.
+
+        Transaction inputs/outputs
+
+        :return: The inputs of this TxUtxo.
+        :rtype: List[TxValue]
+        """
+        return self._inputs
+
+    @inputs.setter
+    def inputs(self, inputs):
+        """Sets the inputs of this TxUtxo.
+
+        Transaction inputs/outputs
+
+        :param inputs: The inputs of this TxUtxo.
+        :type inputs: List[TxValue]
+        """
+
+        self._inputs = inputs
 
     @property
     def no_inputs(self):
@@ -280,29 +255,6 @@ class TxUtxo(Model):
             raise BadUserInputException("Invalid value for `no_outputs`, must not be `None`")
 
         self._no_outputs = no_outputs
-
-    @property
-    def inputs(self):
-        """Gets the inputs of this TxUtxo.
-
-        Transaction inputs/outputs
-
-        :return: The inputs of this TxUtxo.
-        :rtype: List[TxValue]
-        """
-        return self._inputs
-
-    @inputs.setter
-    def inputs(self, inputs):
-        """Sets the inputs of this TxUtxo.
-
-        Transaction inputs/outputs
-
-        :param inputs: The inputs of this TxUtxo.
-        :type inputs: List[TxValue]
-        """
-
-        self._inputs = inputs
 
     @property
     def outputs(self):
@@ -397,3 +349,51 @@ class TxUtxo(Model):
             raise BadUserInputException("Invalid value for `total_output`, must not be `None`")
 
         self._total_output = total_output
+
+    @property
+    def tx_hash(self):
+        """Gets the tx_hash of this TxUtxo.
+
+        Transaction hash
+
+        :return: The tx_hash of this TxUtxo.
+        :rtype: str
+        """
+        return self._tx_hash
+
+    @tx_hash.setter
+    def tx_hash(self, tx_hash):
+        """Sets the tx_hash of this TxUtxo.
+
+        Transaction hash
+
+        :param tx_hash: The tx_hash of this TxUtxo.
+        :type tx_hash: str
+        """
+        if tx_hash is None:
+            raise BadUserInputException("Invalid value for `tx_hash`, must not be `None`")
+
+        self._tx_hash = tx_hash
+
+    @property
+    def tx_type(self):
+        """Gets the tx_type of this TxUtxo.
+
+
+        :return: The tx_type of this TxUtxo.
+        :rtype: str
+        """
+        return self._tx_type
+
+    @tx_type.setter
+    def tx_type(self, tx_type):
+        """Sets the tx_type of this TxUtxo.
+
+
+        :param tx_type: The tx_type of this TxUtxo.
+        :type tx_type: str
+        """
+        if tx_type is None:
+            raise BadUserInputException("Invalid value for `tx_type`, must not be `None`")
+
+        self._tx_type = tx_type

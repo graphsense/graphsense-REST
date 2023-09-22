@@ -1,5 +1,5 @@
 # coding: utf-8
-from gsrest.errors import *
+from gsrest.errors import BadUserInputException
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -14,51 +14,51 @@ class CurrencyStats(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, name: str=None, no_blocks: int=None, no_address_relations: int=None, no_addresses: int=None, no_entities: int=None, no_txs: int=None, no_labels: int=None, no_tagged_addresses: int=None, timestamp: int=None):
+    def __init__(self, name: str=None, no_address_relations: int=None, no_addresses: int=None, no_blocks: int=None, no_entities: int=None, no_labels: int=None, no_tagged_addresses: int=None, no_txs: int=None, timestamp: int=None):
         """CurrencyStats - a model defined in OpenAPI
 
         :param name: The name of this CurrencyStats.
-        :param no_blocks: The no_blocks of this CurrencyStats.
         :param no_address_relations: The no_address_relations of this CurrencyStats.
         :param no_addresses: The no_addresses of this CurrencyStats.
+        :param no_blocks: The no_blocks of this CurrencyStats.
         :param no_entities: The no_entities of this CurrencyStats.
-        :param no_txs: The no_txs of this CurrencyStats.
         :param no_labels: The no_labels of this CurrencyStats.
         :param no_tagged_addresses: The no_tagged_addresses of this CurrencyStats.
+        :param no_txs: The no_txs of this CurrencyStats.
         :param timestamp: The timestamp of this CurrencyStats.
         """
         self.openapi_types = {
             'name': str,
-            'no_blocks': int,
             'no_address_relations': int,
             'no_addresses': int,
+            'no_blocks': int,
             'no_entities': int,
-            'no_txs': int,
             'no_labels': int,
             'no_tagged_addresses': int,
+            'no_txs': int,
             'timestamp': int
         }
 
         self.attribute_map = {
             'name': 'name',
-            'no_blocks': 'no_blocks',
             'no_address_relations': 'no_address_relations',
             'no_addresses': 'no_addresses',
+            'no_blocks': 'no_blocks',
             'no_entities': 'no_entities',
-            'no_txs': 'no_txs',
             'no_labels': 'no_labels',
             'no_tagged_addresses': 'no_tagged_addresses',
+            'no_txs': 'no_txs',
             'timestamp': 'timestamp'
         }
 
         self._name = name
-        self._no_blocks = no_blocks
         self._no_address_relations = no_address_relations
         self._no_addresses = no_addresses
+        self._no_blocks = no_blocks
         self._no_entities = no_entities
-        self._no_txs = no_txs
         self._no_labels = no_labels
         self._no_tagged_addresses = no_tagged_addresses
+        self._no_txs = no_txs
         self._timestamp = timestamp
 
     @classmethod
@@ -79,13 +79,13 @@ class CurrencyStats(Model):
         if not shallow:
             return Model.to_dict(self)
         return { 'name': self._name,
-            'no_blocks': self._no_blocks,
             'no_address_relations': self._no_address_relations,
             'no_addresses': self._no_addresses,
+            'no_blocks': self._no_blocks,
             'no_entities': self._no_entities,
-            'no_txs': self._no_txs,
             'no_labels': self._no_labels,
             'no_tagged_addresses': self._no_tagged_addresses,
+            'no_txs': self._no_txs,
             'timestamp': self._timestamp }
 
 
@@ -111,29 +111,6 @@ class CurrencyStats(Model):
             raise BadUserInputException("Invalid value for `name`, must not be `None`")
 
         self._name = name
-
-    @property
-    def no_blocks(self):
-        """Gets the no_blocks of this CurrencyStats.
-
-
-        :return: The no_blocks of this CurrencyStats.
-        :rtype: int
-        """
-        return self._no_blocks
-
-    @no_blocks.setter
-    def no_blocks(self, no_blocks):
-        """Sets the no_blocks of this CurrencyStats.
-
-
-        :param no_blocks: The no_blocks of this CurrencyStats.
-        :type no_blocks: int
-        """
-        if no_blocks is None:
-            raise BadUserInputException("Invalid value for `no_blocks`, must not be `None`")
-
-        self._no_blocks = no_blocks
 
     @property
     def no_address_relations(self):
@@ -182,6 +159,29 @@ class CurrencyStats(Model):
         self._no_addresses = no_addresses
 
     @property
+    def no_blocks(self):
+        """Gets the no_blocks of this CurrencyStats.
+
+
+        :return: The no_blocks of this CurrencyStats.
+        :rtype: int
+        """
+        return self._no_blocks
+
+    @no_blocks.setter
+    def no_blocks(self, no_blocks):
+        """Sets the no_blocks of this CurrencyStats.
+
+
+        :param no_blocks: The no_blocks of this CurrencyStats.
+        :type no_blocks: int
+        """
+        if no_blocks is None:
+            raise BadUserInputException("Invalid value for `no_blocks`, must not be `None`")
+
+        self._no_blocks = no_blocks
+
+    @property
     def no_entities(self):
         """Gets the no_entities of this CurrencyStats.
 
@@ -203,31 +203,6 @@ class CurrencyStats(Model):
             raise BadUserInputException("Invalid value for `no_entities`, must not be `None`")
 
         self._no_entities = no_entities
-
-    @property
-    def no_txs(self):
-        """Gets the no_txs of this CurrencyStats.
-
-        number of transactions
-
-        :return: The no_txs of this CurrencyStats.
-        :rtype: int
-        """
-        return self._no_txs
-
-    @no_txs.setter
-    def no_txs(self, no_txs):
-        """Sets the no_txs of this CurrencyStats.
-
-        number of transactions
-
-        :param no_txs: The no_txs of this CurrencyStats.
-        :type no_txs: int
-        """
-        if no_txs is None:
-            raise BadUserInputException("Invalid value for `no_txs`, must not be `None`")
-
-        self._no_txs = no_txs
 
     @property
     def no_labels(self):
@@ -274,6 +249,31 @@ class CurrencyStats(Model):
             raise BadUserInputException("Invalid value for `no_tagged_addresses`, must not be `None`")
 
         self._no_tagged_addresses = no_tagged_addresses
+
+    @property
+    def no_txs(self):
+        """Gets the no_txs of this CurrencyStats.
+
+        number of transactions
+
+        :return: The no_txs of this CurrencyStats.
+        :rtype: int
+        """
+        return self._no_txs
+
+    @no_txs.setter
+    def no_txs(self, no_txs):
+        """Sets the no_txs of this CurrencyStats.
+
+        number of transactions
+
+        :param no_txs: The no_txs of this CurrencyStats.
+        :type no_txs: int
+        """
+        if no_txs is None:
+            raise BadUserInputException("Invalid value for `no_txs`, must not be `None`")
+
+        self._no_txs = no_txs
 
     @property
     def timestamp(self):

@@ -1,5 +1,5 @@
 # coding: utf-8
-from gsrest.errors import *
+from gsrest.errors import BadUserInputException
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -14,27 +14,27 @@ class SearchResultByCurrency(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, currency: str=None, addresses: List[str]=None, txs: List[str]=None):
+    def __init__(self, addresses: List[str]=None, currency: str=None, txs: List[str]=None):
         """SearchResultByCurrency - a model defined in OpenAPI
 
-        :param currency: The currency of this SearchResultByCurrency.
         :param addresses: The addresses of this SearchResultByCurrency.
+        :param currency: The currency of this SearchResultByCurrency.
         :param txs: The txs of this SearchResultByCurrency.
         """
         self.openapi_types = {
-            'currency': str,
             'addresses': List[str],
+            'currency': str,
             'txs': List[str]
         }
 
         self.attribute_map = {
-            'currency': 'currency',
             'addresses': 'addresses',
+            'currency': 'currency',
             'txs': 'txs'
         }
 
-        self._currency = currency
         self._addresses = addresses
+        self._currency = currency
         self._txs = txs
 
     @classmethod
@@ -54,35 +54,10 @@ class SearchResultByCurrency(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'currency': self._currency,
-            'addresses': self._addresses,
+        return { 'addresses': self._addresses,
+            'currency': self._currency,
             'txs': self._txs }
 
-
-    @property
-    def currency(self):
-        """Gets the currency of this SearchResultByCurrency.
-
-        crypto currency code
-
-        :return: The currency of this SearchResultByCurrency.
-        :rtype: str
-        """
-        return self._currency
-
-    @currency.setter
-    def currency(self, currency):
-        """Sets the currency of this SearchResultByCurrency.
-
-        crypto currency code
-
-        :param currency: The currency of this SearchResultByCurrency.
-        :type currency: str
-        """
-        if currency is None:
-            raise BadUserInputException("Invalid value for `currency`, must not be `None`")
-
-        self._currency = currency
 
     @property
     def addresses(self):
@@ -108,6 +83,31 @@ class SearchResultByCurrency(Model):
             raise BadUserInputException("Invalid value for `addresses`, must not be `None`")
 
         self._addresses = addresses
+
+    @property
+    def currency(self):
+        """Gets the currency of this SearchResultByCurrency.
+
+        crypto currency code
+
+        :return: The currency of this SearchResultByCurrency.
+        :rtype: str
+        """
+        return self._currency
+
+    @currency.setter
+    def currency(self, currency):
+        """Sets the currency of this SearchResultByCurrency.
+
+        crypto currency code
+
+        :param currency: The currency of this SearchResultByCurrency.
+        :type currency: str
+        """
+        if currency is None:
+            raise BadUserInputException("Invalid value for `currency`, must not be `None`")
+
+        self._currency = currency
 
     @property
     def txs(self):
