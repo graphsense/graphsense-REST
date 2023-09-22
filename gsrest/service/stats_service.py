@@ -8,9 +8,9 @@ async def get_currency_statistics(request, currency):
     if result is None:
         raise SystemError(
             'statistics for currency {} not found'.format(currency))
-    counts = await tagstores(request.app['tagstores'], lambda row: row,
-                             'count', currency,
-                             request.app['show_private_tags'])
+    counts = await tagstores(
+        request.app['tagstores'], lambda row: row, 'count', currency,
+        request.app['request_config']['show_private_tags'])
     no_labels = 0
     no_tagged_addresses = 0
     for c in counts:

@@ -1,5 +1,5 @@
 # coding: utf-8
-
+from gsrest.errors import BadUserInputException
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -74,7 +74,7 @@ class TxValue(Model):
         :type address: List[str]
         """
         if address is None:
-            raise ValueError("Invalid value for `address`, must not be `None`")
+            raise BadUserInputException("Invalid value for `address`, must not be `None`")
 
         self._address = address
 
@@ -97,6 +97,6 @@ class TxValue(Model):
         :type value: Values
         """
         if value is None:
-            raise ValueError("Invalid value for `value`, must not be `None`")
+            raise BadUserInputException("Invalid value for `value`, must not be `None`")
 
         self._value = value

@@ -1,6 +1,7 @@
 from openapi_server.models.block import Block
 from gsrest.service.rates_service import get_rates
 from gsrest.service.txs_service import from_row
+from gsrest.errors import NotFoundException
 
 
 def block_from_row(currency, row):
@@ -21,7 +22,7 @@ async def get_block(request, currency, height):
     db = request.app['db']
     row = await db.get_block(currency, height)
     if not row:
-        raise RuntimeError("Block {} not found".format(height))
+        raise NotFoundException("Block {} not found".format(height))
     return block_from_row(currency, row)
 
 
@@ -30,7 +31,7 @@ async def list_block_txs(request, currency, height):
     txs = await db.list_block_txs(currency, height)
 
     if txs is None:
-        raise RuntimeError("Block {} not found".format(height))
+        raise NotFoundException("Block {} not found".format(height))
     rates = await get_rates(request, currency, height)
 
     return [

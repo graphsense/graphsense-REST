@@ -1,5 +1,5 @@
 # coding: utf-8
-
+from gsrest.errors import BadUserInputException
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -101,7 +101,7 @@ class AddressTxUtxo(Model):
         :type coinbase: bool
         """
         if coinbase is None:
-            raise ValueError("Invalid value for `coinbase`, must not be `None`")
+            raise BadUserInputException("Invalid value for `coinbase`, must not be `None`")
 
         self._coinbase = coinbase
 
@@ -126,7 +126,7 @@ class AddressTxUtxo(Model):
         :type currency: str
         """
         if currency is None:
-            raise ValueError("Invalid value for `currency`, must not be `None`")
+            raise BadUserInputException("Invalid value for `currency`, must not be `None`")
 
         self._currency = currency
 
@@ -151,9 +151,9 @@ class AddressTxUtxo(Model):
         :type height: int
         """
         if height is None:
-            raise ValueError("Invalid value for `height`, must not be `None`")
+            raise BadUserInputException("Invalid value for `height`, must not be `None`")
         if height is not None and height < 0:
-            raise ValueError("Invalid value for `height`, must be a value greater than or equal to `0`")
+            raise BadUserInputException("Invalid value for `height`, must be a value greater than or equal to `0`")
 
         self._height = height
 
@@ -178,7 +178,7 @@ class AddressTxUtxo(Model):
         :type timestamp: int
         """
         if timestamp is None:
-            raise ValueError("Invalid value for `timestamp`, must not be `None`")
+            raise BadUserInputException("Invalid value for `timestamp`, must not be `None`")
 
         self._timestamp = timestamp
 
@@ -203,7 +203,7 @@ class AddressTxUtxo(Model):
         :type tx_hash: str
         """
         if tx_hash is None:
-            raise ValueError("Invalid value for `tx_hash`, must not be `None`")
+            raise BadUserInputException("Invalid value for `tx_hash`, must not be `None`")
 
         self._tx_hash = tx_hash
 
@@ -226,7 +226,7 @@ class AddressTxUtxo(Model):
         :type tx_type: str
         """
         if tx_type is None:
-            raise ValueError("Invalid value for `tx_type`, must not be `None`")
+            raise BadUserInputException("Invalid value for `tx_type`, must not be `None`")
 
         self._tx_type = tx_type
 
@@ -249,6 +249,6 @@ class AddressTxUtxo(Model):
         :type value: Values
         """
         if value is None:
-            raise ValueError("Invalid value for `value`, must not be `None`")
+            raise BadUserInputException("Invalid value for `value`, must not be `None`")
 
         self._value = value

@@ -1,5 +1,5 @@
 # coding: utf-8
-
+from gsrest.errors import BadUserInputException
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -128,7 +128,7 @@ class Link(Model):
         :type currency: str
         """
         if currency is None:
-            raise ValueError("Invalid value for `currency`, must not be `None`")
+            raise BadUserInputException("Invalid value for `currency`, must not be `None`")
 
         self._currency = currency
 
@@ -153,9 +153,9 @@ class Link(Model):
         :type height: int
         """
         if height is None:
-            raise ValueError("Invalid value for `height`, must not be `None`")
+            raise BadUserInputException("Invalid value for `height`, must not be `None`")
         if height is not None and height < 0:
-            raise ValueError("Invalid value for `height`, must be a value greater than or equal to `0`")
+            raise BadUserInputException("Invalid value for `height`, must be a value greater than or equal to `0`")
 
         self._height = height
 
@@ -178,7 +178,7 @@ class Link(Model):
         :type input_value: Values
         """
         if input_value is None:
-            raise ValueError("Invalid value for `input_value`, must not be `None`")
+            raise BadUserInputException("Invalid value for `input_value`, must not be `None`")
 
         self._input_value = input_value
 
@@ -201,7 +201,7 @@ class Link(Model):
         :type output_value: Values
         """
         if output_value is None:
-            raise ValueError("Invalid value for `output_value`, must not be `None`")
+            raise BadUserInputException("Invalid value for `output_value`, must not be `None`")
 
         self._output_value = output_value
 
@@ -226,7 +226,7 @@ class Link(Model):
         :type timestamp: int
         """
         if timestamp is None:
-            raise ValueError("Invalid value for `timestamp`, must not be `None`")
+            raise BadUserInputException("Invalid value for `timestamp`, must not be `None`")
 
         self._timestamp = timestamp
 
@@ -251,7 +251,7 @@ class Link(Model):
         :type tx_hash: str
         """
         if tx_hash is None:
-            raise ValueError("Invalid value for `tx_hash`, must not be `None`")
+            raise BadUserInputException("Invalid value for `tx_hash`, must not be `None`")
 
         self._tx_hash = tx_hash
 
@@ -274,7 +274,7 @@ class Link(Model):
         :type tx_type: str
         """
         if tx_type is None:
-            raise ValueError("Invalid value for `tx_type`, must not be `None`")
+            raise BadUserInputException("Invalid value for `tx_type`, must not be `None`")
 
         self._tx_type = tx_type
 
@@ -322,7 +322,7 @@ class Link(Model):
         :type from_address: str
         """
         if from_address is None:
-            raise ValueError("Invalid value for `from_address`, must not be `None`")
+            raise BadUserInputException("Invalid value for `from_address`, must not be `None`")
 
         self._from_address = from_address
 
@@ -347,7 +347,7 @@ class Link(Model):
         :type to_address: str
         """
         if to_address is None:
-            raise ValueError("Invalid value for `to_address`, must not be `None`")
+            raise BadUserInputException("Invalid value for `to_address`, must not be `None`")
 
         self._to_address = to_address
 
@@ -391,6 +391,6 @@ class Link(Model):
         :type value: Values
         """
         if value is None:
-            raise ValueError("Invalid value for `value`, must not be `None`")
+            raise BadUserInputException("Invalid value for `value`, must not be `None`")
 
         self._value = value

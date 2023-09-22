@@ -1,5 +1,5 @@
 # coding: utf-8
-
+from gsrest.errors import BadUserInputException
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -108,7 +108,7 @@ class CurrencyStats(Model):
         :type name: str
         """
         if name is None:
-            raise ValueError("Invalid value for `name`, must not be `None`")
+            raise BadUserInputException("Invalid value for `name`, must not be `None`")
 
         self._name = name
 
@@ -131,7 +131,7 @@ class CurrencyStats(Model):
         :type no_address_relations: int
         """
         if no_address_relations is None:
-            raise ValueError("Invalid value for `no_address_relations`, must not be `None`")
+            raise BadUserInputException("Invalid value for `no_address_relations`, must not be `None`")
 
         self._no_address_relations = no_address_relations
 
@@ -154,7 +154,7 @@ class CurrencyStats(Model):
         :type no_addresses: int
         """
         if no_addresses is None:
-            raise ValueError("Invalid value for `no_addresses`, must not be `None`")
+            raise BadUserInputException("Invalid value for `no_addresses`, must not be `None`")
 
         self._no_addresses = no_addresses
 
@@ -177,7 +177,7 @@ class CurrencyStats(Model):
         :type no_blocks: int
         """
         if no_blocks is None:
-            raise ValueError("Invalid value for `no_blocks`, must not be `None`")
+            raise BadUserInputException("Invalid value for `no_blocks`, must not be `None`")
 
         self._no_blocks = no_blocks
 
@@ -200,7 +200,7 @@ class CurrencyStats(Model):
         :type no_entities: int
         """
         if no_entities is None:
-            raise ValueError("Invalid value for `no_entities`, must not be `None`")
+            raise BadUserInputException("Invalid value for `no_entities`, must not be `None`")
 
         self._no_entities = no_entities
 
@@ -223,7 +223,7 @@ class CurrencyStats(Model):
         :type no_labels: int
         """
         if no_labels is None:
-            raise ValueError("Invalid value for `no_labels`, must not be `None`")
+            raise BadUserInputException("Invalid value for `no_labels`, must not be `None`")
 
         self._no_labels = no_labels
 
@@ -246,7 +246,7 @@ class CurrencyStats(Model):
         :type no_tagged_addresses: int
         """
         if no_tagged_addresses is None:
-            raise ValueError("Invalid value for `no_tagged_addresses`, must not be `None`")
+            raise BadUserInputException("Invalid value for `no_tagged_addresses`, must not be `None`")
 
         self._no_tagged_addresses = no_tagged_addresses
 
@@ -271,7 +271,7 @@ class CurrencyStats(Model):
         :type no_txs: int
         """
         if no_txs is None:
-            raise ValueError("Invalid value for `no_txs`, must not be `None`")
+            raise BadUserInputException("Invalid value for `no_txs`, must not be `None`")
 
         self._no_txs = no_txs
 
@@ -296,6 +296,6 @@ class CurrencyStats(Model):
         :type timestamp: int
         """
         if timestamp is None:
-            raise ValueError("Invalid value for `timestamp`, must not be `None`")
+            raise BadUserInputException("Invalid value for `timestamp`, must not be `None`")
 
         self._timestamp = timestamp

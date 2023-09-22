@@ -35,10 +35,14 @@ async def search_by_currency(request, currency, q, limit=10):
 
     r = SearchResultByCurrency(currency=currency, addresses=[], txs=[])
 
-    [txs, addresses] = await asyncio.gather(
-        db.list_matching_txs(currency, q, limit),
-        db.list_matching_addresses(currency, q, limit),
-    )
+    if len(q) >= 3:
+        [txs, addresses] = await asyncio.gather(
+            db.list_matching_txs(currency, q, limit),
+            db.list_matching_addresses(currency, q, limit),
+        )
+    else:
+        txs = []
+        addresses = []
 
     r.txs = txs
     r.addresses = addresses
@@ -63,7 +67,7 @@ async def search(request, q, currency=None, limit=10):
     def ts(curr=None):
         return tagstores(request.app['tagstores'], lambda row: row['label'],
                          'list_matching_labels', curr, expression_norm, limit,
-                         request.app['show_private_tags'])
+                         request.app['request_config']['show_private_tags'])
 
     aws1 = [search_by_currency(request, curr, q) for curr in currs]
     if currency:
@@ -75,7 +79,7 @@ async def search(request, q, currency=None, limit=10):
         request.app['tagstores'],
         lambda row: LabeledItemRef(id=row["id"], label=row["label"]),
         'list_matching_actors', expression_norm, limit,
-        request.app['show_private_tags'])
+        request.app['request_config']['show_private_tags'])
 
     aw1 = asyncio.gather(*aws1)
     aw2 = asyncio.gather(*aws2)

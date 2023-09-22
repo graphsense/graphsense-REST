@@ -1,3 +1,5 @@
+from gsrest.errors import *
+
 from typing import List, Dict
 from aiohttp import web
 import traceback
@@ -36,8 +38,8 @@ async def get_statistics(request: web.Request, ) -> web.Response:
                 break
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
-            
-    request.app['show_private_tags'] = show_private_tags
+
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['']:
@@ -63,10 +65,10 @@ async def get_statistics(request: web.Request, ) -> web.Response:
                     text=json.dumps(result),
                     headers={'Content-type': 'application/json'})
         return result
-    except RuntimeError as e:
+    except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
-    except ValueError as e:
+    except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
@@ -108,8 +110,8 @@ async def search(request: web.Request, q, currency=None, limit=None) -> web.Resp
                 break
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
-            
-    request.app['show_private_tags'] = show_private_tags
+
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','q','currency','limit']:
@@ -135,10 +137,10 @@ async def search(request: web.Request, q, currency=None, limit=None) -> web.Resp
                     text=json.dumps(result),
                     headers={'Content-type': 'application/json'})
         return result
-    except RuntimeError as e:
+    except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
-    except ValueError as e:
+    except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:

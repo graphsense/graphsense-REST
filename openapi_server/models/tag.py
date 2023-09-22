@@ -1,5 +1,5 @@
 # coding: utf-8
-
+from gsrest.errors import BadUserInputException
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -250,7 +250,7 @@ class Tag(Model):
         :type currency: str
         """
         if currency is None:
-            raise ValueError("Invalid value for `currency`, must not be `None`")
+            raise BadUserInputException("Invalid value for `currency`, must not be `None`")
 
         self._currency = currency
 
@@ -275,7 +275,7 @@ class Tag(Model):
         :type is_cluster_definer: bool
         """
         if is_cluster_definer is None:
-            raise ValueError("Invalid value for `is_cluster_definer`, must not be `None`")
+            raise BadUserInputException("Invalid value for `is_cluster_definer`, must not be `None`")
 
         self._is_cluster_definer = is_cluster_definer
 
@@ -300,7 +300,7 @@ class Tag(Model):
         :type label: str
         """
         if label is None:
-            raise ValueError("Invalid value for `label`, must not be `None`")
+            raise BadUserInputException("Invalid value for `label`, must not be `None`")
 
         self._label = label
 
@@ -371,7 +371,7 @@ class Tag(Model):
         :type tagpack_creator: str
         """
         if tagpack_creator is None:
-            raise ValueError("Invalid value for `tagpack_creator`, must not be `None`")
+            raise BadUserInputException("Invalid value for `tagpack_creator`, must not be `None`")
 
         self._tagpack_creator = tagpack_creator
 
@@ -396,7 +396,7 @@ class Tag(Model):
         :type tagpack_is_public: bool
         """
         if tagpack_is_public is None:
-            raise ValueError("Invalid value for `tagpack_is_public`, must not be `None`")
+            raise BadUserInputException("Invalid value for `tagpack_is_public`, must not be `None`")
 
         self._tagpack_is_public = tagpack_is_public
 
@@ -421,7 +421,7 @@ class Tag(Model):
         :type tagpack_title: str
         """
         if tagpack_title is None:
-            raise ValueError("Invalid value for `tagpack_title`, must not be `None`")
+            raise BadUserInputException("Invalid value for `tagpack_title`, must not be `None`")
 
         self._tagpack_title = tagpack_title
 

@@ -14,6 +14,7 @@ from gsrest.service.rates_service import list_rates
 from gsrest.db.util import tagstores, tagstores_with_paging
 from gsrest.service.tags_service import address_tag_from_row
 from gsrest.util import get_first_key_present
+from gsrest.errors import NotFoundException, BadUserInputException
 from psycopg2.errors import InvalidTextRepresentation
 
 
@@ -87,14 +88,14 @@ async def get_address(request, currency, address):
     result = await db.get_address(currency, address)
 
     if not result:
-        raise RuntimeError("Address {} not found in currency {}".format(
+        raise NotFoundException("Address {} not found in currency {}".format(
             address, currency))
 
     actors = tagstores(
         request.app['tagstores'],
         lambda row: LabeledItemRef(id=row["id"], label=row["label"]),
         'list_actors_address', currency, address,
-        request.app['show_private_tags'])
+        request.app['request_config']['show_private_tags'])
 
     return address_from_row(currency, result,
                             (await get_rates(request, currency))['rates'],
@@ -114,10 +115,11 @@ async def list_tags_by_address(request,
                 address_tag_from_row,
                 'list_tags_by_address',
                 page, pagesize, currency, address,
-                request.app['show_private_tags'])
+                request.app['request_config']['show_private_tags'])
     except InvalidTextRepresentation as e:
         if currency.upper() in str(e):
-            raise ValueError(f"Currency {currency} currently not supported")
+            raise BadUserInputException(
+                f"Currency {currency} currently not supported")
         else:
             raise e
 
@@ -134,7 +136,7 @@ async def list_neighbors(request,
                          page=None,
                          pagesize=None):
     if node_type not in ['address', 'entity']:
-        raise RuntimeError(f'Unknown node type {node_type}')
+        raise NotFoundException(f'Unknown node type {node_type}')
     is_outgoing = "out" in direction
     db = request.app['db']
     results, paging_state = await db.list_neighbors(currency,
@@ -149,7 +151,8 @@ async def list_neighbors(request,
         for row in results:
             row['labels'] = row['labels'] if 'labels' in row else None
             row['value'] = to_values(row['value'])
-            row["token_values"] = to_values_tokens(row.get("token_values", None))
+            row["token_values"] = to_values_tokens(
+                row.get("token_values", None))
 
     dst = 'dst' if is_outgoing else 'src'
 
@@ -167,8 +170,9 @@ async def add_labels(request, currency, node_type, that, nodes):
     thatfield = that + '_' + field
     ids = tuple((node[thatfield] for node in nodes))
 
-    result = await tagstores(request.app['tagstores'], lambda row: row, fun,
-                             currency, ids, request.app['show_private_tags'])
+    result = await tagstores(
+        request.app['tagstores'], lambda row: row, fun, currency, ids,
+        request.app['request_config']['show_private_tags'])
     iterator = iter(result)
     if node_type == 'address':
         nodes = sorted(nodes, key=lambda node: node[thatfield])

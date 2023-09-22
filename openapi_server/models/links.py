@@ -1,5 +1,5 @@
 # coding: utf-8
-
+from gsrest.errors import BadUserInputException
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -74,7 +74,7 @@ class Links(Model):
         :type links: List[Link]
         """
         if links is None:
-            raise ValueError("Invalid value for `links`, must not be `None`")
+            raise BadUserInputException("Invalid value for `links`, must not be `None`")
 
         self._links = links
 

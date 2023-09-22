@@ -1,5 +1,5 @@
 # coding: utf-8
-
+from gsrest.errors import BadUserInputException
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -185,7 +185,7 @@ class Entity(Model):
         :type balance: Values
         """
         if balance is None:
-            raise ValueError("Invalid value for `balance`, must not be `None`")
+            raise BadUserInputException("Invalid value for `balance`, must not be `None`")
 
         self._balance = balance
 
@@ -231,7 +231,7 @@ class Entity(Model):
         :type currency: str
         """
         if currency is None:
-            raise ValueError("Invalid value for `currency`, must not be `None`")
+            raise BadUserInputException("Invalid value for `currency`, must not be `None`")
 
         self._currency = currency
 
@@ -256,7 +256,7 @@ class Entity(Model):
         :type entity: int
         """
         if entity is None:
-            raise ValueError("Invalid value for `entity`, must not be `None`")
+            raise BadUserInputException("Invalid value for `entity`, must not be `None`")
 
         self._entity = entity
 
@@ -279,7 +279,7 @@ class Entity(Model):
         :type first_tx: TxSummary
         """
         if first_tx is None:
-            raise ValueError("Invalid value for `first_tx`, must not be `None`")
+            raise BadUserInputException("Invalid value for `first_tx`, must not be `None`")
 
         self._first_tx = first_tx
 
@@ -302,7 +302,7 @@ class Entity(Model):
         :type in_degree: int
         """
         if in_degree is None:
-            raise ValueError("Invalid value for `in_degree`, must not be `None`")
+            raise BadUserInputException("Invalid value for `in_degree`, must not be `None`")
 
         self._in_degree = in_degree
 
@@ -325,7 +325,7 @@ class Entity(Model):
         :type last_tx: TxSummary
         """
         if last_tx is None:
-            raise ValueError("Invalid value for `last_tx`, must not be `None`")
+            raise BadUserInputException("Invalid value for `last_tx`, must not be `None`")
 
         self._last_tx = last_tx
 
@@ -350,7 +350,7 @@ class Entity(Model):
         :type no_address_tags: int
         """
         if no_address_tags is None:
-            raise ValueError("Invalid value for `no_address_tags`, must not be `None`")
+            raise BadUserInputException("Invalid value for `no_address_tags`, must not be `None`")
 
         self._no_address_tags = no_address_tags
 
@@ -375,7 +375,7 @@ class Entity(Model):
         :type no_addresses: int
         """
         if no_addresses is None:
-            raise ValueError("Invalid value for `no_addresses`, must not be `None`")
+            raise BadUserInputException("Invalid value for `no_addresses`, must not be `None`")
 
         self._no_addresses = no_addresses
 
@@ -398,7 +398,7 @@ class Entity(Model):
         :type no_incoming_txs: int
         """
         if no_incoming_txs is None:
-            raise ValueError("Invalid value for `no_incoming_txs`, must not be `None`")
+            raise BadUserInputException("Invalid value for `no_incoming_txs`, must not be `None`")
 
         self._no_incoming_txs = no_incoming_txs
 
@@ -421,7 +421,7 @@ class Entity(Model):
         :type no_outgoing_txs: int
         """
         if no_outgoing_txs is None:
-            raise ValueError("Invalid value for `no_outgoing_txs`, must not be `None`")
+            raise BadUserInputException("Invalid value for `no_outgoing_txs`, must not be `None`")
 
         self._no_outgoing_txs = no_outgoing_txs
 
@@ -444,7 +444,7 @@ class Entity(Model):
         :type out_degree: int
         """
         if out_degree is None:
-            raise ValueError("Invalid value for `out_degree`, must not be `None`")
+            raise BadUserInputException("Invalid value for `out_degree`, must not be `None`")
 
         self._out_degree = out_degree
 
@@ -469,7 +469,7 @@ class Entity(Model):
         :type root_address: str
         """
         if root_address is None:
-            raise ValueError("Invalid value for `root_address`, must not be `None`")
+            raise BadUserInputException("Invalid value for `root_address`, must not be `None`")
 
         self._root_address = root_address
 
@@ -515,7 +515,7 @@ class Entity(Model):
         :type total_received: Values
         """
         if total_received is None:
-            raise ValueError("Invalid value for `total_received`, must not be `None`")
+            raise BadUserInputException("Invalid value for `total_received`, must not be `None`")
 
         self._total_received = total_received
 
@@ -538,7 +538,7 @@ class Entity(Model):
         :type total_spent: Values
         """
         if total_spent is None:
-            raise ValueError("Invalid value for `total_spent`, must not be `None`")
+            raise BadUserInputException("Invalid value for `total_spent`, must not be `None`")
 
         self._total_spent = total_spent
 

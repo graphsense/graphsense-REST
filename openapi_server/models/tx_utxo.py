@@ -1,5 +1,5 @@
 # coding: utf-8
-
+from gsrest.errors import BadUserInputException
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -127,7 +127,7 @@ class TxUtxo(Model):
         :type coinbase: bool
         """
         if coinbase is None:
-            raise ValueError("Invalid value for `coinbase`, must not be `None`")
+            raise BadUserInputException("Invalid value for `coinbase`, must not be `None`")
 
         self._coinbase = coinbase
 
@@ -152,7 +152,7 @@ class TxUtxo(Model):
         :type currency: str
         """
         if currency is None:
-            raise ValueError("Invalid value for `currency`, must not be `None`")
+            raise BadUserInputException("Invalid value for `currency`, must not be `None`")
 
         self._currency = currency
 
@@ -177,9 +177,9 @@ class TxUtxo(Model):
         :type height: int
         """
         if height is None:
-            raise ValueError("Invalid value for `height`, must not be `None`")
+            raise BadUserInputException("Invalid value for `height`, must not be `None`")
         if height is not None and height < 0:
-            raise ValueError("Invalid value for `height`, must be a value greater than or equal to `0`")
+            raise BadUserInputException("Invalid value for `height`, must be a value greater than or equal to `0`")
 
         self._height = height
 
@@ -227,7 +227,7 @@ class TxUtxo(Model):
         :type no_inputs: int
         """
         if no_inputs is None:
-            raise ValueError("Invalid value for `no_inputs`, must not be `None`")
+            raise BadUserInputException("Invalid value for `no_inputs`, must not be `None`")
 
         self._no_inputs = no_inputs
 
@@ -252,7 +252,7 @@ class TxUtxo(Model):
         :type no_outputs: int
         """
         if no_outputs is None:
-            raise ValueError("Invalid value for `no_outputs`, must not be `None`")
+            raise BadUserInputException("Invalid value for `no_outputs`, must not be `None`")
 
         self._no_outputs = no_outputs
 
@@ -300,7 +300,7 @@ class TxUtxo(Model):
         :type timestamp: int
         """
         if timestamp is None:
-            raise ValueError("Invalid value for `timestamp`, must not be `None`")
+            raise BadUserInputException("Invalid value for `timestamp`, must not be `None`")
 
         self._timestamp = timestamp
 
@@ -323,7 +323,7 @@ class TxUtxo(Model):
         :type total_input: Values
         """
         if total_input is None:
-            raise ValueError("Invalid value for `total_input`, must not be `None`")
+            raise BadUserInputException("Invalid value for `total_input`, must not be `None`")
 
         self._total_input = total_input
 
@@ -346,7 +346,7 @@ class TxUtxo(Model):
         :type total_output: Values
         """
         if total_output is None:
-            raise ValueError("Invalid value for `total_output`, must not be `None`")
+            raise BadUserInputException("Invalid value for `total_output`, must not be `None`")
 
         self._total_output = total_output
 
@@ -371,7 +371,7 @@ class TxUtxo(Model):
         :type tx_hash: str
         """
         if tx_hash is None:
-            raise ValueError("Invalid value for `tx_hash`, must not be `None`")
+            raise BadUserInputException("Invalid value for `tx_hash`, must not be `None`")
 
         self._tx_hash = tx_hash
 
@@ -394,6 +394,6 @@ class TxUtxo(Model):
         :type tx_type: str
         """
         if tx_type is None:
-            raise ValueError("Invalid value for `tx_type`, must not be `None`")
+            raise BadUserInputException("Invalid value for `tx_type`, must not be `None`")
 
         self._tx_type = tx_type

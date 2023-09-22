@@ -1,5 +1,5 @@
 # coding: utf-8
-
+from gsrest.errors import BadUserInputException
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -262,7 +262,7 @@ class AddressTag(Model):
         :type currency: str
         """
         if currency is None:
-            raise ValueError("Invalid value for `currency`, must not be `None`")
+            raise BadUserInputException("Invalid value for `currency`, must not be `None`")
 
         self._currency = currency
 
@@ -287,7 +287,7 @@ class AddressTag(Model):
         :type is_cluster_definer: bool
         """
         if is_cluster_definer is None:
-            raise ValueError("Invalid value for `is_cluster_definer`, must not be `None`")
+            raise BadUserInputException("Invalid value for `is_cluster_definer`, must not be `None`")
 
         self._is_cluster_definer = is_cluster_definer
 
@@ -312,7 +312,7 @@ class AddressTag(Model):
         :type label: str
         """
         if label is None:
-            raise ValueError("Invalid value for `label`, must not be `None`")
+            raise BadUserInputException("Invalid value for `label`, must not be `None`")
 
         self._label = label
 
@@ -383,7 +383,7 @@ class AddressTag(Model):
         :type tagpack_creator: str
         """
         if tagpack_creator is None:
-            raise ValueError("Invalid value for `tagpack_creator`, must not be `None`")
+            raise BadUserInputException("Invalid value for `tagpack_creator`, must not be `None`")
 
         self._tagpack_creator = tagpack_creator
 
@@ -408,7 +408,7 @@ class AddressTag(Model):
         :type tagpack_is_public: bool
         """
         if tagpack_is_public is None:
-            raise ValueError("Invalid value for `tagpack_is_public`, must not be `None`")
+            raise BadUserInputException("Invalid value for `tagpack_is_public`, must not be `None`")
 
         self._tagpack_is_public = tagpack_is_public
 
@@ -433,7 +433,7 @@ class AddressTag(Model):
         :type tagpack_title: str
         """
         if tagpack_title is None:
-            raise ValueError("Invalid value for `tagpack_title`, must not be `None`")
+            raise BadUserInputException("Invalid value for `tagpack_title`, must not be `None`")
 
         self._tagpack_title = tagpack_title
 
@@ -481,7 +481,7 @@ class AddressTag(Model):
         :type address: str
         """
         if address is None:
-            raise ValueError("Invalid value for `address`, must not be `None`")
+            raise BadUserInputException("Invalid value for `address`, must not be `None`")
 
         self._address = address
 
@@ -506,6 +506,6 @@ class AddressTag(Model):
         :type entity: int
         """
         if entity is None:
-            raise ValueError("Invalid value for `entity`, must not be `None`")
+            raise BadUserInputException("Invalid value for `entity`, must not be `None`")
 
         self._entity = entity

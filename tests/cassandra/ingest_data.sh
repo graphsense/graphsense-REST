@@ -21,10 +21,12 @@ if [ -z "$ORGANIZATION" ]; then
     exit 1
 fi
 
-UTXO_RAW_SCHEMA="https://raw.githubusercontent.com/$ORGANIZATION/graphsense-blocksci/$TAG/scripts/"
-UTXO_TRANSFORMED_SCHEMA="https://raw.githubusercontent.com/$ORGANIZATION/graphsense-transformation/$TAG/scripts/"
-ETH_RAW_SCHEMA="https://raw.githubusercontent.com/$ORGANIZATION/graphsense-ethereum-etl/$TAG/scripts/"
-ETH_TRANSFORMED_SCHEMA="https://raw.githubusercontent.com/$ORGANIZATION/graphsense-ethereum-transformation/$ETHTAG/scripts/"
+# UTXO_RAW_SCHEMA="https://raw.githubusercontent.com/$ORGANIZATION/graphsense-blocksci/$TAG/scripts/"
+# UTXO_TRANSFORMED_SCHEMA="https://raw.githubusercontent.com/$ORGANIZATION/graphsense-transformation/$TAG/scripts/"
+# ETH_RAW_SCHEMA="https://raw.githubusercontent.com/$ORGANIZATION/graphsense-ethereum-etl/$TAG/scripts/"
+# ETH_TRANSFORMED_SCHEMA="https://raw.githubusercontent.com/$ORGANIZATION/graphsense-ethereum-transformation/$ETHTAG/scripts/"
+
+SCHEMA_BASE_PATH="https://raw.githubusercontent.com/$ORGANIZATION/graphsense-lib/$TAG/src/graphsenselib/schema/resources/"
 
 function schema() {
   temp=`mktemp`
@@ -46,11 +48,13 @@ function create() {
   search=$2
   replace=$3
   replaced=`mktemp`
+  # cat $temp
   echo "Replace $search by $replace ..."
-  sed "s/$search/$replace/g" $temp > $replaced
+  sed "s/${search}/$replace/g;s/${replace}_REPLICATION_CONFIG/{'class': 'SimpleStrategy', 'replication_factor': 1}/g" $temp > $replaced
   echo "Remove DROP ..."
   sed -i -r "s/^DROP KEYSPACE.+//" $replaced
   echo "Copy to mockup database ..."
+  # cat $replaced
   docker cp $replaced $CASSANDRA_MOCK:/
   echo "Creating schema ..."
   $MOCK_CMD -f /`basename $replaced`
@@ -80,12 +84,23 @@ for filename in $data; do
     $MOCK_CMD -e "DROP TABLE $table;"
 done
 
-schema "$UTXO_RAW_SCHEMA/schema.cql" graphsense "btc_raw ltc_raw"
-schema "$UTXO_TRANSFORMED_SCHEMA/schema_transformed.cql" btc "btc ltc"
-schema "$ETH_RAW_SCHEMA/schema.cql" eth eth
-schema "$ETH_TRANSFORMED_SCHEMA/schema_transformed.cql" eth eth
-schema "`dirname $0`/schemas/schema.cql" btc "btc ltc"
-schema "`dirname $0`/schemas/schema_eth.cql" eth eth
+schema "$SCHEMA_BASE_PATH/raw_utxo_schema.sql" 0x8BADF00D "resttest_btc_raw resttest_ltc_raw"
+schema "$SCHEMA_BASE_PATH/transformed_utxo_schema.sql" 0x8BADF00D "resttest_btc_transformed resttest_ltc_transformed"
+schema "$SCHEMA_BASE_PATH/raw_account_schema.sql" 0x8BADF00D "resttest_eth_raw"
+schema "$SCHEMA_BASE_PATH/transformed_account_schema.sql" 0x8BADF00D "resttest_eth_transformed"
+# schema "$SCHEMA_BASE_PATH/transformed_delta_updater_account_schema.sql" "CREATE TABLE " "CREATE TABLE eth_transformed"
+# schema "$SCHEMA_BASE_PATH/transformed_delta_updater_utxo_schema.sql" "CREATE TABLE " "btc_transformed ltc_transformed"
+schema "`dirname $0`/schemas/schema.cql" btc "resttest_btc resttest_ltc"
+schema "`dirname $0`/schemas/schema_eth.cql" eth resttest_eth
+
+
+
+# schema "$UTXO_RAW_SCHEMA/schema.cql" graphsense "btc_raw ltc_raw"
+# schema "$UTXO_TRANSFORMED_SCHEMA/schema_transformed.cql" btc "btc ltc"
+# schema "$ETH_RAW_SCHEMA/schema.cql" eth eth
+# schema "$ETH_TRANSFORMED_SCHEMA/schema_transformed.cql" eth eth
+# schema "`dirname $0`/schemas/schema.cql" btc "btc ltc"
+# schema "`dirname $0`/schemas/schema_eth.cql" eth eth
 
 for filename in $data; do
   insert_data $filename `basename $filename`

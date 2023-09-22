@@ -1,5 +1,5 @@
 # coding: utf-8
-
+from gsrest.errors import BadUserInputException
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -90,7 +90,7 @@ class NeighborEntity(Model):
         :type entity: Entity
         """
         if entity is None:
-            raise ValueError("Invalid value for `entity`, must not be `None`")
+            raise BadUserInputException("Invalid value for `entity`, must not be `None`")
 
         self._entity = entity
 
@@ -138,7 +138,7 @@ class NeighborEntity(Model):
         :type no_txs: int
         """
         if no_txs is None:
-            raise ValueError("Invalid value for `no_txs`, must not be `None`")
+            raise BadUserInputException("Invalid value for `no_txs`, must not be `None`")
 
         self._no_txs = no_txs
 
@@ -184,6 +184,6 @@ class NeighborEntity(Model):
         :type value: Values
         """
         if value is None:
-            raise ValueError("Invalid value for `value`, must not be `None`")
+            raise BadUserInputException("Invalid value for `value`, must not be `None`")
 
         self._value = value

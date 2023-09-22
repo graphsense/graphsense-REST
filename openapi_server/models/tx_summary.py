@@ -1,5 +1,5 @@
 # coding: utf-8
-
+from gsrest.errors import BadUserInputException
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -80,9 +80,9 @@ class TxSummary(Model):
         :type height: int
         """
         if height is None:
-            raise ValueError("Invalid value for `height`, must not be `None`")
+            raise BadUserInputException("Invalid value for `height`, must not be `None`")
         if height is not None and height < 0:
-            raise ValueError("Invalid value for `height`, must be a value greater than or equal to `0`")
+            raise BadUserInputException("Invalid value for `height`, must be a value greater than or equal to `0`")
 
         self._height = height
 
@@ -107,7 +107,7 @@ class TxSummary(Model):
         :type timestamp: int
         """
         if timestamp is None:
-            raise ValueError("Invalid value for `timestamp`, must not be `None`")
+            raise BadUserInputException("Invalid value for `timestamp`, must not be `None`")
 
         self._timestamp = timestamp
 
@@ -132,6 +132,6 @@ class TxSummary(Model):
         :type tx_hash: str
         """
         if tx_hash is None:
-            raise ValueError("Invalid value for `tx_hash`, must not be `None`")
+            raise BadUserInputException("Invalid value for `tx_hash`, must not be `None`")
 
         self._tx_hash = tx_hash

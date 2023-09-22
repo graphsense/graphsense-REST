@@ -1,3 +1,5 @@
+from gsrest.errors import *
+
 from typing import List, Dict
 from aiohttp import web
 import traceback
@@ -42,8 +44,8 @@ async def bulk_csv(request: web.Request, currency, operation, num_pages, body) -
                 break
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
-            
-    request.app['show_private_tags'] = show_private_tags
+
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','currency','operation','num_pages','body']:
@@ -52,10 +54,10 @@ async def bulk_csv(request: web.Request, currency, operation, num_pages, body) -
         result = service.bulk_csv(request
                 ,currency=currency,operation=operation,num_pages=num_pages,body=body)
         return result
-    except RuntimeError as e:
+    except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
-    except ValueError as e:
+    except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
@@ -99,8 +101,8 @@ async def bulk_json(request: web.Request, currency, operation, num_pages, body) 
                 break
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
-            
-    request.app['show_private_tags'] = show_private_tags
+
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','currency','operation','num_pages','body']:
@@ -109,10 +111,10 @@ async def bulk_json(request: web.Request, currency, operation, num_pages, body) 
         result = service.bulk_json(request
                 ,currency=currency,operation=operation,num_pages=num_pages,body=body)
         return result
-    except RuntimeError as e:
+    except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
-    except ValueError as e:
+    except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:

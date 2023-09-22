@@ -1,6 +1,7 @@
 from openapi_server.models.rates import Rates
 from gsrest.service.stats_service import get_no_blocks
 from gsrest.util.values import map_rates_for_peged_tokens
+from gsrest.errors import NotFoundException
 
 RATES_TABLE = 'exchange_rates'
 
@@ -26,7 +27,7 @@ async def get_rates(request, currency, height=None):
         r = await db.get_rates(currency, height)
 
     if r is None:
-        raise ValueError("Cannot find height {} in currency {}".format(
+        raise NotFoundException("Cannot find height {} in currency {}".format(
             height, currency))
     return r
 

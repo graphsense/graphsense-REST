@@ -41,6 +41,7 @@ from openapi_server.models.token_config import TokenConfig
 from openapi_server.models.token_configs import TokenConfigs
 from openapi_server.models.tx import Tx
 from openapi_server.models.tx_account import TxAccount
+from openapi_server.models.tx_ref import TxRef
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.tx_utxo import TxUtxo
 from openapi_server.models.tx_value import TxValue

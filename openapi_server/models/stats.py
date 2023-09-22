@@ -1,5 +1,5 @@
 # coding: utf-8
-
+from gsrest.errors import BadUserInputException
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -79,7 +79,7 @@ class Stats(Model):
         :type currencies: List[CurrencyStats]
         """
         if currencies is None:
-            raise ValueError("Invalid value for `currencies`, must not be `None`")
+            raise BadUserInputException("Invalid value for `currencies`, must not be `None`")
 
         self._currencies = currencies
 
@@ -102,7 +102,7 @@ class Stats(Model):
         :type request_timestamp: str
         """
         if request_timestamp is None:
-            raise ValueError("Invalid value for `request_timestamp`, must not be `None`")
+            raise BadUserInputException("Invalid value for `request_timestamp`, must not be `None`")
 
         self._request_timestamp = request_timestamp
 
@@ -125,6 +125,6 @@ class Stats(Model):
         :type version: str
         """
         if version is None:
-            raise ValueError("Invalid value for `version`, must not be `None`")
+            raise BadUserInputException("Invalid value for `version`, must not be `None`")
 
         self._version = version

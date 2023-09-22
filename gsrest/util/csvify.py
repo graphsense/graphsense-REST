@@ -1,6 +1,7 @@
 from werkzeug.datastructures import Headers
 from csv import DictWriter
 from openapi_server.models.values import Values
+from gsrest.errors import BadUserInputException
 
 
 def create_download_header(filename):
@@ -26,10 +27,10 @@ def to_csv(query_function):
     while True:
         (page_state, rows) = query_function(page_state)
         if rows is None:
-            raise ValueError('nothing found')
+            raise BadUserInputException('nothing found')
 
         def flatten(item, name=""):
-            if type(item) == Values:
+            if isinstance(item, Values):
                 flat_dict[name + 'value'] = item.value
                 for rate in item.fiat_values:
                     flat_dict[name + rate.code] = rate.value

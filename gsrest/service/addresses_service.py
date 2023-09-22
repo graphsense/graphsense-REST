@@ -2,6 +2,7 @@ from openapi_server.models.address_txs import AddressTxs
 from gsrest.service.entities_service import get_entity, from_row
 from gsrest.service.rates_service import get_rates
 import gsrest.service.common_service as common
+from gsrest.errors import NotFoundException
 from openapi_server.models.neighbor_addresses import NeighborAddresses
 from openapi_server.models.neighbor_address import NeighborAddress
 import asyncio
@@ -105,7 +106,7 @@ async def try_get_delta_update_entity_dummy(request, currency, address,
     try:
         aws = [get_rates(request, currency), db.new_entity(currency, address)]
         [rates, entity] = await asyncio.gather(*aws)
-    except RuntimeError as e:
+    except NotFoundException as e:
         if 'not found' not in str(e):
             raise e
         raise notfound
@@ -116,10 +117,11 @@ async def try_get_delta_update_entity_dummy(request, currency, address,
 async def get_address_entity(request, currency, address):
     db = request.app['db']
 
-    notfound = RuntimeError('Entity for address {} not found'.format(address))
+    notfound = NotFoundException(
+        'Entity for address {} not found'.format(address))
     try:
         entity_id = await db.get_address_entity_id(currency, address)
-    except RuntimeError as e:
+    except NotFoundException as e:
         if 'not found' not in str(e):
             raise e
         return await try_get_delta_update_entity_dummy(request, currency,

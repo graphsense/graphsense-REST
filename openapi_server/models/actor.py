@@ -1,5 +1,5 @@
 # coding: utf-8
-
+from gsrest.errors import BadUserInputException
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -102,7 +102,7 @@ class Actor(Model):
         :type categories: List[LabeledItemRef]
         """
         if categories is None:
-            raise ValueError("Invalid value for `categories`, must not be `None`")
+            raise BadUserInputException("Invalid value for `categories`, must not be `None`")
 
         self._categories = categories
 
@@ -148,7 +148,7 @@ class Actor(Model):
         :type id: str
         """
         if id is None:
-            raise ValueError("Invalid value for `id`, must not be `None`")
+            raise BadUserInputException("Invalid value for `id`, must not be `None`")
 
         self._id = id
 
@@ -173,7 +173,7 @@ class Actor(Model):
         :type jurisdictions: List[LabeledItemRef]
         """
         if jurisdictions is None:
-            raise ValueError("Invalid value for `jurisdictions`, must not be `None`")
+            raise BadUserInputException("Invalid value for `jurisdictions`, must not be `None`")
 
         self._jurisdictions = jurisdictions
 
@@ -198,7 +198,7 @@ class Actor(Model):
         :type label: str
         """
         if label is None:
-            raise ValueError("Invalid value for `label`, must not be `None`")
+            raise BadUserInputException("Invalid value for `label`, must not be `None`")
 
         self._label = label
 
@@ -246,6 +246,6 @@ class Actor(Model):
         :type uri: str
         """
         if uri is None:
-            raise ValueError("Invalid value for `uri`, must not be `None`")
+            raise BadUserInputException("Invalid value for `uri`, must not be `None`")
 
         self._uri = uri

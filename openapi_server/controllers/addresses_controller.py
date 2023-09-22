@@ -1,3 +1,5 @@
+from gsrest.errors import *
+
 from typing import List, Dict
 from aiohttp import web
 import traceback
@@ -44,8 +46,8 @@ async def get_address(request: web.Request, currency, address) -> web.Response:
                 break
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
-            
-    request.app['show_private_tags'] = show_private_tags
+
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','currency','address']:
@@ -71,10 +73,10 @@ async def get_address(request: web.Request, currency, address) -> web.Response:
                     text=json.dumps(result),
                     headers={'Content-type': 'application/json'})
         return result
-    except RuntimeError as e:
+    except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
-    except ValueError as e:
+    except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
@@ -114,8 +116,8 @@ async def get_address_entity(request: web.Request, currency, address) -> web.Res
                 break
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
-            
-    request.app['show_private_tags'] = show_private_tags
+
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','currency','address']:
@@ -141,10 +143,10 @@ async def get_address_entity(request: web.Request, currency, address) -> web.Res
                     text=json.dumps(result),
                     headers={'Content-type': 'application/json'})
         return result
-    except RuntimeError as e:
+    except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
-    except ValueError as e:
+    except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
@@ -190,8 +192,8 @@ async def list_address_links(request: web.Request, currency, address, neighbor, 
                 break
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
-            
-    request.app['show_private_tags'] = show_private_tags
+
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','currency','address','neighbor','page','pagesize']:
@@ -217,10 +219,10 @@ async def list_address_links(request: web.Request, currency, address, neighbor, 
                     text=json.dumps(result),
                     headers={'Content-type': 'application/json'})
         return result
-    except RuntimeError as e:
+    except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
-    except ValueError as e:
+    except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
@@ -270,8 +272,8 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
                 break
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
-            
-    request.app['show_private_tags'] = show_private_tags
+
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','currency','address','direction','only_ids','include_labels','page','pagesize']:
@@ -297,10 +299,10 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
                     text=json.dumps(result),
                     headers={'Content-type': 'application/json'})
         return result
-    except RuntimeError as e:
+    except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
-    except ValueError as e:
+    except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
@@ -352,8 +354,8 @@ async def list_address_txs(request: web.Request, currency, address, direction=No
                 break
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
-            
-    request.app['show_private_tags'] = show_private_tags
+
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','currency','address','direction','min_height','max_height','token_currency','page','pagesize']:
@@ -379,10 +381,10 @@ async def list_address_txs(request: web.Request, currency, address, direction=No
                     text=json.dumps(result),
                     headers={'Content-type': 'application/json'})
         return result
-    except RuntimeError as e:
+    except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
-    except ValueError as e:
+    except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:
@@ -426,8 +428,8 @@ async def list_tags_by_address(request: web.Request, currency, address, page=Non
                 break
             show_private_tags = show_private_tags and \
                 bool(re.match(re.compile(v), hval))
-            
-    request.app['show_private_tags'] = show_private_tags
+
+    request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
         if 'currency' in ['','currency','address','page','pagesize']:
@@ -453,10 +455,10 @@ async def list_tags_by_address(request: web.Request, currency, address, page=Non
                     text=json.dumps(result),
                     headers={'Content-type': 'application/json'})
         return result
-    except RuntimeError as e:
+    except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=str(e))
-    except ValueError as e:
+    except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=str(e))
     except Exception as e:

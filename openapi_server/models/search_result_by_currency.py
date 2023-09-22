@@ -1,5 +1,5 @@
 # coding: utf-8
-
+from gsrest.errors import BadUserInputException
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -80,7 +80,7 @@ class SearchResultByCurrency(Model):
         :type addresses: List[str]
         """
         if addresses is None:
-            raise ValueError("Invalid value for `addresses`, must not be `None`")
+            raise BadUserInputException("Invalid value for `addresses`, must not be `None`")
 
         self._addresses = addresses
 
@@ -105,7 +105,7 @@ class SearchResultByCurrency(Model):
         :type currency: str
         """
         if currency is None:
-            raise ValueError("Invalid value for `currency`, must not be `None`")
+            raise BadUserInputException("Invalid value for `currency`, must not be `None`")
 
         self._currency = currency
 
@@ -130,6 +130,6 @@ class SearchResultByCurrency(Model):
         :type txs: List[str]
         """
         if txs is None:
-            raise ValueError("Invalid value for `txs`, must not be `None`")
+            raise BadUserInputException("Invalid value for `txs`, must not be `None`")
 
         self._txs = txs

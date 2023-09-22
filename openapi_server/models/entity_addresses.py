@@ -1,5 +1,5 @@
 # coding: utf-8
-
+from gsrest.errors import BadUserInputException
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -74,7 +74,7 @@ class EntityAddresses(Model):
         :type addresses: List[Address]
         """
         if addresses is None:
-            raise ValueError("Invalid value for `addresses`, must not be `None`")
+            raise BadUserInputException("Invalid value for `addresses`, must not be `None`")
 
         self._addresses = addresses
 

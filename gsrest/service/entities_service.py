@@ -12,6 +12,7 @@ from gsrest.util.values import (convert_value, to_values,
 from openapi_server.models.entity_addresses import EntityAddresses
 from gsrest.db.util import tagstores, tagstores_with_paging
 from gsrest.service.tags_service import address_tag_from_row
+from gsrest.errors import NotFoundException, BadUserInputException
 import gsrest.service.common_service as common
 import importlib
 import asyncio
@@ -68,7 +69,8 @@ async def list_address_tags_by_entity(request,
             address_tag_from_row,
             'list_address_tags_by_entity',
             page, pagesize,
-            currency, entity, request.app['show_private_tags'])
+            currency, entity,
+            request.app['request_config']['show_private_tags'])
     return AddressTags(address_tags=address_tags, next_page=next_page)
 
 
@@ -81,18 +83,19 @@ async def get_entity(request,
     result = await db.get_entity(currency, entity)
 
     if result is None:
-        raise RuntimeError("Entity {} not found".format(entity))
+        raise NotFoundException("Entity {} not found".format(entity))
 
     tags = None
     count = 0
     if not exclude_best_address_tag:
-        tags = await tagstores(request.app['tagstores'], address_tag_from_row,
-                               'get_best_entity_tag', currency, entity,
-                               request.app['show_private_tags'])
+        tags = await tagstores(
+            request.app['tagstores'], address_tag_from_row,
+            'get_best_entity_tag', currency, entity,
+            request.app['request_config']['show_private_tags'])
 
-    counts = await tagstores(request.app['tagstores'], lambda x: x,
-                             'count_address_tags_by_entity', currency, entity,
-                             request.app['show_private_tags'])
+    counts = await tagstores(
+        request.app['tagstores'], lambda x: x, 'count_address_tags_by_entity',
+        currency, entity, request.app['request_config']['show_private_tags'])
     for c in counts:
         count += 0 if c['count'] is None else int(c['count'])
 
@@ -102,7 +105,7 @@ async def get_entity(request,
             request.app['tagstores'],
             lambda row: LabeledItemRef(id=row["id"], label=row["label"]),
             'list_actors_entity', currency, entity,
-            request.app['show_private_tags'])
+            request.app['request_config']['show_private_tags'])
 
     rates = (await get_rates(request, currency))['rates']
     return from_row(currency, result, rates,
@@ -171,7 +174,8 @@ async def list_entity_addresses(request,
                 request.app['tagstores'],
                 lambda row: LabeledItemRef(id=row["id"], label=row["label"]),
                 'list_actors_address', currency, row["address"],
-                request.app['show_private_tags'])) for row in addresses
+                request.app['request_config']['show_private_tags']))
+        for row in addresses
     ]
     return EntityAddresses(next_page=paging_state, addresses=addresses)
 
@@ -212,7 +216,7 @@ async def search_entity_neighbors(request,
         min_value = float(min_value)
         max_value = float(max_value[0]) if len(max_value) > 0 else None
         if max_value is not None and min_value > max_value:
-            raise ValueError('Min must not be greater than max')
+            raise BadUserInputException('Min must not be greater than max')
 
         def match_neighbor(neighbor):
             values = getattr(neighbor.entity, key)

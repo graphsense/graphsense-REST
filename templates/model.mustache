@@ -1,5 +1,5 @@
 # coding: utf-8
-
+from gsrest.errors import BadUserInputException
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -105,7 +105,7 @@ class {{classname}}(Model):
         allowed_values = [{{#isNullable}}None,{{/isNullable}}{{#allowableValues}}{{#values}}{{#items.isString}}"{{/items.isString}}{{{this}}}{{#items.isString}}"{{/items.isString}}{{^-last}}, {{/-last}}{{/values}}{{/allowableValues}}]  # noqa: E501
 {{#isArray}}
         if not set({{{name}}}).issubset(set(allowed_values)):
-            raise ValueError(
+            raise BadUserInputException(
                 "Invalid values for `{{{name}}}` [{0}], must be a subset of [{1}]"
                 .format(", ".join(map(str, set({{{name}}}) - set(allowed_values))),
                         ", ".join(map(str, allowed_values)))
@@ -113,7 +113,7 @@ class {{classname}}(Model):
 {{/isArray}}
 {{#isMap}}
         if not set({{{name}}}.keys()).issubset(set(allowed_values)):
-            raise ValueError(
+            raise BadUserInputException(
                 "Invalid keys in `{{{name}}}` [{0}], must be a subset of [{1}]"
                 .format(", ".join(map(str, set({{{name}}}.keys()) - set(allowed_values))),
                         ", ".join(map(str, allowed_values)))
@@ -123,7 +123,7 @@ class {{classname}}(Model):
 {{^isContainer}}
         allowed_values = [{{#isNullable}}None,{{/isNullable}}{{#allowableValues}}{{#values}}{{#isString}}"{{/isString}}{{{this}}}{{#isString}}"{{/isString}}{{^-last}}, {{/-last}}{{/values}}{{/allowableValues}}]  # noqa: E501
         if {{{name}}} not in allowed_values:
-            raise ValueError(
+            raise BadUserInputException(
                 "Invalid value for `{{{name}}}` ({0}), must be one of {1}"
                 .format({{{name}}}, allowed_values)
             )
@@ -132,36 +132,36 @@ class {{classname}}(Model):
 {{^isEnum}}
 {{#required}}
         if {{name}} is None:
-            raise ValueError("Invalid value for `{{name}}`, must not be `None`")
+            raise BadUserInputException("Invalid value for `{{name}}`, must not be `None`")
 {{/required}}
 {{#hasValidation}}
 {{#maxLength}}
         if {{name}} is not None and len({{name}}) > {{maxLength}}:
-            raise ValueError("Invalid value for `{{name}}`, length must be less than or equal to `{{maxLength}}`")
+            raise BadUserInputException("Invalid value for `{{name}}`, length must be less than or equal to `{{maxLength}}`")
 {{/maxLength}}
 {{#minLength}}
         if {{name}} is not None and len({{name}}) < {{minLength}}:
-            raise ValueError("Invalid value for `{{name}}`, length must be greater than or equal to `{{minLength}}`")
+            raise BadUserInputException("Invalid value for `{{name}}`, length must be greater than or equal to `{{minLength}}`")
 {{/minLength}}
 {{#maximum}}
         if {{name}} is not None and {{name}} >{{#exclusiveMaximum}}={{/exclusiveMaximum}} {{maximum}}:
-            raise ValueError("Invalid value for `{{name}}`, must be a value less than {{^exclusiveMaximum}}or equal to {{/exclusiveMaximum}}`{{maximum}}`")
+            raise BadUserInputException("Invalid value for `{{name}}`, must be a value less than {{^exclusiveMaximum}}or equal to {{/exclusiveMaximum}}`{{maximum}}`")
 {{/maximum}}
 {{#minimum}}
         if {{name}} is not None and {{name}} <{{#exclusiveMinimum}}={{/exclusiveMinimum}} {{minimum}}:
-            raise ValueError("Invalid value for `{{name}}`, must be a value greater than {{^exclusiveMinimum}}or equal to {{/exclusiveMinimum}}`{{minimum}}`")
+            raise BadUserInputException("Invalid value for `{{name}}`, must be a value greater than {{^exclusiveMinimum}}or equal to {{/exclusiveMinimum}}`{{minimum}}`")
 {{/minimum}}
 {{#pattern}}
         if {{name}} is not None and not re.search(r'{{{vendorExtensions.x-regex}}}', {{name}}{{#vendorExtensions.x-modifiers}}{{#-first}}, flags={{/-first}}re.{{.}}{{^-last}} | {{/-last}}{{/vendorExtensions.x-modifiers}}):
-            raise ValueError("Invalid value for `{{name}}`, must be a follow pattern or equal to `{{{pattern}}}`")
+            raise BadUserInputException("Invalid value for `{{name}}`, must be a follow pattern or equal to `{{{pattern}}}`")
 {{/pattern}}
 {{#maxItems}}
         if {{name}} is not None and len({{name}}) > {{maxItems}}:
-            raise ValueError("Invalid value for `{{name}}`, number of items must be less than or equal to `{{maxItems}}`")
+            raise BadUserInputException("Invalid value for `{{name}}`, number of items must be less than or equal to `{{maxItems}}`")
 {{/maxItems}}
 {{#minItems}}
         if {{name}} is not None and len({{name}}) < {{minItems}}:
-            raise ValueError("Invalid value for `{{name}}`, number of items must be greater than or equal to `{{minItems}}`")
+            raise BadUserInputException("Invalid value for `{{name}}`, number of items must be greater than or equal to `{{minItems}}`")
 {{/minItems}}
 {{/hasValidation}}
 {{/isEnum}}

@@ -2,13 +2,14 @@ import logging
 import os
 import json
 from aiohttp.test_utils import AioHTTPTestCase
-
-from {{packageName}} import factory
 import pytest
 
 # Register assert rewriting for nice diffs in tests
 # https://docs.pytest.org/en/stable/how-to/writing_plugins.html#assertion-rewriting
 pytest.register_assert_rewrite("gsrest")
+
+
+from {{packageName}} import factory
 
 class BaseTestCase(AioHTTPTestCase):
 
@@ -16,6 +17,18 @@ class BaseTestCase(AioHTTPTestCase):
         logging.getLogger('connexion.operation').setLevel('ERROR')
         return factory(os.path.join(os.getcwd(), 'tests/instance/config.yaml'),
                        validate_responses=True).app
+
+    async def requestOnly(self, path, body, **kwargs):
+        headers = {
+            'Accept': 'application/json',
+            'Authorization': kwargs.get('auth', 'x')
+        }
+        response =  await self.client.request(
+            path=path.format(**kwargs),
+            method='GET' if body is None else 'POST',
+            json=body,
+            headers=headers)
+        return (response, (await response.read()).decode('utf-8'))
 
     async def requestWithCodeAndBody(self, path, code, body, **kwargs):
         headers = {

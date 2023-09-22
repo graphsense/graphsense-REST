@@ -1,5 +1,5 @@
 # coding: utf-8
-
+from gsrest.errors import BadUserInputException
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -154,7 +154,7 @@ class Tx(Model):
         :type coinbase: bool
         """
         if coinbase is None:
-            raise ValueError("Invalid value for `coinbase`, must not be `None`")
+            raise BadUserInputException("Invalid value for `coinbase`, must not be `None`")
 
         self._coinbase = coinbase
 
@@ -179,7 +179,7 @@ class Tx(Model):
         :type currency: str
         """
         if currency is None:
-            raise ValueError("Invalid value for `currency`, must not be `None`")
+            raise BadUserInputException("Invalid value for `currency`, must not be `None`")
 
         self._currency = currency
 
@@ -204,9 +204,9 @@ class Tx(Model):
         :type height: int
         """
         if height is None:
-            raise ValueError("Invalid value for `height`, must not be `None`")
+            raise BadUserInputException("Invalid value for `height`, must not be `None`")
         if height is not None and height < 0:
-            raise ValueError("Invalid value for `height`, must be a value greater than or equal to `0`")
+            raise BadUserInputException("Invalid value for `height`, must be a value greater than or equal to `0`")
 
         self._height = height
 
@@ -254,7 +254,7 @@ class Tx(Model):
         :type no_inputs: int
         """
         if no_inputs is None:
-            raise ValueError("Invalid value for `no_inputs`, must not be `None`")
+            raise BadUserInputException("Invalid value for `no_inputs`, must not be `None`")
 
         self._no_inputs = no_inputs
 
@@ -279,7 +279,7 @@ class Tx(Model):
         :type no_outputs: int
         """
         if no_outputs is None:
-            raise ValueError("Invalid value for `no_outputs`, must not be `None`")
+            raise BadUserInputException("Invalid value for `no_outputs`, must not be `None`")
 
         self._no_outputs = no_outputs
 
@@ -327,7 +327,7 @@ class Tx(Model):
         :type timestamp: int
         """
         if timestamp is None:
-            raise ValueError("Invalid value for `timestamp`, must not be `None`")
+            raise BadUserInputException("Invalid value for `timestamp`, must not be `None`")
 
         self._timestamp = timestamp
 
@@ -350,7 +350,7 @@ class Tx(Model):
         :type total_input: Values
         """
         if total_input is None:
-            raise ValueError("Invalid value for `total_input`, must not be `None`")
+            raise BadUserInputException("Invalid value for `total_input`, must not be `None`")
 
         self._total_input = total_input
 
@@ -373,7 +373,7 @@ class Tx(Model):
         :type total_output: Values
         """
         if total_output is None:
-            raise ValueError("Invalid value for `total_output`, must not be `None`")
+            raise BadUserInputException("Invalid value for `total_output`, must not be `None`")
 
         self._total_output = total_output
 
@@ -398,7 +398,7 @@ class Tx(Model):
         :type tx_hash: str
         """
         if tx_hash is None:
-            raise ValueError("Invalid value for `tx_hash`, must not be `None`")
+            raise BadUserInputException("Invalid value for `tx_hash`, must not be `None`")
 
         self._tx_hash = tx_hash
 
@@ -421,7 +421,7 @@ class Tx(Model):
         :type tx_type: str
         """
         if tx_type is None:
-            raise ValueError("Invalid value for `tx_type`, must not be `None`")
+            raise BadUserInputException("Invalid value for `tx_type`, must not be `None`")
 
         self._tx_type = tx_type
 
@@ -469,7 +469,7 @@ class Tx(Model):
         :type from_address: str
         """
         if from_address is None:
-            raise ValueError("Invalid value for `from_address`, must not be `None`")
+            raise BadUserInputException("Invalid value for `from_address`, must not be `None`")
 
         self._from_address = from_address
 
@@ -494,7 +494,7 @@ class Tx(Model):
         :type to_address: str
         """
         if to_address is None:
-            raise ValueError("Invalid value for `to_address`, must not be `None`")
+            raise BadUserInputException("Invalid value for `to_address`, must not be `None`")
 
         self._to_address = to_address
 
@@ -538,6 +538,6 @@ class Tx(Model):
         :type value: Values
         """
         if value is None:
-            raise ValueError("Invalid value for `value`, must not be `None`")
+            raise BadUserInputException("Invalid value for `value`, must not be `None`")
 
         self._value = value

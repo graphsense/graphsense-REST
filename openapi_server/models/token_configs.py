@@ -1,5 +1,5 @@
 # coding: utf-8
-
+from gsrest.errors import BadUserInputException
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -71,6 +71,6 @@ class TokenConfigs(Model):
         :type token_configs: List[TokenConfig]
         """
         if token_configs is None:
-            raise ValueError("Invalid value for `token_configs`, must not be `None`")
+            raise BadUserInputException("Invalid value for `token_configs`, must not be `None`")
 
         self._token_configs = token_configs

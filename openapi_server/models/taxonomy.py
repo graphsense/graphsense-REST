@@ -1,5 +1,5 @@
 # coding: utf-8
-
+from gsrest.errors import BadUserInputException
 from datetime import date, datetime
 
 from typing import List, Dict, Type
@@ -75,7 +75,7 @@ class Taxonomy(Model):
         :type taxonomy: str
         """
         if taxonomy is None:
-            raise ValueError("Invalid value for `taxonomy`, must not be `None`")
+            raise BadUserInputException("Invalid value for `taxonomy`, must not be `None`")
 
         self._taxonomy = taxonomy
 
@@ -100,6 +100,6 @@ class Taxonomy(Model):
         :type uri: str
         """
         if uri is None:
-            raise ValueError("Invalid value for `uri`, must not be `None`")
+            raise BadUserInputException("Invalid value for `uri`, must not be `None`")
 
         self._uri = uri
