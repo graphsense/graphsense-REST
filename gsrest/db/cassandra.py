@@ -36,7 +36,16 @@ def eth_address_to_hex(address):
 
 def eth_address_from_hex(address):
     # eth addresses are case insensitive
-    return bytes.fromhex(address[2:].lower())
+    try:
+        if address.startswith("0x"):
+            return bytes.fromhex(address[2:].lower())
+        else:
+            return bytes.fromhex(address.lower())
+    except ValueError:
+        # bytes.fromHex throws value error if non hex chars are found
+        raise BadUserInputException(
+            f"The address provided does not look like a ETH address: {address}"
+        )
 
 
 def identity(x):
@@ -1596,7 +1605,10 @@ class Cassandra:
 
     def scrub_prefix_eth(self, currency, expression):
         # remove 0x prefix
-        return expression[2:]
+        if expression.startswith("0x"):
+            return expression[2:]
+        else:
+            return expression
 
     async def get_block_eth(self, currency, height):
         block_group = self.get_block_id_group(currency, height)
