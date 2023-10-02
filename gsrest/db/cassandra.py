@@ -23,9 +23,16 @@ def to_hex(paging_state):
 
 
 def from_hex(page):
-    if isinstance(page, str) and page.startswith("0x"):
-        page = page[2:]
-    return bytes.fromhex(page) if page else None
+    try:
+        if isinstance(page, str) and page.startswith("0x"):
+            page = page[2:]
+        return bytes.fromhex(page) if page else None
+    except ValueError:
+        # bytes.fromHex throws value error if non hex chars are found
+        raise BadUserInputException(
+            f"The requested next page token ({page}) "
+            "is not formatted correctly. "
+            "Only use the next_page token found in the response.")
 
 
 def eth_address_to_hex(address):

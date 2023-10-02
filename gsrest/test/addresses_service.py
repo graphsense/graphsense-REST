@@ -582,6 +582,14 @@ async def get_address(test_case):
                                      address=eth_addressWithTags.address)
     test_case.assertEqual(eth_address.to_dict(), result)
 
+    result, body = await test_case.requestOnly(
+        '/{currency}/addresses/{address}',
+        None,
+        currency='eth',
+        address='1Archi6M1r5b41Rvn1SY2FfJAzsrEUT7aT')
+    assert result.status == 400
+    assert "The address provided does not look like a ETH address" in body
+
 
 async def list_address_txs(test_case):
     """Test case for list_address_txs
@@ -862,6 +870,19 @@ async def list_address_neighbors(test_case):
                                      include_labels=True,
                                      direction='out')
     test_case.assertEqual(eth_address2WithTokenFlows.to_dict(), result)
+
+    # correct handling pages in wrong format.
+    result, body = await test_case.requestOnly(
+        ('/{currency}/addresses/{address}/neighbors?'
+         'include_labels={include_labels}&direction={direction}&page={page}'),
+        None,
+        currency='eth',
+        include_labels=False,
+        direction='in',
+        page="PAGE2",
+        address='0x123456')
+    assert result.status == 400
+    assert "is not formatted correctly" in body
 
 
 async def get_address_entity(test_case):
