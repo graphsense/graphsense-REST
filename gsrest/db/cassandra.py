@@ -7,7 +7,7 @@ from cassandra.protocol import ProtocolException
 from cassandra.cluster import Cluster, NoHostAvailable
 from cassandra.policies import RoundRobinPolicy, TokenAwarePolicy
 from cassandra.query import SimpleStatement, dict_factory, ValueSequence
-from math import floor
+from math import floor, ceil
 
 from gsrest.util.exceptions import BadConfigError
 from gsrest.util.eth_logs import decode_db_logs
@@ -16,6 +16,7 @@ from gsrest.errors import NotFoundException, BadUserInputException
 SMALL_PAGE_SIZE = 1000
 BIG_PAGE_SIZE = 5000
 SEARCH_PAGE_SIZE = 100
+MAX_BIGINT = 2<<62 - 1
 
 
 def to_hex(paging_state):
@@ -244,11 +245,7 @@ class Cassandra:
     def get_supported_currencies(self):
         return self.config['currencies'].keys()
 
-    @eth
     def get_token_configuration(self, currency):
-        return None
-
-    def get_token_configuration_eth(self, currency):
         eth_config = self.parameters.get(currency, None)
         return eth_config["token_config"] if eth_config is not None else {}
 
@@ -522,6 +519,11 @@ class Cassandra:
                                     token_currency=None,
                                     page=None,
                                     pagesize=None):
+        try:
+            page = int(page) if page is not None else None
+        except:
+            raise BadUserInputException(f"Page {page} is not an integer")
+
         # self.logger.debug(f'page {page}')
         if node_type == 'address':
             id, id_group = \
@@ -557,8 +559,7 @@ class Cassandra:
 
         query = (f"SELECT * FROM {node_type}_transactions "
                  f"WHERE {node_type}_id = %s AND {node_type}_id_group = %s"
-                 f" {min_height_q} {max_height_q} and is_outgoing = %s "
-                 "order by tx_id desc")
+                 f" {min_height_q} {max_height_q}")
 
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
         results, paging_state = await self.list_txs_ordered(
@@ -1702,89 +1703,116 @@ class Cassandra:
                                query,
                                params,
                                direction,
-                               page=None,
-                               fetch_size=None):
-        paging_state = (page or '').split('|')
+                               page,
+                               fetch_size):
+        results = []
+        init = True
+        while init or page is not None and len(results) < fetch_size:
+            init = False
+            fs = fetch_size - len(results)
+            print(f'fetch_size {fs}')
+            more_results, page = \
+                    await self.list_txs_ordered_one_iteration(currency, query, params,
+                                                              direction, page,
+                                                              fs)
+            results += more_results
+        print(f'results len {len(results)}')
+        return results, str(page) if page is not None else None
+
+
+    async def list_txs_ordered_one_iteration(self,
+                                             currency,
+                                             query,
+                                             params,
+                                             direction,
+                                             page,
+                                             fetch_size):
+        key = 'transaction_id' if currency == 'eth' else 'tx_id'
+
+        query += " and is_outgoing = %s"
+
+        if page:
+            query += f" and {key} < %s"
+
         if direction:
             params.append(direction == 'out')
+            params.append(page)
             results = await self.execute_async(currency,
                                                'transformed',
                                                query,
-                                               params,
-                                               paging_state=from_hex(
-                                                   paging_state[0]),
-                                               fetch_size=fetch_size)
-            paging_state = to_hex(results.paging_state)
-            results = results.current_rows
-        else:
-            paging_state1 = paging_state[0] or None
-            paging_state2 = paging_state[1] if len(paging_state) > 1 else None
+                                               params)
+            rows = results.current_rows
+            border_tx_id = rows[-1][key] \
+                    if results.paging_state else None
+            return rows, border_tx_id
 
-            async def empty():
-                return Result(current_rows=[], params=None, paging_state=None)
+        query += " order by"
+        if currency == 'eth':
+            query += " currency desc,"
+        half_fetch_size = ceil(fetch_size / 2)
 
-            if paging_state1 == 'eol':
-                aw1 = empty()
+        query += f" {key} desc limit {half_fetch_size}"
+
+        print(f'query {query}')
+
+        params1 = list(params)
+        params1.append(False)
+        if page:
+            params1.append(page)
+        print(f'params1 {params1}, fetch_size {half_fetch_size}')
+        aw1 = self.execute_async(currency,
+                                 'transformed',
+                                 query,
+                                 params1)
+
+        params2 = list(params)
+        params2.append(True)
+        if page:
+           params2.append(page)
+        print(f'params2 {params2}, fetch_size {half_fetch_size}')
+        aw2 = self.execute_async(currency,
+                                 'transformed',
+                                 query,
+                                 params2)
+        [results1, results2] = await asyncio.gather(aw1, aw2)
+
+        results1 = results1.current_rows
+        results2 = results2.current_rows
+
+        print(f'results1 {len(results1)}')
+        print(f'results2 {len(results2)}')
+
+        border_tx_id = results1[-1][key] if results1 else None
+
+        if results2:
+            border_tx_id = max(border_tx_id, results2[-1][key]) \
+                    if border_tx_id else results2[-1][key]
+
+        print(f'border_tx_id {border_tx_id}')
+        results = []
+        i = j = 0
+        while len(results) < fetch_size and \
+              (i < len(results1) or j < len(results2)):  # noqa
+            if i >= len(results1):
+                print(f'i {i} >= len(results1) {len(results1)}')
+                app = results2[j]
+                j += 1
+            elif j >= len(results2):
+                print(f'j {j} >= len(results2) {len(results2)}')
+                app = results1[i]
+                i += 1
+            elif results1[i][key] > results2[j][key]:
+                print(f'results1[i][key] {results1[i][key]} > results2[j][key] {results2[j][key]}')
+                app = results1[i]
+                i += 1
             else:
-                # if fetch_size is odd, get 1 more from incoming
-                half_fetch_size = int(fetch_size / 2) + fetch_size % 2
-                params1 = list(params)
-                params1.append(False)
-                aw1 = self.execute_async(currency,
-                                         'transformed',
-                                         query,
-                                         params1,
-                                         paging_state=from_hex(paging_state1),
-                                         fetch_size=half_fetch_size)
-
-            if paging_state2 == 'eol':
-                aw2 = empty()
-            else:
-                half_fetch_size = int(fetch_size / 2)
-                params2 = list(params)
-                params2.append(True)
-                aw2 = self.execute_async(currency,
-                                         'transformed',
-                                         query,
-                                         params2,
-                                         paging_state=from_hex(paging_state2),
-                                         fetch_size=half_fetch_size)
-            [results1, results2] = await asyncio.gather(aw1, aw2)
-            if results1.paging_state is None and \
-               results2.paging_state is None:
-                paging_state = None
-            else:
-                paging_state1 = 'eol' \
-                    if not results1.paging_state \
-                    else \
-                    to_hex(results1.paging_state)
-                paging_state2 = 'eol' \
-                    if not results2.paging_state \
-                    else \
-                    to_hex(results2.paging_state)
-                paging_state = (paging_state1 or '') \
-                    + '|' + (paging_state2 or '')
-
-            results1 = results1.current_rows
-            results2 = results2.current_rows
-            results = []
-            i = j = 0
-            key = 'transaction_id' if currency == 'eth' else 'tx_id'
-            while len(results) < fetch_size and \
-                  (i < len(results1) or j < len(results2)):  # noqa
-                if i >= len(results1):
-                    results.append(results2[j])
-                    j += 1
-                elif j >= len(results2):
-                    results.append(results1[i])
-                    i += 1
-                elif results1[i][key] > results2[j][key]:
-                    results.append(results1[i])
-                    i += 1
-                else:
-                    results.append(results2[j])
-                    j += 1
-        return results, paging_state
+                print(f'results1[i][key] {results1[i][key]} <= results2[j][key] {results2[j][key]}')
+                app = results2[j]
+                j += 1
+            results.append(app)
+            if app[key] == border_tx_id:
+                break
+        return results, border_tx_id
 
     async def list_txs_by_node_type_eth(self,
                                         currency,
@@ -1796,6 +1824,11 @@ class Cassandra:
                                         token_currency=None,
                                         page=None,
                                         pagesize=None):
+        try:
+            page = int(page) if page is not None else None
+        except:
+            raise BadUserInputException(f"Page {page} is not an integer")
+
         if node_type == 'address':
             address_id, id_group = \
                 await self.get_address_id_id_group(currency, address)
@@ -1807,16 +1840,18 @@ class Cassandra:
             await self.get_id_secondary_group_eth('address_transactions',
                                                   id_group)
         sec_in = self.sec_in(secondary_id_group)
-        params = [id_group, sec_in, address_id]
 
-        min_height_q = max_height_q = token_currency_q = ""
+        if not token_currency:
+            token_config = self.get_token_configuration(currency)
+            token_currencies = list(token_config.keys())
+            token_currencies.append('ETH')
+        else:
+            token_currencies = [token_currency.upper()]
+
+        params = [id_group, sec_in, address_id, token_currencies]
+
+        min_height_q = max_height_q = ""
         if min_height or max_height:
-            if not token_currency:
-                token_currency = currency
-
-            token_currency_q = "AND currency=%s"
-            params.append(token_currency.upper())
-
             first_tx_id, last_tx_id = \
                 await self.resolve_tx_id_range_by_block(currency,
                                                         min_height,
@@ -1840,8 +1875,7 @@ class Cassandra:
                  " WHERE address_id_group = %s and "
                  "address_id_secondary_group in %s"
                  " and address_id = %s"
-                 f" {token_currency_q} {min_height_q} {max_height_q}"
-                 " and is_outgoing = %s")
+                 f" and currency in %s {min_height_q} {max_height_q}")
 
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
         results, paging_state = await self.list_txs_ordered(
