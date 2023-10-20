@@ -711,15 +711,6 @@ async def list_entity_txs(test_case):
 
     test_case.assertEqual(entity_txs.to_dict()['address_txs'][2:3],
                           result['address_txs'])
-    test_case.assertNotEqual(result['next_page'], None)
-
-    result = await test_case.request(path_with_pagesize,
-                                     currency='btc',
-                                     entity=144534,
-                                     pagesize=2,
-                                     page=result['next_page'])
-
-    test_case.assertEqual([], result['address_txs'])
     test_case.assertEqual(result.get('next_page', None), None)
 
     path_with_direction =\

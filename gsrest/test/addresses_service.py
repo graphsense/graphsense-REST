@@ -15,6 +15,7 @@ from gsrest.test.txs_service import tx1_eth, tx2_eth, tx22_eth, tx4_eth
 from gsrest.util.values import make_values
 import gsrest.test.tags_service as ts
 import copy
+import yaml
 
 address = Address(
     currency="btc",
@@ -627,7 +628,7 @@ async def list_address_txs(test_case):
                                      page='')
     test_case.assertEqual(address_txs.to_dict()['address_txs'][0:2],
                           result['address_txs'])
-    test_case.assertNotEqual(result['next_page'], None)
+    test_case.assertNotEqual(result.get('next_page', None), None)
 
     result = await test_case.request(path_with_pagesize,
                                      currency='btc',
@@ -637,15 +638,6 @@ async def list_address_txs(test_case):
 
     test_case.assertEqual(address_txs.to_dict()['address_txs'][2:3],
                           result['address_txs'])
-    test_case.assertNotEqual(result['next_page'], None)
-
-    result = await test_case.request(path_with_pagesize,
-                                     currency='btc',
-                                     address=address2.address,
-                                     pagesize=2,
-                                     page=result['next_page'])
-
-    test_case.assertEqual([], result['address_txs'])
     test_case.assertEqual(result.get('next_page', None), None)
 
     path_with_direction = path + '?direction={direction}'
@@ -752,6 +744,27 @@ async def list_address_txs(test_case):
     ]
     assert [x['height'] for x in result["address_txs"]] == [3, 2, 2, 2, 1]
 
+    path_tc = path + "?token_currency={token_currency}"
+    result = await test_case.request(path_tc,
+                                     currency='eth',
+                                     address=eth_address2.address,
+                                     token_currency='weth')
+
+    assert len(result["address_txs"]) == 1
+    assert [x['currency'] for x in result["address_txs"]
+            ] == ['weth']
+
+    result = await test_case.request(path_tc,
+                                     currency='eth',
+                                     address=eth_address2.address,
+                                     token_currency='eth')
+
+    assert len(result["address_txs"]) == 3
+    assert [x['currency'] for x in result["address_txs"]
+            ] == ['eth', 'eth', 'eth']
+    assert [x['timestamp'] for x in result["address_txs"]
+            ] == [17,16,15]
+
     result = await test_case.request(path_with_range_and_tc,
                                      currency='eth',
                                      address=eth_address2.address,
@@ -760,9 +773,10 @@ async def list_address_txs(test_case):
                                      max_height=2,
                                      token_currency='')
 
-    assert len(result["address_txs"]) == 1
-    assert [x['currency'] for x in result["address_txs"]] == ['eth']
-    assert [x['height'] for x in result["address_txs"]] == [2]
+    assert len(result["address_txs"]) == 3
+    assert [x['currency'] for x in result["address_txs"]] == ['weth', 'usdt',
+                                                              'eth']
+    assert [x['height'] for x in result["address_txs"]] == [2, 2, 2]
 
     result = await test_case.request(path_with_range_and_tc,
                                      currency='eth',
