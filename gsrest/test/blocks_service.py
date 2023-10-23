@@ -81,4 +81,10 @@ async def list_block_txs(test_case):
         token_tx2_eth.to_dict()
     ]
 
+    result = await test_case.request(path, currency="eth", height=2300001)
+    eth_txs = [
+        tx1_eth.to_dict(),
+        tx22_eth.to_dict()
+    ]
+
     assert eth_txs == result
