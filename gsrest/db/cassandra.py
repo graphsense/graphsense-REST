@@ -603,7 +603,7 @@ class Cassandra:
     async def list_block_txs_ids_eth(self, currency, height):
         if height is None:
             return None
-        height_group = self.get_block_id_group(currency, height)
+        height_group = self.get_id_group(currency, height)
         query = ("SELECT txs FROM block_transactions "
                  "WHERE block_id_group=%s and block_id=%s")
         result = await self.execute_async(
