@@ -590,6 +590,15 @@ async def get_address(test_case):
     assert result.status == 400
     assert "The address provided does not look like a ETH address" in body
 
+    # non supported currency
+    result, body = await test_case.requestOnly(
+        '/{currency}/addresses/{address}',
+        None,
+        currency='DOGE',
+        address='DBgS3X3hveRppkeywm9C6HMJKZb2CG8nGV')
+    assert result.status == 404
+    assert "Network doge not supported" in body
+
 
 async def list_address_txs(test_case):
     """Test case for list_address_txs

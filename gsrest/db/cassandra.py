@@ -1,7 +1,7 @@
 import re
 import time
 import asyncio
-from collections import namedtuple
+from collections import namedtuple, UserDict
 from cassandra import InvalidRequest
 from cassandra.protocol import ProtocolException
 from cassandra.cluster import Cluster, NoHostAvailable
@@ -16,6 +16,14 @@ from gsrest.errors import NotFoundException, BadUserInputException
 SMALL_PAGE_SIZE = 1000
 BIG_PAGE_SIZE = 5000
 SEARCH_PAGE_SIZE = 100
+
+
+class NetworkParameters(UserDict):
+
+    def __getitem__(self, network):
+        if network not in self:
+            raise NotFoundException(f'Network {network} not supported.')
+        return super().__getitem__(network)
 
 
 def to_hex(paging_state):
@@ -151,7 +159,7 @@ class Cassandra:
         self.config = config
         self.prepared_statements = {}
         self.connect()
-        self.parameters = {}
+        self.parameters = NetworkParameters()
         for currency in config['currencies']:
             self.check_keyspace(config['currencies'][currency]['raw'])
             self.check_keyspace(config['currencies'][currency]['transformed'])
