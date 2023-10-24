@@ -459,6 +459,7 @@ class Cassandra:
         if tx_ids is None:
             raise NotFoundException(
                 f'Block {height} not found in currency {currency}')
+        tx_ids = sorted(list(set(tx_ids)))
         return await self.list_txs_by_ids(currency,
                                           tx_ids,
                                           include_token_txs=True)
