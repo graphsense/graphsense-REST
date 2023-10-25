@@ -1719,6 +1719,10 @@ class Cassandra:
                                upper_bound, page, fetch_size):
         results = []
         init = True
+        """
+            Keep retrieving pages until the demanded fetch_size is fulfilled
+            or there are no more pages
+        """
         while (init or page is not None) and len(results) < fetch_size:
             init = False
             fs = fetch_size - len(results)
@@ -1738,6 +1742,7 @@ class Cassandra:
 
         query += " and is_outgoing = %s"
 
+        # upper_bound is used for max_height requests
         if page is not None or upper_bound is not None:
             query += f" and {key} < %s"
 
@@ -1765,6 +1770,11 @@ class Cassandra:
         query += " order by"
         if currency == 'eth':
             query += " currency desc,"
+
+        """
+          Make two separate queries for incoming and outgoing txs
+          and merge the results afterwards
+        """
         half_fetch_size = ceil(fetch_size / 2)
 
         query += f" {key} desc limit {half_fetch_size}"
@@ -1791,25 +1801,6 @@ class Cassandra:
             border_tx_id = max(border_tx_id, results2[-1][key]) \
                 if border_tx_id else results2[-1][key]
 
-        # results = []
-        # i = j = 0
-        # while len(results) < fetch_size and \
-        #       (i < len(results1) or j < len(results2)):  # noqa
-        #     if i >= len(results1):
-        #         app = results2[j]
-        #         j += 1
-        #     elif j >= len(results2):
-        #         app = results1[i]
-        #         i += 1
-        #     elif results1[i][key] > results2[j][key]:
-        #         app = results1[i]
-        #         i += 1
-        #     else:
-        #         app = results2[j]
-        #         j += 1
-        #     if app[key] < border_tx_id:
-        #         break
-        #     results.append(app)
         """
             Merge results by sort order (uses a priority queue; heapq)
             fetch_sized items or less are returned
@@ -1890,9 +1881,6 @@ class Cassandra:
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
         results, paging_state = await self.list_txs_ordered(
             currency, query, params, direction, upper_bound, page, fetch_size)
-        if not results:
-            raise NotFoundException(
-                f'no transactions found for address {address} in {currency}')
         txs = [row for row in results]
         tx_ids = [tx['transaction_id'] for tx in txs]
 
