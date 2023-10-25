@@ -803,7 +803,7 @@ async def list_address_txs(test_case):
                                       pagesize=1)
 
     assert len(result1["address_txs"]) == 1
-    assert result1["next_page"] == '13168303'
+    assert result1["next_page"] == '13168304'
 
     path_with_pagesize = path + '?pagesize={pagesize}&page={page}'
     result2 = await test_case.request(path_with_pagesize,
@@ -813,7 +813,7 @@ async def list_address_txs(test_case):
                                       page=result1["next_page"])
 
     assert result1 != result2
-    assert result2["next_page"] == '13168302'
+    assert result2["next_page"] == '13168303'
 
     path_with_pagesize = path + '?pagesize={pagesize}&page={page}'
     result3 = await test_case.request(path_with_pagesize,
@@ -823,16 +823,27 @@ async def list_address_txs(test_case):
                                       page=result2["next_page"])
 
     assert result2 != result3
-    assert result3.get("next_page", None) is None
+    assert result3["next_page"] == '13168302'
+
+    path_with_pagesize = path + '?pagesize={pagesize}&page={page}'
+    result4 = await test_case.request(path_with_pagesize,
+                                      currency='btc',
+                                      address='addressE',
+                                      pagesize=1,
+                                      page=result3["next_page"])
+
+    assert result3 != result4
+    assert result4.get("next_page", None) is None
 
     addr_txs_total = result1["address_txs"] + \
-        result2["address_txs"] + result3["address_txs"]
+        result2["address_txs"] + \
+        result3["address_txs"] + result4["address_txs"]
 
     path_with_pagesize = path + '?pagesize={pagesize}'
     result_total = await test_case.request(path_with_pagesize,
                                            currency='btc',
                                            address='addressE',
-                                           pagesize=3)
+                                           pagesize=4)
 
     assert result_total["address_txs"] == addr_txs_total
 
