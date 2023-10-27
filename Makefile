@@ -16,6 +16,10 @@ format:
 serve:
 	python -m aiohttp.web -H localhost -P 9000 openapi_server:main
 
+
+build-docker:
+	docker build .
+
 drop-integration-db:
 	docker stop cassandra_mock; docker stop tagstore_mock; rm ./tests/.runcass ./tests/.runts
 
