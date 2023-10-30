@@ -567,10 +567,17 @@ class Cassandra:
                 await self.resolve_tx_id_range_by_block(currency,
                                                         min_height,
                                                         max_height)
-            if min_height is not None and first_tx_id is not None:
+            if min_height is not None:
+                if first_tx_id is None:
+                    raise BadUserInputException(
+                        f'Minimum block height {min_height} does not exist')
                 min_height_q = "AND tx_id >= %s"
                 params.append(first_tx_id)
-            if max_height is not None and last_tx_id is not None:
+
+            if max_height is not None:
+                if last_tx_id is None:
+                    raise BadUserInputException(
+                        f'Maximum block height {max_height} does not exist')
                 upper_bound = last_tx_id + 1
 
         query = (f"SELECT * FROM {node_type}_transactions "
@@ -580,7 +587,7 @@ class Cassandra:
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
 
         results, paging_state = await self.list_txs_ordered(
-            currency, query, params, direction, upper_bound, page, fetch_size)
+            currency, query, params, direction, upper_bound, [], page, fetch_size)
 
         txs = await self.list_txs_by_ids(currency,
                                          [row['tx_id'] for row in results],
@@ -1716,7 +1723,7 @@ class Cassandra:
             result['max_secondary_id']
 
     async def list_txs_ordered(self, currency, query, params, direction,
-                               upper_bound, page, fetch_size):
+                               upper_bound, token_currencies, page, fetch_size):
         results = []
         init = True
         """
@@ -1726,19 +1733,27 @@ class Cassandra:
         while (init or page is not None) and len(results) < fetch_size:
             init = False
             fs = fetch_size - len(results)
+            self.logger.debug(f'fs {fs}')
             more_results, page = \
                 await self.list_txs_ordered_one_iteration(currency,
                                                           query, params,
                                                           direction,
-                                                          upper_bound, page,
+                                                          upper_bound,
+                                                          token_currencies, page,
                                                           fs)
+            self.logger.debug(f'results {len(more_results)}')
+            self.logger.debug(f'page {page}')
             results += more_results
         return results, str(page) if page is not None else None
 
     async def list_txs_ordered_one_iteration(self, currency, query, params,
-                                             direction, upper_bound, page,
+                                             direction, upper_bound,
+                                             token_currencies, page,
                                              fetch_size):
         key = 'transaction_id' if currency == 'eth' else 'tx_id'
+
+        if currency == 'eth':
+            query += " and currency = %s"
 
         query += " and is_outgoing = %s"
 
@@ -1751,62 +1766,53 @@ class Cassandra:
         elif upper_bound is not None:
             page = upper_bound
 
-        if direction:
-            params.append(direction == 'out')
-            if page is not None:
-                params.append(page)
-
-            results = await self.execute_async(currency,
-                                               'transformed',
-                                               query,
-                                               params,
-                                               fetch_size=fetch_size)
-
-            rows = results.current_rows
-            border_tx_id = rows[-1][key] \
-                if results.paging_state else None
-            return rows, border_tx_id
-
         query += " order by"
         if currency == 'eth':
             query += " currency desc,"
 
         """
-          Make two separate queries for incoming and outgoing txs
+          Since tx_id comes after is_outgoing and currency
+          make two separate queries for combinations of these two parameter sets
           and merge the results afterwards
         """
-        half_fetch_size = ceil(fetch_size / 2)
+        # divide fetch_size by number of result sets
+        fs = ceil(fetch_size / (len(token_currencies) + 2))
 
-        query += f" {key} desc limit {half_fetch_size}"
+        query += f" {key} desc limit {fs}"
 
-        params1 = list(params)
-        params1.append(False)
-        if page:
-            params1.append(page)
-        aw1 = self.execute_async(currency, 'transformed', query, params1)
+        if currency != 'eth':
+            token_currencies = ['_']
+        aws = []
+        directions = [direction == 'out'] if direction else [False, True]
+        for is_outgoing in directions:
+            for token_currency in token_currencies:
+                p = list(params)
+                if token_currency != '_':
+                    p.append(token_currency)
+                p.append(is_outgoing)
+                if page:
+                    p.append(page)
+                self.logger.debug(f'query {query}')
+                self.logger.debug(f'params {p}')
+                aws.append(self.execute_async(currency, 'transformed', query, p))
 
-        params2 = list(params)
-        params2.append(True)
-        if page:
-            params2.append(page)
-        aw2 = self.execute_async(currency, 'transformed', query, params2)
-        [results1, results2] = await asyncio.gather(aw1, aw2)
+        result_sets = [r.current_rows for r in await asyncio.gather(*aws)]
 
-        results1 = results1.current_rows
-        results2 = results2.current_rows
-
-        border_tx_id = results1[-1][key] if results1 else None
-
-        if results2:
-            border_tx_id = max(border_tx_id, results2[-1][key]) \
-                if border_tx_id else results2[-1][key]
+        border_tx_id = None
+        for results in result_sets:
+            if not results:
+                continue
+            if border_tx_id is None:
+                border_tx_id = results[-1][key]
+                continue
+            border_tx_id = max(border_tx_id, results[-1][key])
 
         """
             Merge results by sort order (uses a priority queue; heapq)
             fetch_sized items or less are returned
         """
         candidates = [
-            v for v in (results1 + results2) if v[key] >= border_tx_id
+            v for results in result_sets for v in results if v[key] >= border_tx_id
         ]
         smallest = heapq.nsmallest(fetch_size,
                                    candidates,
@@ -1849,7 +1855,7 @@ class Cassandra:
         else:
             token_currencies = [token_currency.upper()]
 
-        params = [id_group, sec_in, address_id, token_currencies]
+        params = [id_group, sec_in, address_id]
 
         min_height_q = ""
         upper_bound = None
@@ -1876,11 +1882,11 @@ class Cassandra:
                  " WHERE address_id_group = %s and "
                  "address_id_secondary_group in %s"
                  " and address_id = %s"
-                 f" and currency in %s {min_height_q}")
+                 f" {min_height_q}")
 
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
         results, paging_state = await self.list_txs_ordered(
-            currency, query, params, direction, upper_bound, page, fetch_size)
+            currency, query, params, direction, upper_bound, token_currencies, page, fetch_size)
         txs = [row for row in results]
         tx_ids = [tx['transaction_id'] for tx in txs]
 
