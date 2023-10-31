@@ -815,7 +815,6 @@ async def list_address_txs(test_case):
     assert result1 != result2
     assert result2["next_page"] == '13168303'
 
-    path_with_pagesize = path + '?pagesize={pagesize}&page={page}'
     result3 = await test_case.request(path_with_pagesize,
                                       currency='btc',
                                       address='addressE',
@@ -825,7 +824,6 @@ async def list_address_txs(test_case):
     assert result2 != result3
     assert result3["next_page"] == '13168302'
 
-    path_with_pagesize = path + '?pagesize={pagesize}&page={page}'
     result4 = await test_case.request(path_with_pagesize,
                                       currency='btc',
                                       address='addressE',
@@ -847,40 +845,31 @@ async def list_address_txs(test_case):
 
     assert result_total["address_txs"] == addr_txs_total
 
-    path_with_pagesize_and_page = path + \
-        ('?pagesize={pagesize}&page={page}&min_height={min_height}'
-            '&max_height={max_height}&direction={direction}')
-
-    path_with_pagesize = path + \
-        ('?pagesize={pagesize}&min_height={min_height}&'
-         'max_height={max_height}&direction={direction}')
-    result = await test_case.request(path_with_pagesize,
+    path_with_pagesize_direction = path + \
+        ('?pagesize={pagesize}&direction={direction}')
+    result = await test_case.request(path_with_pagesize_direction,
                                      currency='btc',
                                      address='addressE',
-                                     min_height=1,
-                                     max_height=1000000,
                                      direction='',
                                      pagesize=1)
 
     assert len(result['address_txs']) == 1
     assert result.get("next_page", None) is not None
 
-    result1 = await test_case.request(path_with_pagesize,
+    result1 = await test_case.request(path_with_pagesize_direction,
                                       currency='btc',
                                       address='addressE',
-                                      min_height=1,
-                                      max_height=999999,
                                       direction='in',
                                       pagesize=1)
 
     assert len(result1['address_txs']) == 1
     assert result1.get("next_page", None) is not None
 
+    path_with_pagesize_and_page = path + \
+        ('?pagesize={pagesize}&page={page}&direction={direction}')
     result2 = await test_case.request(path_with_pagesize_and_page,
                                       currency='btc',
                                       address='addressE',
-                                      min_height=1,
-                                      max_height=999999,
                                       direction='in',
                                       pagesize=1,
                                       page=result1["next_page"])
@@ -891,8 +880,6 @@ async def list_address_txs(test_case):
     result3 = await test_case.request(path_with_pagesize_and_page,
                                       currency='btc',
                                       address='addressE',
-                                      min_height=1,
-                                      max_height=999999,
                                       direction='in',
                                       pagesize=1,
                                       page=result2["next_page"])
@@ -903,11 +890,9 @@ async def list_address_txs(test_case):
     addr_txs_total = result1["address_txs"] + \
         result2["address_txs"] + result3["address_txs"]
 
-    result4 = await test_case.request(path_with_pagesize,
+    result4 = await test_case.request(path_with_pagesize_direction,
                                       currency='btc',
                                       address='addressE',
-                                      min_height=1,
-                                      max_height=999999,
                                       direction='in',
                                       pagesize=3)
 
