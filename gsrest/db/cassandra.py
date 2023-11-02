@@ -2,7 +2,9 @@ import re
 import time
 import asyncio
 import heapq
+from typing import Sequence, Optional, Tuple
 from functools import partial
+from itertools import product
 from collections import namedtuple, UserDict
 from cassandra import InvalidRequest
 from cassandra.protocol import ProtocolException
@@ -81,9 +83,13 @@ def replaceFrom(keyspace, query):
     return r.sub(f' FROM {keyspace}.', query)
 
 
-def replacePerc(query):
-    r = re.compile(r'%s', re.IGNORECASE)
-    return r.sub('?', query)
+def replacePerc(query, named=False):
+    if not named:
+        r = re.compile(r'%s', re.IGNORECASE)
+        return r.sub('?', query)
+    else:
+        r = re.compile(r'%\((\S+?)\)s', re.IGNORECASE)
+        return r.sub(r':\1', query)
 
 
 def one(result):
@@ -125,6 +131,99 @@ class Result:
 
 
 TxSummary = namedtuple('TxSummary', ['height', 'timestamp', 'tx_hash'])
+
+
+def is_eth_like(network: str) -> bool:
+    return network == 'eth'
+
+
+def get_tx_id_column_name(network: str) -> str:
+    return 'transaction_id' if is_eth_like(network) else 'tx_id'
+
+
+# helper functions
+def wc(cl, cond):
+    return f"AND {cl} " if cond else ""
+
+
+def merge_address_txs_subquery_results(
+        result_sets: Sequence[Result],
+        fetch_size: int,
+        tx_id_keys: str = "tx_id") -> Tuple[Sequence[dict], Optional[int]]:
+    """Merges sub results of the address txs queries per asset and direction
+
+    Args:
+        result_sets (Sequence[Result]): List of result sets,
+            one per (asset, direction) tuple
+        fetch_size (int): number of items return at most
+        tx_id_keys (str): name of the tx_id column
+
+    Returns:
+        Tuple[Sequence[dict], Optional[int]]: A merged list of ordered
+            transactions and the highest id included in this results set,
+            this is considered as the page for subsequent queries.
+    """
+
+    # check last tx id and return (page)
+    border_tx_id = None
+    for results in result_sets:
+        if not results:
+            continue
+        if border_tx_id is None:
+            border_tx_id = results[-1][tx_id_keys]
+            continue
+        border_tx_id = max(border_tx_id, results[-1][tx_id_keys])
+    """
+        Merge results by sort order (uses a priority queue; heapq)
+        fetch_sized items or less are returned
+    """
+    candidates = [
+        v for results in result_sets for v in results
+        if v[tx_id_keys] >= border_tx_id
+    ]
+    smallest = heapq.nsmallest(fetch_size,
+                               candidates,
+                               key=partial(transaction_ordering_key,
+                                           tx_id_keys))
+    results = list(reversed(smallest))
+
+    return results, border_tx_id
+
+
+def build_select_address_txs_statement(network: str, table_prefix: str,
+                                       cols: Optional[Sequence[str]],
+                                       with_lower_bound: bool,
+                                       with_upper_bound: bool,
+                                       fetch_size: int) -> str:
+    # prebuild useful helpers and conditions
+    eth_like = is_eth_like(network)
+    tx_id_col = get_tx_id_column_name(network)
+
+    # Select and shared where clause
+    # Build select statement
+    columns = (",".join(cols) if cols is not None else "*")
+
+    query = (f"SELECT {columns} from {table_prefix}_transactions "
+             f"WHERE {table_prefix}_id = %(id)s "
+             f"AND {table_prefix}_id_group = %(g_id)s "
+             "AND is_outgoing = %(is_outgoing)s ")
+
+    # conditional where clause, loop independent
+    query += wc(f"{table_prefix}_id_secondary_group in %(s_d_group)s",
+                eth_like)
+
+    query += wc(f"{tx_id_col} >= %(tx_id_lower_bound)s", with_lower_bound)
+    query += wc("currency = %(currency)s", eth_like)
+
+    # conditional where clause, loop dependent
+    query += wc(f"{tx_id_col} < %(tx_id_upper_bound)s", with_upper_bound)
+
+    # Ordering statement
+    ordering_statement = ("ORDER BY " +
+                          (" currency DESC," if eth_like else "") +
+                          f" {tx_id_col} DESC")
+
+    return f"{query} {ordering_statement} LIMIT {fetch_size}"
 
 
 class Cassandra:
@@ -290,6 +389,7 @@ class Cassandra:
         q = replaceFrom(keyspace, query)
         # self.logger.debug(f'{query} {params}')
         q = SimpleStatement(q, fetch_size=fetch_size)
+
         try:
             result = self.session.execute(q, params, paging_state=paging_state)
         except NoHostAvailable:
@@ -310,7 +410,8 @@ class Cassandra:
                             params=None,
                             paging_state=None,
                             fetch_size=None,
-                            autopaging=False):
+                            autopaging=False,
+                            named_params: bool = False):
         try:
             result = await self.execute_async_lowlevel(
                 currency,
@@ -318,7 +419,8 @@ class Cassandra:
                 query,
                 params=params,
                 paging_state=paging_state,
-                fetch_size=fetch_size)
+                fetch_size=fetch_size,
+                named_params=named_params)
         except ProtocolException as e:
             if 'Invalid value for the paging state' not in str(e):
                 raise e
@@ -349,10 +451,12 @@ class Cassandra:
                                query,
                                params=None,
                                paging_state=None,
-                               fetch_size=None):
+                               fetch_size=None,
+                               named_params: bool = False):
         keyspace = self.get_keyspace_mapping(currency, keyspace_type)
         q = replaceFrom(keyspace, query)
-        q = replacePerc(q)
+        q = replacePerc(q, named=named_params)
+
         prep = self.prepared_statements.get(q, None)
         if prep is None:
             self.prepared_statements[q] = prep = self.session.prepare(q)
@@ -559,9 +663,8 @@ class Cassandra:
             raise NotFoundException(
                 f'{node_type} {id} not found in currency {currency}')
 
-        params = [id, id_group]
-        min_height_q = ""
         upper_bound = None
+        first_tx_id = None
         if min_height is not None or max_height is not None:
             first_tx_id, last_tx_id = \
                 await self.resolve_tx_id_range_by_block(currency,
@@ -571,27 +674,32 @@ class Cassandra:
                 if first_tx_id is None:
                     raise BadUserInputException(
                         f'Minimum block height {min_height} does not exist')
-                min_height_q = "AND tx_id >= %s"
-                params.append(first_tx_id)
-
             if max_height is not None:
                 if last_tx_id is None:
                     raise BadUserInputException(
                         f'Maximum block height {max_height} does not exist')
                 upper_bound = last_tx_id + 1
 
-        query = (f"SELECT * FROM {node_type}_transactions "
-                 f"WHERE {node_type}_id = %s AND {node_type}_id_group = %s"
-                 f" {min_height_q}")
-
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
+        include_assets = [currency.upper()]
 
-        results, paging_state = await self.list_txs_ordered(
-            currency, query, params, direction, upper_bound, [], page, fetch_size)
+        results, paging_state = await self.list_address_txs_ordered(
+            network=currency,
+            table_prefix=node_type,
+            item_id=id,
+            item_id_group=id_group,
+            item_id_secondary_group=None,
+            tx_id_lower_bound=first_tx_id,
+            tx_id_upper_bound=upper_bound,
+            direction=direction,
+            include_assets=include_assets,
+            page=page,
+            fetch_size=fetch_size)
 
         txs = await self.list_txs_by_ids(currency,
                                          [row['tx_id'] for row in results],
                                          filter_empty=False)
+
         rows = []
         for (row, tx) in zip(results, txs):
             if tx is None:
@@ -1276,7 +1384,6 @@ class Cassandra:
         return []
 
     async def list_token_txs_eth(self, currency, tx_hash, log_index=None):
-
         tx = await self.get_tx(currency, tx_hash)
         if tx is None:
             return None
@@ -1722,104 +1829,103 @@ class Cassandra:
         return 0 if result is None else \
             result['max_secondary_id']
 
-    async def list_txs_ordered(self, currency, query, params, direction,
-                               upper_bound, token_currencies, page, fetch_size):
+    async def list_address_txs_ordered(
+            self,
+            network: str,
+            table_prefix: str,
+            item_id: int,
+            item_id_group: int,
+            tx_id_lower_bound: Optional[int],
+            tx_id_upper_bound: Optional[int],
+            direction: Optional[str],
+            include_assets: Sequence[Tuple[str, bool]],
+            page: Optional[int],
+            fetch_size: int,
+            cols: Optional[Sequence[str]] = None,
+            item_id_secondary_group: ValueSequence = None):
+        """Loads a address transactions in execution order
+        it allows to only get out- or incoming transaction or only
+        transactions of a certain asset (token), for a given address id
+
+        Args:
+            network (str): base currency / network
+            table_prefix (str): prefix of the table {prefix}_transactions
+            item_id (int): address/cluster id
+            item_id_group (int): address/cluster id group
+            tx_id_lower_bound (Optional[int]): tx id lower bound
+            tx_id_upper_bound (Optional[int]): tx id upper bound
+            direction (Optional[str]): in/out or None, None means both
+            include_assets (Sequence[Tuple[str, bool]]): a list of tuples with
+                assets to include
+            page (Optional[int]): a page id (tx_lower bound)
+            fetch_size (int): how much to fetch per page
+            cols (Optional[Sequence[str]], optional): which columns to select
+                None means *
+            item_id_secondary_group (ValueSequence, optional): address
+                sec group,needed for eth
+        """
+
+        directions = [direction == 'out'] if direction else [False, True]
         results = []
-        init = True
         """
             Keep retrieving pages until the demanded fetch_size is fulfilled
             or there are no more pages
         """
-        while (init or page is not None) and len(results) < fetch_size:
-            init = False
-            fs = fetch_size - len(results)
-            self.logger.debug(f'fs {fs}')
-            more_results, page = \
-                await self.list_txs_ordered_one_iteration(currency,
-                                                          query, params,
-                                                          direction,
-                                                          upper_bound,
-                                                          token_currencies, page,
-                                                          fs)
-            self.logger.debug(f'results {len(more_results)}')
-            self.logger.debug(f'page {page}')
-            results += more_results
+        while len(results) < fetch_size:
+            fs_it = fetch_size - len(results)
+
+            # limit by page or upper_bound, take the min both
+            if page is not None and tx_id_upper_bound is not None:
+                page = min(page, tx_id_upper_bound)
+            elif tx_id_upper_bound is not None:
+                page = tx_id_upper_bound
+
+            # prebuild useful conditions, dependent on loop
+            has_upper_bound = (page is not None
+                               or tx_id_upper_bound is not None)
+
+            # divide fetch_size by number of result sets
+            fs_junk = ceil(fs_it / (len(include_assets) + 2))
+
+            cql_stmt = build_select_address_txs_statement(
+                network,
+                table_prefix,
+                cols,
+                with_lower_bound=(tx_id_lower_bound is not None),
+                with_upper_bound=has_upper_bound,
+                fetch_size=fs_junk)
+
+            # prepare parameters for the query junks one for each direction
+            # and asset tuple
+            params_junks = [{
+                "id": item_id,
+                "g_id": item_id_group,
+                "tx_id_lower_bound": tx_id_lower_bound,
+                "tx_id_upper_bound": page,
+                "s_d_group": item_id_secondary_group,
+                "currency": asset,
+                "is_outgoing": is_outgoing
+            } for is_outgoing, asset in product(directions, include_assets)]
+
+            # run one query per direction and asset
+            aws = [
+                self.execute_async(network,
+                                   'transformed',
+                                   cql_stmt,
+                                   p,
+                                   named_params=True) for p in params_junks
+            ]
+
+            # collect and merge results
+            more_results, page = merge_address_txs_subquery_results(
+                [r.current_rows for r in await asyncio.gather(*aws)], fs_it)
+
+            results.extend(more_results)
+            if page is None:
+                # no more data expected end loop
+                break
+
         return results, str(page) if page is not None else None
-
-    async def list_txs_ordered_one_iteration(self, currency, query, params,
-                                             direction, upper_bound,
-                                             token_currencies, page,
-                                             fetch_size):
-        key = 'transaction_id' if currency == 'eth' else 'tx_id'
-
-        if currency == 'eth':
-            query += " and currency = %s"
-
-        query += " and is_outgoing = %s"
-
-        # upper_bound is used for max_height requests
-        if page is not None or upper_bound is not None:
-            query += f" and {key} < %s"
-
-        if page is not None and upper_bound is not None:
-            page = min(page, upper_bound)
-        elif upper_bound is not None:
-            page = upper_bound
-
-        query += " order by"
-        if currency == 'eth':
-            query += " currency desc,"
-
-        """
-          Since tx_id comes after is_outgoing and currency
-          make two separate queries for combinations of these two parameter sets
-          and merge the results afterwards
-        """
-        # divide fetch_size by number of result sets
-        fs = ceil(fetch_size / (len(token_currencies) + 2))
-
-        query += f" {key} desc limit {fs}"
-
-        if currency != 'eth':
-            token_currencies = ['_']
-        aws = []
-        directions = [direction == 'out'] if direction else [False, True]
-        for is_outgoing in directions:
-            for token_currency in token_currencies:
-                p = list(params)
-                if token_currency != '_':
-                    p.append(token_currency)
-                p.append(is_outgoing)
-                if page:
-                    p.append(page)
-                self.logger.debug(f'query {query}')
-                self.logger.debug(f'params {p}')
-                aws.append(self.execute_async(currency, 'transformed', query, p))
-
-        result_sets = [r.current_rows for r in await asyncio.gather(*aws)]
-
-        border_tx_id = None
-        for results in result_sets:
-            if not results:
-                continue
-            if border_tx_id is None:
-                border_tx_id = results[-1][key]
-                continue
-            border_tx_id = max(border_tx_id, results[-1][key])
-
-        """
-            Merge results by sort order (uses a priority queue; heapq)
-            fetch_sized items or less are returned
-        """
-        candidates = [
-            v for results in result_sets for v in results if v[key] >= border_tx_id
-        ]
-        smallest = heapq.nsmallest(fetch_size,
-                                   candidates,
-                                   key=partial(transaction_ordering_key, key))
-        results = list(reversed(smallest))
-
-        return results, border_tx_id
 
     async def list_txs_by_node_type_eth(self,
                                         currency,
@@ -1850,45 +1956,43 @@ class Cassandra:
 
         if not token_currency:
             token_config = self.get_token_configuration(currency)
-            token_currencies = list(token_config.keys())
-            token_currencies.append('ETH')
+            include_assets = list(token_config.keys())
+            include_assets.append('ETH')
         else:
-            token_currencies = [token_currency.upper()]
+            include_assets = [token_currency.upper()]
 
-        params = [id_group, sec_in, address_id]
-
-        min_height_q = ""
         upper_bound = None
+        first_tx_id = None
         if min_height or max_height:
             first_tx_id, last_tx_id = \
                 await self.resolve_tx_id_range_by_block(currency,
                                                         min_height,
                                                         max_height)
-            if min_height and first_tx_id:
-                min_height_q = "AND transaction_id >= %s"
-                params.append(first_tx_id)
             if max_height and last_tx_id:
                 upper_bound = last_tx_id + 1
 
         use_legacy_log_index = self.parameters[currency][
             "use_legacy_log_index"]
-        if use_legacy_log_index:
-            ref_field = "log_index"
-        else:
-            ref_field = "tx_reference"
 
-        query = (f"SELECT transaction_id, is_outgoing, {ref_field} "
-                 "FROM address_transactions"
-                 " WHERE address_id_group = %s and "
-                 "address_id_secondary_group in %s"
-                 " and address_id = %s"
-                 f" {min_height_q}")
-
+        ref_field = "log_index" if use_legacy_log_index else "tx_reference"
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
-        results, paging_state = await self.list_txs_ordered(
-            currency, query, params, direction, upper_bound, token_currencies, page, fetch_size)
+
+        results, paging_state = await self.list_address_txs_ordered(
+            network=currency,
+            table_prefix="address",
+            cols=["transaction_id as tx_id", "is_outgoing", ref_field],
+            item_id=address_id,
+            item_id_group=id_group,
+            item_id_secondary_group=sec_in,
+            tx_id_lower_bound=first_tx_id,
+            tx_id_upper_bound=upper_bound,
+            direction=direction,
+            include_assets=include_assets,
+            page=page,
+            fetch_size=fetch_size)
+
         txs = [row for row in results]
-        tx_ids = [tx['transaction_id'] for tx in txs]
+        tx_ids = [tx['tx_id'] for tx in txs]
 
         full_txs = {
             tx_id: tx_row
@@ -1900,7 +2004,7 @@ class Cassandra:
             if not use_legacy_log_index:
                 addr_tx["log_index"] = addr_tx["tx_reference"].log_index
 
-            full_tx = full_txs[addr_tx['transaction_id']]
+            full_tx = full_txs[addr_tx['tx_id']]
             if addr_tx["log_index"] is not None:
                 token_tx = await self.fetch_token_transaction(
                     currency, full_tx, addr_tx["log_index"])

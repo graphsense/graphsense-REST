@@ -699,6 +699,7 @@ async def list_entity_txs(test_case):
                                      entity=144534,
                                      pagesize=2,
                                      page='')
+
     test_case.assertEqual(entity_txs.to_dict()['address_txs'][0:2],
                           result['address_txs'])
     test_case.assertNotEqual(result['next_page'], None)
