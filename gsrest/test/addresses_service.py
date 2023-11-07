@@ -636,7 +636,7 @@ async def list_address_txs(test_case):
                                      page='')
     test_case.assertEqual(address_txs.to_dict()['address_txs'][0:2],
                           result['address_txs'])
-    test_case.assertNotEqual(result['next_page'], None)
+    test_case.assertNotEqual(result.get('next_page', None), None)
 
     result = await test_case.request(path_with_pagesize,
                                      currency='btc',
@@ -646,15 +646,6 @@ async def list_address_txs(test_case):
 
     test_case.assertEqual(address_txs.to_dict()['address_txs'][2:3],
                           result['address_txs'])
-    test_case.assertNotEqual(result['next_page'], None)
-
-    result = await test_case.request(path_with_pagesize,
-                                     currency='btc',
-                                     address=address2.address,
-                                     pagesize=2,
-                                     page=result['next_page'])
-
-    test_case.assertEqual([], result['address_txs'])
     test_case.assertEqual(result.get('next_page', None), None)
 
     path_with_direction = path + '?direction={direction}'
@@ -761,6 +752,25 @@ async def list_address_txs(test_case):
     ]
     assert [x['height'] for x in result["address_txs"]] == [3, 2, 2, 2, 1]
 
+    path_tc = path + "?token_currency={token_currency}"
+    result = await test_case.request(path_tc,
+                                     currency='eth',
+                                     address=eth_address2.address,
+                                     token_currency='weth')
+
+    assert len(result["address_txs"]) == 1
+    assert [x['currency'] for x in result["address_txs"]] == ['weth']
+
+    result = await test_case.request(path_tc,
+                                     currency='eth',
+                                     address=eth_address2.address,
+                                     token_currency='eth')
+
+    assert len(result["address_txs"]) == 3
+    assert [x['currency']
+            for x in result["address_txs"]] == ['eth', 'eth', 'eth']
+    assert [x['timestamp'] for x in result["address_txs"]] == [17, 16, 15]
+
     result = await test_case.request(path_with_range_and_tc,
                                      currency='eth',
                                      address=eth_address2.address,
@@ -769,9 +779,10 @@ async def list_address_txs(test_case):
                                      max_height=2,
                                      token_currency='')
 
-    assert len(result["address_txs"]) == 1
-    assert [x['currency'] for x in result["address_txs"]] == ['eth']
-    assert [x['height'] for x in result["address_txs"]] == [2]
+    assert len(result["address_txs"]) == 3
+    assert [x['currency']
+            for x in result["address_txs"]] == ['weth', 'usdt', 'eth']
+    assert [x['height'] for x in result["address_txs"]] == [2, 2, 2]
 
     result = await test_case.request(path_with_range_and_tc,
                                      currency='eth',
@@ -784,6 +795,108 @@ async def list_address_txs(test_case):
     assert len(result["address_txs"]) == 1
     assert [x['currency'] for x in result["address_txs"]] == ['weth']
     assert [x['height'] for x in result["address_txs"]] == [2]
+
+    path_with_pagesize = path + '?pagesize={pagesize}'
+    result1 = await test_case.request(path_with_pagesize,
+                                      currency='btc',
+                                      address='addressE',
+                                      pagesize=1)
+
+    assert len(result1["address_txs"]) == 1
+    assert result1["next_page"] == '13168304'
+
+    path_with_pagesize = path + '?pagesize={pagesize}&page={page}'
+    result2 = await test_case.request(path_with_pagesize,
+                                      currency='btc',
+                                      address='addressE',
+                                      pagesize=1,
+                                      page=result1["next_page"])
+
+    assert result1 != result2
+    assert result2["next_page"] == '13168303'
+
+    result3 = await test_case.request(path_with_pagesize,
+                                      currency='btc',
+                                      address='addressE',
+                                      pagesize=1,
+                                      page=result2["next_page"])
+
+    assert result2 != result3
+    assert result3["next_page"] == '13168302'
+
+    result4 = await test_case.request(path_with_pagesize,
+                                      currency='btc',
+                                      address='addressE',
+                                      pagesize=1,
+                                      page=result3["next_page"])
+
+    assert result3 != result4
+    assert result4.get("next_page", None) is None
+
+    addr_txs_total = result1["address_txs"] + \
+        result2["address_txs"] + \
+        result3["address_txs"] + result4["address_txs"]
+
+    path_with_pagesize = path + '?pagesize={pagesize}'
+    result_total = await test_case.request(path_with_pagesize,
+                                           currency='btc',
+                                           address='addressE',
+                                           pagesize=4)
+
+    assert result_total["address_txs"] == addr_txs_total
+
+    path_with_pagesize_direction = path + \
+        ('?pagesize={pagesize}&direction={direction}')
+    result = await test_case.request(path_with_pagesize_direction,
+                                     currency='btc',
+                                     address='addressE',
+                                     direction='',
+                                     pagesize=1)
+
+    assert len(result['address_txs']) == 1
+    assert result.get("next_page", None) is not None
+
+    result1 = await test_case.request(path_with_pagesize_direction,
+                                      currency='btc',
+                                      address='addressE',
+                                      direction='in',
+                                      pagesize=1)
+
+    assert len(result1['address_txs']) == 1
+    assert result1.get("next_page", None) is not None
+
+    path_with_pagesize_and_page = path + \
+        ('?pagesize={pagesize}&page={page}&direction={direction}')
+    result2 = await test_case.request(path_with_pagesize_and_page,
+                                      currency='btc',
+                                      address='addressE',
+                                      direction='in',
+                                      pagesize=1,
+                                      page=result1["next_page"])
+
+    assert len(result2['address_txs']) == 1
+    assert result2.get("next_page", None) is not None
+
+    result3 = await test_case.request(path_with_pagesize_and_page,
+                                      currency='btc',
+                                      address='addressE',
+                                      direction='in',
+                                      pagesize=1,
+                                      page=result2["next_page"])
+
+    assert len(result3['address_txs']) == 0
+    assert result3.get("next_page", None) is None
+
+    addr_txs_total = result1["address_txs"] + \
+        result2["address_txs"] + result3["address_txs"]
+
+    result4 = await test_case.request(path_with_pagesize_direction,
+                                      currency='btc',
+                                      address='addressE',
+                                      direction='in',
+                                      pagesize=3)
+
+    assert addr_txs_total == result4['address_txs']
 
 
 async def list_tags_by_address(test_case):
