@@ -9,7 +9,7 @@ from collections import namedtuple, UserDict
 from cassandra import InvalidRequest
 from cassandra.protocol import ProtocolException
 from cassandra.cluster import Cluster, NoHostAvailable
-from cassandra.policies import RoundRobinPolicy, TokenAwarePolicy
+from cassandra.policies import DCAwareRoundRobinPolicy, TokenAwarePolicy
 from cassandra.query import SimpleStatement, dict_factory, ValueSequence
 from math import floor, ceil
 
@@ -278,7 +278,7 @@ class Cassandra:
             self.cluster = Cluster(self.config['nodes'],
                                    protocol_version=5,
                                    load_balancing_policy=TokenAwarePolicy(
-                                       RoundRobinPolicy()))
+                                       DCAwareRoundRobinPolicy()))
             self.session = self.cluster.connect()
             self.session.row_factory = dict_factory
             if self.logger:
@@ -1172,7 +1172,7 @@ class Cassandra:
         entity = int(entity)
         query = ("SELECT address_id FROM cluster_addresses "
                  "WHERE cluster_id_group = %s AND cluster_id = %s")
-        fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
+        fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
         results = await self.execute_async(currency,
                                            'transformed',
                                            query, [entity_id_group, entity],
