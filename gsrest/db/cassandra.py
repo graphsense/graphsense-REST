@@ -1,5 +1,6 @@
 import re
 import time
+import hashlib
 import asyncio
 import heapq
 from typing import Sequence, Optional, Tuple
@@ -462,11 +463,14 @@ class Cassandra:
             self.prepared_statements[q] = prep = self.session.prepare(q)
         try:
             prep.fetch_size = int(fetch_size) if fetch_size else None
+            self.session.default_timeout = 60
             response_future = self.session.execute_async(
-                prep, params, timeout=None, paging_state=paging_state)
+                prep, params, timeout=60, paging_state=paging_state)
             loop = asyncio.get_event_loop()
             future = loop.create_future()
 
+            h = hash(q + str(params))
+            self.logger.debug(f'{h} {q} {params}')
             def on_done(result):
                 if future.cancelled():
                     loop.call_soon_threadsafe(future.set_result, None)
@@ -474,8 +478,8 @@ class Cassandra:
                 result = Result(current_rows=result,
                                 params=params,
                                 paging_state=response_future._paging_state)
-                # self.logger.debug(f'{query} {params}')
-                # self.logger.debug(f'result size {len(result.current_rows)}')
+                #self.logger.debug(f'{query} {params}')
+                self.logger.debug(f'{h} result size {len(result.current_rows)}')
                 loop.call_soon_threadsafe(future.set_result, result)
 
             def on_err(result):
