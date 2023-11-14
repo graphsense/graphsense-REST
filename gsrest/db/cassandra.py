@@ -210,7 +210,7 @@ def build_select_address_txs_statement(network: str, table_prefix: str,
              "AND is_outgoing = %(is_outgoing)s ")
 
     # conditional where clause, loop independent
-    query += wc(f"{table_prefix}_id_secondary_group in %(s_d_group)s",
+    query += wc(f"{table_prefix}_id_secondary_group = %(s_d_group)s",
                 eth_like)
 
     query += wc(f"{tx_id_col} >= %(tx_id_lower_bound)s", with_lower_bound)
@@ -1900,6 +1900,9 @@ class Cassandra:
                 with_upper_bound=has_upper_bound,
                 fetch_size=fs_junk)
 
+            if not is_eth_like(network) and item_id_secondary_group is None:
+                item_id_secondary_group = [0]
+
             # prepare parameters for the query junks one for each direction
             # and asset tuple
             params_junks = [{
@@ -1907,10 +1910,11 @@ class Cassandra:
                 "g_id": item_id_group,
                 "tx_id_lower_bound": tx_id_lower_bound,
                 "tx_id_upper_bound": page,
-                "s_d_group": item_id_secondary_group,
+                "s_d_group": s_d_group,
                 "currency": asset,
                 "is_outgoing": is_outgoing
-            } for is_outgoing, asset in product(directions, include_assets)]
+            } for is_outgoing, asset, s_d_group in product(directions, include_assets,
+                                                item_id_secondary_group)]
 
             # run one query per direction and asset
             aws = [
