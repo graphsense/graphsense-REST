@@ -209,7 +209,7 @@ def build_select_address_txs_statement(network: str, table_prefix: str,
              "AND is_outgoing = %(is_outgoing)s ")
 
     # conditional where clause, loop independent
-    query += wc(f"{table_prefix}_id_secondary_group in %(s_d_group)s",
+    query += wc(f"{table_prefix}_id_secondary_group = %(s_d_group)s",
                 eth_like)
 
     query += wc(f"{tx_id_col} >= %(tx_id_lower_bound)s", with_lower_bound)
@@ -499,12 +499,14 @@ class Cassandra:
                                    params,
                                    filter_empty=True,
                                    return_one=True,
-                                   keep_meta=False):
+                                   keep_meta=False,
+                                   named_params: bool = False):
         aws = [
             self.execute_async(currency,
                                keyspace_type,
                                query,
                                param,
+                               named_params=named_params,
                                autopaging=True) for param in params
         ]
         results = []
@@ -1219,7 +1221,10 @@ class Cassandra:
             direction, this, that = ('incoming', 'dst', 'src')
 
         id_group = self.get_id_group(currency, id)
-        base_parameters = [id_group, id]
+        base_parameters = {
+            'id_group': id_group,
+            'id': id
+        }
         has_targets = isinstance(targets, list)
         sec_condition = ''
         if currency == 'eth':
@@ -1229,12 +1234,12 @@ class Cassandra:
                     id_group)
             sec_in = self.sec_in(secondary_id_group)
             sec_condition = \
-                f' AND {this}_address_id_secondary_group in %s'
-            base_parameters.append(sec_in)
+                f' AND {this}_address_id_secondary_group in %(sec_id_group)s'
+            base_parameters['sec_id_group'] = sec_in
 
         basequery = (f"SELECT * FROM {node_type}_{direction}_relations WHERE "
-                     f"{this}_{node_type}_id_group = %s AND "
-                     f"{this}_{node_type}_id = %s {sec_condition}")
+                     f"{this}_{node_type}_id_group = %(id_group)s AND "
+                     f"{this}_{node_type}_id = %(id)s {sec_condition}")
         params = base_parameters.copy()
         if has_targets:
             if len(targets) == 0:
@@ -1242,8 +1247,8 @@ class Cassandra:
 
             query = basequery.replace('*', f'{that}_{node_type}_id')
             targets = ValueSequence(targets)
-            query += f' AND {that}_{node_type}_id in %s'
-            params.append(targets)
+            query += f' AND {that}_{node_type}_id in %(targets)s'
+            params['targets'] = targets
         else:
             query = basequery
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
@@ -1252,19 +1257,21 @@ class Cassandra:
                                            'transformed',
                                            query,
                                            params,
+                                           named_params=True,
                                            paging_state=paging_state,
                                            fetch_size=fetch_size)
         paging_state = results.paging_state
         results = results.current_rows
         if has_targets:
             params = []
-            query = basequery + f" AND {that}_{node_type}_id = %s"
+            query = basequery + f" AND {that}_{node_type}_id = %(target)s"
             for row in results:
                 p = base_parameters.copy()
-                p.append(row[f'{that}_{node_type}_id'])
+                p['target'] = row[f'{that}_{node_type}_id']
                 params.append(p)
             results = await self.concurrent_with_args(currency, 'transformed',
-                                                      query, params)
+                                                      query, params,
+                                                      named_params=True)
 
         if orig_node_type == 'entity' and currency == 'eth':
             for neighbor in results:
@@ -1896,6 +1903,9 @@ class Cassandra:
                 with_upper_bound=has_upper_bound,
                 fetch_size=fs_junk)
 
+            if not is_eth_like(network) and item_id_secondary_group is None:
+                item_id_secondary_group = [0]
+
             # prepare parameters for the query junks one for each direction
             # and asset tuple
             params_junks = [{
@@ -1903,10 +1913,11 @@ class Cassandra:
                 "g_id": item_id_group,
                 "tx_id_lower_bound": tx_id_lower_bound,
                 "tx_id_upper_bound": page,
-                "s_d_group": item_id_secondary_group,
+                "s_d_group": s_d_group,
                 "currency": asset,
                 "is_outgoing": is_outgoing
-            } for is_outgoing, asset in product(directions, include_assets)]
+            } for is_outgoing, asset, s_d_group in product(directions, include_assets,
+                                                item_id_secondary_group)]
 
             # run one query per direction and asset
             aws = [
