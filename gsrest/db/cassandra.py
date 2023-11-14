@@ -499,14 +499,12 @@ class Cassandra:
                                    params,
                                    filter_empty=True,
                                    return_one=True,
-                                   keep_meta=False,
-                                   named_params: bool = False):
+                                   keep_meta=False):
         aws = [
             self.execute_async(currency,
                                keyspace_type,
                                query,
                                param,
-                               named_params=named_params,
                                autopaging=True) for param in params
         ]
         results = []
@@ -1221,10 +1219,7 @@ class Cassandra:
             direction, this, that = ('incoming', 'dst', 'src')
 
         id_group = self.get_id_group(currency, id)
-        base_parameters = {
-            'id_group': id_group,
-            'id': id
-        }
+        base_parameters = [id_group, id]
         has_targets = isinstance(targets, list)
         sec_condition = ''
         if currency == 'eth':
@@ -1234,12 +1229,12 @@ class Cassandra:
                     id_group)
             sec_in = self.sec_in(secondary_id_group)
             sec_condition = \
-                f' AND {this}_address_id_secondary_group in %(sec_id_group)s'
-            base_parameters['sec_id_group'] = sec_in
+                f' AND {this}_address_id_secondary_group in %s'
+            base_parameters.append(sec_in)
 
         basequery = (f"SELECT * FROM {node_type}_{direction}_relations WHERE "
-                     f"{this}_{node_type}_id_group = %(id_group)s AND "
-                     f"{this}_{node_type}_id = %(id)s {sec_condition}")
+                     f"{this}_{node_type}_id_group = %s AND "
+                     f"{this}_{node_type}_id = %s {sec_condition}")
         params = base_parameters.copy()
         if has_targets:
             if len(targets) == 0:
@@ -1247,8 +1242,8 @@ class Cassandra:
 
             query = basequery.replace('*', f'{that}_{node_type}_id')
             targets = ValueSequence(targets)
-            query += f' AND {that}_{node_type}_id in %(targets)s'
-            params['targets'] = targets
+            query += f' AND {that}_{node_type}_id in %s'
+            params.append(targets)
         else:
             query = basequery
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
@@ -1257,21 +1252,19 @@ class Cassandra:
                                            'transformed',
                                            query,
                                            params,
-                                           named_params=True,
                                            paging_state=paging_state,
                                            fetch_size=fetch_size)
         paging_state = results.paging_state
         results = results.current_rows
         if has_targets:
             params = []
-            query = basequery + f" AND {that}_{node_type}_id = %(target)s"
+            query = basequery + f" AND {that}_{node_type}_id = %s"
             for row in results:
                 p = base_parameters.copy()
-                p['target'] = row[f'{that}_{node_type}_id']
+                p.append(row[f'{that}_{node_type}_id'])
                 params.append(p)
             results = await self.concurrent_with_args(currency, 'transformed',
-                                                      query, params,
-                                                      named_params=True)
+                                                      query, params)
 
         if orig_node_type == 'entity' and currency == 'eth':
             for neighbor in results:
