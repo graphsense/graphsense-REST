@@ -1025,23 +1025,20 @@ class Cassandra:
 
         fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
         paging_state = from_hex(page)
-        has_more_pages = True
-        count = 0
         links = dict()
         tx_ids = []
-        while count < fetch_size and has_more_pages:
+        while len(tx_ids) < fetch_size:
             results1 = await self.execute_async(
                 currency,
                 'transformed',
                 first_query, [first_id_group, first_id, isOutgoing],
                 paging_state=paging_state,
-                fetch_size=fetch_size)
+                fetch_size=None)
 
             if not results1.current_rows:
-                return [], None
+                break
 
             paging_state = results1.paging_state
-            has_more_pages = paging_state is not None
 
             params = \
                 [[second_id_group, second_id, not isOutgoing, row['tx_id']]
@@ -1049,10 +1046,10 @@ class Cassandra:
             results2 = await self.concurrent_with_args(currency, 'transformed',
                                                        second_query, params)
 
-            for row in results2:
+            fs = fetch_size - len(tx_ids)
+            for row in results2[:fs]:
                 index = row['tx_id']
                 tx_ids.append(index)
-                count += 1
                 links[index] = dict()
                 links[index][second_value] = row['value']
             for row in results1.current_rows:
@@ -1060,6 +1057,9 @@ class Cassandra:
                 if index not in links:
                     continue
                 links[index][first_value] = row['value']
+
+            if paging_state is None:
+                break
 
         for row in await self.list_txs_by_ids(currency, tx_ids):
             links[row['tx_id']]['tx_hash'] = row['tx_hash']
