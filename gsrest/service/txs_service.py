@@ -6,10 +6,11 @@ from openapi_server.models.tx_ref import TxRef
 from gsrest.service.rates_service import get_rates
 from gsrest.util.values import convert_value, convert_token_value
 from gsrest.errors import NotFoundException
+from gsrest.util import is_eth_like
 
 
 def from_row(currency, row, rates, token_config, include_io=False):
-    if currency == 'eth':
+    if is_eth_like(currency):
         return TxAccount(
             currency=currency
             if "token_tx_id" not in row else row["currency"].lower(),
@@ -137,7 +138,7 @@ async def get_tx(request,
 
 
 async def get_tx_io(request, currency, tx_hash, io):
-    if currency == 'eth':
+    if is_eth_like(currency):
         raise NotFoundException('get_tx_io not implemented for ETH')
     result = await get_tx(request, currency, tx_hash, include_io=True)
     return getattr(result, io)

@@ -1,6 +1,6 @@
 import re
 import time
-import hashlib
+# import hashlib
 import asyncio
 import heapq
 from typing import Sequence, Optional, Tuple
@@ -17,6 +17,7 @@ from math import floor, ceil
 from gsrest.util.exceptions import BadConfigError
 from gsrest.util.eth_logs import decode_db_logs
 from gsrest.errors import NotFoundException, BadUserInputException
+from gsrest.util import is_eth_like
 
 SMALL_PAGE_SIZE = 1000
 BIG_PAGE_SIZE = 5000
@@ -59,6 +60,10 @@ def eth_address_to_hex(address):
     if not isinstance(address, bytes):
         return address
     return '0x' + address.hex()
+
+
+def trx_address_to_hex(address):
+    return eth_address_to_hex(address)
 
 
 def eth_address_from_hex(address):
@@ -134,10 +139,6 @@ class Result:
 TxSummary = namedtuple('TxSummary', ['height', 'timestamp', 'tx_hash'])
 
 
-def is_eth_like(network: str) -> bool:
-    return network == 'eth'
-
-
 def get_tx_id_column_name(network: str) -> str:
     return 'transaction_id' if is_eth_like(network) else 'tx_id'
 
@@ -210,8 +211,7 @@ def build_select_address_txs_statement(network: str, table_prefix: str,
              "AND is_outgoing = %(is_outgoing)s ")
 
     # conditional where clause, loop independent
-    query += wc(f"{table_prefix}_id_secondary_group = %(s_d_group)s",
-                eth_like)
+    query += wc(f"{table_prefix}_id_secondary_group = %(s_d_group)s", eth_like)
 
     query += wc(f"{tx_id_col} >= %(tx_id_lower_bound)s", with_lower_bound)
     query += wc("currency = %(currency)s", eth_like)
@@ -234,7 +234,7 @@ class Cassandra:
         def check(*args, **kwargs):
             self = args[0]
             currency = args[1]
-            if (currency == 'eth'):
+            if (is_eth_like(currency)):
                 do = func.__name__ + "_eth"
                 if hasattr(self, do) and callable(getattr(self, do)):
                     f = getattr(self, do)
@@ -249,7 +249,7 @@ class Cassandra:
         def check(*args, **kwargs):
             self = args[0]
             currency = args[1]
-            if (currency == 'eth'):
+            if (is_eth_like(currency)):
                 do = func.__name__ + "_new"
                 if hasattr(self, do) and callable(getattr(self, do)):
                     f = getattr(self, do)
@@ -471,6 +471,7 @@ class Cassandra:
 
             h = hash(q + str(params))
             self.logger.debug(f'{h} {q} {params}')
+
             def on_done(result):
                 if future.cancelled():
                     loop.call_soon_threadsafe(future.set_result, None)
@@ -478,8 +479,9 @@ class Cassandra:
                 result = Result(current_rows=result,
                                 params=params,
                                 paging_state=response_future._paging_state)
-                #self.logger.debug(f'{query} {params}')
-                self.logger.debug(f'{h} result size {len(result.current_rows)}')
+                # self.logger.debug(f'{query} {params}')
+                self.logger.debug(
+                    f'{h} result size {len(result.current_rows)}')
                 loop.call_soon_threadsafe(future.set_result, result)
 
             def on_err(result):
@@ -554,7 +556,7 @@ class Cassandra:
                 if 'delta_updater_status' not in str(e):
                     raise e
 
-        if currency == 'eth':
+        if is_eth_like(currency):
             stats['no_clusters'] = 0
 
         return stats
@@ -765,7 +767,7 @@ class Cassandra:
                                                  query, params)
 
         for row in result:
-            if currency == 'eth':
+            if is_eth_like(currency):
                 row['address'] = \
                     eth_address_to_hex(row['address'])
         return result
@@ -776,7 +778,7 @@ class Cassandra:
         prefix = self.scrub_prefix(currency, address)
         if not prefix:
             return None
-        if currency == 'eth':
+        if is_eth_like(currency):
             address = eth_address_from_hex(address)
             prefix = prefix.upper()
         prefix_length = self.get_prefix_lengths(currency)['address']
@@ -796,7 +798,7 @@ class Cassandra:
         prefix = self.scrub_prefix(currency, address)
         if not prefix:
             return None
-        if currency == 'eth':
+        if is_eth_like(currency):
             address = eth_address_from_hex(address)
             prefix = prefix.upper()
         query = ("SELECT address_id FROM address_ids_by_address_prefix "
@@ -882,7 +884,7 @@ class Cassandra:
     async def new_entity(self, currency, address):
         data = await self.new_address(currency, address)
         data['no_addresses'] = 1
-        if currency == 'eth':
+        if is_eth_like(currency):
             data['root_address'] = eth_address_to_hex(address)
         else:
             data['root_address'] = address
@@ -896,12 +898,14 @@ class Cassandra:
                                           [address_id, address_id_group])
         result = one(result)
         if not result:
-            if currency != 'eth':
+            if not is_eth_like(currency):
                 return None
             raise NotFoundException(
                 f'Address {address_id} has no external transactions')
         if currency == "eth":
             return eth_address_to_hex(result["address"])
+        elif currency == "trx":
+            return trx_address_to_hex(result["address"])
         else:
             return result["address"]
 
@@ -919,7 +923,7 @@ class Cassandra:
                                           [address_id, address_id_group])
         result = one(result)
         if not result:
-            if currency != 'eth':
+            if not is_eth_like(currency):
                 return None
             raise NotFoundException(
                 f'Address {address} has no external transactions')
@@ -1081,7 +1085,7 @@ class Cassandra:
         if not prefix:
             return []
         prefix = prefix[:prefix_lengths['address']]
-        if currency == 'eth':
+        if is_eth_like(currency):
             # eth addresses are case insensitive
             expression = expression.lower()
             norm = eth_address_to_hex
@@ -1210,7 +1214,7 @@ class Cassandra:
         elif node_type == 'entity':
             id = int(id)
             node_type = 'cluster'
-            if currency == 'eth':
+            if is_eth_like(currency):
                 node_type = 'address'
 
         if id is None:
@@ -1226,9 +1230,10 @@ class Cassandra:
         base_parameters = [id_group, id]
         has_targets = isinstance(targets, list)
         sec_condition = ''
-        if currency == 'eth':
+        if is_eth_like(currency):
             secondary_id_group = \
                 await self.get_id_secondary_group_eth(
+                    currency,
                     f'address_{direction}_relations',
                     id_group)
             sec_in = self.sec_in(secondary_id_group)
@@ -1270,7 +1275,7 @@ class Cassandra:
             results = await self.concurrent_with_args(currency, 'transformed',
                                                       query, params)
 
-        if orig_node_type == 'entity' and currency == 'eth':
+        if orig_node_type == 'entity' and is_eth_like(currency):
             for neighbor in results:
                 neighbor['address_id'] = \
                     neighbor[that + '_cluster_id'] = \
@@ -1289,7 +1294,7 @@ class Cassandra:
             for (row, address) in zip(results, addresses):
                 row[that + '_address'] = address['address']
 
-        field = 'value' if currency == 'eth' else 'estimated_value'
+        field = 'value' if is_eth_like(currency) else 'estimated_value'
         for neighbor in results:
             neighbor['value'] = \
                 self.markup_currency(currency, neighbor[field])
@@ -1299,7 +1304,7 @@ class Cassandra:
                     {k: self.markup_currency(currency, v)
                      for k, v in neighbor["token_values"].items()}
 
-        if currency == 'eth':
+        if is_eth_like(currency):
             for row in results:
                 row['address_id'] = row[that + '_address_id']
 
@@ -1460,7 +1465,7 @@ class Cassandra:
         if len(expression) < prefix_lengths['tx']:
             return []
 
-        if currency == 'eth':
+        if is_eth_like(currency):
             prefix = expression[:prefix_lengths['tx']].upper()
             kind = 'transformed'
             key = 'transaction'
@@ -1682,7 +1687,7 @@ class Cassandra:
         prefix = self.scrub_prefix(currency, address)
         if not prefix:
             return None
-        if currency == 'eth':
+        if is_eth_like(currency):
             address = eth_address_from_hex(address)
             prefix = prefix.upper()
         prefix_length = self.get_prefix_lengths(currency)['address']
@@ -1709,7 +1714,7 @@ class Cassandra:
     async def add_balance_eth(self, currency, row):
         token_config = self.get_token_configuration(currency)
         token_currencies = list(token_config.keys())
-        balance_currencies = ["ETH"] + token_currencies
+        balance_currencies = [currency.upper()] + token_currencies
 
         if 'address_id_group' not in row:
             row['address_id_group'] = \
@@ -1725,12 +1730,12 @@ class Cassandra:
             for c in balance_currencies
         }
 
-        if results["ETH"] is None:
-            results["ETH"] = {
+        if results[currency.upper()] is None:
+            results[currency.upper()] = {
                 'balance':
                 row['total_received'].value - row['total_spent'].value
             }
-        row['balance'] = results["ETH"]["balance"]
+        row['balance'] = results[currency.upper()]["balance"]
         # TODO: Some accounts have negative balances, this does not make sense.
         # for now we cap with 0 in case of negative
         # Exp. for now is that we either lost some token txs somewhere or
@@ -1820,7 +1825,7 @@ class Cassandra:
     def get_address_entity_id_eth(self, currency, address):
         return self.get_address_id(currency, address)
 
-    async def get_id_secondary_group_eth(self, table, id_group):
+    async def get_id_secondary_group_eth(self, currency, table, id_group):
         column_prefix = ''
         if table == 'address_incoming_relations':
             column_prefix = 'dst_'
@@ -1829,7 +1834,7 @@ class Cassandra:
 
         query = (f"SELECT max_secondary_id FROM {table}_"
                  f"secondary_ids WHERE {column_prefix}address_id_group = %s")
-        result = (await self.execute_async('eth', 'transformed', query,
+        result = (await self.execute_async(currency, 'transformed', query,
                                            [id_group])).one()
         return 0 if result is None else \
             result['max_secondary_id']
@@ -1913,8 +1918,8 @@ class Cassandra:
                 "s_d_group": s_d_group,
                 "currency": asset,
                 "is_outgoing": is_outgoing
-            } for is_outgoing, asset, s_d_group in product(directions, include_assets,
-                                                item_id_secondary_group)]
+            } for is_outgoing, asset, s_d_group in product(
+                directions, include_assets, item_id_secondary_group)]
 
             # run one query per direction and asset
             aws = [
@@ -1959,14 +1964,14 @@ class Cassandra:
             address_id = address
             id_group = self.get_id_group(currency, address_id)
         secondary_id_group = \
-            await self.get_id_secondary_group_eth('address_transactions',
+            await self.get_id_secondary_group_eth(currency, 'address_transactions',
                                                   id_group)
         sec_in = self.sec_in(secondary_id_group)
 
         if not token_currency:
             token_config = self.get_token_configuration(currency)
             include_assets = list(token_config.keys())
-            include_assets.append('ETH')
+            include_assets.append(currency.upper())
         else:
             include_assets = [token_currency.upper()]
 
@@ -2161,11 +2166,11 @@ class Cassandra:
                         self.get_address_by_address_id(currency, neighbor_id))
 
         address_id_secondary_group = \
-            await self.get_id_secondary_group_eth('address_transactions',
+            await self.get_id_secondary_group_eth(currency, 'address_transactions',
                                                   address_id_group)
         address_id_secondary_group = self.sec_in(address_id_secondary_group)
         neighbor_id_secondary_group = \
-            await self.get_id_secondary_group_eth('address_transactions',
+            await self.get_id_secondary_group_eth(currency, 'address_transactions',
                                                   neighbor_id_group)
         neighbor_id_secondary_group = self.sec_in(neighbor_id_secondary_group)
 

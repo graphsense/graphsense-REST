@@ -2,10 +2,11 @@ from openapi_server.models.block import Block
 from gsrest.service.rates_service import get_rates
 from gsrest.service.txs_service import from_row
 from gsrest.errors import NotFoundException
+from gsrest.util import is_eth_like
 
 
 def block_from_row(currency, row):
-    if currency == 'eth':
+    if is_eth_like(currency):
         return Block(currency=currency,
                      height=row['block_id'],
                      block_hash=row['block_hash'].hex(),
