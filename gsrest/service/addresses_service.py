@@ -3,6 +3,7 @@ from gsrest.service.entities_service import get_entity, from_row
 from gsrest.service.rates_service import get_rates
 import gsrest.service.common_service as common
 from gsrest.errors import NotFoundException
+from gsrest.util.address import cannonicalize_address
 from openapi_server.models.neighbor_addresses import NeighborAddresses
 from openapi_server.models.neighbor_address import NeighborAddress
 import asyncio
@@ -17,6 +18,7 @@ async def list_tags_by_address(request,
                                address,
                                page=None,
                                pagesize=None):
+    address = cannonicalize_address(currency, address)
     return await common.list_tags_by_address(request,
                                              currency,
                                              address,
@@ -33,6 +35,7 @@ async def list_address_txs(request,
                            token_currency=None,
                            page=None,
                            pagesize=None):
+    address = cannonicalize_address(currency, address)
     db = request.app['db']
     results, paging_state = \
         await db.list_address_txs(currency, address, direction, min_height,
@@ -50,6 +53,7 @@ async def list_address_neighbors(request,
                                  include_labels=False,
                                  page=None,
                                  pagesize=None):
+    address = cannonicalize_address(currency, address)
     db = request.app['db']
     if isinstance(only_ids, list):
         aws = [db.get_address_id(currency, id) for id in only_ids]
@@ -67,7 +71,8 @@ async def list_address_neighbors(request,
     if results is None:
         return NeighborAddresses()
     aws = [
-        get_address(request, currency, row[dst + '_address'])
+        get_address(request, currency,
+                    cannonicalize_address(currency, row[dst + '_address']))
         for row in results
     ]
 
@@ -90,6 +95,7 @@ async def list_address_links(request,
                              neighbor,
                              page=None,
                              pagesize=None):
+    address = cannonicalize_address(currency, address)
     db = request.app['db']
     result = await db.list_address_links(currency,
                                          address,
@@ -102,6 +108,7 @@ async def list_address_links(request,
 
 async def try_get_delta_update_entity_dummy(request, currency, address,
                                             notfound):
+    address = cannonicalize_address(currency, address)
     db = request.app['db']
     try:
         aws = [get_rates(request, currency), db.new_entity(currency, address)]
@@ -115,6 +122,7 @@ async def try_get_delta_update_entity_dummy(request, currency, address,
 
 
 async def get_address_entity(request, currency, address):
+    address = cannonicalize_address(currency, address)
     db = request.app['db']
 
     notfound = NotFoundException(

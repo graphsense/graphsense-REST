@@ -18,6 +18,7 @@ from gsrest.util.exceptions import BadConfigError
 from gsrest.util.eth_logs import decode_db_logs
 from gsrest.errors import NotFoundException, BadUserInputException
 from gsrest.util import is_eth_like
+from gsrest.util.address import cannonicalize_address, address_to_user_format
 
 SMALL_PAGE_SIZE = 1000
 BIG_PAGE_SIZE = 5000
@@ -56,17 +57,16 @@ def transaction_ordering_key(tx_id_key, tx):
     return (tx[tx_id_key], -trace_index, -log_index)
 
 
-def eth_address_to_hex(address):
-    if not isinstance(address, bytes):
-        return address
-    return '0x' + address.hex()
+# def eth_address_to_hex(address):
+#     if not isinstance(address, bytes):
+#         return address
+#     return '0x' + address.hex()
+
+# def trx_address_to_hex(address):
+#     return eth_address_to_hex(address)
 
 
-def trx_address_to_hex(address):
-    return eth_address_to_hex(address)
-
-
-def eth_address_from_hex(address):
+def evm_address_from_hex(currency, address):
     # eth addresses are case insensitive
     try:
         if address.startswith("0x"):
@@ -76,11 +76,11 @@ def eth_address_from_hex(address):
     except ValueError:
         # bytes.fromHex throws value error if non hex chars are found
         raise BadUserInputException(
-            f"The address provided does not look like a ETH address: {address}"
+            f"The address provided does not look like a {currency.upper()} address: {address}"
         )
 
 
-def identity(x):
+def identity(y, x):
     return x
 
 
@@ -769,7 +769,7 @@ class Cassandra:
         for row in result:
             if is_eth_like(currency):
                 row['address'] = \
-                    eth_address_to_hex(row['address'])
+                    address_to_user_format(currency, row['address'])
         return result
 
     async def get_new_address(self, currency, address):
@@ -779,7 +779,7 @@ class Cassandra:
         if not prefix:
             return None
         if is_eth_like(currency):
-            address = eth_address_from_hex(address)
+            address = evm_address_from_hex(currency, address)
             prefix = prefix.upper()
         prefix_length = self.get_prefix_lengths(currency)['address']
         query = ("SELECT * FROM new_addresses "
@@ -799,7 +799,7 @@ class Cassandra:
         if not prefix:
             return None
         if is_eth_like(currency):
-            address = eth_address_from_hex(address)
+            address = evm_address_from_hex(currency, address)
             prefix = prefix.upper()
         query = ("SELECT address_id FROM address_ids_by_address_prefix "
                  "WHERE address_prefix = %s AND address = %s")
@@ -824,7 +824,11 @@ class Cassandra:
     def get_id_group(self, keyspace, id_):
         if keyspace not in self.parameters:
             raise NotFoundException(f'{keyspace} not found')
-        return floor(int(id_) / self.parameters[keyspace]['bucket_size'])
+        blub = floor(int(id_) / self.parameters[keyspace]['bucket_size'])
+        if blub.bit_length():
+            # downcast to 32bit integer
+            blub = (blub + 2**31) % 2**32 - 2**31
+        return blub
 
     def get_block_id_group(self, keyspace, id_):
         if keyspace not in self.parameters:
@@ -885,7 +889,7 @@ class Cassandra:
         data = await self.new_address(currency, address)
         data['no_addresses'] = 1
         if is_eth_like(currency):
-            data['root_address'] = eth_address_to_hex(address)
+            data['root_address'] = address_to_user_format(currency, address)
         else:
             data['root_address'] = address
         return data
@@ -902,12 +906,7 @@ class Cassandra:
                 return None
             raise NotFoundException(
                 f'Address {address_id} has no external transactions')
-        if currency == "eth":
-            return eth_address_to_hex(result["address"])
-        elif currency == "trx":
-            return trx_address_to_hex(result["address"])
-        else:
-            return result["address"]
+        return address_to_user_format(currency, result["address"])
 
     async def get_address(self, currency, address):
         try:
@@ -921,6 +920,7 @@ class Cassandra:
                  " AND address_id_group = %s")
         result = await self.execute_async(currency, 'transformed', query,
                                           [address_id, address_id_group])
+
         result = one(result)
         if not result:
             if not is_eth_like(currency):
@@ -1078,6 +1078,7 @@ class Cassandra:
 
     async def list_matching_addresses(self, currency, expression, limit=10):
         prefix_lengths = self.get_prefix_lengths(currency)
+        expression = cannonicalize_address(currency, expression)
         if len(expression) < prefix_lengths['address']:
             return []
         norm = identity
@@ -1088,7 +1089,7 @@ class Cassandra:
         if is_eth_like(currency):
             # eth addresses are case insensitive
             expression = expression.lower()
-            norm = eth_address_to_hex
+            norm = address_to_user_format
             prefix = prefix.upper()
         rows = []
 
@@ -1103,8 +1104,9 @@ class Cassandra:
                 if result.is_empty():
                     break
                 rows.extend([
-                    norm(row['address']) for row in result.current_rows
-                    if norm(row['address']).startswith(expression)
+                    norm(currency, row['address'])
+                    for row in result.current_rows
+                    if norm(currency, row['address']).startswith(expression)
                 ])
                 paging_state = result.paging_state
 
@@ -1582,7 +1584,7 @@ class Cassandra:
         return await self.finish_address(currency, row, with_txs)
 
     async def finish_entity_eth(self, currency, row, with_txs=True):
-        row['root_address'] = eth_address_to_hex(row['address'])
+        row['root_address'] = address_to_user_format(currency, row['address'])
         return await self.finish_address(currency, row, with_txs)
 
     async def finish_addresses(self, currency, rows, with_txs=True):
@@ -1630,7 +1632,7 @@ class Cassandra:
 
     async def finish_address_eth(self, currency, row, with_txs=True):
         if 'address' in row:
-            row['address'] = eth_address_to_hex(row['address'])
+            row['address'] = address_to_user_format(currency, row['address'])
         row['cluster_id'] = row['address_id']
         row['total_received'] = \
             self.markup_currency(currency, row['total_received'])
@@ -1688,7 +1690,7 @@ class Cassandra:
         if not prefix:
             return None
         if is_eth_like(currency):
-            address = eth_address_from_hex(address)
+            address = evm_address_from_hex(currency, address)
             prefix = prefix.upper()
         prefix_length = self.get_prefix_lengths(currency)['address']
         query = ("SELECT address FROM dirty_addresses "
@@ -2031,10 +2033,10 @@ class Cassandra:
                     (-1 if addr_tx['is_outgoing'] else 1)
 
             else:
-                addr_tx['to_address'] = eth_address_to_hex(
-                    full_tx['to_address'])
-                addr_tx['from_address'] = eth_address_to_hex(
-                    full_tx['from_address'])
+                addr_tx['to_address'] = address_to_user_format(
+                    currency, full_tx['to_address'])
+                addr_tx['from_address'] = address_to_user_format(
+                    currency, full_tx['from_address'])
                 addr_tx['currency'] = currency
                 value = full_tx['value'] * \
                     (-1 if addr_tx['is_outgoing'] else 1)
@@ -2094,18 +2096,20 @@ class Cassandra:
         result_with_tokens = []
         for row in result:
 
-            row['from_address'] = eth_address_to_hex(row['from_address'])
+            row['from_address'] = address_to_user_format(
+                currency, row['from_address'])
             to_address = row['to_address']
             if to_address is None:
                 # this is a contract creation transaction
                 # set recipient to newly created contract
                 # and mark tx as creation
-                row['to_address'] = eth_address_to_hex(
-                    row['receipt_contract_address'])
+                row['to_address'] = address_to_user_format(
+                    currency, row['receipt_contract_address'])
                 row['contract_creation'] = True
             else:
                 # normal transaction
-                row['to_address'] = eth_address_to_hex(to_address)
+                row['to_address'] = address_to_user_format(
+                    currency, to_address)
                 # result['contract_creation'] = False
 
             result_with_tokens.append(row)
@@ -2132,14 +2136,15 @@ class Cassandra:
         if to_address is None:
             # this is a contract creation transaction
             # set recipient to newly created contract and mark tx as creation
-            result['to_address'] = eth_address_to_hex(
-                result['receipt_contract_address'])
+            result['to_address'] = address_to_user_format(
+                currency, result['receipt_contract_address'])
             result['contract_creation'] = True
         else:
             # normal transaction
-            result['to_address'] = eth_address_to_hex(to_address)
+            result['to_address'] = address_to_user_format(currency, to_address)
             # result['contract_creation'] = False
-        result['from_address'] = eth_address_to_hex(result['from_address'])
+        result['from_address'] = address_to_user_format(
+            currency, result['from_address'])
         return result
 
     async def list_links_eth(self,

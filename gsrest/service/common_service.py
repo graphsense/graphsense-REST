@@ -16,6 +16,7 @@ from gsrest.service.tags_service import address_tag_from_row
 from gsrest.util import get_first_key_present
 from gsrest.errors import NotFoundException, BadUserInputException
 from psycopg2.errors import InvalidTextRepresentation
+from gsrest.util.address import cannonicalize_address
 from gsrest.util import is_eth_like
 
 
@@ -85,6 +86,7 @@ async def txs_from_rows(request, currency, rows, token_config):
 
 
 async def get_address(request, currency, address):
+    address = cannonicalize_address(currency, address)
     db = request.app['db']
     result = await db.get_address(currency, address)
 
