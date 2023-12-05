@@ -201,7 +201,7 @@ async def add_labels(request, currency, node_type, that, nodes):
 async def links_response(request, currency, result):
 
     links, next_page = result
-    if currency == 'eth':
+    if is_eth_like(currency):
         db = request.app['db']
         token_config = db.get_token_configuration(currency)
         heights = [row['block_id'] for row in links]

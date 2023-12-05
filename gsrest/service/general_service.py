@@ -47,6 +47,8 @@ async def search_by_currency(request, currency, q, limit=10):
     r.txs = txs
     r.addresses = addresses
 
+    print(addresses)
+
     return r
 
 

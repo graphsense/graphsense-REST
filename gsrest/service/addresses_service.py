@@ -40,6 +40,7 @@ async def list_address_txs(request,
     results, paging_state = \
         await db.list_address_txs(currency, address, direction, min_height,
                                   max_height, token_currency, page, pagesize)
+
     address_txs = await common.txs_from_rows(
         request, currency, results, db.get_token_configuration(currency))
     return AddressTxs(next_page=paging_state, address_txs=address_txs)
@@ -56,7 +57,10 @@ async def list_address_neighbors(request,
     address = cannonicalize_address(currency, address)
     db = request.app['db']
     if isinstance(only_ids, list):
-        aws = [db.get_address_id(currency, id) for id in only_ids]
+        aws = [
+            db.get_address_id(currency, cannonicalize_address(currency, id))
+            for id in only_ids
+        ]
         only_ids = await asyncio.gather(*aws)
         only_ids = [id for id in only_ids if id is not None]
 

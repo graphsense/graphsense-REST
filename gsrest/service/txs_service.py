@@ -107,7 +107,7 @@ async def get_tx(request,
     db = request.app['db']
 
     if token_tx_id is not None:
-        if currency == 'eth':
+        if is_eth_like(currency):
             results = await list_token_txs(request,
                                            currency,
                                            tx_hash,

@@ -29,7 +29,7 @@ def add_tron_prefix(address_bytes, prefix: bytes = TRON_ADDRESS_PREFIX):
 
 
 def strip_tron_prefix(address_bytes, prefix: bytes = TRON_ADDRESS_PREFIX):
-    if len(address_bytes) == 21 and address_bytes.startswith(prefix):
+    if len(address_bytes) > len(prefix) and address_bytes.startswith(prefix):
         return address_bytes[len(prefix):]
     return address_bytes
 
@@ -65,10 +65,14 @@ def tron_address_to_evm(taddress_str: str, validate: bool = True) -> bytes:
     a = ab[:-4]
 
     # recompute checksum
-    checkSumComputed = get_tron_address_checksum(a) if validate else None
+    if validate:
+        checkSumComputed = get_tron_address_checksum(a) if validate else None
 
     if not validate or all(a == b for a, b in zip(checkSum, checkSumComputed)):
-        return strip_tron_prefix(a)
+        if not validate and len(ab) < 21:
+            return strip_tron_prefix(ab)
+        else:
+            return strip_tron_prefix(a)
     else:
         raise ValueError(f"Invalid checksum on address {taddress_str}")
 

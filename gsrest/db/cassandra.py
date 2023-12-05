@@ -57,15 +57,6 @@ def transaction_ordering_key(tx_id_key, tx):
     return (tx[tx_id_key], -trace_index, -log_index)
 
 
-# def eth_address_to_hex(address):
-#     if not isinstance(address, bytes):
-#         return address
-#     return '0x' + address.hex()
-
-# def trx_address_to_hex(address):
-#     return eth_address_to_hex(address)
-
-
 def evm_address_from_hex(currency, address):
     # eth addresses are case insensitive
     try:
@@ -310,6 +301,17 @@ class Cassandra:
             row["currency_ticker"]: row
             for row in self.execute(currency, "transformed", query)
         }
+
+    async def fix_timestamp(self,
+                            currency,
+                            item,
+                            timestamp_col="block_timestamp",
+                            block_id_col="block_id"):
+        if currency == "trx" and item[timestamp_col] < 500000000:
+            # TODO block timestamp in tx is currently wrong / we divide by 1000
+            # to get from mili to seconds. But it appears to be wrong in the txs.
+            block = await self.get_block(currency, item[block_id_col])
+            item[timestamp_col] = block["timestamp"]
 
     def load_parameters(self, keyspace):
         currency = keyspace
@@ -1078,6 +1080,7 @@ class Cassandra:
 
     async def list_matching_addresses(self, currency, expression, limit=10):
         prefix_lengths = self.get_prefix_lengths(currency)
+        expression_orginal = expression
         expression = cannonicalize_address(currency, expression)
         if len(expression) < prefix_lengths['address']:
             return []
@@ -1106,13 +1109,16 @@ class Cassandra:
                 rows.extend([
                     norm(currency, row['address'])
                     for row in result.current_rows
-                    if norm(currency, row['address']).startswith(expression)
+                    if norm(currency, row['address']).startswith(
+                        expression_orginal)
                 ])
                 paging_state = result.paging_state
 
         query = "SELECT address FROM address_ids_by_address_prefix "\
                 "WHERE address_prefix = %s"
+
         await collect(query, True)
+
         if len(rows) < limit:
             query = "SELECT address FROM new_addresses "\
                     "WHERE address_prefix = %s"
@@ -2025,29 +2031,46 @@ class Cassandra:
                 token_tx = await self.fetch_token_transaction(
                     currency, full_tx, addr_tx["log_index"])
 
-                addr_tx['to_address'] = token_tx['to_address']
-                addr_tx['from_address'] = token_tx['from_address']
+                addr_tx['to_address'] = address_to_user_format(
+                    currency, token_tx['to_address'])
+                addr_tx['from_address'] = address_to_user_format(
+                    currency, token_tx['from_address'])
                 addr_tx['currency'] = token_tx["currency"]
                 addr_tx['token_tx_id'] = addr_tx["log_index"]
                 value = token_tx['value'] * \
                     (-1 if addr_tx['is_outgoing'] else 1)
 
             else:
-                addr_tx['to_address'] = address_to_user_format(
-                    currency, full_tx['to_address'])
-                addr_tx['from_address'] = address_to_user_format(
-                    currency, full_tx['from_address'])
+                addr_tx['to_address'] = full_tx['to_address']
+                addr_tx['from_address'] = full_tx['from_address']
                 addr_tx['currency'] = currency
                 value = full_tx['value'] * \
                     (-1 if addr_tx['is_outgoing'] else 1)
 
-            addr_tx['contract_creation'] = full_tx.get('contract_creation',
-                                                       None)
+            contract_creation = full_tx.get('contract_creation', None)
+            if contract_creation is not None:
+                contract_creation = address_to_user_format(
+                    currency, contract_creation)
+
+            addr_tx['contract_creation'] = contract_creation
             addr_tx['tx_hash'] = full_tx['tx_hash']
             addr_tx['height'] = full_tx['block_id']
+
+            # addr
+            # if currency == "trx":
+            #     # TODO block timestamp in tx is currently wrong / we divide by 1000
+            #     # to get from mili to seconds. But it appears to be wrong in the txs.
+            #     block = await self.get_block(currency, result["block_id"])
+            #     result["block_timestamp"] = block["timestamp"]
+
             addr_tx['timestamp'] = full_tx['block_timestamp']
             addr_tx['value'] = value
             addr_tx.pop("log_index")
+
+            await self.fix_timestamp(currency,
+                                     addr_tx,
+                                     timestamp_col="timestamp",
+                                     block_id_col="height")
 
         return results, paging_state
 
@@ -2127,10 +2150,14 @@ class Cassandra:
         statement = ('SELECT tx_hash, block_id, block_timestamp, value, '
                      'from_address, to_address, receipt_contract_address from '
                      'transaction where tx_hash_prefix=%s and tx_hash=%s')
+
         result = await self.execute_async(currency, 'raw', statement, params)
         result = one(result)
+
         if not result:
             return None
+
+        await self.fix_timestamp(currency, result)
 
         to_address = result['to_address']
         if to_address is None:
