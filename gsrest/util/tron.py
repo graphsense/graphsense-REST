@@ -77,6 +77,25 @@ def tron_address_to_evm(taddress_str: str, validate: bool = True) -> bytes:
         raise ValueError(f"Invalid checksum on address {taddress_str}")
 
 
+def partial_tron_to_partial_evm(partial_taddress_str: str,
+                                prefix: bytes = TRON_ADDRESS_PREFIX) -> str:
+    len_taddress = len(partial_taddress_str)
+    len_full_taddress = 34
+    padding_length = len_full_taddress - len_taddress
+
+    try:
+        partial_ab = base58.b58decode(partial_taddress_str +
+                                      "u" * padding_length)
+        partial_a = partial_ab[:len(partial_ab) - 4]
+        partial_evm = strip_tron_prefix(partial_a, prefix)
+        if (len_taddress == len_full_taddress
+            ):  # if it is a full address, don't return only a prefix
+            return "0x" + bytes_to_hex(partial_evm)
+        return ("0x" + bytes_to_hex(partial_evm))[:len_taddress]
+    except Exception as e:
+        raise ValueError(f"Could not convert partial TRON address: {e}")
+
+
 def tron_address_to_evm_string(taddress_str: str,
                                validate: bool = True) -> str:
     return "0x" + bytes_to_hex(tron_address_to_evm(taddress_str, validate))

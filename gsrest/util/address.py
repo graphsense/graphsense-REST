@@ -1,12 +1,15 @@
-from gsrest.util.tron import tron_address_to_evm_string, evm_to_tron_address_string
+from gsrest.util.tron import tron_address_to_evm_string, evm_to_tron_address_string, partial_tron_to_partial_evm
 from gsrest.util.bch import try_bch_address_to_legacy
 from gsrest.util.evm import eth_address_to_hex
 
 
-def cannonicalize_address(currency, address) -> str:
+def cannonicalize_address(currency, address, partial=False) -> str:
     try:
         if currency == "trx":
-            return tron_address_to_evm_string(address, validate=False)
+            if partial:
+                return partial_tron_to_partial_evm(address)
+            else:
+                return tron_address_to_evm_string(address, validate=False)
         elif currency == "bch":
             return try_bch_address_to_legacy(address)
         elif isinstance(address, str):

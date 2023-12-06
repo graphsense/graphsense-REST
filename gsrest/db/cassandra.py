@@ -226,7 +226,11 @@ class Cassandra:
             self = args[0]
             currency = args[1]
             if (is_eth_like(currency)):
-                do = func.__name__ + "_eth"
+                # first look for currency specific
+                # then fallback to eth.
+                do = func.__name__ + "_" + currency
+                if not hasattr(self, do):
+                    do = func.__name__ + "_eth"
                 if hasattr(self, do) and callable(getattr(self, do)):
                     f = getattr(self, do)
                     args = args[1:]
@@ -755,6 +759,18 @@ class Cassandra:
             return None
         return result.one()['txs']
 
+    async def list_block_txs_ids_trx(self, currency, height):
+        if height is None:
+            return None
+        height_group = self.get_id_group(currency, height)
+        query = ("SELECT tx_id FROM block_transactions "
+                 "WHERE block_id_group=%s and block_id=%s")
+        result = await self.execute_async(
+            currency, 'transformed', query,
+            [height_group, int(height)], autopaging=True)
+        res = [r["tx_id"] for r in result.current_rows]
+        return res
+
     async def get_addresses_by_ids(self,
                                    currency,
                                    address_ids,
@@ -1081,7 +1097,7 @@ class Cassandra:
     async def list_matching_addresses(self, currency, expression, limit=10):
         prefix_lengths = self.get_prefix_lengths(currency)
         expression_orginal = expression
-        expression = cannonicalize_address(currency, expression)
+        expression = cannonicalize_address(currency, expression, partial=True)
         if len(expression) < prefix_lengths['address']:
             return []
         norm = identity
