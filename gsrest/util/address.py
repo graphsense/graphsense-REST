@@ -1,6 +1,6 @@
 from gsrest.util.tron import tron_address_to_evm_string, evm_to_tron_address_string, partial_tron_to_partial_evm
 from gsrest.util.bch import try_bch_address_to_legacy
-from gsrest.util.evm import eth_address_to_hex
+from gsrest.util.evm import eth_address_to_hex, is_hex_string
 
 
 def cannonicalize_address(currency, address, partial=False) -> str:
@@ -31,7 +31,10 @@ def address_to_user_format(currency, db_address) -> str:
         if isinstance(db_address, bytes):
             return evm_to_tron_address_string(eth_address_to_hex(db_address))
         else:
-            return evm_to_tron_address_string(db_address)
+            if is_hex_string(db_address):
+                return evm_to_tron_address_string(db_address)
+            else:
+                return db_address
     elif isinstance(db_address, str):
         return db_address
     else:
