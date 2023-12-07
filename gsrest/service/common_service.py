@@ -16,6 +16,8 @@ from gsrest.service.tags_service import address_tag_from_row
 from gsrest.util import get_first_key_present
 from gsrest.errors import NotFoundException, BadUserInputException
 from psycopg2.errors import InvalidTextRepresentation
+from gsrest.util.address import cannonicalize_address
+from gsrest.util import is_eth_like
 
 
 def address_from_row(currency, row, rates, token_config, actors):
@@ -50,7 +52,7 @@ async def txs_from_rows(request, currency, rows, token_config):
     timestamp_keys = ["timestamp", "block_timestamp"]
     heights = [get_first_key_present(row, height_keys) for row in rows]
     rates = await list_rates(request, currency, heights)
-    if currency == 'eth':
+    if is_eth_like(currency):
         return [
             TxAccount(
                 currency=currency
@@ -84,6 +86,7 @@ async def txs_from_rows(request, currency, rows, token_config):
 
 
 async def get_address(request, currency, address):
+    address = cannonicalize_address(currency, address)
     db = request.app['db']
     result = await db.get_address(currency, address)
 
@@ -198,7 +201,7 @@ async def add_labels(request, currency, node_type, that, nodes):
 async def links_response(request, currency, result):
 
     links, next_page = result
-    if currency == 'eth':
+    if is_eth_like(currency):
         db = request.app['db']
         token_config = db.get_token_configuration(currency)
         heights = [row['block_id'] for row in links]

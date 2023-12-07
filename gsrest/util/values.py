@@ -66,6 +66,8 @@ def convert_token_value(value, rates, token_config):
 def convert_value(currency, value, rates):
     if currency == 'eth':
         factor = 1e-18
+    elif currency == "trx":
+        factor = 1e-6
     else:
         factor = 1e-8
 

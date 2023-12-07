@@ -407,7 +407,6 @@ async def list_entity_neighbors(test_case):
                                      entity=entityWithTags.entity,
                                      include_labels=True,
                                      direction='out')
-    print(yaml.dump(result))
     test_case.assertEqual(ewton, result)
 
     result = await test_case.request(path,
