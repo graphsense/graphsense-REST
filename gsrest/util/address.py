@@ -1,4 +1,6 @@
-from gsrest.util.tron import tron_address_to_evm_string, evm_to_tron_address_string, partial_tron_to_partial_evm
+from gsrest.util.tron import (tron_address_to_evm_string,
+                              evm_to_tron_address_string,
+                              partial_tron_to_partial_evm)
 from gsrest.util.bch import try_bch_address_to_legacy
 from gsrest.util.evm import eth_address_to_hex, is_hex_string
 

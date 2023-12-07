@@ -67,8 +67,8 @@ def evm_address_from_hex(currency, address):
     except ValueError:
         # bytes.fromHex throws value error if non hex chars are found
         raise BadUserInputException(
-            f"The address provided does not look like a {currency.upper()} address: {address}"
-        )
+            "The address provided does not look"
+            f" like a {currency.upper()} address: {address}")
 
 
 def identity(y, x):
@@ -312,8 +312,10 @@ class Cassandra:
                             timestamp_col="block_timestamp",
                             block_id_col="block_id"):
         if currency == "trx" and item[timestamp_col] < 500000000:
-            # TODO block timestamp in tx is currently wrong / we divide by 1000
-            # to get from mili to seconds. But it appears to be wrong in the txs.
+            # TODO block timestamp in tx is currently
+            # wrong / we divide by 1000 to get from
+            # mili to seconds. But it appears to be
+            # wrong in the txs.
             block = await self.get_block(currency, item[block_id_col])
             item[timestamp_col] = block["timestamp"]
 
@@ -766,8 +768,10 @@ class Cassandra:
         query = ("SELECT tx_id FROM block_transactions "
                  "WHERE block_id_group=%s and block_id=%s")
         result = await self.execute_async(
-            currency, 'transformed', query,
-            [height_group, int(height)], autopaging=True)
+            currency,
+            'transformed',
+            query, [height_group, int(height)],
+            autopaging=True)
         res = [r["tx_id"] for r in result.current_rows]
         return res
 
@@ -1988,7 +1992,8 @@ class Cassandra:
             address_id = address
             id_group = self.get_id_group(currency, address_id)
         secondary_id_group = \
-            await self.get_id_secondary_group_eth(currency, 'address_transactions',
+            await self.get_id_secondary_group_eth(currency,
+                                                  'address_transactions',
                                                   id_group)
         sec_in = self.sec_in(secondary_id_group)
 
@@ -2071,13 +2076,6 @@ class Cassandra:
             addr_tx['contract_creation'] = contract_creation
             addr_tx['tx_hash'] = full_tx['tx_hash']
             addr_tx['height'] = full_tx['block_id']
-
-            # addr
-            # if currency == "trx":
-            #     # TODO block timestamp in tx is currently wrong / we divide by 1000
-            #     # to get from mili to seconds. But it appears to be wrong in the txs.
-            #     block = await self.get_block(currency, result["block_id"])
-            #     result["block_timestamp"] = block["timestamp"]
 
             addr_tx['timestamp'] = full_tx['block_timestamp']
             addr_tx['value'] = value
@@ -2214,11 +2212,13 @@ class Cassandra:
                         self.get_address_by_address_id(currency, neighbor_id))
 
         address_id_secondary_group = \
-            await self.get_id_secondary_group_eth(currency, 'address_transactions',
+            await self.get_id_secondary_group_eth(currency,
+                                                  'address_transactions',
                                                   address_id_group)
         address_id_secondary_group = self.sec_in(address_id_secondary_group)
         neighbor_id_secondary_group = \
-            await self.get_id_secondary_group_eth(currency, 'address_transactions',
+            await self.get_id_secondary_group_eth(currency,
+                                                  'address_transactions',
                                                   neighbor_id_group)
         neighbor_id_secondary_group = self.sec_in(neighbor_id_secondary_group)
 

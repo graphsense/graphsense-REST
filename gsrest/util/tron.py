@@ -43,7 +43,8 @@ def evm_to_bytes(evm_address_hex: str,
 def evm_to_tron_address(evm_address_hex: str,
                         prefix: bytes = TRON_ADDRESS_PREFIX) -> bytes:
     # inspired by
-    # https://github.com/tronprotocol/tronweb/blob/d8c0d48847c0a2dd1c92f4a93f1e01b31c33dc94/src/utils/crypto.js#L14
+    # https://github.com/tronprotocol/tronweb
+    # /blob/d8c0d48847c0a2dd1c92f4a93f1e01b31c33dc94/src/utils/crypto.js#L14
     a = add_tron_prefix(hex_str_to_bytes(strip_0x(evm_address_hex)), prefix)
     checkSum = get_tron_address_checksum(a)
     taddress = a + checkSum
@@ -88,8 +89,9 @@ def partial_tron_to_partial_evm(partial_taddress_str: str,
                                       "u" * padding_length)
         partial_a = partial_ab[:len(partial_ab) - 4]
         partial_evm = strip_tron_prefix(partial_a, prefix)
-        if (len_taddress == len_full_taddress
-            ):  # if it is a full address, don't return only a prefix
+
+        # if it is a full address, don't return only a prefix
+        if (len_taddress == len_full_taddress):
             return "0x" + bytes_to_hex(partial_evm)
         return ("0x" + bytes_to_hex(partial_evm))[:len_taddress]
     except Exception as e:
