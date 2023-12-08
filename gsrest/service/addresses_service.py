@@ -100,6 +100,7 @@ async def list_address_links(request,
                              page=None,
                              pagesize=None):
     address = cannonicalize_address(currency, address)
+    neighbor = cannonicalize_address(currency, neighbor)
     db = request.app['db']
     result = await db.list_address_links(currency,
                                          address,

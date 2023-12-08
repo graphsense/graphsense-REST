@@ -3,6 +3,7 @@ import time
 # import hashlib
 import asyncio
 import heapq
+from async_lru import alru_cache
 from typing import Sequence, Optional, Tuple
 from functools import partial
 from itertools import product
@@ -316,7 +317,8 @@ class Cassandra:
             # wrong / we divide by 1000 to get from
             # mili to seconds. But it appears to be
             # wrong in the txs.
-            block = await self.get_block(currency, item[block_id_col])
+            block = await self.get_block_timestamp_eth(currency,
+                                                       item[block_id_col])
             item[timestamp_col] = block["timestamp"]
 
     def load_parameters(self, keyspace):
@@ -543,6 +545,7 @@ class Cassandra:
                 results.append(result)
         return results
 
+    @alru_cache(ttl=5)
     async def get_currency_statistics(self, currency):
         query = "SELECT * FROM summary_statistics LIMIT 1"
         result = await self.execute_async(currency, 'transformed', query)
@@ -587,6 +590,7 @@ class Cassandra:
                                           tx_ids,
                                           include_token_txs=True)
 
+    @alru_cache(maxsize=1000)
     async def get_rates(self, currency, height):
         query = "SELECT * FROM exchange_rates WHERE block_id = %s"
         result = await self.execute_async(currency, 'transformed', query,
@@ -1790,6 +1794,14 @@ class Cassandra:
     async def get_block_eth(self, currency, height):
         block_group = self.get_block_id_group(currency, height)
         query = ("SELECT * FROM block WHERE block_id_group = %s and"
+                 " block_id = %s")
+        return (await self.execute_async(currency, 'raw', query,
+                                         [block_group, height])).one()
+
+    @alru_cache(maxsize=1000)
+    async def get_block_timestamp_eth(self, currency, height):
+        block_group = self.get_block_id_group(currency, height)
+        query = ("SELECT timestamp FROM block WHERE block_id_group = %s and"
                  " block_id = %s")
         return (await self.execute_async(currency, 'raw', query,
                                          [block_group, height])).one()
