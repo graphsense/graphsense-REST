@@ -288,7 +288,7 @@ async def search_entity_neighbors(request,
     result = \
         await bfs(request, entity, key_accessor,
                   list_neighbors, stop_neighbor, match_neighbor,
-                  depth)
+                  depth, skip_visited=True)
 
     async def resolve(neighbor):
         if not with_tag:
@@ -332,13 +332,17 @@ async def bfs(request,
               list_neighbors,
               stop_neighbor,
               match_neighbor,
-              max_depth=3):
+              max_depth=3,
+              skip_visited=True):
 
     # collect matching paths
     matching_paths = []
 
     # maintain a queue of paths
     queue = []
+
+    # visited nodes
+    visited = set()
 
     start = True
 
@@ -387,12 +391,13 @@ async def bfs(request,
         for neighbors, path in zip(list_of_neighbors, paths):
             for neighbor in neighbors:
 
+                id = key_accessor(neighbor)
                 new_path = list(path)
                 new_path.append(neighbor)
 
                 # found path
                 if match_neighbor(neighbor):
-                    request.app.logger.debug(f"MATCH {key_accessor(neighbor)}")
+                    request.app.logger.debug(f"MATCH {id}")
                     matching_paths.append(new_path)
                     continue
 
@@ -403,8 +408,16 @@ async def bfs(request,
 
                 # stop if stop criteria fulfilled
                 if (stop_neighbor(neighbor)):
-                    request.app.logger.debug(f"STOP {key_accessor(neighbor)}")
+                    request.app.logger.debug(f"STOP {id}")
                     continue
+
+                # stop if node was already visited
+                if id in visited:
+                    request.app.logger.debug(f"ALREADY VISITED {id}")
+                    continue
+
+                if skip_visited:
+                    visited.add(id)
 
                 queue.append(new_path)
 
