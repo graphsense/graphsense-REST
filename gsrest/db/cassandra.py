@@ -2324,6 +2324,8 @@ class Cassandra:
                                              tx_ids,
                                              include_token_txs=True)
 
+        neighbor = address_to_user_format(currency, neighbor)
+        address = address_to_user_format(currency, address)
         txs = [
             tx for tx in all_txs
             if tx["to_address"] == neighbor and tx["from_address"] == address
