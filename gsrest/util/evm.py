@@ -1,5 +1,3 @@
-from typing import Optional
-
 from gsrest.util.string_edit import remove_prefix
 
 

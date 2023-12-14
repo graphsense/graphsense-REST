@@ -169,7 +169,7 @@ async def list_neighbors(request,
 
 
 async def add_labels(request, currency, node_type, that, nodes):
-    def identity(x,y):
+    def identity(x, y):
         return y
     (field, tfield, fun, fmt) = \
         ('address', 'address', 'list_labels_for_addresses',
@@ -221,7 +221,7 @@ async def links_response(request, currency, result):
                       height=row['block_id'],
                       token_tx_id=row.get("token_tx_id", None),
                       from_address=address_to_user_format(currency,
-                                                        row['from_address']),
+                                                          row['from_address']),
                       to_address=address_to_user_format(currency,
                                                         row['to_address']),
                       contract_creation=row.get("contract_creation", None),

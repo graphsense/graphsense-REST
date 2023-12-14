@@ -136,11 +136,13 @@ async def get_address_entity(request, currency, address):
         if 'not found' not in str(e):
             raise e
         return await try_get_delta_update_entity_dummy(request, currency,
-                                                       address_canonical, notfound)
+                                                       address_canonical,
+                                                       notfound)
 
     if entity_id is None:
         return await try_get_delta_update_entity_dummy(request, currency,
-                                                       address_canonical, notfound)
+                                                       address_canonical,
+                                                       notfound)
 
     result = await get_entity(request,
                               currency,

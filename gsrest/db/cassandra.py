@@ -790,7 +790,6 @@ class Cassandra:
         if not prefix:
             return None
         if is_eth_like(currency):
-            #address = evm_address_from_hex(currency, address)
             prefix = prefix.upper()
         prefix_length = self.get_prefix_lengths(currency)['address']
         query = ("SELECT * FROM new_addresses "
@@ -810,7 +809,6 @@ class Cassandra:
         if not prefix:
             return None
         if is_eth_like(currency):
-            #address = evm_address_from_hex(currency, address)
             prefix = prefix.upper()
         query = ("SELECT address_id FROM address_ids_by_address_prefix "
                  "WHERE address_prefix = %s AND address = %s")
@@ -1709,7 +1707,6 @@ class Cassandra:
         if not prefix:
             return None
         if is_eth_like(currency):
-            #address = evm_address_from_hex(currency, address)
             prefix = prefix.upper()
         prefix_length = self.get_prefix_lengths(currency)['address']
         query = ("SELECT address FROM dirty_addresses "

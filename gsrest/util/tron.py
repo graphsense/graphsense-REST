@@ -94,7 +94,7 @@ def partial_tron_to_partial_evm(partial_taddress_str: str,
         if (len_taddress == len_full_taddress):
             return bytes_to_hex(partial_evm)
         return (bytes_to_hex(partial_evm))[:len_taddress]
-    except Exception as e:
+    except Exception:
         return ""
 
 
