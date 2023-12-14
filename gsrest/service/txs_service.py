@@ -7,6 +7,7 @@ from gsrest.service.rates_service import get_rates
 from gsrest.util.values import convert_value, convert_token_value
 from gsrest.errors import NotFoundException
 from gsrest.util import is_eth_like
+from gsrest.util.address import address_to_user_format
 
 
 def from_row(currency, row, rates, token_config, include_io=False):
@@ -17,8 +18,8 @@ def from_row(currency, row, rates, token_config, include_io=False):
             tx_hash=row['tx_hash'].hex(),
             timestamp=row['block_timestamp'],
             height=row['block_id'],
-            from_address=row['from_address'],
-            to_address=row['to_address'],
+            from_address=address_to_user_format(currency, row['from_address']),
+            to_address=address_to_user_format(currency, row['to_address']),
             token_tx_id=row.get("token_tx_id", None),
             contract_creation=row.get("contract_creation", None),
             value=convert_value(currency, row['value'], rates)

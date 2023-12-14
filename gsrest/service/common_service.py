@@ -16,14 +16,14 @@ from gsrest.service.tags_service import address_tag_from_row
 from gsrest.util import get_first_key_present
 from gsrest.errors import NotFoundException, BadUserInputException
 from psycopg2.errors import InvalidTextRepresentation
-from gsrest.util.address import cannonicalize_address
+from gsrest.util.address import cannonicalize_address, address_to_user_format
 from gsrest.util import is_eth_like
 
 
 def address_from_row(currency, row, rates, token_config, actors):
     return Address(
         currency=currency,
-        address=row['address'],
+        address=address_to_user_format(currency, row['address']),
         entity=row['cluster_id'],
         first_tx=TxSummary(row['first_tx'].height, row['first_tx'].timestamp,
                            row['first_tx'].tx_hash.hex()),
@@ -60,8 +60,9 @@ async def txs_from_rows(request, currency, rows, token_config):
                 tx_hash=row['tx_hash'].hex(),
                 timestamp=get_first_key_present(row, timestamp_keys),
                 height=get_first_key_present(row, height_keys),
-                from_address=row['from_address'],
-                to_address=row['to_address'],
+                from_address=address_to_user_format(currency,
+                                                    row['from_address']),
+                to_address=address_to_user_format(currency, row['to_address']),
                 token_tx_id=row.get("token_tx_id", None),
                 contract_creation=row.get("contract_creation", None),
                 value=convert_value(
@@ -86,9 +87,11 @@ async def txs_from_rows(request, currency, rows, token_config):
 
 
 async def get_address(request, currency, address):
-    address = cannonicalize_address(currency, address)
+    request.app.logger.debug(f'address before canonical {address}')
+    address_canonical = cannonicalize_address(currency, address)
     db = request.app['db']
-    result = await db.get_address(currency, address)
+    request.app.logger.debug(f'address after canonical {address_canonical}')
+    result = await db.get_address(currency, address_canonical)
 
     if not result:
         raise NotFoundException("Address {} not found in currency {}".format(
@@ -166,12 +169,16 @@ async def list_neighbors(request,
 
 
 async def add_labels(request, currency, node_type, that, nodes):
-    (field, tfield, fun) = \
-        ('address', 'address', 'list_labels_for_addresses') \
+    def identity(x,y):
+        return y
+    (field, tfield, fun, fmt) = \
+        ('address', 'address', 'list_labels_for_addresses',
+         address_to_user_format) \
         if node_type == 'address' else \
-        ('cluster_id', 'gs_cluster_id', 'list_labels_for_entities')
+        ('cluster_id', 'gs_cluster_id', 'list_labels_for_entities', identity)
     thatfield = that + '_' + field
-    ids = tuple((node[thatfield] for node in nodes))
+    ids = tuple((fmt(currency, node[thatfield])
+                 for node in nodes))
 
     result = await tagstores(
         request.app['tagstores'], lambda row: row, fun, currency, ids,
@@ -213,8 +220,10 @@ async def links_response(request, currency, result):
                       timestamp=row['block_timestamp'],
                       height=row['block_id'],
                       token_tx_id=row.get("token_tx_id", None),
-                      from_address=row['from_address'],
-                      to_address=row['to_address'],
+                      from_address=address_to_user_format(currency,
+                                                        row['from_address']),
+                      to_address=address_to_user_format(currency,
+                                                        row['to_address']),
                       contract_creation=row.get("contract_creation", None),
                       value=convert_value(currency, row['value'],
                                           rates[row['block_id']])

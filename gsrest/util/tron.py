@@ -92,10 +92,10 @@ def partial_tron_to_partial_evm(partial_taddress_str: str,
 
         # if it is a full address, don't return only a prefix
         if (len_taddress == len_full_taddress):
-            return "0x" + bytes_to_hex(partial_evm)
-        return ("0x" + bytes_to_hex(partial_evm))[:len_taddress]
+            return bytes_to_hex(partial_evm)
+        return (bytes_to_hex(partial_evm))[:len_taddress]
     except Exception as e:
-        raise ValueError(f"Could not convert partial TRON address: {e}")
+        return ""
 
 
 def tron_address_to_evm_string(taddress_str: str,

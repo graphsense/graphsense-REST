@@ -17,6 +17,7 @@ import gsrest.service.common_service as common
 import importlib
 import asyncio
 import time
+from gsrest.util.address import address_to_user_format
 
 MAX_DEPTH = 7
 TAGS_PAGE_SIZE = 100
@@ -33,7 +34,7 @@ def from_row(currency,
     return Entity(
         currency=currency,
         entity=row['cluster_id'],
-        root_address=row['root_address'],
+        root_address=address_to_user_format(currency, row['root_address']),
         first_tx=TxSummary(row['first_tx'].height, row['first_tx'].timestamp,
                            row['first_tx'].tx_hash.hex()),
         last_tx=TxSummary(row['last_tx'].height, row['last_tx'].timestamp,
@@ -107,6 +108,7 @@ async def get_entity(request,
             'list_actors_entity', currency, entity,
             request.app['request_config']['show_private_tags'])
 
+    request.app.logger.debug(f'result address {result}')
     rates = (await get_rates(request, currency))['rates']
     return from_row(currency, result, rates,
                     db.get_token_configuration(currency), tags, count, actors)
@@ -173,7 +175,8 @@ async def list_entity_addresses(request,
             tagstores(
                 request.app['tagstores'],
                 lambda row: LabeledItemRef(id=row["id"], label=row["label"]),
-                'list_actors_address', currency, row["address"],
+                'list_actors_address', currency,
+                address_to_user_format(currency, row["address"]),
                 request.app['request_config']['show_private_tags']))
         for row in addresses
     ]

@@ -3,7 +3,7 @@ from gsrest.service.entities_service import get_entity, from_row
 from gsrest.service.rates_service import get_rates
 import gsrest.service.common_service as common
 from gsrest.errors import NotFoundException
-from gsrest.util.address import cannonicalize_address
+from gsrest.util.address import cannonicalize_address, address_to_user_format
 from openapi_server.models.neighbor_addresses import NeighborAddresses
 from openapi_server.models.neighbor_address import NeighborAddress
 import asyncio
@@ -18,7 +18,6 @@ async def list_tags_by_address(request,
                                address,
                                page=None,
                                pagesize=None):
-    address = cannonicalize_address(currency, address)
     return await common.list_tags_by_address(request,
                                              currency,
                                              address,
@@ -76,7 +75,7 @@ async def list_address_neighbors(request,
         return NeighborAddresses()
     aws = [
         get_address(request, currency,
-                    cannonicalize_address(currency, row[dst + '_address']))
+                    address_to_user_format(currency, row[dst + '_address']))
         for row in results
     ]
 
@@ -113,7 +112,6 @@ async def list_address_links(request,
 
 async def try_get_delta_update_entity_dummy(request, currency, address,
                                             notfound):
-    address = cannonicalize_address(currency, address)
     db = request.app['db']
     try:
         aws = [get_rates(request, currency), db.new_entity(currency, address)]
@@ -127,22 +125,22 @@ async def try_get_delta_update_entity_dummy(request, currency, address,
 
 
 async def get_address_entity(request, currency, address):
-    address = cannonicalize_address(currency, address)
+    address_canonical = cannonicalize_address(currency, address)
     db = request.app['db']
 
     notfound = NotFoundException(
         'Entity for address {} not found'.format(address))
     try:
-        entity_id = await db.get_address_entity_id(currency, address)
+        entity_id = await db.get_address_entity_id(currency, address_canonical)
     except NotFoundException as e:
         if 'not found' not in str(e):
             raise e
         return await try_get_delta_update_entity_dummy(request, currency,
-                                                       address, notfound)
+                                                       address_canonical, notfound)
 
     if entity_id is None:
         return await try_get_delta_update_entity_dummy(request, currency,
-                                                       address, notfound)
+                                                       address_canonical, notfound)
 
     result = await get_entity(request,
                               currency,
