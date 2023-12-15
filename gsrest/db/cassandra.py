@@ -468,8 +468,9 @@ class Cassandra:
             loop = asyncio.get_event_loop()
             future = loop.create_future()
 
-            h = hash(q + str(params))
-            # self.logger.debug(f'{h} {q} {params}')
+            # h = hash(q + str(params))
+
+            # qself.logger.debug(f'{h} {q} {params}')
 
             def on_done(result):
                 if future.cancelled():
@@ -2116,10 +2117,6 @@ class Cassandra:
                                      block_id_col="height")
 
         return results, paging_state
-
-    # async def list_txs_by_node_type_trx(self, currency, node_type, address, *args, **kwargs):
-    #     results, paging_state = await self.list_txs_by_node_type_eth(currency, node_type, address, *args, **kwargs)
-    #     return [r for r in results if r["to_address"] == address or r["from_address"] == address], paging_state
 
     async def list_txs_by_ids_eth(self,
                                   currency,
