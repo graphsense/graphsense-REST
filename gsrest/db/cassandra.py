@@ -19,7 +19,7 @@ from gsrest.util.eth_logs import decode_db_logs
 from gsrest.errors import NotFoundException, BadUserInputException
 from gsrest.util import is_eth_like
 from gsrest.util.address import (address_to_user_format)
-from gsrest.util.evm import (bytes_to_hex, strip_0x)
+from gsrest.util.evm import (bytes_to_hex, strip_0x, hex_str_to_bytes)
 from gsrest.util.tron import partial_tron_to_partial_evm
 from gsrest.util.node_balances import get_balances
 from gsrest.util.id_group import calculate_id_group_with_overflow
@@ -96,8 +96,8 @@ def build_token_tx(token_currency, tx, token_tx, log):
         "block_id": tx["block_id"],
         "block_timestamp": tx["block_timestamp"],
         "tx_hash": tx["tx_hash"],
-        "from_address": from_hex(token_from["value"]),
-        "to_address": from_hex(token_to["value"]),
+        "from_address": hex_str_to_bytes(strip_0x(token_from["value"])),
+        "to_address": hex_str_to_bytes(strip_0x(token_to["value"])),
         "token_tx_id": log["log_index"],
         "value": value["value"]
     }
@@ -2309,13 +2309,25 @@ class Cassandra:
 
         isOutgoing = no_outgoing_txs < no_incoming_txs
 
-        first_id_group, first_id, second_id_group, second_id, \
-            first_id_secondary_group, second_id_secondary_group = \
-            (address_id_group, address_id, neighbor_id_group, neighbor_id,
-             address_id_secondary_group, neighbor_id_secondary_group) \
+        first_id_group,\
+        first_id,\
+        second_id_group,\
+        second_id,\
+        first_id_secondary_group,\
+        second_id_secondary_group = \
+            (address_id_group,
+             address_id,
+             neighbor_id_group,
+             neighbor_id,
+             address_id_secondary_group,
+             neighbor_id_secondary_group) \
             if isOutgoing \
-            else (neighbor_id_group, neighbor_id, address_id_group, address_id,
-                  neighbor_id_secondary_group, address_id_secondary_group)
+            else (neighbor_id_group,
+                  neighbor_id,
+                  address_id_group,
+                  address_id,
+                  neighbor_id_secondary_group,
+                  address_id_secondary_group)
 
         basequery = ("SELECT transaction_id, currency FROM"
                      " address_transactions WHERE "
@@ -2329,11 +2341,9 @@ class Cassandra:
 
         fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
         paging_state = from_hex(page)
-        has_more_pages = True
-        count = 0
-        tx_ids = []
+        tx_ids = set()
 
-        while count < fetch_size and has_more_pages:
+        while len(tx_ids) < fetch_size:
             results1 = await self.execute_async(
                 currency,
                 'transformed',
@@ -2342,32 +2352,36 @@ class Cassandra:
                     first_id_secondary_group
                 ],
                 paging_state=paging_state,
-                fetch_size=fetch_size)
+                fetch_size=None)
 
             if not results1.current_rows:
                 return [], None
 
             paging_state = results1.paging_state
-            has_more_pages = paging_state is not None
+
+            first_tx_ids = set([(row['transaction_id'], row['currency'])
+                                for row in results1.current_rows])
 
             params = [[
                 second_id_group, second_id, not isOutgoing,
-                second_id_secondary_group, row['currency'],
-                row['transaction_id']
-            ] for row in results1.current_rows]
+                second_id_secondary_group, curr, tx_id
+            ] for (tx_id, curr) in first_tx_ids]
 
             results2 = await self.concurrent_with_args(currency, 'transformed',
                                                        second_query, params)
 
-            for row in results2:
-                tx_ids.append(row['transaction_id'])
-                count += 1
+            fs = fetch_size - len(tx_ids)
+            for row in results2[:fs]:
+                tx_ids.add(row['transaction_id'])
+
+            if paging_state is None:
+                break
 
         # Transaction ids with token_tx_id are needed to load the token tx
         # the underlying tx usually is not between the same entities.
         # So we drop that if that is the case
         all_txs = await self.list_txs_by_ids(currency,
-                                             tx_ids,
+                                             list(tx_ids),
                                              include_token_txs=True)
 
         txs = [
