@@ -94,8 +94,8 @@ def build_token_tx(token_currency, tx, token_tx, log):
         "block_id": tx["block_id"],
         "block_timestamp": tx["block_timestamp"],
         "tx_hash": tx["tx_hash"],
-        "from_address": token_from["value"],
-        "to_address": token_to["value"],
+        "from_address": from_hex(token_from["value"]),
+        "to_address": from_hex(token_to["value"]),
         "token_tx_id": log["log_index"],
         "value": value["value"]
     }
@@ -469,7 +469,7 @@ class Cassandra:
             future = loop.create_future()
 
             h = hash(q + str(params))
-            self.logger.debug(f'{h} {q} {params}')
+            # self.logger.debug(f'{h} {q} {params}')
 
             def on_done(result):
                 if future.cancelled():
@@ -479,8 +479,8 @@ class Cassandra:
                                 params=params,
                                 paging_state=response_future._paging_state)
                 # self.logger.debug(f'{query} {params}')
-                self.logger.debug(
-                    f'{h} result size {len(result.current_rows)}')
+                # self.logger.debug(
+                #     f'{h} result size {len(result.current_rows)}')
                 loop.call_soon_threadsafe(future.set_result, result)
 
             def on_err(result):
@@ -589,14 +589,18 @@ class Cassandra:
             return None
         return self.markup_rates(currency, result)
 
+    # async def list_rates(self, currency, heights):
+    #     result = await self.concurrent_with_args(
+    #         currency, 'transformed',
+    #         "SELECT * FROM exchange_rates WHERE block_id = %s",
+    #         [[h] for h in heights])
+    #     for row in result:
+    #         self.markup_rates(currency, row)
+    #     return result
+
     async def list_rates(self, currency, heights):
-        result = await self.concurrent_with_args(
-            currency, 'transformed',
-            "SELECT * FROM exchange_rates WHERE block_id = %s",
-            [[h] for h in heights])
-        for row in result:
-            self.markup_rates(currency, row)
-        return result
+        aws = [self.get_rates(currency, h) for h in heights]
+        return await asyncio.gather(*aws)
 
     async def list_address_txs(self,
                                currency,
@@ -1448,6 +1452,16 @@ class Cassandra:
             for (token_tx, log) in decoded_token_txs
         ]
 
+    async def fetch_transaction_trace(self, currency, tx, trace_index):
+        r = await self.get_traces_in_block(currency, tx["block_id"],
+                                           trace_index)
+        result = r.current_rows
+        if len(result) != 1:
+            raise NotFoundException(f"Found {len(r)} trace in "
+                                    f"tx {tx['tx_hash']}:"
+                                    f"{trace_index}")
+        return result[0]
+
     async def get_logs_in_block_eth(self,
                                     currency,
                                     block_id,
@@ -1465,6 +1479,18 @@ class Cassandra:
         if log_index is not None:
             query += " and log_index=%s"
             params += [log_index]
+
+        return await self.execute_async(currency, 'raw', query, params)
+
+    @eth
+    async def get_traces_in_block(self, currency, block_id, trace_index):
+        raise Exception("Not implemented")
+
+    async def get_traces_in_block_eth(self, currency, block_id, trace_index):
+        block_group = self.get_block_id_group(currency, block_id)
+        query = ('SELECT * from trace where '
+                 'block_id_group=%s and block_id=%s and trace_index=%s')
+        params = [block_group, block_id, trace_index]
 
         return await self.execute_async(currency, 'raw', query, params)
 
@@ -1994,6 +2020,7 @@ class Cassandra:
             await self.get_id_secondary_group_eth(currency,
                                                   'address_transactions',
                                                   id_group)
+
         sec_in = self.sec_in(secondary_id_group)
 
         if not token_currency:
@@ -2045,6 +2072,7 @@ class Cassandra:
             # fix log index field with new tx_refstruct
             if not use_legacy_log_index:
                 addr_tx["log_index"] = addr_tx["tx_reference"].log_index
+                addr_tx["trace_index"] = addr_tx["tx_reference"].trace_index
 
             full_tx = full_txs[addr_tx['tx_id']]
             if addr_tx["log_index"] is not None:
@@ -2058,6 +2086,13 @@ class Cassandra:
                 value = token_tx['value'] * \
                     (-1 if addr_tx['is_outgoing'] else 1)
 
+            elif currency == "trx" and addr_tx["trace_index"] is not None:
+                trace = await self.fetch_transaction_trace(
+                    currency, full_tx, addr_tx["trace_index"])
+
+                addr_tx['from_address'] = trace['caller_address']
+                addr_tx['to_address'] = trace['transferto_address']
+                value = trace["call_value"]
             else:
                 addr_tx['to_address'] = full_tx['to_address']
                 addr_tx['from_address'] = full_tx['from_address']
@@ -2081,6 +2116,10 @@ class Cassandra:
                                      block_id_col="height")
 
         return results, paging_state
+
+    # async def list_txs_by_node_type_trx(self, currency, node_type, address, *args, **kwargs):
+    #     results, paging_state = await self.list_txs_by_node_type_eth(currency, node_type, address, *args, **kwargs)
+    #     return [r for r in results if r["to_address"] == address or r["from_address"] == address], paging_state
 
     async def list_txs_by_ids_eth(self,
                                   currency,

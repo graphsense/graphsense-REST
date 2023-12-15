@@ -1,9 +1,7 @@
-from gsrest.util.tron import (tron_address_to_evm,
-                              evm_to_tron_address_string)
+from gsrest.util.tron import (tron_address_to_evm, evm_to_tron_address_string)
 from gsrest.util.bch import try_bch_address_to_legacy
-from gsrest.util.evm import (eth_address_to_hex,
-                             is_hex_string, hex_str_to_bytes,
-                             strip_0x)
+from gsrest.util.evm import (eth_address_to_hex, is_hex_string,
+                             hex_str_to_bytes, strip_0x)
 from gsrest.errors import BadUserInputException
 
 

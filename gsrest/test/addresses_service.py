@@ -699,6 +699,7 @@ async def list_address_txs(test_case):
     result = await test_case.request(path,
                                      currency='eth',
                                      address=eth_address.address)
+
     test_case.assertEqual(txs.to_dict()['address_txs'], result['address_txs'])
     result = await test_case.request(path_with_direction,
                                      currency='eth',

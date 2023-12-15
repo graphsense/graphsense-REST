@@ -169,6 +169,7 @@ async def list_neighbors(request,
 
 
 async def add_labels(request, currency, node_type, that, nodes):
+
     def identity(x, y):
         return y
     (field, tfield, fun, fmt) = \
@@ -177,8 +178,7 @@ async def add_labels(request, currency, node_type, that, nodes):
         if node_type == 'address' else \
         ('cluster_id', 'gs_cluster_id', 'list_labels_for_entities', identity)
     thatfield = that + '_' + field
-    ids = tuple((fmt(currency, node[thatfield])
-                 for node in nodes))
+    ids = tuple((fmt(currency, node[thatfield]) for node in nodes))
 
     result = await tagstores(
         request.app['tagstores'], lambda row: row, fun, currency, ids,
@@ -214,22 +214,22 @@ async def links_response(request, currency, result):
         heights = [row['block_id'] for row in links]
         rates = await list_rates(request, currency, heights)
         return Links(links=[
-            TxAccount(tx_hash=row['tx_hash'].hex(),
-                      currency=currency
-                      if "token_tx_id" not in row else row["currency"].lower(),
-                      timestamp=row['block_timestamp'],
-                      height=row['block_id'],
-                      token_tx_id=row.get("token_tx_id", None),
-                      from_address=address_to_user_format(currency,
-                                                          row['from_address']),
-                      to_address=address_to_user_format(currency,
-                                                        row['to_address']),
-                      contract_creation=row.get("contract_creation", None),
-                      value=convert_value(currency, row['value'],
-                                          rates[row['block_id']])
-                      if "token_tx_id" not in row else convert_token_value(
-                          row['value'], rates[row['block_id']],
-                          token_config[row["currency"]])) for row in links
+            TxAccount(
+                tx_hash=row['tx_hash'].hex(),
+                currency=currency
+                if "token_tx_id" not in row else row["currency"].lower(),
+                timestamp=row['block_timestamp'],
+                height=row['block_id'],
+                token_tx_id=row.get("token_tx_id", None),
+                from_address=address_to_user_format(currency,
+                                                    row['from_address']),
+                to_address=address_to_user_format(currency, row['to_address']),
+                contract_creation=row.get("contract_creation", None),
+                value=convert_value(currency, row['value'],
+                                    rates[row['block_id']])
+                if "token_tx_id" not in row else convert_token_value(
+                    row['value'], rates[row['block_id']],
+                    token_config[row["currency"]])) for row in links
         ],
                      next_page=next_page)
 

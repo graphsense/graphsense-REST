@@ -30,6 +30,27 @@ log_signatures = {
                 {
                     "name": "from",
                     "type": "address",
+                    "indexed": False
+                },
+                {
+                    "name": "to",
+                    "type": "address",
+                    "indexed": False
+                },
+                {
+                    "name": "value",
+                    "type": "uint256",
+                    "indexed": False
+                },
+            ],
+        },
+        {
+            "name":
+            "Transfer",
+            "inputs": [
+                {
+                    "name": "from",
+                    "type": "address",
                     "indexed": True
                 },
                 {
