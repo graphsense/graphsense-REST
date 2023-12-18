@@ -21,6 +21,7 @@ from gsrest.util import is_eth_like
 from gsrest.util.address import (address_to_user_format)
 from gsrest.util.evm import (bytes_to_hex, strip_0x)
 from gsrest.util.tron import partial_tron_to_partial_evm
+from gsrest.util.node_balances import get_balances
 
 # import hashlib
 
@@ -363,6 +364,14 @@ class Cassandra:
     def get_token_configuration(self, currency):
         eth_config = self.parameters.get(currency, None)
         return eth_config["token_config"] if eth_config is not None else {}
+
+    def get_balance_provider(self, currency):
+        provider = self.config['currencies'][currency].get(
+            "balance_provider", None)
+        if provider is not None:
+            return partial(get_balances, provider)
+        else:
+            return None
 
     def get_keyspace_mapping(self, currency, keyspace_type):
         if currency is None:
@@ -1761,19 +1770,33 @@ class Cassandra:
         token_currencies = list(token_config.keys())
         balance_currencies = [currency.upper()] + token_currencies
 
-        if 'address_id_group' not in row:
-            row['address_id_group'] = \
-                self.get_id_group(currency, row['address_id'])
-        query = 'SELECT balance from balance where address_id=%s '\
-                'and address_id_group=%s ' \
-                "and currency=%s"
+        balance_provider = self.get_balance_provider(currency)
 
-        results = {
-            c: one(await self.execute_async(
-                currency, 'transformed', query,
-                [row['address_id'], row['address_id_group'], c]))
-            for c in balance_currencies
-        }
+        results = None
+        if balance_provider is not None:
+            # load balance from alternative provider.
+            try:
+                results = await balance_provider(currency, row["address"],
+                                                 token_config)
+            except Exception as e:
+                self.logger.warning(
+                    f"Could not fetch balances over alternative provider: {e}")
+
+        if results is None:
+            # load results from gs database
+            if 'address_id_group' not in row:
+                row['address_id_group'] = \
+                    self.get_id_group(currency, row['address_id'])
+            query = 'SELECT balance from balance where address_id=%s '\
+                    'and address_id_group=%s ' \
+                    "and currency=%s"
+
+            results = {
+                c: one(await self.execute_async(
+                    currency, 'transformed', query,
+                    [row['address_id'], row['address_id_group'], c]))
+                for c in balance_currencies
+            }
 
         if results[currency.upper()] is None:
             results[currency.upper()] = {
@@ -1781,6 +1804,13 @@ class Cassandra:
                 row['total_received'].value - row['total_spent'].value
             }
         row['balance'] = results[currency.upper()]["balance"]
+
+        if currency == "trx":
+            # our self compute balances can get negative for now
+            # since we have not implemented all special tx types
+            # in our logic yet
+            row['balance'] = max(row['balance'], 0)
+
         # TODO: Some accounts have negative balances, this does not make sense.
         # for now we cap with 0 in case of negative
         # Exp. for now is that we either lost some token txs somewhere or
