@@ -211,27 +211,9 @@ async def links_response(request, currency, result):
     if is_eth_like(currency):
         db = request.app['db']
         token_config = db.get_token_configuration(currency)
-        heights = [row['block_id'] for row in links]
-        rates = await list_rates(request, currency, heights)
-        return Links(links=[
-            TxAccount(
-                tx_hash=row['tx_hash'].hex(),
-                currency=currency
-                if "token_tx_id" not in row else row["currency"].lower(),
-                timestamp=row['block_timestamp'],
-                height=row['block_id'],
-                token_tx_id=row.get("token_tx_id", None),
-                from_address=address_to_user_format(currency,
-                                                    row['from_address']),
-                to_address=address_to_user_format(currency, row['to_address']),
-                contract_creation=row.get("contract_creation", None),
-                value=convert_value(currency, row['value'],
-                                    rates[row['block_id']])
-                if "token_tx_id" not in row else convert_token_value(
-                    row['value'], rates[row['block_id']],
-                    token_config[row["currency"]])) for row in links
-        ],
-                     next_page=next_page)
+        return Links(
+            links=await txs_from_rows(request, currency, links, token_config),
+            next_page=next_page)
 
     heights = [row['height'] for row in links]
     rates = await list_rates(request, currency, heights)

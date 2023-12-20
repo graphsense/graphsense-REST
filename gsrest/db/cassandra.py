@@ -1,7 +1,9 @@
+import pdb
 import re
 import time
 import asyncio
 import heapq
+import pprint
 from async_lru import alru_cache
 from typing import Sequence, Optional, Tuple
 from functools import partial
@@ -478,9 +480,9 @@ class Cassandra:
             loop = asyncio.get_event_loop()
             future = loop.create_future()
 
-            # h = hash(q + str(params))
+            h = hash(q + str(params))
 
-            # qself.logger.debug(f'{h} {q} {params}')
+            #self.logger.debug(f'{h} {q} {params}')
 
             def on_done(result):
                 if future.cancelled():
@@ -489,9 +491,8 @@ class Cassandra:
                 result = Result(current_rows=result,
                                 params=params,
                                 paging_state=response_future._paging_state)
-                # self.logger.debug(f'{query} {params}')
-                # self.logger.debug(
-                #     f'{h} result size {len(result.current_rows)}')
+                #self.logger.debug(f'{query} {params}')
+                #self.logger.debug(f'{h} result size {len(result.current_rows)}')
                 loop.call_soon_threadsafe(future.set_result, result)
 
             def on_err(result):
@@ -540,7 +541,7 @@ class Cassandra:
                         results.append(result)
                 continue
             if not keep_meta:
-                results.append(result.current_rows)
+                results.extend(result.current_rows)
             else:
                 results.append(result)
         return results
@@ -667,7 +668,6 @@ class Cassandra:
         except ValueError:
             raise BadUserInputException(f"Page {page} is not an integer")
 
-        # self.logger.debug(f'page {page}')
         if node_type == 'address':
             id, id_group = \
                 await self.get_address_id_id_group(currency, id)
@@ -1497,15 +1497,15 @@ class Cassandra:
 
         return await self.execute_async(currency, 'raw', query, params)
 
-    @eth
-    async def get_traces_in_block(self, currency, block_id, trace_index):
-        raise Exception("Not implemented")
-
-    async def get_traces_in_block_eth(self, currency, block_id, trace_index):
+    async def get_traces_in_block(self, currency, block_id, trace_index=None):
         block_group = self.get_block_id_group(currency, block_id)
         query = ('SELECT * from trace where '
-                 'block_id_group=%s and block_id=%s and trace_index=%s')
-        params = [block_group, block_id, trace_index]
+                 'block_id_group=%s and block_id=%s')
+
+        params = [block_group, block_id]
+        if trace_index is not None:
+            query += " and trace_index=%s"
+            params += [trace_index]
 
         return await self.execute_async(currency, 'raw', query, params)
 
@@ -2021,7 +2021,9 @@ class Cassandra:
 
             # collect and merge results
             more_results, page = merge_address_txs_subquery_results(
-                [r.current_rows for r in await asyncio.gather(*aws)], fs_it)
+                [r.current_rows for r in await asyncio.gather(*aws)],
+                fs_it,
+                'transaction_id')
 
             results.extend(more_results)
             if page is None:
@@ -2076,16 +2078,11 @@ class Cassandra:
             if max_height and last_tx_id:
                 upper_bound = last_tx_id + 1
 
-        use_legacy_log_index = self.parameters[currency][
-            "use_legacy_log_index"]
-
-        ref_field = "log_index" if use_legacy_log_index else "tx_reference"
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
 
         results, paging_state = await self.list_address_txs_ordered(
             network=currency,
             table_prefix="address",
-            cols=["transaction_id as tx_id", "is_outgoing", ref_field],
             item_id=address_id,
             item_id_group=id_group,
             item_id_secondary_group=sec_in,
@@ -2096,8 +2093,15 @@ class Cassandra:
             page=page,
             fetch_size=fetch_size)
 
-        txs = [row for row in results]
-        tx_ids = [tx['tx_id'] for tx in txs]
+        results = await self.normalize_address_transactions(currency, results)
+
+        return results, paging_state
+
+
+    async def normalize_address_transactions(self, currency, txs):
+        use_legacy_log_index = self.parameters[currency]["use_legacy_log_index"]
+
+        tx_ids = [tx['transaction_id'] for tx in txs]
 
         full_txs = {
             tx_id: tx_row
@@ -2110,7 +2114,7 @@ class Cassandra:
                 addr_tx["log_index"] = addr_tx["tx_reference"].log_index
                 addr_tx["trace_index"] = addr_tx["tx_reference"].trace_index
 
-            full_tx = full_txs[addr_tx['tx_id']]
+            full_tx = full_txs[addr_tx['transaction_id']]
             if addr_tx["log_index"] is not None:
                 token_tx = await self.fetch_token_transaction(
                     currency, full_tx, addr_tx["log_index"])
@@ -2150,8 +2154,7 @@ class Cassandra:
                                      addr_tx,
                                      timestamp_col="timestamp",
                                      block_id_col="height")
-
-        return results, paging_state
+        return txs
 
     async def list_txs_by_ids_eth(self,
                                   currency,
@@ -2329,7 +2332,7 @@ class Cassandra:
                   neighbor_id_secondary_group,
                   address_id_secondary_group)
 
-        basequery = ("SELECT transaction_id, currency FROM"
+        basequery = (f"SELECT * FROM"
                      " address_transactions WHERE "
                      "address_id_group = %s AND address_id = %s "
                      "AND is_outgoing = %s ")
@@ -2341,9 +2344,9 @@ class Cassandra:
 
         fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
         paging_state = from_hex(page)
-        tx_ids = set()
+        txs = []
 
-        while len(tx_ids) < fetch_size:
+        while len(txs) < fetch_size:
             results1 = await self.execute_async(
                 currency,
                 'transformed',
@@ -2368,22 +2371,21 @@ class Cassandra:
             ] for (tx_id, curr) in first_tx_ids]
 
             results2 = await self.concurrent_with_args(currency, 'transformed',
-                                                       second_query, params)
+                                                       second_query, params,
+                                                       return_one=False,
+                                                       keep_meta=False)
 
-            fs = fetch_size - len(tx_ids)
+            fs = fetch_size - len(txs)
             for row in results2[:fs]:
-                tx_ids.add(row['transaction_id'])
+                txs.append(row)
 
             if paging_state is None:
                 break
 
-        # Transaction ids with token_tx_id are needed to load the token tx
-        # the underlying tx usually is not between the same entities.
-        # So we drop that if that is the case
-        all_txs = await self.list_txs_by_ids(currency,
-                                             list(tx_ids),
-                                             include_token_txs=True)
+        all_txs = await self.normalize_address_transactions(currency, txs)
 
+        # Token/Trace transactions might not be between the requested nodes
+        # so only keep the relevant ones
         txs = [
             tx for tx in all_txs
             if tx["to_address"] == neighbor and tx["from_address"] == address
