@@ -18,6 +18,7 @@ async def list_tags_by_address(request,
                                address,
                                page=None,
                                pagesize=None):
+    address = address_to_user_format(currency, address)
     return await common.list_tags_by_address(request,
                                              currency,
                                              address,

@@ -232,7 +232,7 @@ class Tagstore:
                         t.tagpack=tp.id
                         and c.id=t.confidence
                         and t.currency = %s
-                        and t.address ILIKE %s
+                        and t.address = %s
                         and acm.address=t.address
                         and acm.currency=t.currency
                         {hide_private_condition(show_private)}
