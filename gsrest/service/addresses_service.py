@@ -1,12 +1,15 @@
+import pdb
 from openapi_server.models.address_txs import AddressTxs
 from gsrest.service.entities_service import get_entity, from_row
 from gsrest.service.rates_service import get_rates
 import gsrest.service.common_service as common
-from gsrest.errors import NotFoundException
-from gsrest.util.address import cannonicalize_address, address_to_user_format
+from gsrest.service.common_service import cannonicalize_address
+from gsrest.errors import *
+from gsrest.util.address import address_to_user_format
 from openapi_server.models.neighbor_addresses import NeighborAddresses
 from openapi_server.models.neighbor_address import NeighborAddress
 import asyncio
+from gsrest.db.node_type import NodeType
 
 
 async def get_address(request, currency, address):
@@ -66,7 +69,7 @@ async def list_address_neighbors(request,
 
     results, paging_state = \
         await common.list_neighbors(request, currency, address, direction,
-                                    'address', ids=only_ids,
+                                    NodeType.ADDRESS, ids=only_ids,
                                     include_labels=include_labels,
                                     page=page, pagesize=pagesize)
     is_outgoing = "out" in direction
@@ -111,45 +114,23 @@ async def list_address_links(request,
     return await common.links_response(request, currency, result)
 
 
-async def try_get_delta_update_entity_dummy(request, currency, address,
-                                            notfound):
-    db = request.app['db']
-    try:
-        aws = [get_rates(request, currency), db.new_entity(currency, address)]
-        [rates, entity] = await asyncio.gather(*aws)
-    except NotFoundException as e:
-        if 'not found' not in str(e):
-            raise e
-        raise notfound
-    return from_row(currency, entity, rates['rates'],
-                    db.get_token_configuration(currency))
-
-
 async def get_address_entity(request, currency, address):
     address_canonical = cannonicalize_address(currency, address)
     db = request.app['db']
 
-    notfound = NotFoundException(
-        'Entity for address {} not found'.format(address))
     try:
         entity_id = await db.get_address_entity_id(currency, address_canonical)
-    except NotFoundException as e:
-        if 'not found' not in str(e):
-            raise e
-        return await try_get_delta_update_entity_dummy(request, currency,
-                                                       address_canonical,
-                                                       notfound)
+    except AddressNotFoundException:
+        aws = [get_rates(request, currency), db.new_entity(currency, address_canonical)]
+        [rates, entity] = await asyncio.gather(*aws)
+        return from_row(currency, entity, rates['rates'],
+                        db.get_token_configuration(currency))
 
-    if entity_id is None:
-        return await try_get_delta_update_entity_dummy(request, currency,
-                                                       address_canonical,
-                                                       notfound)
-
-    result = await get_entity(request,
-                              currency,
-                              entity_id,
-                              include_actors=True)
-    if result is None:
-        raise notfound
-
-    return result
+    try:
+        return await get_entity(request,
+                                currency,
+                                entity_id,
+                                include_actors=True)
+    except ClusterNotFoundException:
+        raise DBInconsistencyException(
+            f'entity referenced by {address} in {currency} not found')

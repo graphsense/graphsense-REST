@@ -5,7 +5,7 @@ from openapi_server.models.tx_value import TxValue
 from openapi_server.models.tx_ref import TxRef
 from gsrest.service.rates_service import get_rates
 from gsrest.util.values import convert_value, convert_token_value
-from gsrest.errors import NotFoundException
+from gsrest.errors import TransactionNotFoundException, NotFoundException, BadUserInputException
 from gsrest.util import is_eth_like
 from gsrest.util.address import address_to_user_format
 
@@ -85,10 +85,6 @@ def io_from_rows(currency, values, key, rates, include_io):
 async def list_token_txs(request, currency, tx_hash, token_tx_id=None):
     db = request.app['db']
     results = await db.list_token_txs(currency, tx_hash, log_index=token_tx_id)
-    if results is None:
-        raise NotFoundException(
-            'Transaction {} in keyspace {} not found'.format(
-                tx_hash, currency))
 
     results = [
         from_row(currency, result, (await
@@ -117,19 +113,12 @@ async def get_tx(request,
             if len(results):
                 return results[0]
             else:
-                raise NotFoundException(
-                    'Token transaction {}:{} in keyspace {} not found'.format(
-                        tx_hash, token_tx_id, currency))
+                raise TransactionNotFoundException(currency, tx_hash, token_tx_id)
         else:
-            raise NotFoundException(
+            raise BadUserInputException(
                 f'{currency} does not support token transactions.')
     else:
         result = await db.get_tx(currency, tx_hash)
-        if result is None:
-            raise NotFoundException(
-                'Transaction {} in keyspace {} not found'.format(
-                    tx_hash, currency))
-
         rates = (await get_rates(request, currency,
                                  result['block_id']))['rates']
 

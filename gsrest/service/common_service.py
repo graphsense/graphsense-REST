@@ -1,3 +1,4 @@
+import pdb
 from openapi_server.models.address import Address
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.address_tags import AddressTags
@@ -12,11 +13,13 @@ from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from openapi_server.models.labeled_item_ref import LabeledItemRef
 from gsrest.service.rates_service import list_rates
 from gsrest.db.util import tagstores, tagstores_with_paging
+from gsrest.db.node_type import NodeType
 from gsrest.service.tags_service import address_tag_from_row
 from gsrest.util import get_first_key_present
-from gsrest.errors import NotFoundException, BadUserInputException
+from gsrest.errors import AddressNotFoundException, BadUserInputException
 from psycopg2.errors import InvalidTextRepresentation
-from gsrest.util.address import cannonicalize_address, address_to_user_format
+import gsrest.util.address
+from gsrest.util.address import address_to_user_format
 from gsrest.util import is_eth_like
 
 
@@ -86,16 +89,23 @@ async def txs_from_rows(request, currency, rows, token_config):
     ]
 
 
+def cannonicalize_address(currency, address):
+    try:
+        return gsrest.util.address.cannonicalize_address(currency, address)
+    except ValueError:
+        raise BadUserInputException(
+            "The address provided does not look"
+            f" like a {currency.upper()} address: {address}")
+
+
+
 async def get_address(request, currency, address):
-    request.app.logger.debug(f'address before canonical {address}')
     address_canonical = cannonicalize_address(currency, address)
     db = request.app['db']
-    request.app.logger.debug(f'address after canonical {address_canonical}')
-    result = await db.get_address(currency, address_canonical)
-
-    if not result:
-        raise NotFoundException("Address {} not found in currency {}".format(
-            address, currency))
+    try:
+        result = await db.get_address(currency, address_canonical)
+    except AddressNotFoundException:
+        result = await db.new_address(currency, address_canonical)
 
     actors = tagstores(
         request.app['tagstores'],
@@ -136,13 +146,11 @@ async def list_neighbors(request,
                          currency,
                          id,
                          direction,
-                         node_type,
+                         node_type: NodeType,
                          ids=None,
                          include_labels=False,
                          page=None,
                          pagesize=None):
-    if node_type not in ['address', 'entity']:
-        raise NotFoundException(f'Unknown node type {node_type}')
     is_outgoing = "out" in direction
     db = request.app['db']
     results, paging_state = await db.list_neighbors(currency,
@@ -168,14 +176,14 @@ async def list_neighbors(request,
     return results, paging_state
 
 
-async def add_labels(request, currency, node_type, that, nodes):
+async def add_labels(request, currency, node_type: NodeType, that, nodes):
 
     def identity(x, y):
         return y
     (field, tfield, fun, fmt) = \
         ('address', 'address', 'list_labels_for_addresses',
          address_to_user_format) \
-        if node_type == 'address' else \
+        if node_type == NodeType.ADDRESS else \
         ('cluster_id', 'gs_cluster_id', 'list_labels_for_entities', identity)
     thatfield = that + '_' + field
     ids = tuple((fmt(currency, node[thatfield]) for node in nodes))
@@ -184,7 +192,7 @@ async def add_labels(request, currency, node_type, that, nodes):
         request.app['tagstores'], lambda row: row, fun, currency, ids,
         request.app['request_config']['show_private_tags'])
     iterator = iter(result)
-    if node_type == 'address':
+    if node_type == NodeType.ADDRESS:
         nodes = sorted(nodes, key=lambda node: node[thatfield])
 
     stop_iteration = False
@@ -206,7 +214,6 @@ async def add_labels(request, currency, node_type, that, nodes):
 
 
 async def links_response(request, currency, result):
-
     links, next_page = result
     if is_eth_like(currency):
         db = request.app['db']

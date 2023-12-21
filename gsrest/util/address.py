@@ -2,25 +2,19 @@ from gsrest.util.tron import (tron_address_to_evm, evm_to_tron_address_string)
 from gsrest.util.bch import try_bch_address_to_legacy
 from gsrest.util.evm import (eth_address_to_hex, is_hex_string,
                              hex_str_to_bytes, strip_0x)
-from gsrest.errors import BadUserInputException
 
 
 def cannonicalize_address(currency, address: str):
-    try:
-        if currency == "trx":
-            return tron_address_to_evm(address, validate=False)
-        elif currency == "bch":
-            return try_bch_address_to_legacy(address)
-        elif currency == "eth":
-            return hex_str_to_bytes(strip_0x(address))
-        elif isinstance(address, str):
-            return address
-        else:
-            raise ValueError()
-    except ValueError:
-        raise BadUserInputException(
-            "The address provided does not look"
-            f" like a {currency.upper()} address: {address}")
+    if currency == "trx":
+        return tron_address_to_evm(address, validate=False)
+    elif currency == "bch":
+        return try_bch_address_to_legacy(address)
+    elif currency == "eth":
+        return hex_str_to_bytes(strip_0x(address))
+    elif isinstance(address, str):
+        return address
+    else:
+        raise ValueError()
 
 
 def address_to_user_format(currency, db_address) -> str:

@@ -1,3 +1,5 @@
+import pdb
+from pprint import pprint
 from gsrest.service.common_service import get_address
 from gsrest.service.rates_service import get_rates
 from openapi_server.models.neighbor_entities import NeighborEntities
@@ -12,12 +14,13 @@ from gsrest.util.values import (convert_value, to_values,
 from openapi_server.models.entity_addresses import EntityAddresses
 from gsrest.db.util import tagstores, tagstores_with_paging
 from gsrest.service.tags_service import address_tag_from_row
-from gsrest.errors import NotFoundException, BadUserInputException
+from gsrest.errors import ClusterNotFoundException, BadUserInputException
 import gsrest.service.common_service as common
 import importlib
 import asyncio
 import time
 from gsrest.util.address import address_to_user_format
+from gsrest.db.node_type import NodeType
 
 MAX_DEPTH = 7
 TAGS_PAGE_SIZE = 100
@@ -84,7 +87,7 @@ async def get_entity(request,
     result = await db.get_entity(currency, entity)
 
     if result is None:
-        raise NotFoundException("Entity {} not found".format(entity))
+        raise ClusterNotFoundException(currency, entity)
 
     tags = None
     count = 0
@@ -127,7 +130,7 @@ async def list_entity_neighbors(request,
                                 include_actors=False):
     results, paging_state = \
         await common.list_neighbors(request, currency, entity, direction,
-                                    'entity',
+                                    NodeType.CLUSTER,
                                     only_ids, include_labels, page,
                                     pagesize)
     is_outgoing = "out" in direction

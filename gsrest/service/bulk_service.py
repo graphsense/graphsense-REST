@@ -176,18 +176,17 @@ async def wrap(request, operation, currency, params, keys, num_pages, format,
 
 
 def stack(request, currency, operation, body, num_pages, format):
-    try:
-        for api in apis:
+    for api in apis:
+        try:
             mod = importlib.import_module(f'gsrest.service.{api}_service')
             if hasattr(mod, operation):
                 operation_name = operation
                 operation = getattr(mod, operation)
                 break
-    except ModuleNotFoundError:
-        raise NotFoundException(f'API {api} not found')
-    except AttributeError:
-        raise NotFoundException(f'{api}.{operation}'
-                                ' not found')
+        except ModuleNotFoundError:
+            raise NotFoundException(f'API {api} not found')
+        except AttributeError:
+            raise NotFoundException(f'{api}.{operation} not found')
     aws = []
 
     max_concurrency_bulk_operation = request.app['config']['database'].get(

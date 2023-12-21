@@ -16,15 +16,15 @@ from cassandra.policies import DCAwareRoundRobinPolicy, TokenAwarePolicy
 from cassandra.query import SimpleStatement, dict_factory, ValueSequence
 from math import floor, ceil
 
-from gsrest.util.exceptions import BadConfigError
 from gsrest.util.eth_logs import decode_db_logs
-from gsrest.errors import NotFoundException, BadUserInputException
+from gsrest.errors import *
 from gsrest.util import is_eth_like
 from gsrest.util.address import (address_to_user_format)
 from gsrest.util.evm import (bytes_to_hex, strip_0x, hex_str_to_bytes)
 from gsrest.util.tron import partial_tron_to_partial_evm
 from gsrest.util.node_balances import get_balances
 from gsrest.util.id_group import calculate_id_group_with_overflow
+from gsrest.db.node_type import NodeType
 
 # import hashlib
 
@@ -37,7 +37,7 @@ class NetworkParameters(UserDict):
 
     def __getitem__(self, network):
         if network not in self:
-            raise NotFoundException(f'Network {network} not supported.')
+            raise NetworkNotFoundException(network)
         return super().__getitem__(network)
 
 
@@ -355,7 +355,7 @@ class Cassandra:
 
     def get_prefix_lengths(self, currency):
         if currency not in self.parameters:
-            raise NotFoundException(f'{currency} not found')
+            raise NetworkNotFoundException(currency)
         p = self.parameters[currency]
         return \
             {'address': p['address_prefix_length'],
@@ -491,8 +491,9 @@ class Cassandra:
                 result = Result(current_rows=result,
                                 params=params,
                                 paging_state=response_future._paging_state)
-                #self.logger.debug(f'{query} {params}')
-                #self.logger.debug(f'{h} result size {len(result.current_rows)}')
+                if "address_transactions" in query:
+                    self.logger.debug(f'{query} {params}')
+                    self.logger.debug(f'{h} result size {len(result.current_rows)}')
                 loop.call_soon_threadsafe(future.set_result, result)
 
             def on_err(result):
@@ -584,8 +585,7 @@ class Cassandra:
     async def list_block_txs(self, currency, height):
         tx_ids = await self.list_block_txs_ids(currency, height)
         if tx_ids is None:
-            raise NotFoundException(
-                f'Block {height} not found in currency {currency}')
+            raise BlockNotFoundException(currency, height)
         tx_ids = sorted(list(set(tx_ids)))
         return await self.list_txs_by_ids(currency,
                                           tx_ids,
@@ -624,7 +624,7 @@ class Cassandra:
                                page=None,
                                pagesize=None):
         return await self.list_txs_by_node_type(currency,
-                                                'address',
+                                                NodeType.ADDRESS,
                                                 address,
                                                 direction,
                                                 min_height=min_height,
@@ -643,7 +643,7 @@ class Cassandra:
                               page=None,
                               pagesize=None):
         return await self.list_txs_by_node_type(currency,
-                                                'cluster',
+                                                NodeType.CLUSTER,
                                                 entity,
                                                 direction,
                                                 min_height=min_height,
@@ -655,7 +655,7 @@ class Cassandra:
     @eth
     async def list_txs_by_node_type(self,
                                     currency,
-                                    node_type,
+                                    node_type: NodeType,
                                     id,
                                     direction,
                                     min_height=None,
@@ -668,7 +668,7 @@ class Cassandra:
         except ValueError:
             raise BadUserInputException(f"Page {page} is not an integer")
 
-        if node_type == 'address':
+        if node_type == NodeType.ADDRESS:
             id, id_group = \
                 await self.get_address_id_id_group(currency, id)
             query = ("SELECT * FROM address WHERE address_id = %s"
@@ -683,8 +683,7 @@ class Cassandra:
                                               [id_group, id])
 
         if not result:
-            raise NotFoundException(
-                f'{node_type} {id} not found in currency {currency}')
+            raise nodeNotFoundException(currency, node_type, id)
 
         upper_bound = None
         first_tx_id = None
@@ -708,7 +707,7 @@ class Cassandra:
 
         results, paging_state = await self.list_address_txs_ordered(
             network=currency,
-            table_prefix=node_type,
+            table_prefix=str(node_type),
             item_id=id,
             item_id_group=id_group,
             item_id_secondary_group=None,
@@ -802,8 +801,6 @@ class Cassandra:
         if not self.parameters[currency]["use_delta_updater_v1"]:
             return None
         prefix = self.scrub_prefix(currency, address)
-        if not prefix:
-            return None
         if is_eth_like(currency):
             prefix = prefix.upper()
         prefix_length = self.get_prefix_lengths(currency)['address']
@@ -817,12 +814,11 @@ class Cassandra:
         except InvalidRequest as e:
             if 'new_addresses' not in str(e):
                 raise e
-            return None
+
+        return None
 
     async def get_address_id(self, currency, address):
         prefix = self.scrub_prefix(currency, address)
-        if not prefix:
-            return None
         if is_eth_like(currency):
             prefix = prefix.upper()
         query = ("SELECT address_id FROM address_ids_by_address_prefix "
@@ -839,15 +835,13 @@ class Cassandra:
     async def get_address_id_id_group(self, currency, address):
         address_id = await self.get_address_id(currency, address)
         if address_id is None:
-            raise NotFoundException(
-                "Address {} not found in currency {}".format(
-                    address, currency))
+            raise AddressNotFoundException(currency, address)
         id_group = self.get_id_group(currency, address_id)
         return address_id, id_group
 
     def get_id_group(self, keyspace, id_):
         if keyspace not in self.parameters:
-            raise NotFoundException(f'{keyspace} not found')
+            raise NetworkNotFoundException(keyspace)
         bucket_size = self.parameters[keyspace]['bucket_size']
         gid = floor(int(id_) / bucket_size)
         if gid.bit_length() > 32:
@@ -860,13 +854,13 @@ class Cassandra:
 
     def get_block_id_group(self, keyspace, id_):
         if keyspace not in self.parameters:
-            raise NotFoundException(f'{keyspace} not found')
+            raise NetworkNotFoundException(keyspace)
         return floor(int(id_) / self.parameters[keyspace]['block_bucket_size'])
 
     @eth
     def get_tx_id_group(self, keyspace, id_):
         if keyspace not in self.parameters:
-            raise NotFoundException(f'{keyspace} not found')
+            raise NetworkNotFoundException(keyspace)
         return floor(int(id_) / self.parameters[keyspace]['tx_bucket_size'])
 
     def get_tx_id_group_eth(self, keyspace, id_):
@@ -875,9 +869,7 @@ class Cassandra:
     async def new_address(self, currency, address):
         data = await self.get_new_address(currency, address)
         if data is None:
-            raise NotFoundException(
-                "Address {} not found in currency {}".format(
-                    address, currency))
+            raise AddressNotFoundException(currency, address)
         Values = namedtuple('Values', ['value', 'fiat_values'])
         zero_values = \
             Values(
@@ -929,18 +921,13 @@ class Cassandra:
         if not result:
             if not is_eth_like(currency):
                 return None
-            raise NotFoundException(
-                f'Address {address_id} has no external transactions')
+            raise AddressNotFoundException(currency, address_id,
+                                           no_external_txs=True)
         return result["address"]
 
     async def get_address(self, currency, address):
-        try:
-            address_id, address_id_group = \
-                await self.get_address_id_id_group(currency, address)
-        except NotFoundException as e:
-            if 'not found' not in str(e):
-                raise e
-            return await self.new_address(currency, address)
+        address_id, address_id_group = \
+            await self.get_address_id_id_group(currency, address)
         query = ("SELECT * FROM address WHERE address_id = %s"
                  " AND address_id_group = %s")
         result = await self.execute_async(currency, 'transformed', query,
@@ -950,8 +937,8 @@ class Cassandra:
         if not result:
             if not is_eth_like(currency):
                 return None
-            raise NotFoundException(
-                f'Address {address} has no external transactions')
+            raise AddressNotFoundException(currency, address,
+                                           no_external_txs=True)
 
         return await self.finish_address(currency, result)
 
@@ -966,7 +953,10 @@ class Cassandra:
                                           [address_id_group, address_id])
         result = one(result)
         if not result:
-            return None, None
+            raise DBInconsistencyException(
+                f'address {address} in {currency} with id '
+                f'{address_id} and id_group {address_id_group} '
+                f'not found in address table')
         return result['cluster_id']
 
     async def list_address_links(self,
@@ -976,7 +966,7 @@ class Cassandra:
                                  page=None,
                                  pagesize=None):
         return await self.list_links(currency,
-                                     'address',
+                                     NodeType.ADDRESS,
                                      address,
                                      neighbor,
                                      page=page,
@@ -989,7 +979,7 @@ class Cassandra:
                                 page=None,
                                 pagesize=None):
         return await self.list_links(currency,
-                                     'cluster',
+                                     NodeType.CLUSTER,
                                      address,
                                      neighbor,
                                      page=page,
@@ -998,12 +988,12 @@ class Cassandra:
     @eth
     async def list_links(self,
                          currency,
-                         node_type,
+                         node_type: NodeType,
                          id,
                          neighbor,
                          page=None,
                          pagesize=None):
-        if node_type == 'address':
+        if node_type == NodeType.ADDRESS:
             id, id_group = \
                 await self.get_address_id_id_group(currency, id)
             neighbor_id, neighbor_id_group = \
@@ -1012,10 +1002,6 @@ class Cassandra:
             id_group = self.get_id_group(currency, id)
             neighbor_id = neighbor
             neighbor_id_group = self.get_id_group(currency, neighbor_id)
-
-        if id is None or neighbor_id is None:
-            raise NotFoundException("Links between {} and {} not found".format(
-                id, neighbor))
 
         query = \
             f"SELECT no_{{direction}}_txs FROM {node_type}"\
@@ -1111,8 +1097,6 @@ class Cassandra:
             return []
         norm = identity
         prefix = self.scrub_prefix(currency, expression)
-        if not prefix:
-            return []
         prefix = prefix[:prefix_lengths['address']]
         if is_eth_like(currency):
             # eth addresses are case insensitive
@@ -1167,7 +1151,7 @@ class Cassandra:
                                           [entity_id_group, entity])
         result = one(result)
         if not result:
-            return None
+            raise ClusterNotFoundException(currency, entity)
         return (await self.finish_entities(currency, [result]))[0]
 
     @eth
@@ -1234,26 +1218,24 @@ class Cassandra:
         return await self.finish_addresses(currency, result), \
             to_hex(results.paging_state)
 
-    async def list_neighbors(self, currency, id, is_outgoing, node_type,
+    async def list_neighbors(self, currency, id, is_outgoing,
+                             node_type: NodeType,
                              targets, page, pagesize):
         orig_node_type = node_type
         orig_id = id
-        if node_type == 'address':
+        if node_type == NodeType.ADDRESS:
             id = await self.get_address_id(currency, id)
             if id is None:
                 # check if new address exists
                 if await self.get_new_address(currency, orig_id):
                     return [], None
+                raise AddressNotFoundException(currency, orig_id)
 
-        elif node_type == 'entity':
+        elif node_type == NodeType.CLUSTER:
             id = int(id)
-            node_type = 'cluster'
             if is_eth_like(currency):
-                node_type = 'address'
+                node_type = NodeType.ADDRESS
 
-        if id is None:
-            raise NotFoundException("{} not found in currency {}".format(
-                orig_id, currency))
 
         if is_outgoing:
             direction, this, that = ('outgoing', 'src', 'dst')
@@ -1309,13 +1291,13 @@ class Cassandra:
             results = await self.concurrent_with_args(currency, 'transformed',
                                                       query, params)
 
-        if orig_node_type == 'entity' and is_eth_like(currency):
+        if orig_node_type == NodeType.CLUSTER and is_eth_like(currency):
             for neighbor in results:
                 neighbor['address_id'] = \
                     neighbor[that + '_cluster_id'] = \
                     neighbor[that + '_address_id']
 
-        if orig_node_type == 'address':
+        if orig_node_type == NodeType.ADDRESS:
             ids = [row[that + '_address_id'] for row in results]
             addresses = await self.get_addresses_by_ids(currency,
                                                         ids,
@@ -1403,25 +1385,8 @@ class Cassandra:
             f"Currency {currency} does not support transaction level linking")
 
     @eth
-    async def get_tx(self, currency, tx_hash):
-        prefix = self.get_prefix_lengths(currency)
-        query = ('SELECT tx_id from transaction_by_tx_prefix where '
-                 'tx_prefix=%s and tx_hash=%s')
-        params = [tx_hash[:prefix['tx']], bytearray.fromhex(tx_hash)]
-        result = await self.execute_async(currency, 'raw', query, params)
-        result = one(result)
-        if not result:
-            raise NotFoundException(
-                f'Transaction {tx_hash} not found in {currency}')
-        id = result['tx_id']
-        params = [self.get_tx_id_group(currency, id), id]
-        fields = ("tx_hash, coinbase, block_id, timestamp,"
-                  "total_input, total_output")
-        fields += ",inputs,outputs"
-        query = (f'SELECT {fields} FROM transaction WHERE '
-                 'tx_id_group = %s and tx_id = %s')
-        result = await self.execute_async(currency, 'raw', query, params)
-        return one(result)
+    def get_tx(self, currency, tx_hash):
+        return self.get_tx_by_hash(currency, tx_hash)
 
     @eth
     async def list_token_txs(self, currency, tx_hash, log_index=None):
@@ -1429,9 +1394,6 @@ class Cassandra:
 
     async def list_token_txs_eth(self, currency, tx_hash, log_index=None):
         tx = await self.get_tx(currency, tx_hash)
-        if tx is None:
-            return None
-
         return await self.fetch_token_transactions(currency, tx, log_index)
 
     async def fetch_token_transaction(self, currency, tx, log_index):
@@ -1570,7 +1532,7 @@ class Cassandra:
             expression = strip_0x(expression)
 
         if currency not in self.parameters:
-            raise NotFoundException(f'{currency} not found')
+            raise NetworkNotFoundException(currency)
 
         bech32_prefix = self.parameters[currency].get('bech_32_prefix', '')
         return expression[len(bech32_prefix):] \
@@ -1595,16 +1557,21 @@ class Cassandra:
                                           include_token_txs=include_token_txs)
 
     @eth
-    async def get_tx_by_hash(self, currency, hash):
+    async def get_tx_by_hash(self, currency, tx_hash):
         prefix = self.get_prefix_lengths(currency)
-        params = [hash[:prefix['tx']], bytearray.fromhex(hash)]
+        params = [tx_hash[:prefix['tx']], bytearray.fromhex(tx_hash)]
         statement = ('SELECT tx_id from transaction_by_tx_prefix where '
                      'tx_prefix=%s and tx_hash=%s')
         result = await self.execute_async(currency, 'raw', statement, params)
         result = one(result)
         if not result:
-            return None
-        return self.get_tx_by_id(currency, result['tx_id'])
+            raise TransactionNotFoundException(currency, tx_hash)
+        result = await self.get_tx_by_id(currency, result['tx_id'])
+        if not result:
+            raise DBInconsistencyException(
+                f"transaction {tx_hash} with id {result['tx_id']} in network "
+                f'{currency} not found')
+        return result
 
     @eth
     async def list_txs_by_ids(self,
@@ -1673,8 +1640,8 @@ class Cassandra:
         [tx1, tx2] = await asyncio.gather(*aws)
 
         if not tx1 or not tx2:
-            id = row['address'] if 'address' in row else row['cluster_id']
-            raise NotFoundException(f"transactions for {id} not found")
+            raise DBInconsistencyException(
+                f"first or last transaction not found as referenced by {row}")
 
         row['first_tx'] = TxSummary(tx_hash=tx1['tx_hash'],
                                     timestamp=tx1['timestamp'],
@@ -1724,8 +1691,8 @@ class Cassandra:
         [tx1, tx2] = await asyncio.gather(*aws)
 
         if not tx1 or not tx2:
-            raise NotFoundException(
-                f"transactions for {row['address']} not found")
+            raise DBInconsistencyException(
+                f"first or last transaction not found as referenced by {row}")
 
         row['first_tx'] = TxSummary(tx_hash=tx1['tx_hash'],
                                     timestamp=tx1['block_timestamp'],
@@ -1745,8 +1712,6 @@ class Cassandra:
             return False
 
         prefix = self.scrub_prefix(currency, address)
-        if not prefix:
-            return None
         if is_eth_like(currency):
             prefix = prefix.upper()
         prefix_length = self.get_prefix_lengths(currency)['address']
@@ -2023,7 +1988,7 @@ class Cassandra:
             more_results, page = merge_address_txs_subquery_results(
                 [r.current_rows for r in await asyncio.gather(*aws)],
                 fs_it,
-                'transaction_id')
+                'transaction_id' if is_eth_like(network) else 'tx_id')
 
             results.extend(more_results)
             if page is None:
@@ -2047,11 +2012,11 @@ class Cassandra:
         except ValueError:
             raise BadUserInputException(f"Page {page} is not an integer")
 
-        if node_type == 'address':
+        if node_type == NodeType.ADDRESS:
             address_id, id_group = \
                 await self.get_address_id_id_group(currency, address)
         else:
-            node_type = 'address'
+            node_type = NodeType.ADDRESS
             address_id = address
             id_group = self.get_id_group(currency, address_id)
         secondary_id_group = \
@@ -2095,6 +2060,9 @@ class Cassandra:
 
         results = await self.normalize_address_transactions(currency, results)
 
+        for row in results:
+            row['value'] *= (-1 if row['is_outgoing'] else 1)
+
         return results, paging_state
 
 
@@ -2123,8 +2091,7 @@ class Cassandra:
                 addr_tx['from_address'] = token_tx['from_address']
                 addr_tx['currency'] = token_tx["currency"]
                 addr_tx['token_tx_id'] = addr_tx["log_index"]
-                value = token_tx['value'] * \
-                    (-1 if addr_tx['is_outgoing'] else 1)
+                value = token_tx['value']
 
             elif currency == "trx" and addr_tx["trace_index"] is not None:
                 trace = await self.fetch_transaction_trace(
@@ -2137,8 +2104,7 @@ class Cassandra:
                 addr_tx['to_address'] = full_tx['to_address']
                 addr_tx['from_address'] = full_tx['from_address']
                 addr_tx['currency'] = currency
-                value = full_tx['value'] * \
-                    (-1 if addr_tx['is_outgoing'] else 1)
+                value = full_tx['value']
 
             contract_creation = full_tx.get('contract_creation', None)
 
@@ -2184,7 +2150,12 @@ class Cassandra:
         result = one(result)
         if not result:
             return None
-        return await self.get_tx_by_hash(currency, result['transaction'])
+        try:
+            return await self.get_tx_by_hash_eth(currency, result['transaction'])
+        except TransactionNotFoundException:
+            raise DBInconsistencyException(
+                f"transaction {bytes_to_hex(result['transaction'])} "
+                f"with id {id} in network {currency} not found')")
 
     async def list_txs_by_hashes_eth(self,
                                      currency,
@@ -2221,9 +2192,9 @@ class Cassandra:
 
         return result_with_tokens
 
-    async def get_tx_by_hash_eth(self, currency, hash):
+    async def get_tx_by_hash_eth(self, currency, tx_hash):
         prefix = self.get_prefix_lengths(currency)
-        params = [hash.hex()[:prefix['tx']], hash]
+        params = [tx_hash.hex()[:prefix['tx']], tx_hash]
 
         statement = ('SELECT tx_hash, block_id, block_timestamp, value, '
                      'from_address, to_address, receipt_contract_address from '
@@ -2233,7 +2204,7 @@ class Cassandra:
         result = one(result)
 
         if not result:
-            return None
+            raise TransactionNotFoundException(currency, tx_hash)
 
         await self.fix_timestamp(currency, result)
 
@@ -2251,22 +2222,21 @@ class Cassandra:
 
     async def list_links_eth(self,
                              currency,
-                             node_type,
+                             node_type: NodeType,
                              address,
                              neighbor,
                              page=None,
                              pagesize=None):
-        if node_type == 'address':
+        if node_type == NodeType.ADDRESS:
             address_id, address_id_group = \
                 await self.get_address_id_id_group(currency, address)
             neighbor_id, neighbor_id_group = \
                 await self.get_address_id_id_group(currency, neighbor)
         else:
-            node_type = 'address'
+            node_type = NodeType.ADDRESS
             address_id = address
             address_id_group = self.get_id_group(currency, address_id)
-            address = (await
-                       self.get_address_by_address_id(currency, address_id))
+            address = (await self.get_address_by_address_id(currency, address_id))
             neighbor_id = neighbor
             neighbor_id_group = self.get_id_group(currency, neighbor_id)
             neighbor = (await
@@ -2282,10 +2252,6 @@ class Cassandra:
                                                   'address_transactions',
                                                   neighbor_id_group)
         neighbor_id_secondary_group = self.sec_in(neighbor_id_secondary_group)
-
-        if address_id is None or neighbor_id is None:
-            raise NotFoundException("Links between {} and {} not found".format(
-                address, neighbor))
 
         query = \
             f"SELECT no_{{direction}}_txs FROM {node_type}"\
@@ -2355,15 +2321,15 @@ class Cassandra:
                     first_id_secondary_group
                 ],
                 paging_state=paging_state,
-                fetch_size=None)
+                fetch_size=fetch_size)
 
             if not results1.current_rows:
                 return [], None
 
             paging_state = results1.paging_state
 
-            first_tx_ids = set([(row['transaction_id'], row['currency'])
-                                for row in results1.current_rows])
+            first_tx_ids = [(row['transaction_id'], row['currency'])
+                             for row in results1.current_rows]
 
             params = [[
                 second_id_group, second_id, not isOutgoing,
@@ -2392,8 +2358,8 @@ class Cassandra:
         ]
         return txs, to_hex(paging_state)
 
-    async def get_tx_eth(self, currency, tx_hash):
-        return await self.get_tx_by_hash(currency, from_hex(tx_hash))
+    def get_tx_eth(self, currency, tx_hash):
+        return self.get_tx_by_hash(currency, from_hex(tx_hash))
 
     async def list_entity_addresses_eth(self,
                                         currency,
