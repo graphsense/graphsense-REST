@@ -2328,8 +2328,14 @@ class Cassandra:
 
             paging_state = results1.paging_state
 
-            first_tx_ids = [(row['transaction_id'], row['currency'])
-                             for row in results1.current_rows]
+            first_tx_ids = []
+            last = None
+            for row in results1.current_rows:
+                tupl = (row['transaction_id'], row['currency'])
+                if last and tupl == last:
+                    continue
+                first_tx_ids.append(tupl)
+                last = tupl
 
             params = [[
                 second_id_group, second_id, not isOutgoing,
