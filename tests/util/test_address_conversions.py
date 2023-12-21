@@ -18,5 +18,5 @@ def test_address_conversions():
 
     assert cannonicalize_address("eth", eaddr).hex() == "0b48984414cc0c6a8e599fb6e3bc11e599de2e24"
 
-    with pytest.raises(BadUserInputException):
+    with pytest.raises(ValueError):
         cannonicalize_address("eth", addr).hex()
