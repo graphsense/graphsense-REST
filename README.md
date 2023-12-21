@@ -23,7 +23,7 @@ Open `instance/config.yaml` and configure the database connection.
 
 ## Requirements
 
-Make sure you are running Python 3.9+
+Make sure you are running Python 3.9 or Python 3.10. 
 
     python3 --version
 
