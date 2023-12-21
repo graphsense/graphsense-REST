@@ -22,6 +22,7 @@ from gsrest.util.address import (address_to_user_format)
 from gsrest.util.evm import (bytes_to_hex, strip_0x)
 from gsrest.util.tron import partial_tron_to_partial_evm
 from gsrest.util.node_balances import get_balances
+from gsrest.util.id_group import calculate_id_group_with_overflow
 
 # import hashlib
 
@@ -847,11 +848,15 @@ class Cassandra:
     def get_id_group(self, keyspace, id_):
         if keyspace not in self.parameters:
             raise NotFoundException(f'{keyspace} not found')
-        blub = floor(int(id_) / self.parameters[keyspace]['bucket_size'])
-        if blub.bit_length():
-            # downcast to 32bit integer
-            blub = (blub + 2**31) % 2**32 - 2**31
-        return blub
+        bucket_size = self.parameters[keyspace]['bucket_size']
+        gid = floor(int(id_) / bucket_size)
+        if gid.bit_length() > 32:
+            # tron tx_id are long and the group is int
+            # thus we need to also consider overflows in this case
+            # additionally spark does not calculate ids on int basis but
+            # based on floats which can lead to rounding errors.
+            gid = calculate_id_group_with_overflow(id_, bucket_size)
+        return gid
 
     def get_block_id_group(self, keyspace, id_):
         if keyspace not in self.parameters:
