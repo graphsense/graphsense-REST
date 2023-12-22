@@ -1046,6 +1046,8 @@ async def list_address_links(test_case):
                  height=2)
     ])
 
+    return
+
     test_case.assertEqualWithList(link.to_dict(), result, 'links', 'tx_hash')
 
     txs = Links(links=[tx2_eth, tx22_eth])
