@@ -7,9 +7,10 @@ from typing import Sequence, Optional, Tuple
 from functools import partial
 from itertools import product
 from collections import namedtuple, UserDict
-from cassandra import InvalidRequest
+from cassandra import InvalidRequest, ConsistencyLevel
 from cassandra.protocol import ProtocolException
-from cassandra.cluster import Cluster, NoHostAvailable
+from cassandra.cluster import (EXEC_PROFILE_DEFAULT, Cluster, ExecutionProfile,
+                               NoHostAvailable)
 from cassandra.policies import DCAwareRoundRobinPolicy, TokenAwarePolicy
 from cassandra.query import SimpleStatement, dict_factory, ValueSequence
 from math import floor, ceil
@@ -268,14 +269,25 @@ class Cassandra:
 
     def connect(self):
         try:
-            self.cluster = Cluster(self.config['nodes'],
-                                   protocol_version=5,
-                                   load_balancing_policy=TokenAwarePolicy(
-                                       DCAwareRoundRobinPolicy()))
+            cl = ConsistencyLevel.name_to_value.get(
+                self.config.get("consistency_level", "LOCAL_ONE"),
+                ConsistencyLevel.LOCAL_ONE)
+
+            exec_prof = ExecutionProfile(
+                request_timeout=60,
+                row_factory=dict_factory,
+                load_balancing_policy=TokenAwarePolicy(
+                    DCAwareRoundRobinPolicy()),
+                consistency_level=cl)
+            self.cluster = Cluster(
+                self.config['nodes'],
+                protocol_version=5,
+                connect_timeout=60,
+                execution_profiles={EXEC_PROFILE_DEFAULT: exec_prof})
             self.session = self.cluster.connect()
-            self.session.row_factory = dict_factory
+            # self.session.row_factory = dict_factory
             if self.logger:
-                self.logger.info('Connection ready.')
+                self.logger.info(f'Connection ready. Using CL: {cl}')
         except NoHostAvailable:
             retry = self.config.get('retry_interval', None)
             retry = 5 if retry is None else retry
@@ -477,7 +489,7 @@ class Cassandra:
             self.prepared_statements[q] = prep = self.session.prepare(q)
         try:
             prep.fetch_size = int(fetch_size) if fetch_size else None
-            self.session.default_timeout = 60
+            # self.session.default_timeout = 60
             response_future = self.session.execute_async(
                 prep, params, timeout=60, paging_state=paging_state)
             loop = asyncio.get_event_loop()
