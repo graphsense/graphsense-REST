@@ -58,13 +58,13 @@ def actor_from_row(row, jurisdictions, categories, nr_tags):
                  jurisdictions=[
                      LabeledItemRef(id=x["country_id"], label=x["label"])
                      for x in jurisdictions
-                 ],
-                 categories=[
+    ],
+        categories=[
                      LabeledItemRef(id=x["category_id"], label=x["label"])
                      for x in categories
-                 ],
-                 nr_tags=nr_tags,
-                 context=actor_context_from_row(row["context"]))
+    ],
+        nr_tags=nr_tags,
+        context=actor_context_from_row(row["context"]))
 
 
 async def get_actor(request, actor):

@@ -9,9 +9,9 @@ async def bulk_csv(test_case):
     body = {'height': [1, 2]}
     response = await test_case.client.request(path=block_path.format(
         form="csv", currency="btc"),
-                                              method='POST',
-                                              json=body,
-                                              headers=headers)
+        method='POST',
+        json=body,
+        headers=headers)
     result = (await response.read()).decode('utf-8')
 
     expected =\
@@ -42,9 +42,9 @@ async def bulk_csv(test_case):
     body = {'height': [100, 200]}
     response = await test_case.client.request(path=block_path.format(
         form="csv", currency="btc"),
-                                              method='POST',
-                                              json=body,
-                                              headers=headers)
+        method='POST',
+        json=body,
+        headers=headers)
     result = (await response.read()).decode('utf-8')
     expected = (
         '_error,_info,_request_height\r\n'
@@ -57,9 +57,9 @@ async def bulk_csv(test_case):
     for body in error_bodies:
         response = await test_case.client.request(path=block_path.format(
             form="csv", currency="btc"),
-                                                  method='POST',
-                                                  json=body,
-                                                  headers=headers)
+            method='POST',
+            json=body,
+            headers=headers)
         content = (await response.read()).decode('utf-8')
         test_case.assertEqual(400, response.status, "response is " + content)
 
@@ -68,10 +68,10 @@ async def bulk_json(test_case):
     body = {'height': [1, 2]}
     result = await test_case.requestWithCodeAndBody(block_path.format(
         form="json", currency="btc"),
-                                                    200,
-                                                    body,
-                                                    currency="btc",
-                                                    form='json')
+        200,
+        body,
+        currency="btc",
+        form='json')
 
     def s(b):
         return b['block_hash']

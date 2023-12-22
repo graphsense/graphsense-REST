@@ -97,7 +97,6 @@ def cannonicalize_address(currency, address):
             f" like a {currency.upper()} address: {address}")
 
 
-
 async def get_address(request, currency, address):
     address_canonical = cannonicalize_address(currency, address)
     db = request.app['db']
@@ -236,4 +235,4 @@ async def links_response(request, currency, result):
                                        rates[e['height']]),
         ) for e in links
     ],
-                 next_page=next_page)
+        next_page=next_page)

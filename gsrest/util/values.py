@@ -55,7 +55,7 @@ def convert_value_impl(value, rates, factor):
                       Rate(r['code'],
                            catchNaN(round(value * r['value'] * factor, 2)))
                       for r in rates
-                  ])
+    ])
 
 
 def convert_token_value(value, rates, token_config):
@@ -86,4 +86,4 @@ def to_values(value):
                   fiat_values=[
                       Rate(r['code'], catchNaN(round(r['value'], 2)))
                       for r in value.fiat_values
-                  ])
+    ])

@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class NodeType(Enum):
     ADDRESS = 'address'
     CLUSTER = 'cluster'

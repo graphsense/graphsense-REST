@@ -491,7 +491,8 @@ class Cassandra:
                                 paging_state=response_future._paging_state)
                 if "address_transactions" in query:
                     self.logger.debug(f'{query} {params}')
-                    self.logger.debug(f'{h} result size {len(result.current_rows)}')
+                    self.logger.debug(
+                        f'{h} result size {len(result.current_rows)}')
                 loop.call_soon_threadsafe(future.set_result, result)
 
             def on_err(result):
@@ -1233,7 +1234,6 @@ class Cassandra:
             id = int(id)
             if is_eth_like(currency):
                 node_type = NodeType.ADDRESS
-
 
         if is_outgoing:
             direction, this, that = ('outgoing', 'src', 'dst')
@@ -2063,7 +2063,6 @@ class Cassandra:
 
         return results, paging_state
 
-
     async def normalize_address_transactions(self, currency, txs):
         use_legacy_log_index = self.parameters[currency]["use_legacy_log_index"]
 
@@ -2277,11 +2276,11 @@ class Cassandra:
         isOutgoing = no_outgoing_txs < no_incoming_txs
 
         first_id_group,\
-        first_id,\
-        second_id_group,\
-        second_id,\
-        first_id_secondary_group,\
-        second_id_secondary_group = \
+            first_id,\
+            second_id_group,\
+            second_id,\
+            first_id_secondary_group,\
+            second_id_secondary_group = \
             (address_id_group,
              address_id,
              neighbor_id_group,

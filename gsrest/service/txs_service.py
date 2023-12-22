@@ -113,7 +113,8 @@ async def get_tx(request,
             if len(results):
                 return results[0]
             else:
-                raise TransactionNotFoundException(currency, tx_hash, token_tx_id)
+                raise TransactionNotFoundException(
+                    currency, tx_hash, token_tx_id)
         else:
             raise BadUserInputException(
                 f'{currency} does not support token transactions.')

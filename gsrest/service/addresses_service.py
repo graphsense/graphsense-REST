@@ -120,7 +120,8 @@ async def get_address_entity(request, currency, address):
     try:
         entity_id = await db.get_address_entity_id(currency, address_canonical)
     except AddressNotFoundException:
-        aws = [get_rates(request, currency), db.new_entity(currency, address_canonical)]
+        aws = [get_rates(request, currency), db.new_entity(
+            currency, address_canonical)]
         [rates, entity] = await asyncio.gather(*aws)
         return from_row(currency, entity, rates['rates'],
                         db.get_token_configuration(currency))
