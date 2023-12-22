@@ -181,7 +181,7 @@ def merge_address_txs_subquery_results(
     return results, border_tx_id
 
 
-def build_select_address_txs_statement(network: str, table_prefix: str,
+def build_select_address_txs_statement(network: str, node_type: NodeType,
                                        cols: Optional[Sequence[str]],
                                        with_lower_bound: bool,
                                        with_upper_bound: bool,
@@ -194,13 +194,13 @@ def build_select_address_txs_statement(network: str, table_prefix: str,
     # Build select statement
     columns = (",".join(cols) if cols is not None else "*")
 
-    query = (f"SELECT {columns} from {table_prefix}_transactions "
-             f"WHERE {table_prefix}_id = %(id)s "
-             f"AND {table_prefix}_id_group = %(g_id)s "
+    query = (f"SELECT {columns} from {node_type}_transactions "
+             f"WHERE {node_type}_id = %(id)s "
+             f"AND {node_type}_id_group = %(g_id)s "
              "AND is_outgoing = %(is_outgoing)s ")
 
     # conditional where clause, loop independent
-    query += wc(f"{table_prefix}_id_secondary_group = %(s_d_group)s", eth_like)
+    query += wc(f"{node_type}_id_secondary_group = %(s_d_group)s", eth_like)
 
     query += wc(f"{tx_id_col} >= %(tx_id_lower_bound)s", with_lower_bound)
     query += wc("currency = %(currency)s", eth_like)
@@ -684,23 +684,6 @@ class Cassandra:
         except ValueError:
             raise BadUserInputException(f"Page {page} is not an integer")
 
-        if node_type == NodeType.ADDRESS:
-            id, id_group = \
-                await self.get_address_id_id_group(currency, id)
-            query = ("SELECT * FROM address WHERE address_id = %s"
-                     " AND address_id_group = %s")
-            result = await self.execute_async(currency, 'transformed', query,
-                                              [id, id_group])
-        else:
-            id_group = self.get_id_group(currency, id)
-            query = ("SELECT * FROM cluster "
-                     "WHERE cluster_id_group = %s AND cluster_id = %s ")
-            result = await self.execute_async(currency, 'transformed', query,
-                                              [id_group, id])
-
-        if not result:
-            raise nodeNotFoundException(currency, node_type, id)
-
         upper_bound = None
         first_tx_id = None
         if min_height is not None or max_height is not None:
@@ -723,10 +706,8 @@ class Cassandra:
 
         results, paging_state = await self.list_address_txs_ordered(
             network=currency,
-            table_prefix=str(node_type),
-            item_id=id,
-            item_id_group=id_group,
-            item_id_secondary_group=None,
+            node_type=node_type,
+            id=id,
             tx_id_lower_bound=first_tx_id,
             tx_id_upper_bound=upper_bound,
             direction=direction,
@@ -1912,24 +1893,22 @@ class Cassandra:
     async def list_address_txs_ordered(
             self,
             network: str,
-            table_prefix: str,
-            item_id: int,
-            item_id_group: int,
+            node_type: NodeType,
+            id,
             tx_id_lower_bound: Optional[int],
             tx_id_upper_bound: Optional[int],
             direction: Optional[str],
             include_assets: Sequence[Tuple[str, bool]],
             page: Optional[int],
             fetch_size: int,
-            cols: Optional[Sequence[str]] = None,
-            item_id_secondary_group: ValueSequence = None):
+            cols: Optional[Sequence[str]] = None):
         """Loads a address transactions in execution order
         it allows to only get out- or incoming transaction or only
         transactions of a certain asset (token), for a given address id
 
         Args:
             network (str): base currency / network
-            table_prefix (str): prefix of the table {prefix}_transactions
+            node_type (str): NodeType (ADDRESS/CLUSTER)
             item_id (int): address/cluster id
             item_id_group (int): address/cluster id group
             tx_id_lower_bound (Optional[int]): tx id lower bound
@@ -1941,9 +1920,24 @@ class Cassandra:
             fetch_size (int): how much to fetch per page
             cols (Optional[Sequence[str]], optional): which columns to select
                 None means *
-            item_id_secondary_group (ValueSequence, optional): address
-                sec group,needed for eth
         """
+
+        if node_type == NodeType.ADDRESS:
+            item_id, item_id_group = \
+                await self.get_address_id_id_group(network, id)
+        else:
+            item_id = id
+            item_id_group = self.get_id_group(network, id)
+
+
+        item_id_secondary_group = [0]
+        if is_eth_like(network):
+            secondary_id_group = \
+                await self.get_id_secondary_group_eth(network,
+                                                      'address_transactions',
+                                                      item_id_group)
+
+            item_id_secondary_group = self.sec_in(secondary_id_group)
 
         directions = [direction == 'out'] if direction else [False, True]
         results = []
@@ -1969,14 +1963,11 @@ class Cassandra:
 
             cql_stmt = build_select_address_txs_statement(
                 network,
-                table_prefix,
+                node_type,
                 cols,
                 with_lower_bound=(tx_id_lower_bound is not None),
                 with_upper_bound=has_upper_bound,
                 fetch_size=fs_junk)
-
-            if not is_eth_like(network) and item_id_secondary_group is None:
-                item_id_secondary_group = [0]
 
             # prepare parameters for the query junks one for each direction
             # and asset tuple
@@ -2027,19 +2018,9 @@ class Cassandra:
         except ValueError:
             raise BadUserInputException(f"Page {page} is not an integer")
 
-        if node_type == NodeType.ADDRESS:
-            address_id, id_group = \
-                await self.get_address_id_id_group(currency, address)
-        else:
+        if node_type == NodeType.CLUSTER:
             node_type = NodeType.ADDRESS
-            address_id = address
-            id_group = self.get_id_group(currency, address_id)
-        secondary_id_group = \
-            await self.get_id_secondary_group_eth(currency,
-                                                  'address_transactions',
-                                                  id_group)
-
-        sec_in = self.sec_in(secondary_id_group)
+            address = await self.get_address_by_address_id(currency, address)
 
         if not token_currency:
             token_config = self.get_token_configuration(currency)
@@ -2062,10 +2043,8 @@ class Cassandra:
 
         results, paging_state = await self.list_address_txs_ordered(
             network=currency,
-            table_prefix="address",
-            item_id=address_id,
-            item_id_group=id_group,
-            item_id_secondary_group=sec_in,
+            node_type=node_type,
+            id=address,
             tx_id_lower_bound=first_tx_id,
             tx_id_upper_bound=upper_bound,
             direction=direction,
