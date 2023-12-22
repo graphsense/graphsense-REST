@@ -2286,11 +2286,11 @@ class Cassandra:
 
         isOutgoing = no_outgoing_txs < no_incoming_txs
 
-        first_id_group,\
-            first_id,\
-            second_id_group,\
-            second_id,\
-            first_id_secondary_group,\
+        first_id_group, \
+            first_id, \
+            second_id_group, \
+            second_id, \
+            first_id_secondary_group, \
             second_id_secondary_group = \
             (address_id_group,
              address_id,
