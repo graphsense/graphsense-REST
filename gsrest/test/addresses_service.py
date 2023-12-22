@@ -10,6 +10,7 @@ from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.labeled_item_ref import LabeledItemRef
 from gsrest.util.values import convert_value
+from gsrest.util.tron import evm_to_tron_address_string
 from gsrest.service.rates_service import list_rates
 from gsrest.test.txs_service import tx1_eth, tx2_eth, tx22_eth, tx4_eth
 from gsrest.util.values import make_values
@@ -598,6 +599,22 @@ async def get_address(test_case):
         address='DBgS3X3hveRppkeywm9C6HMJKZb2CG8nGV')
     assert result.status == 404
     assert "Network doge not supported" in body
+
+    result = await test_case.request(
+        path,
+        currency='trx',
+        address=evm_to_tron_address_string("0xabcdef"),
+        include_tags=False)
+
+    assert result["address"] == evm_to_tron_address_string("0xabcdef")
+
+    result = await test_case.request(
+        path,
+        currency='trx',
+        address=evm_to_tron_address_string("0x123456"),
+        include_tags=False)
+
+    assert result["address"] == evm_to_tron_address_string("0x123456")
 
 
 async def list_address_txs(test_case):

@@ -327,7 +327,12 @@ class Cassandra:
             # wrong in the txs.
             block = await self.get_block_timestamp_eth(currency,
                                                        item[block_id_col])
-            item[timestamp_col] = block["timestamp"]
+            if block is not None:
+                item[timestamp_col] = block["timestamp"]
+            else:
+                self.logger.warning(
+                    f"Could not load block {item[block_id_col]}, "
+                    "to fix timestamp.")
 
     def load_parameters(self, keyspace):
         currency = keyspace
@@ -949,7 +954,6 @@ class Cassandra:
                  " AND address_id_group = %s")
         result = await self.execute_async(currency, 'transformed', query,
                                           [address_id, address_id_group])
-
         result = one(result)
         if not result:
             if not is_eth_like(currency):

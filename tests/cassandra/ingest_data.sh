@@ -88,6 +88,8 @@ schema "$SCHEMA_BASE_PATH/raw_utxo_schema.sql" 0x8BADF00D "resttest_btc_raw rest
 schema "$SCHEMA_BASE_PATH/transformed_utxo_schema.sql" 0x8BADF00D "resttest_btc_transformed resttest_ltc_transformed"
 schema "$SCHEMA_BASE_PATH/raw_account_schema.sql" 0x8BADF00D "resttest_eth_raw"
 schema "$SCHEMA_BASE_PATH/transformed_account_schema.sql" 0x8BADF00D "resttest_eth_transformed"
+schema "$SCHEMA_BASE_PATH/raw_account_trx_schema.sql" 0x8BADF00D "resttest_trx_raw"
+schema "$SCHEMA_BASE_PATH/transformed_account_trx_schema.sql" 0x8BADF00D "resttest_trx_transformed"
 # schema "$SCHEMA_BASE_PATH/transformed_delta_updater_account_schema.sql" "CREATE TABLE " "CREATE TABLE eth_transformed"
 # schema "$SCHEMA_BASE_PATH/transformed_delta_updater_utxo_schema.sql" "CREATE TABLE " "btc_transformed ltc_transformed"
 schema "`dirname $0`/schemas/schema.cql" btc "resttest_btc resttest_ltc"

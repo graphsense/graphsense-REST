@@ -82,6 +82,7 @@ async def get_entity(request,
                      exclude_best_address_tag=False,
                      include_actors=False):
     db = request.app['db']
+
     result = await db.get_entity(currency, entity)
 
     if result is None:

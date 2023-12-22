@@ -14,6 +14,9 @@ database:
         eth: 
             raw: resttest_eth_raw
             transformed: resttest_eth_transformed
+        trx:
+            raw: resttest_trx_raw
+            transformed: resttest_trx_transformed
 tagstores:
     - host: "TAGSTORE_MOCK_IP"
 

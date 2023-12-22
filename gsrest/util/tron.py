@@ -71,7 +71,7 @@ def tron_address_to_evm(taddress_str: str, validate: bool = True) -> bytes:
 
     if not validate or all(a == b for a, b in zip(checkSum, checkSumComputed)):
         if not validate and len(ab) < 21:
-            return strip_tron_prefix(ab)
+            return strip_tron_prefix(a)
         else:
             return strip_tron_prefix(a)
     else:
