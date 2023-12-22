@@ -241,7 +241,7 @@ class Tagstore:
                         """
 
         address = address.strip()
-        if is_eth_like(currency):
+        if currency == "eth":
             address = address.lower()
 
         return self.execute(query,
@@ -362,7 +362,7 @@ class Tagstore:
             raise TypeError('x')
             return Result(), None
 
-        if is_eth_like(currency):
+        if currency == "eth":
             addresses = tuple(addr.lower().strip() for addr in addresses)
         else:
             addresses = tuple(addr.strip() for addr in addresses)
