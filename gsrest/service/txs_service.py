@@ -5,7 +5,9 @@ from openapi_server.models.tx_value import TxValue
 from openapi_server.models.tx_ref import TxRef
 from gsrest.service.rates_service import get_rates
 from gsrest.util.values import convert_value, convert_token_value
-from gsrest.errors import TransactionNotFoundException, NotFoundException, BadUserInputException
+from gsrest.errors import (TransactionNotFoundException,
+                           NotFoundException,
+                           BadUserInputException)
 from gsrest.util import is_eth_like
 from gsrest.util.address import address_to_user_format
 

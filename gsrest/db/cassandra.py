@@ -15,7 +15,17 @@ from cassandra.query import SimpleStatement, dict_factory, ValueSequence
 from math import floor, ceil
 
 from gsrest.util.eth_logs import decode_db_logs
-from gsrest.errors import *
+from gsrest.errors import (NetworkNotFoundException,
+                           BadUserInputException,
+                           BadConfigError,
+                           NotFoundException,
+                           BlockNotFoundException,
+                           AddressNotFoundException,
+                           ClusterNotFoundException,
+                           DBInconsistencyException,
+                           nodeNotFoundException,
+                           TransactionNotFoundException)
+
 from gsrest.util import is_eth_like
 from gsrest.util.address import (address_to_user_format)
 from gsrest.util.evm import (bytes_to_hex, strip_0x, hex_str_to_bytes)
@@ -480,7 +490,7 @@ class Cassandra:
 
             h = hash(q + str(params))
 
-            #self.logger.debug(f'{h} {q} {params}')
+            # self.logger.debug(f'{h} {q} {params}')
 
             def on_done(result):
                 if future.cancelled():
@@ -2148,7 +2158,8 @@ class Cassandra:
         if not result:
             return None
         try:
-            return await self.get_tx_by_hash_eth(currency, result['transaction'])
+            return \
+                await self.get_tx_by_hash_eth(currency, result['transaction'])
         except TransactionNotFoundException:
             raise DBInconsistencyException(
                 f"transaction {bytes_to_hex(result['transaction'])} "
@@ -2233,7 +2244,7 @@ class Cassandra:
             node_type = NodeType.ADDRESS
             address_id = address
             address_id_group = self.get_id_group(currency, address_id)
-            address = (await self.get_address_by_address_id(currency, address_id))
+            address = await self.get_address_by_address_id(currency, address_id)
             neighbor_id = neighbor
             neighbor_id_group = self.get_id_group(currency, neighbor_id)
             neighbor = (await
@@ -2295,7 +2306,7 @@ class Cassandra:
                   neighbor_id_secondary_group,
                   address_id_secondary_group)
 
-        basequery = (f"SELECT * FROM"
+        basequery = ("SELECT * FROM"
                      " address_transactions WHERE "
                      "address_id_group = %s AND address_id = %s "
                      "AND is_outgoing = %s ")

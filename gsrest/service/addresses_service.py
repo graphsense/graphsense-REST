@@ -3,7 +3,9 @@ from gsrest.service.entities_service import get_entity, from_row
 from gsrest.service.rates_service import get_rates
 import gsrest.service.common_service as common
 from gsrest.service.common_service import cannonicalize_address
-from gsrest.errors import *
+from gsrest.errors import (AddressNotFoundException,
+                           ClusterNotFoundException,
+                           DBInconsistencyException)
 from gsrest.util.address import address_to_user_format
 from openapi_server.models.neighbor_addresses import NeighborAddresses
 from openapi_server.models.neighbor_address import NeighborAddress

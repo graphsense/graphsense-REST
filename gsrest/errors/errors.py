@@ -49,7 +49,7 @@ def nodeNotFoundException(network, node_type: NodeType, id):
 class AddressNotFoundException(NotFoundException):
     def __init__(self, network, address, no_external_txs=False):
         address = address_to_user_format(network, address)
-        reason = f" because it has no external transactions" \
+        reason = " because it has no external transactions" \
             if no_external_txs else ""
 
         super().__init__(f'Address {address} not found in network '
