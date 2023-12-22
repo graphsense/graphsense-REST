@@ -16,7 +16,7 @@ from openapi_server import util
 async def get_block(request: web.Request, currency, height) -> web.Response:
     """Get a block by its height
 
-
+    
 
     :param currency: The cryptocurrency code (e.g., btc)
     :type currency: str
@@ -48,7 +48,7 @@ async def get_block(request: web.Request, currency, height) -> web.Response:
     try:
         if 'currency' in ['','currency','height']:
             if currency is not None:
-                currency = currency.lower()
+                currency = currency.lower() 
         result = service.get_block(request
                 ,currency=currency,height=height)
         result = await result
@@ -86,7 +86,7 @@ async def get_block(request: web.Request, currency, height) -> web.Response:
 async def list_block_txs(request: web.Request, currency, height) -> web.Response:
     """Get block transactions
 
-
+    
 
     :param currency: The cryptocurrency code (e.g., btc)
     :type currency: str
@@ -118,7 +118,7 @@ async def list_block_txs(request: web.Request, currency, height) -> web.Response
     try:
         if 'currency' in ['','currency','height']:
             if currency is not None:
-                currency = currency.lower()
+                currency = currency.lower() 
         result = service.list_block_txs(request
                 ,currency=currency,height=height)
         result = await result
@@ -134,7 +134,6 @@ async def list_block_txs(request: web.Request, currency, height) -> web.Response
         else:
             result = result.to_dict()
 
-        request.app.logger.debug(result)
         result = web.Response(
                     status=200,
                     text=json.dumps(result),
