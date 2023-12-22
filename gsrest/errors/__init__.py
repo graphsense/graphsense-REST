@@ -1,1 +1,1 @@
-from .errors import * # noqa
+from .errors import *  # noqa

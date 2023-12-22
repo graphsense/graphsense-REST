@@ -5,8 +5,7 @@ from openapi_server.models.tx_value import TxValue
 from openapi_server.models.tx_ref import TxRef
 from gsrest.service.rates_service import get_rates
 from gsrest.util.values import convert_value, convert_token_value
-from gsrest.errors import (TransactionNotFoundException,
-                           NotFoundException,
+from gsrest.errors import (TransactionNotFoundException, NotFoundException,
                            BadUserInputException)
 from gsrest.util import is_eth_like
 from gsrest.util.address import address_to_user_format
@@ -115,8 +114,8 @@ async def get_tx(request,
             if len(results):
                 return results[0]
             else:
-                raise TransactionNotFoundException(
-                    currency, tx_hash, token_tx_id)
+                raise TransactionNotFoundException(currency, tx_hash,
+                                                   token_tx_id)
         else:
             raise BadUserInputException(
                 f'{currency} does not support token transactions.')

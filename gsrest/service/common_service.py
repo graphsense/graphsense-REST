@@ -216,9 +216,9 @@ async def links_response(request, currency, result):
     if is_eth_like(currency):
         db = request.app['db']
         token_config = db.get_token_configuration(currency)
-        return Links(
-            links=await txs_from_rows(request, currency, links, token_config),
-            next_page=next_page)
+        return Links(links=await txs_from_rows(request, currency, links,
+                                               token_config),
+                     next_page=next_page)
 
     heights = [row['height'] for row in links]
     rates = await list_rates(request, currency, heights)
@@ -235,4 +235,4 @@ async def links_response(request, currency, result):
                                        rates[e['height']]),
         ) for e in links
     ],
-        next_page=next_page)
+                 next_page=next_page)

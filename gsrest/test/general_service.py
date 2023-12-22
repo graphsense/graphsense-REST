@@ -57,8 +57,8 @@ async def search(test_case):
             SearchResultByCurrency(currency='ltc', addresses=[], txs=[]),
             SearchResultByCurrency(currency='eth', addresses=[], txs=[])
         ],
-            labels=[],
-            actors=[])
+                            labels=[],
+                            actors=[])
 
     expected = base_search_results()
     expected.currencies[0] = \

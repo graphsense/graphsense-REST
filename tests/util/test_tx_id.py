@@ -99,3 +99,7 @@ def test_compute_tx_id_group():
     #     if calculate_id_group_with_overflow(o, 10000) != r:
     #         print(calculate_id_group_with_overflow(o, 10000),r)
     assert(all([calculate_id_group_with_overflow(o, 10000) == r for o, r in zip(original, ref)]))
+
+    #check that results are unsigned
+    assert(calculate_id_group_with_overflow(25688199397376, 10000) != 2568819939)
+    assert(calculate_id_group_with_overflow(25688199397376, 10000) == -1726147357)

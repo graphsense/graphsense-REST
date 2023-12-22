@@ -3,8 +3,7 @@ from gsrest.service.entities_service import get_entity, from_row
 from gsrest.service.rates_service import get_rates
 import gsrest.service.common_service as common
 from gsrest.service.common_service import cannonicalize_address
-from gsrest.errors import (AddressNotFoundException,
-                           ClusterNotFoundException,
+from gsrest.errors import (AddressNotFoundException, ClusterNotFoundException,
                            DBInconsistencyException)
 from gsrest.util.address import address_to_user_format
 from openapi_server.models.neighbor_addresses import NeighborAddresses
@@ -122,8 +121,10 @@ async def get_address_entity(request, currency, address):
     try:
         entity_id = await db.get_address_entity_id(currency, address_canonical)
     except AddressNotFoundException:
-        aws = [get_rates(request, currency), db.new_entity(
-            currency, address_canonical)]
+        aws = [
+            get_rates(request, currency),
+            db.new_entity(currency, address_canonical)
+        ]
         [rates, entity] = await asyncio.gather(*aws)
         return from_row(currency, entity, rates['rates'],
                         db.get_token_configuration(currency))

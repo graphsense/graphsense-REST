@@ -15,16 +15,11 @@ from cassandra.query import SimpleStatement, dict_factory, ValueSequence
 from math import floor, ceil
 
 from gsrest.util.eth_logs import decode_db_logs
-from gsrest.errors import (NetworkNotFoundException,
-                           BadUserInputException,
-                           BadConfigError,
-                           NotFoundException,
-                           BlockNotFoundException,
-                           AddressNotFoundException,
-                           ClusterNotFoundException,
-                           DBInconsistencyException,
-                           nodeNotFoundException,
-                           TransactionNotFoundException)
+from gsrest.errors import (NetworkNotFoundException, BadUserInputException,
+                           BadConfigError, NotFoundException,
+                           BlockNotFoundException, AddressNotFoundException,
+                           ClusterNotFoundException, DBInconsistencyException,
+                           nodeNotFoundException, TransactionNotFoundException)
 
 from gsrest.util import is_eth_like
 from gsrest.util.address import (address_to_user_format)
@@ -853,7 +848,7 @@ class Cassandra:
             raise NetworkNotFoundException(keyspace)
         bucket_size = self.parameters[keyspace]['bucket_size']
         gid = floor(int(id_) / bucket_size)
-        if gid.bit_length() > 32:
+        if gid.bit_length() > 31:
             # tron tx_id are long and the group is int
             # thus we need to also consider overflows in this case
             # additionally spark does not calculate ids on int basis but
@@ -930,7 +925,8 @@ class Cassandra:
         if not result:
             if not is_eth_like(currency):
                 return None
-            raise AddressNotFoundException(currency, address_id,
+            raise AddressNotFoundException(currency,
+                                           address_id,
                                            no_external_txs=True)
         return result["address"]
 
@@ -946,7 +942,8 @@ class Cassandra:
         if not result:
             if not is_eth_like(currency):
                 return None
-            raise AddressNotFoundException(currency, address,
+            raise AddressNotFoundException(currency,
+                                           address,
                                            no_external_txs=True)
 
         return await self.finish_address(currency, result)
@@ -1228,8 +1225,7 @@ class Cassandra:
             to_hex(results.paging_state)
 
     async def list_neighbors(self, currency, id, is_outgoing,
-                             node_type: NodeType,
-                             targets, page, pagesize):
+                             node_type: NodeType, targets, page, pagesize):
         orig_node_type = node_type
         orig_id = id
         if node_type == NodeType.ADDRESS:
@@ -1994,8 +1990,7 @@ class Cassandra:
 
             # collect and merge results
             more_results, page = merge_address_txs_subquery_results(
-                [r.current_rows for r in await asyncio.gather(*aws)],
-                fs_it,
+                [r.current_rows for r in await asyncio.gather(*aws)], fs_it,
                 'transaction_id' if is_eth_like(network) else 'tx_id')
 
             results.extend(more_results)
@@ -2074,7 +2069,8 @@ class Cassandra:
         return results, paging_state
 
     async def normalize_address_transactions(self, currency, txs):
-        use_legacy_log_index = self.parameters[currency]["use_legacy_log_index"]
+        use_legacy_log_index = self.parameters[currency][
+            "use_legacy_log_index"]
 
         tx_ids = [tx['transaction_id'] for tx in txs]
 
@@ -2244,7 +2240,8 @@ class Cassandra:
             node_type = NodeType.ADDRESS
             address_id = address
             address_id_group = self.get_id_group(currency, address_id)
-            address = await self.get_address_by_address_id(currency, address_id)
+            address = await self.get_address_by_address_id(
+                currency, address_id)
             neighbor_id = neighbor
             neighbor_id_group = self.get_id_group(currency, neighbor_id)
             neighbor = (await
@@ -2350,8 +2347,10 @@ class Cassandra:
                 second_id_secondary_group, curr, tx_id
             ] for (tx_id, curr) in first_tx_ids]
 
-            results2 = await self.concurrent_with_args(currency, 'transformed',
-                                                       second_query, params,
+            results2 = await self.concurrent_with_args(currency,
+                                                       'transformed',
+                                                       second_query,
+                                                       params,
                                                        return_one=False,
                                                        keep_meta=False)
 
