@@ -1070,7 +1070,7 @@ class Cassandra:
                 'transformed',
                 first_query, [first_id_group, first_id, isOutgoing],
                 paging_state=paging_state,
-                fetch_size=None)
+                fetch_size=fetch_size)
 
             if not results1.current_rows:
                 break
