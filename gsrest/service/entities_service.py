@@ -1,5 +1,3 @@
-import pdb
-from pprint import pprint
 from gsrest.service.common_service import get_address
 from gsrest.service.rates_service import get_rates
 from openapi_server.models.neighbor_entities import NeighborEntities

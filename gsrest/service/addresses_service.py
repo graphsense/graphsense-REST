@@ -1,4 +1,3 @@
-import pdb
 from openapi_server.models.address_txs import AddressTxs
 from gsrest.service.entities_service import get_entity, from_row
 from gsrest.service.rates_service import get_rates
