@@ -19,7 +19,6 @@ from gsrest.test.txs_service import tx1_eth, tx2_eth, tx22_eth, tx4_eth
 from gsrest.service.rates_service import list_rates
 from gsrest.util.values import convert_value
 import copy
-import pdb
 
 eth_entity = Entity(currency="eth",
                     no_outgoing_txs=eth_address.no_outgoing_txs,
