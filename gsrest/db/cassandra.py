@@ -49,11 +49,24 @@ def to_hex(paging_state):
     return paging_state.hex() if paging_state else paging_state
 
 
-def from_hex(page):
+def bytes_from_hex(h_str: str) -> bytes:
+    if isinstance(h_str, str) and h_str.startswith("0x"):
+        h_str = h_str[2:]
+    return bytes.fromhex(h_str) if h_str else None
+
+
+def tx_hash_from_hex(tx_hash_str: str) -> bytes:
     try:
-        if isinstance(page, str) and page.startswith("0x"):
-            page = page[2:]
-        return bytes.fromhex(page) if page else None
+        return bytes_from_hex(tx_hash_str)
+    except ValueError:
+        raise BadUserInputException(
+            f"{tx_hash_str} does not look like a valid "
+            "transaction hash.")
+
+
+def page_from_hex(page):
+    try:
+        return bytes_from_hex(page)
     except ValueError:
         # bytes.fromHex throws value error if non hex chars are found
         raise BadUserInputException(
@@ -1065,7 +1078,7 @@ class Cassandra:
         second_query = first_query + " AND tx_id = %s"
 
         fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
-        paging_state = from_hex(page)
+        paging_state = page_from_hex(page)
         links = dict()
         tx_ids = []
         while len(tx_ids) < fetch_size:
@@ -1184,7 +1197,7 @@ class Cassandra:
                             pagesize=None,
                             fields=['*']):
         fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
-        paging_state = from_hex(page)
+        paging_state = page_from_hex(page)
         flds = ','.join(fields)
         query = f"SELECT {flds} FROM cluster"
         has_ids = isinstance(ids, list)
@@ -1215,7 +1228,7 @@ class Cassandra:
                                     entity,
                                     page=None,
                                     pagesize=None):
-        paging_state = from_hex(page)
+        paging_state = page_from_hex(page)
         entity_id_group = self.get_id_group(currency, entity)
         entity = int(entity)
         query = ("SELECT address_id FROM cluster_addresses "
@@ -1292,7 +1305,7 @@ class Cassandra:
         else:
             query = basequery
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
-        paging_state = from_hex(page)
+        paging_state = page_from_hex(page)
         results = await self.execute_async(currency,
                                            'transformed',
                                            query,
@@ -1425,8 +1438,8 @@ class Cassandra:
         return r[0]
 
     async def fetch_token_transactions(self, currency, tx, log_index=None):
-        transfer_topic = from_hex("0xddf252ad1be2c89b69c2b068fc378da"
-                                  "a952ba7f163c4a11628f55a4df523b3ef")
+        transfer_topic = bytes_from_hex("0xddf252ad1be2c89b69c2b068fc378da"
+                                        "a952ba7f163c4a11628f55a4df523b3ef")
         token_tx_logs = await self.get_logs_in_block_eth(currency,
                                                          tx["block_id"],
                                                          topic=transfer_topic,
@@ -1577,9 +1590,14 @@ class Cassandra:
                                           include_token_txs=include_token_txs)
 
     @eth
-    async def get_tx_by_hash(self, currency, tx_hash):
+    async def get_tx_by_hash(self, currency, tx_hash: bytes):
         prefix = self.get_prefix_lengths(currency)
-        params = [tx_hash[:prefix['tx']], bytearray.fromhex(tx_hash)]
+        try:
+            params = [tx_hash[:prefix['tx']], bytearray.fromhex(tx_hash)]
+        except ValueError:
+            raise BadUserInputException(
+                f"{tx_hash} does not look like a valid "
+                "transaction hash.")
         statement = ('SELECT tx_id from transaction_by_tx_prefix where '
                      'tx_prefix=%s and tx_hash=%s')
         result = await self.execute_async(currency, 'raw', statement, params)
@@ -1881,7 +1899,7 @@ class Cassandra:
             result = await self.execute_async(currency,
                                               'transformed',
                                               query,
-                                              paging_state=from_hex(page),
+                                              paging_state=page_from_hex(page),
                                               fetch_size=fetch_size)
             paging_state = result.paging_state
             result = result.current_rows
@@ -2219,8 +2237,12 @@ class Cassandra:
 
     async def get_tx_by_hash_eth(self, currency, tx_hash):
         prefix = self.get_prefix_lengths(currency)
-        params = [tx_hash.hex()[:prefix['tx']], tx_hash]
-
+        try:
+            params = [tx_hash.hex()[:prefix['tx']], tx_hash]
+        except ValueError:
+            raise BadUserInputException(
+                f"{tx_hash} does not look like a valid "
+                "transaction hash.")
         statement = ('SELECT tx_hash, block_id, block_timestamp, value, '
                      'from_address, to_address, receipt_contract_address from '
                      'transaction where tx_hash_prefix=%s and tx_hash=%s')
@@ -2335,7 +2357,7 @@ class Cassandra:
             " AND currency = %s AND transaction_id = %s"
 
         fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
-        paging_state = from_hex(page)
+        paging_state = page_from_hex(page)
         txs = []
 
         while len(txs) < fetch_size:
@@ -2392,8 +2414,8 @@ class Cassandra:
         ]
         return txs, to_hex(paging_state)
 
-    def get_tx_eth(self, currency, tx_hash):
-        return self.get_tx_by_hash(currency, from_hex(tx_hash))
+    def get_tx_eth(self, currency, tx_hash: str):
+        return self.get_tx_by_hash(currency, tx_hash_from_hex(tx_hash))
 
     async def list_entity_addresses_eth(self,
                                         currency,
