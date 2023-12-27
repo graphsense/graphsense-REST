@@ -1046,6 +1046,16 @@ async def get_address_entity(test_case):
                                      include_tags=True)
     test_case.assertEqual(eth_entityWithTags.to_dict(), result)
 
+    non_existent_address = '0x40a197b01CDeF4C77196045EaFFaC80F25Be00FE'
+    result, body = await test_case.requestOnly(path,
+                                               None,
+                                               currency='eth',
+                                               address=non_existent_address,
+                                               include_tags=True)
+    assert result.status == 404
+    assert ("Address 0x40a197b01cdef4c77196045eaffac80f25be00fe"
+            " not found") in body
+
 
 async def list_address_links(test_case):
     path = '/{currency}/addresses/{address}/links?neighbor={neighbor}'

@@ -117,7 +117,6 @@ async def list_address_links(request,
 async def get_address_entity(request, currency, address):
     address_canonical = cannonicalize_address(currency, address)
     db = request.app['db']
-
     try:
         entity_id = await db.get_address_entity_id(currency, address_canonical)
     except AddressNotFoundException:

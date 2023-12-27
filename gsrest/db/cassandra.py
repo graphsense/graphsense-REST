@@ -1896,8 +1896,13 @@ class Cassandra:
             address['no_addresses'] = 1
         return result, to_hex(paging_state)
 
-    def get_address_entity_id_eth(self, currency, address):
-        return self.get_address_id(currency, address)
+    async def get_address_entity_id_eth(self, currency, address):
+        address_id = await self.get_address_id(currency, address)
+        if address_id is None:
+            raise AddressNotFoundException(currency,
+                                           address,
+                                           no_external_txs=True)
+        return address_id
 
     async def get_id_secondary_group_eth(self, currency, table, id_group):
         column_prefix = ''
