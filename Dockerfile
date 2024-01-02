@@ -55,7 +55,7 @@ WORKDIR /srv/graphsense-rest
 
 RUN find gsrest/plugins -name requirements.txt -exec pip install -r {} \;
 
-CMD /usr/bin/gunicorn \
+CMD find gsrest/plugins -name requirements.txt -exec pip install -r {} \; && /usr/bin/gunicorn \
     -c /home/dockeruser/gunicorn-conf.py \
     "openapi_server:main('./instance/config.yaml')" \
      --worker-class aiohttp.GunicornWebWorker
