@@ -1,5 +1,10 @@
 FROM alpine:3.15
-LABEL maintainer="contact@ikna.io"
+LABEL org.opencontainers.image.title="graphsense-rest"
+LABEL org.opencontainers.image.maintainer="contact@ikna.io"
+LABEL org.opencontainers.image.url="https://www.ikna.io/"
+LABEL org.opencontainers.image.description="Dockerized Graphsense REST interface"
+LABEL org.opencontainers.image.source="https://github.com/graphsense/graphsense-REST"
+
 
 ENV NUM_WORKERS=
 ENV NUM_THREADS=
