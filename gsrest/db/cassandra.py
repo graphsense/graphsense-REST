@@ -1,5 +1,5 @@
 import re
-from pprint import pprint
+from pprint import pprint, pformat
 import time
 import asyncio
 import heapq
@@ -716,7 +716,7 @@ class Cassandra:
             id=id,
             tx_id_lower_bound=first_tx_id,
             tx_id_upper_bound=upper_bound,
-            direction=direction,
+            is_outgoing=direction == 'out',
             include_assets=include_assets,
             page=page,
             fetch_size=fetch_size)
@@ -1016,13 +1016,13 @@ class Cassandra:
         if is_outgoing:
             first = id
             second = neighbor
-            direction = 'out'
+            is_outgoing = True
             first_value = 'input_value'
             second_value = 'output_value'
         else:
             first = neighbor
             second = id
-            direction = 'in'
+            is_outgoing = False
             first_value = 'output_value'
             second_value = 'input_value'
 
@@ -1033,7 +1033,7 @@ class Cassandra:
             id=first,
             tx_id_lower_bound=None,
             tx_id_upper_bound=None,
-            direction=direction,
+            is_outgoing=is_outgoing,
             include_assets=[currency.upper()],
             page=page,
             fetch_size=fetch_size)
@@ -1046,11 +1046,12 @@ class Cassandra:
             id=second,
             tx_id_lower_bound=None,
             tx_id_upper_bound=None,
-            direction=direction,
+            is_outgoing=not is_outgoing,
             include_assets=[currency.upper()],
-            tx_ids=first_tx_ids,
+            tx_ids=first_tx_ids, # limit second set by tx ids of first set
             page=page,
             fetch_size=fetch_size)
+
 
         results1 = {row['tx_id']: row for row in results1}
 
@@ -1061,6 +1062,7 @@ class Cassandra:
             raise DBInconsistencyException(
                 'result sets for txs intersection not equal')
 
+        # merge address_transactions and raw transaction sets
         for (row, tx) in zip(results2, txs):
             row[second_value] = row['value']
             row[first_value] = results1[row['tx_id']]['value']
@@ -1882,7 +1884,7 @@ class Cassandra:
             id,
             tx_id_lower_bound: Optional[int],
             tx_id_upper_bound: Optional[int],
-            direction: Optional[str],
+            is_outgoing: Optional[bool],
             include_assets: Sequence[Tuple[str, bool]],
             page: Optional[int],
             fetch_size: int,
@@ -1899,7 +1901,8 @@ class Cassandra:
             item_id_group (int): address/cluster id group
             tx_id_lower_bound (Optional[int]): tx id lower bound
             tx_id_upper_bound (Optional[int]): tx id upper bound
-            direction (Optional[str]): in/out or None, None means both
+            is_outgoing (Optional[bool]): if True fetch only outgoing, if False
+                fetch only incoming, if None fetch both directions
             include_assets (Sequence[Tuple[str, bool]]): a list of tuples with
                 assets to include
             page (Optional[int]): a page id (tx_lower bound)
@@ -1925,7 +1928,7 @@ class Cassandra:
 
             item_id_secondary_group = self.sec_in(secondary_id_group)
 
-        directions = [direction == 'out'] if direction else [False, True]
+        directions = [is_outgoing] if is_outgoing is not None else [False, True]
         results = []
         """
             Keep retrieving pages until the demanded fetch_size is fulfilled
@@ -1956,9 +1959,6 @@ class Cassandra:
                 fetch_size=fs_junk,
                 with_tx_id=(tx_ids is not None))
 
-            if not tx_ids:
-                tx_ids = [0]
-
             # prepare parameters for the query junks one for each direction
             # and asset tuple
             params_junks = [{
@@ -1971,10 +1971,11 @@ class Cassandra:
                 "is_outgoing": is_outgoing,
                 "tx_id": tx_id
             } for is_outgoing, asset, s_d_group, tx_id in product(
-                directions, include_assets, item_id_secondary_group, tx_ids)]
+                directions, include_assets, item_id_secondary_group,
+                [0] if tx_ids is None else tx_ids)]
 
             self.logger.debug(f'cql_stmt {cql_stmt}')
-            self.logger.debug(f'param_junks {pprint(params_junks)}')
+            self.logger.debug(f'param_junks {pformat(params_junks)}')
 
             # run one query per direction and asset
             aws = [
@@ -1991,6 +1992,9 @@ class Cassandra:
                 'transaction_id' if is_eth_like(network) else 'tx_id')
 
             results.extend(more_results)
+            if tx_ids is not None:
+                # don't page if querying specific tx_ids
+                break
             if page is None:
                 # no more data expected end loop
                 break
@@ -2041,7 +2045,7 @@ class Cassandra:
             id=address,
             tx_id_lower_bound=first_tx_id,
             tx_id_upper_bound=upper_bound,
-            direction=direction,
+            is_outgoing=direction == 'out',
             include_assets=include_assets,
             page=page,
             fetch_size=fetch_size)
