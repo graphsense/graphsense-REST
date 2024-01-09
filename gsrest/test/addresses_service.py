@@ -1,3 +1,4 @@
+import pdb
 from openapi_server.models.address import Address
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.neighbor_addresses import NeighborAddresses
@@ -1045,8 +1046,6 @@ async def list_address_links(test_case):
                  timestamp=1361497172,
                  height=2)
     ])
-
-    return
 
     test_case.assertEqualWithList(link.to_dict(), result, 'links', 'tx_hash')
 

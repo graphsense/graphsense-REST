@@ -871,8 +871,6 @@ async def list_entity_links(test_case):
     ])
     test_case.assertEqual(link.to_dict(), result)
 
-    return
-
     result = await test_case.request(path,
                                      currency='eth',
                                      entity=107925000,
