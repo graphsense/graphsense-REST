@@ -220,19 +220,19 @@ async def links_response(request, currency, result):
                                                token_config),
                      next_page=next_page)
 
-    heights = [row['height'] for row in links]
+    heights = [row['block_id'] for row in links]
     rates = await list_rates(request, currency, heights)
 
     return Links(links=[
         LinkUtxo(
             tx_hash=e['tx_hash'].hex(),
-            height=e['height'],
+            height=e['block_id'],
             currency=currency,
             timestamp=e['timestamp'],
             input_value=convert_value(currency, e['input_value'],
-                                      rates[e['height']]),
+                                      rates[e['block_id']]),
             output_value=convert_value(currency, e['output_value'],
-                                       rates[e['height']]),
+                                       rates[e['block_id']]),
         ) for e in links
     ],
                  next_page=next_page)

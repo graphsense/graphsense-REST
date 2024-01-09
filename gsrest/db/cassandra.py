@@ -1,4 +1,5 @@
 import re
+from pprint import pprint, pformat
 import time
 import asyncio
 import heapq
@@ -29,6 +30,7 @@ from gsrest.util.tron import partial_tron_to_partial_evm
 from gsrest.util.node_balances import get_balances
 from gsrest.util.id_group import calculate_id_group_with_overflow
 from gsrest.db.node_type import NodeType
+import pdb
 
 # import hashlib
 
@@ -176,7 +178,7 @@ def merge_address_txs_subquery_results(
         if border_tx_id is None:
             border_tx_id = results[-1][tx_id_keys]
             continue
-        border_tx_id = max(border_tx_id, results[-1][tx_id_keys])
+        border_tx_id = min(border_tx_id, results[-1][tx_id_keys])
     """
         Merge results by sort order (uses a priority queue; heapq)
         fetch_sized items or less are returned
@@ -185,19 +187,20 @@ def merge_address_txs_subquery_results(
         v for results in result_sets for v in results
         if v[tx_id_keys] >= border_tx_id
     ]
-    smallest = heapq.nsmallest(fetch_size,
+    results = heapq.nlargest(fetch_size,
                                candidates,
                                key=partial(transaction_ordering_key,
                                            tx_id_keys))
-    results = list(reversed(smallest))
 
+    border_tx_id = results[-1][tx_id_keys] if results else None
     return results, border_tx_id
 
 
-def build_select_address_txs_statement(network: str, table_prefix: str,
+def build_select_address_txs_statement(network: str, node_type: NodeType,
                                        cols: Optional[Sequence[str]],
                                        with_lower_bound: bool,
                                        with_upper_bound: bool,
+                                       with_tx_id: bool,
                                        fetch_size: int) -> str:
     # prebuild useful helpers and conditions
     eth_like = is_eth_like(network)
@@ -207,19 +210,22 @@ def build_select_address_txs_statement(network: str, table_prefix: str,
     # Build select statement
     columns = (",".join(cols) if cols is not None else "*")
 
-    query = (f"SELECT {columns} from {table_prefix}_transactions "
-             f"WHERE {table_prefix}_id = %(id)s "
-             f"AND {table_prefix}_id_group = %(g_id)s "
+    query = (f"SELECT {columns} from {node_type}_transactions "
+             f"WHERE {node_type}_id = %(id)s "
+             f"AND {node_type}_id_group = %(g_id)s "
              "AND is_outgoing = %(is_outgoing)s ")
 
     # conditional where clause, loop independent
-    query += wc(f"{table_prefix}_id_secondary_group = %(s_d_group)s", eth_like)
+    query += wc(f"{node_type}_id_secondary_group = %(s_d_group)s", eth_like)
 
-    query += wc(f"{tx_id_col} >= %(tx_id_lower_bound)s", with_lower_bound)
     query += wc("currency = %(currency)s", eth_like)
 
     # conditional where clause, loop dependent
-    query += wc(f"{tx_id_col} < %(tx_id_upper_bound)s", with_upper_bound)
+    if not with_tx_id:
+        query += wc(f"{tx_id_col} >= %(tx_id_lower_bound)s", with_lower_bound)
+        query += wc(f"{tx_id_col} < %(tx_id_upper_bound)s", with_upper_bound)
+    else:
+        query += wc(f"{tx_id_col} = %(tx_id)s", True)
 
     # Ordering statement
     ordering_statement = ("ORDER BY " +
@@ -229,8 +235,8 @@ def build_select_address_txs_statement(network: str, table_prefix: str,
     return f"{query} {ordering_statement} LIMIT {fetch_size}"
 
 
-class Cassandra:
 
+class Cassandra:
     def eth(func):
 
         def check(*args, **kwargs):
@@ -513,8 +519,7 @@ class Cassandra:
             loop = asyncio.get_event_loop()
             future = loop.create_future()
 
-            h = hash(q + str(params))
-
+            # h = hash(q + str(params))
             # self.logger.debug(f'{h} {q} {params}')
 
             def on_done(result):
@@ -524,10 +529,9 @@ class Cassandra:
                 result = Result(current_rows=result,
                                 params=params,
                                 paging_state=response_future._paging_state)
-                if "address_transactions" in query:
-                    self.logger.debug(f'{query} {params}')
-                    self.logger.debug(
-                        f'{h} result size {len(result.current_rows)}')
+                # self.logger.debug(f'{query} {params}')
+                # self.logger.debug(
+                #     f'{h} result size {len(result.current_rows)}')
                 loop.call_soon_threadsafe(future.set_result, result)
 
             def on_err(result):
@@ -702,23 +706,6 @@ class Cassandra:
         except ValueError:
             raise BadUserInputException(f"Page {page} is not an integer")
 
-        if node_type == NodeType.ADDRESS:
-            id, id_group = \
-                await self.get_address_id_id_group(currency, id)
-            query = ("SELECT * FROM address WHERE address_id = %s"
-                     " AND address_id_group = %s")
-            result = await self.execute_async(currency, 'transformed', query,
-                                              [id, id_group])
-        else:
-            id_group = self.get_id_group(currency, id)
-            query = ("SELECT * FROM cluster "
-                     "WHERE cluster_id_group = %s AND cluster_id = %s ")
-            result = await self.execute_async(currency, 'transformed', query,
-                                              [id_group, id])
-
-        if not result:
-            raise nodeNotFoundException(currency, node_type, id)
-
         upper_bound = None
         first_tx_id = None
         if min_height is not None or max_height is not None:
@@ -741,13 +728,11 @@ class Cassandra:
 
         results, paging_state = await self.list_address_txs_ordered(
             network=currency,
-            table_prefix=str(node_type),
-            item_id=id,
-            item_id_group=id_group,
-            item_id_secondary_group=None,
+            node_type=node_type,
+            id=id,
             tx_id_lower_bound=first_tx_id,
             tx_id_upper_bound=upper_bound,
-            direction=direction,
+            is_outgoing=(direction == 'out' if direction is not None else None),
             include_assets=include_assets,
             page=page,
             fetch_size=fetch_size)
@@ -1020,7 +1005,6 @@ class Cassandra:
                                      page=page,
                                      pagesize=pagesize)
 
-    @eth
     async def list_links(self,
                          currency,
                          node_type: NodeType,
@@ -1028,99 +1012,104 @@ class Cassandra:
                          neighbor,
                          page=None,
                          pagesize=None):
+        try:
+            page = int(page) if page is not None else None
+        except ValueError:
+            raise BadUserInputException(f"Page {page} is not an integer")
         if node_type == NodeType.ADDRESS:
-            id, id_group = \
-                await self.get_address_id_id_group(currency, id)
-            neighbor_id, neighbor_id_group = \
-                await self.get_address_id_id_group(currency, neighbor)
+            src_node = await self.get_address(currency, id)
+            dst_node = await self.get_address(currency, neighbor)
         else:
-            id_group = self.get_id_group(currency, id)
-            neighbor_id = neighbor
-            neighbor_id_group = self.get_id_group(currency, neighbor_id)
+            src_node = await self.get_entity(currency, id)
+            dst_node = await self.get_entity(currency, neighbor)
 
-        query = \
-            f"SELECT no_{{direction}}_txs FROM {node_type}"\
-            f" WHERE {node_type}_id_group = %s AND"\
-            f" {node_type}_id = %s"
+        if src_node is None:
+            raise nodeNotFoundException(currency, node_type, id)
 
-        no_outgoing_txs = (await self.execute_async(
-            currency, 'transformed', query.format(direction='outgoing'),
-            [id_group, id])).one()
+        if dst_node is None:
+            raise nodeNotFoundException(currency, node_type, neighbor)
 
-        if no_outgoing_txs is None:
-            return [], None
+        is_outgoing = src_node['no_outgoing_txs'] < dst_node['no_incoming_txs']
 
-        no_outgoing_txs = no_outgoing_txs['no_outgoing_txs']
-
-        no_incoming_txs = (await self.execute_async(
-            currency, 'transformed', query.format(direction='incoming'),
-            [neighbor_id_group, neighbor_id])).one()
-
-        if no_incoming_txs is None:
-            return [], None
-
-        no_incoming_txs = no_incoming_txs['no_incoming_txs']
-
-        isOutgoing = no_outgoing_txs < no_incoming_txs
-
-        first_id_group, first_id, second_id_group, second_id, \
-            first_value, second_value = \
-            (id_group, id, neighbor_id_group, neighbor_id,
-             'input_value', 'output_value') \
-            if isOutgoing \
-            else (neighbor_id_group, neighbor_id, id_group, id,
-                  'output_value', 'input_value')
-
-        first_query = f"SELECT * FROM {node_type}_transactions WHERE " \
-                      f"{node_type}_id_group = %s AND {node_type}_id = %s " \
-                      f"AND is_outgoing = %s"
-
-        second_query = first_query + " AND tx_id = %s"
+        if is_outgoing:
+            first = id
+            second = neighbor
+            is_outgoing = True
+            first_value = 'input_value'
+            second_value = 'output_value'
+        else:
+            first = neighbor
+            second = id
+            is_outgoing = False
+            first_value = 'output_value'
+            second_value = 'input_value'
 
         fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
-        paging_state = page_from_hex(page)
-        links = dict()
-        tx_ids = []
-        while len(tx_ids) < fetch_size:
-            results1 = await self.execute_async(
-                currency,
-                'transformed',
-                first_query, [first_id_group, first_id, isOutgoing],
-                paging_state=paging_state,
-                fetch_size=fetch_size)
+        results1, paging_state = await self.list_address_txs_ordered(
+            network=currency,
+            node_type=node_type,
+            id=first,
+            tx_id_lower_bound=None,
+            tx_id_upper_bound=None,
+            is_outgoing=is_outgoing,
+            include_assets=[currency.upper()],
+            page=page,
+            fetch_size=fetch_size)
 
-            if not results1.current_rows:
-                break
+        tx_id = 'transaction_id' if is_eth_like(currency) else 'tx_id'
 
-            paging_state = results1.paging_state
+        first_tx_ids = [row[tx_id] for row in results1]
 
-            params = \
-                [[second_id_group, second_id, not isOutgoing, row['tx_id']]
-                 for row in results1.current_rows]
-            results2 = await self.concurrent_with_args(currency, 'transformed',
-                                                       second_query, params)
+        assets = set([currency.upper()])
+        if is_eth_like(currency):
+            for row in results1:
+                assets.add(row['currency'])
 
-            fs = fetch_size - len(tx_ids)
-            for row in results2[:fs]:
-                index = row['tx_id']
-                tx_ids.append(index)
-                links[index] = dict()
-                links[index][second_value] = row['value']
-            for row in results1.current_rows:
-                index = row['tx_id']
-                if index not in links:
-                    continue
-                links[index][first_value] = row['value']
+        assets = list(assets)
 
-            if paging_state is None:
-                break
+        results2, _ = await self.list_address_txs_ordered(
+            network=currency,
+            node_type=node_type,
+            id=second,
+            tx_id_lower_bound=None,
+            tx_id_upper_bound=None,
+            is_outgoing=not is_outgoing,
+            include_assets=assets,
+            tx_ids=first_tx_ids, # limit second set by tx ids of first set
+            page=page,
+            fetch_size=fetch_size)
 
-        for row in await self.list_txs_by_ids(currency, tx_ids):
-            links[row['tx_id']]['tx_hash'] = row['tx_hash']
-            links[row['tx_id']]['height'] = row['block_id']
-            links[row['tx_id']]['timestamp'] = row['timestamp']
+        results1 = {row[tx_id]: row for row in results1}
 
-        return list(links.values()), to_hex(paging_state)
+        tx_ids = [row[tx_id] for row in results2]
+        txs = await self.list_txs_by_ids(currency, tx_ids)
+
+        if len(results2) != len(txs):
+            raise DBInconsistencyException(
+                'result sets for txs intersection not equal')
+
+        # merge address_transactions and raw transaction sets
+        for (row, tx) in zip(results2, txs):
+            if not is_eth_like(currency):
+                row[second_value] = row['value']
+                row[first_value] = results1[row[tx_id]]['value']
+
+            for k, v in tx.items():
+                row[k] = v
+
+        if is_eth_like(currency):
+            if node_type == NodeType.CLUSTER:
+                neighbor = dst_node['root_address']
+                id = src_node['root_address']
+            # Token/Trace transactions might not be between the requested nodes
+            # so only keep the relevant ones
+            txs = [
+                tx for tx in results2
+                if tx["to_address"] == neighbor and tx["from_address"] == id
+            ]
+
+        return results2, paging_state
+
 
     async def list_matching_addresses(self, currency, expression, limit=10):
         prefix_lengths = self.get_prefix_lengths(currency)
@@ -1939,40 +1928,57 @@ class Cassandra:
     async def list_address_txs_ordered(
             self,
             network: str,
-            table_prefix: str,
-            item_id: int,
-            item_id_group: int,
+            node_type: NodeType,
+            id,
             tx_id_lower_bound: Optional[int],
             tx_id_upper_bound: Optional[int],
-            direction: Optional[str],
+            is_outgoing: Optional[bool],
             include_assets: Sequence[Tuple[str, bool]],
             page: Optional[int],
             fetch_size: int,
             cols: Optional[Sequence[str]] = None,
-            item_id_secondary_group: ValueSequence = None):
+            tx_ids: Optional[Sequence[int]] = None):
         """Loads a address transactions in execution order
         it allows to only get out- or incoming transaction or only
         transactions of a certain asset (token), for a given address id
 
         Args:
             network (str): base currency / network
-            table_prefix (str): prefix of the table {prefix}_transactions
+            node_type (str): NodeType (ADDRESS/CLUSTER)
             item_id (int): address/cluster id
             item_id_group (int): address/cluster id group
             tx_id_lower_bound (Optional[int]): tx id lower bound
             tx_id_upper_bound (Optional[int]): tx id upper bound
-            direction (Optional[str]): in/out or None, None means both
+            is_outgoing (Optional[bool]): if True fetch only outgoing, if False
+                fetch only incoming, if None fetch both directions
             include_assets (Sequence[Tuple[str, bool]]): a list of tuples with
                 assets to include
             page (Optional[int]): a page id (tx_lower bound)
             fetch_size (int): how much to fetch per page
             cols (Optional[Sequence[str]], optional): which columns to select
                 None means *
-            item_id_secondary_group (ValueSequence, optional): address
-                sec group,needed for eth
         """
 
-        directions = [direction == 'out'] if direction else [False, True]
+        if node_type == NodeType.ADDRESS:
+            item_id, item_id_group = \
+                await self.get_address_id_id_group(network, id)
+        else:
+            if is_eth_like(network):
+                node_type = NodeType.ADDRESS
+            item_id = id
+            item_id_group = self.get_id_group(network, id)
+
+
+        item_id_secondary_group = [0]
+        if is_eth_like(network):
+            secondary_id_group = \
+                await self.get_id_secondary_group_eth(network,
+                                                      'address_transactions',
+                                                      item_id_group)
+
+            item_id_secondary_group = self.sec_in(secondary_id_group)
+
+        directions = [is_outgoing] if is_outgoing is not None else [False, True]
         results = []
         """
             Keep retrieving pages until the demanded fetch_size is fulfilled
@@ -1996,14 +2002,12 @@ class Cassandra:
 
             cql_stmt = build_select_address_txs_statement(
                 network,
-                table_prefix,
+                node_type,
                 cols,
                 with_lower_bound=(tx_id_lower_bound is not None),
                 with_upper_bound=has_upper_bound,
-                fetch_size=fs_junk)
-
-            if not is_eth_like(network) and item_id_secondary_group is None:
-                item_id_secondary_group = [0]
+                fetch_size=fs_junk,
+                with_tx_id=(tx_ids is not None))
 
             # prepare parameters for the query junks one for each direction
             # and asset tuple
@@ -2014,9 +2018,11 @@ class Cassandra:
                 "tx_id_upper_bound": page,
                 "s_d_group": s_d_group,
                 "currency": asset,
-                "is_outgoing": is_outgoing
-            } for is_outgoing, asset, s_d_group in product(
-                directions, include_assets, item_id_secondary_group)]
+                "is_outgoing": is_outgoing,
+                "tx_id": tx_id
+            } for is_outgoing, asset, s_d_group, tx_id in product(
+                directions, include_assets, item_id_secondary_group,
+                [0] if tx_ids is None else tx_ids)]
 
             # run one query per direction and asset
             aws = [
@@ -2028,11 +2034,14 @@ class Cassandra:
             ]
 
             # collect and merge results
-            more_results, page = merge_address_txs_subquery_results(
+            more_results, page = self.merge_address_txs_subquery_results(
                 [r.current_rows for r in await asyncio.gather(*aws)], fs_it,
                 'transaction_id' if is_eth_like(network) else 'tx_id')
 
             results.extend(more_results)
+            if tx_ids is not None:
+                # don't page if querying specific tx_ids
+                break
             if page is None:
                 # no more data expected end loop
                 break
@@ -2054,19 +2063,9 @@ class Cassandra:
         except ValueError:
             raise BadUserInputException(f"Page {page} is not an integer")
 
-        if node_type == NodeType.ADDRESS:
-            address_id, id_group = \
-                await self.get_address_id_id_group(currency, address)
-        else:
+        if node_type == NodeType.CLUSTER:
             node_type = NodeType.ADDRESS
-            address_id = address
-            id_group = self.get_id_group(currency, address_id)
-        secondary_id_group = \
-            await self.get_id_secondary_group_eth(currency,
-                                                  'address_transactions',
-                                                  id_group)
-
-        sec_in = self.sec_in(secondary_id_group)
+            address = await self.get_address_by_address_id(currency, address)
 
         if not token_currency:
             token_config = self.get_token_configuration(currency)
@@ -2089,13 +2088,11 @@ class Cassandra:
 
         results, paging_state = await self.list_address_txs_ordered(
             network=currency,
-            table_prefix="address",
-            item_id=address_id,
-            item_id_group=id_group,
-            item_id_secondary_group=sec_in,
+            node_type=node_type,
+            id=address,
             tx_id_lower_bound=first_tx_id,
             tx_id_upper_bound=upper_bound,
-            direction=direction,
+            is_outgoing=(direction == 'out' if direction is not None else None),
             include_assets=include_assets,
             page=page,
             fetch_size=fetch_size)
@@ -2266,153 +2263,6 @@ class Cassandra:
             result['to_address'] = to_address
             # result['contract_creation'] = False
         return result
-
-    async def list_links_eth(self,
-                             currency,
-                             node_type: NodeType,
-                             address,
-                             neighbor,
-                             page=None,
-                             pagesize=None):
-        if node_type == NodeType.ADDRESS:
-            address_id, address_id_group = \
-                await self.get_address_id_id_group(currency, address)
-            neighbor_id, neighbor_id_group = \
-                await self.get_address_id_id_group(currency, neighbor)
-        else:
-            node_type = NodeType.ADDRESS
-            address_id = address
-            address_id_group = self.get_id_group(currency, address_id)
-            address = await self.get_address_by_address_id(
-                currency, address_id)
-            neighbor_id = neighbor
-            neighbor_id_group = self.get_id_group(currency, neighbor_id)
-            neighbor = (await
-                        self.get_address_by_address_id(currency, neighbor_id))
-
-        address_id_secondary_group = \
-            await self.get_id_secondary_group_eth(currency,
-                                                  'address_transactions',
-                                                  address_id_group)
-        address_id_secondary_group = self.sec_in(address_id_secondary_group)
-        neighbor_id_secondary_group = \
-            await self.get_id_secondary_group_eth(currency,
-                                                  'address_transactions',
-                                                  neighbor_id_group)
-        neighbor_id_secondary_group = self.sec_in(neighbor_id_secondary_group)
-
-        query = \
-            f"SELECT no_{{direction}}_txs FROM {node_type}"\
-            f" WHERE {node_type}_id_group = %s AND"\
-            f" {node_type}_id = %s"
-
-        no_outgoing_txs = (await self.execute_async(
-            currency, 'transformed', query.format(direction='outgoing'),
-            [address_id_group, address_id])).one()
-
-        if no_outgoing_txs is None:
-            return [], None
-
-        no_outgoing_txs = no_outgoing_txs['no_outgoing_txs']
-
-        no_incoming_txs = (await self.execute_async(
-            currency, 'transformed', query.format(direction='incoming'),
-            [neighbor_id_group, neighbor_id])).one()
-
-        if no_incoming_txs is None:
-            return [], None
-
-        no_incoming_txs = no_incoming_txs['no_incoming_txs']
-
-        isOutgoing = no_outgoing_txs < no_incoming_txs
-
-        first_id_group, \
-            first_id, \
-            second_id_group, \
-            second_id, \
-            first_id_secondary_group, \
-            second_id_secondary_group = \
-            (address_id_group,
-             address_id,
-             neighbor_id_group,
-             neighbor_id,
-             address_id_secondary_group,
-             neighbor_id_secondary_group) \
-            if isOutgoing \
-            else (neighbor_id_group,
-                  neighbor_id,
-                  address_id_group,
-                  address_id,
-                  neighbor_id_secondary_group,
-                  address_id_secondary_group)
-
-        basequery = ("SELECT * FROM"
-                     " address_transactions WHERE "
-                     "address_id_group = %s AND address_id = %s "
-                     "AND is_outgoing = %s ")
-        first_query = basequery + \
-            "AND address_id_secondary_group IN %s"
-        second_query = basequery + \
-            "AND address_id_secondary_group IN %s"\
-            " AND currency = %s AND transaction_id = %s"
-
-        fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
-        paging_state = page_from_hex(page)
-        txs = []
-
-        while len(txs) < fetch_size:
-            results1 = await self.execute_async(
-                currency,
-                'transformed',
-                first_query, [
-                    first_id_group, first_id, isOutgoing,
-                    first_id_secondary_group
-                ],
-                paging_state=paging_state,
-                fetch_size=fetch_size)
-
-            if not results1.current_rows:
-                return [], None
-
-            paging_state = results1.paging_state
-
-            first_tx_ids = []
-            last = None
-            for row in results1.current_rows:
-                tupl = (row['transaction_id'], row['currency'])
-                if last and tupl == last:
-                    continue
-                first_tx_ids.append(tupl)
-                last = tupl
-
-            params = [[
-                second_id_group, second_id, not isOutgoing,
-                second_id_secondary_group, curr, tx_id
-            ] for (tx_id, curr) in first_tx_ids]
-
-            results2 = await self.concurrent_with_args(currency,
-                                                       'transformed',
-                                                       second_query,
-                                                       params,
-                                                       return_one=False,
-                                                       keep_meta=False)
-
-            fs = fetch_size - len(txs)
-            for row in results2[:fs]:
-                txs.append(row)
-
-            if paging_state is None:
-                break
-
-        all_txs = await self.normalize_address_transactions(currency, txs)
-
-        # Token/Trace transactions might not be between the requested nodes
-        # so only keep the relevant ones
-        txs = [
-            tx for tx in all_txs
-            if tx["to_address"] == neighbor and tx["from_address"] == address
-        ]
-        return txs, to_hex(paging_state)
 
     def get_tx_eth(self, currency, tx_hash: str):
         return self.get_tx_by_hash(currency, tx_hash_from_hex(tx_hash))
