@@ -2034,7 +2034,7 @@ class Cassandra:
             ]
 
             # collect and merge results
-            more_results, page = self.merge_address_txs_subquery_results(
+            more_results, page = merge_address_txs_subquery_results(
                 [r.current_rows for r in await asyncio.gather(*aws)], fs_it,
                 'transaction_id' if is_eth_like(network) else 'tx_id')
 
