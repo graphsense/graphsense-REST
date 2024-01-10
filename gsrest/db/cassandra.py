@@ -1,5 +1,4 @@
 import re
-from pprint import pprint, pformat
 import time
 import asyncio
 import heapq
@@ -30,7 +29,6 @@ from gsrest.util.tron import partial_tron_to_partial_evm
 from gsrest.util.node_balances import get_balances
 from gsrest.util.id_group import calculate_id_group_with_overflow
 from gsrest.db.node_type import NodeType
-import pdb
 
 # import hashlib
 
@@ -188,9 +186,9 @@ def merge_address_txs_subquery_results(
         if v[tx_id_keys] >= border_tx_id
     ]
     results = heapq.nlargest(fetch_size,
-                               candidates,
-                               key=partial(transaction_ordering_key,
-                                           tx_id_keys))
+                             candidates,
+                             key=partial(transaction_ordering_key,
+                                         tx_id_keys))
 
     border_tx_id = results[-1][tx_id_keys] if results else None
     return results, border_tx_id
@@ -233,7 +231,6 @@ def build_select_address_txs_statement(network: str, node_type: NodeType,
                           f" {tx_id_col} DESC")
 
     return f"{query} {ordering_statement} LIMIT {fetch_size}"
-
 
 
 class Cassandra:
@@ -1075,7 +1072,7 @@ class Cassandra:
             tx_id_upper_bound=None,
             is_outgoing=not is_outgoing,
             include_assets=assets,
-            tx_ids=first_tx_ids, # limit second set by tx ids of first set
+            tx_ids=first_tx_ids,  # limit second set by tx ids of first set
             page=page,
             fetch_size=fetch_size)
 
@@ -1109,7 +1106,6 @@ class Cassandra:
             ]
 
         return results2, paging_state
-
 
     async def list_matching_addresses(self, currency, expression, limit=10):
         prefix_lengths = self.get_prefix_lengths(currency)
@@ -1967,7 +1963,6 @@ class Cassandra:
                 node_type = NodeType.ADDRESS
             item_id = id
             item_id_group = self.get_id_group(network, id)
-
 
         item_id_secondary_group = [0]
         if is_eth_like(network):
