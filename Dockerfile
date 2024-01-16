@@ -8,6 +8,7 @@ LABEL org.opencontainers.image.source="https://github.com/graphsense/graphsense-
 
 ENV NUM_WORKERS=
 ENV NUM_THREADS=
+ENV CONFIG_FILE=./instance/config.yaml
 
 RUN mkdir -p /srv/graphsense-rest/
 
@@ -47,7 +48,7 @@ RUN mkdir /var/lib/graphsense-rest && \
 COPY gsrest /srv/graphsense-rest/gsrest
 COPY openapi_server /srv/graphsense-rest/openapi_server
 
-COPY instance /srv/graphsense-rest/instance
+# COPY instance /srv/graphsense-rest/instance
 
 USER dockeruser
 
@@ -57,5 +58,5 @@ RUN find gsrest/plugins -name requirements.txt -exec pip install -r {} \;
 
 CMD find gsrest/plugins -name requirements.txt -exec pip install -r {} \; && /usr/bin/gunicorn \
     -c /home/dockeruser/gunicorn-conf.py \
-    "openapi_server:main('./instance/config.yaml')" \
+    "openapi_server:main('${CONFIG_FILE}')" \
      --worker-class aiohttp.GunicornWebWorker

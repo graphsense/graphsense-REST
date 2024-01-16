@@ -16,9 +16,11 @@ format:
 serve:
 	python -m aiohttp.web -H localhost -P 9000 openapi_server:main
 
-
 build-docker:
-	docker build .
+	docker build -t graphsense-rest .
+
+serve-docker: build-docker
+	docker run -it --network='host' -v "${PWD}/instance/config.yaml:/config.yaml:Z" -e CONFIG_FILE=/config.yaml localhost/graphsense-rest:latest
 
 drop-integration-db:
 	docker stop cassandra_mock; docker stop tagstore_mock; rm ./tests/.runcass ./tests/.runts
@@ -40,4 +42,4 @@ get-openapi-spec-from-upstream:
 	wget -O openapi_server/openapi/openapi.yaml https://raw.githubusercontent.com/graphsense/graphsense-openapi/master/graphsense.yaml
 
 
-.PHONY: format lint test test-all-env serve drop-integration-db generate-openapi-server get-openapi-spec-from-upstream
+.PHONY: format lint test test-all-env serve drop-integration-db generate-openapi-server get-openapi-spec-from-upstream serve-docker
