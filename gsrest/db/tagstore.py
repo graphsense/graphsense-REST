@@ -1,5 +1,6 @@
 import aiopg
 import hashlib
+from gsrest.util import is_eth_like
 
 
 class Result:
@@ -240,7 +241,7 @@ class Tagstore:
                         """
 
         address = address.strip()
-        if currency == 'eth':
+        if currency == "eth":
             address = address.lower()
 
         return self.execute(query,
@@ -302,7 +303,7 @@ class Tagstore:
         return await self.execute(query, [currency.upper(), entity])
 
     async def get_best_entity_tag(self, currency, entity, show_private=False):
-        if currency == 'eth':
+        if is_eth_like(currency):
             # in case of eth we want to propagate the best address tag
             # regardless of if the tagpack is a defines it as cluster definer
             # since cluster == entity in eth
@@ -361,7 +362,7 @@ class Tagstore:
             raise TypeError('x')
             return Result(), None
 
-        if currency == 'eth':
+        if currency == "eth":
             addresses = tuple(addr.lower().strip() for addr in addresses)
         else:
             addresses = tuple(addr.strip() for addr in addresses)

@@ -4,4 +4,4 @@
  {"address_id_group": 705, "address_id": 17642138, "is_outgoing": true, "tx_id": 13168302, "value": -10000000}
  {"address_id_group": 404, "address_id": 10102718, "is_outgoing": false, "tx_id": 13168302, "value": 10000000}
  {"address_id_group": 404, "address_id": 10102718, "is_outgoing": false, "tx_id": 13168303, "value": 1}
- {"address_id_group": 404, "address_id": 10102718, "is_outgoing": true, "tx_id": 13168304, "value": 1}
+ {"address_id_group": 404, "address_id": 10102718, "is_outgoing": true, "tx_id": 13168304, "value": -1}

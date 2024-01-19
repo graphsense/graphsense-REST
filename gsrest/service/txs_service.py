@@ -5,19 +5,22 @@ from openapi_server.models.tx_value import TxValue
 from openapi_server.models.tx_ref import TxRef
 from gsrest.service.rates_service import get_rates
 from gsrest.util.values import convert_value, convert_token_value
-from gsrest.errors import NotFoundException
+from gsrest.errors import (TransactionNotFoundException, NotFoundException,
+                           BadUserInputException)
+from gsrest.util import is_eth_like
+from gsrest.util.address import address_to_user_format
 
 
 def from_row(currency, row, rates, token_config, include_io=False):
-    if currency == 'eth':
+    if is_eth_like(currency):
         return TxAccount(
             currency=currency
             if "token_tx_id" not in row else row["currency"].lower(),
             tx_hash=row['tx_hash'].hex(),
             timestamp=row['block_timestamp'],
             height=row['block_id'],
-            from_address=row['from_address'],
-            to_address=row['to_address'],
+            from_address=address_to_user_format(currency, row['from_address']),
+            to_address=address_to_user_format(currency, row['to_address']),
             token_tx_id=row.get("token_tx_id", None),
             contract_creation=row.get("contract_creation", None),
             value=convert_value(currency, row['value'], rates)
@@ -83,10 +86,6 @@ def io_from_rows(currency, values, key, rates, include_io):
 async def list_token_txs(request, currency, tx_hash, token_tx_id=None):
     db = request.app['db']
     results = await db.list_token_txs(currency, tx_hash, log_index=token_tx_id)
-    if results is None:
-        raise NotFoundException(
-            'Transaction {} in keyspace {} not found'.format(
-                tx_hash, currency))
 
     results = [
         from_row(currency, result, (await
@@ -106,7 +105,7 @@ async def get_tx(request,
     db = request.app['db']
 
     if token_tx_id is not None:
-        if currency == 'eth':
+        if is_eth_like(currency):
             results = await list_token_txs(request,
                                            currency,
                                            tx_hash,
@@ -115,19 +114,13 @@ async def get_tx(request,
             if len(results):
                 return results[0]
             else:
-                raise NotFoundException(
-                    'Token transaction {}:{} in keyspace {} not found'.format(
-                        tx_hash, token_tx_id, currency))
+                raise TransactionNotFoundException(currency, tx_hash,
+                                                   token_tx_id)
         else:
-            raise NotFoundException(
+            raise BadUserInputException(
                 f'{currency} does not support token transactions.')
     else:
         result = await db.get_tx(currency, tx_hash)
-        if result is None:
-            raise NotFoundException(
-                'Transaction {} in keyspace {} not found'.format(
-                    tx_hash, currency))
-
         rates = (await get_rates(request, currency,
                                  result['block_id']))['rates']
 
@@ -137,7 +130,7 @@ async def get_tx(request,
 
 
 async def get_tx_io(request, currency, tx_hash, io):
-    if currency == 'eth':
+    if is_eth_like(currency):
         raise NotFoundException('get_tx_io not implemented for ETH')
     result = await get_tx(request, currency, tx_hash, include_io=True)
     return getattr(result, io)

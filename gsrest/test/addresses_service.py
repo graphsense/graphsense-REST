@@ -10,6 +10,7 @@ from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.labeled_item_ref import LabeledItemRef
 from gsrest.util.values import convert_value
+from gsrest.util.tron import evm_to_tron_address_string
 from gsrest.service.rates_service import list_rates
 from gsrest.test.txs_service import tx1_eth, tx2_eth, tx22_eth, tx4_eth
 from gsrest.util.values import make_values
@@ -599,6 +600,22 @@ async def get_address(test_case):
     assert result.status == 404
     assert "Network doge not supported" in body
 
+    result = await test_case.request(
+        path,
+        currency='trx',
+        address=evm_to_tron_address_string("0xabcdef"),
+        include_tags=False)
+
+    assert result["address"] == evm_to_tron_address_string("0xabcdef")
+
+    result = await test_case.request(
+        path,
+        currency='trx',
+        address=evm_to_tron_address_string("0x123456"),
+        include_tags=False)
+
+    assert result["address"] == evm_to_tron_address_string("0x123456")
+
 
 async def list_address_txs(test_case):
     """Test case for list_address_txs
@@ -699,6 +716,7 @@ async def list_address_txs(test_case):
     result = await test_case.request(path,
                                      currency='eth',
                                      address=eth_address.address)
+
     test_case.assertEqual(txs.to_dict()['address_txs'], result['address_txs'])
     result = await test_case.request(path_with_direction,
                                      currency='eth',
@@ -1027,6 +1045,16 @@ async def get_address_entity(test_case):
                                      address=eth_address.address,
                                      include_tags=True)
     test_case.assertEqual(eth_entityWithTags.to_dict(), result)
+
+    non_existent_address = '0x40a197b01CDeF4C77196045EaFFaC80F25Be00FE'
+    result, body = await test_case.requestOnly(path,
+                                               None,
+                                               currency='eth',
+                                               address=non_existent_address,
+                                               include_tags=True)
+    assert result.status == 404
+    assert ("Address 0x40a197b01cdef4c77196045eaffac80f25be00fe"
+            " not found") in body
 
 
 async def list_address_links(test_case):

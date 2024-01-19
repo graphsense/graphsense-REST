@@ -12,16 +12,20 @@ from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from openapi_server.models.labeled_item_ref import LabeledItemRef
 from gsrest.service.rates_service import list_rates
 from gsrest.db.util import tagstores, tagstores_with_paging
+from gsrest.db.node_type import NodeType
 from gsrest.service.tags_service import address_tag_from_row
 from gsrest.util import get_first_key_present
-from gsrest.errors import NotFoundException, BadUserInputException
+from gsrest.errors import AddressNotFoundException, BadUserInputException
 from psycopg2.errors import InvalidTextRepresentation
+import gsrest.util.address
+from gsrest.util.address import address_to_user_format
+from gsrest.util import is_eth_like
 
 
 def address_from_row(currency, row, rates, token_config, actors):
     return Address(
         currency=currency,
-        address=row['address'],
+        address=address_to_user_format(currency, row['address']),
         entity=row['cluster_id'],
         first_tx=TxSummary(row['first_tx'].height, row['first_tx'].timestamp,
                            row['first_tx'].tx_hash.hex()),
@@ -50,7 +54,7 @@ async def txs_from_rows(request, currency, rows, token_config):
     timestamp_keys = ["timestamp", "block_timestamp"]
     heights = [get_first_key_present(row, height_keys) for row in rows]
     rates = await list_rates(request, currency, heights)
-    if currency == 'eth':
+    if is_eth_like(currency):
         return [
             TxAccount(
                 currency=currency
@@ -58,8 +62,9 @@ async def txs_from_rows(request, currency, rows, token_config):
                 tx_hash=row['tx_hash'].hex(),
                 timestamp=get_first_key_present(row, timestamp_keys),
                 height=get_first_key_present(row, height_keys),
-                from_address=row['from_address'],
-                to_address=row['to_address'],
+                from_address=address_to_user_format(currency,
+                                                    row['from_address']),
+                to_address=address_to_user_format(currency, row['to_address']),
                 token_tx_id=row.get("token_tx_id", None),
                 contract_creation=row.get("contract_creation", None),
                 value=convert_value(
@@ -83,13 +88,22 @@ async def txs_from_rows(request, currency, rows, token_config):
     ]
 
 
-async def get_address(request, currency, address):
-    db = request.app['db']
-    result = await db.get_address(currency, address)
+def cannonicalize_address(currency, address):
+    try:
+        return gsrest.util.address.cannonicalize_address(currency, address)
+    except ValueError:
+        raise BadUserInputException(
+            "The address provided does not look"
+            f" like a {currency.upper()} address: {address}")
 
-    if not result:
-        raise NotFoundException("Address {} not found in currency {}".format(
-            address, currency))
+
+async def get_address(request, currency, address):
+    address_canonical = cannonicalize_address(currency, address)
+    db = request.app['db']
+    try:
+        result = await db.get_address(currency, address_canonical)
+    except AddressNotFoundException:
+        result = await db.new_address(currency, address_canonical)
 
     actors = tagstores(
         request.app['tagstores'],
@@ -130,13 +144,11 @@ async def list_neighbors(request,
                          currency,
                          id,
                          direction,
-                         node_type,
+                         node_type: NodeType,
                          ids=None,
                          include_labels=False,
                          page=None,
                          pagesize=None):
-    if node_type not in ['address', 'entity']:
-        raise NotFoundException(f'Unknown node type {node_type}')
     is_outgoing = "out" in direction
     db = request.app['db']
     results, paging_state = await db.list_neighbors(currency,
@@ -162,19 +174,23 @@ async def list_neighbors(request,
     return results, paging_state
 
 
-async def add_labels(request, currency, node_type, that, nodes):
-    (field, tfield, fun) = \
-        ('address', 'address', 'list_labels_for_addresses') \
-        if node_type == 'address' else \
-        ('cluster_id', 'gs_cluster_id', 'list_labels_for_entities')
+async def add_labels(request, currency, node_type: NodeType, that, nodes):
+
+    def identity(x, y):
+        return y
+    (field, tfield, fun, fmt) = \
+        ('address', 'address', 'list_labels_for_addresses',
+         address_to_user_format) \
+        if node_type == NodeType.ADDRESS else \
+        ('cluster_id', 'gs_cluster_id', 'list_labels_for_entities', identity)
     thatfield = that + '_' + field
-    ids = tuple((node[thatfield] for node in nodes))
+    ids = tuple((fmt(currency, node[thatfield]) for node in nodes))
 
     result = await tagstores(
         request.app['tagstores'], lambda row: row, fun, currency, ids,
         request.app['request_config']['show_private_tags'])
     iterator = iter(result)
-    if node_type == 'address':
+    if node_type == NodeType.ADDRESS:
         nodes = sorted(nodes, key=lambda node: node[thatfield])
 
     stop_iteration = False
@@ -196,44 +212,27 @@ async def add_labels(request, currency, node_type, that, nodes):
 
 
 async def links_response(request, currency, result):
-
     links, next_page = result
-    if currency == 'eth':
+    if is_eth_like(currency):
         db = request.app['db']
         token_config = db.get_token_configuration(currency)
-        heights = [row['block_id'] for row in links]
-        rates = await list_rates(request, currency, heights)
-        return Links(links=[
-            TxAccount(tx_hash=row['tx_hash'].hex(),
-                      currency=currency
-                      if "token_tx_id" not in row else row["currency"].lower(),
-                      timestamp=row['block_timestamp'],
-                      height=row['block_id'],
-                      token_tx_id=row.get("token_tx_id", None),
-                      from_address=row['from_address'],
-                      to_address=row['to_address'],
-                      contract_creation=row.get("contract_creation", None),
-                      value=convert_value(currency, row['value'],
-                                          rates[row['block_id']])
-                      if "token_tx_id" not in row else convert_token_value(
-                          row['value'], rates[row['block_id']],
-                          token_config[row["currency"]])) for row in links
-        ],
+        return Links(links=await txs_from_rows(request, currency, links,
+                                               token_config),
                      next_page=next_page)
 
-    heights = [row['height'] for row in links]
+    heights = [row['block_id'] for row in links]
     rates = await list_rates(request, currency, heights)
 
     return Links(links=[
         LinkUtxo(
             tx_hash=e['tx_hash'].hex(),
-            height=e['height'],
+            height=e['block_id'],
             currency=currency,
             timestamp=e['timestamp'],
             input_value=convert_value(currency, e['input_value'],
-                                      rates[e['height']]),
+                                      rates[e['block_id']]),
             output_value=convert_value(currency, e['output_value'],
-                                       rates[e['height']]),
+                                       rates[e['block_id']]),
         ) for e in links
     ],
                  next_page=next_page)

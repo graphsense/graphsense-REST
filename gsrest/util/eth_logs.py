@@ -18,6 +18,7 @@ class VersionedDict(dict):
 
     def __getitem__(self, key):
         v = super().__getitem__(key)
+
         return v[self.v]
 
 
@@ -36,6 +37,27 @@ log_signatures = {
                     "name": "to",
                     "type": "address",
                     "indexed": True
+                },
+                {
+                    "name": "value",
+                    "type": "uint256",
+                    "indexed": False
+                },
+            ],
+        },
+        {
+            "name":
+            "Transfer",
+            "inputs": [
+                {
+                    "name": "from",
+                    "type": "address",
+                    "indexed": False
+                },
+                {
+                    "name": "to",
+                    "type": "address",
+                    "indexed": False
                 },
                 {
                     "name": "value",
@@ -154,7 +176,20 @@ def decode_log(log):
         logdef = log_signatures[log["topics"][0]]
         for i in range(0, len(logdef)):
             try:
-                result = eth_event.decode_log(log,
+                # Truncate topics to expected length. Importer bug
+                # lead to duplicate topics in some instances.
+                ll = log.copy()
+                nr_topics = sum(
+                    [1
+                     for x in logdef[i]["inputs"] if x["indexed"] is True]) + 1
+                if len(ll["topics"]) != nr_topics:
+                    newTopics = ll['topics'][-nr_topics:]
+                    logger.warning(
+                        f"Truncated log topics, {ll['topics']} "
+                        f"to {newTopics}, might an error in your raw data.")
+                    ll["topics"] = newTopics
+
+                result = eth_event.decode_log(ll,
                                               VersionedDict(log_signatures, i))
                 if "data" in result:
                     result["data"] = {d["name"]: d for d in result["data"]}

@@ -32,10 +32,10 @@ async def get_exchange_rates(test_case):
     result = await test_case.request('/btc/rates/1')
     test_case.assertEqual(rate.to_dict(), result)
 
-    result = await test_case.request('/USDT/rates/1')
+    result = await test_case.request('/eth:USDT/rates/1')
     test_case.assertEqual(rate_usdstable_coin.to_dict(), result)
 
-    result = await test_case.request('/weth/rates/1')
+    result = await test_case.request('/eth:weth/rates/1')
     test_case.assertEqual(rate_eth.to_dict(), result)
 
     result = await test_case.request('/eth/rates/1')

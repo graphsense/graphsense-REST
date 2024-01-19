@@ -1,7 +1,7 @@
 from openapi_server.models.rates import Rates
 from gsrest.service.stats_service import get_no_blocks
 from gsrest.util.values import map_rates_for_peged_tokens
-from gsrest.errors import NotFoundException
+from gsrest.errors import BlockNotFoundException
 
 RATES_TABLE = 'exchange_rates'
 
@@ -16,19 +16,25 @@ async def get_rates(request, currency, height=None):
         height = (await get_no_blocks(request, currency)) - 1
 
     db = request.app['db']
+    if ":" in currency:
+        network, currency, *rest = currency.split(":")
+    else:
+        network, currency = (currency, currency)
 
-    eth_token_config = db.get_token_configuration("eth")
-    if currency.upper() in eth_token_config:
+    token_config = db.get_token_configuration(network)
+    if token_config is not None and currency.upper() in token_config:
         # create pseudo rates for eth stable coin tokens.
-        r = await db.get_rates("eth", height)
-        r["rates"] = map_rates_for_peged_tokens(
-            r['rates'], eth_token_config[currency.upper()])
+        r = await db.get_rates(network, height)
+        # this avoids changing original rates if cached
+        # otherwise results are wrong.
+        r = r.copy()
+        r["rates"] = map_rates_for_peged_tokens(r['rates'],
+                                                token_config[currency.upper()])
     else:
         r = await db.get_rates(currency, height)
 
     if r is None:
-        raise NotFoundException("Cannot find height {} in currency {}".format(
-            height, currency))
+        raise BlockNotFoundException(currency, height)
     return r
 
 

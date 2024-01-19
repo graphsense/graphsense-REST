@@ -31,7 +31,16 @@ stats = Stats(currencies=[
                   no_txs=11,
                   no_labels=2,
                   no_tagged_addresses=20,
-                  no_address_relations=123)
+                  no_address_relations=123),
+    CurrencyStats(name='trx',
+                  no_entities=0,
+                  no_addresses=1,
+                  no_blocks=3,
+                  timestamp=16,
+                  no_txs=10,
+                  no_labels=0,
+                  no_tagged_addresses=0,
+                  no_address_relations=2),
 ])
 
 
@@ -55,7 +64,8 @@ async def search(test_case):
         return SearchResult(currencies=[
             SearchResultByCurrency(currency='btc', addresses=[], txs=[]),
             SearchResultByCurrency(currency='ltc', addresses=[], txs=[]),
-            SearchResultByCurrency(currency='eth', addresses=[], txs=[])
+            SearchResultByCurrency(currency='eth', addresses=[], txs=[]),
+            SearchResultByCurrency(currency='trx', addresses=[], txs=[])
         ],
                             labels=[],
                             actors=[])
@@ -142,6 +152,12 @@ async def search(test_case):
     expected.currencies[2] = \
         SearchResultByCurrency(
             currency='eth',
+            txs=['af6e0000'.rjust(64, "0"), 'af6e0003'.rjust(64, "0")],
+            addresses=[])
+
+    expected.currencies[3] = \
+        SearchResultByCurrency(
+            currency='trx',
             txs=['af6e0000'.rjust(64, "0"), 'af6e0003'.rjust(64, "0")],
             addresses=[])
 

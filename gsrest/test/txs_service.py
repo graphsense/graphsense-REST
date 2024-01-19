@@ -191,6 +191,48 @@ async def get_tx(test_case):
 
     test_case.assertEqual(token_tx2_eth.to_dict(), result)
 
+    invalid_hash = 'abcdefg'
+    path = '/{currency}/txs/{tx_hash}?include_io={include_io}'
+    result, body = await test_case.requestOnly(path,
+                                               None,
+                                               currency='eth',
+                                               tx_hash=invalid_hash,
+                                               include_io=False)
+
+    assert result.status == 400
+    assert (f"{invalid_hash} does not look like a valid"
+            " transaction hash.") in body
+
+    result, body = await test_case.requestOnly(path,
+                                               None,
+                                               currency='btc',
+                                               tx_hash=invalid_hash,
+                                               include_io=False)
+    assert result.status == 400
+    assert (f"{invalid_hash} does not look like a valid"
+            " transaction hash.") in body
+
+    invalid_hash = 'L'
+    path = '/{currency}/txs/{tx_hash}?include_io={include_io}'
+    result, body = await test_case.requestOnly(path,
+                                               None,
+                                               currency='eth',
+                                               tx_hash=invalid_hash,
+                                               include_io=False)
+
+    assert result.status == 400
+    assert (f"{invalid_hash} does not look like a valid"
+            " transaction hash.") in body
+
+    result, body = await test_case.requestOnly(path,
+                                               None,
+                                               currency='btc',
+                                               tx_hash=invalid_hash,
+                                               include_io=False)
+    assert result.status == 400
+    assert (f"{invalid_hash} does not look like a valid"
+            " transaction hash.") in body
+
 
 async def list_token_txs(test_case):
     path = '/{currency}/token_txs/{tx_hash}'

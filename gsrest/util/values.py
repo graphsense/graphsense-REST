@@ -1,5 +1,6 @@
 from openapi_server.models.values import Values
 from openapi_server.models.rate import Rate
+from gsrest.util import is_eth_like
 
 
 def make_values(value, eur, usd):
@@ -30,7 +31,7 @@ def map_rates_for_peged_tokens(rates, token_config):
             "code": "usd",
             "value": 1
         }]
-    elif peg == "eth":
+    elif is_eth_like(peg):
         return rates
     else:
         raise Exception(
@@ -66,6 +67,8 @@ def convert_token_value(value, rates, token_config):
 def convert_value(currency, value, rates):
     if currency == 'eth':
         factor = 1e-18
+    elif currency == "trx":
+        factor = 1e-6
     else:
         factor = 1e-8
 

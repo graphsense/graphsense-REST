@@ -4,7 +4,7 @@ import sys
 from setuptools import setup, find_packages
 
 NAME = "openapi_server"
-VERSION = "23.09"
+VERSION = "23.12"
 
 # To install the library, run the following
 #

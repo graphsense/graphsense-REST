@@ -12,11 +12,13 @@ from gsrest.util.values import (convert_value, to_values,
 from openapi_server.models.entity_addresses import EntityAddresses
 from gsrest.db.util import tagstores, tagstores_with_paging
 from gsrest.service.tags_service import address_tag_from_row
-from gsrest.errors import NotFoundException, BadUserInputException
+from gsrest.errors import ClusterNotFoundException, BadUserInputException
 import gsrest.service.common_service as common
 import importlib
 import asyncio
 import time
+from gsrest.util.address import address_to_user_format
+from gsrest.db.node_type import NodeType
 
 MAX_DEPTH = 7
 TAGS_PAGE_SIZE = 100
@@ -33,7 +35,7 @@ def from_row(currency,
     return Entity(
         currency=currency,
         entity=row['cluster_id'],
-        root_address=row['root_address'],
+        root_address=address_to_user_format(currency, row['root_address']),
         first_tx=TxSummary(row['first_tx'].height, row['first_tx'].timestamp,
                            row['first_tx'].tx_hash.hex()),
         last_tx=TxSummary(row['last_tx'].height, row['last_tx'].timestamp,
@@ -80,10 +82,11 @@ async def get_entity(request,
                      exclude_best_address_tag=False,
                      include_actors=False):
     db = request.app['db']
+
     result = await db.get_entity(currency, entity)
 
     if result is None:
-        raise NotFoundException("Entity {} not found".format(entity))
+        raise ClusterNotFoundException(currency, entity)
 
     tags = None
     count = 0
@@ -107,6 +110,7 @@ async def get_entity(request,
             'list_actors_entity', currency, entity,
             request.app['request_config']['show_private_tags'])
 
+    request.app.logger.debug(f'result address {result}')
     rates = (await get_rates(request, currency))['rates']
     return from_row(currency, result, rates,
                     db.get_token_configuration(currency), tags, count, actors)
@@ -125,7 +129,7 @@ async def list_entity_neighbors(request,
                                 include_actors=False):
     results, paging_state = \
         await common.list_neighbors(request, currency, entity, direction,
-                                    'entity',
+                                    NodeType.CLUSTER,
                                     only_ids, include_labels, page,
                                     pagesize)
     is_outgoing = "out" in direction
@@ -173,7 +177,8 @@ async def list_entity_addresses(request,
             tagstores(
                 request.app['tagstores'],
                 lambda row: LabeledItemRef(id=row["id"], label=row["label"]),
-                'list_actors_address', currency, row["address"],
+                'list_actors_address', currency,
+                address_to_user_format(currency, row["address"]),
                 request.app['request_config']['show_private_tags']))
         for row in addresses
     ]
@@ -288,7 +293,7 @@ async def search_entity_neighbors(request,
     result = \
         await bfs(request, entity, key_accessor,
                   list_neighbors, stop_neighbor, match_neighbor,
-                  depth)
+                  depth, skip_visited=True)
 
     async def resolve(neighbor):
         if not with_tag:
@@ -332,13 +337,17 @@ async def bfs(request,
               list_neighbors,
               stop_neighbor,
               match_neighbor,
-              max_depth=3):
+              max_depth=3,
+              skip_visited=True):
 
     # collect matching paths
     matching_paths = []
 
     # maintain a queue of paths
     queue = []
+
+    # visited nodes
+    visited = set()
 
     start = True
 
@@ -387,12 +396,13 @@ async def bfs(request,
         for neighbors, path in zip(list_of_neighbors, paths):
             for neighbor in neighbors:
 
+                id = key_accessor(neighbor)
                 new_path = list(path)
                 new_path.append(neighbor)
 
                 # found path
                 if match_neighbor(neighbor):
-                    request.app.logger.debug(f"MATCH {key_accessor(neighbor)}")
+                    request.app.logger.debug(f"MATCH {id}")
                     matching_paths.append(new_path)
                     continue
 
@@ -403,8 +413,16 @@ async def bfs(request,
 
                 # stop if stop criteria fulfilled
                 if (stop_neighbor(neighbor)):
-                    request.app.logger.debug(f"STOP {key_accessor(neighbor)}")
+                    request.app.logger.debug(f"STOP {id}")
                     continue
+
+                # stop if node was already visited
+                if id in visited:
+                    request.app.logger.debug(f"ALREADY VISITED {id}")
+                    continue
+
+                if skip_visited:
+                    visited.add(id)
 
                 queue.append(new_path)
 

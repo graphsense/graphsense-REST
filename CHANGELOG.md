@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [24.01.0] - 2024-01-10
+
+### Added
+- added support for the tron currency and its tokens
+- config option to configure read consistency level
+### Fixed
+- ordering issues on fetching transactions on address/entity and neighbor level
+
 ## [23.09] - 2023-09-20
 
 ### Added

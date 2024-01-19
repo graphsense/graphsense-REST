@@ -1,5 +1,4 @@
 from openapi_server.models.address_txs import AddressTxs
-import yaml
 from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.address_tx_utxo import AddressTxUtxo
@@ -407,7 +406,6 @@ async def list_entity_neighbors(test_case):
                                      entity=entityWithTags.entity,
                                      include_labels=True,
                                      direction='out')
-    print(yaml.dump(result))
     test_case.assertEqual(ewton, result)
 
     result = await test_case.request(path,
