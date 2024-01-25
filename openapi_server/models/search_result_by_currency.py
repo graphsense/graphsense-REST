@@ -14,27 +14,27 @@ class SearchResultByCurrency(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, addresses: List[str]=None, currency: str=None, txs: List[str]=None):
+    def __init__(self, currency: str=None, addresses: List[str]=None, txs: List[str]=None):
         """SearchResultByCurrency - a model defined in OpenAPI
 
-        :param addresses: The addresses of this SearchResultByCurrency.
         :param currency: The currency of this SearchResultByCurrency.
+        :param addresses: The addresses of this SearchResultByCurrency.
         :param txs: The txs of this SearchResultByCurrency.
         """
         self.openapi_types = {
-            'addresses': List[str],
             'currency': str,
+            'addresses': List[str],
             'txs': List[str]
         }
 
         self.attribute_map = {
-            'addresses': 'addresses',
             'currency': 'currency',
+            'addresses': 'addresses',
             'txs': 'txs'
         }
 
-        self._addresses = addresses
         self._currency = currency
+        self._addresses = addresses
         self._txs = txs
 
     @classmethod
@@ -54,35 +54,10 @@ class SearchResultByCurrency(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'addresses': self._addresses,
-            'currency': self._currency,
+        return { 'currency': self._currency,
+            'addresses': self._addresses,
             'txs': self._txs }
 
-
-    @property
-    def addresses(self):
-        """Gets the addresses of this SearchResultByCurrency.
-
-        The list of found addresses
-
-        :return: The addresses of this SearchResultByCurrency.
-        :rtype: List[str]
-        """
-        return self._addresses
-
-    @addresses.setter
-    def addresses(self, addresses):
-        """Sets the addresses of this SearchResultByCurrency.
-
-        The list of found addresses
-
-        :param addresses: The addresses of this SearchResultByCurrency.
-        :type addresses: List[str]
-        """
-        if addresses is None:
-            raise BadUserInputException("Invalid value for `addresses`, must not be `None`")
-
-        self._addresses = addresses
 
     @property
     def currency(self):
@@ -108,6 +83,31 @@ class SearchResultByCurrency(Model):
             raise BadUserInputException("Invalid value for `currency`, must not be `None`")
 
         self._currency = currency
+
+    @property
+    def addresses(self):
+        """Gets the addresses of this SearchResultByCurrency.
+
+        The list of found addresses
+
+        :return: The addresses of this SearchResultByCurrency.
+        :rtype: List[str]
+        """
+        return self._addresses
+
+    @addresses.setter
+    def addresses(self, addresses):
+        """Sets the addresses of this SearchResultByCurrency.
+
+        The list of found addresses
+
+        :param addresses: The addresses of this SearchResultByCurrency.
+        :type addresses: List[str]
+        """
+        if addresses is None:
+            raise BadUserInputException("Invalid value for `addresses`, must not be `None`")
+
+        self._addresses = addresses
 
     @property
     def txs(self):

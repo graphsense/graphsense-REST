@@ -14,36 +14,36 @@ class Concept(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, description: str=None, id: str=None, label: str=None, taxonomy: str=None, uri: str=None):
+    def __init__(self, label: str=None, taxonomy: str=None, uri: str=None, description: str=None, id: str=None):
         """Concept - a model defined in OpenAPI
 
-        :param description: The description of this Concept.
-        :param id: The id of this Concept.
         :param label: The label of this Concept.
         :param taxonomy: The taxonomy of this Concept.
         :param uri: The uri of this Concept.
+        :param description: The description of this Concept.
+        :param id: The id of this Concept.
         """
         self.openapi_types = {
-            'description': str,
-            'id': str,
             'label': str,
             'taxonomy': str,
-            'uri': str
+            'uri': str,
+            'description': str,
+            'id': str
         }
 
         self.attribute_map = {
-            'description': 'description',
-            'id': 'id',
             'label': 'label',
             'taxonomy': 'taxonomy',
-            'uri': 'uri'
+            'uri': 'uri',
+            'description': 'description',
+            'id': 'id'
         }
 
-        self._description = description
-        self._id = id
         self._label = label
         self._taxonomy = taxonomy
         self._uri = uri
+        self._description = description
+        self._id = id
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'Concept':
@@ -62,62 +62,12 @@ class Concept(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'description': self._description,
-            'id': self._id,
-            'label': self._label,
+        return { 'label': self._label,
             'taxonomy': self._taxonomy,
-            'uri': self._uri }
+            'uri': self._uri,
+            'description': self._description,
+            'id': self._id }
 
-
-    @property
-    def description(self):
-        """Gets the description of this Concept.
-
-        Description
-
-        :return: The description of this Concept.
-        :rtype: str
-        """
-        return self._description
-
-    @description.setter
-    def description(self, description):
-        """Sets the description of this Concept.
-
-        Description
-
-        :param description: The description of this Concept.
-        :type description: str
-        """
-        if description is None:
-            raise BadUserInputException("Invalid value for `description`, must not be `None`")
-
-        self._description = description
-
-    @property
-    def id(self):
-        """Gets the id of this Concept.
-
-        ID
-
-        :return: The id of this Concept.
-        :rtype: str
-        """
-        return self._id
-
-    @id.setter
-    def id(self, id):
-        """Sets the id of this Concept.
-
-        ID
-
-        :param id: The id of this Concept.
-        :type id: str
-        """
-        if id is None:
-            raise BadUserInputException("Invalid value for `id`, must not be `None`")
-
-        self._id = id
 
     @property
     def label(self):
@@ -193,3 +143,53 @@ class Concept(Model):
             raise BadUserInputException("Invalid value for `uri`, must not be `None`")
 
         self._uri = uri
+
+    @property
+    def description(self):
+        """Gets the description of this Concept.
+
+        Description
+
+        :return: The description of this Concept.
+        :rtype: str
+        """
+        return self._description
+
+    @description.setter
+    def description(self, description):
+        """Sets the description of this Concept.
+
+        Description
+
+        :param description: The description of this Concept.
+        :type description: str
+        """
+        if description is None:
+            raise BadUserInputException("Invalid value for `description`, must not be `None`")
+
+        self._description = description
+
+    @property
+    def id(self):
+        """Gets the id of this Concept.
+
+        ID
+
+        :return: The id of this Concept.
+        :rtype: str
+        """
+        return self._id
+
+    @id.setter
+    def id(self, id):
+        """Sets the id of this Concept.
+
+        ID
+
+        :param id: The id of this Concept.
+        :type id: str
+        """
+        if id is None:
+            raise BadUserInputException("Invalid value for `id`, must not be `None`")
+
+        self._id = id

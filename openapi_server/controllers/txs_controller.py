@@ -160,7 +160,7 @@ async def get_spent_in_txs(request: web.Request, currency, tx_hash, io_index=Non
 
 
 async def get_tx(request: web.Request, currency, tx_hash, include_io=None, token_tx_id=None) -> web.Response:
-    """Returns details of a specific transaction identified by its hash.
+    """Returns details of a specific transaction identified by its hash
 
     
 
@@ -234,7 +234,7 @@ async def get_tx(request: web.Request, currency, tx_hash, include_io=None, token
 
 
 async def get_tx_io(request: web.Request, currency, tx_hash, io) -> web.Response:
-    """Returns input/output values of a specific transaction identified by its hash.
+    """Returns input/output values of a specific transaction identified by its hash
 
     
 

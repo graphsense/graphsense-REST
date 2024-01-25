@@ -14,28 +14,28 @@ class TokenConfig(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, decimals: int=None, peg_currency: str=None, ticker: str=None):
+    def __init__(self, ticker: str=None, decimals: int=None, peg_currency: str=None):
         """TokenConfig - a model defined in OpenAPI
 
+        :param ticker: The ticker of this TokenConfig.
         :param decimals: The decimals of this TokenConfig.
         :param peg_currency: The peg_currency of this TokenConfig.
-        :param ticker: The ticker of this TokenConfig.
         """
         self.openapi_types = {
+            'ticker': str,
             'decimals': int,
-            'peg_currency': str,
-            'ticker': str
+            'peg_currency': str
         }
 
         self.attribute_map = {
+            'ticker': 'ticker',
             'decimals': 'decimals',
-            'peg_currency': 'peg_currency',
-            'ticker': 'ticker'
+            'peg_currency': 'peg_currency'
         }
 
+        self._ticker = ticker
         self._decimals = decimals
         self._peg_currency = peg_currency
-        self._ticker = ticker
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'TokenConfig':
@@ -54,10 +54,35 @@ class TokenConfig(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'decimals': self._decimals,
-            'peg_currency': self._peg_currency,
-            'ticker': self._ticker }
+        return { 'ticker': self._ticker,
+            'decimals': self._decimals,
+            'peg_currency': self._peg_currency }
 
+
+    @property
+    def ticker(self):
+        """Gets the ticker of this TokenConfig.
+
+        ticker symbol of the currency e.g. USDT
+
+        :return: The ticker of this TokenConfig.
+        :rtype: str
+        """
+        return self._ticker
+
+    @ticker.setter
+    def ticker(self, ticker):
+        """Sets the ticker of this TokenConfig.
+
+        ticker symbol of the currency e.g. USDT
+
+        :param ticker: The ticker of this TokenConfig.
+        :type ticker: str
+        """
+        if ticker is None:
+            raise BadUserInputException("Invalid value for `ticker`, must not be `None`")
+
+        self._ticker = ticker
 
     @property
     def decimals(self):
@@ -106,28 +131,3 @@ class TokenConfig(Model):
         """
 
         self._peg_currency = peg_currency
-
-    @property
-    def ticker(self):
-        """Gets the ticker of this TokenConfig.
-
-        ticker symbol of the currency e.g. USDT
-
-        :return: The ticker of this TokenConfig.
-        :rtype: str
-        """
-        return self._ticker
-
-    @ticker.setter
-    def ticker(self, ticker):
-        """Sets the ticker of this TokenConfig.
-
-        ticker symbol of the currency e.g. USDT
-
-        :param ticker: The ticker of this TokenConfig.
-        :type ticker: str
-        """
-        if ticker is None:
-            raise BadUserInputException("Invalid value for `ticker`, must not be `None`")
-
-        self._ticker = ticker
