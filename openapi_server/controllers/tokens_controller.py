@@ -13,7 +13,7 @@ from openapi_server import util
 
 
 async def list_supported_tokens(request: web.Request, currency) -> web.Response:
-    """Returns a list of supported token (sub)currencies.
+    """Returns a list of supported token (sub)currencies
 
     
 

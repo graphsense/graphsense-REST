@@ -7,7 +7,7 @@ info:
     entities, blocks, transactions and tags for automated and highly efficient forensics
     tasks.
   title: GraphSense API
-  version: 1.4.1
+  version: 1.4.2
 servers:
 - url: https://api.ikna.io
 paths:
@@ -1456,7 +1456,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/token_configs'
           description: OK
-      summary: Returns a list of supported token (sub)currencies.
+      summary: Returns a list of supported token (sub)currencies
       tags:
       - tokens
       x-openapi-router-controller: openapi_server.controllers.tokens_controller
@@ -1549,7 +1549,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/tx'
           description: OK
-      summary: Returns details of a specific transaction identified by its hash.
+      summary: Returns details of a specific transaction identified by its hash
       tags:
       - txs
       x-openapi-router-controller: openapi_server.controllers.txs_controller
@@ -1699,7 +1699,7 @@ paths:
                 $ref: '#/components/schemas/tx_values'
           description: OK
       summary: Returns input/output values of a specific transaction identified by
-        its hash.
+        its hash
       tags:
       - txs
       x-openapi-router-controller: openapi_server.controllers.txs_controller
@@ -3397,7 +3397,7 @@ components:
           title: images
           type: array
         refs:
-          description: list of uris to further information of the actors.
+          description: list of uris to further information of the actors
           items:
             $ref: '#/components/schemas/uri'
           title: refs

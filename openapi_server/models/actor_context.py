@@ -138,7 +138,7 @@ class ActorContext(Model):
     def refs(self):
         """Gets the refs of this ActorContext.
 
-        list of uris to further information of the actors.
+        list of uris to further information of the actors
 
         :return: The refs of this ActorContext.
         :rtype: List[str]
@@ -149,7 +149,7 @@ class ActorContext(Model):
     def refs(self, refs):
         """Sets the refs of this ActorContext.
 
-        list of uris to further information of the actors.
+        list of uris to further information of the actors
 
         :param refs: The refs of this ActorContext.
         :type refs: List[str]
