@@ -28,14 +28,13 @@ drop-integration-db:
 generate-openapi-server:
 	docker run --rm   \
 		-v "${PWD}:/build:Z" \
-		-v "${PWD}/openapi_server/openapi/openapi.yaml:/spec.yaml" \
 		-v "${PWD}/templates:/templates" \
 		openapitools/openapi-generator-cli:v5.2.1 \
-		generate -i /spec.yaml \
+		generate -i "https://raw.githubusercontent.com/graphsense/graphsense-openapi/v$(GS_OPENAPI_VERSION)/graphsense.yaml" \
 		-g python-aiohttp \
 		-o /build \
 		-t /templates \
-		--additional-properties=packageVersion=$(RELEASE)
+		--additional-properties=packageVersion=$(GS_REST_SERVICE_VERSION)
 
 
 get-openapi-spec-from-upstream:

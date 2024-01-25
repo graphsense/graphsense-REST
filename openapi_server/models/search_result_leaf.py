@@ -16,24 +16,24 @@ class SearchResultLeaf(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, matching_addresses: List[Address]=None, neighbor: NeighborEntity=None):
+    def __init__(self, neighbor: NeighborEntity=None, matching_addresses: List[Address]=None):
         """SearchResultLeaf - a model defined in OpenAPI
 
-        :param matching_addresses: The matching_addresses of this SearchResultLeaf.
         :param neighbor: The neighbor of this SearchResultLeaf.
+        :param matching_addresses: The matching_addresses of this SearchResultLeaf.
         """
         self.openapi_types = {
-            'matching_addresses': List[Address],
-            'neighbor': NeighborEntity
+            'neighbor': NeighborEntity,
+            'matching_addresses': List[Address]
         }
 
         self.attribute_map = {
-            'matching_addresses': 'matching_addresses',
-            'neighbor': 'neighbor'
+            'neighbor': 'neighbor',
+            'matching_addresses': 'matching_addresses'
         }
 
-        self._matching_addresses = matching_addresses
         self._neighbor = neighbor
+        self._matching_addresses = matching_addresses
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'SearchResultLeaf':
@@ -52,32 +52,9 @@ class SearchResultLeaf(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'matching_addresses': self._matching_addresses,
-            'neighbor': self._neighbor }
+        return { 'neighbor': self._neighbor,
+            'matching_addresses': self._matching_addresses }
 
-
-    @property
-    def matching_addresses(self):
-        """Gets the matching_addresses of this SearchResultLeaf.
-
-
-        :return: The matching_addresses of this SearchResultLeaf.
-        :rtype: List[Address]
-        """
-        return self._matching_addresses
-
-    @matching_addresses.setter
-    def matching_addresses(self, matching_addresses):
-        """Sets the matching_addresses of this SearchResultLeaf.
-
-
-        :param matching_addresses: The matching_addresses of this SearchResultLeaf.
-        :type matching_addresses: List[Address]
-        """
-        if matching_addresses is None:
-            raise BadUserInputException("Invalid value for `matching_addresses`, must not be `None`")
-
-        self._matching_addresses = matching_addresses
 
     @property
     def neighbor(self):
@@ -101,3 +78,26 @@ class SearchResultLeaf(Model):
             raise BadUserInputException("Invalid value for `neighbor`, must not be `None`")
 
         self._neighbor = neighbor
+
+    @property
+    def matching_addresses(self):
+        """Gets the matching_addresses of this SearchResultLeaf.
+
+
+        :return: The matching_addresses of this SearchResultLeaf.
+        :rtype: List[Address]
+        """
+        return self._matching_addresses
+
+    @matching_addresses.setter
+    def matching_addresses(self, matching_addresses):
+        """Sets the matching_addresses of this SearchResultLeaf.
+
+
+        :param matching_addresses: The matching_addresses of this SearchResultLeaf.
+        :type matching_addresses: List[Address]
+        """
+        if matching_addresses is None:
+            raise BadUserInputException("Invalid value for `matching_addresses`, must not be `None`")
+
+        self._matching_addresses = matching_addresses

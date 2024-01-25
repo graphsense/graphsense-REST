@@ -15,24 +15,24 @@ class EntityAddresses(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, addresses: List[Address]=None, next_page: str=None):
+    def __init__(self, next_page: str=None, addresses: List[Address]=None):
         """EntityAddresses - a model defined in OpenAPI
 
-        :param addresses: The addresses of this EntityAddresses.
         :param next_page: The next_page of this EntityAddresses.
+        :param addresses: The addresses of this EntityAddresses.
         """
         self.openapi_types = {
-            'addresses': List[Address],
-            'next_page': str
+            'next_page': str,
+            'addresses': List[Address]
         }
 
         self.attribute_map = {
-            'addresses': 'addresses',
-            'next_page': 'next_page'
+            'next_page': 'next_page',
+            'addresses': 'addresses'
         }
 
-        self._addresses = addresses
         self._next_page = next_page
+        self._addresses = addresses
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'EntityAddresses':
@@ -51,9 +51,30 @@ class EntityAddresses(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'addresses': self._addresses,
-            'next_page': self._next_page }
+        return { 'next_page': self._next_page,
+            'addresses': self._addresses }
 
+
+    @property
+    def next_page(self):
+        """Gets the next_page of this EntityAddresses.
+
+
+        :return: The next_page of this EntityAddresses.
+        :rtype: str
+        """
+        return self._next_page
+
+    @next_page.setter
+    def next_page(self, next_page):
+        """Sets the next_page of this EntityAddresses.
+
+
+        :param next_page: The next_page of this EntityAddresses.
+        :type next_page: str
+        """
+
+        self._next_page = next_page
 
     @property
     def addresses(self):
@@ -77,24 +98,3 @@ class EntityAddresses(Model):
             raise BadUserInputException("Invalid value for `addresses`, must not be `None`")
 
         self._addresses = addresses
-
-    @property
-    def next_page(self):
-        """Gets the next_page of this EntityAddresses.
-
-
-        :return: The next_page of this EntityAddresses.
-        :rtype: str
-        """
-        return self._next_page
-
-    @next_page.setter
-    def next_page(self, next_page):
-        """Sets the next_page of this EntityAddresses.
-
-
-        :param next_page: The next_page of this EntityAddresses.
-        :type next_page: str
-        """
-
-        self._next_page = next_page

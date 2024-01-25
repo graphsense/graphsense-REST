@@ -15,24 +15,24 @@ class NeighborAddresses(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, neighbors: List[NeighborAddress]=None, next_page: str=None):
+    def __init__(self, next_page: str=None, neighbors: List[NeighborAddress]=None):
         """NeighborAddresses - a model defined in OpenAPI
 
-        :param neighbors: The neighbors of this NeighborAddresses.
         :param next_page: The next_page of this NeighborAddresses.
+        :param neighbors: The neighbors of this NeighborAddresses.
         """
         self.openapi_types = {
-            'neighbors': List[NeighborAddress],
-            'next_page': str
+            'next_page': str,
+            'neighbors': List[NeighborAddress]
         }
 
         self.attribute_map = {
-            'neighbors': 'neighbors',
-            'next_page': 'next_page'
+            'next_page': 'next_page',
+            'neighbors': 'neighbors'
         }
 
-        self._neighbors = neighbors
         self._next_page = next_page
+        self._neighbors = neighbors
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'NeighborAddresses':
@@ -51,9 +51,30 @@ class NeighborAddresses(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'neighbors': self._neighbors,
-            'next_page': self._next_page }
+        return { 'next_page': self._next_page,
+            'neighbors': self._neighbors }
 
+
+    @property
+    def next_page(self):
+        """Gets the next_page of this NeighborAddresses.
+
+
+        :return: The next_page of this NeighborAddresses.
+        :rtype: str
+        """
+        return self._next_page
+
+    @next_page.setter
+    def next_page(self, next_page):
+        """Sets the next_page of this NeighborAddresses.
+
+
+        :param next_page: The next_page of this NeighborAddresses.
+        :type next_page: str
+        """
+
+        self._next_page = next_page
 
     @property
     def neighbors(self):
@@ -77,24 +98,3 @@ class NeighborAddresses(Model):
             raise BadUserInputException("Invalid value for `neighbors`, must not be `None`")
 
         self._neighbors = neighbors
-
-    @property
-    def next_page(self):
-        """Gets the next_page of this NeighborAddresses.
-
-
-        :return: The next_page of this NeighborAddresses.
-        :rtype: str
-        """
-        return self._next_page
-
-    @next_page.setter
-    def next_page(self, next_page):
-        """Sets the next_page of this NeighborAddresses.
-
-
-        :param next_page: The next_page of this NeighborAddresses.
-        :type next_page: str
-        """
-
-        self._next_page = next_page

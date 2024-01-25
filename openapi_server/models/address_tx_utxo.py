@@ -15,43 +15,43 @@ class AddressTxUtxo(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, coinbase: bool=None, currency: str=None, height: int=None, timestamp: int=None, tx_hash: str=None, tx_type: str='utxo', value: Values=None):
+    def __init__(self, tx_type: str='utxo', tx_hash: str=None, currency: str=None, coinbase: bool=None, height: int=None, timestamp: int=None, value: Values=None):
         """AddressTxUtxo - a model defined in OpenAPI
 
-        :param coinbase: The coinbase of this AddressTxUtxo.
+        :param tx_type: The tx_type of this AddressTxUtxo.
+        :param tx_hash: The tx_hash of this AddressTxUtxo.
         :param currency: The currency of this AddressTxUtxo.
+        :param coinbase: The coinbase of this AddressTxUtxo.
         :param height: The height of this AddressTxUtxo.
         :param timestamp: The timestamp of this AddressTxUtxo.
-        :param tx_hash: The tx_hash of this AddressTxUtxo.
-        :param tx_type: The tx_type of this AddressTxUtxo.
         :param value: The value of this AddressTxUtxo.
         """
         self.openapi_types = {
-            'coinbase': bool,
+            'tx_type': str,
+            'tx_hash': str,
             'currency': str,
+            'coinbase': bool,
             'height': int,
             'timestamp': int,
-            'tx_hash': str,
-            'tx_type': str,
             'value': Values
         }
 
         self.attribute_map = {
-            'coinbase': 'coinbase',
+            'tx_type': 'tx_type',
+            'tx_hash': 'tx_hash',
             'currency': 'currency',
+            'coinbase': 'coinbase',
             'height': 'height',
             'timestamp': 'timestamp',
-            'tx_hash': 'tx_hash',
-            'tx_type': 'tx_type',
             'value': 'value'
         }
 
-        self._coinbase = coinbase
+        self._tx_type = tx_type
+        self._tx_hash = tx_hash
         self._currency = currency
+        self._coinbase = coinbase
         self._height = height
         self._timestamp = timestamp
-        self._tx_hash = tx_hash
-        self._tx_type = tx_type
         self._value = value
 
     @classmethod
@@ -71,39 +71,62 @@ class AddressTxUtxo(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'coinbase': self._coinbase,
+        return { 'tx_type': self._tx_type,
+            'tx_hash': self._tx_hash,
             'currency': self._currency,
+            'coinbase': self._coinbase,
             'height': self._height,
             'timestamp': self._timestamp,
-            'tx_hash': self._tx_hash,
-            'tx_type': self._tx_type,
             'value': self._value }
 
 
     @property
-    def coinbase(self):
-        """Gets the coinbase of this AddressTxUtxo.
+    def tx_type(self):
+        """Gets the tx_type of this AddressTxUtxo.
 
-        Coinbase transaction flag
 
-        :return: The coinbase of this AddressTxUtxo.
-        :rtype: bool
+        :return: The tx_type of this AddressTxUtxo.
+        :rtype: str
         """
-        return self._coinbase
+        return self._tx_type
 
-    @coinbase.setter
-    def coinbase(self, coinbase):
-        """Sets the coinbase of this AddressTxUtxo.
+    @tx_type.setter
+    def tx_type(self, tx_type):
+        """Sets the tx_type of this AddressTxUtxo.
 
-        Coinbase transaction flag
 
-        :param coinbase: The coinbase of this AddressTxUtxo.
-        :type coinbase: bool
+        :param tx_type: The tx_type of this AddressTxUtxo.
+        :type tx_type: str
         """
-        if coinbase is None:
-            raise BadUserInputException("Invalid value for `coinbase`, must not be `None`")
+        if tx_type is None:
+            raise BadUserInputException("Invalid value for `tx_type`, must not be `None`")
 
-        self._coinbase = coinbase
+        self._tx_type = tx_type
+
+    @property
+    def tx_hash(self):
+        """Gets the tx_hash of this AddressTxUtxo.
+
+        Transaction hash
+
+        :return: The tx_hash of this AddressTxUtxo.
+        :rtype: str
+        """
+        return self._tx_hash
+
+    @tx_hash.setter
+    def tx_hash(self, tx_hash):
+        """Sets the tx_hash of this AddressTxUtxo.
+
+        Transaction hash
+
+        :param tx_hash: The tx_hash of this AddressTxUtxo.
+        :type tx_hash: str
+        """
+        if tx_hash is None:
+            raise BadUserInputException("Invalid value for `tx_hash`, must not be `None`")
+
+        self._tx_hash = tx_hash
 
     @property
     def currency(self):
@@ -129,6 +152,31 @@ class AddressTxUtxo(Model):
             raise BadUserInputException("Invalid value for `currency`, must not be `None`")
 
         self._currency = currency
+
+    @property
+    def coinbase(self):
+        """Gets the coinbase of this AddressTxUtxo.
+
+        Coinbase transaction flag
+
+        :return: The coinbase of this AddressTxUtxo.
+        :rtype: bool
+        """
+        return self._coinbase
+
+    @coinbase.setter
+    def coinbase(self, coinbase):
+        """Sets the coinbase of this AddressTxUtxo.
+
+        Coinbase transaction flag
+
+        :param coinbase: The coinbase of this AddressTxUtxo.
+        :type coinbase: bool
+        """
+        if coinbase is None:
+            raise BadUserInputException("Invalid value for `coinbase`, must not be `None`")
+
+        self._coinbase = coinbase
 
     @property
     def height(self):
@@ -181,54 +229,6 @@ class AddressTxUtxo(Model):
             raise BadUserInputException("Invalid value for `timestamp`, must not be `None`")
 
         self._timestamp = timestamp
-
-    @property
-    def tx_hash(self):
-        """Gets the tx_hash of this AddressTxUtxo.
-
-        Transaction hash
-
-        :return: The tx_hash of this AddressTxUtxo.
-        :rtype: str
-        """
-        return self._tx_hash
-
-    @tx_hash.setter
-    def tx_hash(self, tx_hash):
-        """Sets the tx_hash of this AddressTxUtxo.
-
-        Transaction hash
-
-        :param tx_hash: The tx_hash of this AddressTxUtxo.
-        :type tx_hash: str
-        """
-        if tx_hash is None:
-            raise BadUserInputException("Invalid value for `tx_hash`, must not be `None`")
-
-        self._tx_hash = tx_hash
-
-    @property
-    def tx_type(self):
-        """Gets the tx_type of this AddressTxUtxo.
-
-
-        :return: The tx_type of this AddressTxUtxo.
-        :rtype: str
-        """
-        return self._tx_type
-
-    @tx_type.setter
-    def tx_type(self, tx_type):
-        """Sets the tx_type of this AddressTxUtxo.
-
-
-        :param tx_type: The tx_type of this AddressTxUtxo.
-        :type tx_type: str
-        """
-        if tx_type is None:
-            raise BadUserInputException("Invalid value for `tx_type`, must not be `None`")
-
-        self._tx_type = tx_type
 
     @property
     def value(self):

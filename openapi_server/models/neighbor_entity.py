@@ -16,36 +16,36 @@ class NeighborEntity(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, entity: Entity=None, labels: List[str]=None, no_txs: int=None, token_values: Dict[str, Values]=None, value: Values=None):
+    def __init__(self, labels: List[str]=None, value: Values=None, token_values: Dict[str, Values]=None, no_txs: int=None, entity: Entity=None):
         """NeighborEntity - a model defined in OpenAPI
 
-        :param entity: The entity of this NeighborEntity.
         :param labels: The labels of this NeighborEntity.
-        :param no_txs: The no_txs of this NeighborEntity.
-        :param token_values: The token_values of this NeighborEntity.
         :param value: The value of this NeighborEntity.
+        :param token_values: The token_values of this NeighborEntity.
+        :param no_txs: The no_txs of this NeighborEntity.
+        :param entity: The entity of this NeighborEntity.
         """
         self.openapi_types = {
-            'entity': Entity,
             'labels': List[str],
-            'no_txs': int,
+            'value': Values,
             'token_values': Dict[str, Values],
-            'value': Values
+            'no_txs': int,
+            'entity': Entity
         }
 
         self.attribute_map = {
-            'entity': 'entity',
             'labels': 'labels',
-            'no_txs': 'no_txs',
+            'value': 'value',
             'token_values': 'token_values',
-            'value': 'value'
+            'no_txs': 'no_txs',
+            'entity': 'entity'
         }
 
-        self._entity = entity
         self._labels = labels
-        self._no_txs = no_txs
-        self._token_values = token_values
         self._value = value
+        self._token_values = token_values
+        self._no_txs = no_txs
+        self._entity = entity
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'NeighborEntity':
@@ -64,35 +64,12 @@ class NeighborEntity(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'entity': self._entity,
-            'labels': self._labels,
-            'no_txs': self._no_txs,
+        return { 'labels': self._labels,
+            'value': self._value,
             'token_values': self._token_values,
-            'value': self._value }
+            'no_txs': self._no_txs,
+            'entity': self._entity }
 
-
-    @property
-    def entity(self):
-        """Gets the entity of this NeighborEntity.
-
-
-        :return: The entity of this NeighborEntity.
-        :rtype: Entity
-        """
-        return self._entity
-
-    @entity.setter
-    def entity(self, entity):
-        """Sets the entity of this NeighborEntity.
-
-
-        :param entity: The entity of this NeighborEntity.
-        :type entity: Entity
-        """
-        if entity is None:
-            raise BadUserInputException("Invalid value for `entity`, must not be `None`")
-
-        self._entity = entity
 
     @property
     def labels(self):
@@ -116,6 +93,52 @@ class NeighborEntity(Model):
         """
 
         self._labels = labels
+
+    @property
+    def value(self):
+        """Gets the value of this NeighborEntity.
+
+
+        :return: The value of this NeighborEntity.
+        :rtype: Values
+        """
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        """Sets the value of this NeighborEntity.
+
+
+        :param value: The value of this NeighborEntity.
+        :type value: Values
+        """
+        if value is None:
+            raise BadUserInputException("Invalid value for `value`, must not be `None`")
+
+        self._value = value
+
+    @property
+    def token_values(self):
+        """Gets the token_values of this NeighborEntity.
+
+        Per token value-flow
+
+        :return: The token_values of this NeighborEntity.
+        :rtype: Dict[str, Values]
+        """
+        return self._token_values
+
+    @token_values.setter
+    def token_values(self, token_values):
+        """Sets the token_values of this NeighborEntity.
+
+        Per token value-flow
+
+        :param token_values: The token_values of this NeighborEntity.
+        :type token_values: Dict[str, Values]
+        """
+
+        self._token_values = token_values
 
     @property
     def no_txs(self):
@@ -143,47 +166,24 @@ class NeighborEntity(Model):
         self._no_txs = no_txs
 
     @property
-    def token_values(self):
-        """Gets the token_values of this NeighborEntity.
+    def entity(self):
+        """Gets the entity of this NeighborEntity.
 
-        Per token value-flow
 
-        :return: The token_values of this NeighborEntity.
-        :rtype: Dict[str, Values]
+        :return: The entity of this NeighborEntity.
+        :rtype: Entity
         """
-        return self._token_values
+        return self._entity
 
-    @token_values.setter
-    def token_values(self, token_values):
-        """Sets the token_values of this NeighborEntity.
+    @entity.setter
+    def entity(self, entity):
+        """Sets the entity of this NeighborEntity.
 
-        Per token value-flow
 
-        :param token_values: The token_values of this NeighborEntity.
-        :type token_values: Dict[str, Values]
+        :param entity: The entity of this NeighborEntity.
+        :type entity: Entity
         """
+        if entity is None:
+            raise BadUserInputException("Invalid value for `entity`, must not be `None`")
 
-        self._token_values = token_values
-
-    @property
-    def value(self):
-        """Gets the value of this NeighborEntity.
-
-
-        :return: The value of this NeighborEntity.
-        :rtype: Values
-        """
-        return self._value
-
-    @value.setter
-    def value(self, value):
-        """Sets the value of this NeighborEntity.
-
-
-        :param value: The value of this NeighborEntity.
-        :type value: Values
-        """
-        if value is None:
-            raise BadUserInputException("Invalid value for `value`, must not be `None`")
-
-        self._value = value
+        self._entity = entity

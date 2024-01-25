@@ -14,48 +14,48 @@ class ActorContext(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, coingecko_ids: List[str]=None, defilama_ids: List[str]=None, github_organisation: str=None, images: List[str]=None, legal_name: str=None, refs: List[str]=None, twitter_handle: str=None, uris: List[str]=None):
+    def __init__(self, uris: List[str]=None, images: List[str]=None, refs: List[str]=None, coingecko_ids: List[str]=None, defilama_ids: List[str]=None, twitter_handle: str=None, github_organisation: str=None, legal_name: str=None):
         """ActorContext - a model defined in OpenAPI
 
+        :param uris: The uris of this ActorContext.
+        :param images: The images of this ActorContext.
+        :param refs: The refs of this ActorContext.
         :param coingecko_ids: The coingecko_ids of this ActorContext.
         :param defilama_ids: The defilama_ids of this ActorContext.
-        :param github_organisation: The github_organisation of this ActorContext.
-        :param images: The images of this ActorContext.
-        :param legal_name: The legal_name of this ActorContext.
-        :param refs: The refs of this ActorContext.
         :param twitter_handle: The twitter_handle of this ActorContext.
-        :param uris: The uris of this ActorContext.
+        :param github_organisation: The github_organisation of this ActorContext.
+        :param legal_name: The legal_name of this ActorContext.
         """
         self.openapi_types = {
+            'uris': List[str],
+            'images': List[str],
+            'refs': List[str],
             'coingecko_ids': List[str],
             'defilama_ids': List[str],
-            'github_organisation': str,
-            'images': List[str],
-            'legal_name': str,
-            'refs': List[str],
             'twitter_handle': str,
-            'uris': List[str]
+            'github_organisation': str,
+            'legal_name': str
         }
 
         self.attribute_map = {
+            'uris': 'uris',
+            'images': 'images',
+            'refs': 'refs',
             'coingecko_ids': 'coingecko_ids',
             'defilama_ids': 'defilama_ids',
-            'github_organisation': 'github_organisation',
-            'images': 'images',
-            'legal_name': 'legal_name',
-            'refs': 'refs',
             'twitter_handle': 'twitter_handle',
-            'uris': 'uris'
+            'github_organisation': 'github_organisation',
+            'legal_name': 'legal_name'
         }
 
+        self._uris = uris
+        self._images = images
+        self._refs = refs
         self._coingecko_ids = coingecko_ids
         self._defilama_ids = defilama_ids
-        self._github_organisation = github_organisation
-        self._images = images
-        self._legal_name = legal_name
-        self._refs = refs
         self._twitter_handle = twitter_handle
-        self._uris = uris
+        self._github_organisation = github_organisation
+        self._legal_name = legal_name
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'ActorContext':
@@ -74,15 +74,90 @@ class ActorContext(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'coingecko_ids': self._coingecko_ids,
-            'defilama_ids': self._defilama_ids,
-            'github_organisation': self._github_organisation,
+        return { 'uris': self._uris,
             'images': self._images,
-            'legal_name': self._legal_name,
             'refs': self._refs,
+            'coingecko_ids': self._coingecko_ids,
+            'defilama_ids': self._defilama_ids,
             'twitter_handle': self._twitter_handle,
-            'uris': self._uris }
+            'github_organisation': self._github_organisation,
+            'legal_name': self._legal_name }
 
+
+    @property
+    def uris(self):
+        """Gets the uris of this ActorContext.
+
+        list of additonal uris identifying the actor
+
+        :return: The uris of this ActorContext.
+        :rtype: List[str]
+        """
+        return self._uris
+
+    @uris.setter
+    def uris(self, uris):
+        """Sets the uris of this ActorContext.
+
+        list of additonal uris identifying the actor
+
+        :param uris: The uris of this ActorContext.
+        :type uris: List[str]
+        """
+        if uris is None:
+            raise BadUserInputException("Invalid value for `uris`, must not be `None`")
+
+        self._uris = uris
+
+    @property
+    def images(self):
+        """Gets the images of this ActorContext.
+
+        list of uris to logos of the actor
+
+        :return: The images of this ActorContext.
+        :rtype: List[str]
+        """
+        return self._images
+
+    @images.setter
+    def images(self, images):
+        """Sets the images of this ActorContext.
+
+        list of uris to logos of the actor
+
+        :param images: The images of this ActorContext.
+        :type images: List[str]
+        """
+        if images is None:
+            raise BadUserInputException("Invalid value for `images`, must not be `None`")
+
+        self._images = images
+
+    @property
+    def refs(self):
+        """Gets the refs of this ActorContext.
+
+        list of uris to further information of the actors.
+
+        :return: The refs of this ActorContext.
+        :rtype: List[str]
+        """
+        return self._refs
+
+    @refs.setter
+    def refs(self, refs):
+        """Sets the refs of this ActorContext.
+
+        list of uris to further information of the actors.
+
+        :param refs: The refs of this ActorContext.
+        :type refs: List[str]
+        """
+        if refs is None:
+            raise BadUserInputException("Invalid value for `refs`, must not be `None`")
+
+        self._refs = refs
 
     @property
     def coingecko_ids(self):
@@ -135,102 +210,6 @@ class ActorContext(Model):
         self._defilama_ids = defilama_ids
 
     @property
-    def github_organisation(self):
-        """Gets the github_organisation of this ActorContext.
-
-        semi-colon separated list of github organisations used by the actor
-
-        :return: The github_organisation of this ActorContext.
-        :rtype: str
-        """
-        return self._github_organisation
-
-    @github_organisation.setter
-    def github_organisation(self, github_organisation):
-        """Sets the github_organisation of this ActorContext.
-
-        semi-colon separated list of github organisations used by the actor
-
-        :param github_organisation: The github_organisation of this ActorContext.
-        :type github_organisation: str
-        """
-
-        self._github_organisation = github_organisation
-
-    @property
-    def images(self):
-        """Gets the images of this ActorContext.
-
-        list of uris to logos of the actor
-
-        :return: The images of this ActorContext.
-        :rtype: List[str]
-        """
-        return self._images
-
-    @images.setter
-    def images(self, images):
-        """Sets the images of this ActorContext.
-
-        list of uris to logos of the actor
-
-        :param images: The images of this ActorContext.
-        :type images: List[str]
-        """
-        if images is None:
-            raise BadUserInputException("Invalid value for `images`, must not be `None`")
-
-        self._images = images
-
-    @property
-    def legal_name(self):
-        """Gets the legal_name of this ActorContext.
-
-        Name of the legal entity registerd by the actor.
-
-        :return: The legal_name of this ActorContext.
-        :rtype: str
-        """
-        return self._legal_name
-
-    @legal_name.setter
-    def legal_name(self, legal_name):
-        """Sets the legal_name of this ActorContext.
-
-        Name of the legal entity registerd by the actor.
-
-        :param legal_name: The legal_name of this ActorContext.
-        :type legal_name: str
-        """
-
-        self._legal_name = legal_name
-
-    @property
-    def refs(self):
-        """Gets the refs of this ActorContext.
-
-        list of uris to further information of the actors.
-
-        :return: The refs of this ActorContext.
-        :rtype: List[str]
-        """
-        return self._refs
-
-    @refs.setter
-    def refs(self, refs):
-        """Sets the refs of this ActorContext.
-
-        list of uris to further information of the actors.
-
-        :param refs: The refs of this ActorContext.
-        :type refs: List[str]
-        """
-        if refs is None:
-            raise BadUserInputException("Invalid value for `refs`, must not be `None`")
-
-        self._refs = refs
-
-    @property
     def twitter_handle(self):
         """Gets the twitter_handle of this ActorContext.
 
@@ -254,26 +233,47 @@ class ActorContext(Model):
         self._twitter_handle = twitter_handle
 
     @property
-    def uris(self):
-        """Gets the uris of this ActorContext.
+    def github_organisation(self):
+        """Gets the github_organisation of this ActorContext.
 
-        list of additonal uris identifying the actor
+        semi-colon separated list of github organisations used by the actor
 
-        :return: The uris of this ActorContext.
-        :rtype: List[str]
+        :return: The github_organisation of this ActorContext.
+        :rtype: str
         """
-        return self._uris
+        return self._github_organisation
 
-    @uris.setter
-    def uris(self, uris):
-        """Sets the uris of this ActorContext.
+    @github_organisation.setter
+    def github_organisation(self, github_organisation):
+        """Sets the github_organisation of this ActorContext.
 
-        list of additonal uris identifying the actor
+        semi-colon separated list of github organisations used by the actor
 
-        :param uris: The uris of this ActorContext.
-        :type uris: List[str]
+        :param github_organisation: The github_organisation of this ActorContext.
+        :type github_organisation: str
         """
-        if uris is None:
-            raise BadUserInputException("Invalid value for `uris`, must not be `None`")
 
-        self._uris = uris
+        self._github_organisation = github_organisation
+
+    @property
+    def legal_name(self):
+        """Gets the legal_name of this ActorContext.
+
+        Name of the legal entity registerd by the actor.
+
+        :return: The legal_name of this ActorContext.
+        :rtype: str
+        """
+        return self._legal_name
+
+    @legal_name.setter
+    def legal_name(self, legal_name):
+        """Sets the legal_name of this ActorContext.
+
+        Name of the legal entity registerd by the actor.
+
+        :param legal_name: The legal_name of this ActorContext.
+        :type legal_name: str
+        """
+
+        self._legal_name = legal_name
