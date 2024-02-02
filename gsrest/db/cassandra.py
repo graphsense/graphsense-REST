@@ -192,8 +192,7 @@ def merge_address_txs_subquery_results(
     precedence = heapq.nsmallest if ascending else heapq.nlargest
     results = precedence(fetch_size,
                          candidates,
-                         key=partial(transaction_ordering_key,
-                                     tx_id_keys))
+                         key=partial(transaction_ordering_key, tx_id_keys))
 
     # use the last tx_id as page handle
     border_tx_id = results[-1][tx_id_keys] if results else None
@@ -204,8 +203,7 @@ def build_select_address_txs_statement(network: str, node_type: NodeType,
                                        cols: Optional[Sequence[str]],
                                        with_lower_bound: bool,
                                        with_upper_bound: bool,
-                                       with_tx_id: bool,
-                                       ascending: bool,
+                                       with_tx_id: bool, ascending: bool,
                                        fetch_size: int) -> str:
     # prebuild useful helpers and conditions
     eth_like = is_eth_like(network)
@@ -228,11 +226,15 @@ def build_select_address_txs_statement(network: str, node_type: NodeType,
     # conditional where clause, loop dependent
     if not with_tx_id:
         if ascending:
-            query += wc(f"{tx_id_col} > %(tx_id_lower_bound)s", with_lower_bound)
-            query += wc(f"{tx_id_col} <= %(tx_id_upper_bound)s", with_upper_bound)
+            query += wc(f"{tx_id_col} > %(tx_id_lower_bound)s",
+                        with_lower_bound)
+            query += wc(f"{tx_id_col} <= %(tx_id_upper_bound)s",
+                        with_upper_bound)
         else:
-            query += wc(f"{tx_id_col} >= %(tx_id_lower_bound)s", with_lower_bound)
-            query += wc(f"{tx_id_col} < %(tx_id_upper_bound)s", with_upper_bound)
+            query += wc(f"{tx_id_col} >= %(tx_id_lower_bound)s",
+                        with_lower_bound)
+            query += wc(f"{tx_id_col} < %(tx_id_upper_bound)s",
+                        with_upper_bound)
     else:
         query += wc(f"{tx_id_col} = %(tx_id)s", True)
 
@@ -246,6 +248,7 @@ def build_select_address_txs_statement(network: str, node_type: NodeType,
 
 
 class Cassandra:
+
     def eth(func):
 
         def check(*args, **kwargs):
@@ -747,7 +750,8 @@ class Cassandra:
             id=id,
             tx_id_lower_bound=first_tx_id,
             tx_id_upper_bound=upper_bound,
-            is_outgoing=(direction == 'out' if direction is not None else None),
+            is_outgoing=(direction == 'out'
+                         if direction is not None else None),
             include_assets=include_assets,
             ascending=ascending,
             page=page,
@@ -1804,7 +1808,8 @@ class Cassandra:
                     "and currency=%s"
 
             results = {
-                c: one(await self.execute_async(
+                c:
+                one(await self.execute_async(
                     currency, 'transformed', query,
                     [row['address_id'], row['address_id_group'], c]))
                 for c in balance_currencies
@@ -1940,20 +1945,20 @@ class Cassandra:
         return 0 if result is None else \
             result['max_secondary_id']
 
-    async def list_address_txs_ordered(
-            self,
-            network: str,
-            node_type: NodeType,
-            id,
-            tx_id_lower_bound: Optional[int],
-            tx_id_upper_bound: Optional[int],
-            is_outgoing: Optional[bool],
-            include_assets: Sequence[Tuple[str, bool]],
-            page: Optional[int],
-            fetch_size: int,
-            cols: Optional[Sequence[str]] = None,
-            tx_ids: Optional[Sequence[int]] = None,
-            ascending: bool = False):
+    async def list_address_txs_ordered(self,
+                                       network: str,
+                                       node_type: NodeType,
+                                       id,
+                                       tx_id_lower_bound: Optional[int],
+                                       tx_id_upper_bound: Optional[int],
+                                       is_outgoing: Optional[bool],
+                                       include_assets: Sequence[Tuple[str,
+                                                                      bool]],
+                                       page: Optional[int],
+                                       fetch_size: int,
+                                       cols: Optional[Sequence[str]] = None,
+                                       tx_ids: Optional[Sequence[int]] = None,
+                                       ascending: bool = False):
         """Loads a address transactions in execution order
         it allows to only get out- or incoming transaction or only
         transactions of a certain asset (token), for a given address id
@@ -1996,7 +2001,8 @@ class Cassandra:
 
             item_id_secondary_group = self.sec_in(secondary_id_group)
 
-        directions = [is_outgoing] if is_outgoing is not None else [False, True]
+        directions = [is_outgoing
+                      ] if is_outgoing is not None else [False, True]
         results = []
         """
             Keep retrieving pages until the demanded fetch_size is fulfilled
@@ -2021,7 +2027,6 @@ class Cassandra:
                     this_tx_id_lower_bound = tx_id_lower_bound
                 else:
                     this_tx_id_lower_bound = page
-
 
             # prebuild useful conditions, dependent on loop
             has_upper_bound = this_tx_id_upper_bound is not None
@@ -2067,9 +2072,8 @@ class Cassandra:
 
             # collect and merge results
             more_results, page = merge_address_txs_subquery_results(
-                [r.current_rows for r in await asyncio.gather(*aws)],
-                ascending,
-                fs_it,
+                [r.current_rows
+                 for r in await asyncio.gather(*aws)], ascending, fs_it,
                 'transaction_id' if is_eth_like(network) else 'tx_id')
 
             results.extend(more_results)
@@ -2127,7 +2131,8 @@ class Cassandra:
             id=address,
             tx_id_lower_bound=first_tx_id,
             tx_id_upper_bound=upper_bound,
-            is_outgoing=(direction == 'out' if direction is not None else None),
+            is_outgoing=(direction == 'out'
+                         if direction is not None else None),
             include_assets=include_assets,
             ascending=ascending,
             page=page,

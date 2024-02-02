@@ -720,7 +720,8 @@ async def list_entity_txs(test_case):
                                      order='asc')
     test_case.assertEqual(_reversed, result['address_txs'])
 
-    path_with_order_and_page = path_with_order + '&pagesize={pagesize}&page={page}'
+    path_with_order_and_page = path_with_order + \
+        '&pagesize={pagesize}&page={page}'
     result = await test_case.request(path_with_order_and_page,
                                      currency='btc',
                                      entity=144534,
@@ -737,8 +738,7 @@ async def list_entity_txs(test_case):
                                      pagesize=2,
                                      page=result['next_page'])
 
-    test_case.assertEqual(_reversed[2:3],
-                          result['address_txs'])
+    test_case.assertEqual(_reversed[2:3], result['address_txs'])
     test_case.assertEqual(result.get('next_page', None), None)
 
     path_with_direction =\
