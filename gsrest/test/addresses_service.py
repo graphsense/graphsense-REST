@@ -1,3 +1,4 @@
+import pdb
 from openapi_server.models.address import Address
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.neighbor_addresses import NeighborAddresses
@@ -16,6 +17,7 @@ from gsrest.test.txs_service import tx1_eth, tx2_eth, tx22_eth, tx4_eth
 from gsrest.util.values import make_values
 import gsrest.test.tags_service as ts
 import copy
+from pprint import pprint
 
 address = Address(
     currency="btc",
@@ -662,6 +664,35 @@ async def list_address_txs(test_case):
                                      page=result['next_page'])
 
     test_case.assertEqual(address_txs.to_dict()['address_txs'][2:3],
+                          result['address_txs'])
+    test_case.assertEqual(result.get('next_page', None), None)
+
+    path_with_order = path + '?order={order}'
+    _reversed = list(reversed(address_txs.to_dict()['address_txs']))
+    result = await test_case.request(path_with_order,
+                                     currency='btc',
+                                     address=address2.address,
+                                     order='asc')
+    test_case.assertEqual(_reversed, result['address_txs'])
+
+    path_with_order_and_page = path_with_order + '&pagesize={pagesize}&page={page}'
+    result = await test_case.request(path_with_order_and_page,
+                                     currency='btc',
+                                     address=address2.address,
+                                     order='asc',
+                                     pagesize=2,
+                                     page='')
+    test_case.assertEqual(_reversed[0:2], result['address_txs'])
+    test_case.assertNotEqual(result.get('next_page', None), None)
+
+    result = await test_case.request(path_with_order_and_page,
+                                     currency='btc',
+                                     address=address2.address,
+                                     order='asc',
+                                     pagesize=2,
+                                     page=result['next_page'])
+
+    test_case.assertEqual(_reversed[2:3],
                           result['address_txs'])
     test_case.assertEqual(result.get('next_page', None), None)
 

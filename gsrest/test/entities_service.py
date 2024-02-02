@@ -712,6 +712,35 @@ async def list_entity_txs(test_case):
                           result['address_txs'])
     test_case.assertEqual(result.get('next_page', None), None)
 
+    path_with_order = path + '?order={order}'
+    _reversed = list(reversed(entity_txs.to_dict()['address_txs']))
+    result = await test_case.request(path_with_order,
+                                     currency='btc',
+                                     entity=144534,
+                                     order='asc')
+    test_case.assertEqual(_reversed, result['address_txs'])
+
+    path_with_order_and_page = path_with_order + '&pagesize={pagesize}&page={page}'
+    result = await test_case.request(path_with_order_and_page,
+                                     currency='btc',
+                                     entity=144534,
+                                     order='asc',
+                                     pagesize=2,
+                                     page='')
+    test_case.assertEqual(_reversed[0:2], result['address_txs'])
+    test_case.assertNotEqual(result.get('next_page', None), None)
+
+    result = await test_case.request(path_with_order_and_page,
+                                     currency='btc',
+                                     entity=144534,
+                                     order='asc',
+                                     pagesize=2,
+                                     page=result['next_page'])
+
+    test_case.assertEqual(_reversed[2:3],
+                          result['address_txs'])
+    test_case.assertEqual(result.get('next_page', None), None)
+
     path_with_direction =\
         '/{currency}/entities/{entity}/txs?direction={direction}'
     result = await test_case.request(path_with_direction,

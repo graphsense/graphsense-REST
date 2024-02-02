@@ -35,14 +35,22 @@ async def list_address_txs(request,
                            min_height=None,
                            max_height=None,
                            direction=None,
+                           order='desc',
                            token_currency=None,
                            page=None,
                            pagesize=None):
     address = cannonicalize_address(currency, address)
     db = request.app['db']
     results, paging_state = \
-        await db.list_address_txs(currency, address, direction, min_height,
-                                  max_height, token_currency, page, pagesize)
+        await db.list_address_txs(currency=currency,
+                                  address=address,
+                                  direction=direction,
+                                  min_height=min_height,
+                                  max_height=max_height,
+                                  order=order,
+                                  token_currency=token_currency,
+                                  page=page,
+                                  pagesize=pagesize)
 
     address_txs = await common.txs_from_rows(
         request, currency, results, db.get_token_configuration(currency))

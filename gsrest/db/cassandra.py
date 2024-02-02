@@ -30,8 +30,6 @@ from gsrest.util.node_balances import get_balances
 from gsrest.util.id_group import calculate_id_group_with_overflow
 from gsrest.db.node_type import NodeType
 
-# import hashlib
-
 SMALL_PAGE_SIZE = 1000
 BIG_PAGE_SIZE = 5000
 SEARCH_PAGE_SIZE = 100
@@ -152,6 +150,7 @@ def wc(cl, cond):
 
 def merge_address_txs_subquery_results(
         result_sets: Sequence[Result],
+        ascending: bool,
         fetch_size: int,
         tx_id_keys: str = "tx_id") -> Tuple[Sequence[dict], Optional[int]]:
     """Merges sub results of the address txs queries per asset and direction
@@ -168,7 +167,7 @@ def merge_address_txs_subquery_results(
             this is considered as the page for subsequent queries.
     """
 
-    # check last tx id and return (page)
+    # find the least common tx_id where we then cut the result sets
     border_tx_id = None
     for results in result_sets:
         if not results:
@@ -177,19 +176,26 @@ def merge_address_txs_subquery_results(
             border_tx_id = results[-1][tx_id_keys]
             continue
         border_tx_id = min(border_tx_id, results[-1][tx_id_keys])
-    """
-        Merge results by sort order (uses a priority queue; heapq)
-        fetch_sized items or less are returned
-    """
+
+    # cut result_sets so that we only have the overlapping rows below/above
+    # the border_tx_id
+    # filtered out rows could be overlapping with yet not retrieved result sets
     candidates = [
         v for results in result_sets for v in results
-        if v[tx_id_keys] >= border_tx_id
+        if ascending and v[tx_id_keys] <= border_tx_id
+        or not ascending and v[tx_id_keys] >= border_tx_id
     ]
-    results = heapq.nlargest(fetch_size,
-                             candidates,
-                             key=partial(transaction_ordering_key,
-                                         tx_id_keys))
 
+    # Merge overlapping result sets by given sort order (uses a priority
+    # queue; heapq)
+    # fetch_sized items or less are returned
+    precedence = heapq.nsmallest if ascending else heapq.nlargest
+    results = precedence(fetch_size,
+                         candidates,
+                         key=partial(transaction_ordering_key,
+                                     tx_id_keys))
+
+    # use the last tx_id as page handle
     border_tx_id = results[-1][tx_id_keys] if results else None
     return results, border_tx_id
 
@@ -199,6 +205,7 @@ def build_select_address_txs_statement(network: str, node_type: NodeType,
                                        with_lower_bound: bool,
                                        with_upper_bound: bool,
                                        with_tx_id: bool,
+                                       ascending: bool,
                                        fetch_size: int) -> str:
     # prebuild useful helpers and conditions
     eth_like = is_eth_like(network)
@@ -220,15 +227,20 @@ def build_select_address_txs_statement(network: str, node_type: NodeType,
 
     # conditional where clause, loop dependent
     if not with_tx_id:
-        query += wc(f"{tx_id_col} >= %(tx_id_lower_bound)s", with_lower_bound)
-        query += wc(f"{tx_id_col} < %(tx_id_upper_bound)s", with_upper_bound)
+        if ascending:
+            query += wc(f"{tx_id_col} > %(tx_id_lower_bound)s", with_lower_bound)
+            query += wc(f"{tx_id_col} <= %(tx_id_upper_bound)s", with_upper_bound)
+        else:
+            query += wc(f"{tx_id_col} >= %(tx_id_lower_bound)s", with_lower_bound)
+            query += wc(f"{tx_id_col} < %(tx_id_upper_bound)s", with_upper_bound)
     else:
         query += wc(f"{tx_id_col} = %(tx_id)s", True)
 
+    ordering = "ASC" if ascending else "DESC"
     # Ordering statement
     ordering_statement = ("ORDER BY " +
                           (" currency DESC," if eth_like else "") +
-                          f" {tx_id_col} DESC")
+                          f" {tx_id_col} {ordering}")
 
     return f"{query} {ordering_statement} LIMIT {fetch_size}"
 
@@ -527,8 +539,7 @@ class Cassandra:
                                 params=params,
                                 paging_state=response_future._paging_state)
                 # self.logger.debug(f'{query} {params}')
-                # self.logger.debug(
-                #     f'{h} result size {len(result.current_rows)}')
+                # self.logger.debug(f'result size {len(result.current_rows)}')
                 loop.call_soon_threadsafe(future.set_result, result)
 
             def on_err(result):
@@ -655,15 +666,18 @@ class Cassandra:
                                direction,
                                min_height=None,
                                max_height=None,
+                               order=str,
                                token_currency=None,
                                page=None,
                                pagesize=None):
+        ascending = order == 'asc'
         return await self.list_txs_by_node_type(currency,
                                                 NodeType.ADDRESS,
                                                 address,
                                                 direction,
                                                 min_height=min_height,
                                                 max_height=max_height,
+                                                ascending=ascending,
                                                 token_currency=token_currency,
                                                 page=page,
                                                 pagesize=pagesize)
@@ -674,15 +688,18 @@ class Cassandra:
                               direction,
                               min_height=None,
                               max_height=None,
+                              order=str,
                               token_currency=None,
                               page=None,
                               pagesize=None):
+        ascending = order == 'asc'
         return await self.list_txs_by_node_type(currency,
                                                 NodeType.CLUSTER,
                                                 entity,
                                                 direction,
                                                 min_height=min_height,
                                                 max_height=max_height,
+                                                ascending=ascending,
                                                 token_currency=token_currency,
                                                 page=page,
                                                 pagesize=pagesize)
@@ -695,6 +712,7 @@ class Cassandra:
                                     direction,
                                     min_height=None,
                                     max_height=None,
+                                    ascending=False,
                                     token_currency=None,
                                     page=None,
                                     pagesize=None):
@@ -731,6 +749,7 @@ class Cassandra:
             tx_id_upper_bound=upper_bound,
             is_outgoing=(direction == 'out' if direction is not None else None),
             include_assets=include_assets,
+            ascending=ascending,
             page=page,
             fetch_size=fetch_size)
 
@@ -1933,7 +1952,8 @@ class Cassandra:
             page: Optional[int],
             fetch_size: int,
             cols: Optional[Sequence[str]] = None,
-            tx_ids: Optional[Sequence[int]] = None):
+            tx_ids: Optional[Sequence[int]] = None,
+            ascending: bool = False):
         """Loads a address transactions in execution order
         it allows to only get out- or incoming transaction or only
         transactions of a certain asset (token), for a given address id
@@ -1953,6 +1973,9 @@ class Cassandra:
             fetch_size (int): how much to fetch per page
             cols (Optional[Sequence[str]], optional): which columns to select
                 None means *
+            tx_ids (Optional[Sequence[int]]): limit result to given tx_ids
+            ascending (Optional[bool]): sort list ascending if True or
+                descending if False
         """
 
         if node_type == NodeType.ADDRESS:
@@ -1982,15 +2005,28 @@ class Cassandra:
         while len(results) < fetch_size:
             fs_it = fetch_size - len(results)
 
-            # limit by page or upper_bound, take the min both
-            if page is not None and tx_id_upper_bound is not None:
-                page = min(page, tx_id_upper_bound)
-            elif tx_id_upper_bound is not None:
-                page = tx_id_upper_bound
+            if not ascending:
+                this_tx_id_lower_bound = tx_id_lower_bound
+                if page is not None and tx_id_upper_bound is not None:
+                    this_tx_id_upper_bound = min(page, tx_id_upper_bound)
+                elif tx_id_upper_bound is not None:
+                    this_tx_id_upper_bound = tx_id_upper_bound
+                else:
+                    this_tx_id_upper_bound = page
+            else:
+                this_tx_id_upper_bound = tx_id_upper_bound
+                if page is not None and tx_id_lower_bound is not None:
+                    this_tx_id_lower_bound = max(page, tx_id_lower_bound)
+                elif tx_id_lower_bound is not None:
+                    this_tx_id_lower_bound = tx_id_lower_bound
+                else:
+                    this_tx_id_lower_bound = page
+
 
             # prebuild useful conditions, dependent on loop
-            has_upper_bound = (page is not None
-                               or tx_id_upper_bound is not None)
+            has_upper_bound = this_tx_id_upper_bound is not None
+
+            has_lower_bound = this_tx_id_lower_bound is not None
 
             # divide fetch_size by number of result sets
             fs_junk = ceil(fs_it / (len(include_assets) + 2))
@@ -1999,9 +2035,10 @@ class Cassandra:
                 network,
                 node_type,
                 cols,
-                with_lower_bound=(tx_id_lower_bound is not None),
+                with_lower_bound=has_lower_bound,
                 with_upper_bound=has_upper_bound,
                 fetch_size=fs_junk,
+                ascending=ascending,
                 with_tx_id=(tx_ids is not None))
 
             # prepare parameters for the query junks one for each direction
@@ -2009,8 +2046,8 @@ class Cassandra:
             params_junks = [{
                 "id": item_id,
                 "g_id": item_id_group,
-                "tx_id_lower_bound": tx_id_lower_bound,
-                "tx_id_upper_bound": page,
+                "tx_id_lower_bound": this_tx_id_lower_bound,
+                "tx_id_upper_bound": this_tx_id_upper_bound,
                 "s_d_group": s_d_group,
                 "currency": asset,
                 "is_outgoing": is_outgoing,
@@ -2030,7 +2067,9 @@ class Cassandra:
 
             # collect and merge results
             more_results, page = merge_address_txs_subquery_results(
-                [r.current_rows for r in await asyncio.gather(*aws)], fs_it,
+                [r.current_rows for r in await asyncio.gather(*aws)],
+                ascending,
+                fs_it,
                 'transaction_id' if is_eth_like(network) else 'tx_id')
 
             results.extend(more_results)
@@ -2050,6 +2089,7 @@ class Cassandra:
                                         direction,
                                         min_height=None,
                                         max_height=None,
+                                        ascending=False,
                                         token_currency=None,
                                         page=None,
                                         pagesize=None):
@@ -2089,6 +2129,7 @@ class Cassandra:
             tx_id_upper_bound=upper_bound,
             is_outgoing=(direction == 'out' if direction is not None else None),
             include_assets=include_assets,
+            ascending=ascending,
             page=page,
             fetch_size=fetch_size)
 
