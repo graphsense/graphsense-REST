@@ -382,11 +382,23 @@ class Cassandra:
             "token_config"] = self.load_token_configuration(keyspace)
 
         # check schema for compatibility and set parameter flags
+        keyspace_name = self.get_keyspace_mapping(keyspace, "transformed")
+
+        if keyspace == "eth":
+            query = ("SELECT column_name FROM system_schema.columns "
+                     "WHERE keyspace_name = %s AND "
+                     "table_name = 'block_transactions';")
+            result = self.session.execute(query, (keyspace_name, ))
+            self.parameters[currency]["use_flat_block_txs"] = ("tx_id" in [
+                x["column_name"] for x in result
+            ]) and keyspace == "eth"
+        else:
+            self.parameters[currency]["use_flat_block_txs"] = False
+
         query = (
             "SELECT column_name FROM system_schema.columns "
             "WHERE keyspace_name = %s AND table_name = 'address_transactions';"
         )
-        keyspace_name = self.get_keyspace_mapping(keyspace, "transformed")
         result = self.session.execute(query, (keyspace_name, ))
         self.parameters[currency]["use_legacy_log_index"] = ("log_index" in [
             x["column_name"] for x in result
@@ -795,17 +807,20 @@ class Cassandra:
         return [tx.tx_id for tx in result.one()['txs']]
 
     async def list_block_txs_ids_eth(self, currency, height):
-        if height is None:
-            return None
-        height_group = self.get_id_group(currency, height)
-        query = ("SELECT txs FROM block_transactions "
-                 "WHERE block_id_group=%s and block_id=%s")
-        result = await self.execute_async(
-            currency, 'transformed', query,
-            [height_group, int(height)])
-        if one(result) is None:
-            return None
-        return result.one()['txs']
+        if not self.parameters[currency]["use_flat_block_txs"]:
+            if height is None:
+                return None
+            height_group = self.get_id_group(currency, height)
+            query = ("SELECT txs FROM block_transactions "
+                     "WHERE block_id_group=%s and block_id=%s")
+            result = await self.execute_async(
+                currency, 'transformed', query,
+                [height_group, int(height)])
+            if one(result) is None:
+                return None
+            return result.one()['txs']
+        else:
+            return await self.list_block_txs_ids_trx(currency, height)
 
     async def list_block_txs_ids_trx(self, currency, height):
         if height is None:
@@ -1808,8 +1823,7 @@ class Cassandra:
                     "and currency=%s"
 
             results = {
-                c:
-                one(await self.execute_async(
+                c: one(await self.execute_async(
                     currency, 'transformed', query,
                     [row['address_id'], row['address_id_group'], c]))
                 for c in balance_currencies
