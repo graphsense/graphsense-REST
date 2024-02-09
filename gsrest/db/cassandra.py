@@ -186,6 +186,10 @@ def merge_address_txs_subquery_results(
         or not ascending and v[tx_id_keys] >= border_tx_id
     ]
 
+    results = heapq.nlargest(fetch_size,
+                             candidates,
+                             key=partial(transaction_ordering_key, tx_id_keys))
+
     # Merge overlapping result sets by given sort order (uses a priority
     # queue; heapq)
     # fetch_sized items or less are returned
