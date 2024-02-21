@@ -176,7 +176,7 @@ def merge_address_txs_subquery_results(
         if border_tx_id is None:
             border_tx_id = results[-1][tx_id_keys]
             continue
-        border_tx_id = min(border_tx_id, results[-1][tx_id_keys])
+        border_tx_id = max(border_tx_id, results[-1][tx_id_keys])
     """
         Merge results by sort order (uses a priority queue; heapq)
         fetch_sized items or less are returned
