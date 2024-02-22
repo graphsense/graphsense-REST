@@ -29,6 +29,7 @@ from gsrest.util.tron import partial_tron_to_partial_evm
 from gsrest.util.node_balances import get_balances
 from gsrest.util.id_group import calculate_id_group_with_overflow
 from gsrest.db.node_type import NodeType
+from pprint import pformat
 
 # import hashlib
 
@@ -153,7 +154,8 @@ def wc(cl, cond):
 def merge_address_txs_subquery_results(
         result_sets: Sequence[Result],
         fetch_size: int,
-        tx_id_keys: str = "tx_id") -> Tuple[Sequence[dict], Optional[int]]:
+        tx_id_keys: str = "tx_id",
+        merge_all: bool = False) -> Tuple[Sequence[dict], Optional[int]]:
     """Merges sub results of the address txs queries per asset and direction
 
     Args:
@@ -183,7 +185,7 @@ def merge_address_txs_subquery_results(
     """
     candidates = [
         v for results in result_sets for v in results
-        if v[tx_id_keys] >= border_tx_id
+        if merge_all or v[tx_id_keys] >= border_tx_id
     ]
     results = heapq.nlargest(fetch_size,
                              candidates,
@@ -540,7 +542,7 @@ class Cassandra:
                                 paging_state=response_future._paging_state)
                 # self.logger.debug(f'{query} {params}')
                 # self.logger.debug(
-                #     f'{h} result size {len(result.current_rows)}')
+                #     f'result size {len(result.current_rows)}')
                 loop.call_soon_threadsafe(future.set_result, result)
 
             def on_err(result):
@@ -2048,7 +2050,8 @@ class Cassandra:
             # collect and merge results
             more_results, page = merge_address_txs_subquery_results(
                 [r.current_rows for r in await asyncio.gather(*aws)], fs_it,
-                'transaction_id' if is_eth_like(network) else 'tx_id')
+                'transaction_id' if is_eth_like(network) else 'tx_id',
+                merge_all=tx_ids is not None)
 
             results.extend(more_results)
             if tx_ids is not None:
