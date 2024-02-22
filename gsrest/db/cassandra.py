@@ -29,6 +29,7 @@ from gsrest.util.tron import partial_tron_to_partial_evm
 from gsrest.util.node_balances import get_balances
 from gsrest.util.id_group import calculate_id_group_with_overflow
 from gsrest.db.node_type import NodeType
+from pprint import pformat
 
 SMALL_PAGE_SIZE = 1000
 BIG_PAGE_SIZE = 5000
@@ -152,7 +153,8 @@ def merge_address_txs_subquery_results(
         result_sets: Sequence[Result],
         ascending: bool,
         fetch_size: int,
-        tx_id_keys: str = "tx_id") -> Tuple[Sequence[dict], Optional[int]]:
+        tx_id_keys: str = "tx_id",
+        merge_all: bool = False) -> Tuple[Sequence[dict], Optional[int]]:
     """Merges sub results of the address txs queries per asset and direction
 
     Args:
@@ -175,14 +177,16 @@ def merge_address_txs_subquery_results(
         if border_tx_id is None:
             border_tx_id = results[-1][tx_id_keys]
             continue
-        border_tx_id = min(border_tx_id, results[-1][tx_id_keys])
+        order = min if ascending else max
+        border_tx_id = order(border_tx_id, results[-1][tx_id_keys])
 
     # cut result_sets so that we only have the overlapping rows below/above
     # the border_tx_id
     # filtered out rows could be overlapping with yet not retrieved result sets
     candidates = [
         v for results in result_sets for v in results
-        if ascending and v[tx_id_keys] <= border_tx_id
+        if merge_all
+        or ascending and v[tx_id_keys] <= border_tx_id
         or not ascending and v[tx_id_keys] >= border_tx_id
     ]
 
@@ -2093,6 +2097,7 @@ class Cassandra:
                 [r.current_rows
                  for r in await asyncio.gather(*aws)], ascending, fs_it,
                 'transaction_id' if is_eth_like(network) else 'tx_id')
+                merge_all=tx_ids is not None)
 
             results.extend(more_results)
             if tx_ids is not None:
