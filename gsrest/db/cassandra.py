@@ -185,8 +185,7 @@ def merge_address_txs_subquery_results(
     # filtered out rows could be overlapping with yet not retrieved result sets
     candidates = [
         v for results in result_sets for v in results
-        if merge_all
-        or ascending and v[tx_id_keys] <= border_tx_id
+        if merge_all or ascending and v[tx_id_keys] <= border_tx_id
         or not ascending and v[tx_id_keys] >= border_tx_id
     ]
 
@@ -1831,7 +1830,8 @@ class Cassandra:
                     "and currency=%s"
 
             results = {
-                c: one(await self.execute_async(
+                c:
+                one(await self.execute_async(
                     currency, 'transformed', query,
                     [row['address_id'], row['address_id_group'], c]))
                 for c in balance_currencies
@@ -2094,9 +2094,10 @@ class Cassandra:
 
             # collect and merge results
             more_results, page = merge_address_txs_subquery_results(
-                [r.current_rows
-                 for r in await asyncio.gather(*aws)], ascending, fs_it,
-                'transaction_id' if is_eth_like(network) else 'tx_id')
+                [r.current_rows for r in await asyncio.gather(*aws)],
+                ascending,
+                fs_it,
+                'transaction_id' if is_eth_like(network) else 'tx_id',
                 merge_all=tx_ids is not None)
 
             results.extend(more_results)
