@@ -850,10 +850,11 @@ async def list_entity_txs(test_case):
                                      entity=eth_entityWithTokens.entity)
     assert len(result["address_txs"]) == 5
     assert [x['currency'] for x in result["address_txs"]
-            ] == ['eth', 'weth', 'usdt', 'eth', 'eth']
+            ] == ['eth', 'eth', 'weth', 'usdt', 'eth']
+
     assert [x['value']['value'] for x in result["address_txs"]] == [
-        124000000000000000000, -6818627949560085517, -3360488227,
-        123000000000000000000, -123000000000000000000
+        124000000000000000000, 123000000000000000000, -6818627949560085517,
+        -3360488227, -123000000000000000000
     ]
     assert [x['height'] for x in result["address_txs"]] == [3, 2, 2, 2, 1]
 

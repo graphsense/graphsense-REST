@@ -791,11 +791,12 @@ async def list_address_txs(test_case):
                                      currency='eth',
                                      address=eth_address2.address)
     assert len(result["address_txs"]) == 5
+
     assert [x['currency'] for x in result["address_txs"]
-            ] == ['eth', 'weth', 'usdt', 'eth', 'eth']
+            ] == ['eth', "eth", 'weth', 'usdt', 'eth']
     assert [x['value']['value'] for x in result["address_txs"]] == [
-        124000000000000000000, -6818627949560085517, -3360488227,
-        123000000000000000000, -123000000000000000000
+        124000000000000000000, 123000000000000000000, -6818627949560085517,
+        -3360488227, -123000000000000000000
     ]
     assert [x['height'] for x in result["address_txs"]] == [3, 2, 2, 2, 1]
 
@@ -828,7 +829,7 @@ async def list_address_txs(test_case):
 
     assert len(result["address_txs"]) == 3
     assert [x['currency']
-            for x in result["address_txs"]] == ['weth', 'usdt', 'eth']
+            for x in result["address_txs"]] == ['eth', 'weth', 'usdt']
     assert [x['height'] for x in result["address_txs"]] == [2, 2, 2]
 
     result = await test_case.request(path_with_range_and_tc,

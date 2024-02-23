@@ -1497,7 +1497,7 @@ class Cassandra:
                                            trace_index)
         result = r.current_rows
         if len(result) != 1:
-            raise NotFoundException(f"Found {len(r)} trace in "
+            raise NotFoundException(f"Found {len(result)} trace in "
                                     f"tx {tx['tx_hash']}:"
                                     f"{trace_index}")
         return result[0]
@@ -1830,8 +1830,7 @@ class Cassandra:
                     "and currency=%s"
 
             results = {
-                c:
-                one(await self.execute_async(
+                c: one(await self.execute_async(
                     currency, 'transformed', query,
                     [row['address_id'], row['address_id_group'], c]))
                 for c in balance_currencies
@@ -2195,6 +2194,7 @@ class Cassandra:
                 addr_tx['from_address'] = token_tx['from_address']
                 addr_tx['currency'] = token_tx["currency"]
                 addr_tx['token_tx_id'] = addr_tx["log_index"]
+                addr_tx["type"] = "erc20"
                 value = token_tx['value']
 
             elif currency == "trx" and addr_tx["trace_index"] is not None:
@@ -2203,11 +2203,21 @@ class Cassandra:
 
                 addr_tx['from_address'] = trace['caller_address']
                 addr_tx['to_address'] = trace['transferto_address']
+                addr_tx["type"] = "internal"
                 value = trace["call_value"]
+            elif currency == "eth" and addr_tx["trace_index"] is not None:
+                trace = await self.fetch_transaction_trace(
+                    currency, full_tx, addr_tx["trace_index"])
+
+                addr_tx['from_address'] = trace['from_address']
+                addr_tx['to_address'] = trace['to_address']
+                addr_tx["type"] = "internal"
+                value = trace["value"]
             else:
                 addr_tx['to_address'] = full_tx['to_address']
                 addr_tx['from_address'] = full_tx['from_address']
                 addr_tx['currency'] = currency
+                addr_tx["type"] = "external"
                 value = full_tx['value']
 
             contract_creation = full_tx.get('contract_creation', None)
