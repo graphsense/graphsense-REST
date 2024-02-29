@@ -30,6 +30,7 @@ from gsrest.util.node_balances import get_balances
 from gsrest.util.id_group import calculate_id_group_with_overflow
 from gsrest.db.node_type import NodeType
 
+
 SMALL_PAGE_SIZE = 1000
 BIG_PAGE_SIZE = 5000
 SEARCH_PAGE_SIZE = 100

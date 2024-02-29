@@ -7,10 +7,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 - address search in account model currencies
-- missing transactions in address transactions endpoint
 
 ### Added
 - added parameter `order` to `list_address_txs` and `list_entity_txs` to control sort order of returned list of transactions
+
+## [24.01.3] - 2024-02-22
+
+### Fixed
+- Incomplete retrieval of address transactions
 
 ## [24.01.2] - 2024-02-09
 
