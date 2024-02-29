@@ -3,12 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [24.02rc2]
+## [24.02.0] - 2024-02-29
 
 ### Fixed
 - address search in account model currencies
-
-## [24.02rc1]
+- missing transactions in address transactions endpoint
 
 ### Added
 - added parameter `order` to `list_address_txs` and `list_entity_txs` to control sort order of returned list of transactions
