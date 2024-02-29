@@ -1162,11 +1162,14 @@ class Cassandra:
         norm = identity
         prefix = self.scrub_prefix(currency, expression)
         prefix = prefix[:prefix_lengths['address']]
+
         if is_eth_like(currency):
             # eth addresses are case insensitive
             expression = expression.lower()
             norm = address_to_user_format
             prefix = prefix.upper()
+        else:
+            expression = expression_orginal
         rows = []
 
         async def collect(query):
@@ -1182,7 +1185,7 @@ class Cassandra:
                     norm(currency, row['address'])
                     for row in result.current_rows
                     if norm(currency, row['address']).startswith(
-                        expression_orginal)
+                        expression)
                 ])
                 paging_state = result.paging_state
                 if paging_state is None:
