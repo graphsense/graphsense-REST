@@ -13,11 +13,11 @@ if [ ! -z "$3" ]; then
 fi
 MOCK_CMD="docker exec $CASSANDRA_MOCK cqlsh"
 
-# TAG=develop
+TAG=develop
 # ETHTAG=develop
 
-TAG=`git rev-parse --abbrev-ref HEAD`
-ETHTAG=`git rev-parse --abbrev-ref HEAD`
+# TAG=`git rev-parse --abbrev-ref HEAD`
+# ETHTAG=`git rev-parse --abbrev-ref HEAD`
 
 if [ -z "$ORGANIZATION" ]; then
     echo 'Please set env var $ORGANIZATION'
