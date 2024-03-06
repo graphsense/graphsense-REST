@@ -30,14 +30,12 @@ from gsrest.util.node_balances import get_balances
 from gsrest.util.id_group import calculate_id_group_with_overflow
 from gsrest.db.node_type import NodeType
 
-
 SMALL_PAGE_SIZE = 1000
 BIG_PAGE_SIZE = 5000
 SEARCH_PAGE_SIZE = 100
 
 
 class NetworkParameters(UserDict):
-
     def __getitem__(self, network):
         if network not in self:
             raise NetworkNotFoundException(network)
@@ -81,7 +79,11 @@ def transaction_ordering_key(tx_id_key, tx):
     return (tx[tx_id_key], -trace_index, -log_index)
 
 
-def identity(y, x):
+def identity1(x):
+    return x
+
+
+def identity2(y, x):
     return x
 
 
@@ -122,7 +124,6 @@ def build_token_tx(token_currency, tx, token_tx, log):
 
 
 class Result:
-
     def __init__(self, current_rows, params, paging_state):
         self.current_rows = current_rows
         self.params = params
@@ -255,9 +256,7 @@ def build_select_address_txs_statement(network: str, node_type: NodeType,
 
 
 class Cassandra:
-
     def eth(func):
-
         def check(*args, **kwargs):
             self = args[0]
             currency = args[1]
@@ -276,7 +275,6 @@ class Cassandra:
         return check
 
     def new(func):
-
         def check(*args, **kwargs):
             self = args[0]
             currency = args[1]
@@ -1153,14 +1151,19 @@ class Cassandra:
         return results2, paging_state
 
     async def list_matching_addresses(self, currency, expression, limit=10):
+
         prefix_lengths = self.get_prefix_lengths(currency)
         expression_orginal = expression
+
+        postprocess_address = identity1
         if currency == 'trx':
-            expression = partial_tron_to_partial_evm(expression)
+            postprocess_address = partial_tron_to_partial_evm
+
+        expression = postprocess_address(expression)
 
         if len(expression) < prefix_lengths['address']:
             return []
-        norm = identity
+        norm = identity2
         prefix = self.scrub_prefix(currency, expression)
         prefix = prefix[:prefix_lengths['address']]
 
@@ -1184,9 +1187,8 @@ class Cassandra:
                     break
                 rows.extend([
                     norm(currency, row['address'])
-                    for row in result.current_rows
-                    if norm(currency, row['address']).startswith(
-                        expression)
+                    for row in result.current_rows if postprocess_address(
+                        norm(currency, row['address'])).startswith(expression)
                 ])
                 paging_state = result.paging_state
                 if paging_state is None:
