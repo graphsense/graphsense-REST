@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [24.02.1] - 2024-03-06
+
+### Fixed
+- fixed tron address search
+
 ## [24.02.0] - 2024-02-29
 
 ### Fixed
