@@ -29,6 +29,9 @@ from gsrest.util.tron import partial_tron_to_partial_evm
 from gsrest.util.node_balances import get_balances
 from gsrest.util.id_group import calculate_id_group_with_overflow
 from gsrest.db.node_type import NodeType
+import logging
+
+from pprint import pformat, PrettyPrinter
 
 SMALL_PAGE_SIZE = 1000
 BIG_PAGE_SIZE = 5000
@@ -86,6 +89,12 @@ def identity1(x):
 def identity2(y, x):
     return x
 
+def fmt(v):
+    if isinstance(v, str):
+        return "'" + v + "'"
+    if isinstance(v, bytes):
+        return "0x" + v.hex()
+    return str(v)
 
 def replaceFrom(keyspace, query):
     r = re.compile(r'\s+FROM\s+', re.IGNORECASE)
@@ -121,6 +130,13 @@ def build_token_tx(token_currency, tx, token_tx, log):
         "token_tx_id": log["log_index"],
         "value": value["value"]
     }
+
+class BytesPrettyPrinter(PrettyPrinter):
+    def format(self, object, context, maxlevels, level):
+        if isinstance(object, bytes):
+            x = object.hex()
+            return (x[0:24] + "...", True, False)
+        return PrettyPrinter.format(self, object, context, maxlevels, level)
 
 
 class Result:
@@ -487,11 +503,10 @@ class Cassandra:
                             currency,
                             keyspace_type,
                             query,
-                            params=None,
+                            params=[],
                             paging_state=None,
                             fetch_size=None,
-                            autopaging=False,
-                            named_params: bool = False):
+                            autopaging=False):
         try:
             result = await self.execute_async_lowlevel(
                 currency,
@@ -499,8 +514,7 @@ class Cassandra:
                 query,
                 params=params,
                 paging_state=paging_state,
-                fetch_size=fetch_size,
-                named_params=named_params)
+                fetch_size=fetch_size)
         except ProtocolException as e:
             if 'Invalid value for the paging state' not in str(e):
                 raise e
@@ -529,13 +543,13 @@ class Cassandra:
                                currency,
                                keyspace_type,
                                query,
-                               params=None,
+                               params=[],
                                paging_state=None,
-                               fetch_size=None,
-                               named_params: bool = False):
+                               fetch_size=None):
+        named_params = isinstance(params, dict)
         keyspace = self.get_keyspace_mapping(currency, keyspace_type)
-        q = replaceFrom(keyspace, query)
-        q = replacePerc(q, named=named_params)
+        query = replaceFrom(keyspace, query)
+        q = replacePerc(query, named=named_params)
 
         prep = self.prepared_statements.get(q, None)
         if prep is None:
@@ -558,8 +572,17 @@ class Cassandra:
                 result = Result(current_rows=result,
                                 params=params,
                                 paging_state=response_future._paging_state)
-                # self.logger.debug(f'{query} {params}')
-                # self.logger.debug(f'result size {len(result.current_rows)}')
+                if self.logger.level == logging.DEBUG:
+                    if named_params:
+                        formatted = query
+                        for k,v in params.items():
+                            formatted = formatted.replace("%(" + k + ")s", fmt(v))
+                    else:
+                        formatted = query % tuple([fmt(v) for v in params])
+                    self.logger.debug(formatted)
+                    pp = BytesPrettyPrinter(self.logger)
+                    self.logger.debug(pp.pformat(result.current_rows))
+                    self.logger.debug(f'result size {len(result.current_rows)}')
                 loop.call_soon_threadsafe(future.set_result, result)
 
             def on_err(result):
@@ -1084,71 +1107,99 @@ class Cassandra:
             first_value = 'output_value'
             second_value = 'input_value'
 
+        self.logger.debug(f'is_outgoing {is_outgoing} first {first} second '
+                          f'{second}')
+
+        if is_eth_like(currency):
+            token_config = self.get_token_configuration(currency)
+            include_assets = list(token_config.keys())
+            include_assets.append(currency.upper())
+        else:
+            include_assets = [currency.upper()]
+
+        final_results = []
         fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
-        results1, paging_state = await self.list_address_txs_ordered(
-            network=currency,
-            node_type=node_type,
-            id=first,
-            tx_id_lower_bound=None,
-            tx_id_upper_bound=None,
-            is_outgoing=is_outgoing,
-            include_assets=[currency.upper()],
-            page=page,
-            fetch_size=fetch_size)
+        while len(final_results) < fetch_size:
+            fs_it = fetch_size - len(final_results)
+            results1, new_page = await self.list_address_txs_ordered(
+                network=currency,
+                node_type=node_type,
+                id=first,
+                tx_id_lower_bound=None,
+                tx_id_upper_bound=None,
+                is_outgoing=is_outgoing,
+                include_assets=include_assets,
+                page=page,
+                fetch_size=fs_it)
 
-        tx_id = 'transaction_id' if is_eth_like(currency) else 'tx_id'
+            self.logger.debug(f'results1 {page} {len(results1)}')
+            pp = BytesPrettyPrinter(self.logger)
+            self.logger.debug(pp.pformat(results1))
 
-        first_tx_ids = [row[tx_id] for row in results1]
+            tx_id = 'transaction_id' if is_eth_like(currency) else 'tx_id'
 
-        assets = set([currency.upper()])
-        if is_eth_like(currency):
-            for row in results1:
-                assets.add(row['currency'])
+            first_tx_ids = [row[tx_id] for row in results1]
 
-        assets = list(assets)
+            assets = set([currency.upper()])
+            if is_eth_like(currency):
+                for row in results1:
+                    assets.add(row['currency'])
 
-        results2, _ = await self.list_address_txs_ordered(
-            network=currency,
-            node_type=node_type,
-            id=second,
-            tx_id_lower_bound=None,
-            tx_id_upper_bound=None,
-            is_outgoing=not is_outgoing,
-            include_assets=assets,
-            tx_ids=first_tx_ids,  # limit second set by tx ids of first set
-            page=page,
-            fetch_size=fetch_size)
+            assets = list(assets)
 
-        results1 = {row[tx_id]: row for row in results1}
+            results2, _ = await self.list_address_txs_ordered(
+                network=currency,
+                node_type=node_type,
+                id=second,
+                tx_id_lower_bound=None,
+                tx_id_upper_bound=None,
+                is_outgoing=not is_outgoing,
+                include_assets=assets,
+                tx_ids=first_tx_ids,  # limit second set by tx ids of first set
+                page=page,
+                fetch_size=fs_it)
+            self.logger.debug(f'results2 {page} {len(results2)}')
 
-        tx_ids = [row[tx_id] for row in results2]
-        txs = await self.list_txs_by_ids(currency, tx_ids)
+            results1 = {row[tx_id]: row for row in results1}
+            if is_eth_like(currency):
+                results2 = await self.normalize_address_transactions(currency,
+                                                                     results2)
+            else:
+                tx_ids = [row[tx_id] for row in results2]
+                txs = await self.list_txs_by_ids(currency, tx_ids)
 
-        if len(results2) != len(txs):
-            raise DBInconsistencyException(
-                'result sets for txs intersection not equal')
+                if len(results2) != len(txs):
+                    raise DBInconsistencyException(
+                        'result sets for txs intersection not equal')
 
-        # merge address_transactions and raw transaction sets
-        for (row, tx) in zip(results2, txs):
-            if not is_eth_like(currency):
-                row[second_value] = row['value']
-                row[first_value] = results1[row[tx_id]]['value']
+                # merge address_transactions and raw transaction sets
+                for (row, tx) in zip(results2, txs):
+                    row[second_value] = row['value']
+                    row[first_value] = results1[row[tx_id]]['value']
 
-            for k, v in tx.items():
-                row[k] = v
 
-        if is_eth_like(currency):
-            if node_type == NodeType.CLUSTER:
-                neighbor = dst_node['root_address']
-                id = src_node['root_address']
-            # Token/Trace transactions might not be between the requested nodes
-            # so only keep the relevant ones
-            txs = [
-                tx for tx in results2
-                if tx["to_address"] == neighbor and tx["from_address"] == id
-            ]
+                    for k, v in tx.items():
+                        row[k] = v
 
-        return results2, paging_state
+            if is_eth_like(currency):
+                if node_type == NodeType.CLUSTER:
+                    neighbor = dst_node['root_address']
+                    id = src_node['root_address']
+                # Token/Trace transactions might not be between the requested nodes
+                # so only keep the relevant ones
+                results2 = [
+                    tx for tx in results2
+                    if tx["to_address"] == neighbor
+                    and tx["from_address"] == id
+                ]
+                self.logger.debug(f'results2 size after prune {len(results2)}')
+            final_results.extend(results2)
+
+            page = new_page
+            if page is None:
+                break
+
+        return final_results, page
 
     async def list_matching_addresses(self, currency, expression, limit=10):
 
@@ -1984,7 +2035,7 @@ class Cassandra:
                                        fetch_size: int,
                                        cols: Optional[Sequence[str]] = None,
                                        tx_ids: Optional[Sequence[int]] = None,
-                                       ascending: bool = False):
+                                       ascending: bool = False) -> Tuple[Sequence[dict], Optional[int]]:
         """Loads a address transactions in execution order
         it allows to only get out- or incoming transaction or only
         transactions of a certain asset (token), for a given address id
@@ -2000,7 +2051,7 @@ class Cassandra:
                 fetch only incoming, if None fetch both directions
             include_assets (Sequence[Tuple[str, bool]]): a list of tuples with
                 assets to include
-            page (Optional[int]): a page id (tx_lower bound)
+            page (Optional[int]): a page id (tx id bound)
             fetch_size (int): how much to fetch per page
             cols (Optional[Sequence[str]], optional): which columns to select
                 None means *
@@ -2092,8 +2143,7 @@ class Cassandra:
                 self.execute_async(network,
                                    'transformed',
                                    cql_stmt,
-                                   p,
-                                   named_params=True) for p in params_junks
+                                   p) for p in params_junks
             ]
 
             # collect and merge results
@@ -2104,6 +2154,8 @@ class Cassandra:
                 'transaction_id' if is_eth_like(network) else 'tx_id',
                 merge_all=tx_ids is not None)
 
+            self.logger.debug(f'list tx ordered page {page}')
+
             results.extend(more_results)
             if tx_ids is not None:
                 # don't page if querying specific tx_ids
@@ -2112,7 +2164,7 @@ class Cassandra:
                 # no more data expected end loop
                 break
 
-        return results, str(page) if page is not None else None
+        return results, page
 
     async def list_txs_by_node_type_eth(self,
                                         currency,
@@ -2171,7 +2223,7 @@ class Cassandra:
         for row in results:
             row['value'] *= (-1 if row['is_outgoing'] else 1)
 
-        return results, paging_state
+        return results, str(paging_state)
 
     async def normalize_address_transactions(self, currency, txs):
         use_legacy_log_index = self.parameters[currency][
