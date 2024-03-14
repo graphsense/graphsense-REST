@@ -30,8 +30,7 @@ from gsrest.util.node_balances import get_balances
 from gsrest.util.id_group import calculate_id_group_with_overflow
 from gsrest.db.node_type import NodeType
 import logging
-
-from pprint import pformat, PrettyPrinter
+from pprint import PrettyPrinter
 
 SMALL_PAGE_SIZE = 1000
 BIG_PAGE_SIZE = 5000
@@ -145,6 +144,12 @@ class Result:
         self.params = params
         self.paging_state = paging_state
 
+    def __len__(self):
+        return len(self.current_rows)
+
+    def __getitem__(self, key):
+        return self.current_rows[key]
+
     def is_empty(self):
         return self.current_rows is None or not self.current_rows
 
@@ -171,14 +176,17 @@ def merge_address_txs_subquery_results(
         ascending: bool,
         fetch_size: int,
         tx_id_keys: str = "tx_id",
-        merge_all: bool = False) -> Tuple[Sequence[dict], Optional[int]]:
+        merge_all: bool = False,
+        fetched_limit: Optional[int] = None) -> Tuple[Sequence[dict], Optional[int]]:
     """Merges sub results of the address txs queries per asset and direction
 
     Args:
         result_sets (Sequence[Result]): List of result sets,
-            one per (asset, direction) tuple
+            one per parameter tuple
         fetch_size (int): number of items return at most
         tx_id_keys (str): name of the tx_id column
+        merge_all (bool): Just merge the sets without detecting page
+        fetched_limit (int): The limit that was used to fetch the result sets
 
     Returns:
         Tuple[Sequence[dict], Optional[int]]: A merged list of ordered
@@ -191,6 +199,8 @@ def merge_address_txs_subquery_results(
     for results in result_sets:
         if not results:
             continue
+        if fetched_limit and len(results) < fetched_limit:
+            continue
         if border_tx_id is None:
             border_tx_id = results[-1][tx_id_keys]
             continue
@@ -202,8 +212,10 @@ def merge_address_txs_subquery_results(
     # filtered out rows could be overlapping with yet not retrieved result sets
     candidates = [
         v for results in result_sets for v in results
-        if merge_all or ascending and v[tx_id_keys] <= border_tx_id
-        or not ascending and v[tx_id_keys] >= border_tx_id
+        if border_tx_id is None
+            or merge_all
+            or ascending and v[tx_id_keys] <= border_tx_id
+            or not ascending and v[tx_id_keys] >= border_tx_id
     ]
 
     results = heapq.nlargest(fetch_size,
@@ -228,7 +240,7 @@ def build_select_address_txs_statement(network: str, node_type: NodeType,
                                        with_lower_bound: bool,
                                        with_upper_bound: bool,
                                        with_tx_id: bool, ascending: bool,
-                                       fetch_size: int) -> str:
+                                       limit: int) -> str:
     # prebuild useful helpers and conditions
     eth_like = is_eth_like(network)
     tx_id_col = get_tx_id_column_name(network)
@@ -268,7 +280,7 @@ def build_select_address_txs_statement(network: str, node_type: NodeType,
                           (" currency DESC," if eth_like else "") +
                           f" {tx_id_col} {ordering}")
 
-    return f"{query} {ordering_statement} LIMIT {fetch_size}"
+    return f"{query} {ordering_statement} LIMIT {limit}"
 
 
 class Cassandra:
@@ -580,8 +592,8 @@ class Cassandra:
                     else:
                         formatted = query % tuple([fmt(v) for v in params])
                     self.logger.debug(formatted)
-                    pp = BytesPrettyPrinter(self.logger)
-                    self.logger.debug(pp.pformat(result.current_rows))
+                    pp = BytesPrettyPrinter()
+                    # self.logger.debug(pp.pformat(result.current_rows))
                     self.logger.debug(f'result size {len(result.current_rows)}')
                 loop.call_soon_threadsafe(future.set_result, result)
 
@@ -811,7 +823,7 @@ class Cassandra:
             row['coinbase'] = tx['coinbase']
             rows.append(row)
 
-        return rows, paging_state
+        return rows, str(paging_state) if paging_state is not None else None
 
     async def resolve_tx_id_range_by_block(self, currency, min_height,
                                            max_height):
@@ -1107,8 +1119,6 @@ class Cassandra:
             first_value = 'output_value'
             second_value = 'input_value'
 
-        self.logger.debug(f'is_outgoing {is_outgoing} first {first} second '
-                          f'{second}')
 
         if is_eth_like(currency):
             token_config = self.get_token_configuration(currency)
@@ -1131,10 +1141,6 @@ class Cassandra:
                 include_assets=include_assets,
                 page=page,
                 fetch_size=fs_it)
-
-            self.logger.debug(f'results1 {page} {len(results1)}')
-            pp = BytesPrettyPrinter(self.logger)
-            self.logger.debug(pp.pformat(results1))
 
             tx_id = 'transaction_id' if is_eth_like(currency) else 'tx_id'
 
@@ -1192,14 +1198,13 @@ class Cassandra:
                     if tx["to_address"] == neighbor
                     and tx["from_address"] == id
                 ]
-                self.logger.debug(f'results2 size after prune {len(results2)}')
             final_results.extend(results2)
 
             page = new_page
             if page is None:
                 break
 
-        return final_results, page
+        return final_results, str(page) if page is not None else None
 
     async def list_matching_addresses(self, currency, expression, limit=10):
 
@@ -2119,7 +2124,7 @@ class Cassandra:
                 cols,
                 with_lower_bound=has_lower_bound,
                 with_upper_bound=has_upper_bound,
-                fetch_size=fs_junk,
+                limit=fs_junk,
                 ascending=ascending,
                 with_tx_id=(tx_ids is not None))
 
@@ -2152,7 +2157,8 @@ class Cassandra:
                 ascending,
                 fs_it,
                 'transaction_id' if is_eth_like(network) else 'tx_id',
-                merge_all=tx_ids is not None)
+                merge_all=tx_ids is not None,
+                fetched_limit=fs_junk)
 
             self.logger.debug(f'list tx ordered page {page}')
 
@@ -2223,7 +2229,7 @@ class Cassandra:
         for row in results:
             row['value'] *= (-1 if row['is_outgoing'] else 1)
 
-        return results, str(paging_state)
+        return results, str(paging_state) if paging_state is not None else None
 
     async def normalize_address_transactions(self, currency, txs):
         use_legacy_log_index = self.parameters[currency][
