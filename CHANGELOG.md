@@ -3,6 +3,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [24.02.3] - 2024-03-15
+
+### Fixed
+- Listing txs between addresses (list_address_txs)
+ 
+## [24.02.2] - 2024-03-14
+
+- Listing txs between addresses (list_address_txs)
+
 ## [24.02.1] - 2024-03-06
 
 ### Fixed
