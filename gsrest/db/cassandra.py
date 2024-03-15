@@ -201,6 +201,7 @@ def merge_address_txs_subquery_results(
 
     # find the least common tx_id where we then cut the result sets
     border_tx_id = None
+    has_pages = False
     total_results_len = 0
     for results in result_sets:
         if not results:
@@ -208,6 +209,7 @@ def merge_address_txs_subquery_results(
         total_results_len += len(results)
         if fetched_limit and len(results) < fetched_limit:
             continue
+        has_pages = True
         if border_tx_id is None:
             border_tx_id = results[-1][tx_id_keys]
             continue
@@ -233,7 +235,7 @@ def merge_address_txs_subquery_results(
 
     # use the last tx_id as page handle
     border_tx_id = results[-1][tx_id_keys] \
-        if results and total_results_len > fetch_size else None
+        if results and (has_pages or total_results_len >= fetch_size) else None
     return results, border_tx_id
 
 
