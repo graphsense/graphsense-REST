@@ -7,7 +7,7 @@ test-all-env:
 	tox -- graphsense
 
 lint:
-	flake8 gsrest
+	flake8 ./gsrest --count --max-line-length=80 --statistics --exclude plugins
 
 format:
 	autopep8 --in-place --recursive gsrest
@@ -15,6 +15,9 @@ format:
 
 serve:
 	python -m aiohttp.web -H localhost -P 9000 openapi_server:main
+
+dev:
+	adev runserver -p 9000 --root . --app-factory main openapi_server/__init__.py
 
 build-docker:
 	docker build -t graphsense-rest .
