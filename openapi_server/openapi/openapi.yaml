@@ -360,6 +360,24 @@ paths:
         schema:
           $ref: '#/components/schemas/address_id'
         style: form
+      - description: Return transactions starting from given height
+        example: 1
+        explode: true
+        in: query
+        name: min_height
+        required: false
+        schema:
+          $ref: '#/components/schemas/height'
+        style: form
+      - description: Return transactions up to (including) given height
+        example: 2
+        explode: true
+        in: query
+        name: max_height
+        required: false
+        schema:
+          $ref: '#/components/schemas/height'
+        style: form
       - description: Resumption token for retrieving the next page
         explode: true
         in: query
@@ -1009,6 +1027,24 @@ paths:
         required: true
         schema:
           $ref: '#/components/schemas/entity_id'
+        style: form
+      - description: Return transactions starting from given height
+        example: 1
+        explode: true
+        in: query
+        name: min_height
+        required: false
+        schema:
+          $ref: '#/components/schemas/height'
+        style: form
+      - description: Return transactions up to (including) given height
+        example: 2
+        explode: true
+        in: query
+        name: max_height
+        required: false
+        schema:
+          $ref: '#/components/schemas/height'
         style: form
       - description: Resumption token for retrieving the next page
         explode: true

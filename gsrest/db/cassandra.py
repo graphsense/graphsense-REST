@@ -782,22 +782,10 @@ class Cassandra:
         except ValueError:
             raise BadUserInputException(f"Page {page} is not an integer")
 
-        upper_bound = None
-        first_tx_id = None
-        if min_height is not None or max_height is not None:
-            first_tx_id, last_tx_id = \
-                await self.resolve_tx_id_range_by_block(currency,
-                                                        min_height,
-                                                        max_height)
-            if min_height is not None:
-                if first_tx_id is None:
-                    raise BadUserInputException(
-                        f'Minimum block height {min_height} does not exist')
-            if max_height is not None:
-                if last_tx_id is None:
-                    raise BadUserInputException(
-                        f'Maximum block height {max_height} does not exist')
-                upper_bound = last_tx_id + 1
+        first_tx_id, upper_bound = \
+            await self.resolve_tx_id_range_by_block(currency,
+                                                    min_height,
+                                                    max_height)
 
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
         include_assets = [currency.upper()]
@@ -831,18 +819,28 @@ class Cassandra:
 
         return rows, str(paging_state) if paging_state is not None else None
 
-    async def resolve_tx_id_range_by_block(self, currency, min_height,
-                                           max_height):
-        former_txs = await self.list_block_txs_ids(currency, min_height)
-        first_tx_id = min(former_txs) if former_txs is not None else None
-        latter_txs = await self.list_block_txs_ids(currency, max_height)
-        last_tx_id = max(latter_txs) if latter_txs is not None else None
+    async def resolve_tx_id_range_by_block(self,
+                                           network: str,
+                                           min_height: Optional[int],
+                                           max_height: Optional[int]
+                                          ) -> Tuple[Optional[int], Optional[int]]:
+        first_tx_id = last_tx_id = None
+        if min_height is not None:
+            former_txs = await self.list_block_txs_ids(network, min_height)
+            if former_txs is None:
+                raise BadUserInputException(
+                    f'Minimum block height {min_height} does not exist')
+            first_tx_id = min(former_txs)
+        if max_height is not None:
+            latter_txs = await self.list_block_txs_ids(network, max_height)
+            if latter_txs is None:
+                raise BadUserInputException(
+                    f'Maximum block height {max_height} does not exist')
+            last_tx_id = max(latter_txs) + 1
         return first_tx_id, last_tx_id
 
     @eth
     async def list_block_txs_ids(self, currency, height):
-        if height is None:
-            return None
         height_group = self.get_block_id_group(currency, height)
         query = ("SELECT txs FROM block_transactions "
                  "WHERE block_id_group=%s and block_id=%s")
@@ -1064,12 +1062,16 @@ class Cassandra:
                                  currency,
                                  address,
                                  neighbor,
+                                 min_height=None,
+                                 max_height=None,
                                  page=None,
                                  pagesize=None):
         return await self.list_links(currency,
                                      NodeType.ADDRESS,
                                      address,
                                      neighbor,
+                                     min_height=min_height,
+                                     max_height=max_height,
                                      page=page,
                                      pagesize=pagesize)
 
@@ -1077,12 +1079,16 @@ class Cassandra:
                                 currency,
                                 address,
                                 neighbor,
+                                min_height=None,
+                                max_height=None,
                                 page=None,
                                 pagesize=None):
         return await self.list_links(currency,
                                      NodeType.CLUSTER,
                                      address,
                                      neighbor,
+                                     min_height=min_height,
+                                     max_height=max_height,
                                      page=page,
                                      pagesize=pagesize)
 
@@ -1091,6 +1097,8 @@ class Cassandra:
                          node_type: NodeType,
                          id,
                          neighbor,
+                         min_height=None,
+                         max_height=None,
                          page=None,
                          pagesize=None):
         try:
@@ -1132,6 +1140,11 @@ class Cassandra:
         else:
             include_assets = [currency.upper()]
 
+        tx_id_lower_bound, tx_id_upper_bound = \
+            await self.resolve_tx_id_range_by_block(currency,
+                                                    min_height,
+                                                    max_height)
+
         final_results = []
         fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
         while len(final_results) < fetch_size:
@@ -1140,8 +1153,8 @@ class Cassandra:
                 network=currency,
                 node_type=node_type,
                 id=first,
-                tx_id_lower_bound=None,
-                tx_id_upper_bound=None,
+                tx_id_lower_bound=tx_id_lower_bound,
+                tx_id_upper_bound=tx_id_upper_bound,
                 is_outgoing=is_outgoing,
                 include_assets=include_assets,
                 page=page,
@@ -2225,15 +2238,10 @@ class Cassandra:
         else:
             include_assets = [token_currency.upper()]
 
-        upper_bound = None
-        first_tx_id = None
-        if min_height or max_height:
-            first_tx_id, last_tx_id = \
-                await self.resolve_tx_id_range_by_block(currency,
-                                                        min_height,
-                                                        max_height)
-            if max_height and last_tx_id:
-                upper_bound = last_tx_id + 1
+        first_tx_id, upper_bound = \
+            await self.resolve_tx_id_range_by_block(currency,
+                                                    min_height,
+                                                    max_height)
 
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
 

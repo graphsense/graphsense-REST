@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [dev]
+
+### Added
+
+- added paramters `min_height` and `max_height` to `list_address_links` and `list_entity_links` to limit retrieved txs.
+
 ## [24.02.3] - 2024-03-15
 
 ### Fixed

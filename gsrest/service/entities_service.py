@@ -601,12 +601,16 @@ async def list_entity_links(request,
                             currency,
                             entity,
                             neighbor,
+                            min_height=None,
+                            max_height=None,
                             page=None,
                             pagesize=None):
     db = request.app['db']
     result = await db.list_entity_links(currency,
                                         entity,
                                         neighbor,
+                                        min_height=min_height,
+                                        max_height=max_height,
                                         page=page,
                                         pagesize=pagesize)
 

@@ -108,6 +108,8 @@ async def list_address_links(request,
                              currency,
                              address,
                              neighbor,
+                             min_height=None,
+                             max_height=None,
                              page=None,
                              pagesize=None):
     address = cannonicalize_address(currency, address)
@@ -116,6 +118,8 @@ async def list_address_links(request,
     result = await db.list_address_links(currency,
                                          address,
                                          neighbor,
+                                         min_height=min_height,
+                                         max_height=max_height,
                                          page=page,
                                          pagesize=pagesize)
 
