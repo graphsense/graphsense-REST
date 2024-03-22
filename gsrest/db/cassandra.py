@@ -824,19 +824,50 @@ class Cassandra:
                                            min_height: Optional[int],
                                            max_height: Optional[int]
                                           ) -> Tuple[Optional[int], Optional[int]]:
+        stats = await self.get_currency_statistics(network)
+        if not stats:
+            return None, None
+        last_height = stats['no_blocks'] - 1
         first_tx_id = last_tx_id = None
+        max_tries = 100
         if min_height is not None:
-            former_txs = await self.list_block_txs_ids(network, min_height)
-            if former_txs is None:
-                raise BadUserInputException(
-                    f'Minimum block height {min_height} does not exist')
-            first_tx_id = min(former_txs)
+            orig_min_height = min_height
+            former_txs = []
+            while not former_txs:
+                former_txs = await self.list_block_txs_ids(network, min_height)
+                if former_txs is None:
+                    raise BadUserInputException(
+                        f'Minimum block height {min_height} does not exist')
+                if former_txs:
+                    break
+                # try one block higher until txs are found
+                min_height += 1
+                if min_height > last_height:
+                    break
+                if min_height - orig_min_height > max_tries:
+                    raise BadUserInputException(
+                        f'Block {orig_min_height} does not contains '
+                        'transactions')
+            first_tx_id = min(former_txs) if former_txs else None
         if max_height is not None:
-            latter_txs = await self.list_block_txs_ids(network, max_height)
-            if latter_txs is None:
-                raise BadUserInputException(
-                    f'Maximum block height {max_height} does not exist')
-            last_tx_id = max(latter_txs) + 1
+            orig_max_height = max_height
+            latter_txs = []
+            while not latter_txs:
+                latter_txs = await self.list_block_txs_ids(network, max_height)
+                if latter_txs is None:
+                    raise BadUserInputException(
+                        f'Maximum block height {max_height} does not exist')
+                if latter_txs:
+                    break
+                # try one block lower until txs are found
+                max_height -= 1
+                if max_height < 0:
+                    break
+                if orig_max_height - max_height > max_tries:
+                    raise BadUserInputException(
+                        f'Block {orig_max_height} does not contains '
+                        'transactions')
+            last_tx_id = max(latter_txs) + 1 if latter_txs else None
         return first_tx_id, last_tx_id
 
     @eth
