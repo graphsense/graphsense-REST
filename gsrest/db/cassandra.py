@@ -819,11 +819,9 @@ class Cassandra:
 
         return rows, str(paging_state) if paging_state is not None else None
 
-    async def resolve_tx_id_range_by_block(self,
-                                           network: str,
-                                           min_height: Optional[int],
-                                           max_height: Optional[int]
-                                          ) -> Tuple[Optional[int], Optional[int]]:
+    async def resolve_tx_id_range_by_block(
+            self, network: str, min_height: Optional[int],
+            max_height: Optional[int]) -> Tuple[Optional[int], Optional[int]]:
         stats = await self.get_currency_statistics(network)
         if not stats:
             return None, None
@@ -1954,8 +1952,7 @@ class Cassandra:
                     "and currency=%s"
 
             results = {
-                c:
-                one(await self.execute_async(
+                c: one(await self.execute_async(
                     currency, 'transformed', query,
                     [row['address_id'], row['address_id_group'], c]))
                 for c in balance_currencies
