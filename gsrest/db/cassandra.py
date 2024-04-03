@@ -1292,6 +1292,9 @@ class Cassandra:
             expression = expression_orginal
         rows = []
 
+        if len(prefix) < 1:
+            return []
+
         async def collect(query):
             paging_state = None
             while len(rows) < limit:
