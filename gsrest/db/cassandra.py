@@ -727,18 +727,17 @@ class Cassandra:
                                direction,
                                min_height=None,
                                max_height=None,
-                               order=str,
+                               order=None,
                                token_currency=None,
                                page=None,
                                pagesize=None):
-        ascending = order == 'asc'
         return await self.list_txs_by_node_type(currency,
                                                 NodeType.ADDRESS,
                                                 address,
                                                 direction,
                                                 min_height=min_height,
                                                 max_height=max_height,
-                                                ascending=ascending,
+                                                order=order,
                                                 token_currency=token_currency,
                                                 page=page,
                                                 pagesize=pagesize)
@@ -749,18 +748,17 @@ class Cassandra:
                               direction,
                               min_height=None,
                               max_height=None,
-                              order=str,
+                              order=None,
                               token_currency=None,
                               page=None,
                               pagesize=None):
-        ascending = order == 'asc'
         return await self.list_txs_by_node_type(currency,
                                                 NodeType.CLUSTER,
                                                 entity,
                                                 direction,
                                                 min_height=min_height,
                                                 max_height=max_height,
-                                                ascending=ascending,
+                                                order=order,
                                                 token_currency=token_currency,
                                                 page=page,
                                                 pagesize=pagesize)
@@ -773,7 +771,7 @@ class Cassandra:
                                     direction,
                                     min_height=None,
                                     max_height=None,
-                                    ascending=False,
+                                    order=None,
                                     token_currency=None,
                                     page=None,
                                     pagesize=None):
@@ -781,6 +779,7 @@ class Cassandra:
             page = int(page) if page is not None else None
         except ValueError:
             raise BadUserInputException(f"Page {page} is not an integer")
+        ascending = order == 'asc'
 
         first_tx_id, upper_bound = \
             await self.resolve_tx_id_range_by_block(currency,
@@ -1093,6 +1092,7 @@ class Cassandra:
                                  neighbor,
                                  min_height=None,
                                  max_height=None,
+                                 order=None,
                                  page=None,
                                  pagesize=None):
         return await self.list_links(currency,
@@ -1101,6 +1101,7 @@ class Cassandra:
                                      neighbor,
                                      min_height=min_height,
                                      max_height=max_height,
+                                     order=order,
                                      page=page,
                                      pagesize=pagesize)
 
@@ -1110,6 +1111,7 @@ class Cassandra:
                                 neighbor,
                                 min_height=None,
                                 max_height=None,
+                                order=None,
                                 page=None,
                                 pagesize=None):
         return await self.list_links(currency,
@@ -1118,6 +1120,7 @@ class Cassandra:
                                      neighbor,
                                      min_height=min_height,
                                      max_height=max_height,
+                                     order=order,
                                      page=page,
                                      pagesize=pagesize)
 
@@ -1128,12 +1131,16 @@ class Cassandra:
                          neighbor,
                          min_height=None,
                          max_height=None,
+                         order=None,
                          page=None,
                          pagesize=None):
         try:
             page = int(page) if page is not None else None
         except ValueError:
             raise BadUserInputException(f"Page {page} is not an integer")
+
+        ascending = order == 'asc'
+
         if node_type == NodeType.ADDRESS:
             src_node = await self.get_address(currency, id)
             dst_node = await self.get_address(currency, neighbor)
@@ -1186,6 +1193,7 @@ class Cassandra:
                 tx_id_upper_bound=tx_id_upper_bound,
                 is_outgoing=is_outgoing,
                 include_assets=include_assets,
+                ascending=ascending,
                 page=page,
                 fetch_size=fs_it)
 
@@ -1213,6 +1221,7 @@ class Cassandra:
                 tx_id_upper_bound=None,
                 is_outgoing=not is_outgoing,
                 include_assets=assets,
+                ascending=ascending,
                 tx_ids=first_tx_ids,  # limit second set by tx ids of first set
                 page=page,
                 fetch_size=fs_it)
@@ -2249,7 +2258,7 @@ class Cassandra:
                                         direction,
                                         min_height=None,
                                         max_height=None,
-                                        ascending=False,
+                                        order=None,
                                         token_currency=None,
                                         page=None,
                                         pagesize=None):
@@ -2257,6 +2266,7 @@ class Cassandra:
             page = int(page) if page is not None else None
         except ValueError:
             raise BadUserInputException(f"Page {page} is not an integer")
+        ascending = order == 'asc'
 
         if node_type == NodeType.CLUSTER:
             node_type = NodeType.ADDRESS
