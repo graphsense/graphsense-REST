@@ -603,6 +603,7 @@ async def list_entity_links(request,
                             neighbor,
                             min_height=None,
                             max_height=None,
+                            order='desc',
                             page=None,
                             pagesize=None):
     db = request.app['db']
@@ -611,6 +612,7 @@ async def list_entity_links(request,
                                         neighbor,
                                         min_height=min_height,
                                         max_height=max_height,
+                                        order=order,
                                         page=page,
                                         pagesize=pagesize)
 

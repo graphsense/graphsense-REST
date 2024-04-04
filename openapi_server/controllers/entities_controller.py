@@ -240,7 +240,7 @@ async def list_entity_addresses(request: web.Request, currency, entity, page=Non
         raise web.HTTPInternalServerError()
 
 
-async def list_entity_links(request: web.Request, currency, entity, neighbor, min_height=None, max_height=None, page=None, pagesize=None) -> web.Response:
+async def list_entity_links(request: web.Request, currency, entity, neighbor, min_height=None, max_height=None, order=None, page=None, pagesize=None) -> web.Response:
     """Get transactions between two entities
 
     
@@ -255,6 +255,8 @@ async def list_entity_links(request: web.Request, currency, entity, neighbor, mi
     :type min_height: int
     :param max_height: Return transactions up to (including) given height
     :type max_height: int
+    :param order: Sorting order
+    :type order: str
     :param page: Resumption token for retrieving the next page
     :type page: str
     :param pagesize: Number of items returned in a single page
@@ -283,11 +285,11 @@ async def list_entity_links(request: web.Request, currency, entity, neighbor, mi
     request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
-        if 'currency' in ['','currency','entity','neighbor','min_height','max_height','page','pagesize']:
+        if 'currency' in ['','currency','entity','neighbor','min_height','max_height','order','page','pagesize']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.list_entity_links(request
-                ,currency=currency,entity=entity,neighbor=neighbor,min_height=min_height,max_height=max_height,page=page,pagesize=pagesize)
+                ,currency=currency,entity=entity,neighbor=neighbor,min_height=min_height,max_height=max_height,order=order,page=page,pagesize=pagesize)
         result = await result
 
         for plugin in request.app['plugins']:

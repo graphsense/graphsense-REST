@@ -110,6 +110,7 @@ async def list_address_links(request,
                              neighbor,
                              min_height=None,
                              max_height=None,
+                             order='desc',
                              page=None,
                              pagesize=None):
     address = cannonicalize_address(currency, address)
@@ -120,6 +121,7 @@ async def list_address_links(request,
                                          neighbor,
                                          min_height=min_height,
                                          max_height=max_height,
+                                         order=order,
                                          page=page,
                                          pagesize=pagesize)
 

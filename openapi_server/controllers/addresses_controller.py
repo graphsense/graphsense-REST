@@ -157,7 +157,7 @@ async def get_address_entity(request: web.Request, currency, address) -> web.Res
         raise web.HTTPInternalServerError()
 
 
-async def list_address_links(request: web.Request, currency, address, neighbor, min_height=None, max_height=None, page=None, pagesize=None) -> web.Response:
+async def list_address_links(request: web.Request, currency, address, neighbor, min_height=None, max_height=None, order=None, page=None, pagesize=None) -> web.Response:
     """Get outgoing transactions between two addresses
 
     
@@ -172,6 +172,8 @@ async def list_address_links(request: web.Request, currency, address, neighbor, 
     :type min_height: int
     :param max_height: Return transactions up to (including) given height
     :type max_height: int
+    :param order: Sorting order
+    :type order: str
     :param page: Resumption token for retrieving the next page
     :type page: str
     :param pagesize: Number of items returned in a single page
@@ -200,11 +202,11 @@ async def list_address_links(request: web.Request, currency, address, neighbor, 
     request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
-        if 'currency' in ['','currency','address','neighbor','min_height','max_height','page','pagesize']:
+        if 'currency' in ['','currency','address','neighbor','min_height','max_height','order','page','pagesize']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.list_address_links(request
-                ,currency=currency,address=address,neighbor=neighbor,min_height=min_height,max_height=max_height,page=page,pagesize=pagesize)
+                ,currency=currency,address=address,neighbor=neighbor,min_height=min_height,max_height=max_height,order=order,page=page,pagesize=pagesize)
         result = await result
 
         for plugin in request.app['plugins']:
