@@ -1261,7 +1261,7 @@ class Cassandra:
                     tx for tx in results2 if tx["to_address"] == neighbor
                     and tx["from_address"] == id
                 ]
-                self.logger.debug(f'pruned {before - len(results2)}')
+                self.logger.info(f'pruned {before - len(results2)}')
             final_results.extend(results2)
 
             page = new_page
