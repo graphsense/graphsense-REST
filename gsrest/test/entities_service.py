@@ -907,3 +907,17 @@ async def list_entity_links(test_case):
                                      neighbor=107925001)
     txs = Links(links=[tx2_eth, tx22_eth])
     test_case.assertEqualWithList(txs.to_dict(), result, 'links', 'tx_hash')
+
+    result = await test_case.request(path + "&order=asc",
+                                     currency='eth',
+                                     entity=107925000,
+                                     neighbor=107925001)
+    test_case.assertEqual(['af6e0003', 'af6e0004'],
+                          [x["tx_hash"] for x in result["links"]])
+
+    result = await test_case.request(path + "&order=desc",
+                                     currency='eth',
+                                     entity=107925000,
+                                     neighbor=107925001)
+    test_case.assertEqual(['af6e0004', 'af6e0003'],
+                          [x["tx_hash"] for x in result["links"]])

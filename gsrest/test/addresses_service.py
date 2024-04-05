@@ -16,6 +16,7 @@ from gsrest.test.txs_service import tx1_eth, tx2_eth, tx22_eth, tx4_eth
 from gsrest.util.values import make_values
 import gsrest.test.tags_service as ts
 import copy
+import itertools
 
 address = Address(
     currency="btc",
@@ -1148,3 +1149,104 @@ async def list_address_links(test_case):
                                      page=result['next_page'],
                                      pagesize=1)
     test_case.assertEqual(Links(links=[]).to_dict(), result)
+
+    # test order parameter
+    path = ('/{currency}/addresses/{address}/links?'
+            'neighbor={neighbor}&order={order}')
+    result = await test_case.request(path,
+                                     currency='eth',
+                                     address=eth_address.address,
+                                     neighbor='0x123456',
+                                     order="desc")
+
+    test_case.assertEqual(['af6e0004', 'af6e0003'],
+                          [x['tx_hash'] for x in result['links']])
+    test_case.assertEqual(None, result.get('next_page', None))
+
+    result = await test_case.request(path,
+                                     currency='eth',
+                                     address=eth_address.address,
+                                     neighbor='0x123456',
+                                     order="asc")
+
+    test_case.assertEqual(list(reversed(['af6e0004', 'af6e0003'])),
+                          [x['tx_hash'] for x in result['links']])
+    test_case.assertEqual(None, result.get('next_page', None))
+
+    for mh, ex, exv in [
+        (
+            2,
+            2,
+            ['af6e0004', 'af6e0003'],  # noqa: E131
+        ),
+        (
+            3,
+            1,
+            ['af6e0004'],  # noqa: E131
+        ),
+        (
+            4,
+            0,
+            [],  # noqa: E131
+        )
+    ]:
+        result = await test_case.request(path + '&min_height={min_height}',
+                                         currency='eth',
+                                         address=eth_address.address,
+                                         neighbor='0x123456',
+                                         min_height=mh,
+                                         order="desc")
+
+        test_case.assertEqual(ex, len(result["links"]))
+        test_case.assertEqual(exv, [x['tx_hash'] for x in result['links']])
+
+    rel = itertools.permutations(["A", "B", "C", "D", "E"], r=2)
+    er = {("A", "E"): 1}
+    queries = [(x, y, er.get((x, y), 0)) for x, y in rel]
+
+    for o in ["desc", "asc"]:
+        for a, b, n in queries:
+            result = await test_case.request(path,
+                                             currency='btc',
+                                             address=f"address{a}",
+                                             neighbor=f"address{b}",
+                                             order=o)
+            test_case.assertEqual(n, len(result["links"]))
+
+    for o in ["desc", "asc"]:
+        for a, b, n in queries:
+            result = await test_case.request(path + "&min_height=2",
+                                             currency='btc',
+                                             address=f"address{a}",
+                                             neighbor=f"address{b}",
+                                             order=o)
+            test_case.assertEqual(n, len(result["links"]))
+
+    for o in ["desc", "asc"]:
+        for a, b, n in queries:
+            result = await test_case.request(path + "&max_height=3",
+                                             currency='btc',
+                                             address=f"address{a}",
+                                             neighbor=f"address{b}",
+                                             order=o)
+            test_case.assertEqual(n, len(result["links"]))
+
+    er = {}
+    queries = [(x, y, er.get((x, y), 0)) for x, y in rel]
+    for o in ["desc", "asc"]:
+        for a, b, n in queries:
+            result = await test_case.request(path + "&min_height=3",
+                                             currency='btc',
+                                             address=f"address{a}",
+                                             neighbor=f"address{b}",
+                                             order=o)
+            test_case.assertEqual(n, len(result["links"]))
+
+    for o in ["desc", "asc"]:
+        for a, b, n in queries:
+            result = await test_case.request(path + "&max_height=2",
+                                             currency='btc',
+                                             address=f"address{a}",
+                                             neighbor=f"address{b}",
+                                             order=o)
+            test_case.assertEqual(n, len(result["links"]))

@@ -281,7 +281,7 @@ def build_select_address_txs_statement(network: str, node_type: NodeType,
     ordering = "ASC" if ascending else "DESC"
     # Ordering statement
     ordering_statement = ("ORDER BY " +
-                          (" currency DESC," if eth_like else "") +
+                          (f" currency {ordering}," if eth_like else "") +
                           f" {tx_id_col} {ordering}")
 
     return f"{query} {ordering_statement} LIMIT {limit}"
@@ -874,6 +874,7 @@ class Cassandra:
                  "WHERE block_id_group=%s and block_id=%s")
         result = await self.execute_async(
             currency, 'raw', query, [height_group, int(height)])
+
         if one(result) is None:
             return None
         return [tx.tx_id for tx in result.one()['txs']]
