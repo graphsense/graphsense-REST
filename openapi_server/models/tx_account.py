@@ -220,7 +220,7 @@ class TxAccount(Model):
     def timestamp(self):
         """Gets the timestamp of this TxAccount.
 
-        Timestamp
+        Timestamp in posix seconds format
 
         :return: The timestamp of this TxAccount.
         :rtype: int
@@ -231,7 +231,7 @@ class TxAccount(Model):
     def timestamp(self, timestamp):
         """Sets the timestamp of this TxAccount.
 
-        Timestamp
+        Timestamp in posix seconds format
 
         :param timestamp: The timestamp of this TxAccount.
         :type timestamp: int

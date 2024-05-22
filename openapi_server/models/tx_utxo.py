@@ -331,7 +331,7 @@ class TxUtxo(Model):
     def timestamp(self):
         """Gets the timestamp of this TxUtxo.
 
-        Timestamp
+        Timestamp in posix seconds format
 
         :return: The timestamp of this TxUtxo.
         :rtype: int
@@ -342,7 +342,7 @@ class TxUtxo(Model):
     def timestamp(self, timestamp):
         """Sets the timestamp of this TxUtxo.
 
-        Timestamp
+        Timestamp in posix seconds format
 
         :param timestamp: The timestamp of this TxUtxo.
         :type timestamp: int

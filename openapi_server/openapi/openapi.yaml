@@ -7,7 +7,7 @@ info:
     entities, blocks, transactions and tags for automated and highly efficient forensics
     tasks.
   title: GraphSense API
-  version: 1.4.2
+  version: 1.7.0
 servers:
 - url: https://api.ikna.io
 paths:
@@ -672,6 +672,40 @@ paths:
       tags:
       - addresses
       x-openapi-router-controller: openapi_server.controllers.addresses_controller
+  /{currency}/block_by_date/{date}:
+    get:
+      operationId: get_block_by_date
+      parameters:
+      - description: The cryptocurrency code (e.g., btc)
+        example: btc
+        explode: false
+        in: path
+        name: currency
+        required: true
+        schema:
+          format: string
+          type: string
+        style: simple
+      - description: The time of the block
+        example: 2017-07-21T17:32:28Z
+        explode: false
+        in: path
+        name: date
+        required: true
+        schema:
+          $ref: '#/components/schemas/dateTime'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/blockAtDate'
+          description: OK
+      summary: Get the closest blocks given a timestamp
+      tags:
+      - blocks
+      x-openapi-router-controller: openapi_server.controllers.blocks_controller
   /{currency}/blocks/{height}:
     get:
       operationId: get_block
@@ -2257,6 +2291,16 @@ components:
         format: string
         type: string
       style: form
+    dateTime:
+      description: The time of the block
+      example: 2017-07-21T17:32:28Z
+      explode: false
+      in: path
+      name: date
+      required: true
+      schema:
+        $ref: '#/components/schemas/dateTime'
+      style: simple
     height:
       description: The block height
       example: 1
@@ -2668,6 +2712,46 @@ components:
         type: integer
       style: form
   schemas:
+    blockAtDate:
+      example:
+        beforeTimestamp: 1616376371
+        afterBlock: 47
+        afterTimestamp: 1616376371
+        beforeBlock: 47
+      properties:
+        beforeBlock:
+          description: Height
+          example: 47
+          format: int32
+          minimum: 0
+          title: height
+          type: integer
+        beforeTimestamp:
+          description: Timestamp in posix seconds format
+          example: 1616376371
+          format: int32
+          title: timestamp
+          type: integer
+        afterBlock:
+          description: Height
+          example: 47
+          format: int32
+          minimum: 0
+          title: height
+          type: integer
+        afterTimestamp:
+          description: Timestamp in posix seconds format
+          example: 1616376371
+          format: int32
+          title: timestamp
+          type: integer
+      required:
+      - afterBlock
+      - afterTimestamp
+      - beforeBlock
+      - beforeTimestamp
+      title: blockAtDate
+      type: object
     currency:
       description: crypto currency code
       example: btc
@@ -2686,7 +2770,7 @@ components:
           no_address_relations: 1234567
           no_blocks: 12345
           no_txs: 11
-          timestamp: 123456789
+          timestamp: 1616376371
         - no_tagged_addresses: 123
           no_addresses: 12345
           no_labels: 123
@@ -2695,7 +2779,7 @@ components:
           no_address_relations: 1234567
           no_blocks: 12345
           no_txs: 11
-          timestamp: 123456789
+          timestamp: 1616376371
       properties:
         currencies:
           items:
@@ -2745,7 +2829,7 @@ components:
         no_address_relations: 1234567
         no_blocks: 12345
         no_txs: 11
-        timestamp: 123456789
+        timestamp: 1616376371
       properties:
         name:
           title: name
@@ -2787,8 +2871,8 @@ components:
           title: no_tagged_addresses
           type: integer
         timestamp:
-          description: Timestamp
-          example: 123456789
+          description: Timestamp in posix seconds format
+          example: 1616376371
           format: int32
           title: timestamp
           type: integer
@@ -2810,7 +2894,7 @@ components:
         currency: btc
         height: 47
         no_txs: 11
-        timestamp: 123456789
+        timestamp: 1616376371
       properties:
         block_hash:
           format: string
@@ -2834,8 +2918,8 @@ components:
           title: no_txs
           type: integer
         timestamp:
-          description: Timestamp
-          example: 123456789
+          description: Timestamp in posix seconds format
+          example: 1616376371
           format: int32
           title: timestamp
           type: integer
@@ -2863,7 +2947,7 @@ components:
         first_tx:
           tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
           height: 47
-          timestamp: 123456789
+          timestamp: 1616376371
         total_tokens_received:
           usdt:
             fiat_values:
@@ -2893,7 +2977,7 @@ components:
         last_tx:
           tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
           height: 47
-          timestamp: 123456789
+          timestamp: 1616376371
         entity: 123456
         token_balances:
           usdt:
@@ -3066,7 +3150,7 @@ components:
         first_tx:
           tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
           height: 47
-          timestamp: 123456789
+          timestamp: 1616376371
         total_tokens_received:
           usdt:
             fiat_values:
@@ -3098,7 +3182,7 @@ components:
         last_tx:
           tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
           height: 47
-          timestamp: 123456789
+          timestamp: 1616376371
         entity: 123456
         token_balances:
           usdt:
@@ -3282,7 +3366,7 @@ components:
       example:
         tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
         height: 47
-        timestamp: 123456789
+        timestamp: 1616376371
       properties:
         height:
           description: Height
@@ -3292,8 +3376,8 @@ components:
           title: height
           type: integer
         timestamp:
-          description: Timestamp
-          example: 123456789
+          description: Timestamp in posix seconds format
+          example: 1616376371
           format: int32
           title: timestamp
           type: integer
@@ -3599,9 +3683,14 @@ components:
       minimum: 0
       title: height
       type: integer
+    dateTime:
+      description: a date string following RFC 3339, section 5.6
+      example: 2017-07-21T17:32:28Z
+      format: date-time
+      type: string
     timestamp:
-      description: Timestamp
-      example: 123456789
+      description: Timestamp in posix seconds format
+      example: 1616376371
       format: int32
       title: timestamp
       type: integer
@@ -3648,7 +3737,7 @@ components:
             first_tx:
               tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
               height: 47
-              timestamp: 123456789
+              timestamp: 1616376371
             total_tokens_received:
               usdt:
                 fiat_values:
@@ -3678,7 +3767,7 @@ components:
             last_tx:
               tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
               height: 47
-              timestamp: 123456789
+              timestamp: 1616376371
             entity: 123456
             token_balances:
               usdt:
@@ -3747,7 +3836,7 @@ components:
             first_tx:
               tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
               height: 47
-              timestamp: 123456789
+              timestamp: 1616376371
             total_tokens_received:
               usdt:
                 fiat_values:
@@ -3777,7 +3866,7 @@ components:
             last_tx:
               tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
               height: 47
-              timestamp: 123456789
+              timestamp: 1616376371
             entity: 123456
             token_balances:
               usdt:
@@ -3881,7 +3970,7 @@ components:
             first_tx:
               tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
               height: 47
-              timestamp: 123456789
+              timestamp: 1616376371
             total_tokens_received:
               usdt:
                 fiat_values:
@@ -3913,7 +4002,7 @@ components:
             last_tx:
               tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
               height: 47
-              timestamp: 123456789
+              timestamp: 1616376371
             entity: 123456
             token_balances:
               usdt:
@@ -3980,7 +4069,7 @@ components:
             first_tx:
               tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
               height: 47
-              timestamp: 123456789
+              timestamp: 1616376371
             total_tokens_received:
               usdt:
                 fiat_values:
@@ -4012,7 +4101,7 @@ components:
             last_tx:
               tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
               height: 47
-              timestamp: 123456789
+              timestamp: 1616376371
             entity: 123456
             token_balances:
               usdt:
@@ -4078,7 +4167,7 @@ components:
           first_tx:
             tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
             height: 47
-            timestamp: 123456789
+            timestamp: 1616376371
           total_tokens_received:
             usdt:
               fiat_values:
@@ -4108,7 +4197,7 @@ components:
           last_tx:
             tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
             height: 47
-            timestamp: 123456789
+            timestamp: 1616376371
           entity: 123456
           token_balances:
             usdt:
@@ -4236,7 +4325,7 @@ components:
           first_tx:
             tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
             height: 47
-            timestamp: 123456789
+            timestamp: 1616376371
           total_tokens_received:
             usdt:
               fiat_values:
@@ -4268,7 +4357,7 @@ components:
           last_tx:
             tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
             height: 47
-            timestamp: 123456789
+            timestamp: 1616376371
           entity: 123456
           token_balances:
             usdt:
@@ -4396,8 +4485,8 @@ components:
           title: height
           type: integer
         timestamp:
-          description: Timestamp
-          example: 123456789
+          description: Timestamp in posix seconds format
+          example: 1616376371
           format: int32
           title: timestamp
           type: integer
@@ -4432,7 +4521,7 @@ components:
           first_tx:
             tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
             height: 47
-            timestamp: 123456789
+            timestamp: 1616376371
           total_tokens_received:
             usdt:
               fiat_values:
@@ -4462,7 +4551,7 @@ components:
           last_tx:
             tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
             height: 47
-            timestamp: 123456789
+            timestamp: 1616376371
           entity: 123456
           token_balances:
             usdt:
@@ -4508,7 +4597,7 @@ components:
           first_tx:
             tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
             height: 47
-            timestamp: 123456789
+            timestamp: 1616376371
           total_tokens_received:
             usdt:
               fiat_values:
@@ -4538,7 +4627,7 @@ components:
           last_tx:
             tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
             height: 47
-            timestamp: 123456789
+            timestamp: 1616376371
           entity: 123456
           token_balances:
             usdt:
@@ -4745,7 +4834,7 @@ components:
             first_tx:
               tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
               height: 47
-              timestamp: 123456789
+              timestamp: 1616376371
             total_tokens_received:
               usdt:
                 fiat_values:
@@ -4777,7 +4866,7 @@ components:
             last_tx:
               tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
               height: 47
-              timestamp: 123456789
+              timestamp: 1616376371
             entity: 123456
             token_balances:
               usdt:
@@ -4827,7 +4916,7 @@ components:
           first_tx:
             tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
             height: 47
-            timestamp: 123456789
+            timestamp: 1616376371
           total_tokens_received:
             usdt:
               fiat_values:
@@ -4857,7 +4946,7 @@ components:
           last_tx:
             tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
             height: 47
-            timestamp: 123456789
+            timestamp: 1616376371
           entity: 123456
           token_balances:
             usdt:
@@ -4903,7 +4992,7 @@ components:
           first_tx:
             tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
             height: 47
-            timestamp: 123456789
+            timestamp: 1616376371
           total_tokens_received:
             usdt:
               fiat_values:
@@ -4933,7 +5022,7 @@ components:
           last_tx:
             tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
             height: 47
-            timestamp: 123456789
+            timestamp: 1616376371
           entity: 123456
           token_balances:
             usdt:
@@ -5022,8 +5111,8 @@ components:
             $ref: '#/components/schemas/tx_value'
           type: array
         timestamp:
-          description: Timestamp
-          example: 123456789
+          description: Timestamp in posix seconds format
+          example: 1616376371
           format: int32
           title: timestamp
           type: integer
@@ -5090,7 +5179,7 @@ components:
         from_address: addressA
         token_tx_id: 0
         height: 47
-        timestamp: 123456789
+        timestamp: 1616376371
       properties:
         tx_type:
           default: account
@@ -5117,8 +5206,8 @@ components:
           title: height
           type: integer
         timestamp:
-          description: Timestamp
-          example: 123456789
+          description: Timestamp in posix seconds format
+          example: 1616376371
           format: int32
           title: timestamp
           type: integer
@@ -5201,8 +5290,8 @@ components:
           title: height
           type: integer
         timestamp:
-          description: Timestamp
-          example: 123456789
+          description: Timestamp in posix seconds format
+          example: 1616376371
           format: int32
           title: timestamp
           type: integer

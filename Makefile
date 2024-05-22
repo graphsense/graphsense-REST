@@ -32,16 +32,21 @@ generate-openapi-server:
 	docker run --rm   \
 		-v "${PWD}:/build:Z" \
 		-v "${PWD}/templates:/templates" \
+		-v "${PWD}/openapi_spec/:/graphsense:Z" \
 		openapitools/openapi-generator-cli:v5.2.1 \
-		generate -i "https://raw.githubusercontent.com/graphsense/graphsense-openapi/v$(GS_OPENAPI_VERSION)/graphsense.yaml" \
+		generate -i "/graphsense/graphsense.yaml" \
 		-g python-aiohttp \
 		-o /build \
 		-t /templates \
 		--additional-properties=packageVersion=$(GS_REST_SERVICE_VERSION)
 
 
-get-openapi-spec-from-upstream:
-	wget -O openapi_server/openapi/openapi.yaml https://raw.githubusercontent.com/graphsense/graphsense-openapi/master/graphsense.yaml
+# get-openapi-spec-from-upstream:
+# 	wget -O openapi_server/openapi/openapi.yaml https://raw.githubusercontent.com/graphsense/graphsense-openapi/master/graphsense.yaml
+
+run-designer:
+	docker run -d -p 8080:8080 swaggerapi/swagger-editor
+	echo 'Designer UI is running on port 8080'
 
 
 .PHONY: format lint test test-all-env serve drop-integration-db generate-openapi-server get-openapi-spec-from-upstream serve-docker

@@ -184,7 +184,7 @@ class LinkUtxo(Model):
     def timestamp(self):
         """Gets the timestamp of this LinkUtxo.
 
-        Timestamp
+        Timestamp in posix seconds format
 
         :return: The timestamp of this LinkUtxo.
         :rtype: int
@@ -195,7 +195,7 @@ class LinkUtxo(Model):
     def timestamp(self, timestamp):
         """Sets the timestamp of this LinkUtxo.
 
-        Timestamp
+        Timestamp in posix seconds format
 
         :param timestamp: The timestamp of this LinkUtxo.
         :type timestamp: int

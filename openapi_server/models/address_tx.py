@@ -231,7 +231,7 @@ class AddressTx(Model):
     def timestamp(self):
         """Gets the timestamp of this AddressTx.
 
-        Timestamp
+        Timestamp in posix seconds format
 
         :return: The timestamp of this AddressTx.
         :rtype: int
@@ -242,7 +242,7 @@ class AddressTx(Model):
     def timestamp(self, timestamp):
         """Sets the timestamp of this AddressTx.
 
-        Timestamp
+        Timestamp in posix seconds format
 
         :param timestamp: The timestamp of this AddressTx.
         :type timestamp: int

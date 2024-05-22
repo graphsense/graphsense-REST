@@ -211,7 +211,7 @@ class Link(Model):
     def timestamp(self):
         """Gets the timestamp of this Link.
 
-        Timestamp
+        Timestamp in posix seconds format
 
         :return: The timestamp of this Link.
         :rtype: int
@@ -222,7 +222,7 @@ class Link(Model):
     def timestamp(self, timestamp):
         """Sets the timestamp of this Link.
 
-        Timestamp
+        Timestamp in posix seconds format
 
         :param timestamp: The timestamp of this Link.
         :type timestamp: int

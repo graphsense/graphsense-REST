@@ -11,6 +11,7 @@ from openapi_server.models.address_tx import AddressTx
 from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.block import Block
+from openapi_server.models.block_at_date import BlockAtDate
 from openapi_server.models.concept import Concept
 from openapi_server.models.currency_stats import CurrencyStats
 from openapi_server.models.entity import Entity

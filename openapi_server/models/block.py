@@ -171,7 +171,7 @@ class Block(Model):
     def timestamp(self):
         """Gets the timestamp of this Block.
 
-        Timestamp
+        Timestamp in posix seconds format
 
         :return: The timestamp of this Block.
         :rtype: int
@@ -182,7 +182,7 @@ class Block(Model):
     def timestamp(self, timestamp):
         """Sets the timestamp of this Block.
 
-        Timestamp
+        Timestamp in posix seconds format
 
         :param timestamp: The timestamp of this Block.
         :type timestamp: int

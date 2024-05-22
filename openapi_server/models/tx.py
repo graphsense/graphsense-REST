@@ -358,7 +358,7 @@ class Tx(Model):
     def timestamp(self):
         """Gets the timestamp of this Tx.
 
-        Timestamp
+        Timestamp in posix seconds format
 
         :return: The timestamp of this Tx.
         :rtype: int
@@ -369,7 +369,7 @@ class Tx(Model):
     def timestamp(self, timestamp):
         """Sets the timestamp of this Tx.
 
-        Timestamp
+        Timestamp in posix seconds format
 
         :param timestamp: The timestamp of this Tx.
         :type timestamp: int

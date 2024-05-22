@@ -396,8 +396,8 @@ class Cassandra:
             # wrong / we divide by 1000 to get from
             # mili to seconds. But it appears to be
             # wrong in the txs.
-            block = await self.get_block_timestamp_eth(currency,
-                                                       item[block_id_col])
+            block = await self.get_block_timestamp(currency,
+                                                   item[block_id_col])
             if block is not None:
                 item[timestamp_col] = block["timestamp"]
             else:
@@ -684,6 +684,14 @@ class Cassandra:
     @eth
     async def get_block(self, currency, height):
         query = ("SELECT * FROM block WHERE block_id_group = %s "
+                 "AND block_id = %s")
+        return (await self.execute_async(
+            currency, 'raw', query,
+            [self.get_block_id_group(currency, height), height])).one()
+
+    @alru_cache(maxsize=10000)
+    async def get_block_timestamp(self, currency, height):
+        query = ("SELECT timestamp FROM block WHERE block_id_group = %s "
                  "AND block_id = %s")
         return (await self.execute_async(
             currency, 'raw', query,
@@ -2012,15 +2020,8 @@ class Cassandra:
         return (await self.execute_async(currency, 'raw', query,
                                          [block_group, height])).one()
 
-    @alru_cache(maxsize=1000)
-    async def get_block_timestamp_eth(self, currency, height):
-        block_group = self.get_block_id_group(currency, height)
-        query = ("SELECT timestamp FROM block WHERE block_id_group = %s and"
-                 " block_id = %s")
-        return (await self.execute_async(currency, 'raw', query,
-                                         [block_group, height])).one()
-
     # entity = address_id
+
     async def get_entity_eth(self, currency, entity):
         # mockup entity by address
         id_group = self.get_id_group(currency, entity)
