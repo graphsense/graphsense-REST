@@ -151,7 +151,12 @@ class Tagstore:
                         tp.title,
                         tp.is_public,
                         c.level,
-                        acm.gs_cluster_id
+                        acm.gs_cluster_id,
+                        array(
+                            select concept_id 
+                            from tag_concept tc 
+                            where tc.tag_id = t.id
+                        ) as concepts
                     from
                        tag t,
                        tagpack tp,
@@ -222,7 +227,12 @@ class Tagstore:
                         tp.title,
                         tp.is_public,
                         c.level,
-                        acm.gs_cluster_id
+                        acm.gs_cluster_id,
+                        array(
+                            select concept_id 
+                            from tag_concept tc 
+                            where tc.tag_id = t.id
+                        ) as concepts
                     from
                         tag t,
                         tagpack tp,
@@ -263,7 +273,12 @@ class Tagstore:
                         tp.title,
                         tp.is_public,
                         c.level,
-                        acm.gs_cluster_id
+                        acm.gs_cluster_id,
+                        array(
+                            select concept_id 
+                            from tag_concept tc 
+                            where tc.tag_id = t.id
+                        ) as concepts
                     from
                         tag t,
                         tagpack tp,
@@ -324,7 +339,12 @@ class Tagstore:
                         tp.title,
                         tp.is_public,
                         cd.gs_cluster_id,
-                        c.level
+                        c.level,
+                        array(
+                            select concept_id 
+                            from tag_concept tc 
+                            where tc.tag_id = t.id
+                        ) as concepts
                    from
                         tag t,
                         tagpack tp,
@@ -483,7 +503,12 @@ class Tagstore:
                         tp.title,
                         tp.is_public,
                         c.level,
-                        acm.gs_cluster_id
+                        acm.gs_cluster_id,
+                        array(
+                            select concept_id 
+                            from tag_concept tc 
+                            where tc.tag_id = t.id
+                        ) as concepts
                     from
                        tag t,
                        tagpack tp,

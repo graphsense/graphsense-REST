@@ -30,10 +30,10 @@ class BlockAtDate(Model):
         }
 
         self.attribute_map = {
-            'before_block': 'beforeBlock',
-            'before_timestamp': 'beforeTimestamp',
-            'after_block': 'afterBlock',
-            'after_timestamp': 'afterTimestamp'
+            'before_block': 'before_block',
+            'before_timestamp': 'before_timestamp',
+            'after_block': 'after_block',
+            'after_timestamp': 'after_timestamp'
         }
 
         self._before_block = before_block
@@ -46,7 +46,7 @@ class BlockAtDate(Model):
         """Returns the dict as a model
 
         :param dikt: A dict.
-        :return: The blockAtDate of this BlockAtDate.
+        :return: The block_at_date of this BlockAtDate.
         """
         return util.deserialize_model(dikt, cls)
 

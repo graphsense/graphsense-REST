@@ -16,11 +16,12 @@ class AddressTag(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, label: str=None, category: str=None, actor: str=None, abuse: str=None, tagpack_uri: str=None, source: str=None, lastmod: int=None, tagpack_title: str=None, tagpack_is_public: bool=None, tagpack_creator: str=None, is_cluster_definer: bool=None, confidence: str=None, confidence_level: int=None, currency: str=None, address: str=None, entity: int=None):
+    def __init__(self, label: str=None, category: str=None, concepts: List[str]=None, actor: str=None, abuse: str=None, tagpack_uri: str=None, source: str=None, lastmod: int=None, tagpack_title: str=None, tagpack_is_public: bool=None, tagpack_creator: str=None, is_cluster_definer: bool=None, confidence: str=None, confidence_level: int=None, currency: str=None, address: str=None, entity: int=None):
         """AddressTag - a model defined in OpenAPI
 
         :param label: The label of this AddressTag.
         :param category: The category of this AddressTag.
+        :param concepts: The concepts of this AddressTag.
         :param actor: The actor of this AddressTag.
         :param abuse: The abuse of this AddressTag.
         :param tagpack_uri: The tagpack_uri of this AddressTag.
@@ -39,6 +40,7 @@ class AddressTag(Model):
         self.openapi_types = {
             'label': str,
             'category': str,
+            'concepts': List[str],
             'actor': str,
             'abuse': str,
             'tagpack_uri': str,
@@ -58,6 +60,7 @@ class AddressTag(Model):
         self.attribute_map = {
             'label': 'label',
             'category': 'category',
+            'concepts': 'concepts',
             'actor': 'actor',
             'abuse': 'abuse',
             'tagpack_uri': 'tagpack_uri',
@@ -76,6 +79,7 @@ class AddressTag(Model):
 
         self._label = label
         self._category = category
+        self._concepts = concepts
         self._actor = actor
         self._abuse = abuse
         self._tagpack_uri = tagpack_uri
@@ -110,6 +114,7 @@ class AddressTag(Model):
             return Model.to_dict(self)
         return { 'label': self._label,
             'category': self._category,
+            'concepts': self._concepts,
             'actor': self._actor,
             'abuse': self._abuse,
             'tagpack_uri': self._tagpack_uri,
@@ -173,6 +178,29 @@ class AddressTag(Model):
         """
 
         self._category = category
+
+    @property
+    def concepts(self):
+        """Gets the concepts of this AddressTag.
+
+        A list additional concepts/categories
+
+        :return: The concepts of this AddressTag.
+        :rtype: List[str]
+        """
+        return self._concepts
+
+    @concepts.setter
+    def concepts(self, concepts):
+        """Sets the concepts of this AddressTag.
+
+        A list additional concepts/categories
+
+        :param concepts: The concepts of this AddressTag.
+        :type concepts: List[str]
+        """
+
+        self._concepts = concepts
 
     @property
     def actor(self):

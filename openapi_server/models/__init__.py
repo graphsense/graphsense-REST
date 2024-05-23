@@ -37,6 +37,8 @@ from openapi_server.models.search_result_level5 import SearchResultLevel5
 from openapi_server.models.search_result_level6 import SearchResultLevel6
 from openapi_server.models.stats import Stats
 from openapi_server.models.tag import Tag
+from openapi_server.models.tag_cloud_entry import TagCloudEntry
+from openapi_server.models.tag_summary import TagSummary
 from openapi_server.models.taxonomy import Taxonomy
 from openapi_server.models.token_config import TokenConfig
 from openapi_server.models.token_configs import TokenConfigs

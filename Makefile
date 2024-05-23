@@ -1,5 +1,8 @@
 all: format lint
 
+GS_REST_SERVICE_VERSION ?= "24.05.0rc1"
+GS_REST_DEV_PORT ?= 9000
+
 test:
 	tox -e py39 -- graphsense
 
@@ -14,10 +17,10 @@ format:
 	yapf --in-place --recursive gsrest
 
 serve:
-	python -m aiohttp.web -H localhost -P 9000 openapi_server:main
+	python -m aiohttp.web -H localhost -P ${GS_REST_DEV_PORT} openapi_server:main
 
 dev:
-	adev runserver -p 9000 --root . --app-factory main openapi_server/__init__.py
+	adev runserver -p ${GS_REST_DEV_PORT} --root . --app-factory main openapi_server/__init__.py
 
 build-docker:
 	docker build -t graphsense-rest .

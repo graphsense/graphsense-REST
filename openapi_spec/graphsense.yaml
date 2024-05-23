@@ -82,7 +82,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/blockAtDate'
+                $ref: '#/components/schemas/block_at_date'
       summary: Get the closest blocks given a timestamp
       tags:
       - blocks
@@ -188,6 +188,22 @@ paths:
       summary: Get attribution tags for a given address
       tags:
       - addresses
+  /{currency}/addresses/{address}/tag_summary:
+    get:
+      operationId: get_tag_summary_by_address
+      parameters:
+        - $ref: '#/components/parameters/currency' 
+        - $ref: '#/components/parameters/address' 
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tag_summary'
+      summary: Get attribution tag summary for a given address
+      tags:
+      - addresses
   /{currency}/addresses/{address}/neighbors:
     get:
       operationId: list_address_neighbors
@@ -287,6 +303,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/address_tags'
       summary: Get address tags for a given entity 
+      tags:
+      - entities
+  /{currency}/entities/{entity}/tag_summary:
+    get:
+      operationId: get_tag_summary_by_entity
+      parameters:
+        - $ref: '#/components/parameters/currency' 
+        - $ref: '#/components/parameters/entity'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tag_summary'
+      summary: Get address tag summary for a given entity 
       tags:
       - entities
   /{currency}/entities/{entity}/neighbors:
@@ -1061,21 +1093,65 @@ components:
       description: Number of pages to retrieve for operations with list response
       example: 1
   schemas:
-    blockAtDate:
+    tag_cloud_entry:
       type: object
       required:
-        - beforeBlock
-        - afterBlock
-        - beforeTimestamp
-        - afterTimestamp
+        - cnt
+        - weighted
       properties:
-        beforeBlock:
+        cnt:
+          type: integer
+        weighted:
+          type: number
+    tag_summary:
+      type: object
+      required:
+        - broad_category
+        - tag_count
+        - label_words_tag_cloud
+        - label_tag_cloud
+        - concept_tag_cloud
+        - actors_tag_cloud
+      properties:
+        broad_category:
+          type: string
+        tag_count:
+          type: integer
+        best_actor:
+          type: string
+        best_label:
+          type: string
+        label_words_tag_cloud:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/tag_cloud_entry'
+        label_tag_cloud:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/tag_cloud_entry'
+        concept_tag_cloud:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/tag_cloud_entry'
+        actors_tag_cloud:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/tag_cloud_entry'
+    block_at_date:
+      type: object
+      required:
+        - before_block
+        - after_block
+        - before_timestamp
+        - after_timestamp
+      properties:
+        before_block:
           $ref: '#/components/schemas/height'
-        beforeTimestamp:
+        before_timestamp:
           $ref: '#/components/schemas/timestamp'
-        afterBlock:
+        after_block:
           $ref: '#/components/schemas/height'
-        afterTimestamp:
+        after_timestamp:
           $ref: '#/components/schemas/timestamp'
     currency:
       type: string
@@ -1336,6 +1412,13 @@ components:
           type: string
           description: Category
           example: exchange
+        concepts:
+          type: array
+          description: A list additional concepts/categories
+          items:
+            type: string
+            description: Concept/Category
+            example: miner
         actor:
           type: string
           description: id of the actor that controlls the address
