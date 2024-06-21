@@ -168,7 +168,7 @@ class Tagstore:
                        and acm.address=t.address
                        and acm.currency=t.currency
                        {hide_private_condition(show_private)}
-                       and t.label = %s """
+                       and t.label = %s """  # noqa
         return self.execute(query,
                             params=[label],
                             paging_key='t.id',
@@ -248,7 +248,7 @@ class Tagstore:
                         {hide_private_condition(show_private)}
                     order by
                         c.level desc
-                        """
+                        """  # noqa
 
         address = address.strip()
         if currency == "eth":
@@ -295,7 +295,7 @@ class Tagstore:
                     order by
                         c.level desc,
                         t.address asc
-                        """
+                        """  # noqa
 
         return self.execute(query,
                             params=[currency.upper(), entity],
@@ -520,7 +520,7 @@ class Tagstore:
                        and acm.address=t.address
                        and acm.currency=t.currency
                        {hide_private_condition(show_private)}
-                       and t.actor = %s """
+                       and t.actor = %s """  # noqa
         return self.execute(query,
                             params=[actor_id],
                             paging_key='t.id',

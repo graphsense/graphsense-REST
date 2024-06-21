@@ -10,13 +10,7 @@ from openapi_server.models.neighbor_addresses import NeighborAddresses
 from openapi_server.models.neighbor_address import NeighborAddress
 import asyncio
 from gsrest.db.node_type import NodeType
-from gsrest.util.tag_summary import get_tag_summary
-from functools import partial
 
-
-async def get_tag_summary_by_address(request,currency,address):
-    next_page_fn =partial(list_tags_by_address, request, currency, address)
-    return await get_tag_summary(next_page_fn)
 
 async def get_address(request, currency, address):
     return await common.get_address(request, currency, address)

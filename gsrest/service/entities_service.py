@@ -1,7 +1,5 @@
 from gsrest.service.common_service import get_address
 from gsrest.service.rates_service import get_rates
-from openapi_server.models.tag_summary import TagSummary
-from openapi_server.models.tag_cloud_entry import TagCloudEntry
 from openapi_server.models.neighbor_entities import NeighborEntities
 from openapi_server.models.neighbor_entity import NeighborEntity
 from openapi_server.models.entity import Entity
@@ -21,13 +19,12 @@ import asyncio
 import time
 from gsrest.util.address import address_to_user_format
 from gsrest.db.node_type import NodeType
-from gsrest.util.tag_summary import get_tag_summary
-from functools import partial
 
 MAX_DEPTH = 7
 TAGS_PAGE_SIZE = 100
 SEARCH_TIMEOUT = 300
 PAGE_SIZE_GET_ALL_TAGS = 10000
+
 
 def from_row(currency,
              row,
@@ -63,16 +60,11 @@ def from_row(currency,
         actors=actors if actors else None)
 
 
-async def get_tag_summary_by_entity(request,currency,entity):
-    next_page_fn =partial(list_address_tags_by_entity_internal, request, currency, entity, pagesize=PAGE_SIZE_GET_ALL_TAGS)
-    return await get_tag_summary(next_page_fn)
-
-
 async def list_address_tags_by_entity_internal(request,
-                                      currency,
-                                      entity,
-                                      page=None,
-                                      pagesize=None):
+                                               currency,
+                                               entity,
+                                               page=None,
+                                               pagesize=None):
     address_tags, next_page = \
         await tagstores_with_paging(
             request.app['tagstores'],
@@ -83,13 +75,18 @@ async def list_address_tags_by_entity_internal(request,
             request.app['request_config']['show_private_tags'])
     return AddressTags(address_tags=address_tags, next_page=next_page)
 
+
 async def list_address_tags_by_entity(request,
                                       currency,
                                       entity,
                                       page=None,
                                       pagesize=None):
     pagesize = min(pagesize or TAGS_PAGE_SIZE, TAGS_PAGE_SIZE)
-    return await list_address_tags_by_entity_internal(request=request, currency=currency, entity=entity,page=page,pagesize=pagesize)
+    return await list_address_tags_by_entity_internal(request=request,
+                                                      currency=currency,
+                                                      entity=entity,
+                                                      page=page,
+                                                      pagesize=pagesize)
 
 
 async def get_entity(request,

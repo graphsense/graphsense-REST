@@ -203,7 +203,7 @@ paths:
                 $ref: '#/components/schemas/tag_summary'
       summary: Get attribution tag summary for a given address
       tags:
-      - addresses
+      - experimental
   /{currency}/addresses/{address}/neighbors:
     get:
       operationId: list_address_neighbors
@@ -320,7 +320,7 @@ paths:
                 $ref: '#/components/schemas/tag_summary'
       summary: Get address tag summary for a given entity 
       tags:
-      - entities
+      - experimental
   /{currency}/entities/{entity}/neighbors:
     get:
       operationId: list_entity_neighbors
