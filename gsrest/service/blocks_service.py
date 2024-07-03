@@ -85,7 +85,8 @@ async def get_block_by_date(request, currency, date):
     ts = int(date.timestamp())
 
     async def get_timestamp(blk):
-        return int((await db.get_block_timestamp(currency, blk))['timestamp'])
+        bts = (await db.get_block_timestamp(currency, blk)).get('timestamp', None)
+        return int(bts) if bts else bts
 
     r = await find_block_by_ts(get_timestamp, currency, ts, start, hb)
 
@@ -100,9 +101,12 @@ async def get_block_by_date(request, currency, date):
     at = await get_timestamp(r + 1)
 
     assert bt <= ts
-    assert at >= ts
+    assert at and at >= ts
+
+    ra = r + 1 if at else r
+    ata = at if at else bt
 
     return BlockAtDate(before_block=r,
                        before_timestamp=bt,
-                       after_block=r + 1,
-                       after_timestamp=at)
+                       after_block=ra,
+                       after_timestamp=ata)
