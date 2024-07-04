@@ -80,18 +80,24 @@ async def find_block_by_ts(get_timestamp, currency, ts, start, end):
 
 async def get_block_by_date(request, currency, date):
     db = request.app['db']
-    hb = (await db.get_currency_statistics(currency))['no_blocks']
+    hb = (await db.get_currency_statistics(currency))['no_blocks'] - 1
     start = 0
     ts = int(date.timestamp())
+    capped_to_hb = False
 
     async def get_timestamp(blk):
-        bts = (await db.get_block_timestamp(currency, blk)).get('timestamp', None)
-        return int(bts) if bts else bts
+        bts = (await db.get_block_timestamp(currency, blk))
+        if bts is None:
+            return None
+        else:
+            return int(bts.get('timestamp', None))
 
     r = await find_block_by_ts(get_timestamp, currency, ts, start, hb)
 
     if r >= hb:
-        raise BlockNotFoundException(currency, r)
+        r = hb
+        capped_to_hb = True
+        # raise BlockNotFoundException(currency, r)
 
     bt = await get_timestamp(r)
 
@@ -101,7 +107,7 @@ async def get_block_by_date(request, currency, date):
     at = await get_timestamp(r + 1)
 
     assert bt <= ts
-    assert at and at >= ts
+    assert capped_to_hb or at and at >= ts
 
     ra = r + 1 if at else r
     ata = at if at else bt
