@@ -81,7 +81,7 @@ async def get_tag_summary(get_tags_page_fn,
         best_label = full_label_counter.most_common(1)[0][0].capitalize()
 
     # get broad category
-    broad_category = None
+    broad_category = "user"
     if len(concepts_counter) > 0:
         broad_category = map_concept_to_broad_concept(
             concepts_counter.most_common(1)[0][0])
