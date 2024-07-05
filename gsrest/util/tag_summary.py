@@ -39,10 +39,11 @@ async def get_tag_summary(get_tags_page_fn,
 
         # get tags
         tags = await get_tags_page_fn(page=nextpage)
-        tags_count += len(tags.address_tags)
 
         for t in tags.address_tags:
             if not skipTag(t):
+
+                tags_count += 1
 
                 # compute words
                 norm_words = [normalizeWord(w) for w in t.label.split(" ")]
