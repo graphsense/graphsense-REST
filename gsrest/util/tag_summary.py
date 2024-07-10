@@ -115,7 +115,6 @@ async def get_tag_summary(get_tags_page_fn,
 
         nextpage = tags.next_page
 
-    del t
     # get most common actor (weighted by tag confidence)
     # get best label (within actor if actor is specified)
     p_actor = None
