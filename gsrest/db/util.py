@@ -1,6 +1,9 @@
 import asyncio
 import base64
 from datetime import timezone
+import binascii
+
+from gsrest.errors import (BadUserInputException)
 
 ts_sep = '$'
 sep = '|'
@@ -19,7 +22,11 @@ def decode_page_handles(page):
         return {}
 
     def b64decode(value):
-        return str(base64.b64decode(value.encode(encoding)), encoding)
+        try:
+            return str(base64.b64decode(value.encode(encoding)), encoding)
+        except (UnicodeDecodeError, binascii.Error):
+            raise BadUserInputException(f"{page} does not look like a"
+                                        " valid (base64 encoded) page handle.")
 
     page = b64decode(page)
 
@@ -29,6 +36,7 @@ def decode_page_handles(page):
     for ts_handle in page.split(ts_sep):
         [key, value] = ts_handle.split(sep)
         page_handles[key] = b64decode(value)
+
     return page_handles
 
 
