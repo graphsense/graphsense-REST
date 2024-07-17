@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [24.04.1]
+
+### Fixed
+- unhandled error on bad page token in tags endpoint
+
+
 ## [24.04.0]
 
 ### Added
