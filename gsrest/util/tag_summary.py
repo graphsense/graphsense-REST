@@ -46,7 +46,7 @@ def map_concept_to_broad_concept(concept) -> str:
 
 
 def normalizeWord(istr: str) -> str:
-    return re.sub(r'[^0-9a-zA-Z_ ]+', '', istr.strip().lower())
+    return re.sub(r'[^0-9a-zA-Z_ ]+', ' ', istr.strip().lower())
 
 
 def skipTag(t) -> bool:
@@ -89,7 +89,7 @@ async def get_tag_summary(get_tags_page_fn,
                 tags_count += 1
 
                 # compute words
-                norm_words = [normalizeWord(w) for w in t.label.split(" ")]
+                norm_words = [normalizeWord(w) for w in normalizeWord(t.label).split(" ")]
                 filtered_words = [
                     w for w in norm_words if w not in filter_words
                 ]
@@ -122,7 +122,7 @@ async def get_tag_summary(get_tags_page_fn,
     actor_mc = actor_counter.most_common(1, weighted=True)
     if len(actor_mc) > 0:
         p_actor = actor_mc[0][0]
-        best_label = actor_lables[p_actor].most_common(1, weighted=True)[0][0]
+        best_label = actor_lables[p_actor].most_common(1, weighted=True)[0][0].capitalize()
     else:
         if len(full_label_counter) > 0:
             best_label = full_label_counter.most_common(
