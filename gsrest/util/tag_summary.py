@@ -64,7 +64,8 @@ def calcTagCloud(wctr: wCounter, at_most=None) -> Dict[str, TagCloudEntry]:
 
 async def get_tag_summary(get_tags_page_fn,
                           label_words_max_items=30,
-                          label_max_items=30):
+                          label_max_items=30,
+                          additional_tags=[]):
     nextpage = "start"
     tags_count = 0
     total_words = 0
@@ -74,6 +75,42 @@ async def get_tag_summary(get_tags_page_fn,
     concepts_counter = wCounter()
     actor_lables = defaultdict(wCounter)
 
+    def add_tag_data(t, tags_count, total_words):
+        if not skipTag(t):
+
+            conf = t.confidence_level or 1
+
+            tags_count += 1
+
+            # compute words
+            norm_words = [
+                normalizeWord(w) for w in normalizeWord(t.label).split(" ")
+            ]
+            filtered_words = [w for w in norm_words if w not in filter_words]
+            total_words += len(filtered_words)
+
+            # add words
+            label_word_counter.update(Counter(filtered_words))
+
+            # add labels
+            full_label_counter.add(normalizeWord(t.label), conf)
+
+            # add actor
+            if t.actor:
+                actor_lables[t.actor].add(t.actor, weight=conf)
+                actor_counter.add(t.actor, weight=conf)
+
+            if t.category and not t.concepts:
+                concepts_counter.add(t.category, weight=conf)
+
+            elif t.concepts:
+                for x in t.concepts:
+                    concepts_counter.add(x, weight=conf)
+        return tags_count, total_words
+
+    for t in additional_tags:
+        tags_count, total_words = add_tag_data(t, tags_count, total_words)
+
     while nextpage is not None:
         if nextpage == "start":
             nextpage = None
@@ -82,36 +119,7 @@ async def get_tag_summary(get_tags_page_fn,
         tags = await get_tags_page_fn(page=nextpage)
 
         for t in tags.address_tags:
-            if not skipTag(t):
-
-                conf = t.confidence_level or 1
-
-                tags_count += 1
-
-                # compute words
-                norm_words = [normalizeWord(w) for w in normalizeWord(t.label).split(" ")]
-                filtered_words = [
-                    w for w in norm_words if w not in filter_words
-                ]
-                total_words += len(filtered_words)
-
-                # add words
-                label_word_counter.update(Counter(filtered_words))
-
-                # add labels
-                full_label_counter.add(normalizeWord(t.label), conf)
-
-                # add actor
-                if t.actor:
-                    actor_lables[t.actor].add(t.actor, weight=conf)
-                    actor_counter.add(t.actor, weight=conf)
-
-                if t.category and not t.concepts:
-                    concepts_counter.add(t.category, weight=conf)
-
-                elif t.concepts:
-                    for x in t.concepts:
-                        concepts_counter.add(x, weight=conf)
+            tags_count, total_words = add_tag_data(t, tags_count, total_words)
 
         nextpage = tags.next_page
 
@@ -122,7 +130,8 @@ async def get_tag_summary(get_tags_page_fn,
     actor_mc = actor_counter.most_common(1, weighted=True)
     if len(actor_mc) > 0:
         p_actor = actor_mc[0][0]
-        best_label = actor_lables[p_actor].most_common(1, weighted=True)[0][0].capitalize()
+        best_label = actor_lables[p_actor].most_common(
+            1, weighted=True)[0][0].capitalize()
     else:
         if len(full_label_counter) > 0:
             best_label = full_label_counter.most_common(
