@@ -174,7 +174,8 @@ paths:
         - $ref: '#/components/parameters/currency' 
         - $ref: '#/components/parameters/address' 
         - $ref: '#/components/parameters/page' 
-        - $ref: '#/components/parameters/pagesize' 
+        - $ref: '#/components/parameters/pagesize'
+        - $ref: '#/components/parameters/include_best_cluster_tag' 
       responses:
         "200":
           description: OK
@@ -193,7 +194,8 @@ paths:
       operationId: get_tag_summary_by_address
       parameters:
         - $ref: '#/components/parameters/currency' 
-        - $ref: '#/components/parameters/address' 
+        - $ref: '#/components/parameters/address'
+        - $ref: '#/components/parameters/include_best_cluster_tag'
       responses:
         "200":
           description: OK
@@ -723,6 +725,14 @@ paths:
       x-streamed: true
 components:
   parameters:
+    include_best_cluster_tag:
+      in: query
+      name: include_best_cluster_tag
+      required: false
+      schema:
+        type: boolean
+        default: false
+      description: If the best cluster tag should be inherited to the address level, often helpful for exchanges where not every address is tagged.
     actor:
       in: path
       name: actor

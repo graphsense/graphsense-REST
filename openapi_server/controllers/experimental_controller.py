@@ -12,7 +12,7 @@ from openapi_server import util
 
 
 
-async def get_tag_summary_by_address(request: web.Request, currency, address) -> web.Response:
+async def get_tag_summary_by_address(request: web.Request, currency, address, include_best_cluster_tag=None) -> web.Response:
     """Get attribution tag summary for a given address
 
     
@@ -21,6 +21,8 @@ async def get_tag_summary_by_address(request: web.Request, currency, address) ->
     :type currency: str
     :param address: The cryptocurrency address
     :type address: str
+    :param include_best_cluster_tag: If the best cluster tag should be inherited to the address level, often helpful for exchanges where not every address is tagged.
+    :type include_best_cluster_tag: bool
 
     """
 
@@ -45,11 +47,11 @@ async def get_tag_summary_by_address(request: web.Request, currency, address) ->
     request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
-        if 'currency' in ['','currency','address']:
+        if 'currency' in ['','currency','address','include_best_cluster_tag']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.get_tag_summary_by_address(request
-                ,currency=currency,address=address)
+                ,currency=currency,address=address,include_best_cluster_tag=include_best_cluster_tag)
         result = await result
 
         for plugin in request.app['plugins']:

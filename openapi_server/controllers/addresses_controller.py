@@ -403,7 +403,7 @@ async def list_address_txs(request: web.Request, currency, address, direction=No
         raise web.HTTPInternalServerError()
 
 
-async def list_tags_by_address(request: web.Request, currency, address, page=None, pagesize=None) -> web.Response:
+async def list_tags_by_address(request: web.Request, currency, address, page=None, pagesize=None, include_best_cluster_tag=None) -> web.Response:
     """Get attribution tags for a given address
 
     
@@ -416,6 +416,8 @@ async def list_tags_by_address(request: web.Request, currency, address, page=Non
     :type page: str
     :param pagesize: Number of items returned in a single page
     :type pagesize: int
+    :param include_best_cluster_tag: If the best cluster tag should be inherited to the address level, often helpful for exchanges where not every address is tagged.
+    :type include_best_cluster_tag: bool
 
     """
 
@@ -440,11 +442,11 @@ async def list_tags_by_address(request: web.Request, currency, address, page=Non
     request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
-        if 'currency' in ['','currency','address','page','pagesize']:
+        if 'currency' in ['','currency','address','page','pagesize','include_best_cluster_tag']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.list_tags_by_address(request
-                ,currency=currency,address=address,page=page,pagesize=pagesize)
+                ,currency=currency,address=address,page=page,pagesize=pagesize,include_best_cluster_tag=include_best_cluster_tag)
         result = await result
 
         for plugin in request.app['plugins']:

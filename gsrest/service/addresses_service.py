@@ -10,6 +10,24 @@ from openapi_server.models.neighbor_addresses import NeighborAddresses
 from openapi_server.models.neighbor_address import NeighborAddress
 import asyncio
 from gsrest.db.node_type import NodeType
+from gsrest.db.util import tagstores
+from gsrest.service.tags_service import address_tag_from_row
+
+
+async def get_best_cluster_tag(request, currency, address):
+    address_canonical = cannonicalize_address(currency, address)
+    db = request.app['db']
+
+    entity_id = await db.get_address_entity_id(currency, address_canonical)
+
+    tags = await tagstores(request.app['tagstores'], address_tag_from_row,
+                           'get_best_entity_tag', currency, entity_id,
+                           request.app['request_config']['show_private_tags'])
+
+    if len(tags) > 0:
+        return tags[0]
+    else:
+        return None
 
 
 async def get_address(request, currency, address):
@@ -20,13 +38,24 @@ async def list_tags_by_address(request,
                                currency,
                                address,
                                page=None,
-                               pagesize=None):
+                               pagesize=None,
+                               include_best_cluster_tag=False):
     address = address_to_user_format(currency, address)
-    return await common.list_tags_by_address(request,
-                                             currency,
-                                             address,
-                                             page=page,
-                                             pagesize=pagesize)
+
+    tagdata = await common.list_tags_by_address(request,
+                                                currency,
+                                                address,
+                                                page=page,
+                                                pagesize=pagesize)
+
+    best_cluster_tag = []
+    if (include_best_cluster_tag):
+        best_cluster_tag = await get_best_cluster_tag(request, currency,
+                                                      address)
+        if best_cluster_tag is not None:
+            tagdata.address_tags.append(best_cluster_tag)
+
+    return tagdata
 
 
 async def list_address_txs(request,
