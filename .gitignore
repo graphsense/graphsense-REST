@@ -87,3 +87,4 @@ tests/instance/config.yaml
 
 #Plugins
 gsrest/plugins
+tester.py

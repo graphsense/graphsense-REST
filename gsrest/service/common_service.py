@@ -97,7 +97,7 @@ def cannonicalize_address(currency, address):
             f" like a {currency.upper()} address: {address}")
 
 
-async def get_address(request, currency, address):
+async def get_address(request, currency, address, include_actors=True):
     address_canonical = cannonicalize_address(currency, address)
     db = request.app['db']
     try:
@@ -105,15 +105,17 @@ async def get_address(request, currency, address):
     except AddressNotFoundException:
         result = await db.new_address(currency, address_canonical)
 
-    actors = tagstores(
-        request.app['tagstores'],
-        lambda row: LabeledItemRef(id=row["id"], label=row["label"]),
-        'list_actors_address', currency, address,
-        request.app['request_config']['show_private_tags'])
+    actors = None
+    if include_actors:
+        actors = await tagstores(
+            request.app['tagstores'],
+            lambda row: LabeledItemRef(id=row["id"], label=row["label"]),
+            'list_actors_address', currency, address,
+            request.app['request_config']['show_private_tags'])
 
     return address_from_row(currency, result,
                             (await get_rates(request, currency))['rates'],
-                            db.get_token_configuration(currency), await actors)
+                            db.get_token_configuration(currency), actors)
 
 
 async def list_tags_by_address(request,
@@ -175,7 +177,6 @@ async def list_neighbors(request,
 
 
 async def add_labels(request, currency, node_type: NodeType, that, nodes):
-
     def identity(x, y):
         return y
     (field, tfield, fun, fmt) = \
