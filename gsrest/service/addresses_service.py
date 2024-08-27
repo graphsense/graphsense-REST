@@ -53,6 +53,7 @@ async def list_tags_by_address(request,
         best_cluster_tag = await get_best_cluster_tag(request, currency,
                                                       address)
         if best_cluster_tag is not None:
+            best_cluster_tag.inherited_from = "cluster"
             tagdata.address_tags.append(best_cluster_tag)
 
     return tagdata

@@ -1146,6 +1146,11 @@ components:
         lastmod:
           type: integer
           format: int32
+        inherited_from:
+          type: string
+          enum:
+            - cluster
+          description: if the tag was inherited from cluster
     tag_summary:
       type: object
       required:

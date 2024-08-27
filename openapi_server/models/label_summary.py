@@ -14,7 +14,7 @@ class LabelSummary(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, label: str=None, count: int=None, confidence: float=None, creators: List[str]=None, sources: List[str]=None, concepts: List[str]=None, lastmod: int=None):
+    def __init__(self, label: str=None, count: int=None, confidence: float=None, creators: List[str]=None, sources: List[str]=None, concepts: List[str]=None, lastmod: int=None, inherited_from: str=None):
         """LabelSummary - a model defined in OpenAPI
 
         :param label: The label of this LabelSummary.
@@ -24,6 +24,7 @@ class LabelSummary(Model):
         :param sources: The sources of this LabelSummary.
         :param concepts: The concepts of this LabelSummary.
         :param lastmod: The lastmod of this LabelSummary.
+        :param inherited_from: The inherited_from of this LabelSummary.
         """
         self.openapi_types = {
             'label': str,
@@ -32,7 +33,8 @@ class LabelSummary(Model):
             'creators': List[str],
             'sources': List[str],
             'concepts': List[str],
-            'lastmod': int
+            'lastmod': int,
+            'inherited_from': str
         }
 
         self.attribute_map = {
@@ -42,7 +44,8 @@ class LabelSummary(Model):
             'creators': 'creators',
             'sources': 'sources',
             'concepts': 'concepts',
-            'lastmod': 'lastmod'
+            'lastmod': 'lastmod',
+            'inherited_from': 'inherited_from'
         }
 
         self._label = label
@@ -52,6 +55,7 @@ class LabelSummary(Model):
         self._sources = sources
         self._concepts = concepts
         self._lastmod = lastmod
+        self._inherited_from = inherited_from
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'LabelSummary':
@@ -76,7 +80,8 @@ class LabelSummary(Model):
             'creators': self._creators,
             'sources': self._sources,
             'concepts': self._concepts,
-            'lastmod': self._lastmod }
+            'lastmod': self._lastmod,
+            'inherited_from': self._inherited_from }
 
 
     @property
@@ -239,3 +244,32 @@ class LabelSummary(Model):
             raise BadUserInputException("Invalid value for `lastmod`, must not be `None`")
 
         self._lastmod = lastmod
+
+    @property
+    def inherited_from(self):
+        """Gets the inherited_from of this LabelSummary.
+
+        if the tag was inherited from cluster
+
+        :return: The inherited_from of this LabelSummary.
+        :rtype: str
+        """
+        return self._inherited_from
+
+    @inherited_from.setter
+    def inherited_from(self, inherited_from):
+        """Sets the inherited_from of this LabelSummary.
+
+        if the tag was inherited from cluster
+
+        :param inherited_from: The inherited_from of this LabelSummary.
+        :type inherited_from: str
+        """
+        allowed_values = ["cluster"]  # noqa: E501
+        if inherited_from not in allowed_values:
+            raise BadUserInputException(
+                "Invalid value for `inherited_from` ({0}), must be one of {1}"
+                .format(inherited_from, allowed_values)
+            )
+
+        self._inherited_from = inherited_from

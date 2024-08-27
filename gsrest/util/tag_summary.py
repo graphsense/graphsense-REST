@@ -84,7 +84,8 @@ async def get_tag_summary(get_tags_page_fn,
             "sumConfidence": 0,
             "creators": set(),
             "concepts": set(),
-            "lastmod": 0
+            "lastmod": 0,
+            "inherited": True
         })
 
     def add_tag_data(t, tags_count, total_words):
@@ -131,6 +132,8 @@ async def get_tag_summary(get_tags_page_fn,
             ls["creators"].add(t.tagpack_creator)
             ls["sumConfidence"] += conf
             ls["lastmod"] = max(ls["lastmod"], t.lastmod)
+            ls["inherited"] = t.inherited_from == "cluster" and (
+                ls["inherited"])
 
         return tags_count, total_words
 
@@ -170,19 +173,22 @@ async def get_tag_summary(get_tags_page_fn,
             concepts_counter.most_common(1, weighted=True)[0][0])
 
     ltc = calcTagCloud(full_label_counter)
-    return TagSummary(broad_category=broad_category,
-                      tag_count=tags_count,
-                      best_actor=p_actor,
-                      best_label=best_label,
-                      label_tag_cloud=calcTagCloud(full_label_counter),
-                      concept_tag_cloud=calcTagCloud(concepts_counter),
-                      label_summary={
-                          key: LabelSummary(label=value["lbl"],
-                                            count=value["cnt"],
-                                            confidence=ltc[key].weighted,
-                                            creators=list(value["creators"]),
-                                            sources=list(value["src"]),
-                                            concepts=list(value['concepts']),
-                                            lastmod=value["lastmod"])
-                          for (key, value) in label_summary.items()
-                      })
+    return TagSummary(
+        broad_category=broad_category,
+        tag_count=tags_count,
+        best_actor=p_actor,
+        best_label=best_label,
+        # label_tag_cloud=calcTagCloud(full_label_counter),
+        concept_tag_cloud=calcTagCloud(concepts_counter),
+        label_summary={
+            key: LabelSummary(
+                label=value["lbl"],
+                count=value["cnt"],
+                confidence=ltc[key].weighted,
+                creators=list(value["creators"]),
+                sources=list(value["src"]),
+                concepts=list(value['concepts']),
+                lastmod=value["lastmod"],
+                inherited_from="cluster" if value["inherited"] else None)
+            for (key, value) in label_summary.items()
+        })
