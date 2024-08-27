@@ -2,6 +2,7 @@ from collections import Counter, defaultdict
 import re
 from openapi_server.models.tag_summary import TagSummary
 from openapi_server.models.tag_cloud_entry import TagCloudEntry
+from openapi_server.models.label_summary import LabelSummary
 from typing import Dict
 
 
@@ -50,8 +51,9 @@ def normalizeWord(istr: str) -> str:
 
 
 def skipTag(t) -> bool:
-    return (t.label == "dark web" and t.confidence == "web_crawl"
-            and t.category is None)
+    return False
+    # return (t.label == "dark web" and t.confidence == "web_crawl"
+    #         and t.category is None)
 
 
 def calcTagCloud(wctr: wCounter, at_most=None) -> Dict[str, TagCloudEntry]:
@@ -70,15 +72,25 @@ async def get_tag_summary(get_tags_page_fn,
     tags_count = 0
     total_words = 0
     actor_counter = wCounter()
-    label_word_counter = wCounter()
+    # label_word_counter = wCounter()
     full_label_counter = wCounter()
     concepts_counter = wCounter()
     actor_lables = defaultdict(wCounter)
+    label_summary = defaultdict(
+        lambda: {
+            "cnt": 0,
+            "lbl": None,
+            "src": set(),
+            "sumConfidence": 0,
+            "creators": set(),
+            "concepts": set(),
+            "lastmod": 0
+        })
 
     def add_tag_data(t, tags_count, total_words):
         if not skipTag(t):
 
-            conf = t.confidence_level or 1
+            conf = t.confidence_level or 0.1
 
             tags_count += 1
 
@@ -90,9 +102,11 @@ async def get_tag_summary(get_tags_page_fn,
             total_words += len(filtered_words)
 
             # add words
-            label_word_counter.update(Counter(filtered_words))
+            # label_word_counter.update(Counter(filtered_words))
 
             # add labels
+            nlabel = normalizeWord(t.label)
+            ls = label_summary[nlabel]
             full_label_counter.add(normalizeWord(t.label), conf)
 
             # add actor
@@ -103,9 +117,21 @@ async def get_tag_summary(get_tags_page_fn,
             if t.category and not t.concepts:
                 concepts_counter.add(t.category, weight=conf)
 
+                ls["concepts"].add(t.category)
+
             elif t.concepts:
                 for x in t.concepts:
                     concepts_counter.add(x, weight=conf)
+
+                    ls["concepts"].add(x)
+
+            ls["cnt"] += 1
+            ls["lbl"] = t.label
+            ls["src"].add(t.source)
+            ls["creators"].add(t.tagpack_creator)
+            ls["sumConfidence"] += conf
+            ls["lastmod"] = max(ls["lastmod"], t.lastmod)
+
         return tags_count, total_words
 
     for t in additional_tags:
@@ -143,14 +169,20 @@ async def get_tag_summary(get_tags_page_fn,
         broad_category = map_concept_to_broad_concept(
             concepts_counter.most_common(1, weighted=True)[0][0])
 
-    return TagSummary(
-        broad_category=broad_category,
-        tag_count=tags_count,
-        best_actor=p_actor,
-        best_label=best_label,
-        label_words_tag_cloud=calcTagCloud(label_word_counter,
-                                           at_most=label_words_max_items),
-        label_tag_cloud=calcTagCloud(full_label_counter),
-        concept_tag_cloud=calcTagCloud(concepts_counter),
-        actors_tag_cloud=calcTagCloud(actor_counter),
-    )
+    ltc = calcTagCloud(full_label_counter)
+    return TagSummary(broad_category=broad_category,
+                      tag_count=tags_count,
+                      best_actor=p_actor,
+                      best_label=best_label,
+                      label_tag_cloud=calcTagCloud(full_label_counter),
+                      concept_tag_cloud=calcTagCloud(concepts_counter),
+                      label_summary={
+                          key: LabelSummary(label=value["lbl"],
+                                            count=value["cnt"],
+                                            confidence=ltc[key].weighted,
+                                            creators=list(value["creators"]),
+                                            sources=list(value["src"]),
+                                            concepts=list(value['concepts']),
+                                            lastmod=value["lastmod"])
+                          for (key, value) in label_summary.items()
+                      })

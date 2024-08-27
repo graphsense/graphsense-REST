@@ -5,6 +5,7 @@ from datetime import date, datetime
 from typing import List, Dict, Type
 
 from openapi_server.models.base_model_ import Model
+from openapi_server.models.label_summary import LabelSummary
 from openapi_server.models.tag_cloud_entry import TagCloudEntry
 from openapi_server import util
 
@@ -15,27 +16,23 @@ class TagSummary(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, broad_category: str=None, tag_count: int=None, best_actor: str=None, best_label: str=None, label_words_tag_cloud: Dict[str, TagCloudEntry]=None, label_tag_cloud: Dict[str, TagCloudEntry]=None, concept_tag_cloud: Dict[str, TagCloudEntry]=None, actors_tag_cloud: Dict[str, TagCloudEntry]=None):
+    def __init__(self, broad_category: str=None, tag_count: int=None, best_actor: str=None, best_label: str=None, label_summary: Dict[str, LabelSummary]=None, concept_tag_cloud: Dict[str, TagCloudEntry]=None):
         """TagSummary - a model defined in OpenAPI
 
         :param broad_category: The broad_category of this TagSummary.
         :param tag_count: The tag_count of this TagSummary.
         :param best_actor: The best_actor of this TagSummary.
         :param best_label: The best_label of this TagSummary.
-        :param label_words_tag_cloud: The label_words_tag_cloud of this TagSummary.
-        :param label_tag_cloud: The label_tag_cloud of this TagSummary.
+        :param label_summary: The label_summary of this TagSummary.
         :param concept_tag_cloud: The concept_tag_cloud of this TagSummary.
-        :param actors_tag_cloud: The actors_tag_cloud of this TagSummary.
         """
         self.openapi_types = {
             'broad_category': str,
             'tag_count': int,
             'best_actor': str,
             'best_label': str,
-            'label_words_tag_cloud': Dict[str, TagCloudEntry],
-            'label_tag_cloud': Dict[str, TagCloudEntry],
-            'concept_tag_cloud': Dict[str, TagCloudEntry],
-            'actors_tag_cloud': Dict[str, TagCloudEntry]
+            'label_summary': Dict[str, LabelSummary],
+            'concept_tag_cloud': Dict[str, TagCloudEntry]
         }
 
         self.attribute_map = {
@@ -43,20 +40,16 @@ class TagSummary(Model):
             'tag_count': 'tag_count',
             'best_actor': 'best_actor',
             'best_label': 'best_label',
-            'label_words_tag_cloud': 'label_words_tag_cloud',
-            'label_tag_cloud': 'label_tag_cloud',
-            'concept_tag_cloud': 'concept_tag_cloud',
-            'actors_tag_cloud': 'actors_tag_cloud'
+            'label_summary': 'label_summary',
+            'concept_tag_cloud': 'concept_tag_cloud'
         }
 
         self._broad_category = broad_category
         self._tag_count = tag_count
         self._best_actor = best_actor
         self._best_label = best_label
-        self._label_words_tag_cloud = label_words_tag_cloud
-        self._label_tag_cloud = label_tag_cloud
+        self._label_summary = label_summary
         self._concept_tag_cloud = concept_tag_cloud
-        self._actors_tag_cloud = actors_tag_cloud
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'TagSummary':
@@ -79,10 +72,8 @@ class TagSummary(Model):
             'tag_count': self._tag_count,
             'best_actor': self._best_actor,
             'best_label': self._best_label,
-            'label_words_tag_cloud': self._label_words_tag_cloud,
-            'label_tag_cloud': self._label_tag_cloud,
-            'concept_tag_cloud': self._concept_tag_cloud,
-            'actors_tag_cloud': self._actors_tag_cloud }
+            'label_summary': self._label_summary,
+            'concept_tag_cloud': self._concept_tag_cloud }
 
 
     @property
@@ -174,50 +165,27 @@ class TagSummary(Model):
         self._best_label = best_label
 
     @property
-    def label_words_tag_cloud(self):
-        """Gets the label_words_tag_cloud of this TagSummary.
+    def label_summary(self):
+        """Gets the label_summary of this TagSummary.
 
 
-        :return: The label_words_tag_cloud of this TagSummary.
-        :rtype: Dict[str, TagCloudEntry]
+        :return: The label_summary of this TagSummary.
+        :rtype: Dict[str, LabelSummary]
         """
-        return self._label_words_tag_cloud
+        return self._label_summary
 
-    @label_words_tag_cloud.setter
-    def label_words_tag_cloud(self, label_words_tag_cloud):
-        """Sets the label_words_tag_cloud of this TagSummary.
+    @label_summary.setter
+    def label_summary(self, label_summary):
+        """Sets the label_summary of this TagSummary.
 
 
-        :param label_words_tag_cloud: The label_words_tag_cloud of this TagSummary.
-        :type label_words_tag_cloud: Dict[str, TagCloudEntry]
+        :param label_summary: The label_summary of this TagSummary.
+        :type label_summary: Dict[str, LabelSummary]
         """
-        if label_words_tag_cloud is None:
-            raise BadUserInputException("Invalid value for `label_words_tag_cloud`, must not be `None`")
+        if label_summary is None:
+            raise BadUserInputException("Invalid value for `label_summary`, must not be `None`")
 
-        self._label_words_tag_cloud = label_words_tag_cloud
-
-    @property
-    def label_tag_cloud(self):
-        """Gets the label_tag_cloud of this TagSummary.
-
-
-        :return: The label_tag_cloud of this TagSummary.
-        :rtype: Dict[str, TagCloudEntry]
-        """
-        return self._label_tag_cloud
-
-    @label_tag_cloud.setter
-    def label_tag_cloud(self, label_tag_cloud):
-        """Sets the label_tag_cloud of this TagSummary.
-
-
-        :param label_tag_cloud: The label_tag_cloud of this TagSummary.
-        :type label_tag_cloud: Dict[str, TagCloudEntry]
-        """
-        if label_tag_cloud is None:
-            raise BadUserInputException("Invalid value for `label_tag_cloud`, must not be `None`")
-
-        self._label_tag_cloud = label_tag_cloud
+        self._label_summary = label_summary
 
     @property
     def concept_tag_cloud(self):
@@ -241,26 +209,3 @@ class TagSummary(Model):
             raise BadUserInputException("Invalid value for `concept_tag_cloud`, must not be `None`")
 
         self._concept_tag_cloud = concept_tag_cloud
-
-    @property
-    def actors_tag_cloud(self):
-        """Gets the actors_tag_cloud of this TagSummary.
-
-
-        :return: The actors_tag_cloud of this TagSummary.
-        :rtype: Dict[str, TagCloudEntry]
-        """
-        return self._actors_tag_cloud
-
-    @actors_tag_cloud.setter
-    def actors_tag_cloud(self, actors_tag_cloud):
-        """Sets the actors_tag_cloud of this TagSummary.
-
-
-        :param actors_tag_cloud: The actors_tag_cloud of this TagSummary.
-        :type actors_tag_cloud: Dict[str, TagCloudEntry]
-        """
-        if actors_tag_cloud is None:
-            raise BadUserInputException("Invalid value for `actors_tag_cloud`, must not be `None`")
-
-        self._actors_tag_cloud = actors_tag_cloud

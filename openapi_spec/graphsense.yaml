@@ -1113,15 +1113,49 @@ components:
           type: integer
         weighted:
           type: number
+    label_summary:
+      type: object
+      required:
+        - label
+        - count
+        - confidence
+        - creators
+        - sources
+        - lastmod
+        - concepts
+      properties:
+        label:
+          type: string
+        count:
+          type: integer
+          format: int32
+        confidence:
+          type: number
+        creators:
+          type: array
+          items:
+            type: string
+        sources:
+          type: array
+          items:
+            type: string
+        concepts:
+          type: array
+          items:
+            type: string
+        lastmod:
+          type: integer
+          format: int32
     tag_summary:
       type: object
       required:
         - broad_category
         - tag_count
-        - label_words_tag_cloud
-        - label_tag_cloud
+        # - label_words_tag_cloud
+        # - label_tag_cloud
         - concept_tag_cloud
-        - actors_tag_cloud
+        - label_summary
+        # - actors_tag_cloud
       properties:
         broad_category:
           type: string
@@ -1131,22 +1165,26 @@ components:
           type: string
         best_label:
           type: string
-        label_words_tag_cloud:
+        # label_words_tag_cloud:
+        #   type: object
+        #   additionalProperties:
+        #     $ref: '#/components/schemas/tag_cloud_entry'
+        # label_tag_cloud:
+        #   type: object
+        #   additionalProperties:
+        #     $ref: '#/components/schemas/tag_cloud_entry'
+        label_summary:
           type: object
           additionalProperties:
-            $ref: '#/components/schemas/tag_cloud_entry'
-        label_tag_cloud:
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/tag_cloud_entry'
+            $ref: '#/components/schemas/label_summary'
         concept_tag_cloud:
           type: object
           additionalProperties:
             $ref: '#/components/schemas/tag_cloud_entry'
-        actors_tag_cloud:
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/tag_cloud_entry'
+        # actors_tag_cloud:
+        #   type: object
+        #   additionalProperties:
+        #     $ref: '#/components/schemas/tag_cloud_entry'
     block_at_date:
       type: object
       required:
@@ -1475,6 +1513,11 @@ components:
           format: int32
           description: Confidence level
           example: 100
+        inherited_from:
+          type: string
+          enum:
+            - cluster
+          description: if the tag was inherited from cluster
         currency:
           $ref: '#/components/schemas/currency'
     address_tag:
