@@ -33,7 +33,9 @@ fi
 # ETH_RAW_SCHEMA="https://raw.githubusercontent.com/$ORGANIZATION/graphsense-ethereum-etl/$TAG/scripts/"
 # ETH_TRANSFORMED_SCHEMA="https://raw.githubusercontent.com/$ORGANIZATION/graphsense-ethereum-transformation/$ETHTAG/scripts/"
 
-SCHEMA_BASE_PATH="https://raw.githubusercontent.com/$ORGANIZATION/graphsense-lib/$TAG/src/graphsenselib/schema/resources/"
+SCHEMA_BASE_PATH=${SCHEMA_BASE_PATH:-"https://raw.githubusercontent.com/$ORGANIZATION/graphsense-lib/$TAG/src/graphsenselib/schema/resources/"}
+
+echo "Using schemas from ${SCHEMA_BASE_PATH}"
 
 function schema() {
   temp=`mktemp`

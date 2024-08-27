@@ -13,6 +13,10 @@ DOCKER_GROUPID?=999
 ORGANIZATION?=graphsense
 TESTCONTAINER_NAME?=graphsense-rest-test 
 
+# overwrite for testing where to fetch schema
+SCHEMA_BASE_PATH?=https://raw.githubusercontent.com/graphsense/graphsense-lib/develop/src/graphsenselib/schema/resources/
+export SCHEMA_BASE_PATH
+
 test: $(CASSANDRA_MARKER) $(TAGSTORE_MARKER)
 	# start container if it's not running
 	docker ps -a | grep $(CASSANDRA_MOCK) || bash -c 'rm -f $(CASSANDRA_MARKER) && make $(CASSANDRA_MARKER)'

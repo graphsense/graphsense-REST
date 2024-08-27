@@ -954,7 +954,7 @@ components:
       schema:
         type: boolean
         default: true
-      description: Whether to include the actors
+      description: Whether to include information about the actor behind the address
     include_io:
       in: query
       name: include_io
