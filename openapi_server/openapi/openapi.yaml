@@ -281,6 +281,15 @@ paths:
           schema:
             $ref: '#/components/schemas/address_id'
           style: simple
+        - description: Whether to include the actors
+          explode: true
+          in: query
+          name: include_actors
+          required: false
+          schema:
+            default: true
+            type: boolean
+          style: form
       responses:
         "200":
           content:
@@ -474,6 +483,15 @@ paths:
           required: false
           schema:
             default: false
+            type: boolean
+          style: form
+        - description: Whether to include the actors
+          explode: true
+          in: query
+          name: include_actors
+          required: false
+          schema:
+            default: true
             type: boolean
           style: form
         - description: Resumption token for retrieving the next page
@@ -2608,6 +2626,16 @@ components:
       required: false
       schema:
         default: false
+        type: boolean
+      style: form
+    include_actors_defaulttrue:
+      description: Whether to include the actors
+      explode: true
+      in: query
+      name: include_actors
+      required: false
+      schema:
+        default: true
         type: boolean
       style: form
     include_io:

@@ -17,7 +17,7 @@ from openapi_server import util
 
 
 
-async def get_address(request: web.Request, currency, address) -> web.Response:
+async def get_address(request: web.Request, currency, address, include_actors=None) -> web.Response:
     """Get an address
 
     
@@ -26,6 +26,8 @@ async def get_address(request: web.Request, currency, address) -> web.Response:
     :type currency: str
     :param address: The cryptocurrency address
     :type address: str
+    :param include_actors: Whether to include the actors
+    :type include_actors: bool
 
     """
 
@@ -50,11 +52,11 @@ async def get_address(request: web.Request, currency, address) -> web.Response:
     request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
-        if 'currency' in ['','currency','address']:
+        if 'currency' in ['','currency','address','include_actors']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.get_address(request
-                ,currency=currency,address=address)
+                ,currency=currency,address=address,include_actors=include_actors)
         result = await result
 
         for plugin in request.app['plugins']:
@@ -239,7 +241,7 @@ async def list_address_links(request: web.Request, currency, address, neighbor, 
         raise web.HTTPInternalServerError()
 
 
-async def list_address_neighbors(request: web.Request, currency, address, direction, only_ids=None, include_labels=None, page=None, pagesize=None) -> web.Response:
+async def list_address_neighbors(request: web.Request, currency, address, direction, only_ids=None, include_labels=None, include_actors=None, page=None, pagesize=None) -> web.Response:
     """Get an address&#39;s neighbors in the address graph
 
     
@@ -254,6 +256,8 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
     :type only_ids: List[str]
     :param include_labels: Whether to include labels of first page of address tags
     :type include_labels: bool
+    :param include_actors: Whether to include the actors
+    :type include_actors: bool
     :param page: Resumption token for retrieving the next page
     :type page: str
     :param pagesize: Number of items returned in a single page
@@ -282,11 +286,11 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
     request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
-        if 'currency' in ['','currency','address','direction','only_ids','include_labels','page','pagesize']:
+        if 'currency' in ['','currency','address','direction','only_ids','include_labels','include_actors','page','pagesize']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.list_address_neighbors(request
-                ,currency=currency,address=address,direction=direction,only_ids=only_ids,include_labels=include_labels,page=page,pagesize=pagesize)
+                ,currency=currency,address=address,direction=direction,only_ids=only_ids,include_labels=include_labels,include_actors=include_actors,page=page,pagesize=pagesize)
         result = await result
 
         for plugin in request.app['plugins']:

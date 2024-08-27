@@ -130,7 +130,8 @@ paths:
       operationId: get_address
       parameters:
         - $ref: '#/components/parameters/currency' 
-        - $ref: '#/components/parameters/address' 
+        - $ref: '#/components/parameters/address'
+        - $ref: '#/components/parameters/include_actors_defaulttrue'
       responses:
         "200":
           description: OK
@@ -214,7 +215,8 @@ paths:
         - $ref: '#/components/parameters/address' 
         - $ref: '#/components/parameters/direction' 
         - $ref: '#/components/parameters/only_address_ids' 
-        - $ref: '#/components/parameters/include_labels' 
+        - $ref: '#/components/parameters/include_labels'
+        - $ref: '#/components/parameters/include_actors_defaulttrue'
         - $ref: '#/components/parameters/page' 
         - $ref: '#/components/parameters/pagesize' 
       responses:
@@ -333,7 +335,7 @@ paths:
         - $ref: '#/components/parameters/only_entity_ids' 
         - $ref: '#/components/parameters/include_labels' 
         - $ref: '#/components/parameters/exclude_best_address_tag' 
-        - $ref: '#/components/parameters/include_actors' 
+        - $ref: '#/components/parameters/include_actors'
         - $ref: '#/components/parameters/page' 
         - $ref: '#/components/parameters/pagesize' 
       responses:
@@ -928,7 +930,7 @@ components:
       schema:
         type: boolean
         default: false
-      description: Whether to include labels of first page of address tags 
+      description: Whether to include labels of first page of address tags
     exclude_best_address_tag:
       in: query
       name: exclude_best_address_tag
@@ -944,7 +946,15 @@ components:
       schema:
         type: boolean
         default: false
-      description: Whether to include the actors 
+      description: Whether to include information about the actor behind the address
+    include_actors_defaulttrue:
+      in: query
+      name: include_actors
+      required: false
+      schema:
+        type: boolean
+        default: true
+      description: Whether to include the actors
     include_io:
       in: query
       name: include_io

@@ -30,8 +30,11 @@ async def get_best_cluster_tag(request, currency, address):
         return None
 
 
-async def get_address(request, currency, address):
-    return await common.get_address(request, currency, address)
+async def get_address(request, currency, address, include_actors=True):
+    return await common.get_address(request,
+                                    currency,
+                                    address,
+                                    include_actors=include_actors)
 
 
 async def list_tags_by_address(request,
@@ -93,8 +96,10 @@ async def list_address_neighbors(request,
                                  direction,
                                  only_ids=None,
                                  include_labels=False,
+                                 include_actors=True,
                                  page=None,
                                  pagesize=None):
+
     address = cannonicalize_address(currency, address)
     db = request.app['db']
     if isinstance(only_ids, list):
@@ -116,9 +121,10 @@ async def list_address_neighbors(request,
     if results is None:
         return NeighborAddresses()
     aws = [
-        get_address(request, currency,
-                    address_to_user_format(currency, row[dst + '_address']))
-        for row in results
+        get_address(request,
+                    currency,
+                    address_to_user_format(currency, row[dst + '_address']),
+                    include_actors=include_actors) for row in results
     ]
 
     nodes = await asyncio.gather(*aws)
