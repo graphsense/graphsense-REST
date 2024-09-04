@@ -83,7 +83,6 @@ async def get_block_by_date(request, currency, date):
     hb = (await db.get_currency_statistics(currency))['no_blocks'] - 1
     start = 0
     ts = int(date.timestamp())
-    capped_to_hb = False
 
     async def get_timestamp(blk):
         bts = (await db.get_block_timestamp(currency, blk))
@@ -94,25 +93,22 @@ async def get_block_by_date(request, currency, date):
 
     r = await find_block_by_ts(get_timestamp, currency, ts, start, hb)
 
-    if r >= hb:
-        r = hb
-        capped_to_hb = True
-        # raise BlockNotFoundException(currency, r)
+    print(r, hb)
 
-    bt = await get_timestamp(r)
+    if r == -1 or r > hb:
+        r = None
+        at = None
+        bt = None
+    elif r == hb:
+        bt = await get_timestamp(r)
+        at = None
 
-    if bt > ts and r == 0:
-        raise BlockNotFoundException(currency, -1)
+    else:
+        bt = await get_timestamp(r)
 
-    at = await get_timestamp(r + 1)
-
-    assert bt <= ts
-    assert capped_to_hb or at and at >= ts
-
-    ra = r + 1 if at else r
-    ata = at if at else bt
+        at = await get_timestamp(r + 1)
 
     return BlockAtDate(before_block=r,
                        before_timestamp=bt,
-                       after_block=ra,
-                       after_timestamp=ata)
+                       after_block=r + 1 if at is not None else None,
+                       after_timestamp=at)

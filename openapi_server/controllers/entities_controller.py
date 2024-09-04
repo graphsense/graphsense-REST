@@ -29,7 +29,7 @@ async def get_entity(request: web.Request, currency, entity, exclude_best_addres
     :type entity: int
     :param exclude_best_address_tag: Whether to exclude the best address tag
     :type exclude_best_address_tag: bool
-    :param include_actors: Whether to include the actors
+    :param include_actors: Whether to include information about the actor behind the address
     :type include_actors: bool
 
     """
@@ -339,7 +339,7 @@ async def list_entity_neighbors(request: web.Request, currency, entity, directio
     :type include_labels: bool
     :param exclude_best_address_tag: Whether to exclude the best address tag
     :type exclude_best_address_tag: bool
-    :param include_actors: Whether to include the actors
+    :param include_actors: Whether to include information about the actor behind the address
     :type include_actors: bool
     :param page: Resumption token for retrieving the next page
     :type page: str

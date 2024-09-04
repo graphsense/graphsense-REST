@@ -542,6 +542,10 @@ eth_entityWithTokens = Entity(currency="eth",
                               best_address_tag=ts.eth_tag1)
 
 
+async def get_tag_summary_by_address(test_case):
+    pass
+
+
 async def get_address(test_case):
     """Test case for get_address
     """

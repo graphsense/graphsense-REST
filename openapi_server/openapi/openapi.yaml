@@ -281,7 +281,7 @@ paths:
           schema:
             $ref: '#/components/schemas/address_id'
           style: simple
-        - description: Whether to include the actors
+        - description: Whether to include information about the actor behind the address
           explode: true
           in: query
           name: include_actors
@@ -485,7 +485,7 @@ paths:
             default: false
             type: boolean
           style: form
-        - description: Whether to include the actors
+        - description: Whether to include information about the actor behind the address
           explode: true
           in: query
           name: include_actors
@@ -565,8 +565,8 @@ paths:
           description: OK
       summary: Get attribution tag summary for a given address
       tags:
-        - experimental
-      x-openapi-router-controller: openapi_server.controllers.experimental_controller
+        - addresses
+      x-openapi-router-controller: openapi_server.controllers.addresses_controller
   /{currency}/addresses/{address}/tags:
     get:
       operationId: list_tags_by_address
@@ -1038,7 +1038,7 @@ paths:
             default: false
             type: boolean
           style: form
-        - description: Whether to include the actors
+        - description: Whether to include information about the actor behind the address
           explode: true
           in: query
           name: include_actors
@@ -1271,7 +1271,7 @@ paths:
             default: false
             type: boolean
           style: form
-        - description: Whether to include the actors
+        - description: Whether to include information about the actor behind the address
           explode: true
           in: query
           name: include_actors
@@ -1414,40 +1414,6 @@ paths:
       tags:
         - entities
       x-openapi-router-controller: openapi_server.controllers.entities_controller
-  /{currency}/entities/{entity}/tag_summary:
-    get:
-      operationId: get_tag_summary_by_entity
-      parameters:
-        - description: The cryptocurrency code (e.g., btc)
-          example: btc
-          explode: false
-          in: path
-          name: currency
-          required: true
-          schema:
-            format: string
-            type: string
-          style: simple
-        - description: The entity ID
-          example: 67065
-          explode: false
-          in: path
-          name: entity
-          required: true
-          schema:
-            $ref: '#/components/schemas/entity_id'
-          style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/tag_summary'
-          description: OK
-      summary: Get address tag summary for a given entity
-      tags:
-        - experimental
-      x-openapi-router-controller: openapi_server.controllers.experimental_controller
   /{currency}/entities/{entity}/tags:
     get:
       operationId: list_address_tags_by_entity
@@ -2619,7 +2585,7 @@ components:
         type: boolean
       style: form
     include_actors:
-      description: Whether to include the actors
+      description: Whether to include information about the actor behind the address
       explode: true
       in: query
       name: include_actors
@@ -2629,7 +2595,7 @@ components:
         type: boolean
       style: form
     include_actors_defaulttrue:
-      description: Whether to include the actors
+      description: Whether to include information about the actor behind the address
       explode: true
       in: query
       name: include_actors
@@ -2982,11 +2948,6 @@ components:
           format: int32
           title: timestamp
           type: integer
-      required:
-        - after_block
-        - after_timestamp
-        - before_block
-        - before_timestamp
       title: block_at_date
       type: object
     currency:

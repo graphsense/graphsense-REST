@@ -206,7 +206,7 @@ paths:
                 $ref: '#/components/schemas/tag_summary'
       summary: Get attribution tag summary for a given address
       tags:
-      - experimental
+      - addresses
   /{currency}/addresses/{address}/neighbors:
     get:
       operationId: list_address_neighbors
@@ -309,22 +309,6 @@ paths:
       summary: Get address tags for a given entity 
       tags:
       - entities
-  /{currency}/entities/{entity}/tag_summary:
-    get:
-      operationId: get_tag_summary_by_entity
-      parameters:
-        - $ref: '#/components/parameters/currency' 
-        - $ref: '#/components/parameters/entity'
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/tag_summary'
-      summary: Get address tag summary for a given entity 
-      tags:
-      - experimental
   /{currency}/entities/{entity}/neighbors:
     get:
       operationId: list_entity_neighbors
@@ -1202,11 +1186,6 @@ components:
         #     $ref: '#/components/schemas/tag_cloud_entry'
     block_at_date:
       type: object
-      required:
-        - before_block
-        - after_block
-        - before_timestamp
-        - after_timestamp
       properties:
         before_block:
           $ref: '#/components/schemas/height'

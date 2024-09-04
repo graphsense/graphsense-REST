@@ -84,8 +84,6 @@ class BlockAtDate(Model):
         :param before_block: The before_block of this BlockAtDate.
         :type before_block: int
         """
-        if before_block is None:
-            raise BadUserInputException("Invalid value for `before_block`, must not be `None`")
         if before_block is not None and before_block < 0:
             raise BadUserInputException("Invalid value for `before_block`, must be a value greater than or equal to `0`")
 
@@ -111,8 +109,6 @@ class BlockAtDate(Model):
         :param before_timestamp: The before_timestamp of this BlockAtDate.
         :type before_timestamp: int
         """
-        if before_timestamp is None:
-            raise BadUserInputException("Invalid value for `before_timestamp`, must not be `None`")
 
         self._before_timestamp = before_timestamp
 
@@ -136,8 +132,6 @@ class BlockAtDate(Model):
         :param after_block: The after_block of this BlockAtDate.
         :type after_block: int
         """
-        if after_block is None:
-            raise BadUserInputException("Invalid value for `after_block`, must not be `None`")
         if after_block is not None and after_block < 0:
             raise BadUserInputException("Invalid value for `after_block`, must be a value greater than or equal to `0`")
 
@@ -163,7 +157,5 @@ class BlockAtDate(Model):
         :param after_timestamp: The after_timestamp of this BlockAtDate.
         :type after_timestamp: int
         """
-        if after_timestamp is None:
-            raise BadUserInputException("Invalid value for `after_timestamp`, must not be `None`")
 
         self._after_timestamp = after_timestamp

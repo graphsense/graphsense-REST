@@ -19,6 +19,8 @@ import asyncio
 import time
 from gsrest.util.address import address_to_user_format
 from gsrest.db.node_type import NodeType
+from gsrest.util.tag_summary import get_tag_summary
+from functools import partial
 
 MAX_DEPTH = 7
 TAGS_PAGE_SIZE = 100
@@ -74,6 +76,15 @@ async def list_address_tags_by_entity_internal(request,
             currency, entity,
             request.app['request_config']['show_private_tags'])
     return AddressTags(address_tags=address_tags, next_page=next_page)
+
+
+async def get_tag_summary_by_entity(request, currency, entity):
+    next_page_fn = partial(list_address_tags_by_entity_internal,
+                           request,
+                           currency,
+                           entity,
+                           pagesize=PAGE_SIZE_GET_ALL_TAGS)
+    return await get_tag_summary(next_page_fn)
 
 
 async def list_address_tags_by_entity(request,

@@ -12,6 +12,7 @@ from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.entity import Entity
 from openapi_server.models.links import Links
 from openapi_server.models.neighbor_addresses import NeighborAddresses
+from openapi_server.models.tag_summary import TagSummary
 import gsrest.service.addresses_service as service
 from openapi_server import util
 
@@ -26,7 +27,7 @@ async def get_address(request: web.Request, currency, address, include_actors=No
     :type currency: str
     :param address: The cryptocurrency address
     :type address: str
-    :param include_actors: Whether to include the actors
+    :param include_actors: Whether to include information about the actor behind the address
     :type include_actors: bool
 
     """
@@ -159,6 +160,78 @@ async def get_address_entity(request: web.Request, currency, address) -> web.Res
         raise web.HTTPInternalServerError()
 
 
+async def get_tag_summary_by_address(request: web.Request, currency, address, include_best_cluster_tag=None) -> web.Response:
+    """Get attribution tag summary for a given address
+
+    
+
+    :param currency: The cryptocurrency code (e.g., btc)
+    :type currency: str
+    :param address: The cryptocurrency address
+    :type address: str
+    :param include_best_cluster_tag: If the best cluster tag should be inherited to the address level, often helpful for exchanges where not every address is tagged.
+    :type include_best_cluster_tag: bool
+
+    """
+
+    for plugin in request.app['plugins']:
+        if hasattr(plugin, 'before_request'):
+            context =\
+                request.app['plugin_contexts'][plugin.__module__]
+            request = plugin.before_request(context, request)
+
+    show_private_tags_conf = \
+        request.app['config'].get('show_private_tags', False)
+    show_private_tags = bool(show_private_tags_conf)
+    if show_private_tags:
+        for (k,v) in show_private_tags_conf['on_header'].items():
+            hval = request.headers.get(k, None)
+            if not hval:
+                show_private_tags = False
+                break
+            show_private_tags = show_private_tags and \
+                bool(re.match(re.compile(v), hval))
+
+    request.app['request_config']['show_private_tags'] = show_private_tags
+
+    try:
+        if 'currency' in ['','currency','address','include_best_cluster_tag']:
+            if currency is not None:
+                currency = currency.lower() 
+        result = service.get_tag_summary_by_address(request
+                ,currency=currency,address=address,include_best_cluster_tag=include_best_cluster_tag)
+        result = await result
+
+        for plugin in request.app['plugins']:
+            if hasattr(plugin, 'before_response'):
+                context =\
+                    request.app['plugin_contexts'][plugin.__module__]
+                plugin.before_response(context, request, result)
+
+        if isinstance(result, list):
+            result = [d.to_dict() for d in result]
+        else:
+            result = result.to_dict()
+
+        result = web.Response(
+                    status=200,
+                    text=json.dumps(result),
+                    headers={'Content-type': 'application/json'})
+        return result
+    except NotFoundException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPNotFound(text=str(e))
+    except BadUserInputException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=str(e))
+    except Exception as e:
+        tb = traceback.format_exception(type(e), e, e.__traceback__)
+        tb.append(f"Request URL: {request.url}")
+        tb = "\n".join(tb)
+        request.app.logger.error(tb)
+        raise web.HTTPInternalServerError()
+
+
 async def list_address_links(request: web.Request, currency, address, neighbor, min_height=None, max_height=None, order=None, page=None, pagesize=None) -> web.Response:
     """Get outgoing transactions between two addresses
 
@@ -256,7 +329,7 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
     :type only_ids: List[str]
     :param include_labels: Whether to include labels of first page of address tags
     :type include_labels: bool
-    :param include_actors: Whether to include the actors
+    :param include_actors: Whether to include information about the actor behind the address
     :type include_actors: bool
     :param page: Resumption token for retrieving the next page
     :type page: str

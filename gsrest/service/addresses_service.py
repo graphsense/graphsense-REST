@@ -12,6 +12,8 @@ import asyncio
 from gsrest.db.node_type import NodeType
 from gsrest.db.util import tagstores
 from gsrest.service.tags_service import address_tag_from_row
+from functools import partial
+from gsrest.util.tag_summary import get_tag_summary
 
 
 async def get_best_cluster_tag(request, currency, address):
@@ -28,6 +30,20 @@ async def get_best_cluster_tag(request, currency, address):
         return tags[0]
     else:
         return None
+
+
+async def get_tag_summary_by_address(request,
+                                     currency,
+                                     address,
+                                     include_best_cluster_tag=False):
+    address_canonical = cannonicalize_address(currency, address)
+
+    next_page_fn = partial(list_tags_by_address,
+                           request,
+                           currency,
+                           address_canonical,
+                           include_best_cluster_tag=include_best_cluster_tag)
+    return await get_tag_summary(next_page_fn)
 
 
 async def get_address(request, currency, address, include_actors=True):
