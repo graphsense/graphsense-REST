@@ -137,7 +137,7 @@ tx4_eth = TxAccount(tx_hash='123456',
 # 'to_address': '0xbeefbabeea323f07c59926295205d3b7a17e8638'}
 token_tx1_eth = TxAccount(
     tx_hash='af6e0003',
-    identifier='af6e0003|T1',
+    identifier='af6e0003_T1',
     tx_type="account",
     currency='weth',
     network="eth",
@@ -160,7 +160,7 @@ token_tx1_eth = TxAccount(
 # 'to_address': '0xcaf7ce56598e8588c9bf471e08b53e8a8d9541b3'}
 token_tx2_eth = TxAccount(
     tx_hash='af6e0003',
-    identifier='af6e0003|T2',
+    identifier='af6e0003_T2',
     currency='usdt',
     network="eth",
     tx_type="account",
