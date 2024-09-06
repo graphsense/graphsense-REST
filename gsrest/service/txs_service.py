@@ -9,23 +9,60 @@ from gsrest.errors import (TransactionNotFoundException, NotFoundException,
                            BadUserInputException)
 from gsrest.util import is_eth_like
 from gsrest.util.address import address_to_user_format
+from gsrest.util import get_first_key_present
+
+
+def get_type_account(row):
+    if row['type'] == "internal":
+        return "account"
+    elif row['type'] == "erc20":
+        return "account"
+    elif row["type"] == "external":
+        return "account"
+    else:
+        raise Exception(f"Unknown transaction type {row}")
+
+
+def get_tx_idenifier(row):
+    if row['type'] == "internal":
+        return f"{row['tx_hash'].hex()}|I{row['trace_index']}"
+    elif row['type'] == "erc20":
+        return f"{row['tx_hash'].hex()}|T{row['token_tx_id']}"
+    elif row["type"] == "external":
+        return row["tx_hash"].hex()
+    else:
+        raise Exception(f"Unknown transaction type {row}")
+
+
+def tx_account_from_row(currency, row, rates, token_config):
+    height_keys = ["height", "block_id"]
+    timestamp_keys = ["timestamp", "block_timestamp"]
+    height = get_first_key_present(row, height_keys)
+
+    r = rates[height] if isinstance(rates, dict) else rates
+
+    return TxAccount(currency=currency
+                     if "token_tx_id" not in row else row["currency"].lower(),
+                     network=currency,
+                     tx_type=get_type_account(row),
+                     identifier=get_tx_idenifier(row),
+                     tx_hash=row['tx_hash'].hex(),
+                     timestamp=get_first_key_present(row, timestamp_keys),
+                     height=height,
+                     from_address=address_to_user_format(
+                         currency, row['from_address']),
+                     to_address=address_to_user_format(currency,
+                                                       row['to_address']),
+                     token_tx_id=row.get("token_tx_id", None),
+                     contract_creation=row.get("contract_creation", None),
+                     value=convert_value(currency, row['value'], r)
+                     if "token_tx_id" not in row else convert_token_value(
+                         row['value'], r, token_config[row["currency"]]))
 
 
 def from_row(currency, row, rates, token_config, include_io=False):
     if is_eth_like(currency):
-        return TxAccount(
-            currency=currency
-            if "token_tx_id" not in row else row["currency"].lower(),
-            tx_hash=row['tx_hash'].hex(),
-            timestamp=row['block_timestamp'],
-            height=row['block_id'],
-            from_address=address_to_user_format(currency, row['from_address']),
-            to_address=address_to_user_format(currency, row['to_address']),
-            token_tx_id=row.get("token_tx_id", None),
-            contract_creation=row.get("contract_creation", None),
-            value=convert_value(currency, row['value'], rates)
-            if "token_tx_id" not in row else convert_token_value(
-                row['value'], rates, token_config[row["currency"]]))
+        return tx_account_from_row(currency, row, rates, token_config)
 
     return TxUtxo(currency=currency,
                   tx_hash=row['tx_hash'].hex(),
@@ -97,12 +134,46 @@ async def list_token_txs(request, currency, tx_hash, token_tx_id=None):
     return results
 
 
+async def get_trace_txs(request, currency, tx, trace_index=None):
+    db = request.app['db']
+    result = await db.fetch_transaction_trace(currency, tx, trace_index)
+
+    if result:
+        result["type"] = "internal"
+        result['timestamp'] = tx['block_timestamp']
+
+        if currency == "trx":
+            result['from_address'] = result['caller_address']
+            result['to_address'] = result['transferto_address']
+            result['value'] = result["call_value"]
+        else:
+            result['contract_creation'] = result["trace_type"] == 'create'
+
+    return from_row(currency, result, (await
+                                       get_rates(request, currency,
+                                                 result['block_id']))['rates'],
+                    db.get_token_configuration(currency))
+
+
 async def get_tx(request,
                  currency,
                  tx_hash,
                  token_tx_id=None,
                  include_io=False):
     db = request.app['db']
+
+    trace_index = None
+    try:
+        if "|I" in tx_hash:
+            h, postfix, *_ = tx_hash.split("|")
+            trace_index = int(postfix.strip("IT"))
+            tx_hash = h
+        elif "|T" in tx_hash:
+            h, postfix, *_ = tx_hash.split("|")
+            token_tx_id = int(postfix.strip("IT")) or token_tx_id
+            tx_hash = h
+    except ValueError:
+        pass
 
     if token_tx_id is not None:
         if is_eth_like(currency):
@@ -119,10 +190,27 @@ async def get_tx(request,
         else:
             raise BadUserInputException(
                 f'{currency} does not support token transactions.')
+    elif trace_index is not None:
+        if is_eth_like(currency):
+            tx = await db.get_tx(currency, tx_hash)
+            res = await get_trace_txs(request, currency, tx, trace_index)
+
+            if res:
+                return res
+            else:
+                raise TransactionNotFoundException(currency, tx_hash,
+                                                   token_tx_id)
+
+        else:
+            raise BadUserInputException(
+                f'{currency} does not support trace transactions.')
     else:
         result = await db.get_tx(currency, tx_hash)
         rates = (await get_rates(request, currency,
                                  result['block_id']))['rates']
+
+        if result:
+            result['type'] = 'external'
 
         result = from_row(currency, result, rates,
                           db.get_token_configuration(currency), include_io)

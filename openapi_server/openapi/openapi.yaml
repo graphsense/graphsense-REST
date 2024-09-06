@@ -5119,6 +5119,7 @@ components:
       type: object
     tx_account:
       example:
+        identifier: identifier
         contract_creation: true
         currency: btc
         tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
@@ -5133,6 +5134,7 @@ components:
           value: 6
         from_address: addressA
         token_tx_id: 0
+        network: btc
         height: 47
         timestamp: 1616376371
       properties:
@@ -5140,10 +5142,21 @@ components:
           default: account
           title: tx_type
           type: string
+        identifier:
+          description: uniquely identifies a transaction or a sub transaction like a token transaction or trace.
+          title: identifier
+          type: string
         token_tx_id:
+          deprecated: true
+          description: identifies a specific token transaction within a tx_hash, (deprecated) use identifier instead in encapsulates all information that uniquely identifies the transaction
           title: token_tx_id
           type: integer
         currency:
+          description: crypto currency code
+          example: btc
+          title: currency
+          type: string
+        network:
           description: crypto currency code
           example: btc
           title: currency
@@ -5186,6 +5199,8 @@ components:
         - currency
         - from_address
         - height
+        - identifier
+        - network
         - timestamp
         - to_address
         - tx_hash

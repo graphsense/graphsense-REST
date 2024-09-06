@@ -130,7 +130,8 @@ def build_token_tx(token_currency, tx, token_tx, log):
         "from_address": hex_str_to_bytes(strip_0x(token_from["value"])),
         "to_address": hex_str_to_bytes(strip_0x(token_to["value"])),
         "token_tx_id": log["log_index"],
-        "value": value["value"]
+        "value": value["value"],
+        "type": "erc20"
     }
 
 
@@ -2326,6 +2327,10 @@ class Cassandra:
                 addr_tx["trace_index"] = addr_tx["tx_reference"].trace_index
 
             full_tx = full_txs[addr_tx['transaction_id']]
+            contract_creation = full_tx.get('contract_creation', None)
+
+            addr_tx['contract_creation'] = contract_creation
+
             if addr_tx["log_index"] is not None:
                 token_tx = await self.fetch_token_transaction(
                     currency, full_tx, addr_tx["log_index"])
@@ -2335,6 +2340,7 @@ class Cassandra:
                 addr_tx['currency'] = token_tx["currency"]
                 addr_tx['token_tx_id'] = addr_tx["log_index"]
                 addr_tx["type"] = "erc20"
+                addr_tx['contract_creation'] = False
                 value = token_tx['value']
 
             elif currency == "trx" and addr_tx["trace_index"] is not None:
@@ -2352,6 +2358,7 @@ class Cassandra:
                 addr_tx['from_address'] = trace['from_address']
                 addr_tx['to_address'] = trace['to_address']
                 addr_tx["type"] = "internal"
+                addr_tx['contract_creation'] = trace["trace_type"] == 'create'
                 value = trace["value"]
             else:
                 addr_tx['to_address'] = full_tx['to_address']
@@ -2360,9 +2367,6 @@ class Cassandra:
                 addr_tx["type"] = "external"
                 value = full_tx['value']
 
-            contract_creation = full_tx.get('contract_creation', None)
-
-            addr_tx['contract_creation'] = contract_creation
             addr_tx['tx_hash'] = full_tx['tx_hash']
             addr_tx['height'] = full_tx['block_id']
 
@@ -2428,6 +2432,7 @@ class Cassandra:
         for row in result:
 
             to_address = row['to_address']
+            row["type"] = "external"
             if to_address is None:
                 # this is a contract creation transaction
                 # set recipient to newly created contract
@@ -2443,6 +2448,7 @@ class Cassandra:
             if include_token_txs:
                 token_txs = await self.fetch_token_transactions(currency, row)
                 for ttx in token_txs:
+                    ttx['type'] = 'erc20'
                     result_with_tokens.append(ttx)
 
         return result_with_tokens

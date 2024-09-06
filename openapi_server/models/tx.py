@@ -18,7 +18,7 @@ class Tx(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, tx_type: str='account', currency: str=None, tx_hash: str=None, coinbase: bool=None, height: int=None, no_inputs: int=None, no_outputs: int=None, inputs: List[TxValue]=None, outputs: List[TxValue]=None, timestamp: int=None, total_input: Values=None, total_output: Values=None, token_tx_id: int=None, value: Values=None, from_address: str=None, to_address: str=None, contract_creation: bool=None):
+    def __init__(self, tx_type: str='account', currency: str=None, tx_hash: str=None, coinbase: bool=None, height: int=None, no_inputs: int=None, no_outputs: int=None, inputs: List[TxValue]=None, outputs: List[TxValue]=None, timestamp: int=None, total_input: Values=None, total_output: Values=None, identifier: str=None, token_tx_id: int=None, network: str=None, value: Values=None, from_address: str=None, to_address: str=None, contract_creation: bool=None):
         """Tx - a model defined in OpenAPI
 
         :param tx_type: The tx_type of this Tx.
@@ -33,7 +33,9 @@ class Tx(Model):
         :param timestamp: The timestamp of this Tx.
         :param total_input: The total_input of this Tx.
         :param total_output: The total_output of this Tx.
+        :param identifier: The identifier of this Tx.
         :param token_tx_id: The token_tx_id of this Tx.
+        :param network: The network of this Tx.
         :param value: The value of this Tx.
         :param from_address: The from_address of this Tx.
         :param to_address: The to_address of this Tx.
@@ -52,7 +54,9 @@ class Tx(Model):
             'timestamp': int,
             'total_input': Values,
             'total_output': Values,
+            'identifier': str,
             'token_tx_id': int,
+            'network': str,
             'value': Values,
             'from_address': str,
             'to_address': str,
@@ -72,7 +76,9 @@ class Tx(Model):
             'timestamp': 'timestamp',
             'total_input': 'total_input',
             'total_output': 'total_output',
+            'identifier': 'identifier',
             'token_tx_id': 'token_tx_id',
+            'network': 'network',
             'value': 'value',
             'from_address': 'from_address',
             'to_address': 'to_address',
@@ -91,7 +97,9 @@ class Tx(Model):
         self._timestamp = timestamp
         self._total_input = total_input
         self._total_output = total_output
+        self._identifier = identifier
         self._token_tx_id = token_tx_id
+        self._network = network
         self._value = value
         self._from_address = from_address
         self._to_address = to_address
@@ -126,7 +134,9 @@ class Tx(Model):
             'timestamp': self._timestamp,
             'total_input': self._total_input,
             'total_output': self._total_output,
+            'identifier': self._identifier,
             'token_tx_id': self._token_tx_id,
+            'network': self._network,
             'value': self._value,
             'from_address': self._from_address,
             'to_address': self._to_address,
@@ -426,9 +436,35 @@ class Tx(Model):
         self._total_output = total_output
 
     @property
+    def identifier(self):
+        """Gets the identifier of this Tx.
+
+        uniquely identifies a transaction or a sub transaction like a token transaction or trace.
+
+        :return: The identifier of this Tx.
+        :rtype: str
+        """
+        return self._identifier
+
+    @identifier.setter
+    def identifier(self, identifier):
+        """Sets the identifier of this Tx.
+
+        uniquely identifies a transaction or a sub transaction like a token transaction or trace.
+
+        :param identifier: The identifier of this Tx.
+        :type identifier: str
+        """
+        if identifier is None:
+            raise BadUserInputException("Invalid value for `identifier`, must not be `None`")
+
+        self._identifier = identifier
+
+    @property
     def token_tx_id(self):
         """Gets the token_tx_id of this Tx.
 
+        identifies a specific token transaction within a tx_hash, (deprecated) use identifier instead in encapsulates all information that uniquely identifies the transaction
 
         :return: The token_tx_id of this Tx.
         :rtype: int
@@ -439,12 +475,38 @@ class Tx(Model):
     def token_tx_id(self, token_tx_id):
         """Sets the token_tx_id of this Tx.
 
+        identifies a specific token transaction within a tx_hash, (deprecated) use identifier instead in encapsulates all information that uniquely identifies the transaction
 
         :param token_tx_id: The token_tx_id of this Tx.
         :type token_tx_id: int
         """
 
         self._token_tx_id = token_tx_id
+
+    @property
+    def network(self):
+        """Gets the network of this Tx.
+
+        crypto currency code
+
+        :return: The network of this Tx.
+        :rtype: str
+        """
+        return self._network
+
+    @network.setter
+    def network(self, network):
+        """Sets the network of this Tx.
+
+        crypto currency code
+
+        :param network: The network of this Tx.
+        :type network: str
+        """
+        if network is None:
+            raise BadUserInputException("Invalid value for `network`, must not be `None`")
+
+        self._network = network
 
     @property
     def value(self):

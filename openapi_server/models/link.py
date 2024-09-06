@@ -17,7 +17,7 @@ class Link(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, tx_type: str='account', tx_hash: str=None, currency: str=None, height: int=None, timestamp: int=None, input_value: Values=None, output_value: Values=None, token_tx_id: int=None, value: Values=None, from_address: str=None, to_address: str=None, contract_creation: bool=None):
+    def __init__(self, tx_type: str='account', tx_hash: str=None, currency: str=None, height: int=None, timestamp: int=None, input_value: Values=None, output_value: Values=None, identifier: str=None, token_tx_id: int=None, network: str=None, value: Values=None, from_address: str=None, to_address: str=None, contract_creation: bool=None):
         """Link - a model defined in OpenAPI
 
         :param tx_type: The tx_type of this Link.
@@ -27,7 +27,9 @@ class Link(Model):
         :param timestamp: The timestamp of this Link.
         :param input_value: The input_value of this Link.
         :param output_value: The output_value of this Link.
+        :param identifier: The identifier of this Link.
         :param token_tx_id: The token_tx_id of this Link.
+        :param network: The network of this Link.
         :param value: The value of this Link.
         :param from_address: The from_address of this Link.
         :param to_address: The to_address of this Link.
@@ -41,7 +43,9 @@ class Link(Model):
             'timestamp': int,
             'input_value': Values,
             'output_value': Values,
+            'identifier': str,
             'token_tx_id': int,
+            'network': str,
             'value': Values,
             'from_address': str,
             'to_address': str,
@@ -56,7 +60,9 @@ class Link(Model):
             'timestamp': 'timestamp',
             'input_value': 'input_value',
             'output_value': 'output_value',
+            'identifier': 'identifier',
             'token_tx_id': 'token_tx_id',
+            'network': 'network',
             'value': 'value',
             'from_address': 'from_address',
             'to_address': 'to_address',
@@ -70,7 +76,9 @@ class Link(Model):
         self._timestamp = timestamp
         self._input_value = input_value
         self._output_value = output_value
+        self._identifier = identifier
         self._token_tx_id = token_tx_id
+        self._network = network
         self._value = value
         self._from_address = from_address
         self._to_address = to_address
@@ -100,7 +108,9 @@ class Link(Model):
             'timestamp': self._timestamp,
             'input_value': self._input_value,
             'output_value': self._output_value,
+            'identifier': self._identifier,
             'token_tx_id': self._token_tx_id,
+            'network': self._network,
             'value': self._value,
             'from_address': self._from_address,
             'to_address': self._to_address,
@@ -279,9 +289,35 @@ class Link(Model):
         self._output_value = output_value
 
     @property
+    def identifier(self):
+        """Gets the identifier of this Link.
+
+        uniquely identifies a transaction or a sub transaction like a token transaction or trace.
+
+        :return: The identifier of this Link.
+        :rtype: str
+        """
+        return self._identifier
+
+    @identifier.setter
+    def identifier(self, identifier):
+        """Sets the identifier of this Link.
+
+        uniquely identifies a transaction or a sub transaction like a token transaction or trace.
+
+        :param identifier: The identifier of this Link.
+        :type identifier: str
+        """
+        if identifier is None:
+            raise BadUserInputException("Invalid value for `identifier`, must not be `None`")
+
+        self._identifier = identifier
+
+    @property
     def token_tx_id(self):
         """Gets the token_tx_id of this Link.
 
+        identifies a specific token transaction within a tx_hash, (deprecated) use identifier instead in encapsulates all information that uniquely identifies the transaction
 
         :return: The token_tx_id of this Link.
         :rtype: int
@@ -292,12 +328,38 @@ class Link(Model):
     def token_tx_id(self, token_tx_id):
         """Sets the token_tx_id of this Link.
 
+        identifies a specific token transaction within a tx_hash, (deprecated) use identifier instead in encapsulates all information that uniquely identifies the transaction
 
         :param token_tx_id: The token_tx_id of this Link.
         :type token_tx_id: int
         """
 
         self._token_tx_id = token_tx_id
+
+    @property
+    def network(self):
+        """Gets the network of this Link.
+
+        crypto currency code
+
+        :return: The network of this Link.
+        :rtype: str
+        """
+        return self._network
+
+    @network.setter
+    def network(self, network):
+        """Sets the network of this Link.
+
+        crypto currency code
+
+        :param network: The network of this Link.
+        :type network: str
+        """
+        if network is None:
+            raise BadUserInputException("Invalid value for `network`, must not be `None`")
+
+        self._network = network
 
     @property
     def value(self):

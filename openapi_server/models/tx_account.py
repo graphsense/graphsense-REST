@@ -15,12 +15,14 @@ class TxAccount(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, tx_type: str='account', token_tx_id: int=None, currency: str=None, tx_hash: str=None, height: int=None, timestamp: int=None, value: Values=None, from_address: str=None, to_address: str=None, contract_creation: bool=None):
+    def __init__(self, tx_type: str='account', identifier: str=None, token_tx_id: int=None, currency: str=None, network: str=None, tx_hash: str=None, height: int=None, timestamp: int=None, value: Values=None, from_address: str=None, to_address: str=None, contract_creation: bool=None):
         """TxAccount - a model defined in OpenAPI
 
         :param tx_type: The tx_type of this TxAccount.
+        :param identifier: The identifier of this TxAccount.
         :param token_tx_id: The token_tx_id of this TxAccount.
         :param currency: The currency of this TxAccount.
+        :param network: The network of this TxAccount.
         :param tx_hash: The tx_hash of this TxAccount.
         :param height: The height of this TxAccount.
         :param timestamp: The timestamp of this TxAccount.
@@ -31,8 +33,10 @@ class TxAccount(Model):
         """
         self.openapi_types = {
             'tx_type': str,
+            'identifier': str,
             'token_tx_id': int,
             'currency': str,
+            'network': str,
             'tx_hash': str,
             'height': int,
             'timestamp': int,
@@ -44,8 +48,10 @@ class TxAccount(Model):
 
         self.attribute_map = {
             'tx_type': 'tx_type',
+            'identifier': 'identifier',
             'token_tx_id': 'token_tx_id',
             'currency': 'currency',
+            'network': 'network',
             'tx_hash': 'tx_hash',
             'height': 'height',
             'timestamp': 'timestamp',
@@ -56,8 +62,10 @@ class TxAccount(Model):
         }
 
         self._tx_type = tx_type
+        self._identifier = identifier
         self._token_tx_id = token_tx_id
         self._currency = currency
+        self._network = network
         self._tx_hash = tx_hash
         self._height = height
         self._timestamp = timestamp
@@ -84,8 +92,10 @@ class TxAccount(Model):
         if not shallow:
             return Model.to_dict(self)
         return { 'tx_type': self._tx_type,
+            'identifier': self._identifier,
             'token_tx_id': self._token_tx_id,
             'currency': self._currency,
+            'network': self._network,
             'tx_hash': self._tx_hash,
             'height': self._height,
             'timestamp': self._timestamp,
@@ -119,9 +129,35 @@ class TxAccount(Model):
         self._tx_type = tx_type
 
     @property
+    def identifier(self):
+        """Gets the identifier of this TxAccount.
+
+        uniquely identifies a transaction or a sub transaction like a token transaction or trace.
+
+        :return: The identifier of this TxAccount.
+        :rtype: str
+        """
+        return self._identifier
+
+    @identifier.setter
+    def identifier(self, identifier):
+        """Sets the identifier of this TxAccount.
+
+        uniquely identifies a transaction or a sub transaction like a token transaction or trace.
+
+        :param identifier: The identifier of this TxAccount.
+        :type identifier: str
+        """
+        if identifier is None:
+            raise BadUserInputException("Invalid value for `identifier`, must not be `None`")
+
+        self._identifier = identifier
+
+    @property
     def token_tx_id(self):
         """Gets the token_tx_id of this TxAccount.
 
+        identifies a specific token transaction within a tx_hash, (deprecated) use identifier instead in encapsulates all information that uniquely identifies the transaction
 
         :return: The token_tx_id of this TxAccount.
         :rtype: int
@@ -132,6 +168,7 @@ class TxAccount(Model):
     def token_tx_id(self, token_tx_id):
         """Sets the token_tx_id of this TxAccount.
 
+        identifies a specific token transaction within a tx_hash, (deprecated) use identifier instead in encapsulates all information that uniquely identifies the transaction
 
         :param token_tx_id: The token_tx_id of this TxAccount.
         :type token_tx_id: int
@@ -163,6 +200,31 @@ class TxAccount(Model):
             raise BadUserInputException("Invalid value for `currency`, must not be `None`")
 
         self._currency = currency
+
+    @property
+    def network(self):
+        """Gets the network of this TxAccount.
+
+        crypto currency code
+
+        :return: The network of this TxAccount.
+        :rtype: str
+        """
+        return self._network
+
+    @network.setter
+    def network(self, network):
+        """Sets the network of this TxAccount.
+
+        crypto currency code
+
+        :param network: The network of this TxAccount.
+        :type network: str
+        """
+        if network is None:
+            raise BadUserInputException("Invalid value for `network`, must not be `None`")
+
+        self._network = network
 
     @property
     def tx_hash(self):

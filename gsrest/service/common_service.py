@@ -2,12 +2,10 @@ from openapi_server.models.address import Address
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.address_tags import AddressTags
 from gsrest.util.values import (convert_value, convert_token_values_map,
-                                to_values, to_values_tokens,
-                                convert_token_value)
+                                to_values, to_values_tokens)
 from gsrest.service.rates_service import get_rates
 from openapi_server.models.link_utxo import LinkUtxo
 from openapi_server.models.links import Links
-from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from openapi_server.models.labeled_item_ref import LabeledItemRef
 from gsrest.service.rates_service import list_rates
@@ -20,6 +18,7 @@ from psycopg2.errors import InvalidTextRepresentation
 import gsrest.util.address
 from gsrest.util.address import address_to_user_format
 from gsrest.util import is_eth_like
+from gsrest.service.txs_service import tx_account_from_row
 
 
 def address_from_row(currency, row, rates, token_config, actors):
@@ -51,28 +50,11 @@ def address_from_row(currency, row, rates, token_config, actors):
 
 async def txs_from_rows(request, currency, rows, token_config):
     height_keys = ["height", "block_id"]
-    timestamp_keys = ["timestamp", "block_timestamp"]
     heights = [get_first_key_present(row, height_keys) for row in rows]
     rates = await list_rates(request, currency, heights)
     if is_eth_like(currency):
         return [
-            TxAccount(
-                currency=currency
-                if "token_tx_id" not in row else row["currency"].lower(),
-                tx_hash=row['tx_hash'].hex(),
-                timestamp=get_first_key_present(row, timestamp_keys),
-                height=get_first_key_present(row, height_keys),
-                from_address=address_to_user_format(currency,
-                                                    row['from_address']),
-                to_address=address_to_user_format(currency, row['to_address']),
-                token_tx_id=row.get("token_tx_id", None),
-                contract_creation=row.get("contract_creation", None),
-                value=convert_value(
-                    currency, row['value'], rates[get_first_key_present(
-                        row, height_keys)])
-                if "token_tx_id" not in row else convert_token_value(
-                    row['value'], rates[get_first_key_present(
-                        row, height_keys)], token_config[row["currency"]]))
+            tx_account_from_row(currency, row, rates, token_config)
             for row in rows
         ]
 

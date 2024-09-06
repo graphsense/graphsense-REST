@@ -1989,7 +1989,9 @@ components:
       required:
         - tx_type
         - currency
+        - network
         - tx_hash
+        - identifier
         - height
         - timestamp
         - value
@@ -1999,9 +2001,16 @@ components:
         tx_type:
           type: string
           default: 'account'
+        identifier:
+          type: string
+          description: uniquely identifies a transaction or a sub transaction like a token transaction or trace.
         token_tx_id:
           type: integer
+          description: identifies a specific token transaction within a tx_hash, (deprecated) use identifier instead in encapsulates all information that uniquely identifies the transaction
+          deprecated: true
         currency:
+          $ref: '#/components/schemas/currency'
+        network:
           $ref: '#/components/schemas/currency'
         tx_hash:
           $ref: '#/components/schemas/tx_hash'

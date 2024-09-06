@@ -73,6 +73,7 @@ async def list_block_txs(test_case):
 
     tx22_eth = TxAccount(**tx1_eth.to_dict())
     tx22_eth.tx_hash = 'af6e0001'
+    tx22_eth.identifier = 'af6e0001'
     tx22_eth.height = 2
     eth_txs = [
         tx22_eth.to_dict(),
