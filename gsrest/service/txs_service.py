@@ -11,6 +11,8 @@ from gsrest.util import is_eth_like
 from gsrest.util.address import address_to_user_format
 from gsrest.util import get_first_key_present
 
+SUBTX_IDENT_SEPERATOR_CHAR = "_"
+
 
 def get_type_account(row):
     if row['type'] == "internal":
@@ -24,12 +26,13 @@ def get_type_account(row):
 
 
 def get_tx_idenifier(row):
+    h = row['tx_hash'].hex()
     if row['type'] == "internal":
-        return f"{row['tx_hash'].hex()}|I{row['trace_index']}"
+        return f"{h}{SUBTX_IDENT_SEPERATOR_CHAR}I{row['trace_index']}"
     elif row['type'] == "erc20":
-        return f"{row['tx_hash'].hex()}|T{row['token_tx_id']}"
+        return f"{h}{SUBTX_IDENT_SEPERATOR_CHAR}T{row['token_tx_id']}"
     elif row["type"] == "external":
-        return row["tx_hash"].hex()
+        return h
     else:
         raise Exception(f"Unknown transaction type {row}")
 
@@ -164,12 +167,12 @@ async def get_tx(request,
 
     trace_index = None
     try:
-        if "|I" in tx_hash:
-            h, postfix, *_ = tx_hash.split("|")
+        if f"{SUBTX_IDENT_SEPERATOR_CHAR}I" in tx_hash:
+            h, postfix, *_ = tx_hash.split(SUBTX_IDENT_SEPERATOR_CHAR)
             trace_index = int(postfix.strip("IT"))
             tx_hash = h
-        elif "|T" in tx_hash:
-            h, postfix, *_ = tx_hash.split("|")
+        elif f"{SUBTX_IDENT_SEPERATOR_CHAR}T" in tx_hash:
+            h, postfix, *_ = tx_hash.split(SUBTX_IDENT_SEPERATOR_CHAR)
             token_tx_id = int(postfix.strip("IT")) or token_tx_id
             tx_hash = h
     except ValueError:
