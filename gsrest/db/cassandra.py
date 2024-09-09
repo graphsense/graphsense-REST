@@ -1229,7 +1229,12 @@ class Cassandra:
                 id=second,
                 tx_id_lower_bound=None,
                 tx_id_upper_bound=None,
-                is_outgoing=not is_outgoing,
+                # is_outgoing=not is_outgoing,
+                # fetch both directions regardless, this is needed since for
+                # some transactions the total flow is an inflow but it is an
+                # outflowat the same time. If we would not fetch both
+                # directions we would miss these transactions.
+                is_outgoing=None,
                 include_assets=assets,
                 ascending=ascending,
                 tx_ids=first_tx_ids,  # limit second set by tx ids of first set
