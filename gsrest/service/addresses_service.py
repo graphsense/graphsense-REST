@@ -14,6 +14,7 @@ from gsrest.db.util import tagstores
 from gsrest.service.tags_service import address_tag_from_row
 from functools import partial
 from gsrest.util.tag_summary import get_tag_summary
+from gsrest.util import is_eth_like
 
 
 async def get_best_cluster_tag(request, currency, address):
@@ -68,7 +69,7 @@ async def list_tags_by_address(request,
                                                 pagesize=pagesize)
 
     best_cluster_tag = []
-    if (include_best_cluster_tag):
+    if (include_best_cluster_tag and not is_eth_like(currency)):
         best_cluster_tag = await get_best_cluster_tag(request, currency,
                                                       address)
         if best_cluster_tag is not None:
