@@ -264,20 +264,19 @@ def build_select_address_txs_statement(network: str, node_type: NodeType,
 
     query += wc("currency = %(currency)s", eth_like)
 
-    # conditional where clause, loop dependent
-    if not with_tx_id:
-        if ascending:
-            query += wc(f"{tx_id_col} > %(tx_id_lower_bound)s",
-                        with_lower_bound)
-            query += wc(f"{tx_id_col} <= %(tx_id_upper_bound)s",
-                        with_upper_bound)
-        else:
-            query += wc(f"{tx_id_col} >= %(tx_id_lower_bound)s",
-                        with_lower_bound)
-            query += wc(f"{tx_id_col} < %(tx_id_upper_bound)s",
-                        with_upper_bound)
-    else:
-        query += wc(f"{tx_id_col} = %(tx_id)s", True)
+    # decending
+    query += wc(f"{tx_id_col} > %(tx_id_lower_bound)s", not with_tx_id
+                and ascending and with_lower_bound)
+    query += wc(f"{tx_id_col} <= %(tx_id_upper_bound)s", not with_tx_id
+                and ascending and with_upper_bound)
+
+    # acending
+    query += wc(f"{tx_id_col} >= %(tx_id_lower_bound)s", not with_tx_id
+                and not ascending and with_lower_bound)
+    query += wc(f"{tx_id_col} < %(tx_id_upper_bound)s", not with_tx_id
+                and not ascending and with_upper_bound)
+
+    query += wc(f"{tx_id_col} = %(tx_id)s", with_tx_id)
 
     ordering = "ASC" if ascending else "DESC"
     # Ordering statement

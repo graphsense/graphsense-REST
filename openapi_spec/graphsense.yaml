@@ -1113,6 +1113,7 @@ components:
         - label
         - count
         - confidence
+        - relevance
         - creators
         - sources
         - lastmod
@@ -1124,6 +1125,8 @@ components:
           type: integer
           format: int32
         confidence:
+          type: number
+        relevance:
           type: number
         creators:
           type: array

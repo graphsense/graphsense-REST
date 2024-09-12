@@ -4,6 +4,7 @@ from openapi_server.models.tag_summary import TagSummary
 from openapi_server.models.tag_cloud_entry import TagCloudEntry
 from openapi_server.models.label_summary import LabelSummary
 from typing import Dict
+import difflib
 
 
 class wCounter:
@@ -46,8 +47,14 @@ def map_concept_to_broad_concept(concept) -> str:
         return "entity"
 
 
+def remove_mulit_spaces(istr: str) -> str:
+    return re.sub(' +', ' ', istr)
+
+
 def normalizeWord(istr: str) -> str:
-    return re.sub(r'[^0-9a-zA-Z_ ]+', ' ', istr.strip().lower())
+    return remove_mulit_spaces(
+        re.sub(r'[^0-9a-zA-Z_ ]+', ' ',
+               istr.strip().lower()))
 
 
 def skipTag(t) -> bool:
@@ -172,7 +179,19 @@ async def get_tag_summary(get_tags_page_fn,
         broad_category = map_concept_to_broad_concept(
             concepts_counter.most_common(1, weighted=True)[0][0])
 
-    ltc = calcTagCloud(full_label_counter)
+    sw_full_label_counter = wCounter()
+
+    data = full_label_counter.most_common()
+    keys = {k for k, _ in data}
+    for k, v in data:
+        sw_full_label_counter.add(
+            k,
+            v * (1 + len(
+                difflib.get_close_matches(
+                    k, list(keys ^ set([k])), n=len(keys) - 1))))
+
+    ltc = calcTagCloud(sw_full_label_counter)
+
     return TagSummary(
         broad_category=broad_category,
         tag_count=tags_count,
@@ -184,7 +203,8 @@ async def get_tag_summary(get_tags_page_fn,
             key: LabelSummary(
                 label=value["lbl"],
                 count=value["cnt"],
-                confidence=ltc[key].weighted,
+                confidence=value["sumConfidence"] / (value["cnt"] * 100),
+                relevance=ltc[key].weighted,
                 creators=list(value["creators"]),
                 sources=list(value["src"]),
                 concepts=list(value['concepts']),

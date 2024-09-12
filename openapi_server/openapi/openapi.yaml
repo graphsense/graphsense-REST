@@ -2783,8 +2783,8 @@ components:
   schemas:
     tag_cloud_entry:
       example:
-        cnt: 5
-        weighted: 2.3021358869347655
+        cnt: 2
+        weighted: 7.061401241503109
       properties:
         cnt:
           title: cnt
@@ -2812,6 +2812,7 @@ components:
         confidence: 1.4658129805029452
         count: 6
         label: label
+        relevance: 5.962133916683182
         lastmod: 5
       properties:
         label:
@@ -2823,6 +2824,9 @@ components:
           type: integer
         confidence:
           title: confidence
+          type: number
+        relevance:
+          title: relevance
           type: number
         creators:
           items:
@@ -2856,6 +2860,7 @@ components:
         - creators
         - label
         - lastmod
+        - relevance
         - sources
       title: label_summary
       type: object
@@ -2865,8 +2870,8 @@ components:
         best_actor: best_actor
         concept_tag_cloud:
           key:
-            cnt: 5
-            weighted: 2.3021358869347655
+            cnt: 2
+            weighted: 7.061401241503109
         label_summary:
           key:
             inherited_from: cluster
@@ -2882,6 +2887,7 @@ components:
             confidence: 1.4658129805029452
             count: 6
             label: label
+            relevance: 5.962133916683182
             lastmod: 5
         best_label: best_label
         broad_category: broad_category

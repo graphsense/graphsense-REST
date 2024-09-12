@@ -14,12 +14,13 @@ class LabelSummary(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, label: str=None, count: int=None, confidence: float=None, creators: List[str]=None, sources: List[str]=None, concepts: List[str]=None, lastmod: int=None, inherited_from: str=None):
+    def __init__(self, label: str=None, count: int=None, confidence: float=None, relevance: float=None, creators: List[str]=None, sources: List[str]=None, concepts: List[str]=None, lastmod: int=None, inherited_from: str=None):
         """LabelSummary - a model defined in OpenAPI
 
         :param label: The label of this LabelSummary.
         :param count: The count of this LabelSummary.
         :param confidence: The confidence of this LabelSummary.
+        :param relevance: The relevance of this LabelSummary.
         :param creators: The creators of this LabelSummary.
         :param sources: The sources of this LabelSummary.
         :param concepts: The concepts of this LabelSummary.
@@ -30,6 +31,7 @@ class LabelSummary(Model):
             'label': str,
             'count': int,
             'confidence': float,
+            'relevance': float,
             'creators': List[str],
             'sources': List[str],
             'concepts': List[str],
@@ -41,6 +43,7 @@ class LabelSummary(Model):
             'label': 'label',
             'count': 'count',
             'confidence': 'confidence',
+            'relevance': 'relevance',
             'creators': 'creators',
             'sources': 'sources',
             'concepts': 'concepts',
@@ -51,6 +54,7 @@ class LabelSummary(Model):
         self._label = label
         self._count = count
         self._confidence = confidence
+        self._relevance = relevance
         self._creators = creators
         self._sources = sources
         self._concepts = concepts
@@ -77,6 +81,7 @@ class LabelSummary(Model):
         return { 'label': self._label,
             'count': self._count,
             'confidence': self._confidence,
+            'relevance': self._relevance,
             'creators': self._creators,
             'sources': self._sources,
             'concepts': self._concepts,
@@ -152,6 +157,29 @@ class LabelSummary(Model):
             raise BadUserInputException("Invalid value for `confidence`, must not be `None`")
 
         self._confidence = confidence
+
+    @property
+    def relevance(self):
+        """Gets the relevance of this LabelSummary.
+
+
+        :return: The relevance of this LabelSummary.
+        :rtype: float
+        """
+        return self._relevance
+
+    @relevance.setter
+    def relevance(self, relevance):
+        """Sets the relevance of this LabelSummary.
+
+
+        :param relevance: The relevance of this LabelSummary.
+        :type relevance: float
+        """
+        if relevance is None:
+            raise BadUserInputException("Invalid value for `relevance`, must not be `None`")
+
+        self._relevance = relevance
 
     @property
     def creators(self):
