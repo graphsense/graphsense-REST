@@ -4,7 +4,6 @@ from openapi_server.models.tag_summary import TagSummary
 from openapi_server.models.tag_cloud_entry import TagCloudEntry
 from openapi_server.models.label_summary import LabelSummary
 from typing import Dict
-import difflib
 
 
 class wCounter:
@@ -37,7 +36,10 @@ class wCounter:
         return len(self.ctr)
 
 
-filter_words = {w: True for w in ["to", "in", "the", "by", "of", "at", ""]}
+filter_words = {
+    w: True
+    for w in ["to", "in", "the", "by", "of", "at", "", "vault"]
+}
 
 
 def map_concept_to_broad_concept(concept) -> str:
@@ -79,7 +81,7 @@ async def get_tag_summary(get_tags_page_fn,
     tags_count = 0
     total_words = 0
     actor_counter = wCounter()
-    # label_word_counter = wCounter()
+    label_word_counter = wCounter()
     full_label_counter = wCounter()
     concepts_counter = wCounter()
     actor_lables = defaultdict(wCounter)
@@ -110,12 +112,12 @@ async def get_tag_summary(get_tags_page_fn,
             total_words += len(filtered_words)
 
             # add words
-            # label_word_counter.update(Counter(filtered_words))
+            label_word_counter.update(Counter(filtered_words))
 
             # add labels
             nlabel = normalizeWord(t.label)
             ls = label_summary[nlabel]
-            full_label_counter.add(normalizeWord(t.label), conf)
+            full_label_counter.add(nlabel, conf)
 
             # add actor
             if t.actor:
@@ -179,16 +181,17 @@ async def get_tag_summary(get_tags_page_fn,
         broad_category = map_concept_to_broad_concept(
             concepts_counter.most_common(1, weighted=True)[0][0])
 
+    # create a relevance score, prefer items where similar labels exist.
     sw_full_label_counter = wCounter()
-
-    data = full_label_counter.most_common()
-    keys = {k for k, _ in data}
-    for k, v in data:
-        sw_full_label_counter.add(
-            k,
-            v * (1 + len(
-                difflib.get_close_matches(
-                    k, list(keys ^ set([k])), n=len(keys) - 1))))
+    data = full_label_counter.most_common(weighted=True)
+    for lbl, v in data:
+        multiplier = sum([
+            occurances
+            for word, occurances in label_word_counter.most_common()
+            if word in lbl and occurances > 1
+        ])
+        n = (1 + multiplier / total_words)
+        sw_full_label_counter.add(lbl, v * n)
 
     ltc = calcTagCloud(sw_full_label_counter)
 
