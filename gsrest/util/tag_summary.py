@@ -58,6 +58,7 @@ def normalizeWord(istr: str) -> str:
         re.sub(r'[^0-9a-zA-Z_ ]+', ' ',
                istr.strip().lower()))
 
+
 def get_concept_weight(c: str) -> float:
     if c == "defi":
         return 0.5
@@ -131,13 +132,16 @@ async def get_tag_summary(get_tags_page_fn,
                 actor_counter.add(t.actor, weight=conf)
 
             if t.category and not t.concepts:
-                concepts_counter.add(t.category, weight=conf * get_concept_weight(t.category))
+                concepts_counter.add(t.category,
+                                     weight=conf *
+                                     get_concept_weight(t.category))
 
                 ls["concepts"].add(t.category)
 
             elif t.concepts:
                 for x in t.concepts:
-                    concepts_counter.add(x, weight=conf * get_concept_weight(x))
+                    concepts_counter.add(x,
+                                         weight=conf * get_concept_weight(x))
 
                     ls["concepts"].add(x)
 
