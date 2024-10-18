@@ -128,7 +128,7 @@ async def get_tag_summary(get_tags_page_fn,
 
             # add actor
             if t.actor:
-                actor_lables[t.actor].add(t.actor, weight=conf)
+                actor_lables[t.actor].add(t.label, weight=conf)
                 actor_counter.add(t.actor, weight=conf)
 
             if t.category and not t.concepts:
