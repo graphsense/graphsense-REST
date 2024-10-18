@@ -3,6 +3,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [24.10.0] - 2024-10-18
+
+### Added
+
+- added endpoiont `/{currency}/addresses/{address}/tag_summary` to fetch a condensed summary of tags on an address
+- added endpoint `/{currency}/block_by_date/{date}` to get nearest blocks given a timestamp
+- syntax to load token transactions and traces via the `/{currency}/txs/{tx_hash}` endpoint.
+- consistent availability of include_actor on all address related endpoints (to improve performance)
+
+### Fixed
+- missing links between two addresses on rare occasions (when there was not net outflow for one address).
+
+
 ## [24.04.1]
 
 ### Fixed
