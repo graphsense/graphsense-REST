@@ -753,7 +753,7 @@ components:
       schema:
         $ref: '#/components/schemas/dateTime'
       description: The time of the block
-      example: 2017-07-21T17:32:28Z
+      example: '2017-07-21T17:32:28Z'
     height:
       in: path
       name: height
@@ -1662,7 +1662,7 @@ components:
       type: string
       format: date-time
       description: a date string following RFC 3339, section 5.6
-      example: 2017-07-21T17:32:28Z
+      example: '2017-07-21T17:32:28Z'
     timestamp:
       type: integer
       format: int32
