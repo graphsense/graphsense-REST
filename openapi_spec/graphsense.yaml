@@ -856,7 +856,7 @@ components:
       schema:
         $ref: '#/components/schemas/address_id'
       description: Neighbor address
-      example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
+      example: 1FKCzy3BEtiZDhRDtivp7Y7RVb9edg5BH7
     entity_neighbor:
       in: query
       name: neighbor
