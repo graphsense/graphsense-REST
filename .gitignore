@@ -72,7 +72,7 @@ tags
 .ctags_ignore
 
 #generated files by OpenAPI Generator (see templates for editing these)
-.openapi-generator*
+.openapi-generator
 
 #Flask
 instance/config.*yaml
