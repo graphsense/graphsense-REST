@@ -769,6 +769,7 @@ components:
       schema:
         type: string
       description: Resumption token for retrieving the next page
+      example: ""
     pagesize:
       in: query
       name: pagesize
