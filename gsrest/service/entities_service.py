@@ -160,7 +160,7 @@ async def list_entity_neighbors(request,
     dst = 'dst' if is_outgoing else 'src'
     relations = []
     if results is None:
-        return NeighborEntities()
+        return NeighborEntities(neighbors=[])
     if not relations_only:
         aws = [
             get_entity(request,

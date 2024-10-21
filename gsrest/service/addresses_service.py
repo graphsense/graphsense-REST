@@ -136,7 +136,7 @@ async def list_address_neighbors(request,
     dst = 'dst' if is_outgoing else 'src'
     relations = []
     if results is None:
-        return NeighborAddresses()
+        return NeighborAddresses(neighbors=[])
     aws = [
         get_address(request,
                     currency,
