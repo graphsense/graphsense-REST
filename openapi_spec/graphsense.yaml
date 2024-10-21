@@ -1070,10 +1070,12 @@ components:
         type: string
         enum:
           - get_block
+          - get_block_by_date
           - list_block_txs
           - get_address
           - list_address_txs
           - list_tags_by_address
+          - get_tag_summary_by_address
           - list_address_neighbors
           - get_address_entity
           - list_address_links
