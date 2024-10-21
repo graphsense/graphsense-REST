@@ -115,6 +115,7 @@ paths:
             type: string
           style: form
         - description: Resumption token for retrieving the next page
+          example: ""
           explode: true
           in: query
           name: page
@@ -187,6 +188,7 @@ paths:
             type: string
           style: simple
         - description: Resumption token for retrieving the next page
+          example: ""
           explode: true
           in: query
           name: page
@@ -273,7 +275,7 @@ paths:
             type: string
           style: simple
         - description: The cryptocurrency address
-          example: addressA
+          example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
           explode: false
           in: path
           name: address
@@ -316,7 +318,7 @@ paths:
             type: string
           style: simple
         - description: The cryptocurrency address
-          example: addressA
+          example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
           explode: false
           in: path
           name: address
@@ -350,7 +352,7 @@ paths:
             type: string
           style: simple
         - description: The cryptocurrency address
-          example: addressA
+          example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
           explode: false
           in: path
           name: address
@@ -359,7 +361,7 @@ paths:
             $ref: '#/components/schemas/address_id'
           style: simple
         - description: Neighbor address
-          example: addressE
+          example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
           explode: true
           in: query
           name: neighbor
@@ -399,6 +401,7 @@ paths:
             type: string
           style: form
         - description: Resumption token for retrieving the next page
+          example: ""
           explode: true
           in: query
           name: page
@@ -446,7 +449,7 @@ paths:
             type: string
           style: simple
         - description: The cryptocurrency address
-          example: addressA
+          example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
           explode: false
           in: path
           name: address
@@ -495,6 +498,7 @@ paths:
             type: boolean
           style: form
         - description: Resumption token for retrieving the next page
+          example: ""
           explode: true
           in: query
           name: page
@@ -539,7 +543,7 @@ paths:
             type: string
           style: simple
         - description: The cryptocurrency address
-          example: addressA
+          example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
           explode: false
           in: path
           name: address
@@ -582,7 +586,7 @@ paths:
             type: string
           style: simple
         - description: The cryptocurrency address
-          example: addressA
+          example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
           explode: false
           in: path
           name: address
@@ -591,6 +595,7 @@ paths:
             $ref: '#/components/schemas/address_id'
           style: simple
         - description: Resumption token for retrieving the next page
+          example: ""
           explode: true
           in: query
           name: page
@@ -647,7 +652,7 @@ paths:
             type: string
           style: simple
         - description: The cryptocurrency address
-          example: addressA
+          example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
           explode: false
           in: path
           name: address
@@ -708,6 +713,7 @@ paths:
             type: string
           style: form
         - description: Resumption token for retrieving the next page
+          example: ""
           explode: true
           in: query
           name: page
@@ -872,10 +878,12 @@ paths:
           schema:
             enum:
               - get_block
+              - get_block_by_date
               - list_block_txs
               - get_address
               - list_address_txs
               - list_tags_by_address
+              - get_tag_summary_by_address
               - list_address_neighbors
               - get_address_entity
               - list_address_links
@@ -949,10 +957,12 @@ paths:
           schema:
             enum:
               - get_block
+              - get_block_by_date
               - list_block_txs
               - get_address
               - list_address_txs
               - list_tags_by_address
+              - get_tag_summary_by_address
               - list_address_neighbors
               - get_address_entity
               - list_address_links
@@ -1082,6 +1092,7 @@ paths:
             $ref: '#/components/schemas/entity_id'
           style: simple
         - description: Resumption token for retrieving the next page
+          example: ""
           explode: true
           in: query
           name: page
@@ -1175,6 +1186,7 @@ paths:
             type: string
           style: form
         - description: Resumption token for retrieving the next page
+          example: ""
           explode: true
           in: query
           name: page
@@ -1281,6 +1293,7 @@ paths:
             type: boolean
           style: form
         - description: Resumption token for retrieving the next page
+          example: ""
           explode: true
           in: query
           name: page
@@ -1438,6 +1451,7 @@ paths:
             $ref: '#/components/schemas/entity_id'
           style: simple
         - description: Resumption token for retrieving the next page
+          example: ""
           explode: true
           in: query
           name: page
@@ -1546,6 +1560,7 @@ paths:
             type: string
           style: form
         - description: Resumption token for retrieving the next page
+          example: ""
           explode: true
           in: query
           name: page
@@ -1901,7 +1916,7 @@ components:
         coinbase: false
         height: 47
         inputs:
-          - address: addressA
+          - address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
             value:
               fiat_values:
                 - code: eur
@@ -1957,7 +1972,7 @@ components:
           coinbase: false
           height: 47
           inputs:
-            - address: addressA
+            - address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
               value:
                 fiat_values:
                   - code: eur
@@ -2379,6 +2394,7 @@ components:
       style: simple
     page:
       description: Resumption token for retrieving the next page
+      example: ""
       explode: true
       in: query
       name: page
@@ -2483,7 +2499,7 @@ components:
       style: simple
     address:
       description: The cryptocurrency address
-      example: addressA
+      example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
       explode: false
       in: path
       name: address
@@ -2493,7 +2509,7 @@ components:
       style: simple
     neighbor:
       description: Neighbor address
-      example: addressE
+      example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
       explode: true
       in: query
       name: neighbor
@@ -2751,10 +2767,12 @@ components:
       schema:
         enum:
           - get_block
+          - get_block_by_date
           - list_block_txs
           - get_address
           - list_address_txs
           - list_tags_by_address
+          - get_tag_summary_by_address
           - list_address_neighbors
           - get_address_entity
           - list_address_links
@@ -3146,7 +3164,7 @@ components:
           value: 6
         in_degree: 1
         is_contract: true
-        address: addressA
+        address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
         out_degree: 5
         first_tx:
           tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
@@ -3221,7 +3239,7 @@ components:
           type: string
         address:
           description: Address
-          example: addressA
+          example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
           title: address
           type: string
         entity:
@@ -3367,7 +3385,7 @@ components:
               - 0.3
             value: 200000000000000
         no_address_tags: 2
-        root_address: addressA
+        root_address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
         actors:
           - id: id
             label: example
@@ -3431,7 +3449,7 @@ components:
           type: integer
         root_address:
           description: Address
-          example: addressA
+          example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
           title: address
           type: string
         balance:
@@ -3882,7 +3900,7 @@ components:
       type: string
     address_id:
       description: Address
-      example: addressA
+      example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
       title: address
       type: string
     entity_id:
@@ -3947,7 +3965,7 @@ components:
                 value: 6
               in_degree: 1
               is_contract: true
-              address: addressA
+              address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
               out_degree: 5
               first_tx:
                 tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
@@ -4046,7 +4064,7 @@ components:
                 value: 6
               in_degree: 1
               is_contract: true
-              address: addressA
+              address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
               out_degree: 5
               first_tx:
                 tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
@@ -4198,7 +4216,7 @@ components:
                     - 0.3
                   value: 200000000000000
               no_address_tags: 2
-              root_address: addressA
+              root_address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
               actors:
                 - id: id
                   label: example
@@ -4297,7 +4315,7 @@ components:
                     - 0.3
                   value: 200000000000000
               no_address_tags: 2
-              root_address: addressA
+              root_address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
               actors:
                 - id: id
                   label: example
@@ -4377,7 +4395,7 @@ components:
             value: 6
           in_degree: 1
           is_contract: true
-          address: addressA
+          address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
           out_degree: 5
           first_tx:
             tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
@@ -4553,7 +4571,7 @@ components:
                 - 0.3
               value: 200000000000000
           no_address_tags: 2
-          root_address: addressA
+          root_address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
           actors:
             - id: id
               label: example
@@ -4731,7 +4749,7 @@ components:
               value: 6
             in_degree: 1
             is_contract: true
-            address: addressA
+            address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
             out_degree: 5
             first_tx:
               tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
@@ -4807,7 +4825,7 @@ components:
               value: 6
             in_degree: 1
             is_contract: true
-            address: addressA
+            address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
             out_degree: 5
             first_tx:
               tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
@@ -5101,8 +5119,8 @@ components:
     tx_value:
       example:
         address:
-          - addressA
-          - addressA
+          - 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
+          - 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
         value:
           fiat_values:
             - code: code
@@ -5129,7 +5147,7 @@ components:
         contract_creation: true
         currency: btc
         tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
-        to_address: addressA
+        to_address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
         tx_type: account
         value:
           fiat_values:
@@ -5138,7 +5156,7 @@ components:
             - code: code
               value: 0.8008282
           value: 6
-        from_address: addressA
+        from_address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
         token_tx_id: 0
         network: btc
         height: 47
@@ -5189,12 +5207,12 @@ components:
           $ref: '#/components/schemas/values'
         from_address:
           description: Address
-          example: addressA
+          example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
           title: address
           type: string
         to_address:
           description: Address
-          example: addressA
+          example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
           title: address
           type: string
         contract_creation:
@@ -5578,7 +5596,7 @@ components:
       properties:
         address:
           description: Address
-          example: addressA
+          example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
           title: address
           type: string
         entity:
