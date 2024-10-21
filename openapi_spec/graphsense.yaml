@@ -848,7 +848,7 @@ components:
       schema:
         $ref: '#/components/schemas/address_id'
       description: The cryptocurrency address
-      example: 'addressA'
+      example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
     neighbor:
       in: query
       name: neighbor
@@ -856,7 +856,7 @@ components:
       schema:
         $ref: '#/components/schemas/address_id'
       description: Neighbor address
-      example: 'addressE'
+      example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
     entity_neighbor:
       in: query
       name: neighbor
@@ -1647,7 +1647,7 @@ components:
     address_id:
       type: string
       description: Address
-      example: addressA
+      example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
     entity_id:
       type: integer
       format: int32
@@ -2256,7 +2256,7 @@ components:
         coinbase: false
         height: 47
         inputs: 
-          - address: addressA
+          - address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
             value: 
               fiat_values: 
                 - code: eur
@@ -2312,7 +2312,7 @@ components:
         coinbase: false
         height: 47
         inputs: 
-          - address: addressA
+          - address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
             value: 
               fiat_values: 
                 - code: eur
