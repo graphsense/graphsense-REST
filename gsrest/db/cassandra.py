@@ -179,12 +179,15 @@ def wc(cl, cond):
 
 
 def merge_address_txs_subquery_results(
+    logger,
     result_sets: Sequence[Result],
     ascending: bool,
     fetch_size: int,
     tx_id_keys: str = "tx_id",
-    fetched_limit: Optional[int] = None
-) -> Tuple[Sequence[dict], Optional[int]]:
+    fetched_limit: Optional[int] = None,
+    page: Optional[int] = None,
+    offset: int = 0
+) -> Tuple[Sequence[dict], Optional[int], Optional[int]]:
     """Merges sub results of the address txs queries per asset and direction
 
     Args:
@@ -195,22 +198,19 @@ def merge_address_txs_subquery_results(
         fetched_limit (int): The limit that was used to fetch the result sets
 
     Returns:
-        Tuple[Sequence[dict], Optional[int]]: A merged list of ordered
-            transactions and the highest id included in this results set,
-            this is considered as the page for subsequent queries.
+        Tuple[Sequence[dict], Optional[int, int]]: A merged list of ordered
+            transactions, highest id and the number of rows with this same id
+            included in this results set,
+            the last two form the page id for subsequent queries.
     """
 
     # find the least common tx_id where we then cut the result sets
     border_tx_id = None
-    has_pages = False
-    total_results_len = 0
     for results in result_sets:
         if not results:
             continue
-        total_results_len += len(results)
         if fetched_limit and len(results) < fetched_limit:
             continue
-        has_pages = True
         if border_tx_id is None:
             border_tx_id = results[-1][tx_id_keys]
             continue
@@ -226,18 +226,32 @@ def merge_address_txs_subquery_results(
         or not ascending and v[tx_id_keys] >= border_tx_id
     ]
 
-    # Merge overlapping result sets by given sort order (uses a priority
-    # queue; heapq)
-    # fetch_sized items or less are returned
-    precedence = heapq.nsmallest if ascending else heapq.nlargest
-    results = precedence(fetch_size,
-                         candidates,
-                         key=partial(transaction_ordering_key, tx_id_keys))
+    # Merge overlapping result sets by given sort order
+    results = sorted(candidates,
+                     reverse=not ascending,
+                     key=partial(transaction_ordering_key, tx_id_keys))
+
+    if results and offset:
+        results = results[offset:]
+
+    results = results[:fetch_size]
 
     # use the last tx_id as page handle
     border_tx_id = results[-1][tx_id_keys] \
-        if results and (has_pages or total_results_len >= fetch_size) else None
-    return results, border_tx_id
+        if results else None
+
+    if border_tx_id is None:
+        return results, None, None
+
+    # calc how many of the same border_tx_id
+    same_key_offset = 0
+    while len(results) > same_key_offset \
+          and results[-same_key_offset - 1][tx_id_keys] == border_tx_id:
+        same_key_offset += 1
+
+    if page == border_tx_id:
+        same_key_offset += offset
+    return results, border_tx_id, same_key_offset
 
 
 def build_select_address_txs_statement(network: str, node_type: NodeType,
@@ -264,16 +278,16 @@ def build_select_address_txs_statement(network: str, node_type: NodeType,
 
     query += wc("currency = %(currency)s", eth_like)
 
-    # decending
-    query += wc(f"{tx_id_col} > %(tx_id_lower_bound)s", not with_tx_id
+    # ascending
+    query += wc(f"{tx_id_col} >= %(tx_id_lower_bound)s", not with_tx_id
                 and ascending and with_lower_bound)
     query += wc(f"{tx_id_col} <= %(tx_id_upper_bound)s", not with_tx_id
                 and ascending and with_upper_bound)
 
-    # acending
+    # descending
     query += wc(f"{tx_id_col} >= %(tx_id_lower_bound)s", not with_tx_id
                 and not ascending and with_lower_bound)
-    query += wc(f"{tx_id_col} < %(tx_id_upper_bound)s", not with_tx_id
+    query += wc(f"{tx_id_col} <= %(tx_id_upper_bound)s", not with_tx_id
                 and not ascending and with_upper_bound)
 
     query += wc(f"{tx_id_col} = %(tx_id)s", with_tx_id)
@@ -2113,11 +2127,11 @@ class Cassandra:
             tx_id_upper_bound: Optional[int],
             is_outgoing: Optional[bool],
             include_assets: Sequence[Tuple[str, bool]],
-            page: Optional[int],
+            page: Optional[str],
             fetch_size: int,
             cols: Optional[Sequence[str]] = None,
             tx_ids: Optional[Sequence[Tuple[int, Optional[dict]]]] = None,
-            ascending: bool = False) -> Tuple[Sequence[dict], Optional[int]]:
+            ascending: bool = False) -> Tuple[Sequence[dict], Optional[str]]:
         """Loads a address transactions in execution order
         it allows to only get out- or incoming transaction or only
         transactions of a certain asset (token), for a given address id
@@ -2141,6 +2155,13 @@ class Cassandra:
             ascending (Optional[bool]): sort list ascending if True or
                 descending if False
         """
+        try:
+            (page, offset) = page.split(':') \
+                if page is not None else (None, None)
+            page = int(page) if page is not None else None
+            offset = int(offset) if offset is not None else None
+        except ValueError:
+            raise BadUserInputException(f"Page {page} is not an integer")
 
         if node_type == NodeType.ADDRESS:
             item_id, item_id_group = \
@@ -2193,7 +2214,10 @@ class Cassandra:
             has_lower_bound = this_tx_id_lower_bound is not None
 
             # divide fetch_size by number of result sets
-            fs_junk = ceil(fs_it / (len(include_assets) + 2))
+            # at it must be 2
+            fs_junk = max(2, ceil(fs_it / (len(include_assets) + 2)))
+
+            self.logger.setLevel(logging.DEBUG)
 
             cql_stmt = build_select_address_txs_statement(
                 network,
@@ -2241,22 +2265,25 @@ class Cassandra:
             aws = [fetch(cql_stmt, p) for p in params_junks]
 
             # collect and merge results
-            more_results, page = merge_address_txs_subquery_results(
+            more_results, page, offset = merge_address_txs_subquery_results(
+                self.logger,
                 [r.current_rows for r in await asyncio.gather(*aws)],
                 ascending,
                 fs_it,
                 'transaction_id' if is_eth_like(network) else 'tx_id',
-                fetched_limit=fs_junk)
+                fetched_limit=fs_junk,
+                page=page,
+                offset=offset)
 
-            self.logger.debug(f'list tx ordered page {page}')
+            self.logger.debug(f'list tx ordered page {page}:{offset}')
             self.logger.debug(f'more_results len {len(more_results)}')
 
             results.extend(more_results)
             if page is None:
                 # no more data expected end loop
                 break
-
-        return results, page
+        self.logger.setLevel(logging.INFO)
+        return results, f'{page}:{offset}' if page is not None else None
 
     async def list_txs_by_node_type_eth(self,
                                         currency,
@@ -2269,10 +2296,6 @@ class Cassandra:
                                         token_currency=None,
                                         page=None,
                                         pagesize=None):
-        try:
-            page = int(page) if page is not None else None
-        except ValueError:
-            raise BadUserInputException(f"Page {page} is not an integer")
         ascending = order == 'asc'
 
         if node_type == NodeType.CLUSTER:
