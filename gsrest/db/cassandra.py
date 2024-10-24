@@ -1,7 +1,6 @@
 import re
 import time
 import asyncio
-import heapq
 from async_lru import alru_cache
 from typing import Sequence, Optional, Tuple
 from functools import partial
@@ -245,8 +244,7 @@ def merge_address_txs_subquery_results(
 
     # calc how many of the same border_tx_id
     same_key_offset = 0
-    while len(results) > same_key_offset \
-          and results[-same_key_offset - 1][tx_id_keys] == border_tx_id:
+    while len(results) > same_key_offset and results[-same_key_offset - 1][tx_id_keys] == border_tx_id: # noqa
         same_key_offset += 1
 
     if page == border_tx_id:
@@ -797,16 +795,16 @@ class Cassandra:
                                     token_currency=None,
                                     page=None,
                                     pagesize=None):
-        try:
-            page = int(page) if page is not None else None
-        except ValueError:
-            raise BadUserInputException(f"Page {page} is not an integer")
         ascending = order == 'asc'
 
+        self.logger.debug(f'min_height {min_height}')
+        self.logger.debug(f'max_height {max_height}')
         first_tx_id, upper_bound = \
             await self.resolve_tx_id_range_by_block(currency,
                                                     min_height,
                                                     max_height)
+        self.logger.debug(f'first_tx_id {first_tx_id}')
+        self.logger.debug(f'upper_bound {upper_bound}')
 
         fetch_size = min(pagesize or BIG_PAGE_SIZE, BIG_PAGE_SIZE)
         include_assets = [currency.upper()]
@@ -886,7 +884,7 @@ class Cassandra:
                     raise BadUserInputException(
                         f'Block {orig_max_height} does not contains '
                         'transactions')
-            last_tx_id = max(latter_txs) + 1 if latter_txs else None
+            last_tx_id = max(latter_txs) if latter_txs else None
         return first_tx_id, last_tx_id
 
     @eth
@@ -1157,11 +1155,6 @@ class Cassandra:
                          order=None,
                          page=None,
                          pagesize=None):
-        try:
-            page = int(page) if page is not None else None
-        except ValueError:
-            raise BadUserInputException(f"Page {page} is not an integer")
-
         ascending = order == 'asc'
 
         if node_type == NodeType.ADDRESS:
@@ -1251,7 +1244,7 @@ class Cassandra:
                 include_assets=assets,
                 ascending=ascending,
                 tx_ids=first_tx_ids,  # limit second set by tx ids of first set
-                page=page,
+                page=None,
                 fetch_size=fs_it)
             self.logger.debug(f'results2 {len(results2)} {page}')
 
@@ -2217,8 +2210,6 @@ class Cassandra:
             # at it must be 2
             fs_junk = max(2, ceil(fs_it / (len(include_assets) + 2)))
 
-            self.logger.setLevel(logging.DEBUG)
-
             cql_stmt = build_select_address_txs_statement(
                 network,
                 node_type,
@@ -2264,25 +2255,34 @@ class Cassandra:
             # run one query per direction, asset and secondary group id
             aws = [fetch(cql_stmt, p) for p in params_junks]
 
+            tx_id_keys = 'transaction_id' if is_eth_like(network) else 'tx_id'
             # collect and merge results
             more_results, page, offset = merge_address_txs_subquery_results(
                 self.logger,
                 [r.current_rows for r in await asyncio.gather(*aws)],
                 ascending,
                 fs_it,
-                'transaction_id' if is_eth_like(network) else 'tx_id',
+                tx_id_keys,
                 fetched_limit=fs_junk,
                 page=page,
                 offset=offset)
+
+            self.logger.debug(f'tx_id_lower_bound {tx_id_lower_bound}')
+            self.logger.debug(f'tx_id_upper_bound {tx_id_upper_bound}')
+
+            more_results = [r for r in more_results
+                            if (tx_id_lower_bound is None
+                                or r[tx_id_keys] >= tx_id_lower_bound)
+                            and (tx_id_upper_bound is None
+                                 or r[tx_id_keys] <= tx_id_upper_bound)]
 
             self.logger.debug(f'list tx ordered page {page}:{offset}')
             self.logger.debug(f'more_results len {len(more_results)}')
 
             results.extend(more_results)
-            if page is None:
+            if page is None or tx_ids:
                 # no more data expected end loop
                 break
-        self.logger.setLevel(logging.INFO)
         return results, f'{page}:{offset}' if page is not None else None
 
     async def list_txs_by_node_type_eth(self,
