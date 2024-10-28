@@ -1086,7 +1086,10 @@ components:
           - list_entity_links
           - list_entity_addresses
           - get_tx
+          - list_token_txs
           - get_tx_io
+          - get_spent_in_txs
+          - get_spending_txs
           - get_exchange_rates
       description: The operation to execute in bulk
       example: get_block
