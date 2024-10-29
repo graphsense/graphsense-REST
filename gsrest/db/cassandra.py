@@ -230,6 +230,9 @@ def merge_address_txs_subquery_results(
                      reverse=not ascending,
                      key=partial(transaction_ordering_key, tx_id_keys))
 
+    # pp = BytesPrettyPrinter()
+    # logger.debug(f'results {pp.pformat(results)}')
+
     if results and offset:
         results = results[offset:]
 
@@ -608,11 +611,12 @@ class Cassandra:
                                 "%(" + k + ")s", fmt(v))
                     else:
                         formatted = query % tuple([fmt(v) for v in params])
-                    self.logger.debug(formatted)
-                    # pp = BytesPrettyPrinter()
-                    # self.logger.debug(pp.pformat(result.current_rows))
-                    self.logger.debug(
-                        f'result size {len(result.current_rows)}')
+                    if len(result.current_rows) > 0:
+                        self.logger.debug(formatted)
+                        # pp = BytesPrettyPrinter()
+                        # self.logger.debug(pp.pformat(result.current_rows))
+                        self.logger.debug(
+                            f'result size {len(result.current_rows)}')
                 loop.call_soon_threadsafe(future.set_result, result)
 
             def on_err(result):
@@ -2208,7 +2212,8 @@ class Cassandra:
 
             # divide fetch_size by number of result sets
             # at it must be 2
-            fs_junk = max(2, ceil(fs_it / (len(include_assets) + 2)))
+            fs_junk = max(2 + (offset or 0),
+                          ceil(fs_it / (len(include_assets) + 2)))
 
             cql_stmt = build_select_address_txs_statement(
                 network,
