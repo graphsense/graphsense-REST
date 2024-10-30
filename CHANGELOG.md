@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [24.10.1] - 2024-10-30
+
+### Fixed
+- missing eth/tron address sub-transaction when paging
+- missing bulk-endpoints list_token_txs, get_spent_in_txs, get_sending_txs, get_block_by_date, get_tag_summary_by_address
+
 ## [24.10.0] - 2024-10-18
 
 ### Added
