@@ -1,6 +1,6 @@
 all: format lint
 
-GS_REST_SERVICE_VERSION ?= "24.05.0rc1"
+GS_REST_SERVICE_VERSION ?= "24.11.0"
 GS_REST_DEV_PORT ?= 9000
 
 test:
