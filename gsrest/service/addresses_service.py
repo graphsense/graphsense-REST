@@ -181,7 +181,7 @@ async def list_address_links(request,
     return await common.links_response(request, currency, result)
 
 
-async def get_address_entity(request, currency, address):
+async def get_address_entity(request, currency, address, include_actors=True):
     address_canonical = cannonicalize_address(currency, address)
     db = request.app['db']
     try:
@@ -199,7 +199,7 @@ async def get_address_entity(request, currency, address):
         return await get_entity(request,
                                 currency,
                                 entity_id,
-                                include_actors=True)
+                                include_actors=include_actors)
     except ClusterNotFoundException:
         raise DBInconsistencyException(
             f'entity referenced by {address} in {currency} not found')

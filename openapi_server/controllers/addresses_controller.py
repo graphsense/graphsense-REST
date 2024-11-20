@@ -90,7 +90,7 @@ async def get_address(request: web.Request, currency, address, include_actors=No
         raise web.HTTPInternalServerError()
 
 
-async def get_address_entity(request: web.Request, currency, address) -> web.Response:
+async def get_address_entity(request: web.Request, currency, address, include_actors=None) -> web.Response:
     """Get the entity of an address
 
     
@@ -99,6 +99,8 @@ async def get_address_entity(request: web.Request, currency, address) -> web.Res
     :type currency: str
     :param address: The cryptocurrency address
     :type address: str
+    :param include_actors: Whether to include information about the actor behind the address
+    :type include_actors: bool
 
     """
 
@@ -123,11 +125,11 @@ async def get_address_entity(request: web.Request, currency, address) -> web.Res
     request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
-        if 'currency' in ['','currency','address']:
+        if 'currency' in ['','currency','address','include_actors']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.get_address_entity(request
-                ,currency=currency,address=address)
+                ,currency=currency,address=address,include_actors=include_actors)
         result = await result
 
         for plugin in request.app['plugins']:

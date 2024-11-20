@@ -5,7 +5,7 @@ info:
   contact:
     name: Iknaio Cryptoasset Analytics GmbH
     email: contact@ikna.io
-  version: "1.7.1"
+  version: "1.8.0"
 servers:
   - url: 'https://api.ikna.io'
 paths:
@@ -235,6 +235,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/currency' 
         - $ref: '#/components/parameters/address' 
+        - $ref: '#/components/parameters/include_actors_defaulttrue'
       responses:
         "200":
           description: OK

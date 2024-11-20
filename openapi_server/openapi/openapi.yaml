@@ -5,7 +5,7 @@ info:
     name: Iknaio Cryptoasset Analytics GmbH
   description: GraphSense API provides programmatic access to various ledgers' addresses, entities, blocks, transactions and tags for automated and highly efficient forensics tasks.
   title: GraphSense API
-  version: 1.7.1
+  version: 1.8.0
 servers:
   - url: https://api.ikna.io
 paths:
@@ -326,6 +326,15 @@ paths:
           schema:
             $ref: '#/components/schemas/address_id'
           style: simple
+        - description: Whether to include information about the actor behind the address
+          explode: true
+          in: query
+          name: include_actors
+          required: false
+          schema:
+            default: true
+            type: boolean
+          style: form
       responses:
         "200":
           content:
@@ -894,7 +903,10 @@ paths:
               - list_entity_links
               - list_entity_addresses
               - get_tx
+              - list_token_txs
               - get_tx_io
+              - get_spent_in_txs
+              - get_spending_txs
               - get_exchange_rates
             type: string
           style: simple
@@ -973,7 +985,10 @@ paths:
               - list_entity_links
               - list_entity_addresses
               - get_tx
+              - list_token_txs
               - get_tx_io
+              - get_spent_in_txs
+              - get_spending_txs
               - get_exchange_rates
             type: string
           style: simple
@@ -2783,7 +2798,10 @@ components:
           - list_entity_links
           - list_entity_addresses
           - get_tx
+          - list_token_txs
           - get_tx_io
+          - get_spent_in_txs
+          - get_spending_txs
           - get_exchange_rates
         type: string
       style: simple
