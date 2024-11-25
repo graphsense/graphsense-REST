@@ -433,6 +433,8 @@ paths:
         - $ref: '#/components/parameters/currency' 
         - $ref: '#/components/parameters/tx_hash' 
         - $ref: '#/components/parameters/include_io'
+        - $ref: '#/components/parameters/include_nonstandard_io'
+        - $ref: '#/components/parameters/include_io_index'
         - $ref: '#/components/parameters/token_tx_id'
       responses:
         "200":
@@ -475,6 +477,8 @@ paths:
         - $ref: '#/components/parameters/currency' 
         - $ref: '#/components/parameters/tx_hash' 
         - $ref: '#/components/parameters/io'
+        - $ref: '#/components/parameters/include_nonstandard_io'
+        - $ref: '#/components/parameters/include_io_index'
       responses:
         "200":
           description: OK
@@ -949,6 +953,22 @@ components:
         type: boolean
         default: false
       description: Whether to include inputs/outputs of a transaction (UTXO only)
+    include_nonstandard_io:
+        in: query
+        name: include_nonstandard_io
+        required: false
+        schema:
+            type: boolean
+            default: false
+        description: Whether to include non-standard inputs/outputs such as OP_RETURN of a transaction (UTXO only)
+    include_io_index:
+        in: query
+        name: include_io_index
+        required: false
+        schema:
+            type: boolean
+            default: false
+        description: Whether to include the index of inputs/outputs of a transaction (UTXO only)
     token_tx_id:
       in: query
       name: token_tx_id
@@ -1994,6 +2014,10 @@ components:
             $ref: '#/components/schemas/address_id'
         value:
           $ref: '#/components/schemas/values'
+        index:
+          type: integer
+          format: int32
+          description: Optional index for the inputs and outputs
     tx_account:
       type: object
       required:
@@ -2665,6 +2689,7 @@ components:
             - code: usd
               value: 25.55
           value: 21200000
+        index: 0
       - address:
           - 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
         value:

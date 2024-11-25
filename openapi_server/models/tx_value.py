@@ -15,24 +15,28 @@ class TxValue(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, address: List[str]=None, value: Values=None):
+    def __init__(self, address: List[str]=None, value: Values=None, index: int=None):
         """TxValue - a model defined in OpenAPI
 
         :param address: The address of this TxValue.
         :param value: The value of this TxValue.
+        :param index: The index of this TxValue.
         """
         self.openapi_types = {
             'address': List[str],
-            'value': Values
+            'value': Values,
+            'index': int
         }
 
         self.attribute_map = {
             'address': 'address',
-            'value': 'value'
+            'value': 'value',
+            'index': 'index'
         }
 
         self._address = address
         self._value = value
+        self._index = index
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'TxValue':
@@ -52,7 +56,8 @@ class TxValue(Model):
         if not shallow:
             return Model.to_dict(self)
         return { 'address': self._address,
-            'value': self._value }
+            'value': self._value,
+            'index': self._index }
 
 
     @property
@@ -100,3 +105,26 @@ class TxValue(Model):
             raise BadUserInputException("Invalid value for `value`, must not be `None`")
 
         self._value = value
+
+    @property
+    def index(self):
+        """Gets the index of this TxValue.
+
+        Optional index for the inputs and outputs
+
+        :return: The index of this TxValue.
+        :rtype: int
+        """
+        return self._index
+
+    @index.setter
+    def index(self, index):
+        """Sets the index of this TxValue.
+
+        Optional index for the inputs and outputs
+
+        :param index: The index of this TxValue.
+        :type index: int
+        """
+
+        self._index = index

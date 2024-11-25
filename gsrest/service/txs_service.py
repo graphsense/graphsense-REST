@@ -63,7 +63,7 @@ def tx_account_from_row(currency, row, rates, token_config):
                          row['value'], r, token_config[row["currency"]]))
 
 
-def from_row(currency, row, rates, token_config, include_io=False):
+def from_row(currency, row, rates, token_config, include_io=False, include_nonstandard_io=False, include_io_index=False):
     if is_eth_like(currency):
         return tx_account_from_row(currency, row, rates, token_config)
 
@@ -74,9 +74,9 @@ def from_row(currency, row, rates, token_config, include_io=False):
                   no_inputs=0 if not row['inputs'] else len(row['inputs']),
                   no_outputs=0 if not row['outputs'] else len(row['outputs']),
                   inputs=io_from_rows(currency, row, 'inputs', rates,
-                                      include_io),
+                                      include_io, include_nonstandard_io, include_io_index),
                   outputs=io_from_rows(currency, row, 'outputs', rates,
-                                       include_io),
+                                       include_io, include_nonstandard_io, include_io_index),
                   timestamp=row['timestamp'],
                   total_input=convert_value(currency, row['total_input'],
                                             rates),
@@ -109,18 +109,34 @@ async def get_spending_txs(request, currency: str, tx_hash: str,
     return results
 
 
-def io_from_rows(currency, values, key, rates, include_io):
+def io_from_rows(currency, values, key, rates, include_io, include_nonstandard_io,
+                 include_io_index):
     if not include_io:
         return None
     if key not in values:
         return None
     if not values[key]:
         return []
-    return [
-        TxValue(address=i.address,
-                value=convert_value(currency, i.value, rates))
-        for i in values[key] if i.address is not None
-    ]
+
+    results = []
+    for idx, i in enumerate(values[key]):
+        if i.address is not None:
+            results.append(
+                TxValue(
+                    address=i.address,
+                    value=convert_value(currency, i.value, rates),
+                    index=idx if include_io_index else None
+                )
+            )
+        elif include_nonstandard_io:
+            results.append(
+                TxValue(
+                    address=None,
+                    value=convert_value(currency, i.value, rates),
+                    index=idx if include_io_index else None
+                )
+            )
+    return results
 
 
 async def list_token_txs(request, currency, tx_hash, token_tx_id=None):
@@ -162,7 +178,9 @@ async def get_tx(request,
                  currency,
                  tx_hash,
                  token_tx_id=None,
-                 include_io=False):
+                 include_io=False,
+                 include_nonstandard_io=False,
+                 include_io_index=False):
     db = request.app['db']
 
     trace_index = None
@@ -216,14 +234,15 @@ async def get_tx(request,
             result['type'] = 'external'
 
         result = from_row(currency, result, rates,
-                          db.get_token_configuration(currency), include_io)
+                          db.get_token_configuration(currency), include_io,
+                          include_nonstandard_io, include_io_index)
         return result
 
 
-async def get_tx_io(request, currency, tx_hash, io):
+async def get_tx_io(request, currency, tx_hash, io,include_nonstandard_io,include_io_index):
     if is_eth_like(currency):
         raise NotFoundException('get_tx_io not implemented for ETH')
-    result = await get_tx(request, currency, tx_hash, include_io=True)
+    result = await get_tx(request, currency, tx_hash, include_io=True, include_nonstandard_io=include_nonstandard_io, include_io_index=include_io_index)
     return getattr(result, io)
 
 

@@ -1742,6 +1742,24 @@ paths:
             default: false
             type: boolean
           style: form
+        - description: Whether to include non-standard inputs/outputs such as OP_RETURN of a transaction (UTXO only)
+          explode: true
+          in: query
+          name: include_nonstandard_io
+          required: false
+          schema:
+            default: false
+            type: boolean
+          style: form
+        - description: Whether to include the index of inputs/outputs of a transaction (UTXO only)
+          explode: true
+          in: query
+          name: include_io_index
+          required: false
+          schema:
+            default: false
+            type: boolean
+          style: form
         - description: Select a specific token_transaction (Account model only)
           explode: true
           in: query
@@ -1897,6 +1915,24 @@ paths:
               - outputs
             type: string
           style: simple
+        - description: Whether to include non-standard inputs/outputs such as OP_RETURN of a transaction (UTXO only)
+          explode: true
+          in: query
+          name: include_nonstandard_io
+          required: false
+          schema:
+            default: false
+            type: boolean
+          style: form
+        - description: Whether to include the index of inputs/outputs of a transaction (UTXO only)
+          explode: true
+          in: query
+          name: include_io_index
+          required: false
+          schema:
+            default: false
+            type: boolean
+          style: form
       responses:
         "200":
           content:
@@ -2334,6 +2370,7 @@ components:
               - code: usd
                 value: 25.55
             value: 21200000
+          index: 0
         - address:
             - 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
           value:
@@ -2640,6 +2677,26 @@ components:
       explode: true
       in: query
       name: include_io
+      required: false
+      schema:
+        default: false
+        type: boolean
+      style: form
+    include_nonstandard_io:
+      description: Whether to include non-standard inputs/outputs such as OP_RETURN of a transaction (UTXO only)
+      explode: true
+      in: query
+      name: include_nonstandard_io
+      required: false
+      schema:
+        default: false
+        type: boolean
+      style: form
+    include_io_index:
+      description: Whether to include the index of inputs/outputs of a transaction (UTXO only)
+      explode: true
+      in: query
+      name: include_io_index
       required: false
       schema:
         default: false
@@ -5139,6 +5196,7 @@ components:
         address:
           - 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
           - 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
+        index: 0
         value:
           fiat_values:
             - code: code
@@ -5154,6 +5212,11 @@ components:
           type: array
         value:
           $ref: '#/components/schemas/values'
+        index:
+          description: Optional index for the inputs and outputs
+          format: int32
+          title: index
+          type: integer
       required:
         - address
         - value
