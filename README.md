@@ -99,14 +99,10 @@ REST log messages can be delivered via mail. See `instance/config.yaml.template`
 
 ### Generate server stub
 
+Install version 4.44.2 of yq (https://github.com/mikefarah/yq/) and run the following command to generate the server stub:
+
 ```sh
-BRANCH=master
-docker run --rm \
-  -v "${PWD}:/build" \
-  -v "${PWD}/templates:/templates" \
-  openapitools/openapi-generator-cli \
-  generate -i "https://raw.githubusercontent.com/graphsense/graphsense-openapi/${BRANCH}/graphsense.yaml" \
-  -g python-aiohttp -o /build -t /templates
+generate-openapi-server
 ```
 
 The service implementation (`gsrest/service`) should use the generated models
