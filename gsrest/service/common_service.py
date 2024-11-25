@@ -159,7 +159,6 @@ async def list_neighbors(request,
 
 
 async def add_labels(request, currency, node_type: NodeType, that, nodes):
-
     def identity(x, y):
         return y
     (field, tfield, fun, fmt) = \

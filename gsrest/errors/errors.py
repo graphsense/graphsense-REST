@@ -21,19 +21,16 @@ class NotFoundException(UserFacingExceptions):
 
 
 class NetworkNotFoundException(NotFoundException):
-
     def __init__(self, network):
         super().__init__(f'Network {network} not supported')
 
 
 class BlockNotFoundException(NotFoundException):
-
     def __init__(self, network, height):
         super().__init__(f'Block {height} not found in network {network}')
 
 
 class TransactionNotFoundException(NotFoundException):
-
     def __init__(self, network, tx_hash, token_id=None):
         msg = \
             (f'Token transaction {tx_hash}:{token_id} '
@@ -51,7 +48,6 @@ def nodeNotFoundException(network, node_type: NodeType, id):
 
 
 class AddressNotFoundException(NotFoundException):
-
     def __init__(self, network, address, no_external_txs=False):
         address = address_to_user_format(network, address)
         reason = " because it has no external transactions" \
@@ -62,7 +58,6 @@ class AddressNotFoundException(NotFoundException):
 
 
 class ClusterNotFoundException(NotFoundException):
-
     def __init__(self, network, cluster):
         super().__init__(f'Cluster {cluster} not found in network {network}')
 

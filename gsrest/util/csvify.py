@@ -11,7 +11,6 @@ def create_download_header(filename):
 
 
 class writer:
-
     def write(self, str):
         self.str = str
 

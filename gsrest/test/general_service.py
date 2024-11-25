@@ -59,7 +59,6 @@ async def get_statistics(test_case):
 
 
 async def search(test_case):
-
     def base_search_results():
         return SearchResult(currencies=[
             SearchResultByCurrency(currency='btc', addresses=[], txs=[]),

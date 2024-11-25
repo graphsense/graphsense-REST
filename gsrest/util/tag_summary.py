@@ -7,7 +7,6 @@ from typing import Dict
 
 
 class wCounter:
-
     def __init__(self):
         self.wctr = Counter()
         self.ctr = Counter()
