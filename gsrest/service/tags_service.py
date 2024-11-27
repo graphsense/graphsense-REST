@@ -1,4 +1,5 @@
-import json
+from typing import List, Callable
+from functools import wraps
 from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.address_tags import AddressTags
 from openapi_server.models.taxonomy import Taxonomy
@@ -7,8 +8,9 @@ from openapi_server.models.concept import Concept
 from openapi_server.models.actor import Actor
 from openapi_server.models.actor_context import ActorContext
 from openapi_server.models.labeled_item_ref import LabeledItemRef
-from gsrest.db.util import tagstores, tagstores_with_paging, dt_to_int
+from gsrest.db.util import dt_to_int
 from gsrest.errors import NotFoundException
+from tagstore.db import TagstoreDbAsync, Taxonomies, TagPublic, ActorPublic
 
 
 def address_tag_from_row(row):
@@ -30,106 +32,178 @@ def address_tag_from_row(row):
                       currency=row['currency'].upper())
 
 
-def actor_context_from_row(context_str):
-    if context_str is None:
-        return None
-    ctx = json.loads(context_str)
-
-    # currently we only have a license for coingecko images
-    # so we filter here.
-    image_urls = [img for img in ctx.get("images", []) if "coingecko."]
-
-    return ActorContext(
-        uris=ctx.get("uris", []),
-        images=image_urls,
-        refs=ctx.get("refs", []),
-        coingecko_ids=ctx.get("coingecko_ids", []),
-        defilama_ids=ctx.get("defilama_ids", []),
-        twitter_handle=ctx.get("twitter_handle", None),
-        github_organisation=ctx.get("github_organisation", None),
-        legal_name=ctx.get("legal_name", None),
-    )
+def address_tag_from_PublicTag(pt: TagPublic):
+    return AddressTag(address=pt.identifier,
+                      entity=None,
+                      label=pt.label,
+                      category=pt.primary_concept,
+                      actor=pt.actor,
+                      abuse=None,
+                      source=pt.source,
+                      lastmod=pt.lastmod,
+                      tagpack_is_public=pt.group == "public",
+                      tagpack_uri=None,
+                      tagpack_creator=pt.creator,
+                      tagpack_title=None,
+                      confidence=pt.confidence,
+                      confidence_level=pt.confidence_level,
+                      is_cluster_definer=pt.is_cluster_definer,
+                      currency=pt.network.upper())
 
 
-def actor_from_row(row, jurisdictions, categories, nr_tags):
-    return Actor(id=row["id"],
-                 uri=row["uri"],
-                 label=row["label"],
-                 jurisdictions=[
-                     LabeledItemRef(id=x["country_id"], label=x["label"])
-                     for x in jurisdictions
-                 ],
-                 categories=[
-                     LabeledItemRef(id=x["category_id"], label=x["label"])
-                     for x in categories
-                 ],
-                 nr_tags=nr_tags,
-                 context=actor_context_from_row(row["context"]))
+def get_address_tag_result(current_page: int,
+                           tags: List[AddressTag]) -> AddressTags:
+    return AddressTags(next_page=current_page + 1 if len(tags) > 0 else None,
+                       address_tags=tags)
 
 
+def ensure_taxonomy_cache():
+
+    def wrapper(func):
+
+        @wraps(func)
+        async def wrapped(*args, **kwargs):
+            request = args[0]
+            tagstore_db = TagstoreDbAsync(request.app["gs-tagstore"])
+            if request.app.get('taxonomy_labels', None) is None:
+                taxs = await tagstore_db.get_taxonomies(
+                    {Taxonomies.CONCEPT, Taxonomies.COUNTRY})
+                request.app['taxonomy_labels'] = {
+                    Taxonomies.CONCEPT: {x.id: x.label
+                                         for x in taxs.concept},
+                    Taxonomies.COUNTRY: {x.id: x.label
+                                         for x in taxs.country}
+                }
+            return await func(*args, **kwargs)
+
+        return wrapped
+
+    return wrapper
+
+
+def get_tagstore_access_groups(request):
+    return ["public"
+            ] if not request.app['request_config']['show_private_tags'] else [
+                "public", "private"
+            ]
+
+
+def actor_from_ActorPublic(
+        ap: ActorPublic, label_for_idFn: Callable[[Taxonomies, str],
+                                                  str]) -> Actor:
+    return Actor(
+        id=ap.id,
+        uri=ap.primary_uri,
+        label=ap.label,
+        jurisdictions=[
+            LabeledItemRef(id=x, label=label_for_idFn(Taxonomies.COUNTRY, x))
+            for x in ap.jurisdictions
+        ],
+        categories=[
+            LabeledItemRef(id=x, label=label_for_idFn(Taxonomies.CONCEPT, x))
+            for x in ap.concepts
+        ],
+        nr_tags=ap.nr_tags,
+        context=ActorContext(
+            uris=ap.additional_uris,
+            images=ap.image_links,
+            refs=ap.online_references,
+            coingecko_ids=ap.coingecko_ids,
+            defilama_ids=ap.defilama_ids,
+            twitter_handle=",".join(ap.twitter_handles),
+            github_organisation=",".join(ap.github_organisations),
+            legal_name=ap.legal_name,
+        ))
+
+
+@ensure_taxonomy_cache()
 async def get_actor(request, actor):
-    actor_cr = await tagstores(request.app['tagstores'], lambda x: x,
-                               'get_actor', actor)
+    tsdb = TagstoreDbAsync(request.app["gs-tagstore"])
 
-    categories = await tagstores(request.app['tagstores'], lambda x: x,
-                                 'get_actor_categories', actor)
+    a = await tsdb.get_actor_by_id(actor, include_tag_count=True)
 
-    jurisdictions = await tagstores(request.app['tagstores'], lambda x: x,
-                                    'get_actor_jurisdictions', actor)
-
-    nr_tags = (await tagstores(request.app['tagstores'], lambda x: x["count"],
-                               'get_nr_of_tags_by_actor', actor))[0]
-
-    actor_row = actor_cr
-
-    if len(actor_row) == 0:
+    if a is None:
         raise NotFoundException(f"Actor {actor} not found.")
     else:
-        return actor_from_row(actor_row[0], jurisdictions, categories, nr_tags)
+        taxonomies = request.app["taxonomy_labels"]
+        breakpoint()
+        return actor_from_ActorPublic(
+            a, label_for_idFn=lambda t, x: taxonomies[t].get(x, None))
 
 
 async def get_actor_tags(request, actor, page=None, pagesize=None):
-    fun = 'list_address_tags_for_actor'
-    to_obj = address_tag_from_row
+    tsdb = TagstoreDbAsync(request.app["gs-tagstore"])
 
     if pagesize is None:
         pagesize = 100
     pagesize = min(pagesize, 100)
 
-    tags, next_page = await tagstores_with_paging(
-        request.app['tagstores'], to_obj, fun, page, pagesize, actor,
-        request.app['request_config']['show_private_tags'])
+    if page is None:
+        page = 0
+    page = int(page)
 
-    return AddressTags(next_page=next_page, address_tags=tags)
+    tags = await tsdb.get_tags_by_actorid(
+        actor,
+        offset=page * pagesize,
+        page_size=pagesize,
+        groups=get_tagstore_access_groups(request))
+
+    return get_address_tag_result(page,
+                                  list(map(address_tag_from_PublicTag, tags)))
 
 
 async def list_address_tags(request, label, page=None, pagesize=None):
-    fun = 'list_address_tags'
-    to_obj = address_tag_from_row
+    tsdb = TagstoreDbAsync(request.app["gs-tagstore"])
 
     if pagesize is None:
         pagesize = 100
     pagesize = min(pagesize, 100)
 
-    tags, next_page = await tagstores_with_paging(
-        request.app['tagstores'], to_obj, fun, page, pagesize, label,
-        request.app['request_config']['show_private_tags'])
+    if page is None:
+        page = 0
+    page = int(page)
 
-    return AddressTags(next_page=next_page, address_tags=tags)
+    tags = await tsdb.get_tags_by_label(
+        label,
+        offset=page * pagesize,
+        page_size=pagesize,
+        groups=get_tagstore_access_groups(request))
+
+    return get_address_tag_result(page,
+                                  list(map(address_tag_from_PublicTag, tags)))
 
 
 async def list_concepts(request, taxonomy):
-    return await tagstores(
-        request.app['tagstores'],
-        lambda row: Concept(id=row['id'],
-                            label=row['label'],
-                            description=row['description'],
-                            taxonomy=row['taxonomy'],
-                            uri=row['source']), 'list_concepts', taxonomy)
+    tsdb = TagstoreDbAsync(request.app["gs-tagstore"])
+
+    taxs = await tsdb.get_taxonomies({Taxonomies[taxonomy.upper()]})
+
+    restult = []
+
+    for k, v in taxs:
+        if v is None:
+            continue
+
+        for x in v:
+            restult.append(
+                Concept(id=x.id,
+                        label=x.label,
+                        description=x.description,
+                        taxonomy=x.taxonomy,
+                        uri=x.source))
+
+    return restult
 
 
 async def list_taxonomies(request):
-    return await tagstores(
-        request.app['tagstores'],
-        lambda row: Taxonomy(taxonomy=row['id'], uri=row['source']),
-        'list_taxonomies')
+
+    tsdb = TagstoreDbAsync(request.app["gs-tagstore"])
+
+    taxs = await tsdb.get_taxonomies()
+
+    return [
+        Taxonomy(taxonomy=k,
+                 uri=("https://github.com/graphsense/"
+                      "graphsense-tagpack-tool/tree/master/src/tagpack/db"))
+        for k, v in taxs
+    ]

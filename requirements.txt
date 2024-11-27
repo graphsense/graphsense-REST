@@ -17,3 +17,4 @@ base58~=2.1
 cashaddress>=1.0.6, < 1.1
 async-lru~=2.0.4
 python-dateutil>=2.9.0
+tagpack-tool @ git+https://github.com/graphsense/graphsense-tagpack-tool@feature/interface

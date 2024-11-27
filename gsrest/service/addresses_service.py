@@ -60,6 +60,7 @@ async def list_tags_by_address(request,
                                page=None,
                                pagesize=None,
                                include_best_cluster_tag=False):
+
     address = address_to_user_format(currency, address)
 
     tagdata = await common.list_tags_by_address(request,

@@ -131,49 +131,46 @@ class Tagstore:
                 await cur.execute(query, params)
                 return await to_result(self.logger, cur, page, pagesize)
 
-    def list_taxonomies(self):
-        return self.execute("select * from taxonomy")
-
     def list_concepts(self, taxonomy):
         return self.execute("select * from concept where taxonomy = %s",
                             [taxonomy])
 
-    def list_address_tags(self,
-                          label,
-                          show_private=False,
-                          page=None,
-                          pagesize=None):
-        query = f"""select
-                        t.*,
-                        tp.uri,
-                        tp.uri,
-                        tp.creator,
-                        tp.title,
-                        tp.is_public,
-                        c.level,
-                        acm.gs_cluster_id,
-                        array(
-                            select concept_id 
-                            from tag_concept tc 
-                            where tc.tag_id = t.id
-                        ) as concepts
-                    from
-                       tag t,
-                       tagpack tp,
-                       confidence c,
-                       address_cluster_mapping acm
-                   where
-                       t.tagpack = tp.id
-                       and t.confidence = c.id
-                       and acm.address=t.address
-                       and acm.currency=t.currency
-                       {hide_private_condition(show_private)}
-                       and t.label = %s """  # noqa
-        return self.execute(query,
-                            params=[label],
-                            paging_key='t.id',
-                            page=page,
-                            pagesize=pagesize)
+    # def list_address_tags(self,
+    #                       label,
+    #                       show_private=False,
+    #                       page=None,
+    #                       pagesize=None):
+    #     query = f"""select
+    #                     t.*,
+    #                     tp.uri,
+    #                     tp.uri,
+    #                     tp.creator,
+    #                     tp.title,
+    #                     tp.is_public,
+    #                     c.level,
+    #                     acm.gs_cluster_id,
+    #                     array(
+    #                         select concept_id
+    #                         from tag_concept tc
+    #                         where tc.tag_id = t.id
+    #                     ) as concepts
+    #                 from
+    #                    tag t,
+    #                    tagpack tp,
+    #                    confidence c,
+    #                    address_cluster_mapping acm
+    #                where
+    #                    t.tagpack = tp.id
+    #                    and t.confidence = c.id
+    #                    and acm.address=t.address
+    #                    and acm.currency=t.currency
+    #                    {hide_private_condition(show_private)}
+    #                    and t.label = %s """  # noqa
+    #     return self.execute(query,
+    #                         params=[label],
+    #                         paging_key='t.id',
+    #                         page=page,
+    #                         pagesize=pagesize)
 
     def list_matching_labels(self,
                              currency,
@@ -468,72 +465,72 @@ class Tagstore:
                     order by label"""
         return await self.execute(query, params=[currency.upper(), entity])
 
-    async def get_actor(self, actor_id):
-        query = "SELECT * FROM actor WHERE id=%s"
-        return await self.execute(query, params=[actor_id])
+    # async def get_actor(self, actor_id):
+    #     query = "SELECT * FROM actor WHERE id=%s"
+    #     return await self.execute(query, params=[actor_id])
 
-    async def get_actor_categories(self, actor_id):
-        query = (
-            "SELECT actor_categories.*,concept.label FROM "
-            "actor_categories, concept "
-            "WHERE actor_categories.category_id = concept.id and actor_id=%s")
-        return await self.execute(query, params=[actor_id])
+    # async def get_actor_categories(self, actor_id):
+    #     query = (
+    #         "SELECT actor_categories.*,concept.label FROM "
+    #         "actor_categories, concept "
+    #         "WHERE actor_categories.category_id = concept.id and actor_id=%s")
+    #     return await self.execute(query, params=[actor_id])
 
-    async def get_actor_jurisdictions(self, actor_id):
-        query = (
-            "SELECT actor_jurisdictions.*,concept.label FROM "
-            "actor_jurisdictions, concept "
-            "WHERE actor_jurisdictions.country_id = concept.id and actor_id=%s"
-        )
-        return await self.execute(query, params=[actor_id])
+    # async def get_actor_jurisdictions(self, actor_id):
+    #     query = (
+    #         "SELECT actor_jurisdictions.*,concept.label FROM "
+    #         "actor_jurisdictions, concept "
+    #         "WHERE actor_jurisdictions.country_id = concept.id and actor_id=%s"
+    #     )
+    #     return await self.execute(query, params=[actor_id])
 
-    async def get_nr_of_tags_by_actor(self, actor_id):
-        query = "SELECT count(*) FROM tag WHERE actor=%s"
-        return await self.execute(query, params=[actor_id])
+    # async def get_nr_of_tags_by_actor(self, actor_id):
+    #     query = "SELECT count(*) FROM tag WHERE actor=%s"
+    #     return await self.execute(query, params=[actor_id])
 
-    def list_address_tags_for_actor(self,
-                                    actor_id,
-                                    show_private=False,
-                                    page=None,
-                                    pagesize=None):
-        query = f"""select
-                        t.*,
-                        tp.uri,
-                        tp.creator,
-                        tp.title,
-                        tp.is_public,
-                        c.level,
-                        acm.gs_cluster_id,
-                        array(
-                            select concept_id 
-                            from tag_concept tc 
-                            where tc.tag_id = t.id
-                        ) as concepts
-                    from
-                       tag t,
-                       tagpack tp,
-                       confidence c,
-                       address_cluster_mapping acm
-                   where
-                       t.tagpack = tp.id
-                       and t.confidence = c.id
-                       and acm.address=t.address
-                       and acm.currency=t.currency
-                       {hide_private_condition(show_private)}
-                       and t.actor = %s """  # noqa
-        return self.execute(query,
-                            params=[actor_id],
-                            paging_key='t.id',
-                            page=page,
-                            pagesize=pagesize)
+    # def list_address_tags_for_actor(self,
+    #                                 actor_id,
+    #                                 show_private=False,
+    #                                 page=None,
+    #                                 pagesize=None):
+    #     query = f"""select
+    #                     t.*,
+    #                     tp.uri,
+    #                     tp.creator,
+    #                     tp.title,
+    #                     tp.is_public,
+    #                     c.level,
+    #                     acm.gs_cluster_id,
+    #                     array(
+    #                         select concept_id
+    #                         from tag_concept tc
+    #                         where tc.tag_id = t.id
+    #                     ) as concepts
+    #                 from
+    #                    tag t,
+    #                    tagpack tp,
+    #                    confidence c,
+    #                    address_cluster_mapping acm
+    #                where
+    #                    t.tagpack = tp.id
+    #                    and t.confidence = c.id
+    #                    and acm.address=t.address
+    #                    and acm.currency=t.currency
+    #                    {hide_private_condition(show_private)}
+    #                    and t.actor = %s """  # noqa
+    #     return self.execute(query,
+    #                         params=[actor_id],
+    #                         paging_key='t.id',
+    #                         page=page,
+    #                         pagesize=pagesize)
 
-    def count(self, currency, show_private=False):
-        query = """
-            select
-                no_labels,
-                no_implicit_tagged_addresses as no_tagged_addresses
-            from
-                statistics tp
-            where
-                currency = %s"""
-        return self.execute(query, params=[currency.upper()])
+    # def count(self, currency, show_private=False):
+    #     query = """
+    #         select
+    #             no_labels,
+    #             no_implicit_tagged_addresses as no_tagged_addresses
+    #         from
+    #             statistics tp
+    #         where
+    #             currency = %s"""
+    #     return self.execute(query, params=[currency.upper()])

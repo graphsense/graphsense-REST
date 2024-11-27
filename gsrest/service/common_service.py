@@ -20,6 +20,8 @@ from gsrest.util.address import address_to_user_format
 from gsrest.util import is_eth_like
 from gsrest.service.txs_service import tx_account_from_row
 
+from tagstore.db import TagstoreDbAsync
+
 
 def address_from_row(currency, row, rates, token_config, actors):
     return Address(
@@ -106,6 +108,12 @@ async def list_tags_by_address(request,
                                page=None,
                                pagesize=None):
 
+    private_tags = request.app['request_config']['show_private_tags']
+
+    # tsdb = TagstoreDbAsync(request.app["gs-tagstore"])
+
+    # tagdata_new = await tsdb.get_tags_by_subjectid(address, page, pagesize, ["public", 'private'] if private_tags else ["public"])
+
     try:
         address_tags, next_page = \
             await tagstores_with_paging(
@@ -120,6 +128,8 @@ async def list_tags_by_address(request,
                 f"Currency {currency} currently not supported")
         else:
             raise e
+
+    breakpoint()
 
     return AddressTags(address_tags=address_tags, next_page=next_page)
 

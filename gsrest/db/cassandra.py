@@ -178,14 +178,14 @@ def wc(cl, cond):
 
 
 def merge_address_txs_subquery_results(
-    logger,
-    result_sets: Sequence[Result],
-    ascending: bool,
-    fetch_size: int,
-    tx_id_keys: str = "tx_id",
-    fetched_limit: Optional[int] = None,
-    page: Optional[int] = None,
-    offset: int = 0
+        logger,
+        result_sets: Sequence[Result],
+        ascending: bool,
+        fetch_size: int,
+        tx_id_keys: str = "tx_id",
+        fetched_limit: Optional[int] = None,
+        page: Optional[int] = None,
+        offset: int = 0
 ) -> Tuple[Sequence[dict], Optional[int], Optional[int]]:
     """Merges sub results of the address txs queries per asset and direction
 
@@ -247,7 +247,8 @@ def merge_address_txs_subquery_results(
 
     # calc how many of the same border_tx_id
     same_key_offset = 0
-    while len(results) > same_key_offset and results[-same_key_offset - 1][tx_id_keys] == border_tx_id: # noqa
+    while len(results) > same_key_offset and results[
+            -same_key_offset - 1][tx_id_keys] == border_tx_id:  # noqa
         same_key_offset += 1
 
     if page == border_tx_id:
@@ -2275,11 +2276,13 @@ class Cassandra:
             self.logger.debug(f'tx_id_lower_bound {tx_id_lower_bound}')
             self.logger.debug(f'tx_id_upper_bound {tx_id_upper_bound}')
 
-            more_results = [r for r in more_results
-                            if (tx_id_lower_bound is None
-                                or r[tx_id_keys] >= tx_id_lower_bound)
-                            and (tx_id_upper_bound is None
-                                 or r[tx_id_keys] <= tx_id_upper_bound)]
+            more_results = [
+                r for r in more_results
+                if (tx_id_lower_bound is None
+                    or r[tx_id_keys] >= tx_id_lower_bound) and (
+                        tx_id_upper_bound is None
+                        or r[tx_id_keys] <= tx_id_upper_bound)
+            ]
 
             self.logger.debug(f'list tx ordered page {page}:{offset}')
             self.logger.debug(f'more_results len {len(more_results)}')

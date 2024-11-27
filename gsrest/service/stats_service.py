@@ -1,21 +1,23 @@
 from openapi_server.models.currency_stats import CurrencyStats
-from gsrest.db.util import tagstores
+from tagstore.db import TagstoreDbAsync
 
 
 async def get_currency_statistics(request, currency):
     db = request.app['db']
+
+    tsdb = TagstoreDbAsync(request.app["gs-tagstore"])
+
+    tag_stats = await tsdb.get_network_statistics_cached()
+
     result = await db.get_currency_statistics(currency)
     if result is None:
         raise SystemError(
             'statistics for currency {} not found'.format(currency))
-    counts = await tagstores(
-        request.app['tagstores'], lambda row: row, 'count', currency,
-        request.app['request_config']['show_private_tags'])
-    no_labels = 0
-    no_tagged_addresses = 0
-    for c in counts:
-        no_labels += c['no_labels']
-        no_tagged_addresses += c['no_tagged_addresses']
+
+    network_stats = tag_stats.by_network[currency.upper()]
+    no_labels = network_stats.nr_labels
+    no_tagged_addresses = network_stats.nr_identifiers_implicit
+
     return CurrencyStats(name=currency,
                          no_blocks=result['no_blocks'],
                          no_address_relations=result['no_address_relations'],

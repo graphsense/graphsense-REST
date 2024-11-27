@@ -1,6 +1,7 @@
 import importlib
 from gsrest.db.tagstore import Tagstore
 import asyncio
+from tagstore.db.database import get_db_engine_async
 
 connection = None
 
@@ -15,6 +16,9 @@ async def get_connection(app):
     app['tagstores'] = [
         Tagstore(conf, app.logger) for conf in app['config']['tagstores']
     ]
+
+    app['gs-tagstore'] = get_db_engine_async(
+        app['config']['gs-tagstore']['url'])
     aws = [ts.connect() for ts in app['tagstores']]
     await asyncio.gather(*aws)
     yield
