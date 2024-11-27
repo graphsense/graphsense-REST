@@ -37,6 +37,7 @@ SEARCH_PAGE_SIZE = 100
 
 
 class NetworkParameters(UserDict):
+
     def __getitem__(self, network):
         if network not in self:
             raise NetworkNotFoundException(network)
@@ -134,6 +135,7 @@ def build_token_tx(token_currency, tx, token_tx, log):
 
 
 class BytesPrettyPrinter(PrettyPrinter):
+
     def format(self, object, context, maxlevels, level):
         if isinstance(object, bytes):
             x = object.hex()
@@ -142,6 +144,7 @@ class BytesPrettyPrinter(PrettyPrinter):
 
 
 class Result:
+
     def __init__(self, current_rows, params, paging_state):
         self.current_rows = current_rows
         self.params = params
@@ -301,7 +304,9 @@ def build_select_address_txs_statement(network: str, node_type: NodeType,
 
 
 class Cassandra:
+
     def eth(func):
+
         def check(*args, **kwargs):
             self = args[0]
             currency = args[1]
@@ -320,6 +325,7 @@ class Cassandra:
         return check
 
     def new(func):
+
         def check(*args, **kwargs):
             self = args[0]
             currency = args[1]
@@ -1981,7 +1987,8 @@ class Cassandra:
                     "and currency=%s"
 
             results = {
-                c: one(await self.execute_async(
+                c:
+                one(await self.execute_async(
                     currency, 'transformed', query,
                     [row['address_id'], row['address_id_group'], c]))
                 for c in balance_currencies
@@ -2272,10 +2279,9 @@ class Cassandra:
 
             more_results = [
                 r for r in more_results
-                if (tx_id_lower_bound is None
-                    or r[tx_id_keys] >= tx_id_lower_bound) and (
-                        tx_id_upper_bound is None
-                        or r[tx_id_keys] <= tx_id_upper_bound)
+                if (tx_id_lower_bound is None or r[tx_id_keys] >=
+                    tx_id_lower_bound) and (tx_id_upper_bound is None or
+                                            r[tx_id_keys] <= tx_id_upper_bound)
             ]
 
             self.logger.debug(f'list tx ordered page {page}:{offset}')

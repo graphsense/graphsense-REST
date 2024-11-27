@@ -41,6 +41,7 @@ def decode_page_handles(page):
 
 
 def encode_page_handles(pagesAndIds):
+
     def b64encode(value):
         return str(base64.b64encode(value.encode(encoding)), encoding)
 

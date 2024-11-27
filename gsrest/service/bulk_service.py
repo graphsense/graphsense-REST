@@ -71,6 +71,7 @@ async def bulk(request, currency, operation, body, num_pages, form='csv'):
 
 
 class writer:
+
     def write(self, str):
         self.str = str
 

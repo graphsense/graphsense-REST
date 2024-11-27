@@ -87,3 +87,6 @@ tests/instance/config.yaml
 
 #Plugins
 gsrest/plugins
+
+# IDE
+.idea
