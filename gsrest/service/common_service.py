@@ -1,6 +1,8 @@
+from typing import List
+
 from openapi_server.models.address import Address
 from openapi_server.models.tx_summary import TxSummary
-from openapi_server.models.address_tags import AddressTags
+from openapi_server.models.address_tag import AddressTag
 from gsrest.util.values import (convert_value, convert_token_values_map,
                                 to_values, to_values_tokens)
 from gsrest.service.rates_service import get_rates
@@ -9,18 +11,18 @@ from openapi_server.models.links import Links
 from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from openapi_server.models.labeled_item_ref import LabeledItemRef
 from gsrest.service.rates_service import list_rates
-from gsrest.db.util import tagstores, tagstores_with_paging
 from gsrest.db.node_type import NodeType
-from gsrest.service.tags_service import address_tag_from_row
+from gsrest.service.tags_service import (get_tagstore_access_groups,
+                                         address_tag_from_PublicTag,
+                                         get_address_tag_result)
 from gsrest.util import get_first_key_present
 from gsrest.errors import AddressNotFoundException, BadUserInputException
-from psycopg2.errors import InvalidTextRepresentation
 import gsrest.util.address
 from gsrest.util.address import address_to_user_format
 from gsrest.util import is_eth_like
 from gsrest.service.txs_service import tx_account_from_row
-
 from tagstore.db import TagstoreDbAsync
+import asyncio
 
 
 def address_from_row(currency, row, rates, token_config, actors):
@@ -91,11 +93,10 @@ async def get_address(request, currency, address, include_actors=True):
 
     actors = None
     if include_actors:
-        actors = await tagstores(
-            request.app['tagstores'],
-            lambda row: LabeledItemRef(id=row["id"], label=row["label"]),
-            'list_actors_address', currency, address,
-            request.app['request_config']['show_private_tags'])
+        tsdb = TagstoreDbAsync(request.app["gs-tagstore"])
+        actor_res = await tsdb.get_actors_by_subjectid(
+            address, get_tagstore_access_groups(request))
+        actors = [LabeledItemRef(id=a.id, label=a.label) for a in actor_res]
 
     return address_from_row(currency, result,
                             (await get_rates(request, currency))['rates'],
@@ -106,32 +107,24 @@ async def list_tags_by_address(request,
                                currency,
                                address,
                                page=None,
-                               pagesize=None):
+                               pagesize=None) -> List[AddressTag]:
 
-    private_tags = request.app['request_config']['show_private_tags']
+    tsdb = TagstoreDbAsync(request.app["gs-tagstore"])
 
-    # tsdb = TagstoreDbAsync(request.app["gs-tagstore"])
+    if page is None:
+        page = 0
+    page = int(page)
 
-    # tagdata_new = await tsdb.get_tags_by_subjectid(address, page, pagesize, ["public", 'private'] if private_tags else ["public"])
+    tags = [
+        address_tag_from_PublicTag(pt) for pt in
+        (await tsdb.get_tags_by_subjectid(address,
+                                          page * (pagesize or 0),
+                                          pagesize,
+                                          get_tagstore_access_groups(request),
+                                          network=currency.upper()))
+    ]
 
-    try:
-        address_tags, next_page = \
-            await tagstores_with_paging(
-                request.app['tagstores'],
-                address_tag_from_row,
-                'list_tags_by_address',
-                page, pagesize, currency, address,
-                request.app['request_config']['show_private_tags'])
-    except InvalidTextRepresentation as e:
-        if currency.upper() in str(e):
-            raise BadUserInputException(
-                f"Currency {currency} currently not supported")
-        else:
-            raise e
-
-    breakpoint()
-
-    return AddressTags(address_tags=address_tags, next_page=next_page)
+    return get_address_tag_result(page, pagesize, tags)
 
 
 async def list_neighbors(request,
@@ -169,6 +162,8 @@ async def list_neighbors(request,
 
 
 async def add_labels(request, currency, node_type: NodeType, that, nodes):
+    tsdb = TagstoreDbAsync(request.app["gs-tagstore"])
+    tsgroups = get_tagstore_access_groups(request)
 
     def identity(x, y):
         return y
@@ -180,27 +175,23 @@ async def add_labels(request, currency, node_type: NodeType, that, nodes):
     thatfield = that + '_' + field
     ids = tuple((fmt(currency, node[thatfield]) for node in nodes))
 
-    result = await tagstores(
-        request.app['tagstores'], lambda row: row, fun, currency, ids,
-        request.app['request_config']['show_private_tags'])
-    iterator = iter(result)
     if node_type == NodeType.ADDRESS:
-        nodes = sorted(nodes, key=lambda node: node[thatfield])
+        tstasks = [
+            tsdb.get_labels_by_subjectid(addr, tsgroups) for addr in ids
+        ]
+    else:
+        tstasks = [
+            tsdb.get_labels_by_clusterid(cluster_id, tsgroups)
+            for cluster_id in ids
+        ]
 
-    stop_iteration = False
-    try:
-        row = next(iterator)
-    except StopIteration:
-        stop_iteration = True
+    tsresults = {k: v for k, v in zip(ids, await asyncio.gather(*tstasks))}
+
+    # print(ids)
+
     for node in nodes:
-        if stop_iteration or node[thatfield] != row[tfield]:
-            node['labels'] = []
-            continue
-        node['labels'] = row['labels']
-        try:
-            row = next(iterator)
-        except StopIteration:
-            stop_iteration = True
+        nid = node[thatfield]
+        node["labels"] = tsresults.get(nid, [])
 
     return nodes
 

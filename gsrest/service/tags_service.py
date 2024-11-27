@@ -32,7 +32,7 @@ def address_tag_from_row(row):
                       currency=row['currency'].upper())
 
 
-def address_tag_from_PublicTag(pt: TagPublic):
+def address_tag_from_PublicTag(pt: TagPublic) -> AddressTag:
     return AddressTag(address=pt.identifier,
                       entity=None,
                       label=pt.label,
@@ -51,10 +51,11 @@ def address_tag_from_PublicTag(pt: TagPublic):
                       currency=pt.network.upper())
 
 
-def get_address_tag_result(current_page: int,
+def get_address_tag_result(current_page: int, page_size: int,
                            tags: List[AddressTag]) -> AddressTags:
-    return AddressTags(next_page=current_page + 1 if len(tags) > 0 else None,
-                       address_tags=tags)
+    tcnt = len(tags)
+    np = current_page + 1 if (tcnt > 0 and tcnt == page_size) else None
+    return AddressTags(next_page=np, address_tags=tags)
 
 
 def ensure_taxonomy_cache():
@@ -69,10 +70,14 @@ def ensure_taxonomy_cache():
                 taxs = await tagstore_db.get_taxonomies(
                     {Taxonomies.CONCEPT, Taxonomies.COUNTRY})
                 request.app['taxonomy_labels'] = {
-                    Taxonomies.CONCEPT: {x.id: x.label
-                                         for x in taxs.concept},
-                    Taxonomies.COUNTRY: {x.id: x.label
-                                         for x in taxs.country}
+                    Taxonomies.CONCEPT: {
+                        x.id: x.label
+                        for x in taxs.concept
+                    },
+                    Taxonomies.COUNTRY: {
+                        x.id: x.label
+                        for x in taxs.country
+                    }
                 }
             return await func(*args, **kwargs)
 
@@ -126,7 +131,6 @@ async def get_actor(request, actor):
         raise NotFoundException(f"Actor {actor} not found.")
     else:
         taxonomies = request.app["taxonomy_labels"]
-        breakpoint()
         return actor_from_ActorPublic(
             a, label_for_idFn=lambda t, x: taxonomies[t].get(x, None))
 
@@ -134,30 +138,22 @@ async def get_actor(request, actor):
 async def get_actor_tags(request, actor, page=None, pagesize=None):
     tsdb = TagstoreDbAsync(request.app["gs-tagstore"])
 
-    if pagesize is None:
-        pagesize = 100
-    pagesize = min(pagesize, 100)
-
     if page is None:
         page = 0
     page = int(page)
 
     tags = await tsdb.get_tags_by_actorid(
         actor,
-        offset=page * pagesize,
+        offset=page * (pagesize or 0),
         page_size=pagesize,
         groups=get_tagstore_access_groups(request))
 
-    return get_address_tag_result(page,
+    return get_address_tag_result(page, pagesize,
                                   list(map(address_tag_from_PublicTag, tags)))
 
 
 async def list_address_tags(request, label, page=None, pagesize=None):
     tsdb = TagstoreDbAsync(request.app["gs-tagstore"])
-
-    if pagesize is None:
-        pagesize = 100
-    pagesize = min(pagesize, 100)
 
     if page is None:
         page = 0
@@ -165,11 +161,11 @@ async def list_address_tags(request, label, page=None, pagesize=None):
 
     tags = await tsdb.get_tags_by_label(
         label,
-        offset=page * pagesize,
+        offset=page * (pagesize or 0),
         page_size=pagesize,
         groups=get_tagstore_access_groups(request))
 
-    return get_address_tag_result(page,
+    return get_address_tag_result(page, pagesize,
                                   list(map(address_tag_from_PublicTag, tags)))
 
 

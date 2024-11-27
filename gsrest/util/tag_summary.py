@@ -213,7 +213,8 @@ async def get_tag_summary(get_tags_page_fn,
         # label_tag_cloud=calcTagCloud(full_label_counter),
         concept_tag_cloud=calcTagCloud(concepts_counter),
         label_summary={
-            key: LabelSummary(
+            key:
+            LabelSummary(
                 label=value["lbl"],
                 count=value["cnt"],
                 confidence=value["sumConfidence"] / (value["cnt"] * 100),

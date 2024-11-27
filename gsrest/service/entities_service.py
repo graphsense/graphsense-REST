@@ -5,13 +5,13 @@ from openapi_server.models.neighbor_entity import NeighborEntity
 from openapi_server.models.entity import Entity
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.address_txs import AddressTxs
-from openapi_server.models.address_tags import AddressTags
 from openapi_server.models.labeled_item_ref import LabeledItemRef
 from gsrest.util.values import (convert_value, to_values,
                                 convert_token_values_map, to_values_tokens)
 from openapi_server.models.entity_addresses import EntityAddresses
-from gsrest.db.util import tagstores, tagstores_with_paging
-from gsrest.service.tags_service import address_tag_from_row
+from gsrest.service.tags_service import (get_tagstore_access_groups,
+                                         address_tag_from_PublicTag,
+                                         get_address_tag_result)
 from gsrest.errors import ClusterNotFoundException, BadUserInputException
 import gsrest.service.common_service as common
 import importlib
@@ -21,6 +21,7 @@ from gsrest.util.address import address_to_user_format
 from gsrest.db.node_type import NodeType
 from gsrest.util.tag_summary import get_tag_summary
 from functools import partial
+from tagstore.db import TagstoreDbAsync
 
 MAX_DEPTH = 7
 TAGS_PAGE_SIZE = 100
@@ -32,7 +33,7 @@ def from_row(currency,
              row,
              rates,
              token_config,
-             tags=None,
+             best_tag=None,
              count=0,
              actors=None):
     return Entity(
@@ -57,7 +58,7 @@ def from_row(currency,
         balance=convert_value(currency, row['balance'], rates),
         token_balances=convert_token_values_map(
             currency, row.get('token_balances', None), rates, token_config),
-        best_address_tag=None if not tags else tags[0],
+        best_address_tag=best_tag,
         no_address_tags=count,
         actors=actors if actors else None)
 
@@ -67,15 +68,21 @@ async def list_address_tags_by_entity_internal(request,
                                                entity,
                                                page=None,
                                                pagesize=None):
-    address_tags, next_page = \
-        await tagstores_with_paging(
-            request.app['tagstores'],
-            address_tag_from_row,
-            'list_address_tags_by_entity',
-            page, pagesize,
-            currency, entity,
-            request.app['request_config']['show_private_tags'])
-    return AddressTags(address_tags=address_tags, next_page=next_page)
+
+    tsdb = TagstoreDbAsync(request.app["gs-tagstore"])
+
+    if page is None:
+        page = 0
+    page = int(page)
+
+    tags = [
+        address_tag_from_PublicTag(pt)
+        for pt in (await tsdb.get_tags_by_clusterid(
+            int(entity), currency.upper(), page *
+            (pagesize or 0), pagesize, get_tagstore_access_groups(request)))
+    ]
+
+    return get_address_tag_result(page, pagesize, tags)
 
 
 async def get_tag_summary_by_entity(request, currency, entity):
@@ -106,38 +113,40 @@ async def get_entity(request,
                      exclude_best_address_tag=False,
                      include_actors=False):
     db = request.app['db']
+    tagstore_db = TagstoreDbAsync(request.app["gs-tagstore"])
+    tagstore_groups = get_tagstore_access_groups(request)
 
     result = await db.get_entity(currency, entity)
 
     if result is None:
         raise ClusterNotFoundException(currency, entity)
 
-    tags = None
+    best_tag = None
     count = 0
     if not exclude_best_address_tag:
-        tags = await tagstores(
-            request.app['tagstores'], address_tag_from_row,
-            'get_best_entity_tag', currency, entity,
-            request.app['request_config']['show_private_tags'])
 
-    counts = await tagstores(
-        request.app['tagstores'], lambda x: x, 'count_address_tags_by_entity',
-        currency, entity, request.app['request_config']['show_private_tags'])
-    for c in counts:
-        count += 0 if c['count'] is None else int(c['count'])
+        tag = await tagstore_db.get_best_cluster_tag(int(entity),
+                                                     currency.upper(),
+                                                     tagstore_groups)
+
+        if tag is not None:
+            best_tag = address_tag_from_PublicTag(tag)
+
+    count = await tagstore_db.get_nr_tags_by_clusterid(int(entity),
+                                                       currency.upper(),
+                                                       tagstore_groups)
 
     actors = None
     if include_actors:
-        actors = await tagstores(
-            request.app['tagstores'],
-            lambda row: LabeledItemRef(id=row["id"], label=row["label"]),
-            'list_actors_entity', currency, entity,
-            request.app['request_config']['show_private_tags'])
+        actor_res = tagstore_db.get_actors_by_clusterid(
+            int(entity), currency.upper(), tagstore_groups)
+        actors = [LabeledItemRef(id=a.id, label=a.label) for a in actor_res]
 
     request.app.logger.debug(f'result address {result}')
     rates = (await get_rates(request, currency))['rates']
     return from_row(currency, result, rates,
-                    db.get_token_configuration(currency), tags, count, actors)
+                    db.get_token_configuration(currency), best_tag, count,
+                    actors)
 
 
 async def list_entity_neighbors(request,
@@ -190,6 +199,8 @@ async def list_entity_addresses(request,
                                 entity,
                                 page=None,
                                 pagesize=None):
+    tsdb = TagstoreDbAsync(request.app["gs-tagstore"])
+    ts_groups = get_tagstore_access_groups(request)
     db = request.app['db']
     addresses, paging_state = \
         await db.list_entity_addresses(currency, entity, page, pagesize)
@@ -197,14 +208,12 @@ async def list_entity_addresses(request,
     rates = (await get_rates(request, currency))['rates']
     addresses = [
         common.address_from_row(
-            currency, row, rates, db.get_token_configuration(currency), await
-            tagstores(
-                request.app['tagstores'],
-                lambda row: LabeledItemRef(id=row["id"], label=row["label"]),
-                'list_actors_address', currency,
-                address_to_user_format(currency, row["address"]),
-                request.app['request_config']['show_private_tags']))
-        for row in addresses
+            currency, row, rates, db.get_token_configuration(currency), [
+                LabeledItemRef(id=a.id, label=a.label)
+                for a in (await tsdb.get_actors_by_subjectid(
+                    address_to_user_format(currency, row["address"]), ts_groups
+                ))
+            ]) for row in addresses
     ]
     return EntityAddresses(next_page=paging_state, addresses=addresses)
 

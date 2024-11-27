@@ -10,27 +10,30 @@ from openapi_server.models.neighbor_addresses import NeighborAddresses
 from openapi_server.models.neighbor_address import NeighborAddress
 import asyncio
 from gsrest.db.node_type import NodeType
-from gsrest.db.util import tagstores
-from gsrest.service.tags_service import address_tag_from_row
+from gsrest.service.tags_service import address_tag_from_PublicTag
+from gsrest.service.tags_service import get_tagstore_access_groups
+from openapi_server.models.address_tag import AddressTag
 from functools import partial
 from gsrest.util.tag_summary import get_tag_summary
 from gsrest.util import is_eth_like
+from tagstore.db import TagstoreDbAsync
 
 
-async def get_best_cluster_tag(request, currency, address):
+async def get_best_cluster_tag(request, currency,
+                               address) -> AddressTag | None:
     address_canonical = cannonicalize_address(currency, address)
     db = request.app['db']
+    tagstore_db = TagstoreDbAsync(request.app["gs-tagstore"])
 
-    entity_id = await db.get_address_entity_id(currency, address_canonical)
+    clstr_id = await db.get_address_entity_id(currency, address_canonical)
 
-    tags = await tagstores(request.app['tagstores'], address_tag_from_row,
-                           'get_best_entity_tag', currency, entity_id,
-                           request.app['request_config']['show_private_tags'])
+    tag = await tagstore_db.get_best_cluster_tag(
+        clstr_id, currency.upper(), get_tagstore_access_groups(request))
 
-    if len(tags) > 0:
-        return tags[0]
-    else:
-        return None
+    if tag is not None:
+        return address_tag_from_PublicTag(tag)
+
+    return None
 
 
 async def get_tag_summary_by_address(request,

@@ -1987,7 +1987,8 @@ class Cassandra:
                     "and currency=%s"
 
             results = {
-                c: one(await self.execute_async(
+                c:
+                one(await self.execute_async(
                     currency, 'transformed', query,
                     [row['address_id'], row['address_id_group'], c]))
                 for c in balance_currencies
@@ -2278,10 +2279,9 @@ class Cassandra:
 
             more_results = [
                 r for r in more_results
-                if (tx_id_lower_bound is None
-                    or r[tx_id_keys] >= tx_id_lower_bound) and (
-                        tx_id_upper_bound is None
-                        or r[tx_id_keys] <= tx_id_upper_bound)
+                if (tx_id_lower_bound is None or r[tx_id_keys] >=
+                    tx_id_lower_bound) and (tx_id_upper_bound is None or
+                                            r[tx_id_keys] <= tx_id_upper_bound)
             ]
 
             self.logger.debug(f'list tx ordered page {page}:{offset}')

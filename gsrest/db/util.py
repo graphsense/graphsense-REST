@@ -70,7 +70,6 @@ async def tagstores_with_paging(tss, wrapper, fun, page, pagesize, *args):
         page = page_handles.get(ts.id(), None)
         f = getattr(ts, fun)
         aws.append(f(*args, page=page, pagesize=pagesize))
-        breakpoint()
 
     results = await asyncio.gather(*aws)
 

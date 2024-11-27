@@ -6,9 +6,9 @@ from openapi_server.models.labeled_item_ref import LabeledItemRef
 from openapi_server.models.search_result_by_currency \
     import SearchResultByCurrency
 from gsrest.service.stats_service import get_currency_statistics
+from gsrest.service.tags_service import get_tagstore_access_groups
 from gsrest.util.string_edit import alphanumeric_lower
-from gsrest.db.util import tagstores
-from fuzzy_match import algorithims
+from tagstore.db import TagstoreDbAsync
 
 
 async def get_statistics(request):
@@ -53,6 +53,7 @@ async def search_by_currency(request, currency, q, limit=10):
 async def search(request, q, currency=None, limit=10):
     db = request.app['db']
     currencies = db.get_supported_currencies()
+    tsdb = TagstoreDbAsync(request.app["gs-tagstore"])
 
     q = q.strip()
     result = SearchResult(currencies=[], labels=[])
@@ -64,37 +65,18 @@ async def search(request, q, currency=None, limit=10):
 
     expression_norm = alphanumeric_lower(q)
 
-    def ts(curr=None):
-        return tagstores(request.app['tagstores'], lambda row: row['label'],
-                         'list_matching_labels', curr, expression_norm, limit,
-                         request.app['request_config']['show_private_tags'])
+    tagstore_search = tsdb.search_labels(
+        expression_norm, limit, groups=get_tagstore_access_groups(request))
 
     aws1 = [search_by_currency(request, curr, q) for curr in currs]
-    if currency:
-        aws2 = [ts(curr) for curr in currs]
-    else:
-        aws2 = [ts()]
-
-    aw3 = tagstores(
-        request.app['tagstores'],
-        lambda row: LabeledItemRef(id=row["id"], label=row["label"]),
-        'list_matching_actors', expression_norm, limit,
-        request.app['request_config']['show_private_tags'])
-
     aw1 = asyncio.gather(*aws1)
-    aw2 = asyncio.gather(*aws2)
 
-    [r1, r2, r3] = await asyncio.gather(aw1, aw2, aw3)
+    [r1, r2] = await asyncio.gather(aw1, tagstore_search)
 
-    result.currencies = r1
-    for labels in r2:
-        if labels:
-            result.labels += labels
+    result.labels = [x.label for x in r2.tag_labels]
 
-    result.labels = sorted(
-        list(set(result.labels)),
-        key=lambda x: -algorithims.trigram(x.lower(), expression_norm))
-
-    result.actors = r3
+    result.actors = [
+        LabeledItemRef(id=x.id, label=x.label) for x in r2.actor_labels
+    ]
 
     return result
