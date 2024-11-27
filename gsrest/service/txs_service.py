@@ -135,7 +135,7 @@ def io_from_rows(currency, values, key, rates, include_io,
                         index=idx if include_io_index else None))
         elif include_nonstandard_io:
             results.append(
-                TxValue(address=None,
+                TxValue(address=[],
                         value=convert_value(currency, i.value, rates),
                         index=idx if include_io_index else None))
     return results
