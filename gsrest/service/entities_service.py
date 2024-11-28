@@ -19,7 +19,6 @@ import asyncio
 import time
 from gsrest.util.address import address_to_user_format
 from gsrest.db.node_type import NodeType
-from gsrest.util.tag_summary import get_tag_summary
 from functools import partial
 from tagstore.db import TagstoreDbAsync
 
@@ -85,15 +84,6 @@ async def list_address_tags_by_entity_internal(request,
     return get_address_tag_result(page, pagesize, tags)
 
 
-async def get_tag_summary_by_entity(request, currency, entity):
-    next_page_fn = partial(list_address_tags_by_entity_internal,
-                           request,
-                           currency,
-                           entity,
-                           pagesize=PAGE_SIZE_GET_ALL_TAGS)
-    return await get_tag_summary(next_page_fn)
-
-
 async def list_address_tags_by_entity(request,
                                       currency,
                                       entity,
@@ -138,7 +128,7 @@ async def get_entity(request,
 
     actors = None
     if include_actors:
-        actor_res = tagstore_db.get_actors_by_clusterid(
+        actor_res = await tagstore_db.get_actors_by_clusterid(
             int(entity), currency.upper(), tagstore_groups)
         actors = [LabeledItemRef(id=a.id, label=a.label) for a in actor_res]
 

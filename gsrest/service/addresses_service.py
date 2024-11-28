@@ -1,3 +1,4 @@
+from typing import List
 from openapi_server.models.address_txs import AddressTxs
 from gsrest.service.entities_service import get_entity, from_row
 from gsrest.service.rates_service import get_rates
@@ -10,30 +11,95 @@ from openapi_server.models.neighbor_addresses import NeighborAddresses
 from openapi_server.models.neighbor_address import NeighborAddress
 import asyncio
 from gsrest.db.node_type import NodeType
-from gsrest.service.tags_service import address_tag_from_PublicTag
-from gsrest.service.tags_service import get_tagstore_access_groups
+from gsrest.service.tags_service import (get_tagstore_access_groups,
+                                         address_tag_from_PublicTag,
+                                         get_address_tag_result)
 from openapi_server.models.address_tag import AddressTag
-from functools import partial
-from gsrest.util.tag_summary import get_tag_summary
+from openapi_server.models.address_tags import AddressTags
 from gsrest.util import is_eth_like
-from tagstore.db import TagstoreDbAsync
+from tagstore.db import TagstoreDbAsync, TagPublic
+from tagstore.algorithms.tag_digest import TagDigest, compute_tag_digest
+from openapi_server.models.tag_summary import TagSummary
+from openapi_server.models.tag_cloud_entry import TagCloudEntry
+from openapi_server.models.label_summary import LabelSummary
 
 
-async def get_best_cluster_tag(request, currency,
-                               address) -> AddressTag | None:
+def tagSummary_from_tagDigest(td: TagDigest):
+    return TagSummary(broad_category=td.broad_concept,
+                      tag_count=td.nr_tags,
+                      best_actor=td.best_actor,
+                      best_label=td.best_label,
+                      concept_tag_cloud={
+                          k: TagCloudEntry(cnt=v.count, weighted=v.weighted)
+                          for k, v in td.concept_tag_cloud.items()
+                      },
+                      label_summary={
+                          key:
+                          LabelSummary(label=v.label,
+                                       count=v.count,
+                                       confidence=v.confidence,
+                                       relevance=v.relevance,
+                                       creators=v.creators,
+                                       sources=v.sources,
+                                       concepts=v.concepts,
+                                       lastmod=v.lastmod,
+                                       inherited_from=v.inherited_from)
+                          for (key, v) in td.label_digest.items()
+                      })
+
+
+async def get_best_cluster_tag_raw(request, currency,
+                                   address) -> TagPublic | None:
     address_canonical = cannonicalize_address(currency, address)
     db = request.app['db']
     tagstore_db = TagstoreDbAsync(request.app["gs-tagstore"])
 
     clstr_id = await db.get_address_entity_id(currency, address_canonical)
 
-    tag = await tagstore_db.get_best_cluster_tag(
+    return await tagstore_db.get_best_cluster_tag(
         clstr_id, currency.upper(), get_tagstore_access_groups(request))
+
+
+async def get_best_cluster_tag(request, currency,
+                               address) -> AddressTag | None:
+    tag = await get_best_cluster_tag_raw(request, currency, address)
 
     if tag is not None:
         return address_tag_from_PublicTag(tag)
 
     return None
+
+
+async def list_tags_by_address_raw(
+        request,
+        currency,
+        address,
+        page=None,
+        pagesize=None,
+        include_best_cluster_tag=False) -> List[TagPublic]:
+
+    address = address_to_user_format(currency, address)
+
+    tsdb = TagstoreDbAsync(request.app["gs-tagstore"])
+
+    if page is None:
+        page = 0
+    page = int(page)
+
+    tags = list(await
+                tsdb.get_tags_by_subjectid(address,
+                                           page * (pagesize or 0),
+                                           pagesize,
+                                           get_tagstore_access_groups(request),
+                                           network=currency.upper()))
+
+    if (include_best_cluster_tag and not is_eth_like(currency)):
+        best_cluster_tag = await get_best_cluster_tag_raw(
+            request, currency, address)
+        if best_cluster_tag is not None:
+            tags.append(best_cluster_tag)
+
+    return tags
 
 
 async def get_tag_summary_by_address(request,
@@ -42,12 +108,17 @@ async def get_tag_summary_by_address(request,
                                      include_best_cluster_tag=False):
     address_canonical = cannonicalize_address(currency, address)
 
-    next_page_fn = partial(list_tags_by_address,
-                           request,
-                           currency,
-                           address_canonical,
-                           include_best_cluster_tag=include_best_cluster_tag)
-    return await get_tag_summary(next_page_fn)
+    tags = await list_tags_by_address_raw(
+        request,
+        currency,
+        address_canonical,
+        page=None,
+        pagesize=None,
+        include_best_cluster_tag=include_best_cluster_tag)
+
+    digest = compute_tag_digest(tags)
+
+    return tagSummary_from_tagDigest(digest)
 
 
 async def get_address(request, currency, address, include_actors=True):
@@ -62,25 +133,42 @@ async def list_tags_by_address(request,
                                address,
                                page=None,
                                pagesize=None,
-                               include_best_cluster_tag=False):
+                               include_best_cluster_tag=False) -> AddressTags:
+    tags = [
+        address_tag_from_PublicTag(pt)
+        for pt in (await list_tags_by_address_raw(
+            request,
+            currency,
+            address,
+            page=page,
+            pagesize=pagesize,
+            include_best_cluster_tag=include_best_cluster_tag))
+    ]
 
-    address = address_to_user_format(currency, address)
+    return get_address_tag_result(page, pagesize, tags)
 
-    tagdata = await common.list_tags_by_address(request,
-                                                currency,
-                                                address,
-                                                page=page,
-                                                pagesize=pagesize)
 
-    best_cluster_tag = []
-    if (include_best_cluster_tag and not is_eth_like(currency)):
-        best_cluster_tag = await get_best_cluster_tag(request, currency,
-                                                      address)
-        if best_cluster_tag is not None:
-            best_cluster_tag.inherited_from = "cluster"
-            tagdata.address_tags.append(best_cluster_tag)
+# async def list_tags_by_address_raw(request,
+#                                currency,
+#                                address,
+#                                page=None,
+#                                pagesize=None,
+#                                include_best_cluster_tag=False):
 
-    return tagdata
+#     taglist = await list_tags_by_address_raw_basic(request,
+#                                                 currency,
+#                                                 address,
+#                                                 page=page,
+#                                                 pagesize=pagesize)
+
+#     if (include_best_cluster_tag and not is_eth_like(currency)):
+#         best_cluster_tag = await get_best_cluster_tag_raw(request, currency,
+#                                                       address)
+#         if best_cluster_tag is not None:
+#             best_cluster_tag.inherited_from = "cluster"
+#             taglist.append(best_cluster_tag)
+
+#     return tagdata
 
 
 async def list_address_txs(request,

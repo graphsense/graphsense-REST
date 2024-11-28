@@ -1,8 +1,5 @@
-from typing import List
-
 from openapi_server.models.address import Address
 from openapi_server.models.tx_summary import TxSummary
-from openapi_server.models.address_tag import AddressTag
 from gsrest.util.values import (convert_value, convert_token_values_map,
                                 to_values, to_values_tokens)
 from gsrest.service.rates_service import get_rates
@@ -12,9 +9,7 @@ from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from openapi_server.models.labeled_item_ref import LabeledItemRef
 from gsrest.service.rates_service import list_rates
 from gsrest.db.node_type import NodeType
-from gsrest.service.tags_service import (get_tagstore_access_groups,
-                                         address_tag_from_PublicTag,
-                                         get_address_tag_result)
+from gsrest.service.tags_service import (get_tagstore_access_groups)
 from gsrest.util import get_first_key_present
 from gsrest.errors import AddressNotFoundException, BadUserInputException
 import gsrest.util.address
@@ -101,30 +96,6 @@ async def get_address(request, currency, address, include_actors=True):
     return address_from_row(currency, result,
                             (await get_rates(request, currency))['rates'],
                             db.get_token_configuration(currency), actors)
-
-
-async def list_tags_by_address(request,
-                               currency,
-                               address,
-                               page=None,
-                               pagesize=None) -> List[AddressTag]:
-
-    tsdb = TagstoreDbAsync(request.app["gs-tagstore"])
-
-    if page is None:
-        page = 0
-    page = int(page)
-
-    tags = [
-        address_tag_from_PublicTag(pt) for pt in
-        (await tsdb.get_tags_by_subjectid(address,
-                                          page * (pagesize or 0),
-                                          pagesize,
-                                          get_tagstore_access_groups(request),
-                                          network=currency.upper()))
-    ]
-
-    return get_address_tag_result(page, pagesize, tags)
 
 
 async def list_neighbors(request,

@@ -12,31 +12,12 @@ from gsrest.db.util import dt_to_int
 from gsrest.errors import NotFoundException
 from tagstore.db import TagstoreDbAsync, Taxonomies, TagPublic, ActorPublic
 
-
-def address_tag_from_row(row):
-    return AddressTag(address=row['address'],
-                      entity=row['gs_cluster_id'],
-                      label=row['label'],
-                      category=row['category'],
-                      actor=row['actor'],
-                      abuse=row['abuse'],
-                      source=row['source'],
-                      lastmod=dt_to_int(row['lastmod']),
-                      tagpack_is_public=row['is_public'],
-                      tagpack_uri=row['tagpack'] if row['is_public'] else None,
-                      tagpack_creator=row['creator'],
-                      tagpack_title=row['title'],
-                      confidence=row['confidence'],
-                      confidence_level=row['level'],
-                      is_cluster_definer=bool(row['is_cluster_definer']),
-                      currency=row['currency'].upper())
-
-
 def address_tag_from_PublicTag(pt: TagPublic) -> AddressTag:
     return AddressTag(address=pt.identifier,
                       entity=None,
                       label=pt.label,
                       category=pt.primary_concept,
+                      concepts=pt.additional_concepts,
                       actor=pt.actor,
                       abuse=None,
                       source=pt.source,
@@ -48,6 +29,7 @@ def address_tag_from_PublicTag(pt: TagPublic) -> AddressTag:
                       confidence=pt.confidence,
                       confidence_level=pt.confidence_level,
                       is_cluster_definer=pt.is_cluster_definer,
+                      inherited_from = pt.inherited_from.name if pt.inherited_from else None,
                       currency=pt.network.upper())
 
 
