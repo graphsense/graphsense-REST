@@ -8,29 +8,30 @@ from openapi_server.models.concept import Concept
 from openapi_server.models.actor import Actor
 from openapi_server.models.actor_context import ActorContext
 from openapi_server.models.labeled_item_ref import LabeledItemRef
-from gsrest.db.util import dt_to_int
 from gsrest.errors import NotFoundException
 from tagstore.db import TagstoreDbAsync, Taxonomies, TagPublic, ActorPublic
 
+
 def address_tag_from_PublicTag(pt: TagPublic) -> AddressTag:
-    return AddressTag(address=pt.identifier,
-                      entity=None,
-                      label=pt.label,
-                      category=pt.primary_concept,
-                      concepts=pt.additional_concepts,
-                      actor=pt.actor,
-                      abuse=None,
-                      source=pt.source,
-                      lastmod=pt.lastmod,
-                      tagpack_is_public=pt.group == "public",
-                      tagpack_uri=None,
-                      tagpack_creator=pt.creator,
-                      tagpack_title=None,
-                      confidence=pt.confidence,
-                      confidence_level=pt.confidence_level,
-                      is_cluster_definer=pt.is_cluster_definer,
-                      inherited_from = pt.inherited_from.name if pt.inherited_from else None,
-                      currency=pt.network.upper())
+    return AddressTag(
+        address=pt.identifier,
+        entity=None,
+        label=pt.label,
+        category=pt.primary_concept,
+        concepts=pt.additional_concepts,
+        actor=pt.actor,
+        abuse=None,
+        source=pt.source,
+        lastmod=pt.lastmod,
+        tagpack_is_public=pt.group == "public",
+        tagpack_uri=None,
+        tagpack_creator=pt.creator,
+        tagpack_title=None,
+        confidence=pt.confidence,
+        confidence_level=pt.confidence_level,
+        is_cluster_definer=pt.is_cluster_definer,
+        inherited_from=pt.inherited_from.name if pt.inherited_from else None,
+        currency=pt.network.upper())
 
 
 def get_address_tag_result(current_page: int, page_size: int,

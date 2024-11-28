@@ -19,7 +19,6 @@ import asyncio
 import time
 from gsrest.util.address import address_to_user_format
 from gsrest.db.node_type import NodeType
-from functools import partial
 from tagstore.db import TagstoreDbAsync
 
 MAX_DEPTH = 7
