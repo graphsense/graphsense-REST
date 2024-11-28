@@ -98,11 +98,10 @@ REST log messages can be delivered via mail. See `instance/config.yaml.template`
 ## Development
 
 ### Generate server stub
-
-Install version 4.44.2 of yq (https://github.com/mikefarah/yq/) and run the following command to generate the server stub:
+Install version 4.44.2 or higher of yq (https://github.com/mikefarah/yq/) and run the following command to generate the server stub:
 
 ```sh
-generate-openapi-server
+make generate-openapi-server
 ```
 
 The service implementation (`gsrest/service`) should use the generated models

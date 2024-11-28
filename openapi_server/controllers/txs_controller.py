@@ -159,7 +159,7 @@ async def get_spent_in_txs(request: web.Request, currency, tx_hash, io_index=Non
         raise web.HTTPInternalServerError()
 
 
-async def get_tx(request: web.Request, currency, tx_hash, include_io=None, token_tx_id=None) -> web.Response:
+async def get_tx(request: web.Request, currency, tx_hash, include_io=None, include_nonstandard_io=None, include_io_index=None, token_tx_id=None) -> web.Response:
     """Returns details of a specific transaction identified by its hash
 
     
@@ -170,6 +170,10 @@ async def get_tx(request: web.Request, currency, tx_hash, include_io=None, token
     :type tx_hash: str
     :param include_io: Whether to include inputs/outputs of a transaction (UTXO only)
     :type include_io: bool
+    :param include_nonstandard_io: Whether to include non-standard inputs/outputs such as OP_RETURN of a transaction (UTXO only)
+    :type include_nonstandard_io: bool
+    :param include_io_index: Whether to include the index of inputs/outputs of a transaction (UTXO only)
+    :type include_io_index: bool
     :param token_tx_id: Select a specific token_transaction (Account model only)
     :type token_tx_id: int
 
@@ -196,11 +200,11 @@ async def get_tx(request: web.Request, currency, tx_hash, include_io=None, token
     request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
-        if 'currency' in ['','currency','tx_hash','include_io','token_tx_id']:
+        if 'currency' in ['','currency','tx_hash','include_io','include_nonstandard_io','include_io_index','token_tx_id']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.get_tx(request
-                ,currency=currency,tx_hash=tx_hash,include_io=include_io,token_tx_id=token_tx_id)
+                ,currency=currency,tx_hash=tx_hash,include_io=include_io,include_nonstandard_io=include_nonstandard_io,include_io_index=include_io_index,token_tx_id=token_tx_id)
         result = await result
 
         for plugin in request.app['plugins']:
@@ -233,7 +237,7 @@ async def get_tx(request: web.Request, currency, tx_hash, include_io=None, token
         raise web.HTTPInternalServerError()
 
 
-async def get_tx_io(request: web.Request, currency, tx_hash, io) -> web.Response:
+async def get_tx_io(request: web.Request, currency, tx_hash, io, include_nonstandard_io=None, include_io_index=None) -> web.Response:
     """Returns input/output values of a specific transaction identified by its hash
 
     
@@ -244,6 +248,10 @@ async def get_tx_io(request: web.Request, currency, tx_hash, io) -> web.Response
     :type tx_hash: str
     :param io: Input or outpus values of a transaction
     :type io: str
+    :param include_nonstandard_io: Whether to include non-standard inputs/outputs such as OP_RETURN of a transaction (UTXO only)
+    :type include_nonstandard_io: bool
+    :param include_io_index: Whether to include the index of inputs/outputs of a transaction (UTXO only)
+    :type include_io_index: bool
 
     """
 
@@ -268,11 +276,11 @@ async def get_tx_io(request: web.Request, currency, tx_hash, io) -> web.Response
     request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
-        if 'currency' in ['','currency','tx_hash','io']:
+        if 'currency' in ['','currency','tx_hash','io','include_nonstandard_io','include_io_index']:
             if currency is not None:
                 currency = currency.lower() 
         result = service.get_tx_io(request
-                ,currency=currency,tx_hash=tx_hash,io=io)
+                ,currency=currency,tx_hash=tx_hash,io=io,include_nonstandard_io=include_nonstandard_io,include_io_index=include_io_index)
         result = await result
 
         for plugin in request.app['plugins']:
