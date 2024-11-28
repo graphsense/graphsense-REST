@@ -86,9 +86,7 @@ async def list_tags_by_address_raw(
 
     tsdb = TagstoreDbAsync(request.app["gs-tagstore"])
 
-    if page is None:
-        page = 0
-    page = int(page)
+    page = int(page) if page is not None else 0
 
     tags = list(
         await tsdb.get_tags_by_subjectid(
@@ -136,6 +134,7 @@ async def get_address(request, currency, address, include_actors=True):
 async def list_tags_by_address(
     request, currency, address, page=None, pagesize=None, include_best_cluster_tag=False
 ) -> AddressTags:
+    page = int(page) if page is not None else 0
     tags = [
         address_tag_from_PublicTag(pt)
         for pt in (

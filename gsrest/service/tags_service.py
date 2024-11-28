@@ -16,7 +16,7 @@ from openapi_server.models.taxonomy import Taxonomy
 def address_tag_from_PublicTag(pt: TagPublic) -> AddressTag:
     return AddressTag(
         address=pt.identifier,
-        entity=0,
+        # entity=0,
         label=pt.label,
         category=pt.primary_concept,
         concepts=pt.additional_concepts,
@@ -25,9 +25,9 @@ def address_tag_from_PublicTag(pt: TagPublic) -> AddressTag:
         source=pt.source,
         lastmod=pt.lastmod,
         tagpack_is_public=pt.group == "public",
-        tagpack_uri="None",
+        tagpack_uri=pt.tagpack_uri,
         tagpack_creator=pt.creator,
-        tagpack_title="None",
+        tagpack_title=pt.tagpack_title,
         confidence=pt.confidence,
         confidence_level=pt.confidence_level,
         is_cluster_definer=pt.is_cluster_definer,
@@ -41,7 +41,7 @@ def get_address_tag_result(
 ) -> AddressTags:
     tcnt = len(tags)
     np = current_page + 1 if (tcnt > 0 and tcnt == page_size) else None
-    return AddressTags(next_page=np, address_tags=tags)
+    return AddressTags(next_page=str(np) if np is not None else None, address_tags=tags)
 
 
 def ensure_taxonomy_cache():
@@ -120,9 +120,7 @@ async def get_actor(request, actor):
 async def get_actor_tags(request, actor, page=None, pagesize=None):
     tsdb = TagstoreDbAsync(request.app["gs-tagstore"])
 
-    if page is None:
-        page = 0
-    page = int(page)
+    page = int(page) if page is not None else 0
 
     tags = await tsdb.get_tags_by_actorid(
         actor,
@@ -138,10 +136,7 @@ async def get_actor_tags(request, actor, page=None, pagesize=None):
 
 async def list_address_tags(request, label, page=None, pagesize=None):
     tsdb = TagstoreDbAsync(request.app["gs-tagstore"])
-
-    if page is None:
-        page = 0
-    page = int(page)
+    page = int(page) if page is not None else 0
 
     tags = await tsdb.get_tags_by_label(
         label,

@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        python-version: 
+        python-version:
           - '3.9'
           - '3.10'
 
@@ -33,8 +33,6 @@ jobs:
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        flake8 ./gsrest --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 ./gsrest --count --max-line-length=80 --statistics
+        make lint
     - name: Test with tox
       run: tox -- $GITHUB_REPOSITORY_OWNER

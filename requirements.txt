@@ -9,9 +9,9 @@ cassandra-driver>=3.27.0
 openapi-schema-validator >= 0.2.3
 numpy>=1.22
 eth-event>=1.2.3
-lz4~=4.3.2
-base58~=2.1
+lz4>=4.3.2
+base58>=2.1
 cashaddress>=1.0.6, < 1.1
-async-lru~=2.0.4
+async-lru>=2.0.4
 python-dateutil>=2.9.0
 tagpack-tool @ git+https://github.com/graphsense/graphsense-tagpack-tool@feature/interface

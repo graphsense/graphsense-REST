@@ -74,9 +74,7 @@ async def list_address_tags_by_entity_internal(
 ):
     tsdb = TagstoreDbAsync(request.app["gs-tagstore"])
 
-    if page is None:
-        page = 0
-    page = int(page)
+    page = int(page) if page is not None else 0
 
     tags = [
         address_tag_from_PublicTag(pt)

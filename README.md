@@ -23,7 +23,7 @@ Open `instance/config.yaml` and configure the database connection.
 
 ## Requirements
 
-Make sure you are running Python 3.9 or Python 3.10. 
+Make sure you are running Python > 3.9.
 
     python3 --version
 
@@ -45,11 +45,11 @@ for further details.
 
 Run the REST interface
 
-    python -m aiohttp.web -H localhost -P 5000 openapi_server:main
+    make serve
 
 Test the service in your browser:
 
-    http://localhost:5000
+    http://localhost:9000
 
 ## Deployment
 
@@ -59,7 +59,7 @@ Install gunicorn:
 
     pip install gunicorn
 
-If unspecified gunicorn is run with a number of workers and threads both equal to the number of CPUs x 2. 
+If unspecified gunicorn is run with a number of workers and threads both equal to the number of CPUs x 2.
 
 Run production server, overriding number of workers and threads through command line options (4 workers, 4 threads). Specify the aiohttp specific WebWorker class to leverage the full power of lightweight threads:
 
@@ -140,7 +140,7 @@ You may use `tests/fetch_data.sh` to fetch live data and customize for testing.
 
 ### Testing in Docker
 
-In order to have a reproducible test environment, tests can also be run via docker. 
+In order to have a reproducible test environment, tests can also be run via docker.
 
 ```
 export UID  # in order to inject user id into the docker container and avoid permission issues
@@ -148,10 +148,9 @@ cd tests
 make test
 ```
 
-On OS X you need to install GNU sed and link it on your system as `sed`. 
+On OS X you need to install GNU sed and link it on your system as `sed`.
 
-[graphsense-blocksci]: https://github.com/graphsense/graphsense-blocksci
-[graphsense-transformation]: https://github.com/graphsense/graphsense-transformation
+[graphsense-transformation]: https://github.com/graphsense/graphsense-spark
 [graphsense-dashboard]: https://github.com/graphsense/graphsense-dashboard
 [openapi-generator]: https://openapi-generator.tech
 [connexion]: https://github.com/zalando/connexion

@@ -16,7 +16,26 @@ class AddressTag(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, label: str=None, category: str=None, concepts: List[str]=None, actor: str=None, abuse: str=None, tagpack_uri: str=None, source: str=None, lastmod: int=None, tagpack_title: str=None, tagpack_is_public: bool=None, tagpack_creator: str=None, is_cluster_definer: bool=None, confidence: str=None, confidence_level: int=None, inherited_from: str=None, currency: str=None, address: str=None, entity: int=None):
+    def __init__(
+        self,
+        label: str = None,
+        category: str = None,
+        concepts: List[str] = None,
+        actor: str = None,
+        abuse: str = None,
+        tagpack_uri: str = None,
+        source: str = None,
+        lastmod: int = None,
+        tagpack_title: str = None,
+        tagpack_is_public: bool = None,
+        tagpack_creator: str = None,
+        is_cluster_definer: bool = None,
+        confidence: str = None,
+        confidence_level: int = None,
+        inherited_from: str = None,
+        currency: str = None,
+        address: str = None,
+    ):
         """AddressTag - a model defined in OpenAPI
 
         :param label: The label of this AddressTag.
@@ -36,48 +55,45 @@ class AddressTag(Model):
         :param inherited_from: The inherited_from of this AddressTag.
         :param currency: The currency of this AddressTag.
         :param address: The address of this AddressTag.
-        :param entity: The entity of this AddressTag.
         """
         self.openapi_types = {
-            'label': str,
-            'category': str,
-            'concepts': List[str],
-            'actor': str,
-            'abuse': str,
-            'tagpack_uri': str,
-            'source': str,
-            'lastmod': int,
-            'tagpack_title': str,
-            'tagpack_is_public': bool,
-            'tagpack_creator': str,
-            'is_cluster_definer': bool,
-            'confidence': str,
-            'confidence_level': int,
-            'inherited_from': str,
-            'currency': str,
-            'address': str,
-            'entity': int
+            "label": str,
+            "category": str,
+            "concepts": List[str],
+            "actor": str,
+            "abuse": str,
+            "tagpack_uri": str,
+            "source": str,
+            "lastmod": int,
+            "tagpack_title": str,
+            "tagpack_is_public": bool,
+            "tagpack_creator": str,
+            "is_cluster_definer": bool,
+            "confidence": str,
+            "confidence_level": int,
+            "inherited_from": str,
+            "currency": str,
+            "address": str,
         }
 
         self.attribute_map = {
-            'label': 'label',
-            'category': 'category',
-            'concepts': 'concepts',
-            'actor': 'actor',
-            'abuse': 'abuse',
-            'tagpack_uri': 'tagpack_uri',
-            'source': 'source',
-            'lastmod': 'lastmod',
-            'tagpack_title': 'tagpack_title',
-            'tagpack_is_public': 'tagpack_is_public',
-            'tagpack_creator': 'tagpack_creator',
-            'is_cluster_definer': 'is_cluster_definer',
-            'confidence': 'confidence',
-            'confidence_level': 'confidence_level',
-            'inherited_from': 'inherited_from',
-            'currency': 'currency',
-            'address': 'address',
-            'entity': 'entity'
+            "label": "label",
+            "category": "category",
+            "concepts": "concepts",
+            "actor": "actor",
+            "abuse": "abuse",
+            "tagpack_uri": "tagpack_uri",
+            "source": "source",
+            "lastmod": "lastmod",
+            "tagpack_title": "tagpack_title",
+            "tagpack_is_public": "tagpack_is_public",
+            "tagpack_creator": "tagpack_creator",
+            "is_cluster_definer": "is_cluster_definer",
+            "confidence": "confidence",
+            "confidence_level": "confidence_level",
+            "inherited_from": "inherited_from",
+            "currency": "currency",
+            "address": "address",
         }
 
         self._label = label
@@ -97,10 +113,9 @@ class AddressTag(Model):
         self._inherited_from = inherited_from
         self._currency = currency
         self._address = address
-        self._entity = entity
 
     @classmethod
-    def from_dict(cls, dikt: dict) -> 'AddressTag':
+    def from_dict(cls, dikt: dict) -> "AddressTag":
         """Returns the dict as a model
 
         :param dikt: A dict.
@@ -116,25 +131,25 @@ class AddressTag(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'label': self._label,
-            'category': self._category,
-            'concepts': self._concepts,
-            'actor': self._actor,
-            'abuse': self._abuse,
-            'tagpack_uri': self._tagpack_uri,
-            'source': self._source,
-            'lastmod': self._lastmod,
-            'tagpack_title': self._tagpack_title,
-            'tagpack_is_public': self._tagpack_is_public,
-            'tagpack_creator': self._tagpack_creator,
-            'is_cluster_definer': self._is_cluster_definer,
-            'confidence': self._confidence,
-            'confidence_level': self._confidence_level,
-            'inherited_from': self._inherited_from,
-            'currency': self._currency,
-            'address': self._address,
-            'entity': self._entity }
-
+        return {
+            "label": self._label,
+            "category": self._category,
+            "concepts": self._concepts,
+            "actor": self._actor,
+            "abuse": self._abuse,
+            "tagpack_uri": self._tagpack_uri,
+            "source": self._source,
+            "lastmod": self._lastmod,
+            "tagpack_title": self._tagpack_title,
+            "tagpack_is_public": self._tagpack_is_public,
+            "tagpack_creator": self._tagpack_creator,
+            "is_cluster_definer": self._is_cluster_definer,
+            "confidence": self._confidence,
+            "confidence_level": self._confidence_level,
+            "inherited_from": self._inherited_from,
+            "currency": self._currency,
+            "address": self._address,
+        }
 
     @property
     def label(self):
@@ -343,7 +358,9 @@ class AddressTag(Model):
         :type tagpack_title: str
         """
         if tagpack_title is None:
-            raise BadUserInputException("Invalid value for `tagpack_title`, must not be `None`")
+            raise BadUserInputException(
+                "Invalid value for `tagpack_title`, must not be `None`"
+            )
 
         self._tagpack_title = tagpack_title
 
@@ -368,7 +385,9 @@ class AddressTag(Model):
         :type tagpack_is_public: bool
         """
         if tagpack_is_public is None:
-            raise BadUserInputException("Invalid value for `tagpack_is_public`, must not be `None`")
+            raise BadUserInputException(
+                "Invalid value for `tagpack_is_public`, must not be `None`"
+            )
 
         self._tagpack_is_public = tagpack_is_public
 
@@ -393,7 +412,9 @@ class AddressTag(Model):
         :type tagpack_creator: str
         """
         if tagpack_creator is None:
-            raise BadUserInputException("Invalid value for `tagpack_creator`, must not be `None`")
+            raise BadUserInputException(
+                "Invalid value for `tagpack_creator`, must not be `None`"
+            )
 
         self._tagpack_creator = tagpack_creator
 
@@ -418,7 +439,9 @@ class AddressTag(Model):
         :type is_cluster_definer: bool
         """
         if is_cluster_definer is None:
-            raise BadUserInputException("Invalid value for `is_cluster_definer`, must not be `None`")
+            raise BadUserInputException(
+                "Invalid value for `is_cluster_definer`, must not be `None`"
+            )
 
         self._is_cluster_definer = is_cluster_definer
 
@@ -491,8 +514,9 @@ class AddressTag(Model):
         allowed_values = ["cluster"]  # noqa: E501
         if inherited_from not in allowed_values:
             raise BadUserInputException(
-                "Invalid value for `inherited_from` ({0}), must be one of {1}"
-                .format(inherited_from, allowed_values)
+                "Invalid value for `inherited_from` ({0}), must be one of {1}".format(
+                    inherited_from, allowed_values
+                )
             )
 
         self._inherited_from = inherited_from
@@ -518,7 +542,9 @@ class AddressTag(Model):
         :type currency: str
         """
         if currency is None:
-            raise BadUserInputException("Invalid value for `currency`, must not be `None`")
+            raise BadUserInputException(
+                "Invalid value for `currency`, must not be `None`"
+            )
 
         self._currency = currency
 
@@ -543,31 +569,8 @@ class AddressTag(Model):
         :type address: str
         """
         if address is None:
-            raise BadUserInputException("Invalid value for `address`, must not be `None`")
+            raise BadUserInputException(
+                "Invalid value for `address`, must not be `None`"
+            )
 
         self._address = address
-
-    @property
-    def entity(self):
-        """Gets the entity of this AddressTag.
-
-        Entity id
-
-        :return: The entity of this AddressTag.
-        :rtype: int
-        """
-        return self._entity
-
-    @entity.setter
-    def entity(self, entity):
-        """Sets the entity of this AddressTag.
-
-        Entity id
-
-        :param entity: The entity of this AddressTag.
-        :type entity: int
-        """
-        if entity is None:
-            raise BadUserInputException("Invalid value for `entity`, must not be `None`")
-
-        self._entity = entity

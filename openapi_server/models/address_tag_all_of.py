@@ -14,27 +14,19 @@ class AddressTagAllOf(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, address: str=None, entity: int=None):
+    def __init__(self, address: str = None):
         """AddressTagAllOf - a model defined in OpenAPI
 
         :param address: The address of this AddressTagAllOf.
-        :param entity: The entity of this AddressTagAllOf.
         """
-        self.openapi_types = {
-            'address': str,
-            'entity': int
-        }
+        self.openapi_types = {"address": str}
 
-        self.attribute_map = {
-            'address': 'address',
-            'entity': 'entity'
-        }
+        self.attribute_map = {"address": "address"}
 
         self._address = address
-        self._entity = entity
 
     @classmethod
-    def from_dict(cls, dikt: dict) -> 'AddressTagAllOf':
+    def from_dict(cls, dikt: dict) -> "AddressTagAllOf":
         """Returns the dict as a model
 
         :param dikt: A dict.
@@ -50,9 +42,7 @@ class AddressTagAllOf(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'address': self._address,
-            'entity': self._entity }
-
+        return {"address": self._address}
 
     @property
     def address(self):
@@ -75,31 +65,8 @@ class AddressTagAllOf(Model):
         :type address: str
         """
         if address is None:
-            raise BadUserInputException("Invalid value for `address`, must not be `None`")
+            raise BadUserInputException(
+                "Invalid value for `address`, must not be `None`"
+            )
 
         self._address = address
-
-    @property
-    def entity(self):
-        """Gets the entity of this AddressTagAllOf.
-
-        Entity id
-
-        :return: The entity of this AddressTagAllOf.
-        :rtype: int
-        """
-        return self._entity
-
-    @entity.setter
-    def entity(self, entity):
-        """Sets the entity of this AddressTagAllOf.
-
-        Entity id
-
-        :param entity: The entity of this AddressTagAllOf.
-        :type entity: int
-        """
-        if entity is None:
-            raise BadUserInputException("Invalid value for `entity`, must not be `None`")
-
-        self._entity = entity

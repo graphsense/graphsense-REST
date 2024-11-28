@@ -26,9 +26,9 @@ paths:
     get:
       operationId: search
       parameters:
-        - $ref: '#/components/parameters/currency_query' 
-        - $ref: '#/components/parameters/search_query' 
-        - $ref: '#/components/parameters/limit' 
+        - $ref: '#/components/parameters/currency_query'
+        - $ref: '#/components/parameters/search_query'
+        - $ref: '#/components/parameters/limit'
       responses:
         "200":
           description: OK
@@ -40,8 +40,8 @@ paths:
                 search_result_1Archive:
                   summary: search result for '1Archive'
                   value:
-                    currencies: 
-                        addresses: 
+                    currencies:
+                        addresses:
                           - 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
                           - 1ArchiveisY6i4Hpostivemate1sVRhQ71
                           - 1ArchiveiskxdThieferHRHi1592TqsV4c
@@ -51,21 +51,21 @@ paths:
                 search_result_04d9200:
                   summary: search result for '04d9200'
                   value:
-                    currencies: 
+                    currencies:
                         addresses: []
                         currency: btc
-                        txs: 
+                        txs:
                           - 04d920038d78be339694fe28116789dc49509cc9f47724d4ebcf574261caee8c,
                           - 04d920094700443cab848544411a9a6d6628ab0d8502a796fbc70989b7991ccf
                     labels: []
                 search_result_internet:
                   summary: search result for 'internet'
                   value:
-                    currencies: 
+                    currencies:
                         addresses: []
                         currency: btc
                         txs: []
-                    labels: 
+                    labels:
                       - Internet Archive
       summary: Returns matching addresses, transactions and labels
       tags:
@@ -74,7 +74,7 @@ paths:
     get:
       operationId: get_block_by_date
       parameters:
-        - $ref: '#/components/parameters/currency' 
+        - $ref: '#/components/parameters/currency'
         - $ref: '#/components/parameters/dateTime'
       responses:
         "200":
@@ -90,7 +90,7 @@ paths:
     get:
       operationId: get_block
       parameters:
-        - $ref: '#/components/parameters/currency' 
+        - $ref: '#/components/parameters/currency'
         - $ref: '#/components/parameters/height'
       responses:
         "200":
@@ -106,7 +106,7 @@ paths:
     get:
       operationId: list_block_txs
       parameters:
-        - $ref: '#/components/parameters/currency' 
+        - $ref: '#/components/parameters/currency'
         - $ref: '#/components/parameters/height'
       responses:
         "200":
@@ -122,14 +122,14 @@ paths:
                   $ref: '#/components/examples/txs_utxo'
                 tx_account_array:
                   $ref: '#/components/examples/txs_account'
-      summary: Get block transactions 
+      summary: Get block transactions
       tags:
       - blocks
   /{currency}/addresses/{address}:
     get:
       operationId: get_address
       parameters:
-        - $ref: '#/components/parameters/currency' 
+        - $ref: '#/components/parameters/currency'
         - $ref: '#/components/parameters/address'
         - $ref: '#/components/parameters/include_actors_defaulttrue'
       responses:
@@ -146,15 +146,15 @@ paths:
     get:
       operationId: list_address_txs
       parameters:
-        - $ref: '#/components/parameters/currency' 
-        - $ref: '#/components/parameters/address' 
-        - $ref: '#/components/parameters/direction_txs' 
-        - $ref: '#/components/parameters/min_height' 
-        - $ref: '#/components/parameters/max_height' 
-        - $ref: '#/components/parameters/sorting_order' 
-        - $ref: '#/components/parameters/token_currency' 
-        - $ref: '#/components/parameters/page' 
-        - $ref: '#/components/parameters/pagesize' 
+        - $ref: '#/components/parameters/currency'
+        - $ref: '#/components/parameters/address'
+        - $ref: '#/components/parameters/direction_txs'
+        - $ref: '#/components/parameters/min_height'
+        - $ref: '#/components/parameters/max_height'
+        - $ref: '#/components/parameters/sorting_order'
+        - $ref: '#/components/parameters/token_currency'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pagesize'
       responses:
         "200":
           description: OK
@@ -172,11 +172,11 @@ paths:
     get:
       operationId: list_tags_by_address
       parameters:
-        - $ref: '#/components/parameters/currency' 
-        - $ref: '#/components/parameters/address' 
-        - $ref: '#/components/parameters/page' 
+        - $ref: '#/components/parameters/currency'
+        - $ref: '#/components/parameters/address'
+        - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pagesize'
-        - $ref: '#/components/parameters/include_best_cluster_tag' 
+        - $ref: '#/components/parameters/include_best_cluster_tag'
       responses:
         "200":
           description: OK
@@ -194,7 +194,7 @@ paths:
     get:
       operationId: get_tag_summary_by_address
       parameters:
-        - $ref: '#/components/parameters/currency' 
+        - $ref: '#/components/parameters/currency'
         - $ref: '#/components/parameters/address'
         - $ref: '#/components/parameters/include_best_cluster_tag'
       responses:
@@ -211,14 +211,14 @@ paths:
     get:
       operationId: list_address_neighbors
       parameters:
-        - $ref: '#/components/parameters/currency' 
-        - $ref: '#/components/parameters/address' 
-        - $ref: '#/components/parameters/direction' 
-        - $ref: '#/components/parameters/only_address_ids' 
+        - $ref: '#/components/parameters/currency'
+        - $ref: '#/components/parameters/address'
+        - $ref: '#/components/parameters/direction'
+        - $ref: '#/components/parameters/only_address_ids'
         - $ref: '#/components/parameters/include_labels'
         - $ref: '#/components/parameters/include_actors_defaulttrue'
-        - $ref: '#/components/parameters/page' 
-        - $ref: '#/components/parameters/pagesize' 
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pagesize'
       responses:
         "200":
           description: OK
@@ -233,8 +233,8 @@ paths:
     get:
       operationId: get_address_entity
       parameters:
-        - $ref: '#/components/parameters/currency' 
-        - $ref: '#/components/parameters/address' 
+        - $ref: '#/components/parameters/currency'
+        - $ref: '#/components/parameters/address'
         - $ref: '#/components/parameters/include_actors_defaulttrue'
       responses:
         "200":
@@ -250,14 +250,14 @@ paths:
     get:
       operationId: list_address_links
       parameters:
-        - $ref: '#/components/parameters/currency' 
-        - $ref: '#/components/parameters/address' 
-        - $ref: '#/components/parameters/neighbor' 
-        - $ref: '#/components/parameters/min_height' 
-        - $ref: '#/components/parameters/max_height' 
-        - $ref: '#/components/parameters/sorting_order' 
-        - $ref: '#/components/parameters/page' 
-        - $ref: '#/components/parameters/pagesize' 
+        - $ref: '#/components/parameters/currency'
+        - $ref: '#/components/parameters/address'
+        - $ref: '#/components/parameters/neighbor'
+        - $ref: '#/components/parameters/min_height'
+        - $ref: '#/components/parameters/max_height'
+        - $ref: '#/components/parameters/sorting_order'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pagesize'
       responses:
         "200":
           description: OK
@@ -268,17 +268,17 @@ paths:
                   $ref: '#/components/examples/links_internetarchive'
               schema:
                 $ref: '#/components/schemas/links'
-      summary: Get outgoing transactions between two addresses 
+      summary: Get outgoing transactions between two addresses
       tags:
       - addresses
   /{currency}/entities/{entity}:
     get:
       operationId: get_entity
       parameters:
-        - $ref: '#/components/parameters/currency' 
-        - $ref: '#/components/parameters/entity' 
-        - $ref: '#/components/parameters/exclude_best_address_tag' 
-        - $ref: '#/components/parameters/include_actors' 
+        - $ref: '#/components/parameters/currency'
+        - $ref: '#/components/parameters/entity'
+        - $ref: '#/components/parameters/exclude_best_address_tag'
+        - $ref: '#/components/parameters/include_actors'
       responses:
         "200":
           description: OK
@@ -293,10 +293,10 @@ paths:
     get:
       operationId: list_address_tags_by_entity
       parameters:
-        - $ref: '#/components/parameters/currency' 
-        - $ref: '#/components/parameters/entity' 
-        - $ref: '#/components/parameters/page' 
-        - $ref: '#/components/parameters/pagesize' 
+        - $ref: '#/components/parameters/currency'
+        - $ref: '#/components/parameters/entity'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pagesize'
       responses:
         "200":
           description: OK
@@ -307,22 +307,22 @@ paths:
                   $ref: '#/components/examples/internetarchive_entitys_addresses'
               schema:
                 $ref: '#/components/schemas/address_tags'
-      summary: Get address tags for a given entity 
+      summary: Get address tags for a given entity
       tags:
       - entities
   /{currency}/entities/{entity}/neighbors:
     get:
       operationId: list_entity_neighbors
       parameters:
-        - $ref: '#/components/parameters/currency' 
-        - $ref: '#/components/parameters/entity' 
-        - $ref: '#/components/parameters/direction' 
-        - $ref: '#/components/parameters/only_entity_ids' 
-        - $ref: '#/components/parameters/include_labels' 
-        - $ref: '#/components/parameters/exclude_best_address_tag' 
+        - $ref: '#/components/parameters/currency'
+        - $ref: '#/components/parameters/entity'
+        - $ref: '#/components/parameters/direction'
+        - $ref: '#/components/parameters/only_entity_ids'
+        - $ref: '#/components/parameters/include_labels'
+        - $ref: '#/components/parameters/exclude_best_address_tag'
         - $ref: '#/components/parameters/include_actors'
-        - $ref: '#/components/parameters/page' 
-        - $ref: '#/components/parameters/pagesize' 
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pagesize'
       responses:
         "200":
           description: OK
@@ -337,15 +337,15 @@ paths:
     get:
       operationId: list_entity_txs
       parameters:
-        - $ref: '#/components/parameters/currency' 
-        - $ref: '#/components/parameters/entity' 
-        - $ref: '#/components/parameters/direction_txs' 
-        - $ref: '#/components/parameters/min_height' 
-        - $ref: '#/components/parameters/max_height' 
-        - $ref: '#/components/parameters/sorting_order' 
-        - $ref: '#/components/parameters/token_currency' 
-        - $ref: '#/components/parameters/page' 
-        - $ref: '#/components/parameters/pagesize' 
+        - $ref: '#/components/parameters/currency'
+        - $ref: '#/components/parameters/entity'
+        - $ref: '#/components/parameters/direction_txs'
+        - $ref: '#/components/parameters/min_height'
+        - $ref: '#/components/parameters/max_height'
+        - $ref: '#/components/parameters/sorting_order'
+        - $ref: '#/components/parameters/token_currency'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pagesize'
       responses:
         "200":
           description: OK
@@ -363,14 +363,14 @@ paths:
     get:
       operationId: list_entity_links
       parameters:
-        - $ref: '#/components/parameters/currency' 
-        - $ref: '#/components/parameters/entity' 
-        - $ref: '#/components/parameters/entity_neighbor' 
-        - $ref: '#/components/parameters/min_height' 
-        - $ref: '#/components/parameters/max_height' 
-        - $ref: '#/components/parameters/sorting_order' 
-        - $ref: '#/components/parameters/page' 
-        - $ref: '#/components/parameters/pagesize' 
+        - $ref: '#/components/parameters/currency'
+        - $ref: '#/components/parameters/entity'
+        - $ref: '#/components/parameters/entity_neighbor'
+        - $ref: '#/components/parameters/min_height'
+        - $ref: '#/components/parameters/max_height'
+        - $ref: '#/components/parameters/sorting_order'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pagesize'
       responses:
         "200":
           description: OK
@@ -388,10 +388,10 @@ paths:
     get:
       operationId: list_entity_addresses
       parameters:
-        - $ref: '#/components/parameters/currency' 
-        - $ref: '#/components/parameters/entity' 
-        - $ref: '#/components/parameters/page' 
-        - $ref: '#/components/parameters/pagesize' 
+        - $ref: '#/components/parameters/currency'
+        - $ref: '#/components/parameters/entity'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pagesize'
       responses:
         "200":
           description: OK
@@ -399,21 +399,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/entity_addresses'
-      summary: Get an entity's addresses 
+      summary: Get an entity's addresses
       tags:
       - entities
   /{currency}/entities/{entity}/search:
     get:
       operationId: search_entity_neighbors
       parameters:
-        - $ref: '#/components/parameters/currency' 
-        - $ref: '#/components/parameters/entity' 
-        - $ref: '#/components/parameters/direction' 
-        - $ref: '#/components/parameters/search_key' 
-        - $ref: '#/components/parameters/search_value' 
-        - $ref: '#/components/parameters/depth' 
-        - $ref: '#/components/parameters/breadth' 
-        - $ref: '#/components/parameters/skip_num_addresses' 
+        - $ref: '#/components/parameters/currency'
+        - $ref: '#/components/parameters/entity'
+        - $ref: '#/components/parameters/direction'
+        - $ref: '#/components/parameters/search_key'
+        - $ref: '#/components/parameters/search_value'
+        - $ref: '#/components/parameters/depth'
+        - $ref: '#/components/parameters/breadth'
+        - $ref: '#/components/parameters/skip_num_addresses'
       responses:
         "200":
           description: OK
@@ -421,7 +421,7 @@ paths:
             application/json:
               schema:
                 type: array
-                items: 
+                items:
                   $ref: '#/components/schemas/search_result_level1'
       summary: Search deeply for matching neighbors
       tags:
@@ -430,8 +430,8 @@ paths:
     get:
       operationId: get_tx
       parameters:
-        - $ref: '#/components/parameters/currency' 
-        - $ref: '#/components/parameters/tx_hash' 
+        - $ref: '#/components/parameters/currency'
+        - $ref: '#/components/parameters/tx_hash'
         - $ref: '#/components/parameters/include_io'
         - $ref: '#/components/parameters/include_nonstandard_io'
         - $ref: '#/components/parameters/include_io_index'
@@ -455,8 +455,8 @@ paths:
     get:
       operationId: list_token_txs
       parameters:
-        - $ref: '#/components/parameters/currency' 
-        - $ref: '#/components/parameters/tx_hash' 
+        - $ref: '#/components/parameters/currency'
+        - $ref: '#/components/parameters/tx_hash'
       responses:
         "200":
           description: OK
@@ -474,8 +474,8 @@ paths:
     get:
       operationId: get_tx_io
       parameters:
-        - $ref: '#/components/parameters/currency' 
-        - $ref: '#/components/parameters/tx_hash' 
+        - $ref: '#/components/parameters/currency'
+        - $ref: '#/components/parameters/tx_hash'
         - $ref: '#/components/parameters/io'
         - $ref: '#/components/parameters/include_nonstandard_io'
         - $ref: '#/components/parameters/include_io_index'
@@ -496,8 +496,8 @@ paths:
     get:
       operationId: get_spent_in_txs
       parameters:
-        - $ref: '#/components/parameters/currency' 
-        - $ref: '#/components/parameters/tx_hash' 
+        - $ref: '#/components/parameters/currency'
+        - $ref: '#/components/parameters/tx_hash'
         - $ref: '#/components/parameters/io_index'
       responses:
         "200":
@@ -511,15 +511,15 @@ paths:
               examples:
                 txs_account:
                   $ref: '#/components/examples/tx_refs'
-      summary: Returns in which other transactions, outputs from the asked transaction are spent. Think forward references in the transaction graph. This endpoint is only available for utxo like currencies. 
+      summary: Returns in which other transactions, outputs from the asked transaction are spent. Think forward references in the transaction graph. This endpoint is only available for utxo like currencies.
       tags:
         - txs
   /{currency}/txs/{tx_hash}/spending:
     get:
       operationId: get_spending_txs
       parameters:
-        - $ref: '#/components/parameters/currency' 
-        - $ref: '#/components/parameters/tx_hash' 
+        - $ref: '#/components/parameters/currency'
+        - $ref: '#/components/parameters/tx_hash'
         - $ref: '#/components/parameters/io_index'
       responses:
         "200":
@@ -533,15 +533,15 @@ paths:
               examples:
                 txs_account:
                   $ref: '#/components/examples/tx_refs'
-      summary: Returns in which other transaction's outputs the asked transaction spent. Think backwards references is the transaction graph. This endpoint is only available for utxo like currencies. 
+      summary: Returns in which other transaction's outputs the asked transaction spent. Think backwards references is the transaction graph. This endpoint is only available for utxo like currencies.
       tags:
         - txs
   /{currency}/rates/{height}:
     get:
       operationId: get_exchange_rates
       parameters:
-        - $ref: '#/components/parameters/currency' 
-        - $ref: '#/components/parameters/height' 
+        - $ref: '#/components/parameters/currency'
+        - $ref: '#/components/parameters/height'
       responses:
         "200":
           description: OK
@@ -559,7 +559,7 @@ paths:
     get:
       operationId: list_supported_tokens
       parameters:
-        - $ref: '#/components/parameters/currency' 
+        - $ref: '#/components/parameters/currency'
       responses:
         "200":
           description: OK
@@ -577,9 +577,9 @@ paths:
     get:
       operationId: list_address_tags
       parameters:
-        - $ref: '#/components/parameters/label' 
-        - $ref: '#/components/parameters/page' 
-        - $ref: '#/components/parameters/pagesize' 
+        - $ref: '#/components/parameters/label'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pagesize'
       responses:
         "200":
           description: OK
@@ -597,7 +597,7 @@ paths:
     get:
       operationId: get_actor
       parameters:
-        - $ref: '#/components/parameters/actor'  
+        - $ref: '#/components/parameters/actor'
       responses:
         "200":
           description: OK
@@ -612,9 +612,9 @@ paths:
     get:
       operationId: get_actor_tags
       parameters:
-        - $ref: '#/components/parameters/actor'  
-        - $ref: '#/components/parameters/page' 
-        - $ref: '#/components/parameters/pagesize' 
+        - $ref: '#/components/parameters/actor'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pagesize'
       responses:
         "200":
           description: OK
@@ -644,7 +644,7 @@ paths:
     get:
       operationId: list_concepts
       parameters:
-        - $ref: '#/components/parameters/taxonomy' 
+        - $ref: '#/components/parameters/taxonomy'
       responses:
         "200":
           description: OK
@@ -658,13 +658,13 @@ paths:
       tags:
         - tags
   /{currency}/bulk.csv/{operation}:
-    post: 
+    post:
       operationId: bulk_csv
-      parameters: 
-        - $ref: '#/components/parameters/currency' 
-        - $ref: '#/components/parameters/operation' 
-        - $ref: '#/components/parameters/num_pages' 
-      requestBody: 
+      parameters:
+        - $ref: '#/components/parameters/currency'
+        - $ref: '#/components/parameters/operation'
+        - $ref: '#/components/parameters/num_pages'
+      requestBody:
         required: true
         content:
           application/json:
@@ -677,7 +677,7 @@ paths:
         "200":
           description: OK
           content:
-            text/csv: 
+            text/csv:
               schema:
                 type: string
       summary: Get data as CSV in bulk
@@ -687,11 +687,11 @@ paths:
   /{currency}/bulk.json/{operation}:
     post:
       operationId: bulk_json
-      parameters: 
-        - $ref: '#/components/parameters/currency' 
-        - $ref: '#/components/parameters/operation' 
-        - $ref: '#/components/parameters/num_pages' 
-      requestBody: 
+      parameters:
+        - $ref: '#/components/parameters/currency'
+        - $ref: '#/components/parameters/operation'
+        - $ref: '#/components/parameters/num_pages'
+      requestBody:
         required: true
         content:
           application/json:
@@ -704,7 +704,7 @@ paths:
         "200":
           description: OK
           content:
-            application/json: 
+            application/json:
               schema:
                 type: array
                 items:
@@ -999,7 +999,7 @@ components:
       required: true
       schema:
         type: string
-        enum: 
+        enum:
           - category
           - addresses
           - entities
@@ -1227,7 +1227,7 @@ components:
           $ref: '#/components/schemas/timestamp'
     currency:
       type: string
-      description: crypto currency code 
+      description: crypto currency code
       example: btc
     stats:
       type: object
@@ -1313,15 +1313,15 @@ components:
         block_hash:
           type: string
           format: string
-        currency: 
+        currency:
           $ref: '#/components/schemas/currency'
-        height: 
+        height:
           $ref: '#/components/schemas/height'
-        no_txs: 
+        no_txs:
           format: int32
           type: integer
           example: 11
-        timestamp: 
+        timestamp:
           $ref: '#/components/schemas/timestamp'
     address:
       type: object
@@ -1340,41 +1340,41 @@ components:
         - total_spent
         - status
       properties:
-        currency: 
+        currency:
           $ref: '#/components/schemas/currency'
-        address: 
+        address:
           $ref: '#/components/schemas/address_id'
-        entity: 
+        entity:
           $ref: '#/components/schemas/entity_id'
-        balance: 
+        balance:
           $ref: '#/components/schemas/values'
         token_balances:
           $ref: '#/components/schemas/token_values'
-        first_tx: 
+        first_tx:
           $ref: '#/components/schemas/tx_summary'
-        last_tx: 
+        last_tx:
           $ref: '#/components/schemas/tx_summary'
-        in_degree: 
+        in_degree:
           type: integer
           format: int32
-        out_degree: 
+        out_degree:
           type: integer
           format: int32
-        no_incoming_txs: 
+        no_incoming_txs:
           type: integer
           format: int32
-        no_outgoing_txs: 
+        no_outgoing_txs:
           type: integer
           format: int32
-        total_received: 
+        total_received:
           $ref: '#/components/schemas/values'
-        total_spent: 
+        total_spent:
           $ref: '#/components/schemas/values'
-        total_tokens_received: 
+        total_tokens_received:
           $ref: '#/components/schemas/token_values'
-        total_tokens_spent: 
+        total_tokens_spent:
           $ref: '#/components/schemas/token_values'
-        actors: 
+        actors:
           $ref: '#/components/schemas/labeled_item_refs'
         is_contract:
           type: boolean
@@ -1402,49 +1402,49 @@ components:
         - total_spent
         - no_address_tags
       properties:
-        currency: 
+        currency:
           $ref: '#/components/schemas/currency'
-        entity: 
+        entity:
           $ref: '#/components/schemas/entity_id'
-        root_address: 
+        root_address:
           $ref: '#/components/schemas/address_id'
-        balance: 
+        balance:
           $ref: '#/components/schemas/values'
         token_balances:
           $ref: '#/components/schemas/token_values'
-        first_tx: 
+        first_tx:
           $ref: '#/components/schemas/tx_summary'
-        last_tx: 
+        last_tx:
           $ref: '#/components/schemas/tx_summary'
-        in_degree: 
+        in_degree:
           type: integer
           format: int32
-        out_degree: 
+        out_degree:
           type: integer
           format: int32
-        no_addresses: 
+        no_addresses:
           $ref: '#/components/schemas/no_addresses'
-        no_incoming_txs: 
+        no_incoming_txs:
           type: integer
           format: int32
-        no_outgoing_txs: 
+        no_outgoing_txs:
           type: integer
           format: int32
-        total_received: 
+        total_received:
           $ref: '#/components/schemas/values'
-        total_spent: 
+        total_spent:
           $ref: '#/components/schemas/values'
-        total_tokens_received: 
+        total_tokens_received:
           $ref: '#/components/schemas/token_values'
-        total_tokens_spent: 
+        total_tokens_spent:
           $ref: '#/components/schemas/token_values'
-        actors: 
+        actors:
           $ref: '#/components/schemas/labeled_item_refs'
         best_address_tag:
           $ref: '#/components/schemas/address_tag'
         no_address_tags:
           $ref: '#/components/schemas/no_address_tags'
-    address_tags: 
+    address_tags:
       type: object
       required:
         - address_tags
@@ -1462,7 +1462,7 @@ components:
         - timestamp
         - tx_hash
       properties:
-        height: 
+        height:
           $ref: '#/components/schemas/height'
         timestamp:
           $ref: '#/components/schemas/timestamp'
@@ -1505,7 +1505,7 @@ components:
           example: "https://example.com/tagpacks/sample.yaml"
         source:
           type: string
-          description: Source 
+          description: Source
           example: "https://foobar.com"
         lastmod:
           type: integer
@@ -1550,12 +1550,11 @@ components:
         - type: object
           required:
             - address
-            - entity
           properties:
             address:
               $ref: '#/components/schemas/address_id'
-            entity:
-              $ref: '#/components/schemas/entity_id'
+            # entity:
+            #   $ref: '#/components/schemas/entity_id'
     actors:
       type: array
       items:
@@ -1628,14 +1627,14 @@ components:
           items:
             type: string
         twitter_handle:
-          type: string 
+          type: string
           description: semi-colon separated list of twitter handles used by the actor
         github_organisation:
           type: string
           description: semi-colon separated list of github organisations used by the actor
         legal_name:
           type: string
-          description: Name of the legal entity registerd by the actor.       
+          description: Name of the legal entity registerd by the actor.
     token_values:
       type: object
       description: Per token value-flow
@@ -1720,7 +1719,7 @@ components:
       required:
         - neighbors
       properties:
-        next_page: 
+        next_page:
           $ref: '#/components/schemas/next_page'
         neighbors:
           type: array
@@ -1731,7 +1730,7 @@ components:
       required:
         - neighbors
       properties:
-        next_page: 
+        next_page:
           $ref: '#/components/schemas/next_page'
         neighbors:
           type: array
@@ -1744,18 +1743,18 @@ components:
         - value
         - address
       properties:
-        labels: 
+        labels:
           type: array
-          items: 
+          items:
             type: string
-          description: The neighbor's tag labels 
-        value: 
+          description: The neighbor's tag labels
+        value:
           $ref: '#/components/schemas/values'
         token_values:
           $ref: '#/components/schemas/token_values'
-        no_txs: 
+        no_txs:
           $ref: '#/components/schemas/no_txs'
-        address: 
+        address:
           $ref: '#/components/schemas/address'
     neighbor_entity:
       type: object
@@ -1764,25 +1763,25 @@ components:
         - value
         - entity
       properties:
-        labels: 
+        labels:
           type: array
-          items: 
+          items:
             type: string
-          description: The neighbor's tag labels 
-        value: 
+          description: The neighbor's tag labels
+        value:
           $ref: '#/components/schemas/values'
         token_values:
           $ref: '#/components/schemas/token_values'
-        no_txs: 
+        no_txs:
           $ref: '#/components/schemas/no_txs'
-        entity: 
+        entity:
           $ref: '#/components/schemas/entity'
     links:
       type: object
       required:
         - links
       properties:
-        next_page: 
+        next_page:
           $ref: '#/components/schemas/next_page'
         links:
           type: array
@@ -1792,7 +1791,7 @@ components:
       oneOf:
         - $ref: '#/components/schemas/link_utxo'
         - $ref: '#/components/schemas/tx_account'
-      discriminator: 
+      discriminator:
         propertyName: 'tx_type'
         mapping:
           utxo: '#/components/schemas/link_utxo'
@@ -1811,24 +1810,24 @@ components:
           tx_type:
             type: string
             default: 'utxo'
-          tx_hash: 
+          tx_hash:
             $ref: '#/components/schemas/tx_hash'
           currency:
             $ref: '#/components/schemas/currency'
-          height: 
+          height:
             $ref: '#/components/schemas/height'
-          timestamp: 
+          timestamp:
             $ref: '#/components/schemas/timestamp'
           input_value:
             $ref: '#/components/schemas/values'
-          output_value: 
+          output_value:
             $ref: '#/components/schemas/values'
     entity_addresses:
       type: object
       required:
         - addresses
       properties:
-        next_page: 
+        next_page:
           $ref: '#/components/schemas/next_page'
         addresses:
           type: array
@@ -1836,7 +1835,7 @@ components:
             $ref: '#/components/schemas/address'
     search_result_level1:
       type: object
-      required: 
+      required:
         - neighbor
         - matching_addresses
         - paths
@@ -1854,7 +1853,7 @@ components:
           description: Branches to matching entities
     search_result_level2:
       type: object
-      required: 
+      required:
         - neighbor
         - matching_addresses
         - paths
@@ -1872,7 +1871,7 @@ components:
           description: Branches to matching entities
     search_result_level3:
       type: object
-      required: 
+      required:
         - neighbor
         - matching_addresses
         - paths
@@ -1890,7 +1889,7 @@ components:
           description: Branches to matching entities
     search_result_level4:
       type: object
-      required: 
+      required:
         - neighbor
         - matching_addresses
         - paths
@@ -1908,7 +1907,7 @@ components:
           description: Branches to matching entities
     search_result_level5:
       type: object
-      required: 
+      required:
         - neighbor
         - matching_addresses
         - paths
@@ -1926,7 +1925,7 @@ components:
           description: Branches to matching entities
     search_result_level6:
       type: object
-      required: 
+      required:
         - neighbor
         - matching_addresses
         - paths
@@ -1979,11 +1978,11 @@ components:
           $ref: '#/components/schemas/coinbase'
         height:
           $ref: '#/components/schemas/height'
-        no_inputs: 
+        no_inputs:
           format: int32
           type: integer
           description: number of input addresses
-        no_outputs: 
+        no_outputs:
           format: int32
           type: integer
           description: number of output addresses
@@ -1991,7 +1990,7 @@ components:
           $ref: '#/components/schemas/tx_values'
         outputs:
           $ref: '#/components/schemas/tx_values'
-        timestamp: 
+        timestamp:
           $ref: '#/components/schemas/timestamp'
         total_input:
           $ref: '#/components/schemas/values'
@@ -2008,7 +2007,7 @@ components:
         - address
         - value
       properties:
-        address: 
+        address:
           type: array
           items:
             $ref: '#/components/schemas/address_id'
@@ -2050,7 +2049,7 @@ components:
           $ref: '#/components/schemas/tx_hash'
         height:
           $ref: '#/components/schemas/height'
-        timestamp: 
+        timestamp:
           $ref: '#/components/schemas/timestamp'
         value:
           $ref: '#/components/schemas/values'
@@ -2060,18 +2059,18 @@ components:
           $ref: '#/components/schemas/address_id'
         contract_creation:
           type: boolean
-          description: Indicates if this transaction created a new contract. Recipient address is the address of the new contract. 
+          description: Indicates if this transaction created a new contract. Recipient address is the address of the new contract.
     txs_account:
       type: array
       description: A list of account model transactions
-      items: 
+      items:
         $ref: '#/components/schemas/tx_account'
     address_txs:
       type: object
       required:
         - address_txs
       properties:
-        next_page: 
+        next_page:
           $ref: '#/components/schemas/next_page'
         address_txs:
           type: array
@@ -2099,7 +2098,7 @@ components:
           $ref: '#/components/schemas/coinbase'
         height:
           $ref: '#/components/schemas/height'
-        timestamp: 
+        timestamp:
           $ref: '#/components/schemas/timestamp'
         value:
           $ref: '#/components/schemas/values'
@@ -2107,7 +2106,7 @@ components:
       oneOf:
         - $ref: '#/components/schemas/address_tx_utxo'
         - $ref: '#/components/schemas/tx_account'
-      discriminator: 
+      discriminator:
         propertyName: 'tx_type'
         mapping:
           utxo: '#/components/schemas/address_tx_utxo'
@@ -2116,7 +2115,7 @@ components:
       oneOf:
         - $ref: '#/components/schemas/tx_utxo'
         - $ref: '#/components/schemas/tx_account'
-      discriminator: 
+      discriminator:
         propertyName: 'tx_type'
         mapping:
           utxo: '#/components/schemas/tx_utxo'
@@ -2124,7 +2123,7 @@ components:
     rates:
       type: object
       properties:
-        height: 
+        height:
           $ref: '#/components/schemas/height'
         rates:
           type: array
@@ -2209,17 +2208,17 @@ components:
         - addresses
         - txs
       properties:
-        currency: 
+        currency:
           $ref: '#/components/schemas/currency'
         addresses:
           type: array
           description: The list of found addresses
-          items: 
+          items:
             type: string
         txs:
           type: array
           description: The list of found transaction ids
-          items: 
+          items:
             type: string
     search_result_labels:
       type: array
@@ -2253,10 +2252,10 @@ components:
           description: ticker symbol of the currency e.g. USDT
         decimals:
           type: integer
-          description: the number of digits after the comma. Values are always delivered as integers. This value can be used to set the decimal point at the right place. 
+          description: the number of digits after the comma. Values are always delivered as integers. This value can be used to set the decimal point at the right place.
         peg_currency:
           type: string
-          description: is set if token is a stablecoin. It holds the thicker symbol of the currency the tokens is pegged to. 
+          description: is set if token is a stablecoin. It holds the thicker symbol of the currency the tokens is pegged to.
     token_configs:
       type: object
       required:
@@ -2278,17 +2277,17 @@ components:
           - ticker: WETH
             decimals: 18
             peg_currency: ETH
-    tx_utxo: 
+    tx_utxo:
       summary: UTXO transaction
       value:
         tx_type: 'utxo'
         tx_hash: '04d92601677d62a985310b61a301e74870fa942c8be0648e16b1db23b996a8cd'
         coinbase: false
         height: 47
-        inputs: 
+        inputs:
           - address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
-            value: 
-              fiat_values: 
+            value:
+              fiat_values:
                 - code: eur
                   value: 10
                 - code: usd
@@ -2296,7 +2295,7 @@ components:
               value: 5
           - address: addressB
             value:
-              fiat_values: 
+              fiat_values:
                 - code: eur
                   value: 20
                 - code: usd
@@ -2304,8 +2303,8 @@ components:
               value: 10
         outputs:
           - address: addressC
-            value: 
-              fiat_values: 
+            value:
+              fiat_values:
                 - code: eur
                   value: 5
                 - code: usd
@@ -2313,7 +2312,7 @@ components:
               value: 2.5
           - address: addressD
             value:
-              fiat_values: 
+              fiat_values:
                 - code: eur
                   value: 25
                 - code: usd
@@ -2321,14 +2320,14 @@ components:
               value: 12.5
         timestamp: 123456789
         total_input:
-            fiat_values: 
+            fiat_values:
               - code: eur
                 value: 30
               - code: usd
                 value: 60
             value: 15
         total_output:
-            fiat_values: 
+            fiat_values:
               - code: eur
                 value: 30
               - code: usd
@@ -2341,10 +2340,10 @@ components:
         tx_hash: '04d92601677d62a985310b61a301e74870fa942c8be0648e16b1db23b996a8cd'
         coinbase: false
         height: 47
-        inputs: 
+        inputs:
           - address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
-            value: 
-              fiat_values: 
+            value:
+              fiat_values:
                 - code: eur
                   value: 10
                 - code: usd
@@ -2352,7 +2351,7 @@ components:
               value: 5
           - address: addressB
             value:
-              fiat_values: 
+              fiat_values:
                 - code: eur
                   value: 20
                 - code: usd
@@ -2360,8 +2359,8 @@ components:
               value: 10
         outputs:
           - address: addressC
-            value: 
-              fiat_values: 
+            value:
+              fiat_values:
                 - code: eur
                   value: 5
                 - code: usd
@@ -2369,7 +2368,7 @@ components:
               value: 2.5
           - address: addressD
             value:
-              fiat_values: 
+              fiat_values:
                 - code: eur
                   value: 25
                 - code: usd
@@ -2377,14 +2376,14 @@ components:
               value: 12.5
         timestamp: 123456789
         total_input:
-            fiat_values: 
+            fiat_values:
               - code: eur
                 value: 30
               - code: usd
                 value: 60
             value: 15
         total_output:
-            fiat_values: 
+            fiat_values:
               - code: eur
                 value: 30
               - code: usd
@@ -2399,7 +2398,7 @@ components:
         height: 47
         timestamp: 123456789
         value:
-            fiat_values: 
+            fiat_values:
               - code: eur
                 value: 30
               - code: usd
@@ -2422,7 +2421,7 @@ components:
         height: 47
         timestamp: 123456789
         value:
-            fiat_values: 
+            fiat_values:
               - code: eur
                 value: 30
               - code: usd
