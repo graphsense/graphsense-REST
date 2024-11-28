@@ -38,30 +38,17 @@ database:
 
 # Restrict allowed origins for CORS
 #
-# The origin, or list of origins to allow requests from. 
+# The origin, or list of origins to allow requests from.
 #
-# Default : ‘*’ 
-# ALLOWED_ORIGINS: 
+# Default : ‘*’
+# ALLOWED_ORIGINS:
 #   - 'https://example.com'
 
-tagstores:
-    # add postgres db configuration for each tagstore like:
-    - host: "POSTGRES_HOST" 
-    # additional properties with default values:
-    # port: 5432
-    # database: "tagstore"
-    # schema: "tagstore" 
-    # username: "tagstore"
-    # password: "tagstore"
-    # query_timeout: 300
-    # max. number of connections in the aiopg connection pool
-    # max_connections: 10 
-    # time in sections after which stale connections are recycled
-    # pool_recycle: 3600 
-    # see https://aiopg.readthedocs.io/en/stable/core.html#aiopg.create_pool
+gs-tagstore:
+    url: 'postgresql+asyncpg://graphsense:test@localhost:5432/tagstore'
 
 # configure when to include private tags in responses
-# private tags are excluded by default 
+# private tags are excluded by default
 #
 # show_private_tags:
   # on_header:

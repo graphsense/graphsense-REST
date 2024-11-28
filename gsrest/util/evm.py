@@ -4,7 +4,7 @@ from gsrest.util.string_edit import remove_prefix
 def eth_address_to_hex(address):
     if not isinstance(address, bytes):
         return address
-    return '0x' + bytes_to_hex(address)
+    return "0x" + bytes_to_hex(address)
 
 
 def is_hex_string(string: str) -> bool:

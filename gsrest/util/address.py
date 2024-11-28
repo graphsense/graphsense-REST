@@ -1,7 +1,11 @@
-from gsrest.util.tron import (tron_address_to_evm, evm_to_tron_address_string)
 from gsrest.util.bch import try_bch_address_to_legacy
-from gsrest.util.evm import (eth_address_to_hex, is_hex_string,
-                             hex_str_to_bytes, strip_0x)
+from gsrest.util.evm import (
+    eth_address_to_hex,
+    hex_str_to_bytes,
+    is_hex_string,
+    strip_0x,
+)
+from gsrest.util.tron import evm_to_tron_address_string, tron_address_to_evm
 
 
 def cannonicalize_address(currency, address: str):
@@ -34,5 +38,4 @@ def address_to_user_format(currency, db_address) -> str:
     elif isinstance(db_address, str):
         return db_address
     else:
-        raise Exception(
-            f"Don't know how to decode db address, {db_address} {currency}")
+        raise Exception(f"Don't know how to decode db address, {db_address} {currency}")

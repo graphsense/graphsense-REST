@@ -1,4 +1,2 @@
-yapf
-flake8
-autopep8
+ruff
 aiohttp-devtools

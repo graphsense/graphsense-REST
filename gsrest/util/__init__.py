@@ -6,4 +6,4 @@ def get_first_key_present(target_dict, keylist):
 
 
 def is_eth_like(network: str) -> bool:
-    return network == 'eth' or network == 'trx'
+    return network == "eth" or network == "trx"

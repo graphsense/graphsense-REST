@@ -10,16 +10,25 @@ test-all-env:
 	tox -- graphsense
 
 lint:
-	flake8 ./gsrest --count --max-line-length=80 --statistics --exclude plugins
+	ruff check gsrest
 
 format:
-	autopep8 --in-place --recursive gsrest
-	yapf --in-place --recursive gsrest
+	ruff check --select I --fix gsrest
+	ruff format gsrest
 
-serve:
+install-dev:
+	 pip install -r requirements.txt
+	 pip install -r test-requirements.txt
+	 pip install -r dev-requirements.txt
+	 pre-commit install
+
+pre-commit:
+	pre-commit run --all-files
+
+serve-old:
 	python -m aiohttp.web -H localhost -P ${GS_REST_DEV_PORT} openapi_server:main
 
-dev:
+serve:
 	adev runserver -p ${GS_REST_DEV_PORT} --root . --app-factory main openapi_server/__init__.py
 
 build-docker:
@@ -49,4 +58,4 @@ run-designer:
 	echo 'Designer UI is running on port 8080'
 
 
-.PHONY: format lint test test-all-env serve drop-integration-db generate-openapi-server get-openapi-spec-from-upstream serve-docker
+.PHONY: format lint test test-all-env serve drop-integration-db generate-openapi-server get-openapi-spec-from-upstream serve-docker pre-commit install-dev

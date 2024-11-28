@@ -1,7 +1,7 @@
 import logging
+from argparse import Namespace
 
 import eth_event
-from argparse import Namespace
 
 logger = logging.getLogger(__name__)
 
@@ -11,7 +11,6 @@ def no_nones(lst):
 
 
 class VersionedDict(dict):
-
     def __init__(self, mapping, version):
         self.v = version
         super().__init__(mapping)
@@ -25,119 +24,51 @@ class VersionedDict(dict):
 log_signatures = {
     "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef": [
         {
-            "name":
-            "Transfer",
+            "name": "Transfer",
             "inputs": [
-                {
-                    "name": "from",
-                    "type": "address",
-                    "indexed": True
-                },
-                {
-                    "name": "to",
-                    "type": "address",
-                    "indexed": True
-                },
-                {
-                    "name": "value",
-                    "type": "uint256",
-                    "indexed": False
-                },
+                {"name": "from", "type": "address", "indexed": True},
+                {"name": "to", "type": "address", "indexed": True},
+                {"name": "value", "type": "uint256", "indexed": False},
             ],
         },
         {
-            "name":
-            "Transfer",
+            "name": "Transfer",
             "inputs": [
-                {
-                    "name": "from",
-                    "type": "address",
-                    "indexed": False
-                },
-                {
-                    "name": "to",
-                    "type": "address",
-                    "indexed": False
-                },
-                {
-                    "name": "value",
-                    "type": "uint256",
-                    "indexed": False
-                },
+                {"name": "from", "type": "address", "indexed": False},
+                {"name": "to", "type": "address", "indexed": False},
+                {"name": "value", "type": "uint256", "indexed": False},
             ],
         },
         {
-            "name":
-            "Transfer",
+            "name": "Transfer",
             "inputs": [
-                {
-                    "name": "from",
-                    "type": "address",
-                    "indexed": True
-                },
-                {
-                    "name": "to",
-                    "type": "address",
-                    "indexed": True
-                },
-                {
-                    "name": "value",
-                    "type": "uint256",
-                    "indexed": True
-                },
+                {"name": "from", "type": "address", "indexed": True},
+                {"name": "to", "type": "address", "indexed": True},
+                {"name": "value", "type": "uint256", "indexed": True},
             ],
         },
     ],
-    "0xf285329298fd841af46eb83bbe90d1ebe2951c975a65b19a02f965f842ee69c5": [{
-        "name":
-        "ChangeOwner",
-        "inputs": [{
-            "name": "new_owner",
-            "type": "address",
-            "indexed": True
-        }],
-    }],
+    "0xf285329298fd841af46eb83bbe90d1ebe2951c975a65b19a02f965f842ee69c5": [
+        {
+            "name": "ChangeOwner",
+            "inputs": [{"name": "new_owner", "type": "address", "indexed": True}],
+        }
+    ],
     "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925": [
         {
-            "name":
-            "Approval",
+            "name": "Approval",
             "inputs": [
-                {
-                    "name": "owner",
-                    "type": "address",
-                    "indexed": True
-                },
-                {
-                    "name": "spender",
-                    "type": "address",
-                    "indexed": True
-                },
-                {
-                    "name": "value",
-                    "type": "uint256",
-                    "indexed": False
-                },
+                {"name": "owner", "type": "address", "indexed": True},
+                {"name": "spender", "type": "address", "indexed": True},
+                {"name": "value", "type": "uint256", "indexed": False},
             ],
         },
         {
-            "name":
-            "Approval",
+            "name": "Approval",
             "inputs": [
-                {
-                    "name": "owner",
-                    "type": "address",
-                    "indexed": True
-                },
-                {
-                    "name": "spender",
-                    "type": "address",
-                    "indexed": True
-                },
-                {
-                    "name": "value",
-                    "type": "uint256",
-                    "indexed": True
-                },
+                {"name": "owner", "type": "address", "indexed": True},
+                {"name": "spender", "type": "address", "indexed": True},
+                {"name": "value", "type": "uint256", "indexed": True},
             ],
         },
     ],
@@ -162,8 +93,7 @@ def convert_db_log(db_log) -> dict:
 def decoded_log_to_str(decoded_log) -> str:
     name = decoded_log["name"]
     addr = decoded_log["address"].lower()
-    params = ",".join(
-        [f"{x['name']}={x['value']}" for x in decoded_log["data"]])
+    params = ",".join([f"{x['name']}={x['value']}" for x in decoded_log["data"]])
     return f"{addr}|{name}({params})"
 
 
@@ -179,25 +109,24 @@ def decode_log(log):
                 # Truncate topics to expected length. Importer bug
                 # lead to duplicate topics in some instances.
                 ll = log.copy()
-                nr_topics = sum(
-                    [1
-                     for x in logdef[i]["inputs"] if x["indexed"] is True]) + 1
+                nr_topics = (
+                    sum([1 for x in logdef[i]["inputs"] if x["indexed"] is True]) + 1
+                )
                 if len(ll["topics"]) != nr_topics:
-                    newTopics = ll['topics'][-nr_topics:]
+                    newTopics = ll["topics"][-nr_topics:]
                     logger.warning(
                         f"Truncated log topics, {ll['topics']} "
-                        f"to {newTopics}, might an error in your raw data.")
+                        f"to {newTopics}, might an error in your raw data."
+                    )
                     ll["topics"] = newTopics
 
-                result = eth_event.decode_log(ll,
-                                              VersionedDict(log_signatures, i))
+                result = eth_event.decode_log(ll, VersionedDict(log_signatures, i))
                 if "data" in result:
                     result["data"] = {d["name"]: d for d in result["data"]}
                 return result
-            except (eth_event.EventError) as e:
+            except eth_event.EventError as e:
                 if i == len(logdef) - 1:
-                    logger.info(
-                        f"Failed to decode supported log type. {e}. {log}")
+                    logger.info(f"Failed to decode supported log type. {e}. {log}")
     else:
         logger.debug("Can't decode log, not supported yet")
     return None

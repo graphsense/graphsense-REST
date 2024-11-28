@@ -1,17 +1,18 @@
-from werkzeug.datastructures import Headers
 from csv import DictWriter
-from openapi_server.models.values import Values
+
+from werkzeug.datastructures import Headers
+
 from gsrest.errors import BadUserInputException
+from openapi_server.models.values import Values
 
 
 def create_download_header(filename):
     headers = Headers()
-    headers.add('Content-Disposition', 'attachment', filename=filename)
+    headers.add("Content-Disposition", "attachment", filename=filename)
     return headers
 
 
 class writer:
-
     def write(self, str):
         self.str = str
 
@@ -27,15 +28,15 @@ def to_csv(query_function):
     while True:
         (page_state, rows) = query_function(page_state)
         if rows is None:
-            raise BadUserInputException('nothing found')
+            raise BadUserInputException("nothing found")
 
         def flatten(item, name=""):
             if isinstance(item, Values):
-                flat_dict[name + 'value'] = item.value
+                flat_dict[name + "value"] = item.value
                 for rate in item.fiat_values:
                     flat_dict[name + rate.code] = rate.value
                 return
-            if 'to_dict' in dir(item):
+            if "to_dict" in dir(item):
                 item = item.to_dict()
             if isinstance(item, dict):
                 for sub_item in item:

@@ -1,16 +1,19 @@
-import importlib
-from csv import DictWriter, Error as CSVError
-from openapi_server.models.values import Values
-from openapi_server.models.entity import Entity
-from openapi_server.models.address_tag import AddressTag
 import asyncio
-import json
-from aiohttp import web
-import traceback
-import inspect
 import contextlib
+import importlib
+import inspect
+import json
+import traceback
+from csv import DictWriter
+from csv import Error as CSVError
 from functools import reduce
-from gsrest.errors import NotFoundException, BadUserInputException
+
+from aiohttp import web
+
+from gsrest.errors import BadUserInputException, NotFoundException
+from openapi_server.models.address_tag import AddressTag
+from openapi_server.models.entity import Entity
+from openapi_server.models.values import Values
 
 
 @contextlib.asynccontextmanager
@@ -19,59 +22,58 @@ async def asyncnullcontext():
 
 
 def bulk_json(*args, **kwargs):
-    kwargs['form'] = 'json'
+    kwargs["form"] = "json"
     return bulk(*args, **kwargs)
 
 
 def bulk_csv(*args, **kwargs):
-    kwargs['form'] = 'csv'
+    kwargs["form"] = "csv"
     return bulk(*args, **kwargs)
 
 
-apis = ['addresses', 'entities', 'blocks', 'txs', 'rates', 'tags']
+apis = ["addresses", "entities", "blocks", "txs", "rates", "tags"]
 
-error_field = '_error'
-info_field = '_info'
-request_field_prefix = '_request_'
+error_field = "_error"
+info_field = "_info"
+request_field_prefix = "_request_"
 
 
-async def bulk(request, currency, operation, body, num_pages, form='csv'):
+async def bulk(request, currency, operation, body, num_pages, form="csv"):
     try:
         the_stack = stack(request, currency, operation, body, num_pages, form)
     except TypeError as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        text = str(e).replace('positional ', '') \
-            .replace('()', '') \
-            .replace('keyword ', '')
+        text = (
+            str(e).replace("positional ", "").replace("()", "").replace("keyword ", "")
+        )
         raise web.HTTPBadRequest(text=text)
 
-    if form == 'csv':
+    if form == "csv":
         gen = to_csv(the_stack, request.app.logger)
-        mimetype = 'text/csv'
+        mimetype = "text/csv"
     else:
         gen = to_json(the_stack, request.app.logger)
-        mimetype = 'application/json'
+        mimetype = "application/json"
 
-    response = web.StreamResponse(status=200,
-                                  reason='OK',
-                                  headers={
-                                      'Content-Type':
-                                      mimetype,
-                                      'Content-Disposition':
-                                      f'attachment; filename=bulk.{form}'
-                                  })
+    response = web.StreamResponse(
+        status=200,
+        reason="OK",
+        headers={
+            "Content-Type": mimetype,
+            "Content-Disposition": f"attachment; filename=bulk.{form}",
+        },
+    )
 
     response.enable_chunked_encoding()
     await response.prepare(request)
 
     async for row in gen:
-        await response.write(bytes(row, 'utf-8'))
+        await response.write(bytes(row, "utf-8"))
     await response.write_eof()
     return response
 
 
 class writer:
-
     def write(self, str):
         self.str = str
 
@@ -80,7 +82,7 @@ class writer:
 
 
 def flatten(item, name="", flat_dict=None, format=None):
-    if format == 'json':
+    if format == "json":
         if isinstance(item, dict):
             return item
         return item.to_dict()
@@ -93,41 +95,50 @@ def flatten(item, name="", flat_dict=None, format=None):
     if isinstance(item, Entity) and item.best_address_tag is None:
         item.best_address_tag = AddressTag()
     if isinstance(item, Values):
-        flat_dict[name + 'value'] = item.value
+        flat_dict[name + "value"] = item.value
         for rate in item.fiat_values:
             flat_dict[name + rate.code] = rate.value
         return
-    if 'to_dict' in dir(item):
+    if "to_dict" in dir(item):
         item = item.to_dict(shallow=True)
     if isinstance(item, dict):
         for sub_item in item:
             flatten(item[sub_item], name + sub_item + "_", flat_dict, format)
     elif isinstance(item, list):
-        if format == 'csv':
+        if format == "csv":
             name = name[:-1]
             item = [i if isinstance(i, str) else str(i) for i in item if i]
-            flat_dict[name] = ','.join(item)
+            flat_dict[name] = ",".join(item)
             if not name == "actors":
-                flat_dict[f'{name}_count'] = len(item)
+                flat_dict[f"{name}_count"] = len(item)
         else:
-            flat_dict[name[:-1]] = \
-                [flatten(sub_item, format=format) for sub_item in item]
+            flat_dict[name[:-1]] = [
+                flatten(sub_item, format=format) for sub_item in item
+            ]
     else:
         # if item is not None:
         flat_dict[name[:-1]] = item
     return flat_dict
 
 
-async def wrap(request, operation, currency, params, keys, num_pages, format,
-               max_concurrency_sem_context):
+async def wrap(
+    request,
+    operation,
+    currency,
+    params,
+    keys,
+    num_pages,
+    format,
+    max_concurrency_sem_context,
+):
     params = dict(params)
-    for (k, v) in keys.items():
+    for k, v in keys.items():
         params[k] = v
     try:
         async with max_concurrency_sem_context:
             result = await operation(request, currency, **params)
     except NotFoundException:
-        result = {error_field: 'not found'}
+        result = {error_field: "not found"}
     except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         result = {error_field: str(e)}
@@ -136,24 +147,24 @@ async def wrap(request, operation, currency, params, keys, num_pages, format,
         result = {error_field: str(e)}
     except Exception as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        result = {error_field: 'internal error'}
+        result = {error_field: "internal error"}
     if isinstance(result, list):
         rows = result
         page_state = None
-    elif not hasattr(result, 'next_page'):
+    elif not hasattr(result, "next_page"):
         rows = [result]
         page_state = None
     else:
         result = result.to_dict(shallow=True)
         for k in result:
-            if k != 'next_page':
+            if k != "next_page":
                 rows = result[k]
                 break
-        page_state = result.get('next_page', None)
+        page_state = result.get("next_page", None)
     flat = []
 
     def append_keys(fl):
-        for (k, v) in keys.items():
+        for k, v in keys.items():
             fl[request_field_prefix + k] = v
 
     for row in rows:
@@ -163,13 +174,21 @@ async def wrap(request, operation, currency, params, keys, num_pages, format,
     if not rows:
         fl = {}
         append_keys(fl)
-        fl[info_field] = 'no data'
+        fl[info_field] = "no data"
         flat.append(fl)
     num_pages -= 1
     if num_pages > 0 and page_state:
-        params['page'] = page_state
-        more = await wrap(request, operation, currency, params, keys,
-                          num_pages, format, max_concurrency_sem_context)
+        params["page"] = page_state
+        more = await wrap(
+            request,
+            operation,
+            currency,
+            params,
+            keys,
+            num_pages,
+            format,
+            max_concurrency_sem_context,
+        )
         for row in more:
             flat.append(row)
     return flat
@@ -178,28 +197,29 @@ async def wrap(request, operation, currency, params, keys, num_pages, format,
 def stack(request, currency, operation, body, num_pages, format):
     for api in apis:
         try:
-            mod = importlib.import_module(f'gsrest.service.{api}_service')
+            mod = importlib.import_module(f"gsrest.service.{api}_service")
             if hasattr(mod, operation):
                 operation_name = operation
                 operation = getattr(mod, operation)
                 break
         except ModuleNotFoundError:
-            raise NotFoundException(f'API {api} not found')
+            raise NotFoundException(f"API {api} not found")
         except AttributeError:
-            raise NotFoundException(f'{api}.{operation} not found')
+            raise NotFoundException(f"{api}.{operation} not found")
     aws = []
 
-    max_concurrency_bulk_operation = request.app['config']['database'].get(
-        f"max_concurrency_bulk_{operation_name}", 10)
+    max_concurrency_bulk_operation = request.app["config"]["database"].get(
+        f"max_concurrency_bulk_{operation_name}", 10
+    )
 
     params = {}
     keys = {}
-    check = {'request': None, 'currency': currency}
+    check = {"request": None, "currency": currency}
     ln = 0
-    for (attr, a) in body.items():
+    for attr, a in body.items():
         if a is None:
             continue
-        if attr == 'only_ids' or not isinstance(a, list):
+        if attr == "only_ids" or not isinstance(a, list):
             # filter out this param because it's also a list
             # and must not be taken as a key
             params[attr] = a
@@ -211,7 +231,7 @@ def stack(request, currency, operation, body, num_pages, format):
             check[attr] = a[0]
 
     if not keys:
-        raise TypeError('Keys need to be passed as list')
+        raise TypeError("Keys need to be passed as list")
     inspect.getcallargs(operation, **check)
 
     if operation_name in ["list_entity_txs", "list_entity_addresses"]:
@@ -224,10 +244,11 @@ def stack(request, currency, operation, body, num_pages, format):
 
     for i in range(0, ln):
         the_keys = {}
-        for (k, v) in keys.items():
+        for k, v in keys.items():
             the_keys[k] = v[i]
-        aw = wrap(request, operation, currency, params, the_keys, num_pages,
-                  format, context)
+        aw = wrap(
+            request, operation, currency, params, the_keys, num_pages, format, context
+        )
 
         aws.append(aw)
 
@@ -239,8 +260,11 @@ async def to_csv(stack, logger):
 
     def is_count_column(row, key):
         postfix = "_count"
-        return key.endswith(postfix) and key[:-len(postfix)] in row and type(
-            row.get(key, None)) == int
+        return (
+            key.endswith(postfix)
+            and key[: -len(postfix)] in row
+            and isinstance(row.get(key, None), int)
+        )
 
     def write_csv_row(csvwriter, buffer_writer, row, header_columns):
         try:
@@ -277,14 +301,11 @@ async def to_csv(stack, logger):
         except (BadUserInputException, CSVError) as e:
             logger.error(f"Error writing bulk row {row}: ({type(e)}) {e}")
             request_fields = {
-                k: v
-                for k, v in row.items() if k.startswith(request_field_prefix)
+                k: v for k, v in row.items() if k.startswith(request_field_prefix)
             }
             error_and_request_fields = {
-                **{
-                    error_field: "internal error - can't produce csv"
-                },
-                **request_fields
+                **{error_field: "internal error - can't produce csv"},
+                **request_fields,
             }
             csvwriter.writerow(error_and_request_fields)
         return buffer_writer.get()
@@ -298,18 +319,21 @@ async def to_csv(stack, logger):
             rows = await op
             rows_to_infer_header.extend(rows)
             regular_rows += sum(
-                1 for r in rows
-                if info_field not in r and error_field not in r)
+                1 for r in rows if info_field not in r and error_field not in r
+            )
         else:
             ops_rest.append(op)
 
     # Infer header
     headerfields = sorted(
         list(
-            reduce(set.union, [set(r.keys()) for r in rows_to_infer_header],
-                   set()).union(set([error_field, info_field]))))
+            reduce(
+                set.union, [set(r.keys()) for r in rows_to_infer_header], set()
+            ).union(set([error_field, info_field]))
+        )
+    )
 
-    csv = DictWriter(wr, headerfields, restval='', extrasaction='ignore')
+    csv = DictWriter(wr, headerfields, restval="", extrasaction="ignore")
 
     # write header
     csv.writeheader()

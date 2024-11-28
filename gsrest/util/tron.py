@@ -1,6 +1,8 @@
 import hashlib
+
 import base58
-from gsrest.util.evm import strip_0x, hex_str_to_bytes, bytes_to_hex
+
+from gsrest.util.evm import bytes_to_hex, hex_str_to_bytes, strip_0x
 
 TRON_ADDRESS_PREFIX = b"\x41"
 
@@ -30,18 +32,17 @@ def add_tron_prefix(address_bytes, prefix: bytes = TRON_ADDRESS_PREFIX):
 
 def strip_tron_prefix(address_bytes, prefix: bytes = TRON_ADDRESS_PREFIX):
     if len(address_bytes) > len(prefix) and address_bytes.startswith(prefix):
-        return address_bytes[len(prefix):]
+        return address_bytes[len(prefix) :]
     return address_bytes
 
 
-def evm_to_bytes(evm_address_hex: str,
-                 prefix: bytes = TRON_ADDRESS_PREFIX) -> bytes:
-    return strip_tron_prefix(hex_str_to_bytes(strip_0x(evm_address_hex)),
-                             prefix)
+def evm_to_bytes(evm_address_hex: str, prefix: bytes = TRON_ADDRESS_PREFIX) -> bytes:
+    return strip_tron_prefix(hex_str_to_bytes(strip_0x(evm_address_hex)), prefix)
 
 
-def evm_to_tron_address(evm_address_hex: str,
-                        prefix: bytes = TRON_ADDRESS_PREFIX) -> bytes:
+def evm_to_tron_address(
+    evm_address_hex: str, prefix: bytes = TRON_ADDRESS_PREFIX
+) -> bytes:
     # inspired by
     # https://github.com/tronprotocol/tronweb
     # /blob/d8c0d48847c0a2dd1c92f4a93f1e01b31c33dc94/src/utils/crypto.js#L14
@@ -51,8 +52,9 @@ def evm_to_tron_address(evm_address_hex: str,
     return base58.b58encode(taddress)
 
 
-def evm_to_tron_address_string(evm_address_hex: str,
-                               prefix: bytes = TRON_ADDRESS_PREFIX) -> str:
+def evm_to_tron_address_string(
+    evm_address_hex: str, prefix: bytes = TRON_ADDRESS_PREFIX
+) -> str:
     return evm_to_tron_address(evm_address_hex, prefix).decode("utf-8")
 
 
@@ -78,28 +80,27 @@ def tron_address_to_evm(taddress_str: str, validate: bool = True) -> bytes:
         raise ValueError(f"Invalid checksum on address {taddress_str}")
 
 
-def partial_tron_to_partial_evm(partial_taddress_str: str,
-                                prefix: bytes = TRON_ADDRESS_PREFIX) -> str:
+def partial_tron_to_partial_evm(
+    partial_taddress_str: str, prefix: bytes = TRON_ADDRESS_PREFIX
+) -> str:
     len_taddress = len(partial_taddress_str)
     len_full_taddress = 34
     padding_length = len_full_taddress - len_taddress
 
     try:
-        partial_ab = base58.b58decode(partial_taddress_str +
-                                      "u" * padding_length)
-        partial_a = partial_ab[:len(partial_ab) - 4]
+        partial_ab = base58.b58decode(partial_taddress_str + "u" * padding_length)
+        partial_a = partial_ab[: len(partial_ab) - 4]
         partial_evm = strip_tron_prefix(partial_a, prefix)
 
         # if it is a full address, don't return only a prefix
-        if (len_taddress == len_full_taddress):
+        if len_taddress == len_full_taddress:
             return bytes_to_hex(partial_evm)
         return (bytes_to_hex(partial_evm))[:len_taddress]
     except Exception:
         return ""
 
 
-def tron_address_to_evm_string(taddress_str: str,
-                               validate: bool = True) -> str:
+def tron_address_to_evm_string(taddress_str: str, validate: bool = True) -> str:
     return "0x" + bytes_to_hex(tron_address_to_evm(taddress_str, validate))
 
 
@@ -113,8 +114,7 @@ def tron_address_to_legacy(taddress_str: str, validate: bool = True) -> bytes:
     return tron_address_to_evm(taddress_str, validate)
 
 
-def tron_address_to_legacy_string(taddress_str: str,
-                                  validate: bool = True) -> str:
+def tron_address_to_legacy_string(taddress_str: str, validate: bool = True) -> str:
     """Converts a tron address to its legacy evm/eth format
 
     Args:
@@ -141,13 +141,16 @@ def equal_evm_evm(evm_address1: str, evm_address2: str) -> bool:
 def equal_tron_tron(evm_address1: str, evm_address2: str) -> bool:
     try:
         return tron_address_to_bytes(evm_address1) == tron_address_to_bytes(
-            evm_address2)
+            evm_address2
+        )
     except ValueError:
         return False
 
 
 def tron_address_equal(address1: str, address2: str) -> bool:
-    return (equal_evm_tron(address1, address2)
-            or equal_evm_tron(address2, address1)
-            or equal_evm_evm(address1, address2)
-            or equal_tron_tron(address1, address2))
+    return (
+        equal_evm_tron(address1, address2)
+        or equal_evm_tron(address2, address1)
+        or equal_evm_evm(address1, address2)
+        or equal_tron_tron(address1, address2)
+    )

@@ -1,4 +1,4 @@
-from cashaddress.convert import Address, to_legacy_address, InvalidAddress
+from cashaddress.convert import Address, InvalidAddress, to_legacy_address
 
 # Patch P2SH32 legacy address support
 # https://bch.info/en/upgrade
