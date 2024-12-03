@@ -51,7 +51,7 @@ pre-commit:
 
 
 update-openapi-version:
-	sed -i '/^info:/,/^  version:/s/^\(\s*version:\s*\).*/\1"$(GS_REST_SERVICE_VERSIONM)"/' openapi_spec/graphsense.yaml
+	sed -i '/^info:/,/^  version:/s/^\(\s*version:\s*\).*/\1$(GS_REST_SERVICE_VERSIONM)/' openapi_spec/graphsense.yaml
 
 
 tag-version:

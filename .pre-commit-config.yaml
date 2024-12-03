@@ -6,28 +6,20 @@ repos:
   rev: 7.1.1
   hooks:
     - id: flake8
-      args: ["./gsrest", "--count", "--max-line-length=80", "--statistics", "--exclude", "plugins"]
-
-- repo: https://github.com/hhatto/autopep8
-  rev: v2.3.1
-  hooks:
-    - id: autopep8
-      args: ["--in-place", "--recursive", "gsrest"]
-
-- repo: https://github.com/google/yapf
-  rev: v0.43.0
-  hooks:
-    - id: yapf
-      args: ["--in-place", "--recursive", "gsrest"]
+      args: ["--count", "--max-line-length=80", "--statistics", "--exclude", "plugins"]
+      files: ^gsrest/.*\.py$
 
 - repo: local
   hooks:
-    - id: pytest-check
-      name: pytest-check
-      entry: tox -e py39 -- graphsense
+    - id: code-format
+      name: Code Format (AutoPEP8 + YAPF)
+      entry: |
+        bash -c 'autopep8 --in-place --recursive gsrest && yapf --in-place --recursive gsrest'
       language: system
       pass_filenames: false
       always_run: true
+      files: ^gsrest/.*\.py$
+
 
     - id: generate-openapi-server
       name: Generate OpenAPI Server
@@ -36,3 +28,7 @@ repos:
       pass_filenames: false
       always_run: true
 
+    - id: update-openapi-version
+      name: Update OpenAPI Version
+      entry: make update-openapi-version
+      language: system
