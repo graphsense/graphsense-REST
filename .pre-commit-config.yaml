@@ -1,0 +1,38 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+
+- repo: https://github.com/pycqa/flake8
+  rev: 7.1.1
+  hooks:
+    - id: flake8
+      args: ["./gsrest", "--count", "--max-line-length=80", "--statistics", "--exclude", "plugins"]
+
+- repo: https://github.com/hhatto/autopep8
+  rev: v2.3.1
+  hooks:
+    - id: autopep8
+      args: ["--in-place", "--recursive", "gsrest"]
+
+- repo: https://github.com/google/yapf
+  rev: v0.43.0
+  hooks:
+    - id: yapf
+      args: ["--in-place", "--recursive", "gsrest"]
+
+- repo: local
+  hooks:
+    - id: pytest-check
+      name: pytest-check
+      entry: tox -e py39 -- graphsense
+      language: system
+      pass_filenames: false
+      always_run: true
+
+    - id: generate-openapi-server
+      name: Generate OpenAPI Server
+      entry: make generate-openapi-server
+      language: system
+      pass_filenames: false
+      always_run: true
+

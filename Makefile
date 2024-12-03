@@ -46,6 +46,10 @@ generate-openapi-server:
 	yq -i 'del(.components.schemas.search_result_level1.example,.components.schemas.search_result_level2.example,.components.schemas.search_result_level3.example,.components.schemas.search_result_level4.example,.components.schemas.search_result_level5.example,.components.schemas.search_result_level6.example,.components.schemas.search_result_leaf.example)' openapi_server/openapi/openapi.yaml
 
 
+pre-commit:
+	pre-commit run --all-files
+
+
 update-openapi-version:
 	sed -i '/^info:/,/^  version:/s/^\(\s*version:\s*\).*/\1"$(GS_REST_SERVICE_VERSIONM)"/' openapi_spec/graphsense.yaml
 
