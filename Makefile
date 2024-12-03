@@ -1,6 +1,7 @@
 all: format lint
 
 GS_REST_SERVICE_VERSION ?= "24.11.1"
+GS_REST_SERVICE_VERSIONM ?= "1.8.1"
 GS_REST_DEV_PORT ?= 9000
 
 test:
@@ -43,6 +44,16 @@ generate-openapi-server:
 		-t /templates \
 		--additional-properties=packageVersion=$(GS_REST_SERVICE_VERSION)
 	yq -i 'del(.components.schemas.search_result_level1.example,.components.schemas.search_result_level2.example,.components.schemas.search_result_level3.example,.components.schemas.search_result_level4.example,.components.schemas.search_result_level5.example,.components.schemas.search_result_level6.example,.components.schemas.search_result_leaf.example)' openapi_server/openapi/openapi.yaml
+
+
+update-openapi-version:
+	sed -i '/^info:/,/^  version:/s/^\(\s*version:\s*\).*/\1"$(GS_REST_SERVICE_VERSIONM)"/' openapi_spec/graphsense.yaml
+
+
+tag-version:
+	-git diff --exit-code && git diff --staged --exit-code && git tag -a v$(GS_REST_SERVICE_VERSIONM) -m 'Release v$(GS_REST_SERVICE_VERSION)' || (echo "Repo is dirty please commit first" && exit 1)
+	git diff --exit-code && git diff --staged --exit-code && git tag -a v$(GS_REST_SERVICE_VERSION) -m 'Release v$(GS_REST_SERVICE_VERSION)' || (echo "Repo is dirty please commit first" && exit 1)
+
 
 run-designer:
 	docker run -d -p 8080:8080 swaggerapi/swagger-editor
