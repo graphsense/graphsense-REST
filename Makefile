@@ -1,8 +1,9 @@
 all: format lint
 
-include .env
+-include .env
 
-GS_REST_SERVICE_VERSION ?= "24.11.0"
+GS_REST_SERVICE_VERSION ?= "1.9.3-ts2-dev1"
+GS_REST_SERVICE_VERSIONM ?= "1.9.3-ts2-dev1"
 GS_REST_DEV_PORT ?= 9000
 
 test:
@@ -36,11 +37,8 @@ serve:
 build-docker:
 	docker build -t graphsense-rest .
 
-serve-docker: build-docker
+serve-docker:
 	docker run -it --network='host' -v "${PWD}/instance/config.yaml:/config.yaml:Z" -e CONFIG_FILE=/config.yaml localhost/graphsense-rest:latest
-
-drop-integration-db:
-	docker stop cassandra_mock; docker stop tagstore_mock; rm ./tests/.runcass ./tests/.runts
 
 generate-openapi-server:
 	docker run --rm   \
@@ -59,5 +57,13 @@ run-designer:
 	docker run -d -p 8080:8080 swaggerapi/swagger-editor
 	echo 'Designer UI is running on port 8080'
 
+update-openapi-version:
+	sed -i '/^info:/,/^  version:/s/^\(\s*version:\s*\).*/\1$(GS_REST_SERVICE_VERSIONM)/' openapi_spec/graphsense.yaml
 
-.PHONY: format lint test test-all-env serve drop-integration-db generate-openapi-server get-openapi-spec-from-upstream serve-docker pre-commit install-dev
+tag-version:
+	-git diff --exit-code && git diff --staged --exit-code && git tag -a v$(GS_REST_SERVICE_VERSIONM) -m 'Release v$(GS_REST_SERVICE_VERSION)' || (echo "Repo is dirty please commit first" && exit 1)
+	git diff --exit-code && git diff --staged --exit-code && git tag -a v$(GS_REST_SERVICE_VERSION) -m 'Release v$(GS_REST_SERVICE_VERSION)' || (echo "Repo is dirty please commit first" && exit 1)
+
+
+
+.PHONY: format lint test test-all-env serve generate-openapi-server get-openapi-spec-from-upstream serve-docker pre-commit install-dev update-openapi-version tag-version

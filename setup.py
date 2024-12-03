@@ -1,9 +1,10 @@
 # coding: utf-8
 
+import sys
 from setuptools import setup, find_packages
 
 NAME = "openapi_server"
-VERSION = "24.11.0"
+VERSION = "1.9.3-ts2-dev1"
 
 # To install the library, run the following
 #
@@ -27,7 +28,7 @@ setup(
     description="GraphSense API",
     author_email="contact@ikna.io",
     keywords=["OpenAPI", "GraphSense API"],
-    python_requires='>=3.8',
+    python_requires='>=3.10',
     install_requires=REQUIRES,
     packages=find_packages(),
     package_data={'': ['openapi/openapi.yaml']},

@@ -27,5 +27,5 @@ test-requirements.txt
 requirements.txt
 README.md
 tests/__init__.py
-tests/conftests.py
+tests/conftest.py
 openapi_server/__init__.py
