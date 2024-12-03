@@ -14,19 +14,23 @@ class AddressTagAllOf(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, address: str = None):
+    def __init__(self, address: str=None):
         """AddressTagAllOf - a model defined in OpenAPI
 
         :param address: The address of this AddressTagAllOf.
         """
-        self.openapi_types = {"address": str}
+        self.openapi_types = {
+            'address': str
+        }
 
-        self.attribute_map = {"address": "address"}
+        self.attribute_map = {
+            'address': 'address'
+        }
 
         self._address = address
 
     @classmethod
-    def from_dict(cls, dikt: dict) -> "AddressTagAllOf":
+    def from_dict(cls, dikt: dict) -> 'AddressTagAllOf':
         """Returns the dict as a model
 
         :param dikt: A dict.
@@ -42,7 +46,8 @@ class AddressTagAllOf(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return {"address": self._address}
+        return { 'address': self._address }
+
 
     @property
     def address(self):
@@ -65,8 +70,6 @@ class AddressTagAllOf(Model):
         :type address: str
         """
         if address is None:
-            raise BadUserInputException(
-                "Invalid value for `address`, must not be `None`"
-            )
+            raise BadUserInputException("Invalid value for `address`, must not be `None`")
 
         self._address = address

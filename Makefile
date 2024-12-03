@@ -2,8 +2,8 @@ all: format lint
 
 -include .env
 
-GS_REST_SERVICE_VERSION ?= "24.12.0-dev50"
-GS_REST_SERVICE_VERSIONM ?= "1.9.0-dev50"
+GS_REST_SERVICE_VERSIONM ?= "24.12.0-dev50"
+GS_REST_SERVICE_VERSION ?= "1.9.0-dev50"
 GS_REST_DEV_PORT ?= 9000
 
 test:
@@ -40,7 +40,7 @@ build-docker:
 serve-docker:
 	docker run -it --network='host' -v "${PWD}/instance/config.yaml:/config.yaml:Z" -e CONFIG_FILE=/config.yaml localhost/graphsense-rest:latest
 
-generate-openapi-server:
+generate-openapi-server: update-openapi-version
 	docker run --rm   \
 		-v "${PWD}:/build:Z" \
 		-v "${PWD}/templates:/templates" \
@@ -58,7 +58,7 @@ run-designer:
 	echo 'Designer UI is running on port 8080'
 
 update-openapi-version:
-	sed -i '/^info:/,/^  version:/s/^\(\s*version:\s*\).*/\1$(GS_REST_SERVICE_VERSIONM)/' openapi_spec/graphsense.yaml
+	sed -i '/^info:/,/^  version:/s/^\(\s*version:\s*\).*/\1$(GS_REST_SERVICE_VERSION)/' openapi_spec/graphsense.yaml
 
 tag-version:
 	-git diff --exit-code && git diff --staged --exit-code && git tag -a v$(GS_REST_SERVICE_VERSIONM) -m 'Release v$(GS_REST_SERVICE_VERSION)' || (echo "Repo is dirty please commit first" && exit 1)

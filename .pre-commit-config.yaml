@@ -14,6 +14,10 @@ repos:
     hooks:
     -   id: trailing-whitespace
     -   id: end-of-file-fixer
+        exclude: |
+            (?x)^(
+                setup.py
+            )$
     -
         id: check-yaml
         exclude: tests/testfiles
@@ -40,15 +44,15 @@ repos:
     #   language: system
     #   pass_filenames: false
     #   always_run: true
-    # - id: generate-openapi-server
-    #   name: Generate OpenAPI Server
-    #   entry: make generate-openapi-server
-    #   language: system
-    #   pass_filenames: false
-    #   always_run: true
-    - id: update-openapi-version
-      name: Update OpenAPI Version
-      entry: make update-openapi-version
-      pass_filenames: false
+    - id: generate-openapi-server
+      name: Generate OpenAPI Server
+      entry: make generate-openapi-server
       language: system
+      pass_filenames: false
       always_run: true
+    # - id: update-openapi-version
+    #   name: Update OpenAPI Version
+    #   entry: make update-openapi-version
+    #   pass_filenames: false
+    #   language: system
+    #   always_run: true
