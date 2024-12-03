@@ -97,6 +97,14 @@ REST log messages can be delivered via mail. See `instance/config.yaml.template`
 
 ## Development
 
+To install development dependencies run:
+
+    pip install -r requirements-dev.txt
+
+To install pre-commit hooks run:
+
+    pre-commit install
+
 ### Generate server stub
 Install version 4.44.2 or higher of yq (https://github.com/mikefarah/yq/) and run the following command to generate the server stub:
 
