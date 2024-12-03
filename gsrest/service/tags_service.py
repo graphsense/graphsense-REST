@@ -16,6 +16,7 @@ def address_tag_from_row(row):
                       entity=row['gs_cluster_id'],
                       label=row['label'],
                       category=row['category'],
+                      concepts=row['concepts'],
                       actor=row['actor'],
                       abuse=row['abuse'],
                       source=row['source'],
