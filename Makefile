@@ -2,8 +2,8 @@ all: format lint
 
 -include .env
 
-GS_REST_SERVICE_VERSION ?= "1.9.3-ts2-dev1"
-GS_REST_SERVICE_VERSIONM ?= "1.9.3-ts2-dev1"
+GS_REST_SERVICE_VERSION ?= "24.12.0-dev50"
+GS_REST_SERVICE_VERSIONM ?= "1.9.0-dev50"
 GS_REST_DEV_PORT ?= 9000
 
 test:
