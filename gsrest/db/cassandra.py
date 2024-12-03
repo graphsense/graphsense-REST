@@ -399,6 +399,7 @@ class Cassandra:
             )
             self.cluster = Cluster(
                 self.config["nodes"],
+                port=int(self.config.get("port", 9042)),
                 protocol_version=5,
                 connect_timeout=60,
                 execution_profiles={EXEC_PROFILE_DEFAULT: exec_prof},

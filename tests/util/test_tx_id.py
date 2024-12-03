@@ -31,7 +31,6 @@ from gsrest.util.id_group import calculate_id_group_with_overflow
 # |             100000|         10|            10|         10|         10|                10.0|                10.0|             10|             10| true|
 
 
-
 def test_compute_tx_id_group():
     original = [
         9223372036854775807,
@@ -45,23 +44,23 @@ def test_compute_tx_id_group():
         178442263217559972,
         178442263217559973,
         178442263217559974,
-                2147483647,
-                2147483648,
-                2147483646,
-                4294967295,
-                4294967296,
-                4294967294,
-            21474836470000,
-            21474836470001,
-            21474836469999,
-            21474836470002,
-            21474836469998,
-            42949672950000,
-            42949672960000,
-            42949672940000,
-                         1,
-                      1000,
-                    100000,
+        2147483647,
+        2147483648,
+        2147483646,
+        4294967295,
+        4294967296,
+        4294967294,
+        21474836470000,
+        21474836470001,
+        21474836469999,
+        21474836470002,
+        21474836469998,
+        42949672950000,
+        42949672960000,
+        42949672940000,
+        1,
+        1000,
+        100000,
     ]
 
     ref = [
@@ -98,8 +97,10 @@ def test_compute_tx_id_group():
     # for o, r in zip(original, ref):
     #     if calculate_id_group_with_overflow(o, 10000) != r:
     #         print(calculate_id_group_with_overflow(o, 10000),r)
-    assert(all([calculate_id_group_with_overflow(o, 10000) == r for o, r in zip(original, ref)]))
+    assert all(
+        [calculate_id_group_with_overflow(o, 10000) == r for o, r in zip(original, ref)]
+    )
 
-    #check that results are unsigned
-    assert(calculate_id_group_with_overflow(25688199397376, 10000) != 2568819939)
-    assert(calculate_id_group_with_overflow(25688199397376, 10000) == -1726147357)
+    # check that results are unsigned
+    assert calculate_id_group_with_overflow(25688199397376, 10000) != 2568819939
+    assert calculate_id_group_with_overflow(25688199397376, 10000) == -1726147357

@@ -35,4 +35,4 @@ jobs:
         # stop the build if there are Python syntax errors or undefined names
         make lint
     - name: Test with tox
-      run: tox -- $GITHUB_REPOSITORY_OWNER
+      run: tox

@@ -1,4 +1,4 @@
-from tagstore.db import TagstoreDbAsync
+from tagstore.db import NetworkStatisticsPublic, TagstoreDbAsync
 
 from openapi_server.models.currency_stats import CurrencyStats
 
@@ -14,7 +14,9 @@ async def get_currency_statistics(request, currency):
     if result is None:
         raise SystemError("statistics for currency {} not found".format(currency))
 
-    network_stats = tag_stats.by_network[currency.upper()]
+    network_stats = tag_stats.by_network.get(
+        currency.upper(), NetworkStatisticsPublic.zero()
+    )
     no_labels = network_stats.nr_labels
     no_tagged_addresses = network_stats.nr_identifiers_implicit
 

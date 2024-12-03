@@ -7,3 +7,7 @@ def get_first_key_present(target_dict, keylist):
 
 def is_eth_like(network: str) -> bool:
     return network == "eth" or network == "trx"
+
+
+def omit(d, keys):
+    return {x: d[x] for x in d if x not in keys}

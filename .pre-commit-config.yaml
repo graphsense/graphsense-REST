@@ -7,10 +7,8 @@ repos:
   hooks:
     # Run the linter.
     - id: ruff
-      args: [--exclude, openapi_server ]
     # Run the formatter.
     - id: ruff-format
-
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
@@ -23,6 +21,13 @@ repos:
     -
         id: name-tests-test
         args: [--pytest-test-first]
+        exclude: |
+            (?x)^(
+                tests/cassandra/insert.py|
+                tests/tagstore/insert.py|
+                tests/txs_pagesize_tester.py|
+                tests/txs_pagesize_tests.py
+            )$
     -
         id: debug-statements
         exclude: postmortemdebug.py

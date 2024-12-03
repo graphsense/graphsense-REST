@@ -76,6 +76,16 @@ def get_tagstore_access_groups(request):
 def actor_from_ActorPublic(
     ap: ActorPublic, label_for_idFn: Callable[[Taxonomies, str], str]
 ) -> Actor:
+    has_context = (
+        ap.additional_uris
+        or ap.image_links
+        or ap.online_references
+        or ap.coingecko_ids
+        or ap.defilama_ids
+        or ap.twitter_handles
+        or ap.github_organisations
+        or ap.legal_name
+    )
     return Actor(
         id=ap.id,
         uri=ap.primary_uri,
@@ -98,7 +108,9 @@ def actor_from_ActorPublic(
             twitter_handle=",".join(ap.twitter_handles),
             github_organisation=",".join(ap.github_organisations),
             legal_name=ap.legal_name,
-        ),
+        )
+        if (has_context)
+        else None,
     )
 
 
@@ -165,7 +177,7 @@ async def list_concepts(request, taxonomy):
 
     taxs = await tsdb.get_taxonomies({Taxonomies[taxonomy.upper()]})
 
-    restult = []
+    result = []
 
     for k, v in taxs:
         if v is None:
@@ -174,7 +186,7 @@ async def list_concepts(request, taxonomy):
         for x in v:
             if only_abuses and not x.is_abuse:
                 continue
-            restult.append(
+            result.append(
                 Concept(
                     id=x.id,
                     label=x.label,
@@ -184,7 +196,7 @@ async def list_concepts(request, taxonomy):
                 )
             )
 
-    return restult
+    return result
 
 
 async def list_taxonomies(request):

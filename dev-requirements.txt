@@ -1,2 +1,3 @@
 ruff
 aiohttp-devtools
+tox

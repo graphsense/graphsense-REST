@@ -26,7 +26,7 @@ def address_to_user_format(currency, db_address) -> str:
         if isinstance(db_address, bytes):
             return eth_address_to_hex(db_address)
         else:
-            return db_address
+            return db_address.lower()
     elif currency == "trx":
         if isinstance(db_address, bytes):
             return evm_to_tron_address_string(eth_address_to_hex(db_address))

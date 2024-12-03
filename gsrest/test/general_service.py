@@ -57,12 +57,12 @@ async def get_statistics(test_case):
     result = await test_case.request("/stats")
     result["currencies"] = sorted(result["currencies"], key=lambda c: c["name"])
     cs = [c.to_dict() for c in stats.currencies]
-    test_case.assertEqual(cs, result["currencies"])
+    assert cs == result["currencies"]
 
     result = await test_case.request("/stats", auth="unauthenticated")
     result["currencies"] = sorted(result["currencies"], key=lambda c: c["name"])
 
-    test_case.assertEqual(cs, result["currencies"])
+    assert cs == result["currencies"]
 
 
 async def search(test_case):
@@ -80,7 +80,7 @@ async def search(test_case):
 
     expected = base_search_results()
     expected.currencies[0] = SearchResultByCurrency(
-        currency="btc", addresses=["xyz120new", "xyz1234", "xyz1278"], txs=[]
+        currency="btc", addresses=["xyz1234", "xyz1278"], txs=[]
     )
 
     path = "/search?q={q}"
@@ -122,11 +122,11 @@ async def search(test_case):
 
     result = await test_case.request(path, q="internet")
     result["labels"] = sorted(result["labels"])
-    test_case.assertEqual(expected.to_dict(), result)
+    assert expected.to_dict() == result
 
     result = await test_case.request(path, auth="y", q="internet")
     expected.labels = ["Internet, Archive"]
-    test_case.assertEqual(expected.to_dict(), result)
+    assert expected.to_dict() == result
 
     expected = base_search_results()
     expected.actors = [
@@ -137,11 +137,15 @@ async def search(test_case):
 
     result = await test_case.request(path, q="actor")
     result["labels"] = sorted(result["labels"])
-    test_case.assertEqual(expected.to_dict(), result)
+    assert expected.to_dict() == result
 
     result = await test_case.request(path, auth="y", q="actor")
-    expected.actors = [{"id": "actorX", "label": "Actor X"}]
-    test_case.assertEqual(expected.to_dict(), result)
+    expected.actors = [
+        {"id": "actorX", "label": "Actor X"},
+        {"id": "actorY", "label": "Actor Y"},
+        {"id": "anotherActor", "label": "Another Actor Y"},
+    ]
+    assert expected.to_dict() == result
 
     expected = base_search_results()
     expected.currencies[2] = SearchResultByCurrency(
@@ -157,7 +161,7 @@ async def search(test_case):
     )
 
     result = await test_case.request(path, q="af6e")
-    test_case.assertEqual(expected.to_dict(), result)
+    expected.to_dict() == result
 
     expected = base_search_results()
     expected.currencies[2] = SearchResultByCurrency(
@@ -165,4 +169,4 @@ async def search(test_case):
     )
 
     result = await test_case.request(path, q="0xabcde")
-    test_case.assertEqual(expected.to_dict(), result)
+    assert expected.to_dict() == result

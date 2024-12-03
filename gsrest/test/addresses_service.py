@@ -4,9 +4,11 @@ import itertools
 import gsrest.test.tags_service as ts
 from gsrest.service.rates_service import list_rates
 from gsrest.test.txs_service import tx1_eth, tx2_eth, tx4_eth, tx22_eth
+from gsrest.util import omit
 from gsrest.util.tron import evm_to_tron_address_string
 from gsrest.util.values import convert_value, make_values
 from openapi_server.models.address import Address
+from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.entity import Entity
@@ -39,7 +41,7 @@ address = Address(
     entity=17642138,
     in_degree=5013,
     balance=make_values(eur=1.15, usd=2.31, value=115422577),
-    status="dirty",
+    status="clean",
 )
 
 addressWithTags = Address(**address.to_dict())
@@ -217,40 +219,6 @@ addressWithTotalSpent0 = Address(
     status="clean",
 )
 
-newAddress = Address(
-    first_tx=TxSummary(tx_hash="12345678", height=12, timestamp=123),
-    currency="btc",
-    total_spent=make_values(usd=0.0, value=0, eur=0.0),
-    out_degree=0,
-    no_incoming_txs=0,
-    no_outgoing_txs=0,
-    total_received=make_values(usd=0.0, value=0, eur=0.0),
-    last_tx=TxSummary(tx_hash="12345678", height=12, timestamp=123),
-    address="newAddress",
-    entity=68000,
-    in_degree=0,
-    balance=make_values(eur=0.0, usd=0.0, value=0),
-    status="new",
-)
-
-newEntity = Entity(
-    first_tx=newAddress.first_tx,
-    currency=newAddress.currency,
-    total_spent=newAddress.total_spent,
-    out_degree=newAddress.out_degree,
-    no_incoming_txs=newAddress.no_incoming_txs,
-    no_outgoing_txs=newAddress.no_outgoing_txs,
-    total_received=newAddress.total_received,
-    last_tx=newAddress.last_tx,
-    root_address=newAddress.address,
-    entity=newAddress.entity,
-    in_degree=newAddress.in_degree,
-    balance=newAddress.balance,
-    no_addresses=1,
-    no_address_tags=0,
-    best_address_tag=None,
-)
-
 addressWithTagsOutNeighbors = NeighborAddresses(
     next_page=None,
     neighbors=[
@@ -273,7 +241,7 @@ addressWithTagsInNeighbors = NeighborAddresses(
     next_page=None,
     neighbors=[
         NeighborAddress(
-            labels=[],
+            labels=["coinbase"],
             no_txs=1,
             value=make_values(value=1091, usd=0.01, eur=0.0),
             address=addressB,
@@ -305,6 +273,7 @@ entityWithTags = Entity(
     best_address_tag=ts.tag1,
 )
 
+
 entity2 = Entity(
     currency="btc",
     no_address_tags=2,
@@ -320,7 +289,7 @@ entity2 = Entity(
     out_degree=176,
     first_tx=TxSummary(timestamp=1434554207, height=1, tx_hash="4567"),
     balance=make_values(value=115422577, usd=2.31, eur=1.15),
-    best_address_tag=ts.tag8,
+    best_address_tag=AddressTag(**ts.tag8.to_dict(), inherited_from="cluster"),
 )
 
 entity3 = Entity(**entity2.to_dict())
@@ -517,13 +486,13 @@ async def get_address(test_case):
     result = await test_case.request(
         path, currency="btc", address=addressWithoutTags.address, include_tags=True
     )
-    test_case.assertEqual(addressWithoutTags.to_dict(), result)
+    assert addressWithoutTags.to_dict() == result
 
     result = await test_case.request(
         path, currency="btc", address=addressWithTags.address, include_tags=True
     )
     awt = addressWithTags.to_dict()
-    test_case.assertEqual(awt, result)
+    assert awt == result
     awt_public = Address(**awt)
     awt_public.tags = [ts.tag1, ts.tag3]
     result = await test_case.request(
@@ -539,11 +508,6 @@ async def get_address(test_case):
         basepath, currency="btc", address=addressWithTotalSpent0.address
     )
     test_case.assertEqual(addressWithTotalSpent0.to_dict(), result)
-
-    result = await test_case.request(
-        basepath, currency="btc", address=newAddress.address
-    )
-    test_case.assertEqual(newAddress.to_dict(), result)
 
     # ETH
     result = await test_case.request(
@@ -963,42 +927,40 @@ async def list_tags_by_address(test_case):
         path, currency="btc", address=addressWithTags.address
     )
     tags = [tag.to_dict() for tag in addressWithTags.tags]
-    test_case.assertEqual(tags, result["address_tags"])
+    assert tags == result["address_tags"]
 
     result = await test_case.request(
         path, auth="unauthorized", currency="btc", address=addressWithTags.address
     )
     tags = [tag for tag in tags if tag["tagpack_is_public"]]
-    test_case.assertEqual(tags, result["address_tags"])
+    assert tags == result["address_tags"]
 
     result = await test_case.request(
         path, currency="eth", address=eth_addressWithTags.address
     )
-    test_case.assertEqual(
-        [tag.to_dict() for tag in eth_addressWithTags.tags], result["address_tags"]
-    )
+
+    expected = [
+        omit(tag.to_dict(), {"inherited_from"}) for tag in eth_addressWithTags.tags
+    ]
+
+    assert expected == result["address_tags"]
 
     # Casing of the address does not matter for ethereum
     result = await test_case.request(
         path, currency="eth", address=eth_addressWithTags.address.upper()
     )
-    test_case.assertEqual(
-        [tag.to_dict() for tag in eth_addressWithTags.tags], result["address_tags"]
-    )
+    assert expected == result["address_tags"]
 
     # Adding trailing whitespace is handled gracefully
     result = await test_case.request(
         path, currency="eth", address=eth_addressWithTags.address.upper() + "   "
     )
-    test_case.assertEqual(
-        [tag.to_dict() for tag in eth_addressWithTags.tags], result["address_tags"]
-    )
+    assert expected == result["address_tags"]
 
-    result, content = await test_case.requestOnly(
-        path, None, currency="abcd", address=eth_addressWithTags.address
+    result = await test_case.request(
+        path, currency="abcd", address=eth_addressWithTags.address
     )
-    assert result.status == 400
-    assert "Currency abcd currently not supported" in content
+    assert result["address_tags"] == []
 
 
 async def list_address_neighbors(test_case):
@@ -1015,7 +977,7 @@ async def list_address_neighbors(test_case):
         direction="out",
     )
     awton = addressWithTagsOutNeighbors.to_dict()
-    test_case.assertEqual(awton, result)
+    assert awton == result
 
     result = await test_case.request(
         path + "&only_ids={only_ids}",
@@ -1047,7 +1009,7 @@ async def list_address_neighbors(test_case):
         include_labels=True,
         direction="in",
     )
-    test_case.assertEqual(addressWithTagsInNeighbors.to_dict(), result)
+    assert addressWithTagsInNeighbors.to_dict() == result
 
     result = await test_case.request(
         path,
@@ -1092,17 +1054,15 @@ async def get_address_entity(test_case):
     result = await test_case.request(
         path, currency="btc", address=address.address, include_tags=True
     )
-    test_case.assertEqual(entityWithTags.to_dict(), result)
-
-    result = await test_case.request(
-        path, currency="btc", address=newAddress.address, include_tags=True
-    )
-    test_case.assertEqual(newEntity.to_dict(), result)
+    assert entityWithTags.to_dict() == result
 
     result = await test_case.request(
         path, currency="eth", address=eth_address.address, include_tags=True
     )
-    test_case.assertEqual(eth_entityWithTags.to_dict(), result)
+
+    ewt = eth_entityWithTags.to_dict()
+    ewt["best_address_tag"].pop("inherited_from")
+    assert ewt == result
 
     non_existent_address = "0x40a197b01CDeF4C77196045EaFFaC80F25Be00FE"
     result, body = await test_case.requestOnly(

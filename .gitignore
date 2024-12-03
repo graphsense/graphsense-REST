@@ -90,3 +90,5 @@ gsrest/plugins
 
 # IDE
 .idea
+
+.ruff_cache/

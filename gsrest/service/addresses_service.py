@@ -287,9 +287,19 @@ async def get_address_entity(request, currency, address, include_actors=True):
         )
 
     try:
-        return await get_entity(
+        entity = await get_entity(
             request, currency, entity_id, include_actors=include_actors
         )
+        # remove inherited indicator from tag.
+        if (
+            entity is not None
+            and entity.best_address_tag is not None
+            and entity.best_address_tag.address == address
+        ):
+            d = entity.best_address_tag.to_dict()
+            d.pop("inherited_from")
+            entity.best_address_tag = AddressTag.from_dict(d)
+        return entity
     except ClusterNotFoundException:
         raise DBInconsistencyException(
             f"entity referenced by {address} in {currency} not found"

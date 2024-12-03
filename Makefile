@@ -1,20 +1,22 @@
 all: format lint
 
+include .env
+
 GS_REST_SERVICE_VERSION ?= "24.11.0"
 GS_REST_DEV_PORT ?= 9000
 
 test:
-	tox -e py39 -- graphsense
+	pytest -x -vv
 
 test-all-env:
-	tox -- graphsense
+	tox
 
 lint:
-	ruff check gsrest
+	ruff check .
 
 format:
-	ruff check --select I --fix gsrest
-	ruff format gsrest
+	ruff check --select I --fix
+	ruff format
 
 install-dev:
 	 pip install -r requirements.txt
