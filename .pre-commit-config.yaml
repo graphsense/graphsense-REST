@@ -31,4 +31,6 @@ repos:
     - id: update-openapi-version
       name: Update OpenAPI Version
       entry: make update-openapi-version
+      pass_filenames: false
       language: system
+      always_run: true
