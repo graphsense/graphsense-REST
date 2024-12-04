@@ -8,6 +8,11 @@ licence = "LICENSE"
 keywords = ["OpenAPI", "GraphSense API"]
 requires-python = ">=3.9"
 url = 'https://github.com/graphsense/graphsense-REST/'
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
 dependencies = [
     "aiohttp-cors>=0.7.0",
     "aiohttp-jinja2>=1.5.0",
@@ -90,6 +95,7 @@ exclude = [
 [dependency-groups]
 dev = [
     "aiohttp-devtools>=1.1.2",
+    "gunicorn>=23.0.0",
     "pre-commit>=4.0.1",
     "pytest-aiohttp>=1.0.5",
     "pytest-cov>=6.0.0",
