@@ -42,7 +42,7 @@ build-docker:
 serve-docker:
 	docker run -it --network='host' -e NUM_THREADS=1 -e NUM_WORKERS=1 -v "${PWD}/instance/config.yaml:/config.yaml:Z" -e CONFIG_FILE=/config.yaml localhost/graphsense-rest:latest
 
-generate-openapi-server: update-openapi-version
+generate-openapi-server: update-package-version
 	docker run --rm   \
 		-v "${PWD}:/build:Z" \
 		-v "${PWD}/templates:/templates" \
@@ -58,6 +58,9 @@ generate-openapi-server: update-openapi-version
 run-designer:
 	docker run -d -p 8080:8080 swaggerapi/swagger-editor
 	echo 'Designer UI is running on port 8080'
+
+update-package-version: update-openapi-version
+	sed -i -r 's/(version = ).*/\1$(GS_REST_SERVICE_VERSION)/' pyproject.toml
 
 update-openapi-version:
 	sed -i '/^info:/,/^  version:/s/^\(\s*version:\s*\).*/\1$(GS_REST_SERVICE_VERSION)/' openapi_spec/graphsense.yaml

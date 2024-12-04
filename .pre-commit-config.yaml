@@ -15,12 +15,6 @@ repos:
       language: system
       pass_filenames: false
       always_run: true
-    # - id: update-openapi-version
-    #   name: Update OpenAPI Version
-    #   entry: make update-openapi-version
-    #   pass_filenames: false
-    #   language: system
-    #   always_run: true
 - repo: https://github.com/astral-sh/ruff-pre-commit
   # Ruff version.
   rev: v0.8.0
@@ -35,14 +29,12 @@ repos:
     -   id: trailing-whitespace
         exclude: |
             (?x)^(
-                setup.py|
                 openapi_server/.*|
                 tests/test_*.py
             )$
     -   id: end-of-file-fixer
         exclude: |
             (?x)^(
-                setup.py|
                 openapi_server/.*|
                 tests/test_.*.py
             )$
