@@ -42,7 +42,7 @@ serve-docker:
 generate-openapi-server: update-package-version
 	docker run --rm   \
 		-v "${PWD}:/build:Z" \
-		-v "${PWD}/templates:/templates" \
+		-v "${PWD}/openapi_spec/templates:/templates" \
 		-v "${PWD}/openapi_spec/:/graphsense:Z" \
 		openapitools/openapi-generator-cli:v5.2.1 \
 		generate -i "/graphsense/graphsense.yaml" \
