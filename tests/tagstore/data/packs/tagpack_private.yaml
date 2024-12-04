@@ -13,6 +13,7 @@ tags:
   label: Internet Archive 2
   is_cluster_definer: true
   confidence: web_crawl
+  abuse: scam
 - address: address2818641
   label: labelY
   is_cluster_definer: true

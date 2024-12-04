@@ -10,7 +10,7 @@ pytest.register_assert_rewrite("gsrest")
 
 from aiohttp.test_utils import AioHTTPTestCase  # noqa: E402
 
-from openapi_server import factory_internal  # noqa: E402
+from gsrest import factory_internal  # noqa: E402
 
 
 class BaseTestCase(AioHTTPTestCase):

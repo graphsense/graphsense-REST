@@ -13,7 +13,7 @@ ENV CONFIG_FILE=./instance/config.yaml
 RUN mkdir -p /srv/graphsense-rest/
 
 COPY requirements.txt /srv/graphsense-rest/
-COPY conf/gunicorn-conf.py /srv/graphsense-rest/gunicorn-conf.py
+COPY docker/gunicorn-conf.py /srv/graphsense-rest/gunicorn-conf.py
 COPY setup.py /srv/graphsense-rest/
 COPY README.md /srv/graphsense-rest/
 COPY gsrest /srv/graphsense-rest/gsrest
@@ -26,7 +26,9 @@ RUN apk --no-cache --update add \
     bash \
     shadow \
     git \
-    postgresql-dev
+    postgresql-dev \
+    libevdev-dev \
+    libev
 RUN useradd -r -m -u 10000 dockeruser
 RUN apk --no-cache --update --virtual build-dependendencies add \
     gcc \
@@ -57,5 +59,5 @@ RUN find gsrest/plugins -name requirements.txt -exec pip install -r {} \;
 
 CMD find gsrest/plugins -name requirements.txt -exec pip install -r {} \; && gunicorn \
     -c /srv/graphsense-rest/gunicorn-conf.py \
-    "openapi_server:main('${CONFIG_FILE}')" \
+    "gsrest:main('${CONFIG_FILE}')" \
      --worker-class aiohttp.GunicornWebWorker

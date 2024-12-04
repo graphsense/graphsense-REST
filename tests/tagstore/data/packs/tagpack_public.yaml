@@ -37,6 +37,7 @@ tags:
   label: isolinks
   category: exchange
   source: Unspecified
+  is_cluster_definer: true
 - address: addressY
   label: cimedy
   source: Unspecified

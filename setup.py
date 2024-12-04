@@ -33,8 +33,7 @@ setup(
     packages=find_packages(),
     package_data={'': ['openapi/openapi.yaml']},
     include_package_data=True,
-    entry_points={
-        'console_scripts': ['openapi_server=openapi_server.__main__:main']},
+    entry_points={},
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/graphsense/graphsense-REST/',

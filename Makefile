@@ -5,9 +5,11 @@ all: format lint
 GS_REST_SERVICE_VERSIONM ?= "24.12.0-dev50"
 GS_REST_SERVICE_VERSION ?= "1.9.0-dev50"
 GS_REST_DEV_PORT ?= 9000
+NUM_WORKERS ?= 1
+NUM_THREADS ?= 1
 
 test:
-	pytest -x -vv
+	pytest -x -rx -vv
 
 test-all-env:
 	tox
@@ -29,16 +31,16 @@ pre-commit:
 	pre-commit run --all-files
 
 serve-old:
-	python -m aiohttp.web -H localhost -P ${GS_REST_DEV_PORT} openapi_server:main
+	python -m aiohttp.web -H localhost -P ${GS_REST_DEV_PORT} gsrest:main
 
 serve:
-	adev runserver -p ${GS_REST_DEV_PORT} --root . --app-factory main openapi_server/__init__.py
+	adev runserver -p ${GS_REST_DEV_PORT} --root . --app-factory main gsrest/__init__.py
 
 build-docker:
 	docker build -t graphsense-rest .
 
 serve-docker:
-	docker run -it --network='host' -v "${PWD}/instance/config.yaml:/config.yaml:Z" -e CONFIG_FILE=/config.yaml localhost/graphsense-rest:latest
+	docker run -it --network='host' -e NUM_THREADS=1 -e NUM_WORKERS=1 -v "${PWD}/instance/config.yaml:/config.yaml:Z" -e CONFIG_FILE=/config.yaml localhost/graphsense-rest:latest
 
 generate-openapi-server: update-openapi-version
 	docker run --rm   \

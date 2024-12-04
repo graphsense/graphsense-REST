@@ -74,7 +74,7 @@ async def get_best_cluster_tag(request, currency, address) -> AddressTag | None:
     tag = await get_best_cluster_tag_raw(request, currency, address)
 
     if tag is not None:
-        return address_tag_from_PublicTag(tag)
+        return address_tag_from_PublicTag(request, tag)
 
     return None
 
@@ -136,7 +136,7 @@ async def list_tags_by_address(
 ) -> AddressTags:
     page = int(page) if page is not None else 0
     tags = [
-        address_tag_from_PublicTag(pt)
+        address_tag_from_PublicTag(request, pt)
         for pt in (
             await list_tags_by_address_raw(
                 request,

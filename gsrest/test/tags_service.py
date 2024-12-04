@@ -45,7 +45,7 @@ tag2 = AddressTag(
 tag3 = AddressTag(
     category="organization",
     label="Internet Archive 2",
-    abuse=None,
+    abuse="scam",
     lastmod=1562112000,
     source="https://archive.org/donate/cryptocurrency",
     address="addressA",
@@ -57,7 +57,7 @@ tag3 = AddressTag(
     confidence_level=20,
     tagpack_creator="GraphSense Core Team",
     tagpack_title="GraphSense Private",
-    concepts=[],
+    concepts=["scam"],
     # entity=17642138,
 )
 
@@ -166,7 +166,7 @@ tag5 = AddressTag(
     tagpack_creator="GraphSense Core Team",
     tagpack_title="GraphSense",
     tagpack_is_public=True,
-    is_cluster_definer=False,
+    is_cluster_definer=True,
     concepts=[],
     # entity=123,
 )

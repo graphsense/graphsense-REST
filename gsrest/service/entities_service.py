@@ -77,7 +77,7 @@ async def list_address_tags_by_entity_internal(
     page = int(page) if page is not None else 0
 
     tags = [
-        address_tag_from_PublicTag(pt)
+        address_tag_from_PublicTag(request, pt)
         for pt in (
             await tsdb.get_tags_by_clusterid(
                 int(entity),
@@ -121,7 +121,7 @@ async def get_entity(
         )
 
         if tag is not None:
-            best_tag = address_tag_from_PublicTag(tag)
+            best_tag = address_tag_from_PublicTag(request, tag)
 
     count = await tagstore_db.get_nr_tags_by_clusterid(
         int(entity), currency.upper(), tagstore_groups

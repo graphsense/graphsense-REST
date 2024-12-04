@@ -511,189 +511,189 @@ async def list_entity_addresses(test_case):
 async def search_entity_neighbors(test_case):
     # Test category matching
 
-    # path = (
-    #     "/{currency}/entities/{entity}/search"
-    #     "?direction={direction}"
-    #     "&key={key}"
-    #     "&value={value}"
-    #     "&depth={depth}"
-    #     "&breadth={breadth}"
-    # )
+    path = (
+        "/{currency}/entities/{entity}/search"
+        "?direction={direction}"
+        "&key={key}"
+        "&value={value}"
+        "&depth={depth}"
+        "&breadth={breadth}"
+    )
 
-    # category = "exchange"
-    # result = await test_case.request(
-    #     path,
-    #     currency="btc",
-    #     entity=entityWithTags.entity,
-    #     direction="out",
-    #     depth=2,
-    #     breadth=10,
-    #     key="category",
-    #     value=",".join([category]),
-    # )
-    # test_case.assertEqual(2818641, result[0]["neighbor"]["entity"]["entity"])
-    # test_case.assertEqual(123, result[0]["paths"][0]["neighbor"]["entity"]["entity"])
-    # test_case.assertEqual(
-    #     category,
-    #     result[0]["paths"][0]["neighbor"]["entity"]["best_address_tag"]["category"],
-    # )  # noqa
+    category = "exchange"
+    result = await test_case.request(
+        path,
+        currency="btc",
+        entity=entityWithTags.entity,
+        direction="out",
+        depth=2,
+        breadth=10,
+        key="category",
+        value=",".join([category]),
+    )
+    # breakpoint()
+    test_case.assertEqual(2818641, result[0]["neighbor"]["entity"]["entity"])
+    test_case.assertEqual(123, result[0]["paths"][0]["neighbor"]["entity"]["entity"])
+    test_case.assertEqual(
+        category,
+        result[0]["paths"][0]["neighbor"]["entity"]["best_address_tag"]["category"],
+    )  # noqa
 
-    # category = "exchange"
-    # result = await test_case.request(
-    #     path,
-    #     currency="btc",
-    #     entity=entityWithTags.entity,
-    #     direction="in",
-    #     depth=2,
-    #     breadth=10,
-    #     key="category",
-    #     value=",".join([category]),
-    # )
-    # test_case.assertEqual(67065, result[0]["neighbor"]["entity"]["entity"])
-    # test_case.assertEqual(123, result[0]["paths"][0]["neighbor"]["entity"]["entity"])
-    # test_case.assertEqual(
-    #     category,
-    #     result[0]["paths"][0]["neighbor"]["entity"]["best_address_tag"]["category"],
-    # )  # noqa
+    category = "exchange"
+    result = await test_case.request(
+        path,
+        currency="btc",
+        entity=entityWithTags.entity,
+        direction="in",
+        depth=2,
+        breadth=10,
+        key="category",
+        value=",".join([category]),
+    )
+    test_case.assertEqual(67065, result[0]["neighbor"]["entity"]["entity"])
+    test_case.assertEqual(123, result[0]["paths"][0]["neighbor"]["entity"]["entity"])
+    test_case.assertEqual(
+        category,
+        result[0]["paths"][0]["neighbor"]["entity"]["best_address_tag"]["category"],
+    )  # noqa
 
-    # # Test addresses matching
+    # Test addresses matching
 
-    # addresses = ["abcdefg", "xyz1278"]
-    # result = await test_case.request(
-    #     path,
-    #     currency="btc",
-    #     entity=entityWithTags.entity,
-    #     direction="out",
-    #     depth=2,
-    #     breadth=10,
-    #     key="addresses",
-    #     value=",".join(addresses),
-    # )
-    # test_case.assertEqual(2818641, result[0]["neighbor"]["entity"]["entity"])
-    # test_case.assertEqual(456, result[0]["paths"][0]["neighbor"]["entity"]["entity"])
-    # test_case.assertEqual(
-    #     addresses, [a["address"] for a in result[0]["paths"][0]["matching_addresses"]]
-    # )
+    addresses = ["abcdefg", "xyz1278"]
+    result = await test_case.request(
+        path,
+        currency="btc",
+        entity=entityWithTags.entity,
+        direction="out",
+        depth=2,
+        breadth=10,
+        key="addresses",
+        value=",".join(addresses),
+    )
+    test_case.assertEqual(2818641, result[0]["neighbor"]["entity"]["entity"])
+    test_case.assertEqual(456, result[0]["paths"][0]["neighbor"]["entity"]["entity"])
+    test_case.assertEqual(
+        addresses, [a["address"] for a in result[0]["paths"][0]["matching_addresses"]]
+    )
 
-    # result = await test_case.request(
-    #     path,
-    #     currency="btc",
-    #     entity=entityWithTags.entity,
-    #     direction="out",
-    #     depth=2,
-    #     breadth=10,
-    #     key="entities",
-    #     value=",".join(["123"]),
-    # )
-    # test_case.assertEqual(2818641, result[0]["neighbor"]["entity"]["entity"])
-    # test_case.assertEqual(123, result[0]["paths"][0]["neighbor"]["entity"]["entity"])
+    result = await test_case.request(
+        path,
+        currency="btc",
+        entity=entityWithTags.entity,
+        direction="out",
+        depth=2,
+        breadth=10,
+        key="entities",
+        value=",".join(["123"]),
+    )
+    test_case.assertEqual(2818641, result[0]["neighbor"]["entity"]["entity"])
+    test_case.assertEqual(123, result[0]["paths"][0]["neighbor"]["entity"]["entity"])
 
-    # addresses = ["abcdefg"]
-    # result = await test_case.request(
-    #     path,
-    #     currency="btc",
-    #     entity=entityWithTags.entity,
-    #     direction="out",
-    #     depth=2,
-    #     breadth=10,
-    #     key="addresses",
-    #     value=",".join(addresses),
-    # )
-    # test_case.assertEqual(2818641, result[0]["neighbor"]["entity"]["entity"])
-    # test_case.assertEqual(456, result[0]["paths"][0]["neighbor"]["entity"]["entity"])
-    # test_case.assertEqual(
-    #     addresses, [a["address"] for a in result[0]["paths"][0]["matching_addresses"]]
-    # )
+    addresses = ["abcdefg"]
+    result = await test_case.request(
+        path,
+        currency="btc",
+        entity=entityWithTags.entity,
+        direction="out",
+        depth=2,
+        breadth=10,
+        key="addresses",
+        value=",".join(addresses),
+    )
+    test_case.assertEqual(2818641, result[0]["neighbor"]["entity"]["entity"])
+    test_case.assertEqual(456, result[0]["paths"][0]["neighbor"]["entity"]["entity"])
+    test_case.assertEqual(
+        addresses, [a["address"] for a in result[0]["paths"][0]["matching_addresses"]]
+    )
 
-    # addresses = ["0x234567"]
-    # result = await test_case.request(
-    #     path,
-    #     currency="eth",
-    #     entity=eth_entity.entity,
-    #     direction="out",
-    #     depth=2,
-    #     breadth=10,
-    #     key="addresses",
-    #     value=",".join(addresses),
-    # )
-    # test_case.assertEqual(107925001, result[0]["neighbor"]["entity"]["entity"])
-    # test_case.assertEqual(
-    #     107925002, result[0]["paths"][0]["neighbor"]["entity"]["entity"]
-    # )
-    # test_case.assertEqual(
-    #     addresses, [a["address"] for a in result[0]["paths"][0]["matching_addresses"]]
-    # )
+    addresses = ["0x234567"]
+    result = await test_case.request(
+        path,
+        currency="eth",
+        entity=eth_entity.entity,
+        direction="out",
+        depth=2,
+        breadth=10,
+        key="addresses",
+        value=",".join(addresses),
+    )
+    test_case.assertEqual(107925001, result[0]["neighbor"]["entity"]["entity"])
+    test_case.assertEqual(
+        107925002, result[0]["paths"][0]["neighbor"]["entity"]["entity"]
+    )
+    test_case.assertEqual(
+        addresses, [a["address"] for a in result[0]["paths"][0]["matching_addresses"]]
+    )
 
-    # # Test value matching
+    # Test value matching
 
-    # result = await test_case.request(
-    #     path,
-    #     currency="btc",
-    #     entity=entityWithTags.entity,
-    #     direction="out",
-    #     depth=2,
-    #     breadth=10,
-    #     key="total_received",
-    #     value=",".join(["value", "5", "150"]),
-    # )
-    # test_case.assertEqual(2818641, result[0]["neighbor"]["entity"]["entity"])
-    # test_case.assertEqual(789, result[0]["paths"][0]["neighbor"]["entity"]["entity"])
-    # test_case.assertEqual(
-    #     10, result[0]["paths"][0]["neighbor"]["entity"]["total_received"]["value"]
-    # )
+    result = await test_case.request(
+        path,
+        currency="btc",
+        entity=entityWithTags.entity,
+        direction="out",
+        depth=2,
+        breadth=10,
+        key="total_received",
+        value=",".join(["value", "5", "150"]),
+    )
+    test_case.assertEqual(2818641, result[0]["neighbor"]["entity"]["entity"])
+    test_case.assertEqual(789, result[0]["paths"][0]["neighbor"]["entity"]["entity"])
+    test_case.assertEqual(
+        10, result[0]["paths"][0]["neighbor"]["entity"]["total_received"]["value"]
+    )
 
-    # # Test value matching
+    # Test value matching
 
-    # result = await test_case.request(
-    #     path,
-    #     currency="btc",
-    #     entity=entityWithTags.entity,
-    #     direction="out",
-    #     depth=2,
-    #     breadth=10,
-    #     key="total_received",
-    #     value=",".join(["value", "5", "8"]),
-    # )
-    # test_case.assertEqual([], result)
-    # #
-    # # Test value matching
+    result = await test_case.request(
+        path,
+        currency="btc",
+        entity=entityWithTags.entity,
+        direction="out",
+        depth=2,
+        breadth=10,
+        key="total_received",
+        value=",".join(["value", "5", "8"]),
+    )
+    test_case.assertEqual([], result)
+    #
+    # Test value matching
 
-    # result = await test_case.request(
-    #     path,
-    #     currency="btc",
-    #     entity=entityWithTags.entity,
-    #     direction="out",
-    #     depth=2,
-    #     breadth=10,
-    #     key="total_received",
-    #     value=",".join(["eur", "50", "100"]),
-    # )
-    # test_case.assertEqual(2818641, result[0]["neighbor"]["entity"]["entity"])
-    # test_case.assertEqual(789, result[0]["paths"][0]["neighbor"]["entity"]["entity"])
-    # test_case.assertEqual(
-    #     100.0,
-    #     result[0]["paths"][0]["neighbor"]["entity"]["total_received"]["fiat_values"][0][
-    #         "value"
-    #     ],
-    # )
+    result = await test_case.request(
+        path,
+        currency="btc",
+        entity=entityWithTags.entity,
+        direction="out",
+        depth=2,
+        breadth=10,
+        key="total_received",
+        value=",".join(["eur", "50", "100"]),
+    )
+    test_case.assertEqual(2818641, result[0]["neighbor"]["entity"]["entity"])
+    test_case.assertEqual(789, result[0]["paths"][0]["neighbor"]["entity"]["entity"])
+    test_case.assertEqual(
+        100.0,
+        result[0]["paths"][0]["neighbor"]["entity"]["total_received"]["fiat_values"][0][
+            "value"
+        ],
+    )
 
-    # addresses = ["abcdefg", "xyz1278"]
-    # result = await test_case.request(
-    #     path,
-    #     currency="btc",
-    #     entity=entityWithTags.entity,
-    #     direction="out",
-    #     depth=7,
-    #     breadth=10,
-    #     key="addresses",
-    #     value=",".join(addresses),
-    # )
-    # test_case.assertEqual(2818641, result[0]["neighbor"]["entity"]["entity"])
-    # test_case.assertEqual(456, result[0]["paths"][0]["neighbor"]["entity"]["entity"])
-    # test_case.assertEqual(
-    #     addresses, [a["address"] for a in result[0]["paths"][0]["matching_addresses"]]
-    # )
-    pass
+    addresses = ["abcdefg", "xyz1278"]
+    result = await test_case.request(
+        path,
+        currency="btc",
+        entity=entityWithTags.entity,
+        direction="out",
+        depth=7,
+        breadth=10,
+        key="addresses",
+        value=",".join(addresses),
+    )
+    test_case.assertEqual(2818641, result[0]["neighbor"]["entity"]["entity"])
+    test_case.assertEqual(456, result[0]["paths"][0]["neighbor"]["entity"]["entity"])
+    test_case.assertEqual(
+        addresses, [a["address"] for a in result[0]["paths"][0]["matching_addresses"]]
+    )
 
 
 async def list_entity_txs(test_case):

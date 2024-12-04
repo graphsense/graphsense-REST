@@ -1,8 +1,8 @@
-from functools import wraps
 from typing import Callable, List
 
 from tagstore.db import ActorPublic, TagPublic, TagstoreDbAsync, Taxonomies
 
+from gsrest.db import get_cached_is_abuse, get_cached_taxonomy_concept_label
 from gsrest.errors import NotFoundException
 from openapi_server.models.actor import Actor
 from openapi_server.models.actor_context import ActorContext
@@ -13,7 +13,8 @@ from openapi_server.models.labeled_item_ref import LabeledItemRef
 from openapi_server.models.taxonomy import Taxonomy
 
 
-def address_tag_from_PublicTag(pt: TagPublic) -> AddressTag:
+def address_tag_from_PublicTag(request, pt: TagPublic) -> AddressTag:
+    abuse = next((x for x in pt.concepts if get_cached_is_abuse(request.app, x)), None)
     return AddressTag(
         address=pt.identifier,
         # entity=0,
@@ -21,7 +22,7 @@ def address_tag_from_PublicTag(pt: TagPublic) -> AddressTag:
         category=pt.primary_concept,
         concepts=pt.additional_concepts,
         actor=pt.actor,
-        abuse=None,
+        abuse=abuse,
         source=pt.source,
         lastmod=pt.lastmod,
         tagpack_is_public=pt.group == "public",
@@ -42,27 +43,6 @@ def get_address_tag_result(
     tcnt = len(tags)
     np = current_page + 1 if (tcnt > 0 and tcnt == page_size) else None
     return AddressTags(next_page=str(np) if np is not None else None, address_tags=tags)
-
-
-def ensure_taxonomy_cache():
-    def wrapper(func):
-        @wraps(func)
-        async def wrapped(*args, **kwargs):
-            request = args[0]
-            tagstore_db = TagstoreDbAsync(request.app["gs-tagstore"])
-            if request.app.get("taxonomy_labels", None) is None:
-                taxs = await tagstore_db.get_taxonomies(
-                    {Taxonomies.CONCEPT, Taxonomies.COUNTRY}
-                )
-                request.app["taxonomy_labels"] = {
-                    Taxonomies.CONCEPT: {x.id: x.label for x in taxs.concept},
-                    Taxonomies.COUNTRY: {x.id: x.label for x in taxs.country},
-                }
-            return await func(*args, **kwargs)
-
-        return wrapped
-
-    return wrapper
 
 
 def get_tagstore_access_groups(request):
@@ -114,7 +94,6 @@ def actor_from_ActorPublic(
     )
 
 
-@ensure_taxonomy_cache()
 async def get_actor(request, actor):
     tsdb = TagstoreDbAsync(request.app["gs-tagstore"])
 
@@ -123,9 +102,11 @@ async def get_actor(request, actor):
     if a is None:
         raise NotFoundException(f"Actor {actor} not found.")
     else:
-        taxonomies = request.app["taxonomy_labels"]
         return actor_from_ActorPublic(
-            a, label_for_idFn=lambda t, x: taxonomies[t].get(x, None)
+            a,
+            label_for_idFn=lambda t, x: get_cached_taxonomy_concept_label(
+                request.app, t, x
+            ),
         )
 
 
@@ -142,7 +123,7 @@ async def get_actor_tags(request, actor, page=None, pagesize=None):
     )
 
     return get_address_tag_result(
-        page, pagesize, list(map(address_tag_from_PublicTag, tags))
+        page, pagesize, [address_tag_from_PublicTag(request, t) for t in tags]
     )
 
 
@@ -158,7 +139,7 @@ async def list_address_tags(request, label, page=None, pagesize=None):
     )
 
     return get_address_tag_result(
-        page, pagesize, list(map(address_tag_from_PublicTag, tags))
+        page, pagesize, [address_tag_from_PublicTag(request, t) for t in tags]
     )
 
 

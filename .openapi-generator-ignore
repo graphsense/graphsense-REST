@@ -29,4 +29,5 @@ README.md
 tests/__init__.py
 tests/conftest.py
 openapi_server/__init__.py
+openapi_server/__main__.py
 tox.ini
