@@ -52,7 +52,7 @@ async def get_spending_txs(request: web.Request, currency, tx_hash, io_index=Non
     try:
         if 'currency' in ['','currency','tx_hash','io_index']:
             if currency is not None:
-                currency = currency.lower() 
+                currency = currency.lower()
         result = service.get_spending_txs(request
                 ,currency=currency,tx_hash=tx_hash,io_index=io_index)
         result = await result
@@ -124,7 +124,7 @@ async def get_spent_in_txs(request: web.Request, currency, tx_hash, io_index=Non
     try:
         if 'currency' in ['','currency','tx_hash','io_index']:
             if currency is not None:
-                currency = currency.lower() 
+                currency = currency.lower()
         result = service.get_spent_in_txs(request
                 ,currency=currency,tx_hash=tx_hash,io_index=io_index)
         result = await result
@@ -202,7 +202,7 @@ async def get_tx(request: web.Request, currency, tx_hash, include_io=None, inclu
     try:
         if 'currency' in ['','currency','tx_hash','include_io','include_nonstandard_io','include_io_index','token_tx_id']:
             if currency is not None:
-                currency = currency.lower() 
+                currency = currency.lower()
         result = service.get_tx(request
                 ,currency=currency,tx_hash=tx_hash,include_io=include_io,include_nonstandard_io=include_nonstandard_io,include_io_index=include_io_index,token_tx_id=token_tx_id)
         result = await result
@@ -278,7 +278,7 @@ async def get_tx_io(request: web.Request, currency, tx_hash, io, include_nonstan
     try:
         if 'currency' in ['','currency','tx_hash','io','include_nonstandard_io','include_io_index']:
             if currency is not None:
-                currency = currency.lower() 
+                currency = currency.lower()
         result = service.get_tx_io(request
                 ,currency=currency,tx_hash=tx_hash,io=io,include_nonstandard_io=include_nonstandard_io,include_io_index=include_io_index)
         result = await result
@@ -348,7 +348,7 @@ async def list_token_txs(request: web.Request, currency, tx_hash) -> web.Respons
     try:
         if 'currency' in ['','currency','tx_hash']:
             if currency is not None:
-                currency = currency.lower() 
+                currency = currency.lower()
         result = service.list_token_txs(request
                 ,currency=currency,tx_hash=tx_hash)
         result = await result

@@ -1,3 +1,0 @@
-ruff
-aiohttp-devtools
-tox

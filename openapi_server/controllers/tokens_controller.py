@@ -45,7 +45,7 @@ async def list_supported_tokens(request: web.Request, currency) -> web.Response:
     try:
         if 'currency' in ['','currency']:
             if currency is not None:
-                currency = currency.lower() 
+                currency = currency.lower()
         result = service.list_supported_tokens(request
                 ,currency=currency)
         result = await result

@@ -134,7 +134,7 @@ async def {{operationId}}(request: web.Request, {{#allParams}}{{paramName}}{{^re
     try:
         if 'currency' in [''{{#allParams}},'{{paramName}}'{{/allParams}}]:
             if currency is not None:
-                currency = currency.lower() 
+                currency = currency.lower()
         result = service.{{operationId}}(request
                 {{#allParams}},{{paramName}}={{paramName}}{{/allParams}})
         {{^vendorExtensions.x-streamed}}

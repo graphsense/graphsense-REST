@@ -50,7 +50,7 @@ async def bulk_csv(request: web.Request, currency, operation, num_pages, body) -
     try:
         if 'currency' in ['','currency','operation','num_pages','body']:
             if currency is not None:
-                currency = currency.lower() 
+                currency = currency.lower()
         result = service.bulk_csv(request
                 ,currency=currency,operation=operation,num_pages=num_pages,body=body)
         return result
@@ -107,7 +107,7 @@ async def bulk_json(request: web.Request, currency, operation, num_pages, body) 
     try:
         if 'currency' in ['','currency','operation','num_pages','body']:
             if currency is not None:
-                currency = currency.lower() 
+                currency = currency.lower()
         result = service.bulk_json(request
                 ,currency=currency,operation=operation,num_pages=num_pages,body=body)
         return result

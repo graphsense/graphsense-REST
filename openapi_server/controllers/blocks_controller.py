@@ -49,7 +49,7 @@ async def get_block(request: web.Request, currency, height) -> web.Response:
     try:
         if 'currency' in ['','currency','height']:
             if currency is not None:
-                currency = currency.lower() 
+                currency = currency.lower()
         result = service.get_block(request
                 ,currency=currency,height=height)
         result = await result
@@ -120,7 +120,7 @@ async def get_block_by_date(request: web.Request, currency, date) -> web.Respons
     try:
         if 'currency' in ['','currency','date']:
             if currency is not None:
-                currency = currency.lower() 
+                currency = currency.lower()
         result = service.get_block_by_date(request
                 ,currency=currency,date=date)
         result = await result
@@ -190,7 +190,7 @@ async def list_block_txs(request: web.Request, currency, height) -> web.Response
     try:
         if 'currency' in ['','currency','height']:
             if currency is not None:
-                currency = currency.lower() 
+                currency = currency.lower()
         result = service.list_block_txs(request
                 ,currency=currency,height=height)
         result = await result

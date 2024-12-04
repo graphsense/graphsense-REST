@@ -9,17 +9,17 @@ NUM_WORKERS ?= 1
 NUM_THREADS ?= 1
 
 test:
-	pytest -x -rx -vv
+	uv run pytest -x -rx -vv
 
 test-all-env:
-	tox
+	uv run tox
 
 lint:
-	ruff check .
+	uv run ruff check .
 
 format:
-	ruff check --select I --fix
-	ruff format
+	uv run ruff check --select I --fix
+	uv run ruff format
 
 install-dev:
 	 pip install -r requirements.txt
@@ -28,13 +28,13 @@ install-dev:
 	 pre-commit install
 
 pre-commit:
-	pre-commit run --all-files
+	uv run pre-commit run --all-files
 
 serve-old:
-	python -m aiohttp.web -H localhost -P ${GS_REST_DEV_PORT} gsrest:main
+	uv run python -m aiohttp.web -H localhost -P ${GS_REST_DEV_PORT} gsrest:main
 
 serve:
-	adev runserver -p ${GS_REST_DEV_PORT} --root . --app-factory main gsrest/__init__.py
+	uv run adev runserver -p ${GS_REST_DEV_PORT} --root . --app-factory main gsrest/__init__.py
 
 build-docker:
 	docker build -t graphsense-rest .

@@ -55,7 +55,7 @@ async def get_address(request: web.Request, currency, address, include_actors=No
     try:
         if 'currency' in ['','currency','address','include_actors']:
             if currency is not None:
-                currency = currency.lower() 
+                currency = currency.lower()
         result = service.get_address(request
                 ,currency=currency,address=address,include_actors=include_actors)
         result = await result
@@ -127,7 +127,7 @@ async def get_address_entity(request: web.Request, currency, address, include_ac
     try:
         if 'currency' in ['','currency','address','include_actors']:
             if currency is not None:
-                currency = currency.lower() 
+                currency = currency.lower()
         result = service.get_address_entity(request
                 ,currency=currency,address=address,include_actors=include_actors)
         result = await result
@@ -199,7 +199,7 @@ async def get_tag_summary_by_address(request: web.Request, currency, address, in
     try:
         if 'currency' in ['','currency','address','include_best_cluster_tag']:
             if currency is not None:
-                currency = currency.lower() 
+                currency = currency.lower()
         result = service.get_tag_summary_by_address(request
                 ,currency=currency,address=address,include_best_cluster_tag=include_best_cluster_tag)
         result = await result
@@ -281,7 +281,7 @@ async def list_address_links(request: web.Request, currency, address, neighbor, 
     try:
         if 'currency' in ['','currency','address','neighbor','min_height','max_height','order','page','pagesize']:
             if currency is not None:
-                currency = currency.lower() 
+                currency = currency.lower()
         result = service.list_address_links(request
                 ,currency=currency,address=address,neighbor=neighbor,min_height=min_height,max_height=max_height,order=order,page=page,pagesize=pagesize)
         result = await result
@@ -363,7 +363,7 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
     try:
         if 'currency' in ['','currency','address','direction','only_ids','include_labels','include_actors','page','pagesize']:
             if currency is not None:
-                currency = currency.lower() 
+                currency = currency.lower()
         result = service.list_address_neighbors(request
                 ,currency=currency,address=address,direction=direction,only_ids=only_ids,include_labels=include_labels,include_actors=include_actors,page=page,pagesize=pagesize)
         result = await result
@@ -447,7 +447,7 @@ async def list_address_txs(request: web.Request, currency, address, direction=No
     try:
         if 'currency' in ['','currency','address','direction','min_height','max_height','order','token_currency','page','pagesize']:
             if currency is not None:
-                currency = currency.lower() 
+                currency = currency.lower()
         result = service.list_address_txs(request
                 ,currency=currency,address=address,direction=direction,min_height=min_height,max_height=max_height,order=order,token_currency=token_currency,page=page,pagesize=pagesize)
         result = await result
@@ -523,7 +523,7 @@ async def list_tags_by_address(request: web.Request, currency, address, page=Non
     try:
         if 'currency' in ['','currency','address','page','pagesize','include_best_cluster_tag']:
             if currency is not None:
-                currency = currency.lower() 
+                currency = currency.lower()
         result = service.list_tags_by_address(request
                 ,currency=currency,address=address,page=page,pagesize=pagesize,include_best_cluster_tag=include_best_cluster_tag)
         result = await result

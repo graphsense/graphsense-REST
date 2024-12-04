@@ -48,7 +48,7 @@ async def get_actor(request: web.Request, actor) -> web.Response:
     try:
         if 'currency' in ['','actor']:
             if currency is not None:
-                currency = currency.lower() 
+                currency = currency.lower()
         result = service.get_actor(request
                 ,actor=actor)
         result = await result
@@ -120,7 +120,7 @@ async def get_actor_tags(request: web.Request, actor, page=None, pagesize=None) 
     try:
         if 'currency' in ['','actor','page','pagesize']:
             if currency is not None:
-                currency = currency.lower() 
+                currency = currency.lower()
         result = service.get_actor_tags(request
                 ,actor=actor,page=page,pagesize=pagesize)
         result = await result
@@ -192,7 +192,7 @@ async def list_address_tags(request: web.Request, label, page=None, pagesize=Non
     try:
         if 'currency' in ['','label','page','pagesize']:
             if currency is not None:
-                currency = currency.lower() 
+                currency = currency.lower()
         result = service.list_address_tags(request
                 ,label=label,page=page,pagesize=pagesize)
         result = await result
@@ -260,7 +260,7 @@ async def list_concepts(request: web.Request, taxonomy) -> web.Response:
     try:
         if 'currency' in ['','taxonomy']:
             if currency is not None:
-                currency = currency.lower() 
+                currency = currency.lower()
         result = service.list_concepts(request
                 ,taxonomy=taxonomy)
         result = await result
@@ -326,7 +326,7 @@ async def list_taxonomies(request: web.Request, ) -> web.Response:
     try:
         if 'currency' in ['']:
             if currency is not None:
-                currency = currency.lower() 
+                currency = currency.lower()
         result = service.list_taxonomies(request
                 )
         result = await result

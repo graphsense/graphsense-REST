@@ -44,7 +44,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 - Listing txs between addresses (list_address_txs)
- 
+
 ## [24.02.2] - 2024-03-14
 
 - Listing txs between addresses (list_address_txs)
@@ -199,7 +199,7 @@ Also see the changelog of the [OpenAPI specification](https://github.com/graphse
 - fix `list_entity_links`
 - catch NaNs from Cassandra
 ### Removed
-- tag retrieval from Cassandra 
+- tag retrieval from Cassandra
 
 ## [0.5.1] - 2021-11-30
 ### Added
@@ -287,7 +287,7 @@ given the [Graphsense OpenAPI specification](https://github.com/graphsense/graph
 - `start_develop.sh`
 - CSV export of txs, tags and neighbors
 ### Removed
-- Egonet calls 
+- Egonet calls
 
 ## [0.4.0] - 2019-02-01
 ### Changed
@@ -306,4 +306,4 @@ given the [Graphsense OpenAPI specification](https://github.com/graphsense/graph
 - Support for multiple currencies (e.g., `localhost:9000/btc/...`)
 - Transactions call (random samples)
 - Blocks call (random samples)
-- Exchange rates call 
+- Exchange rates call
