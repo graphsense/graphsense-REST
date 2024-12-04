@@ -22,10 +22,7 @@ format:
 	uv run ruff format
 
 install-dev:
-	 pip install -r requirements.txt
-	 pip install -r test-requirements.txt
-	 pip install -r dev-requirements.txt
-	 pre-commit install
+	uv sync --all-extras --dev
 
 pre-commit:
 	uv run pre-commit run --all-files

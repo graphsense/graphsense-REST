@@ -6,7 +6,7 @@ readme = "README.md"
 changelog = "CHANGELOG.md"
 licence = "LICENSE"
 keywords = ["OpenAPI", "GraphSense API"]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 url = 'https://github.com/graphsense/graphsense-REST/'
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -36,20 +36,18 @@ tagpack-tool = { git = "https://github.com/graphsense/graphsense-tagpack-tool", 
 legacy_tox_ini = """
 [tox]
 skipsdist=True
-envlist = py39,py310,py311
+envlist = py310,py311
 ;requires=tox-venv
 
 [gh-actions]
 python =
-    3.9: py39
     3.10: py310
     3.11: py311
 
 [testenv]
+runner = uv-venv-lock-runner
+uv_sync_flags=--python={env_python}
 passenv=*
-deps=-r{toxinidir}/requirements.txt
-    -r{toxinidir}/test-requirements.txt
-    {toxinidir}
 commands=
     pytest -x -rx -vv --cov=openapi_server
 """
@@ -103,5 +101,6 @@ dev = [
     "pytest>=8.3.4",
     "ruff>=0.8.1",
     "testcontainers[cassandra,postgres]>=4.8.2",
+    "tox-uv>=1.16.0",
     "tox>=4.23.2",
 ]
