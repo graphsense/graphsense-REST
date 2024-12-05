@@ -36,7 +36,7 @@ tagpack-tool = { git = "https://github.com/graphsense/graphsense-tagpack-tool", 
 legacy_tox_ini = """
 [tox]
 skipsdist=True
-envlist = py310,py311,py312,py313
+envlist = py310,py311,py312
 ;requires=tox-venv
 
 [gh-actions]
@@ -44,7 +44,6 @@ python =
     3.10: py310
     3.11: py311
     3.12: py312
-    3.13: py313
 
 [testenv]
 runner = uv-venv-lock-runner
