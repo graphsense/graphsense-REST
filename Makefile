@@ -37,7 +37,7 @@ build-docker:
 	docker build -t graphsense-rest .
 
 serve-docker:
-	docker run -it --network='host' -e NUM_THREADS=1 -e NUM_WORKERS=1 -v "${PWD}/instance/config.yaml:/config.yaml:Z" -e CONFIG_FILE=/config.yaml localhost/graphsense-rest:latest
+	docker run -rm -it --network='host' -e NUM_THREADS=1 -e NUM_WORKERS=1 -v "${PWD}/instance/config.yaml:/config.yaml:Z" -e CONFIG_FILE=/config.yaml localhost/graphsense-rest:latest
 
 generate-openapi-server: update-package-version
 	docker run --rm   \
@@ -53,7 +53,7 @@ generate-openapi-server: update-package-version
 	yq -i 'del(.components.schemas.search_result_level1.example,.components.schemas.search_result_level2.example,.components.schemas.search_result_level3.example,.components.schemas.search_result_level4.example,.components.schemas.search_result_level5.example,.components.schemas.search_result_level6.example,.components.schemas.search_result_leaf.example)' openapi_server/openapi/openapi.yaml
 
 run-designer:
-	docker run -d -p 8080:8080 swaggerapi/swagger-editor
+	docker run --rm -d -p 8080:8080 swaggerapi/swagger-editor
 	echo 'Designer UI is running on port 8080'
 
 update-package-version: update-openapi-version
