@@ -192,7 +192,7 @@ async def get_trace_txs(request, currency, tx, trace_index=None):
     db = request.app["db"]
     result = await db.fetch_transaction_trace(currency, tx, trace_index)
 
-    if result:
+    if result and result["tx_hash"] == tx["tx_hash"]:
         result["type"] = "internal"
         result["timestamp"] = tx["block_timestamp"]
 
@@ -203,12 +203,14 @@ async def get_trace_txs(request, currency, tx, trace_index=None):
         else:
             result["contract_creation"] = result["trace_type"] == "create"
 
-    return from_row(
-        currency,
-        result,
-        (await get_rates(request, currency, result["block_id"]))["rates"],
-        db.get_token_configuration(currency),
-    )
+        return from_row(
+            currency,
+            result,
+            (await get_rates(request, currency, result["block_id"]))["rates"],
+            db.get_token_configuration(currency),
+        )
+    else:
+        return None
 
 
 async def get_tx(
@@ -223,17 +225,17 @@ async def get_tx(
     db = request.app["db"]
 
     trace_index = None
-    try:
-        if f"{SUBTX_IDENT_SEPERATOR_CHAR}I" in tx_hash:
-            h, postfix, *_ = tx_hash.split(SUBTX_IDENT_SEPERATOR_CHAR)
-            trace_index = int(postfix.strip("IT"))
-            tx_hash = h
-        elif f"{SUBTX_IDENT_SEPERATOR_CHAR}T" in tx_hash:
-            h, postfix, *_ = tx_hash.split(SUBTX_IDENT_SEPERATOR_CHAR)
-            token_tx_id = int(postfix.strip("IT")) or token_tx_id
-            tx_hash = h
-    except ValueError:
-        pass
+
+    tx_ident = tx_hash
+
+    if f"{SUBTX_IDENT_SEPERATOR_CHAR}I" in tx_hash:
+        h, postfix, *_ = tx_hash.split(SUBTX_IDENT_SEPERATOR_CHAR)
+        trace_index = int(postfix.strip("IT"))
+        tx_hash = h
+    elif f"{SUBTX_IDENT_SEPERATOR_CHAR}T" in tx_hash:
+        h, postfix, *_ = tx_hash.split(SUBTX_IDENT_SEPERATOR_CHAR)
+        token_tx_id = int(postfix.strip("IT")) or token_tx_id
+        tx_hash = h
 
     if token_tx_id is not None:
         if is_eth_like(currency):
@@ -244,7 +246,7 @@ async def get_tx(
             if len(results):
                 return results[0]
             else:
-                raise TransactionNotFoundException(currency, tx_hash, token_tx_id)
+                raise TransactionNotFoundException(currency, tx_ident, token_tx_id)
         else:
             raise BadUserInputException(
                 f"{currency} does not support token transactions."
@@ -257,7 +259,7 @@ async def get_tx(
             if res:
                 return res
             else:
-                raise TransactionNotFoundException(currency, tx_hash, token_tx_id)
+                raise TransactionNotFoundException(currency, tx_ident, token_tx_id)
 
         else:
             raise BadUserInputException(
