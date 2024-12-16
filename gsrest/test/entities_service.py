@@ -180,7 +180,7 @@ tag_entityB = Entity(
         inherited_from="cluster",
         tagpack_uri=tagstore_public_tp_uri,
         concepts=[],
-        # entity=14,
+        entity=14,
     ),
 )
 
@@ -216,7 +216,7 @@ tag_entityC = Entity(
         tagpack_uri=tagstore_public_tp_uri,
         inherited_from="cluster",
         concepts=[],
-        # entity=16,
+        entity=16,
     ),
 )
 
@@ -252,7 +252,7 @@ tag_entityD = Entity(
         tagpack_uri=tagstore_public_tp_uri,
         concepts=[],
         inherited_from="cluster",
-        # entity=19,
+        entity=19,
     ),
 )
 
@@ -288,7 +288,7 @@ tag_entityE = Entity(
         tagpack_uri=tagstore_public_tp_uri,
         inherited_from="cluster",
         concepts=[],
-        # entity=20,
+        entity=20,
     ),
 )
 
@@ -531,7 +531,7 @@ async def search_entity_neighbors(test_case):
         key="category",
         value=",".join([category]),
     )
-    # breakpoint()
+
     test_case.assertEqual(2818641, result[0]["neighbor"]["entity"]["entity"])
     test_case.assertEqual(123, result[0]["paths"][0]["neighbor"]["entity"]["entity"])
     test_case.assertEqual(

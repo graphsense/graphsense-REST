@@ -16,7 +16,7 @@ class AddressTag(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, label: str=None, category: str=None, concepts: List[str]=None, actor: str=None, abuse: str=None, tagpack_uri: str=None, source: str=None, lastmod: int=None, tagpack_title: str=None, tagpack_is_public: bool=None, tagpack_creator: str=None, is_cluster_definer: bool=None, confidence: str=None, confidence_level: int=None, inherited_from: str=None, currency: str=None, address: str=None):
+    def __init__(self, label: str=None, category: str=None, concepts: List[str]=None, actor: str=None, abuse: str=None, tagpack_uri: str=None, source: str=None, lastmod: int=None, tagpack_title: str=None, tagpack_is_public: bool=None, tagpack_creator: str=None, is_cluster_definer: bool=None, confidence: str=None, confidence_level: int=None, inherited_from: str=None, currency: str=None, address: str=None, entity: int=None):
         """AddressTag - a model defined in OpenAPI
 
         :param label: The label of this AddressTag.
@@ -36,6 +36,7 @@ class AddressTag(Model):
         :param inherited_from: The inherited_from of this AddressTag.
         :param currency: The currency of this AddressTag.
         :param address: The address of this AddressTag.
+        :param entity: The entity of this AddressTag.
         """
         self.openapi_types = {
             'label': str,
@@ -54,7 +55,8 @@ class AddressTag(Model):
             'confidence_level': int,
             'inherited_from': str,
             'currency': str,
-            'address': str
+            'address': str,
+            'entity': int
         }
 
         self.attribute_map = {
@@ -74,7 +76,8 @@ class AddressTag(Model):
             'confidence_level': 'confidence_level',
             'inherited_from': 'inherited_from',
             'currency': 'currency',
-            'address': 'address'
+            'address': 'address',
+            'entity': 'entity'
         }
 
         self._label = label
@@ -94,6 +97,7 @@ class AddressTag(Model):
         self._inherited_from = inherited_from
         self._currency = currency
         self._address = address
+        self._entity = entity
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'AddressTag':
@@ -128,7 +132,8 @@ class AddressTag(Model):
             'confidence_level': self._confidence_level,
             'inherited_from': self._inherited_from,
             'currency': self._currency,
-            'address': self._address }
+            'address': self._address,
+            'entity': self._entity }
 
 
     @property
@@ -541,3 +546,26 @@ class AddressTag(Model):
             raise BadUserInputException("Invalid value for `address`, must not be `None`")
 
         self._address = address
+
+    @property
+    def entity(self):
+        """Gets the entity of this AddressTag.
+
+        Entity id
+
+        :return: The entity of this AddressTag.
+        :rtype: int
+        """
+        return self._entity
+
+    @entity.setter
+    def entity(self, entity):
+        """Sets the entity of this AddressTag.
+
+        Entity id
+
+        :param entity: The entity of this AddressTag.
+        :type entity: int
+        """
+
+        self._entity = entity

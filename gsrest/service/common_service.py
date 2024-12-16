@@ -1,12 +1,16 @@
 import asyncio
+from typing import Optional
 
 from tagstore.db import TagstoreDbAsync
 
 import gsrest.util.address
 from gsrest.db.node_type import NodeType
-from gsrest.errors import AddressNotFoundException, BadUserInputException
+from gsrest.errors import (
+    AddressNotFoundException,
+    BadUserInputException,
+    NetworkNotFoundException,
+)
 from gsrest.service.rates_service import get_rates, list_rates
-from gsrest.service.tags_service import get_tagstore_access_groups
 from gsrest.service.txs_service import tx_account_from_row
 from gsrest.util import get_first_key_present, is_eth_like
 from gsrest.util.address import address_to_user_format
@@ -22,6 +26,33 @@ from openapi_server.models.labeled_item_ref import LabeledItemRef
 from openapi_server.models.link_utxo import LinkUtxo
 from openapi_server.models.links import Links
 from openapi_server.models.tx_summary import TxSummary
+
+
+def cannonicalize_address(currency, address):
+    try:
+        return gsrest.util.address.cannonicalize_address(currency, address)
+    except ValueError:
+        raise BadUserInputException(
+            "The address provided does not look"
+            f" like a {currency.upper()} address: {address}"
+        )
+
+
+async def try_get_cluster_id(db, network, address) -> Optional[int]:
+    try:
+        network = network.lower()
+        address_canonical = cannonicalize_address(network, address)
+        return await db.get_address_entity_id(network, address_canonical)
+    except (AddressNotFoundException, NetworkNotFoundException):
+        return None
+
+
+def get_tagstore_access_groups(request):
+    return (
+        ["public"]
+        if not request.app["request_config"]["show_private_tags"]
+        else ["public", "private"]
+    )
 
 
 def address_from_row(currency, row, rates, token_config, actors):
@@ -75,16 +106,6 @@ async def txs_from_rows(request, currency, rows, token_config):
         )
         for row in rows
     ]
-
-
-def cannonicalize_address(currency, address):
-    try:
-        return gsrest.util.address.cannonicalize_address(currency, address)
-    except ValueError:
-        raise BadUserInputException(
-            "The address provided does not look"
-            f" like a {currency.upper()} address: {address}"
-        )
 
 
 async def get_address(request, currency, address, include_actors=True):

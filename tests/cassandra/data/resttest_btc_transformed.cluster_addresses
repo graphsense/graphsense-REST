@@ -9,3 +9,5 @@
 {"cluster_id_group": 0, "cluster_id": 16, "address_id": 18}
 {"cluster_id_group": 0, "cluster_id": 19, "address_id": 19}
 {"cluster_id_group": 0, "cluster_id": 20, "address_id": 20}
+{"cluster_id_group": 0, "cluster_id": 123, "address_id": 100}
+{"cluster_id_group": 0, "cluster_id": 456, "address_id": 101}

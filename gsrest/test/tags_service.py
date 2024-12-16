@@ -20,7 +20,7 @@ tag1 = AddressTag(
     tagpack_creator="GraphSense Core Team",
     tagpack_title="GraphSense",
     concepts=[],
-    # entity=17642138,
+    entity=17642138,
 )
 
 tag2 = AddressTag(
@@ -39,7 +39,7 @@ tag2 = AddressTag(
     tagpack_creator="GraphSense Core Team",
     tagpack_title="GraphSense",
     concepts=[],
-    # entity=17642138,
+    entity=17642138,
 )
 
 tag3 = AddressTag(
@@ -58,7 +58,7 @@ tag3 = AddressTag(
     tagpack_creator="GraphSense Core Team",
     tagpack_title="GraphSense Private",
     concepts=["scam"],
-    # entity=17642138,
+    entity=17642138,
 )
 
 tag4 = AddressTag(
@@ -77,7 +77,7 @@ tag4 = AddressTag(
     confidence="ownership",
     confidence_level=100,
     concepts=[],
-    # entity=17642138,
+    entity=17642138,
 )
 
 eth_tag1 = AddressTag(
@@ -96,7 +96,7 @@ eth_tag1 = AddressTag(
     tagpack_creator="GraphSense Core Team",
     tagpack_title="GraphSense uriX",
     concepts=[],
-    # entity=107925000,
+    entity=107925000,
 )
 
 eth_tag2 = AddressTag(
@@ -115,7 +115,7 @@ eth_tag2 = AddressTag(
     tagpack_creator="GraphSense Core Team",
     tagpack_title="GraphSense uriY",
     concepts=[],
-    # entity=107925000,
+    entity=107925000,
 )
 
 etag1 = AddressTag(
@@ -136,22 +136,6 @@ etag1 = AddressTag(
     concepts=[],
 )
 
-# etag2 = AddressTag(
-#     tagpack_uri="https://tagpack_uri",
-#     lastmod=1,
-#     label="isolinks",
-#     source="Unspecified",
-#     category="exchange",
-#     currency="BTC",
-#     address="addressX",
-#     abuse=None,
-#     confidence=tag1.confidence,
-#     confidence_level=tag1.confidence_level,
-#     tagpack_is_public=True,
-#     is_cluster_definer=True,
-#     concepts=[],
-# )
-
 tag5 = AddressTag(
     tagpack_uri=base_tagpack_src + "tagpack_public.yaml",
     lastmod=1562112000,
@@ -168,7 +152,7 @@ tag5 = AddressTag(
     tagpack_is_public=True,
     is_cluster_definer=True,
     concepts=[],
-    # entity=123,
+    entity=123,
 )
 
 tag6 = AddressTag(
@@ -187,7 +171,7 @@ tag6 = AddressTag(
     tagpack_is_public=True,
     is_cluster_definer=False,
     concepts=[],
-    # entity=456,
+    entity=456,
 )
 
 tag7 = AddressTag(
@@ -225,7 +209,7 @@ tag8 = AddressTag(
     tagpack_title="GraphSense",
     tagpack_uri=base_tagpack_src + "tagpack_public.yaml",
     concepts=[],
-    # entity=2818641,
+    entity=2818641,
 )
 
 eth_tag3 = AddressTag(
@@ -244,7 +228,7 @@ eth_tag3 = AddressTag(
     tagpack_creator="GraphSense Core Team",
     tagpack_title="GraphSense uriX",
     concepts=[],
-    # entity=107925000,
+    entity=107925000,
 )
 
 eth_etag1 = eth_tag1.to_dict()
@@ -273,7 +257,7 @@ eth_tag_actor = AddressTag(
     actor="actorX",
     address="0x123456",
     concepts=[],
-    # entity=107925001,
+    entity=107925001,
     currency="ETH",
     tagpack_creator="GraphSense Core Team",
     tagpack_title="GraphSense uriX",
@@ -294,7 +278,7 @@ btc_tag_actorX = AddressTag(
     actor="actorX",
     address="abcdefg",
     concepts=[],
-    # entity=107925001,
+    entity=456,
     currency="BTC",
     tagpack_uri=base_tagpack_src + "tagpack_public.yaml",
     is_cluster_definer=False,
@@ -317,7 +301,7 @@ async def get_actor_tags(test_case):
             "lastmod": 1562112000,
             "confidence_level": 100,
             "currency": "BTC",
-            # "entity": 107925001,
+            "entity": 17642138,
             "is_cluster_definer": False,
             "label": "labelX",
             "actor": "actorY",
@@ -335,7 +319,7 @@ async def get_actor_tags(test_case):
             "lastmod": 1562112000,
             "confidence_level": 100,
             "currency": "ETH",
-            # "entity": 107925001,
+            "entity": 107925001,
             "is_cluster_definer": False,
             "label": "LabelY",
             "actor": "actorY",
@@ -394,7 +378,7 @@ async def list_address_tags(test_case):
     t2["tagpack_is_public"] = False
     t2["is_cluster_definer"] = True
     t2["tagpack_title"] += " Private"
-    # t2["entity"] = 456
+    t2["entity"] = 456
     assert [t1, t2] == result["address_tags"]
 
     result = await test_case.request(path, auth="unauthorized", label="isolinks")

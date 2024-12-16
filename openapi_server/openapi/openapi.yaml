@@ -5680,6 +5680,12 @@ components:
           example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
           title: address
           type: string
+        entity:
+          description: Entity id
+          example: 123456
+          format: int32
+          title: entity
+          type: integer
       required:
         - address
       type: object

@@ -7,12 +7,11 @@ from tagstore.db import TagstoreDbAsync
 import gsrest.service.common_service as common
 from gsrest.db.node_type import NodeType
 from gsrest.errors import BadUserInputException, ClusterNotFoundException
-from gsrest.service.common_service import get_address
+from gsrest.service.common_service import get_address, get_tagstore_access_groups
 from gsrest.service.rates_service import get_rates
 from gsrest.service.tags_service import (
     address_tag_from_PublicTag,
     get_address_tag_result,
-    get_tagstore_access_groups,
 )
 from gsrest.util.address import address_to_user_format
 from gsrest.util.values import (
@@ -77,7 +76,7 @@ async def list_address_tags_by_entity_internal(
     page = int(page) if page is not None else 0
 
     tags = [
-        address_tag_from_PublicTag(request, pt)
+        address_tag_from_PublicTag(request, pt, int(entity))
         for pt in (
             await tsdb.get_tags_by_clusterid(
                 int(entity),
@@ -121,7 +120,7 @@ async def get_entity(
         )
 
         if tag is not None:
-            best_tag = address_tag_from_PublicTag(request, tag)
+            best_tag = address_tag_from_PublicTag(request, tag, int(entity))
 
     count = await tagstore_db.get_nr_tags_by_clusterid(
         int(entity), currency.upper(), tagstore_groups

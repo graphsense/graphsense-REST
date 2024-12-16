@@ -1,9 +1,11 @@
-from typing import Callable, List
+import asyncio
+from typing import Callable, List, Optional
 
 from tagstore.db import ActorPublic, TagPublic, TagstoreDbAsync, Taxonomies
 
 from gsrest.db import get_cached_is_abuse, get_cached_taxonomy_concept_label
 from gsrest.errors import NotFoundException
+from gsrest.service.common_service import get_tagstore_access_groups, try_get_cluster_id
 from openapi_server.models.actor import Actor
 from openapi_server.models.actor_context import ActorContext
 from openapi_server.models.address_tag import AddressTag
@@ -13,11 +15,13 @@ from openapi_server.models.labeled_item_ref import LabeledItemRef
 from openapi_server.models.taxonomy import Taxonomy
 
 
-def address_tag_from_PublicTag(request, pt: TagPublic) -> AddressTag:
+def address_tag_from_PublicTag(
+    request, pt: TagPublic, entity: Optional[int]
+) -> AddressTag:
     abuse = next((x for x in pt.concepts if get_cached_is_abuse(request.app, x)), None)
     return AddressTag(
         address=pt.identifier,
-        # entity=0,
+        entity=entity,
         label=pt.label,
         category=pt.primary_concept,
         concepts=pt.additional_concepts,
@@ -45,12 +49,11 @@ def get_address_tag_result(
     return AddressTags(next_page=str(np) if np is not None else None, address_tags=tags)
 
 
-def get_tagstore_access_groups(request):
-    return (
-        ["public"]
-        if not request.app["request_config"]["show_private_tags"]
-        else ["public", "private"]
-    )
+async def get_entities_dict(request, tags: List[TagPublic]):
+    db = request.app["db"]
+    queryItems = list({(t.identifier, t.network) for t in tags})
+    entityQueries = [try_get_cluster_id(db, n, i) for i, n in queryItems]
+    return {q: d for q, d in zip(queryItems, await asyncio.gather(*entityQueries))}
 
 
 def actor_from_ActorPublic(
@@ -122,8 +125,17 @@ async def get_actor_tags(request, actor, page=None, pagesize=None):
         groups=get_tagstore_access_groups(request),
     )
 
+    tagEntities = await get_entities_dict(request, tags)
+
     return get_address_tag_result(
-        page, pagesize, [address_tag_from_PublicTag(request, t) for t in tags]
+        page,
+        pagesize,
+        [
+            address_tag_from_PublicTag(
+                request, t, tagEntities[(t.identifier, t.network)]
+            )
+            for t in tags
+        ],
     )
 
 
@@ -138,8 +150,17 @@ async def list_address_tags(request, label, page=None, pagesize=None):
         groups=get_tagstore_access_groups(request),
     )
 
+    tagEntities = await get_entities_dict(request, tags)
+
     return get_address_tag_result(
-        page, pagesize, [address_tag_from_PublicTag(request, t) for t in tags]
+        page,
+        pagesize,
+        [
+            address_tag_from_PublicTag(
+                request, t, tagEntities[(t.identifier, t.network)]
+            )
+            for t in tags
+        ],
     )
 
 

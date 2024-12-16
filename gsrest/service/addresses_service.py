@@ -1,5 +1,5 @@
 import asyncio
-from typing import List
+from typing import List, Optional, Tuple
 
 from tagstore.algorithms.tag_digest import TagDigest, compute_tag_digest
 from tagstore.db import TagPublic, TagstoreDbAsync
@@ -11,13 +11,16 @@ from gsrest.errors import (
     ClusterNotFoundException,
     DBInconsistencyException,
 )
-from gsrest.service.common_service import cannonicalize_address
+from gsrest.service.common_service import (
+    cannonicalize_address,
+    get_tagstore_access_groups,
+    try_get_cluster_id,
+)
 from gsrest.service.entities_service import from_row, get_entity
 from gsrest.service.rates_service import get_rates
 from gsrest.service.tags_service import (
     address_tag_from_PublicTag,
     get_address_tag_result,
-    get_tagstore_access_groups,
 )
 from gsrest.util import is_eth_like
 from gsrest.util.address import address_to_user_format
@@ -58,23 +61,24 @@ def tagSummary_from_tagDigest(td: TagDigest):
     )
 
 
-async def get_best_cluster_tag_raw(request, currency, address) -> TagPublic | None:
-    address_canonical = cannonicalize_address(currency, address)
+async def _get_best_cluster_tag_raw(
+    request, currency, address
+) -> Tuple[int, Optional[TagPublic]]:
     db = request.app["db"]
     tagstore_db = TagstoreDbAsync(request.app["gs-tagstore"])
 
-    clstr_id = await db.get_address_entity_id(currency, address_canonical)
+    clstr_id = await try_get_cluster_id(db, currency, address)
 
-    return await tagstore_db.get_best_cluster_tag(
+    return clstr_id, await tagstore_db.get_best_cluster_tag(
         clstr_id, currency.upper(), get_tagstore_access_groups(request)
     )
 
 
 async def get_best_cluster_tag(request, currency, address) -> AddressTag | None:
-    tag = await get_best_cluster_tag_raw(request, currency, address)
+    clstr_id = tag = await _get_best_cluster_tag_raw(request, currency, address)
 
     if tag is not None:
-        return address_tag_from_PublicTag(request, tag)
+        return address_tag_from_PublicTag(request, tag, clstr_id)
 
     return None
 
@@ -99,7 +103,9 @@ async def list_tags_by_address_raw(
     )
 
     if include_best_cluster_tag and not is_eth_like(currency):
-        best_cluster_tag = await get_best_cluster_tag_raw(request, currency, address)
+        _, best_cluster_tag = await _get_best_cluster_tag_raw(
+            request, currency, address
+        )
         if best_cluster_tag is not None:
             tags.append(best_cluster_tag)
 
@@ -135,8 +141,12 @@ async def list_tags_by_address(
     request, currency, address, page=None, pagesize=None, include_best_cluster_tag=False
 ) -> AddressTags:
     page = int(page) if page is not None else 0
+    db = request.app["db"]
+
+    clstr_id = await try_get_cluster_id(db, currency, address)
+
     tags = [
-        address_tag_from_PublicTag(request, pt)
+        address_tag_from_PublicTag(request, pt, clstr_id)
         for pt in (
             await list_tags_by_address_raw(
                 request,

@@ -1542,8 +1542,8 @@ components:
           properties:
             address:
               $ref: '#/components/schemas/address_id'
-            # entity:
-            #   $ref: '#/components/schemas/entity_id'
+            entity:
+              $ref: '#/components/schemas/entity_id'
     actors:
       type: array
       items:

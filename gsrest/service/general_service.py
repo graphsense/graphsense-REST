@@ -3,8 +3,8 @@ from datetime import datetime
 
 from tagstore.db import TagstoreDbAsync
 
+from gsrest.service.common_service import get_tagstore_access_groups
 from gsrest.service.stats_service import get_currency_statistics
-from gsrest.service.tags_service import get_tagstore_access_groups
 from gsrest.util.string_edit import alphanumeric_lower
 from openapi_server.models.labeled_item_ref import LabeledItemRef
 from openapi_server.models.search_result import SearchResult
