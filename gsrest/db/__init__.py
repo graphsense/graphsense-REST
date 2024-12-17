@@ -21,7 +21,19 @@ async def get_connection(app):
     cls = getattr(mod, driver.capitalize())
     app["db"] = cls(config, app.logger)
 
-    engine = get_db_engine_async(app["config"]["gs-tagstore"]["url"])
+    ts_conf = app["config"]["gs-tagstore"]
+    max_conn = ts_conf.get("pool_size", 50)
+    max_pool_time = ts_conf.get("pool_timeout", 300)
+    mo = ts_conf.get("max_overflow", 10)
+    recycle = ts_conf.get("pool_recycle", 3600)
+    engine = get_db_engine_async(
+        ts_conf["url"],
+        pool_size=int(max_conn),
+        max_overflow=int(mo),
+        pool_recycle=int(recycle),
+        pool_timeout=int(max_pool_time),
+        echo=True,
+    )
 
     # fetch taxonomy lookup
     tagstore_db = TagstoreDbAsync(engine)

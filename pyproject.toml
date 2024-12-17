@@ -1,6 +1,6 @@
 [project]
 name = "gsrest"
-version = "2.0.0a3"
+version = "2.0.0a4"
 description = "GraphSense API REST API"
 readme = "README.md"
 changelog = "CHANGELOG.md"
@@ -30,7 +30,7 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-tagpack-tool = { git = "https://github.com/graphsense/graphsense-tagpack-tool", tag = "v25.01.0a5" }
+tagpack-tool = { git = "https://github.com/graphsense/graphsense-tagpack-tool", tag = "v25.01.0a9" }
 
 [tool.tox]
 legacy_tox_ini = """
