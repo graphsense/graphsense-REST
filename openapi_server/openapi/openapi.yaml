@@ -3758,6 +3758,9 @@ components:
           enum:
             - cluster
           type: string
+        tag_type:
+          description: kind of tag e.g. Mention; representing a mention of an address, or Actor; representing an actor saying something about the actor behind the address.
+          type: string
         currency:
           description: crypto currency code
           example: btc

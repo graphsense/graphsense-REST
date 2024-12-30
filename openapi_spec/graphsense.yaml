@@ -1531,6 +1531,9 @@ components:
           enum:
             - cluster
           description: if the tag was inherited from cluster
+        tag_type:
+          type: string
+          description: kind of tag e.g. Mention; representing a mention of an address, or Actor; representing an actor saying something about the actor behind the address.
         currency:
           $ref: '#/components/schemas/currency'
     address_tag:

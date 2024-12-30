@@ -14,7 +14,7 @@ class Tag(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, label: str=None, category: str=None, concepts: List[str]=None, actor: str=None, abuse: str=None, tagpack_uri: str=None, source: str=None, lastmod: int=None, tagpack_title: str=None, tagpack_is_public: bool=None, tagpack_creator: str=None, is_cluster_definer: bool=None, confidence: str=None, confidence_level: int=None, inherited_from: str=None, currency: str=None):
+    def __init__(self, label: str=None, category: str=None, concepts: List[str]=None, actor: str=None, abuse: str=None, tagpack_uri: str=None, source: str=None, lastmod: int=None, tagpack_title: str=None, tagpack_is_public: bool=None, tagpack_creator: str=None, is_cluster_definer: bool=None, confidence: str=None, confidence_level: int=None, inherited_from: str=None, tag_type: str=None, currency: str=None):
         """Tag - a model defined in OpenAPI
 
         :param label: The label of this Tag.
@@ -32,6 +32,7 @@ class Tag(Model):
         :param confidence: The confidence of this Tag.
         :param confidence_level: The confidence_level of this Tag.
         :param inherited_from: The inherited_from of this Tag.
+        :param tag_type: The tag_type of this Tag.
         :param currency: The currency of this Tag.
         """
         self.openapi_types = {
@@ -50,6 +51,7 @@ class Tag(Model):
             'confidence': str,
             'confidence_level': int,
             'inherited_from': str,
+            'tag_type': str,
             'currency': str
         }
 
@@ -69,6 +71,7 @@ class Tag(Model):
             'confidence': 'confidence',
             'confidence_level': 'confidence_level',
             'inherited_from': 'inherited_from',
+            'tag_type': 'tag_type',
             'currency': 'currency'
         }
 
@@ -87,6 +90,7 @@ class Tag(Model):
         self._confidence = confidence
         self._confidence_level = confidence_level
         self._inherited_from = inherited_from
+        self._tag_type = tag_type
         self._currency = currency
 
     @classmethod
@@ -121,6 +125,7 @@ class Tag(Model):
             'confidence': self._confidence,
             'confidence_level': self._confidence_level,
             'inherited_from': self._inherited_from,
+            'tag_type': self._tag_type,
             'currency': self._currency }
 
 
@@ -484,6 +489,29 @@ class Tag(Model):
             )
 
         self._inherited_from = inherited_from
+
+    @property
+    def tag_type(self):
+        """Gets the tag_type of this Tag.
+
+        kind of tag e.g. Mention; representing a mention of an address, or Actor; representing an actor saying something about the actor behind the address.
+
+        :return: The tag_type of this Tag.
+        :rtype: str
+        """
+        return self._tag_type
+
+    @tag_type.setter
+    def tag_type(self, tag_type):
+        """Sets the tag_type of this Tag.
+
+        kind of tag e.g. Mention; representing a mention of an address, or Actor; representing an actor saying something about the actor behind the address.
+
+        :param tag_type: The tag_type of this Tag.
+        :type tag_type: str
+        """
+
+        self._tag_type = tag_type
 
     @property
     def currency(self):

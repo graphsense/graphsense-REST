@@ -26,6 +26,7 @@ def address_tag_from_PublicTag(
         category=pt.primary_concept,
         concepts=pt.additional_concepts,
         actor=pt.actor,
+        tag_type=pt.tag_type,
         abuse=abuse,
         source=pt.source,
         lastmod=pt.lastmod,

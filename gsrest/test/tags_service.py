@@ -21,6 +21,7 @@ tag1 = AddressTag(
     tagpack_title="GraphSense",
     concepts=[],
     entity=17642138,
+    tag_type="actor",
 )
 
 tag2 = AddressTag(
@@ -40,6 +41,7 @@ tag2 = AddressTag(
     tagpack_title="GraphSense",
     concepts=[],
     entity=17642138,
+    tag_type="actor",
 )
 
 tag3 = AddressTag(
@@ -59,6 +61,7 @@ tag3 = AddressTag(
     tagpack_title="GraphSense Private",
     concepts=["scam"],
     entity=17642138,
+    tag_type="actor",
 )
 
 tag4 = AddressTag(
@@ -78,6 +81,7 @@ tag4 = AddressTag(
     confidence_level=100,
     concepts=[],
     entity=17642138,
+    tag_type="actor",
 )
 
 eth_tag1 = AddressTag(
@@ -97,6 +101,7 @@ eth_tag1 = AddressTag(
     tagpack_title="GraphSense uriX",
     concepts=[],
     entity=107925000,
+    tag_type="actor",
 )
 
 eth_tag2 = AddressTag(
@@ -116,6 +121,7 @@ eth_tag2 = AddressTag(
     tagpack_title="GraphSense uriY",
     concepts=[],
     entity=107925000,
+    tag_type="actor",
 )
 
 etag1 = AddressTag(
@@ -134,6 +140,7 @@ etag1 = AddressTag(
     is_cluster_definer=True,
     tagpack_is_public=tag1.tagpack_is_public,
     concepts=[],
+    tag_type="actor",
 )
 
 tag5 = AddressTag(
@@ -153,6 +160,7 @@ tag5 = AddressTag(
     is_cluster_definer=True,
     concepts=[],
     entity=123,
+    tag_type="actor",
 )
 
 tag6 = AddressTag(
@@ -172,6 +180,7 @@ tag6 = AddressTag(
     is_cluster_definer=False,
     concepts=[],
     entity=456,
+    tag_type="actor",
 )
 
 tag7 = AddressTag(
@@ -191,6 +200,7 @@ tag7 = AddressTag(
     is_cluster_definer=False,
     concepts=[],
     # entity=1234,
+    tag_type="actor",
 )
 
 tag8 = AddressTag(
@@ -210,6 +220,7 @@ tag8 = AddressTag(
     tagpack_uri=base_tagpack_src + "tagpack_public.yaml",
     concepts=[],
     entity=2818641,
+    tag_type="actor",
 )
 
 eth_tag3 = AddressTag(
@@ -229,6 +240,7 @@ eth_tag3 = AddressTag(
     tagpack_title="GraphSense uriX",
     concepts=[],
     entity=107925000,
+    tag_type="actor",
 )
 
 eth_etag1 = eth_tag1.to_dict()
@@ -245,6 +257,7 @@ etag4 = AddressTag(
     currency=tag2.currency,
     is_cluster_definer=True,
     tagpack_is_public=tag2.tagpack_is_public,
+    tag_type="actor",
 )
 
 eth_tag_actor = AddressTag(
@@ -264,6 +277,7 @@ eth_tag_actor = AddressTag(
     tagpack_uri=base_tagpack_src + "tagpack_uriX.yaml",
     is_cluster_definer=False,
     tagpack_is_public=False,
+    tag_type="actor",
 )
 
 btc_tag_actorX = AddressTag(
@@ -283,6 +297,7 @@ btc_tag_actorX = AddressTag(
     tagpack_uri=base_tagpack_src + "tagpack_public.yaml",
     is_cluster_definer=False,
     tagpack_is_public=True,
+    tag_type="actor",
 )
 
 
@@ -310,6 +325,7 @@ async def get_actor_tags(test_case):
             "tagpack_title": "GraphSense",
             "tagpack_uri": base_tagpack_src + "tagpack_public.yaml",
             "tagpack_creator": "GraphSense Core Team",
+            "tag_type": "actor",
         },
         {
             "address": "0x123456",
@@ -328,6 +344,7 @@ async def get_actor_tags(test_case):
             "tagpack_title": "GraphSense uriY",
             "tagpack_uri": base_tagpack_src + "tagpack_uriY.yaml",
             "tagpack_creator": "GraphSense Core Team",
+            "tag_type": "actor",
         },
     ]
     assert expexted_result == result["address_tags"]

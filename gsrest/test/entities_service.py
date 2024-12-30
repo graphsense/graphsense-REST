@@ -181,6 +181,7 @@ tag_entityB = Entity(
         tagpack_uri=tagstore_public_tp_uri,
         concepts=[],
         entity=14,
+        tag_type="actor",
     ),
 )
 
@@ -217,6 +218,7 @@ tag_entityC = Entity(
         inherited_from="cluster",
         concepts=[],
         entity=16,
+        tag_type="actor",
     ),
 )
 
@@ -253,6 +255,7 @@ tag_entityD = Entity(
         concepts=[],
         inherited_from="cluster",
         entity=19,
+        tag_type="actor",
     ),
 )
 
@@ -289,6 +292,7 @@ tag_entityE = Entity(
         inherited_from="cluster",
         concepts=[],
         entity=20,
+        tag_type="actor",
     ),
 )
 

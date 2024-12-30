@@ -16,7 +16,7 @@ class AddressTag(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, label: str=None, category: str=None, concepts: List[str]=None, actor: str=None, abuse: str=None, tagpack_uri: str=None, source: str=None, lastmod: int=None, tagpack_title: str=None, tagpack_is_public: bool=None, tagpack_creator: str=None, is_cluster_definer: bool=None, confidence: str=None, confidence_level: int=None, inherited_from: str=None, currency: str=None, address: str=None, entity: int=None):
+    def __init__(self, label: str=None, category: str=None, concepts: List[str]=None, actor: str=None, abuse: str=None, tagpack_uri: str=None, source: str=None, lastmod: int=None, tagpack_title: str=None, tagpack_is_public: bool=None, tagpack_creator: str=None, is_cluster_definer: bool=None, confidence: str=None, confidence_level: int=None, inherited_from: str=None, tag_type: str=None, currency: str=None, address: str=None, entity: int=None):
         """AddressTag - a model defined in OpenAPI
 
         :param label: The label of this AddressTag.
@@ -34,6 +34,7 @@ class AddressTag(Model):
         :param confidence: The confidence of this AddressTag.
         :param confidence_level: The confidence_level of this AddressTag.
         :param inherited_from: The inherited_from of this AddressTag.
+        :param tag_type: The tag_type of this AddressTag.
         :param currency: The currency of this AddressTag.
         :param address: The address of this AddressTag.
         :param entity: The entity of this AddressTag.
@@ -54,6 +55,7 @@ class AddressTag(Model):
             'confidence': str,
             'confidence_level': int,
             'inherited_from': str,
+            'tag_type': str,
             'currency': str,
             'address': str,
             'entity': int
@@ -75,6 +77,7 @@ class AddressTag(Model):
             'confidence': 'confidence',
             'confidence_level': 'confidence_level',
             'inherited_from': 'inherited_from',
+            'tag_type': 'tag_type',
             'currency': 'currency',
             'address': 'address',
             'entity': 'entity'
@@ -95,6 +98,7 @@ class AddressTag(Model):
         self._confidence = confidence
         self._confidence_level = confidence_level
         self._inherited_from = inherited_from
+        self._tag_type = tag_type
         self._currency = currency
         self._address = address
         self._entity = entity
@@ -131,6 +135,7 @@ class AddressTag(Model):
             'confidence': self._confidence,
             'confidence_level': self._confidence_level,
             'inherited_from': self._inherited_from,
+            'tag_type': self._tag_type,
             'currency': self._currency,
             'address': self._address,
             'entity': self._entity }
@@ -496,6 +501,29 @@ class AddressTag(Model):
             )
 
         self._inherited_from = inherited_from
+
+    @property
+    def tag_type(self):
+        """Gets the tag_type of this AddressTag.
+
+        kind of tag e.g. Mention; representing a mention of an address, or Actor; representing an actor saying something about the actor behind the address.
+
+        :return: The tag_type of this AddressTag.
+        :rtype: str
+        """
+        return self._tag_type
+
+    @tag_type.setter
+    def tag_type(self, tag_type):
+        """Sets the tag_type of this AddressTag.
+
+        kind of tag e.g. Mention; representing a mention of an address, or Actor; representing an actor saying something about the actor behind the address.
+
+        :param tag_type: The tag_type of this AddressTag.
+        :type tag_type: str
+        """
+
+        self._tag_type = tag_type
 
     @property
     def currency(self):
