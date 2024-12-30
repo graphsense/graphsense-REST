@@ -3770,6 +3770,7 @@ components:
         - currency
         - is_cluster_definer
         - label
+        - tag_type
         - tagpack_creator
         - tagpack_is_public
         - tagpack_title

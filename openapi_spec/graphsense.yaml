@@ -1466,6 +1466,7 @@ components:
         - tagpack_title
         - tagpack_creator
         - is_cluster_definer
+        - tag_type
       properties:
         label:
           $ref: '#/components/schemas/label'

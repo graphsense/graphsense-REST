@@ -510,6 +510,8 @@ class Tag(Model):
         :param tag_type: The tag_type of this Tag.
         :type tag_type: str
         """
+        if tag_type is None:
+            raise BadUserInputException("Invalid value for `tag_type`, must not be `None`")
 
         self._tag_type = tag_type
 
