@@ -107,7 +107,9 @@ async def list_tags_by_address_raw(
             request, currency, address
         )
         if best_cluster_tag is not None:
-            tags.append(best_cluster_tag)
+            is_direct_tag = best_cluster_tag.identifier == address
+            if not is_direct_tag:
+                tags.append(best_cluster_tag)
 
     return tags
 
