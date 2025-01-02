@@ -178,7 +178,7 @@ async def list_concepts(request, taxonomy):
         only_abuses = True
         taxonomy = "concept"
 
-    if taxonomy not in [x.value for x in Taxonomies]:
+    if taxonomy.lower() not in [x.name.lower() for x in Taxonomies]:
         raise NotFoundException(f"Taxonomy {taxonomy} does not exist.")
 
     taxs = await tsdb.get_taxonomies({Taxonomies[taxonomy.upper()]})
