@@ -3,6 +3,7 @@ import logging
 import re
 import time
 from collections import UserDict, namedtuple
+from datetime import datetime
 from functools import partial
 from itertools import product
 from math import ceil, floor
@@ -45,6 +46,14 @@ from gsrest.util.tron import partial_tron_to_partial_evm
 SMALL_PAGE_SIZE = 1000
 BIG_PAGE_SIZE = 5000
 SEARCH_PAGE_SIZE = 100
+
+
+def getDateFromKeyspaceName(x):
+    datePart = x.split("_")[-1]
+    try:
+        return datetime.strptime(datePart, "%Y%m%d")
+    except ValueError:
+        return None
 
 
 class NetworkParameters(UserDict):
@@ -379,7 +388,20 @@ class Cassandra:
         self.prepared_statements = {}
         self.connect()
         self.parameters = NetworkParameters()
+
         for currency in config["currencies"]:
+            if config["currencies"][currency] is None:
+                config["currencies"][currency] = {}
+
+            # automatically find latest active keyspace if not configured
+            if "raw" not in config["currencies"][currency]:
+                config["currencies"][currency]["raw"] = f"{currency}_raw"
+
+            if "transformed" not in config["currencies"][currency]:
+                config["currencies"][currency]["transformed"] = (
+                    self.find_latest_transformed_keyspace(currency)
+                )
+
             self.check_keyspace(config["currencies"][currency]["raw"])
             self.check_keyspace(config["currencies"][currency]["transformed"])
             self.load_parameters(currency)
@@ -421,6 +443,37 @@ class Cassandra:
         result = self.session.execute(query, [keyspace])
         if one(result) is None:
             raise BadConfigError("Keyspace {} does not exist".format(keyspace))
+
+        if self.logger:
+            self.logger.info(f"Using keyspace: {keyspace}")
+
+    def find_latest_transformed_keyspace(self, network):
+        query = "SELECT keyspace_name FROM system_schema.keyspaces"
+        result = self.session.execute(query)
+        prefix = f"{network.lower()}_transformed"
+        candidates = [
+            getDateFromKeyspaceName(x["keyspace_name"])
+            for x in result
+            if x["keyspace_name"].startswith(prefix)
+        ]
+
+        for c in reversed(sorted(filter(lambda x: x is not None, candidates))):
+            ks = f"{prefix}_{c.strftime('%Y%m%d')}"
+            q = f"SELECT * FROM {ks}.summary_statistics limit 1"
+            result = self.session.execute(q)
+
+            if one(result) is None:
+                if self.logger:
+                    self.logger.error(
+                        f"{ks} is not online (missing summary_statistics row). skipping"
+                    )
+                continue
+            else:
+                return ks
+
+        raise Exception(
+            f"Automatic detection for transformed keyspace failed for network {network}."
+        )
 
     @eth
     def load_token_configuration(self, currency):
