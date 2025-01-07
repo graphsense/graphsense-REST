@@ -32,7 +32,7 @@ async def get_connection(app):
         max_overflow=int(mo),
         pool_recycle=int(recycle),
         pool_timeout=int(max_pool_time),
-        echo=True,
+        # echo=True,
     )
 
     # fetch taxonomy lookup

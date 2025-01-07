@@ -5,7 +5,7 @@ info:
   contact:
     name: Iknaio Cryptoasset Analytics GmbH
     email: contact@ikna.io
-  version: "2.0.0a7"
+  version: "2.0.0a8"
 servers:
   - url: 'https://api.ikna.io'
 paths:
