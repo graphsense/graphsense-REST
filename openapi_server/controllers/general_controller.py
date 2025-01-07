@@ -67,10 +67,10 @@ async def get_statistics(request: web.Request, ) -> web.Response:
         return result
     except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPNotFound(text=str(e))
+        raise web.HTTPNotFound(text=e.get_user_msg())
     except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
+        raise web.HTTPBadRequest(text=e.get_user_msg())
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")
@@ -139,10 +139,10 @@ async def search(request: web.Request, q, currency=None, limit=None) -> web.Resp
         return result
     except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPNotFound(text=str(e))
+        raise web.HTTPNotFound(text=e.get_user_msg())
     except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
+        raise web.HTTPBadRequest(text=e.get_user_msg())
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")

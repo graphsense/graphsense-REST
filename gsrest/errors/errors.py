@@ -14,6 +14,13 @@ class UserFacingExceptions(Exception):
     """Hierarchy of exceptions that end up being communicated
     to the end user, but do not produce error logs"""
 
+    def __init__(self, user_msg: str):
+        super().__init__(user_msg)
+        self.user_msg = user_msg
+
+    def get_user_msg(self):
+        return self.user_msg
+
 
 class NotFoundException(UserFacingExceptions):
     """this exception should be used if some

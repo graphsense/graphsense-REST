@@ -78,10 +78,10 @@ async def get_address(request: web.Request, currency, address, include_actors=No
         return result
     except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPNotFound(text=str(e))
+        raise web.HTTPNotFound(text=e.get_user_msg())
     except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
+        raise web.HTTPBadRequest(text=e.get_user_msg())
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")
@@ -150,10 +150,10 @@ async def get_address_entity(request: web.Request, currency, address, include_ac
         return result
     except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPNotFound(text=str(e))
+        raise web.HTTPNotFound(text=e.get_user_msg())
     except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
+        raise web.HTTPBadRequest(text=e.get_user_msg())
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")
@@ -222,10 +222,10 @@ async def get_tag_summary_by_address(request: web.Request, currency, address, in
         return result
     except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPNotFound(text=str(e))
+        raise web.HTTPNotFound(text=e.get_user_msg())
     except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
+        raise web.HTTPBadRequest(text=e.get_user_msg())
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")
@@ -304,10 +304,10 @@ async def list_address_links(request: web.Request, currency, address, neighbor, 
         return result
     except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPNotFound(text=str(e))
+        raise web.HTTPNotFound(text=e.get_user_msg())
     except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
+        raise web.HTTPBadRequest(text=e.get_user_msg())
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")
@@ -386,10 +386,10 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
         return result
     except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPNotFound(text=str(e))
+        raise web.HTTPNotFound(text=e.get_user_msg())
     except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
+        raise web.HTTPBadRequest(text=e.get_user_msg())
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")
@@ -470,10 +470,10 @@ async def list_address_txs(request: web.Request, currency, address, direction=No
         return result
     except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPNotFound(text=str(e))
+        raise web.HTTPNotFound(text=e.get_user_msg())
     except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
+        raise web.HTTPBadRequest(text=e.get_user_msg())
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")
@@ -546,10 +546,10 @@ async def list_tags_by_address(request: web.Request, currency, address, page=Non
         return result
     except NotFoundException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPNotFound(text=str(e))
+        raise web.HTTPNotFound(text=e.get_user_msg())
     except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
-        raise web.HTTPBadRequest(text=str(e))
+        raise web.HTTPBadRequest(text=e.get_user_msg())
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")
