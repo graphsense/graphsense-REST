@@ -3,6 +3,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [25.01.0/1.9.0] - 2025-01-10
+
+### New
+
+- Updated to v25.01.0 of the tagstore only works with newer versions than this (Resync of database needed)
+- tagstore is now a direct lib dependency, no duplication of query code anymore
+- gs-rest now supports keyspace auto discovery (using the latest complete (summary stats has data) ks in cassandra)
+
+### Changed
+- now uses uv to package and dep. mgmt, ruff for linting and formatting
+- tests now use testcontainers for more robust/quicker testing setup
+
 ## [24.11.2] - 2024-12-03
 
 ### Fixed
