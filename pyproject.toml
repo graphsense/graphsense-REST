@@ -1,6 +1,6 @@
 [project]
 name = "gsrest"
-version = "1.9.0"
+version = "1.9.1"
 description = "GraphSense API REST API"
 readme = "README.md"
 changelog = "CHANGELOG.md"
@@ -26,7 +26,7 @@ dependencies = [
     "openapi-schema-validator>=0.2.3",
     "python-dateutil>=2.9.0",
     "swagger-ui-bundle>=0.0.9",
-    "tagpack-tool==v25.01.0",
+    "tagpack-tool==v25.01.1",
 ]
 
 [tool.tox]

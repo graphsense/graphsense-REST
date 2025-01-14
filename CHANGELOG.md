@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [25.01.1/1.9.1] - 2025-01-14
+
+### fixed
+- bumped tagstore dependency to v25.01.1; fixing best cluster tag queries.
+
 ## [25.01.0/1.9.0] - 2025-01-10
 
 ### New
