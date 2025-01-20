@@ -43,7 +43,7 @@ async def try_get_cluster_id(db, network, address) -> Optional[int]:
         network = network.lower()
         address_canonical = cannonicalize_address(network, address)
         return await db.get_address_entity_id(network, address_canonical)
-    except (AddressNotFoundException, NetworkNotFoundException):
+    except (AddressNotFoundException, NetworkNotFoundException, BadUserInputException):
         return None
 
 
