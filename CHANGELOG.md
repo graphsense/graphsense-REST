@@ -3,7 +3,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [25.01.2/1.9.3] - 2025-01-20
+## [25.01.4/1.9.4] - 2025-01-20
+
+### fixed
+- fix connection cleanup for tagstore
+
+
+## [25.01.3/1.9.3] - 2025-01-20
 
 ### fixed
 - get_entities for tags fails on nonsensical tags

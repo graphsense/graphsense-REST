@@ -48,7 +48,17 @@ async def get_connection(app):
 
     app["gs-tagstore"] = engine
 
+    app.logger.info("Setup done")
+
     yield
 
-    app["db"].close()
-    app.logger.info(f"Closed {driver} connection.")
+    app.logger.info("Begin app teardown")
+    try:
+        app["db"].close()
+        app.logger.info(f"Closed {driver} connection.")
+        app.logger.info(engine.pool.status())
+        await engine.dispose()
+        app.logger.info(engine.pool.status())
+        app.logger.info("Closed Tagstore connection.")
+    except Exception as x:
+        app.logger.error(x)
