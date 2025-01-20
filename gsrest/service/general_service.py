@@ -37,7 +37,7 @@ async def search_by_currency(request, currency, q, limit=10):
     if len(q) >= 3:
         [txs, addresses] = await asyncio.gather(
             db.list_matching_txs(currency, q, limit),
-            db.list_matching_addresses(currency, q, limit),
+            db.list_matching_addresses(currency, q, limit=limit),
         )
     else:
         txs = []
@@ -69,7 +69,7 @@ async def search(request, q, currency=None, limit=10):
         expression_norm, limit, groups=get_tagstore_access_groups(request)
     )
 
-    aws1 = [search_by_currency(request, curr, q) for curr in currs]
+    aws1 = [search_by_currency(request, curr, q, limit=limit) for curr in currs]
     aw1 = asyncio.gather(*aws1)
 
     [r1, r2] = await asyncio.gather(aw1, tagstore_search)

@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [25.01.2/1.9.2] - 2025-01-20
+
+### fixed
+- limit parameter not passed to address search
+
+
 ## [25.01.1/1.9.1] - 2025-01-14
 
 ### fixed
