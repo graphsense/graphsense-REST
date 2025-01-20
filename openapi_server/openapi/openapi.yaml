@@ -239,7 +239,7 @@ paths:
       operationId: list_concepts
       parameters:
         - description: The taxonomy
-          example: foo
+          example: concept
           explode: false
           in: path
           name: taxonomy
@@ -2797,7 +2797,7 @@ components:
       style: form
     taxonomy:
       description: The taxonomy
-      example: foo
+      example: concept
       explode: false
       in: path
       name: taxonomy

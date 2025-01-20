@@ -1062,7 +1062,7 @@ components:
       schema:
         type: string
       description: The taxonomy
-      example: foo
+      example: concept
     search_query:
       in: query
       name: q
