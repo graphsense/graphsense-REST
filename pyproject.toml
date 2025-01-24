@@ -26,7 +26,7 @@ dependencies = [
     "openapi-schema-validator>=0.2.3",
     "python-dateutil>=2.9.0",
     "swagger-ui-bundle>=0.0.9",
-    "tagpack-tool==v25.01.1",
+    "tagpack-tool==25.1.3",
 ]
 
 [tool.tox]
@@ -87,6 +87,9 @@ exclude = [
     "tests/test_*.py",
     "setup.py"
 ]
+
+[tool.ruff.lint]
+extend-select = ["T201"]
 
 [dependency-groups]
 dev = [

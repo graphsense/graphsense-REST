@@ -266,9 +266,9 @@ for order in ["desc", "asc"]:
                 kwargs["direction"] = direction
             else:
                 kwargs.pop("direction", None)
-            print(f"Testing {kwargs}, order = {order}, direction = {direction}")
+            # print(f"Testing {kwargs}, order = {order}, direction = {direction}")
             for pagesize in pagesizes:
-                print(f"pagesize = {pagesize}")
+                # print(f"pagesize = {pagesize}")
                 timestamps = txs_pagesize_tester(
                     pagesize=pagesize, order=order, **kwargs
                 )
@@ -276,4 +276,4 @@ for order in ["desc", "asc"]:
                     prev_timestamps = timestamps
                 assert timestamps == prev_timestamps, "result lengths not equal"
                 prev_timestamp = timestamps
-                print(f"length {len(timestamps)}")
+                # print(f"length {len(timestamps)}")

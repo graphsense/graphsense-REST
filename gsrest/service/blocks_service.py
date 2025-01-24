@@ -97,8 +97,6 @@ async def get_block_by_date(request, currency, date):
 
     r = await find_block_by_ts(get_timestamp, currency, ts, start, hb)
 
-    print(r, hb)
-
     if r == -1 or r > hb:
         r = None
         at = None
