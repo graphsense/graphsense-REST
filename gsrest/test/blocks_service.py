@@ -19,7 +19,7 @@ block2 = Block(
 )
 
 eth_block = Block(
-    height=1, currency="eth", block_hash="123456", no_txs=5, timestamp=123
+    height=1, currency="eth", block_hash="123456", no_txs=2, timestamp=123
 )
 
 eth_block2 = Block(

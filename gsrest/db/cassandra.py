@@ -956,6 +956,47 @@ class Cassandra:
 
         return rows, str(paging_state) if paging_state is not None else None
 
+    @eth
+    async def get_next_block_with_transactions(
+        self, network: str, find_max_block: bool, height: int, highest_block: int
+    ):
+        # BTC and similar have txs in every block, since there is at least the coinbase
+        # so no search needed.
+        return height
+
+    async def get_next_block_with_transactions_eth(
+        self, network: str, find_max_block: bool, height: int, highest_block: int
+    ) -> Optional[int]:
+        height_group = self.get_block_id_group(network, height)
+        max_group = self.get_block_id_group(network, highest_block)
+        min_group = 0
+        if find_max_block:
+            query = (
+                "SELECT max(block_id) as block FROM block "
+                "WHERE block_id_group=%s and transaction_count > 0 and block_id <= %s allow filtering "
+            )
+        else:
+            query = (
+                "SELECT min(block_id) as block FROM block "
+                "WHERE block_id_group=%s and transaction_count > 0 and block_id >= %s allow filtering "
+            )
+        result_block = None
+        while (
+            result_block is None
+            and height_group >= min_group
+            and height_group <= max_group
+        ):
+            result = await self.execute_async(
+                network, "raw", query, [height_group, int(height)]
+            )
+            row = one(result)
+            if row is not None:
+                result_block = row["block"]
+
+            height_group = height_group + (-1 if find_max_block else +1)
+
+        return result_block
+
     async def resolve_tx_id_range_by_block(
         self, network: str, min_height: Optional[int], max_height: Optional[int]
     ) -> Tuple[Optional[int], Optional[int]]:
@@ -964,47 +1005,28 @@ class Cassandra:
             return None, None
         last_height = stats["no_blocks"] - 1
         first_tx_id = last_tx_id = None
-        max_tries = 100
         if min_height is not None:
-            orig_min_height = min_height
-            former_txs = []
-            while not former_txs:
-                former_txs = await self.list_block_txs_ids(network, min_height)
-                if former_txs is None:
-                    raise BadUserInputException(
-                        f"Minimum block height {min_height} does not exist"
-                    )
-                if former_txs:
-                    break
-                # try one block higher until txs are found
-                min_height += 1
-                if min_height > last_height:
-                    break
-                if min_height - orig_min_height > max_tries:
-                    raise BadUserInputException(
-                        f"Block {orig_min_height} does not contains " "transactions"
-                    )
+            min_block_with_txs = await self.get_next_block_with_transactions(
+                network, False, min_height, last_height
+            )
+
+            former_txs = (
+                await self.list_block_txs_ids(network, min_block_with_txs)
+                if min_block_with_txs is not None
+                else None
+            )
             first_tx_id = min(former_txs) if former_txs else None
         if max_height is not None:
-            orig_max_height = max_height
-            latter_txs = []
-            while not latter_txs:
-                latter_txs = await self.list_block_txs_ids(network, max_height)
-                if latter_txs is None:
-                    raise BadUserInputException(
-                        f"Maximum block height {max_height} does not exist"
-                    )
-                if latter_txs:
-                    break
-                # try one block lower until txs are found
-                max_height -= 1
-                if max_height < 0:
-                    break
-                if orig_max_height - max_height > max_tries:
-                    raise BadUserInputException(
-                        f"Block {orig_max_height} does not contains " "transactions"
-                    )
+            max_block_with_txs = await self.get_next_block_with_transactions(
+                network, True, max_height, last_height
+            )
+            latter_txs = (
+                await self.list_block_txs_ids(network, max_block_with_txs)
+                if max_block_with_txs is not None
+                else None
+            )
             last_tx_id = max(latter_txs) if latter_txs else None
+
         return first_tx_id, last_tx_id
 
     @eth
