@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [25.01.5rc1/1.9.5rc1] - 2025-01-30
+
+### fixed
+- eth filtering txs in eth if blocks have not txs -> min/max tx id failed in some cases.
+- bumped tagstore dependency
+
 ## [25.01.4/1.9.4] - 2025-01-20
 
 ### fixed
