@@ -98,7 +98,7 @@ async def list_tags_by_address_raw(
             page * (pagesize or 0),
             pagesize,
             get_tagstore_access_groups(request),
-            network=currency.upper(),
+            # network=currency.upper(),
         )
     )
 
@@ -160,6 +160,13 @@ async def list_tags_by_address(
             )
         )
     ]
+
+    async def add_foreign_network_clusters(tag):
+        if tag.currency != currency:
+            tag.entity = await try_get_cluster_id(db, tag.currency, address)
+        return tag
+
+    tags = [await add_foreign_network_clusters(t) for t in tags]
 
     return get_address_tag_result(page, pagesize, tags)
 

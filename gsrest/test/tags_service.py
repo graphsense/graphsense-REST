@@ -199,7 +199,6 @@ tag7 = AddressTag(
     tagpack_is_public=True,
     is_cluster_definer=False,
     concepts=[],
-    # entity=1234,
     tag_type="actor",
 )
 

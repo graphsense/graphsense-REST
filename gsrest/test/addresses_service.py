@@ -45,7 +45,7 @@ address = Address(
 )
 
 addressWithTags = Address(**address.to_dict())
-addressWithTags.tags = [ts.tag1, ts.tag2, ts.tag3]
+addressWithTags.tags = [ts.tag1, ts.tag7, ts.tag2, ts.tag3]
 
 address2 = Address(
     out_degree=1,
@@ -960,7 +960,7 @@ async def list_tags_by_address(test_case):
     result = await test_case.request(
         path, currency="abcd", address=eth_addressWithTags.address
     )
-    assert result["address_tags"] == []
+    assert len(result["address_tags"]) == 2
 
 
 async def list_address_neighbors(test_case):
