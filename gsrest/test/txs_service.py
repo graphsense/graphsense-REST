@@ -10,21 +10,21 @@ tx1 = TxUtxo(
     coinbase=False,
     outputs=[
         TxValue(
-            address=["1HxbaBMF2jXBVnagoHvaA6rLxmaYL8gb8T"],
+            address=["addressE"],
             value=make_values(eur=0.0, usd=0.0, value=75000000),
         ),
         TxValue(
-            address=["1MaFeRMwbk7AMk4fRd3xXpSiehoSqsvE5X"],
+            address=["addressA"],
             value=make_values(eur=0.0, usd=0.0, value=137389),
         ),
     ],
     inputs=[
         TxValue(
-            address=["1MaFeRMwbk7AMk4fRd3xXpSiehoSqsvE5X"],
+            address=["addressA"],
             value=make_values(eur=0.0, usd=0.0, value=75110000),
         ),
         TxValue(
-            address=["1MaFeRMwbk7AMk4fRd3xXpSiehoSqsvE5X"],
+            address=["addressA"],
             value=make_values(eur=0.0, usd=0.0, value=37389),
         ),
     ],

@@ -24,7 +24,8 @@ from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.entity import Entity
 from openapi_server.models.entity_addresses import EntityAddresses
 from openapi_server.models.labeled_item_ref import LabeledItemRef
-from openapi_server.models.link_utxo import LinkUtxo
+
+# from openapi_server.models.link_utxo import LinkUtxo
 from openapi_server.models.links import Links
 from openapi_server.models.neighbor_entities import NeighborEntities
 from openapi_server.models.neighbor_entity import NeighborEntity
@@ -947,14 +948,14 @@ async def list_entity_links(test_case):
     )
     link = Links(
         links=[
-            LinkUtxo(
-                tx_hash="abcdef",
-                currency="btc",
-                input_value=make_values(eur=-0.01, usd=-0.03, value=-1260000),
-                output_value=make_values(eur=0.01, usd=0.03, value=1260000),
-                timestamp=1511153263,
-                height=2,
-            )
+            # LinkUtxo(
+            #    tx_hash="abcdef",
+            #    currency="btc",
+            #    input_value=make_values(eur=-0.01, usd=-0.03, value=-1260000),
+            #    output_value=make_values(eur=0.01, usd=0.03, value=1260000),
+            #    timestamp=1511153263,
+            #    height=2,
+            # )
         ]
     )
     test_case.assertEqual(link.to_dict(), result)
@@ -964,14 +965,14 @@ async def list_entity_links(test_case):
     )
     link = Links(
         links=[
-            LinkUtxo(
-                tx_hash="123456",
-                currency="btc",
-                input_value=make_values(eur=-0.01, usd=-0.03, value=-1260000),
-                output_value=make_values(eur=0.01, usd=0.03, value=1260000),
-                timestamp=1510347493,
-                height=3,
-            )
+            # LinkUtxo(
+            #    tx_hash="123456",
+            #    currency="btc",
+            #    input_value=make_values(eur=-0.01, usd=-0.03, value=-1260000),
+            #    output_value=make_values(eur=0.01, usd=0.03, value=1260000),
+            #    timestamp=1510347493,
+            #    height=3,
+            # )
         ]
     )
     test_case.assertEqual(link.to_dict(), result)

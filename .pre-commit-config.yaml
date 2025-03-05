@@ -1,20 +1,6 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
--   repo: local
-    hooks:
-    - id: pytest-check
-      name: pytest-check
-      entry: make test
-      language: system
-      pass_filenames: false
-      always_run: true
-    - id: generate-openapi-server
-      name: Generate OpenAPI Server
-      entry: make generate-openapi-server
-      language: system
-      pass_filenames: false
-      always_run: true
 - repo: https://github.com/astral-sh/ruff-pre-commit
   # Ruff version.
   rev: v0.8.0
@@ -66,3 +52,17 @@ repos:
   hooks:
     # Update the uv lockfile
     - id: uv-lock
+-   repo: local
+    hooks:
+    - id: pytest-check
+      name: pytest-check
+      entry: make test
+      language: system
+      pass_filenames: false
+      always_run: true
+    - id: generate-openapi-server
+      name: Generate OpenAPI Server
+      entry: make generate-openapi-server
+      language: system
+      pass_filenames: false
+      always_run: true

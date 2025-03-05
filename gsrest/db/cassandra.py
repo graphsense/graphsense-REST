@@ -1443,6 +1443,39 @@ class Cassandra:
                 self.logger.info(f"pruned {before - len(results2)}")
             final_results.extend(results2)
 
+            if not is_eth_like(currency):
+                # make sure id is in inputs and neighbor in outputs
+                if node_type == NodeType.ADDRESS:
+
+                    async def has_address_in_ios(address, ios):
+                        addresses_io = sum([x.address for x in ios], [])
+                        return address in addresses_io
+
+                    final_results = [
+                        fr
+                        for fr in final_results
+                        if await has_address_in_ios(id, fr["inputs"])
+                        and await has_address_in_ios(neighbor, fr["outputs"])
+                    ]
+                else:
+
+                    async def has_cluster_id_in_ios(cluster_id, ios):
+                        addresses_io = sum([x.address for x in ios], [])
+                        # get cluster ids for all the addresses
+                        cluster_ids_io = [
+                            await self.get_address_entity_id(currency, address)
+                            for address in addresses_io
+                        ]
+
+                        return cluster_id in cluster_ids_io
+
+                    final_results = [
+                        fr
+                        for fr in final_results
+                        if await has_cluster_id_in_ios(id, fr["inputs"])
+                        and await has_cluster_id_in_ios(neighbor, fr["outputs"])
+                    ]
+
             page = new_page
             self.logger.debug(f"next page {page}")
             if page is None:
