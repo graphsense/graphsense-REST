@@ -2,8 +2,8 @@ all: format lint
 
 -include .env
 
-GS_REST_SERVICE_VERSIONM ?= "25.03.0"
-GS_REST_SERVICE_VERSION ?= "1.10.0"
+GS_REST_SERVICE_VERSIONM ?= "25.03.1rc1"
+GS_REST_SERVICE_VERSION ?= "1.10.1rc1"
 GS_REST_DEV_PORT ?= 9000
 NUM_WORKERS ?= 1
 NUM_THREADS ?= 1
@@ -37,7 +37,7 @@ build-docker:
 	docker build -t graphsense-rest .
 
 serve-docker:
-	docker run -rm -it --network='host' -e NUM_THREADS=1 -e NUM_WORKERS=1 -v "${PWD}/instance/config.yaml:/config.yaml:Z" -e CONFIG_FILE=/config.yaml localhost/graphsense-rest:latest
+	docker run --rm -it --network='host' -e NUM_THREADS=1 -e NUM_WORKERS=1 -v "${PWD}/instance/config.yaml:/config.yaml:Z" -e CONFIG_FILE=/config.yaml localhost/graphsense-rest:latest
 
 generate-openapi-server: update-package-version
 	docker run --rm   \

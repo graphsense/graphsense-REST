@@ -1,5 +1,5 @@
-FROM  python:3.11-alpine3.20
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+FROM python:3.11-alpine3.20 AS builder
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 LABEL org.opencontainers.image.title="graphsense-rest"
 LABEL org.opencontainers.image.maintainer="contact@ikna.io"
 LABEL org.opencontainers.image.url="https://www.ikna.io/"
@@ -7,14 +7,15 @@ LABEL org.opencontainers.image.description="Dockerized Graphsense REST interface
 LABEL org.opencontainers.image.source="https://github.com/graphsense/graphsense-REST"
 
 
+ENV UV_COMPILE_BYTECODE=1
+ENV UV_LINK_MODE=copy
 ENV NUM_WORKERS=
 ENV NUM_THREADS=
 ENV CONFIG_FILE=./instance/config.yaml
 
 # copy code
 RUN mkdir -p /srv/graphsense-rest/
-COPY docker/gunicorn-conf.py /srv/graphsense-rest/gunicorn-conf.py
-COPY gsrest /srv/graphsense-rest/gsrest
+COPY --exclude=gsrest/test gsrest /srv/graphsense-rest/gsrest
 COPY openapi_server /srv/graphsense-rest/openapi_server
 COPY pyproject.toml /srv/graphsense-rest/
 COPY uv.lock /srv/graphsense-rest/
@@ -30,18 +31,39 @@ RUN apk --no-cache --update add \
     libev
 
 # create non root user
-RUN useradd -r -m -u 10000 dockeruser
-RUN chown dockeruser /srv/graphsense-rest
-USER dockeruser
+# RUN useradd -r -m -u 10000 dockeruser
+# RUN chown dockeruser /srv/graphsense-rest
+# USER dockeruser
 WORKDIR /srv/graphsense-rest
 
 # Install gsrest and dependencies
-RUN uv sync --frozen
+RUN uv sync --frozen --no-dev
 RUN uv pip install gunicorn
 
-RUN find gsrest/plugins -name requirements.txt -exec uv pip install -r {} \;
+FROM python:3.11-alpine3.20
+COPY --from=builder /srv/graphsense-rest/ /srv/graphsense-rest/
+COPY docker/gunicorn-conf.py /srv/graphsense-rest/gunicorn-conf.py
 
-CMD find gsrest/plugins -name requirements.txt -exec uv pip install -r {} \; && uv run gunicorn \
+ENV PATH="/srv/graphsense-rest/.venv/bin:$PATH"
+ENV PYTHONPATH=/srv/graphsense-rest
+ENV NUM_WORKERS=
+ENV NUM_THREADS=
+ENV CONFIG_FILE=./instance/config.yaml
+ENV GIT_PYTHON_REFRESH=quiet
+
+# install sudo as root
+RUN apk add --update sudo
+
+WORKDIR /srv/graphsense-rest
+RUN mkdir -p gsrest/plugins
+
+RUN adduser -S -D -u 10000 dockeruser
+RUN chown dockeruser /srv/graphsense-rest
+USER dockeruser
+
+# RUN find gsrest/plugins -name requirements.txt -exec uv pip install -r {} \;
+
+CMD find gsrest/plugins -name requirements.txt -exec pip install -r {} \; && gunicorn \
     -c /srv/graphsense-rest/gunicorn-conf.py \
     "gsrest:main('${CONFIG_FILE}')" \
      --worker-class aiohttp.GunicornWebWorker
