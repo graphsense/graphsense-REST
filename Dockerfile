@@ -63,7 +63,7 @@ USER dockeruser
 
 # RUN find gsrest/plugins -name requirements.txt -exec uv pip install -r {} \;
 
-CMD find gsrest/plugins -name requirements.txt -exec pip install -r {} \; && gunicorn \
+CMD find gsrest/plugins -name requirements.txt -exec /srv/graphsense-rest/.venv/bin/python -m pip install -r {} \; && gunicorn \
     -c /srv/graphsense-rest/gunicorn-conf.py \
     "gsrest:main('${CONFIG_FILE}')" \
      --worker-class aiohttp.GunicornWebWorker
