@@ -15,7 +15,7 @@ ENV CONFIG_FILE=./instance/config.yaml
 
 # copy code
 RUN mkdir -p /srv/graphsense-rest/
-COPY --exclude=gsrest/test gsrest /srv/graphsense-rest/gsrest
+COPY gsrest /srv/graphsense-rest/gsrest
 COPY openapi_server /srv/graphsense-rest/openapi_server
 COPY pyproject.toml /srv/graphsense-rest/
 COPY uv.lock /srv/graphsense-rest/
