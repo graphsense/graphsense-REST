@@ -38,7 +38,7 @@ WORKDIR /srv/graphsense-rest
 
 # Install gsrest and dependencies
 RUN uv sync --frozen --no-dev
-RUN uv pip install gunicorn
+RUN uv pip install gunicorn pip
 
 FROM python:3.11-alpine3.20
 COPY --from=builder /srv/graphsense-rest/ /srv/graphsense-rest/
@@ -58,7 +58,7 @@ WORKDIR /srv/graphsense-rest
 RUN mkdir -p gsrest/plugins
 
 RUN adduser -S -D -u 10000 dockeruser
-RUN chown dockeruser /srv/graphsense-rest
+RUN chown -R dockeruser /srv/graphsense-rest
 USER dockeruser
 
 # RUN find gsrest/plugins -name requirements.txt -exec uv pip install -r {} \;
