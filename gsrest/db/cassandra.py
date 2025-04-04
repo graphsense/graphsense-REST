@@ -195,6 +195,21 @@ def wc(cl, cond):
     return f"AND {cl} " if cond else ""
 
 
+SUBTX_IDENT_SEPERATOR_CHAR = "_"
+
+
+def get_tx_idenifier(row, type_overwrite=None):
+    h = row["tx_hash"].hex()
+    if type_overwrite == "internal" or row["type"] == "internal":
+        return f"{h}{SUBTX_IDENT_SEPERATOR_CHAR}I{row['trace_index']}"
+    elif type_overwrite == "erc20" or row["type"] == "erc20":
+        return f"{h}{SUBTX_IDENT_SEPERATOR_CHAR}T{row['token_tx_id']}"
+    elif type_overwrite == "external" or row["type"] == "external":
+        return h
+    else:
+        raise Exception(f"Unknown transaction type {row}")
+
+
 def merge_address_txs_subquery_results(
     logger,
     result_sets: Sequence[Result],
@@ -1860,6 +1875,11 @@ class Cassandra:
             )
         return result[0]
 
+    async def fetch_transaction_traces(self, currency, tx):
+        r = await self.get_traces_in_block(currency, tx["block_id"])
+        result = r.current_rows
+        return [x for x in result if x["tx_hash"] == tx["tx_hash"]]
+
     async def get_logs_in_block_eth(
         self, currency, block_id, topic=None, log_index=None
     ):
@@ -1938,7 +1958,22 @@ class Cassandra:
 
             paging_state = result.paging_state
 
-        return rows[0:limit]
+        out_rows = rows[0:limit]
+
+        # also show internal txs and token txs when only on result is left
+        if is_eth_like(currency) and len(rows) == 1:
+            tx_hash = bytearray.fromhex(rows[0])
+            tx = await self.get_tx_by_hash_eth(currency, tx_hash)
+            token_txs = await self.fetch_token_transactions(currency, tx)
+            traces = await self.fetch_transaction_traces(currency, tx)
+            ids = list(
+                {get_tx_idenifier(x) for x in token_txs}.union(
+                    {get_tx_idenifier(x, type_overwrite="internal") for x in traces}
+                )
+            )
+            out_rows.extend(ids)
+
+        return out_rows
 
     def scrub_prefix(self, currency, expression):
         if isinstance(expression, bytes):

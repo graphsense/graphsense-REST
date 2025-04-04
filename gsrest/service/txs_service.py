@@ -1,5 +1,6 @@
 from typing import Optional
 
+from gsrest.db.cassandra import SUBTX_IDENT_SEPERATOR_CHAR, get_tx_idenifier
 from gsrest.errors import (
     BadUserInputException,
     NotFoundException,
@@ -14,8 +15,6 @@ from openapi_server.models.tx_ref import TxRef
 from openapi_server.models.tx_utxo import TxUtxo
 from openapi_server.models.tx_value import TxValue
 
-SUBTX_IDENT_SEPERATOR_CHAR = "_"
-
 
 def get_type_account(row):
     if row["type"] == "internal":
@@ -24,18 +23,6 @@ def get_type_account(row):
         return "account"
     elif row["type"] == "external":
         return "account"
-    else:
-        raise Exception(f"Unknown transaction type {row}")
-
-
-def get_tx_idenifier(row):
-    h = row["tx_hash"].hex()
-    if row["type"] == "internal":
-        return f"{h}{SUBTX_IDENT_SEPERATOR_CHAR}I{row['trace_index']}"
-    elif row["type"] == "erc20":
-        return f"{h}{SUBTX_IDENT_SEPERATOR_CHAR}T{row['token_tx_id']}"
-    elif row["type"] == "external":
-        return h
     else:
         raise Exception(f"Unknown transaction type {row}")
 
