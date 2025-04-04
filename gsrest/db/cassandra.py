@@ -1965,7 +1965,8 @@ class Cassandra:
             tx_hash = bytearray.fromhex(rows[0])
             tx = await self.get_tx_by_hash_eth(currency, tx_hash)
             token_txs = await self.fetch_token_transactions(currency, tx)
-            traces = await self.fetch_transaction_traces(currency, tx)
+            # smallest trace is equivalent to tx itself so filter
+            traces = (await self.fetch_transaction_traces(currency, tx))[1:]
             ids = list(
                 {get_tx_idenifier(x) for x in token_txs}.union(
                     {get_tx_idenifier(x, type_overwrite="internal") for x in traces}
