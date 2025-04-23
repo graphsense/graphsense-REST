@@ -199,16 +199,11 @@ SUBTX_IDENT_SEPERATOR_CHAR = "_"
 
 
 def get_tx_idenifier(row, type_overwrite=None):
+    trace_tx = row.get("is_tx_trace", False)
     h = row["tx_hash"].hex()
-    if (
-        type_overwrite == "internal"
-        or row["type"] == "internal"
-        and not row["is_tx_trace"]
-    ):
+    if type_overwrite == "internal" or row["type"] == "internal" and not trace_tx:
         return f"{h}{SUBTX_IDENT_SEPERATOR_CHAR}I{row['trace_index']}"
-    elif (
-        type_overwrite == "internal" or row["type"] == "internal" and row["is_tx_trace"]
-    ):
+    elif type_overwrite == "internal" or row["type"] == "internal" and trace_tx:
         return h
     elif type_overwrite == "erc20" or row["type"] == "erc20":
         return f"{h}{SUBTX_IDENT_SEPERATOR_CHAR}T{row['token_tx_id']}"
