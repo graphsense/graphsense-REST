@@ -472,6 +472,7 @@ class Cassandra:
             if x["keyspace_name"].startswith(prefix)
         ]
 
+        res = []
         for c in reversed(sorted(filter(lambda x: x is not None, candidates))):
             ks = f"{prefix}_{c.strftime('%Y%m%d')}"
             q = f"SELECT * FROM {ks}.summary_statistics limit 1"
@@ -484,11 +485,17 @@ class Cassandra:
                     )
                 continue
             else:
-                return ks
+                # return ks
+                res.append((ks, result[0]["no_blocks"]))
 
-        raise Exception(
-            f"Automatic detection for transformed keyspace failed for network {network}."
-        )
+        res = list(reversed(sorted(res, key=lambda item: item[1])))
+
+        if len(res) > 0:
+            return res[0][0]
+        else:
+            raise Exception(
+                f"Automatic detection for transformed keyspace failed for network {network}."
+            )
 
     @eth
     def load_token_configuration(self, currency):
