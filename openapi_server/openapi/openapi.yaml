@@ -5,7 +5,7 @@ info:
     name: Iknaio Cryptoasset Analytics GmbH
   description: GraphSense API provides programmatic access to various ledgers' addresses, entities, blocks, transactions and tags for automated and highly efficient forensics tasks.
   title: GraphSense API
-  version: 1.10.1rc4
+  version: 1.10.1rc5
 servers:
   - url: https://api.ikna.io
 paths:
