@@ -1,6 +1,6 @@
 [project]
 name = "gsrest"
-version = "1.10.1rc5"
+version = "1.11.0rc1"
 description = "GraphSense API REST API"
 readme = "README.md"
 changelog = "CHANGELOG.md"
