@@ -182,6 +182,7 @@ async def get_trace_txs(request, currency, tx, trace_index=None):
     if result and result["tx_hash"] == tx["tx_hash"]:
         result["type"] = "internal"
         result["timestamp"] = tx["block_timestamp"]
+        result["is_tx_trace"] = False
 
         if currency == "trx":
             result["from_address"] = result["caller_address"]
@@ -189,6 +190,10 @@ async def get_trace_txs(request, currency, tx, trace_index=None):
             result["value"] = result["call_value"]
         else:
             result["contract_creation"] = result["trace_type"] == "create"
+            is_tx_trace = result["trace_address"].strip() == ""
+            result["is_tx_trace"] = is_tx_trace
+            if is_tx_trace:
+                result["type"] = "external"
 
         return from_row(
             currency,
