@@ -224,11 +224,21 @@ async def get_tx(
 
     if f"{SUBTX_IDENT_SEPERATOR_CHAR}I" in tx_hash:
         h, postfix, *_ = tx_hash.split(SUBTX_IDENT_SEPERATOR_CHAR)
-        trace_index = int(postfix.strip("IT"))
+        try:
+            tindexS = postfix.strip("IT")
+            trace_index = int(tindexS)
+        except ValueError:
+            raise BadUserInputException(f"Trace index: {tindexS} is not an integer.")
         tx_hash = h
     elif f"{SUBTX_IDENT_SEPERATOR_CHAR}T" in tx_hash:
         h, postfix, *_ = tx_hash.split(SUBTX_IDENT_SEPERATOR_CHAR)
-        token_tx_id = int(postfix.strip("IT")) or token_tx_id
+
+        try:
+            tindexS = postfix.strip("IT")
+            token_tx_id = int(tindexS) or token_tx_id
+        except ValueError:
+            raise BadUserInputException(f"Token index: {tindexS} is not an integer.")
+
         tx_hash = h
 
     if token_tx_id is not None:
