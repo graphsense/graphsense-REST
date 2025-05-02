@@ -3,7 +3,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [25.03.0/1.10.0] - 2025-01-30
+## [25.05.0/1.11.0] - 2025-05-2
+
+### changed
+- Search now also returns token and sub tx (traces in eth) ids, iif search yields on result otherwise.
+- keyspace autodiscovery now uses blockheight in summary table to select latest keyspace, not only ks name
+-
+
+### fixed
+- fixed ambiguity eth internal and external txs (#476)
+- tagpack-tool division by zero if label contains only filler words
+- user input validation and error messages
+
+
+## [25.03.0/1.10.0] - 2025-03-14
 
 ### changed
 - tags are now fetched without currency filter.
