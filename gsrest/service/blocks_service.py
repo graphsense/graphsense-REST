@@ -85,7 +85,7 @@ async def find_block_by_ts(get_timestamp, currency, ts, start, end):
 async def get_block_by_date(request, currency, date):
     db = request.app["db"]
     use_linear_search = request.app["config"]["database"].get(
-        "use_linear_search", False
+        "block_by_date_use_linear_search", False
     )
     ts = int(date.timestamp())
 
