@@ -84,35 +84,62 @@ async def find_block_by_ts(get_timestamp, currency, ts, start, end):
 
 async def get_block_by_date(request, currency, date):
     db = request.app["db"]
-    hb = (await db.get_currency_statistics(currency))["no_blocks"] - 1
-    start = 0
+    use_linear_search = request.app["config"]["database"].get(
+        "use_linear_search", False
+    )
     ts = int(date.timestamp())
 
-    async def get_timestamp(blk):
-        bts = await db.get_block_timestamp(currency, blk)
-        if bts is None:
-            return None
+    if use_linear_search:
+        x = await db.get_block_by_date_allow_filtering(currency, ts)
+
+        if x:
+            block = x["block_id"]
+
+            block_before = block - 1
+            block_before_ts = await db.get_block_timestamp(currency, block_before)
+
+            return BlockAtDate(
+                before_block=block_before,
+                before_timestamp=block_before_ts["timestamp"],
+                after_block=block,
+                after_timestamp=x["timestamp"],
+            )
         else:
-            return int(bts.get("timestamp", None))
-
-    r = await find_block_by_ts(get_timestamp, currency, ts, start, hb)
-
-    if r == -1 or r > hb:
-        r = None
-        at = None
-        bt = None
-    elif r == hb:
-        bt = await get_timestamp(r)
-        at = None
-
+            return BlockAtDate(
+                before_block=None,
+                before_timestamp=None,
+                after_block=None,
+                after_timestamp=None,
+            )
     else:
-        bt = await get_timestamp(r)
+        hb = (await db.get_currency_statistics(currency))["no_blocks"] - 1
+        start = 0
 
-        at = await get_timestamp(r + 1)
+        async def get_timestamp(blk):
+            bts = await db.get_block_timestamp(currency, blk)
+            if bts is None:
+                return None
+            else:
+                return int(bts.get("timestamp", None))
 
-    return BlockAtDate(
-        before_block=r,
-        before_timestamp=bt,
-        after_block=r + 1 if at is not None else None,
-        after_timestamp=at,
-    )
+        r = await find_block_by_ts(get_timestamp, currency, ts, start, hb)
+
+        if r == -1 or r > hb:
+            r = None
+            at = None
+            bt = None
+        elif r == hb:
+            bt = await get_timestamp(r)
+            at = None
+
+        else:
+            bt = await get_timestamp(r)
+
+            at = await get_timestamp(r + 1)
+
+        return BlockAtDate(
+            before_block=r,
+            before_timestamp=bt,
+            after_block=r + 1 if at is not None else None,
+            after_timestamp=at,
+        )
