@@ -15,7 +15,7 @@ def create_token_request(contract_address: str, account: str, block: str = "late
                 "to": contract_address,
                 "data": f"0x70a08231000000000000000000000000{strip_0x(account)}",
             },
-            "latest",
+            block,
         ],
         "id": 1,
     }
