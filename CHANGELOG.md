@@ -8,7 +8,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### changed
 - Search now also returns token and sub tx (traces in eth) ids, iif search yields on result otherwise.
 - keyspace autodiscovery now uses blockheight in summary table to select latest keyspace, not only ks name
--
 
 ### fixed
 - fixed ambiguity eth internal and external txs (#476)
