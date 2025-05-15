@@ -92,3 +92,4 @@ gsrest/plugins
 .idea
 
 .ruff_cache/
+local

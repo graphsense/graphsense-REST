@@ -847,7 +847,7 @@ class Cassandra:
         ).one()
 
     async def get_block_by_date_allow_filtering(self, currency, timestamp: int) -> int:
-        query = "SELECT block_id, timestamp FROM block WHERE timestamp >= %s limit 2 allow filtering"
+        query = "SELECT min(block_id) as block_id, timestamp FROM block WHERE timestamp >= %s allow filtering"
         return (
             await self.execute_async(
                 currency,
