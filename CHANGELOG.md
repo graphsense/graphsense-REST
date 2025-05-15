@@ -3,6 +3,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+
+## [25.05.1/1.11.1] - 2025-05-15
+
+### added
+- added database.block_by_date_use_linear_search config option for testing purposes (disables binary search for blocks)
+
+### fixed
+- reverted fixed ambiguity eth internal and external txs (#476) - caused problems for the frontend and old gs files
+
 ## [25.05.0/1.11.0] - 2025-05-2
 
 ### changed
