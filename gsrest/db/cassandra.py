@@ -5,7 +5,6 @@ import time
 from collections import UserDict, namedtuple
 from datetime import datetime
 from functools import partial
-from itertools import product
 from math import ceil, floor
 from pprint import PrettyPrinter
 from typing import Optional, Sequence, Tuple
@@ -304,69 +303,6 @@ def build_select_address_txs_statement(
     network: str,
     node_type: NodeType,
     cols: Optional[Sequence[str]],
-    with_lower_bound: bool,
-    with_upper_bound: bool,
-    with_tx_id: bool,
-    ascending: bool,
-    limit: int,
-) -> str:
-    # prebuild useful helpers and conditions
-    eth_like = is_eth_like(network)
-    tx_id_col = get_tx_id_column_name(network)
-
-    # Select and shared where clause
-    # Build select statement
-    columns = ",".join(cols) if cols is not None else "*"
-
-    query = (
-        f"SELECT {columns} from {node_type}_transactions "
-        f"WHERE {node_type}_id = %(id)s "
-        f"AND {node_type}_id_group = %(g_id)s "
-        "AND is_outgoing = %(is_outgoing)s "
-    )
-
-    # conditional where clause, loop independent
-    query += wc(f"{node_type}_id_secondary_group = %(s_d_group)s", eth_like)
-
-    query += wc("currency = %(currency)s", eth_like)
-
-    # ascending
-    query += wc(
-        f"{tx_id_col} >= %(tx_id_lower_bound)s",
-        not with_tx_id and ascending and with_lower_bound,
-    )
-    query += wc(
-        f"{tx_id_col} <= %(tx_id_upper_bound)s",
-        not with_tx_id and ascending and with_upper_bound,
-    )
-
-    # descending
-    query += wc(
-        f"{tx_id_col} >= %(tx_id_lower_bound)s",
-        not with_tx_id and not ascending and with_lower_bound,
-    )
-    query += wc(
-        f"{tx_id_col} <= %(tx_id_upper_bound)s",
-        not with_tx_id and not ascending and with_upper_bound,
-    )
-
-    query += wc(f"{tx_id_col} = %(tx_id)s", with_tx_id)
-
-    ordering = "ASC" if ascending else "DESC"
-    # Ordering statement
-    ordering_statement = (
-        "ORDER BY "
-        + (f" currency {ordering}," if eth_like else "")
-        + f" {tx_id_col} {ordering}"
-    )
-
-    return f"{query} {ordering_statement} LIMIT {limit}"
-
-
-def build_select_address_txs_statement2(
-    network: str,
-    node_type: NodeType,
-    cols: Optional[Sequence[str]],
     item_id: int,
     item_id_group: int,
     secondary_id_group: list[int],
@@ -387,21 +323,9 @@ def build_select_address_txs_statement2(
     # Build select statement
     columns = ",".join(cols) if cols is not None else "*"
 
-    def display_list(l: list):
-        res = str(l)
-        return "(" + res[1:-1] + ")"
+    def display_list(list_: list):
+        return "(" + str(list_)[1:-1] + ")"
 
-    '''    query = f"""
-            SELECT * from address_transactions WHERE
-            address_id = {item_id}
-            AND address_id_group = {item_id_group}
-            AND is_outgoing in {display_list(directions).lower()}
-            AND address_id_secondary_group in {display_list(self.sec_in(secondary_id_group))}
-            AND currency in {display_list(include_assets)} {tx_id_snippet}
-            LIMIT {fetch_size}
-            -- ORDER BY currency DESC, transaction_id DESC -- cant do that when doing both is_outgoing in one query have to = false or = true
-            """
-    '''
     query = (
         f"SELECT {columns} from {node_type}_transactions "
         f"WHERE {node_type}_id = {item_id} "
@@ -410,10 +334,12 @@ def build_select_address_txs_statement2(
     )
 
     # conditional where clause, loop independent
-    query += wc(
-        f"{node_type}_id_secondary_group in {display_list(list(range(secondary_id_group+1)))}",
-        eth_like,
-    )
+    if eth_like:
+        query += wc(
+            f"{node_type}_id_secondary_group in {display_list(list(range(secondary_id_group+1)))}",
+            eth_like,
+        )
+
     query += wc(f"currency in {display_list(include_assets)}", eth_like)
     query += wc(
         f"{tx_id_col} >= {lower_bound}",
@@ -2494,13 +2420,12 @@ class Cassandra:
             item_id = id
             item_id_group = self.get_id_group(network, id)
 
-        item_id_secondary_group = [0]
         if is_eth_like(network):
             secondary_id_group = await self.get_id_secondary_group_eth(
                 network, "address_transactions", item_id_group
             )
-
-            item_id_secondary_group = self.sec_in(secondary_id_group)
+        else:
+            secondary_id_group = None
 
         directions = [is_outgoing] if is_outgoing is not None else [False, True]
         results = []
@@ -2528,28 +2453,12 @@ class Cassandra:
                 else:
                     this_tx_id_lower_bound = page
 
-            # prebuild useful conditions, dependent on loop
-            has_upper_bound = this_tx_id_upper_bound is not None
-
-            has_lower_bound = this_tx_id_lower_bound is not None
-
             # divide fetch_size by number of result sets
             # at it must be 2
-            fs_junk = max(2 + (offset or 0), ceil(fs_it / (len(include_assets) + 2)))
+            fs_junk = max(2 + (offset or 0), ceil(fs_it / 2))
 
-            cql_stmt = build_select_address_txs_statement(
-                network,
-                node_type,
-                cols,
-                with_lower_bound=has_lower_bound,
-                with_upper_bound=has_upper_bound,
-                limit=fs_junk,
-                ascending=ascending,
-                with_tx_id=(tx_ids is not None),
-            )
-
-            cql_stmts2 = [
-                build_select_address_txs_statement2(
+            cql_stmts = [
+                build_select_address_txs_statement(
                     network,
                     node_type,
                     cols,
@@ -2562,50 +2471,19 @@ class Cassandra:
                     this_tx_id_upper_bound,
                     tx_ids,
                     ascending,
-                    fs_it,
+                    fs_junk,
                 )
                 for direction in directions
             ]
 
-            # prepare parameters for the query junks one for each direction
-            # and asset tuple
-            params_junks = [
-                {
-                    "id": item_id,
-                    "g_id": item_id_group,
-                    "tx_id_lower_bound": this_tx_id_lower_bound,
-                    "tx_id_upper_bound": this_tx_id_upper_bound,
-                    "s_d_group": s_d_group,
-                    "currency": asset,
-                    "is_outgoing": is_outgoing,
-                    "tx_id": tx_id,
-                    "tx_ref": tx_ref,
-                }
-                for is_outgoing, asset, s_d_group, (tx_id, tx_ref) in product(
-                    directions,
-                    include_assets,
-                    item_id_secondary_group,
-                    [(0, None)] if tx_ids is None else tx_ids,
-                )
-            ]
-
-            def tx_ref_match(a, b):
-                return a[0] == b[0] and a[1] == b[1]
-
-            async def fetch(stmt, params):
-                res = await self.execute_async(network, "transformed", cql_stmt, params)
-                if params["tx_ref"] is None:
-                    return res
-
-                res.current_rows = [
-                    r for r in res if tx_ref_match(r["tx_reference"], params["tx_ref"])
-                ]
-                return res
-
-            async def fetch2(stmt, tx_ids):
+            async def fetch(stmt, tx_ids):
                 res = await self.execute_async(network, "transformed", stmt)
 
+                if not is_eth_like(network):
+                    return res
+
                 if tx_ids is not None and len(tx_ids) > 0:
+                    self.logger.debug(tx_ids)
                     tx_refs = [x[1] for x in tx_ids]
                     tx_refs_tuples = [(x[0], x[1]) for x in tx_refs]
                     res.current_rows = [
@@ -2617,82 +2495,9 @@ class Cassandra:
 
                 return res
 
-            # run one query per direction, asset and secondary group id
+            aws = [fetch(stmt, tx_ids) for stmt in cql_stmts]
 
-            def create_address_transactions_query():
-                def display_list(l: list):
-                    res = str(l)
-                    return "(" + res[1:-1] + ")"
-
-                if tx_ids is None:
-                    tx_id_snippet = ""
-                else:
-                    tx_ids_ = []
-                    # ref_literals = []
-                    for tx_id_i in tx_ids:  # todo
-                        tx_id = tx_id_i[0]
-                        # tx_ref =  tx_id_i[1] # {"trace_index": 66, "log_index": None}
-
-                        # build a CQL literal for that UDT:
-                        # trace = "null" if tx_ref.trace_index is None else tx_ref.trace_index
-                        # log = "null" if tx_ref.log_index is None else tx_ref.log_index
-                        # tx_ref_literal = {"trace_index": trace, "log_index": log}
-                        tx_ids_.append(tx_id)
-                        # ref_literals.append(tx_ref_literal)
-
-                    tx_id_snippet = f"""
-                    AND transaction_id in {display_list(tx_ids_)}
-                    """
-                    # AND tx_reference in {display_list(ref_literals).replace("'","")}
-                    # """ seems to be slower than filtering in rest
-
-                query = f"""
-                    SELECT * from address_transactions WHERE
-                    address_id = {item_id}
-                    AND address_id_group = {item_id_group}
-                    AND is_outgoing in {display_list(directions).lower()}
-                    AND address_id_secondary_group in {display_list(self.sec_in(secondary_id_group))}
-                    AND currency in {display_list(include_assets)} {tx_id_snippet}
-                    LIMIT {fetch_size}
-                    -- ORDER BY currency DESC, transaction_id DESC -- cant do that when doing both is_outgoing in one query have to = false or = true
-                    """
-
-                return query
-
-            # query = create_address_transactions_query()
-
-            # run one query per direction, asset and secondary group id
-            # print(params_junks)
-            print(cql_stmt)
-            print("----------------------")
-            aws = [fetch(cql_stmt, p) for p in params_junks]
-            aws2 = [fetch2(stmt, tx_ids) for stmt in cql_stmts2]
-
-            from time import time
-
-            now = time()
             h = [r.current_rows for r in await asyncio.gather(*aws)]
-            print(f"Time1 {time() - now}")
-
-            now = time()
-            h2 = [r.current_rows for r in await asyncio.gather(*aws2)]
-            print(f"Time2 {time() - now}")
-
-            flattened_h = [row for sublist in h for row in sublist]
-            flattened_h2 = [row for sublist in h2 for row in sublist]
-
-            excl1 = []
-            for l in flattened_h:
-                if l not in flattened_h2:
-                    excl1.append(l)
-
-            excl2 = []
-            for l in flattened_h2:
-                if l not in flattened_h:
-                    excl2.append(l)
-
-            print(f"exlc1, {len(excl1)}")
-            print(f"excl2, {len(excl2)}")
 
             tx_id_keys = "transaction_id" if is_eth_like(network) else "tx_id"
             # collect and merge results
@@ -2707,7 +2512,6 @@ class Cassandra:
                 offset=offset,
             )
 
-            print(f"took {time() - now} seconds to query and merge results. {len(aws)}")
             self.logger.debug(f"tx_id_lower_bound {tx_id_lower_bound}")
             self.logger.debug(f"tx_id_upper_bound {tx_id_upper_bound}")
 
