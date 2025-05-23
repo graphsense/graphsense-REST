@@ -5,7 +5,7 @@ import time
 from collections import UserDict, namedtuple
 from datetime import datetime
 from functools import partial
-from math import ceil, floor
+from math import floor
 from pprint import PrettyPrinter
 from typing import Optional, Sequence, Tuple
 
@@ -216,7 +216,7 @@ def merge_address_txs_subquery_results(
     logger,
     result_sets: Sequence[Result],
     ascending: bool,
-    fetch_size: int,
+    fetch_size: Optional[int],
     tx_id_keys: str = "tx_id",
     fetched_limit: Optional[int] = None,
     page: Optional[int] = None,
@@ -278,7 +278,8 @@ def merge_address_txs_subquery_results(
     if results and offset:
         results = results[offset:]
 
-    results = results[:fetch_size]
+    if fetch_size is not None:
+        results = results[:fetch_size]
 
     # use the last tx_id as page handle
     border_tx_id = results[-1][tx_id_keys] if results else None
@@ -361,7 +362,7 @@ def build_select_address_txs_statement(
         + f" {tx_id_col} {ordering}"
     )
 
-    return f"{query} {ordering_statement} LIMIT {limit}"
+    return f"{query} {ordering_statement}" + ("" if with_tx_id else f" LIMIT {limit}")
 
 
 class Cassandra:
@@ -1390,6 +1391,8 @@ class Cassandra:
 
         final_results = []
         fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
+
+        res1Count = 0
         while len(final_results) < fetch_size:
             fs_it = fetch_size - len(final_results)
             results1, new_page = await self.list_address_txs_ordered(
@@ -1406,6 +1409,7 @@ class Cassandra:
             )
 
             self.logger.debug(f"results1 {len(results1)} {new_page}")
+            res1Count += len(results1)
 
             tx_id = "transaction_id" if is_eth_like(currency) else "tx_id"
 
@@ -1438,7 +1442,7 @@ class Cassandra:
                 ascending=ascending,
                 tx_ids=first_tx_ids,  # limit second set by tx ids of first set
                 page=None,
-                fetch_size=fs_it,
+                fetch_size=len(first_tx_ids),
             )
             self.logger.debug(f"results2 {len(results2)} {page}")
 
@@ -1518,6 +1522,7 @@ class Cassandra:
             if page is None:
                 break
 
+        self.logger.error(f"went over {res1Count}")
         self.logger.debug(f"final_results len {len(final_results)}")
 
         return final_results, str(page) if page is not None else None
@@ -2455,7 +2460,9 @@ class Cassandra:
 
             # divide fetch_size by number of result sets
             # at it must be 2
-            fs_junk = max(2 + (offset or 0), ceil(fs_it / 2))
+            fs_junk = (
+                offset or 0
+            ) + fetch_size  # max(2 + (offset or 0), ceil(fs_it / 2))
 
             cql_stmts = [
                 build_select_address_txs_statement(
@@ -2505,9 +2512,9 @@ class Cassandra:
                 self.logger,
                 h,
                 ascending,
-                fs_it,
+                fs_it if tx_ids is not None else None,
                 tx_id_keys,
-                fetched_limit=fs_junk,
+                fetched_limit=fs_junk if tx_ids is not None else None,
                 page=page,
                 offset=offset,
             )
