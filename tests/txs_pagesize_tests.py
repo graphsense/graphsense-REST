@@ -1,5 +1,6 @@
 from txs_pagesize_tester import txs_pagesize_tester
 from tqdm import tqdm
+from time import time
 
 pagesizes = [100, 53, 7, 1]
 
@@ -262,6 +263,7 @@ for order in ["desc", "asc"]:
         if "neighbor" not in kwargs:
             direction_set = [None, "out", "in"]
         for direction in direction_set:
+            now = time()
             prev_timestamps = None
             if direction:
                 kwargs["direction"] = direction
@@ -278,3 +280,9 @@ for order in ["desc", "asc"]:
                 assert timestamps == prev_timestamps, "result lengths not equal"
                 prev_timestamp = timestamps
                 # print(f"length {len(timestamps)}")
+
+            msg = (
+                f"Test {kwargs}, order = {order}, "
+                f"direction = {direction} took {time() - now} seconds"
+            )
+            print(msg)  # noqa

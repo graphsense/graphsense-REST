@@ -13,7 +13,7 @@ from graphsense.api import addresses_api, entities_api
 
 def txs_pagesize_tester(currency, id, **kwargs):
     configuration = graphsense.Configuration(
-        host=os.environ.get("API_URL", "http://localhost:9000")
+        host=os.environ.get("API_URL", "http://localhost:8000")
     )
 
     configuration.api_key["api_key"] = os.environ.get("API_KEY", "dummy")
