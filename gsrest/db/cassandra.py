@@ -95,9 +95,11 @@ def page_from_hex(page):
 
 def transaction_ordering_key(tx_id_key, tx):
     ref = tx.get("tx_reference", [None, None])
+    asset = tx.get("currency", None)
     trace_index = ref[0] or 0
     log_index = ref[1] or 0
-    return (tx[tx_id_key], -trace_index, -log_index)
+    asset = asset or ""
+    return (tx[tx_id_key], -trace_index, -log_index, asset)
 
 
 def identity1(x):
@@ -237,7 +239,6 @@ def merge_address_txs_subquery_results(
             included in this results set,
             the last two form the page id for subsequent queries.
     """
-
     # find the least common tx_id where we then cut the result sets
     border_tx_id = None
     for results in result_sets:
@@ -324,8 +325,8 @@ def build_select_address_txs_statement(
     # Build select statement
     columns = ",".join(cols) if cols is not None else "*"
 
-    def display_list(list_: list):
-        return "(" + str(list_)[1:-1] + ")"
+    def unique_elements_as_cassandralist(list_: list):
+        return "(" + str(list(set(list_)))[1:-1] + ")"
 
     query = (
         f"SELECT {columns} from {node_type}_transactions "
@@ -337,11 +338,13 @@ def build_select_address_txs_statement(
     # conditional where clause, loop independent
     if eth_like:
         query += wc(
-            f"{node_type}_id_secondary_group in {display_list(list(range(secondary_id_group+1)))}",
+            f"{node_type}_id_secondary_group in {unique_elements_as_cassandralist(list(range(secondary_id_group+1)))}",
             eth_like,
         )
 
-    query += wc(f"currency in {display_list(include_assets)}", eth_like)
+    query += wc(
+        f"currency in {unique_elements_as_cassandralist(include_assets)}", eth_like
+    )
     query += wc(
         f"{tx_id_col} >= {lower_bound}",
         not with_tx_id and lower_bound is not None,
@@ -352,17 +355,24 @@ def build_select_address_txs_statement(
     )
 
     if with_tx_id:
-        query += wc(f"{tx_id_col} in {display_list([x[0] for x in tx_ids])}", True)
+        query += wc(
+            f"{tx_id_col} in {unique_elements_as_cassandralist([x[0] for x in tx_ids])}",
+            True,
+        )
 
     ordering = "ASC" if ascending else "DESC"
 
     ordering_statement = (
-        "ORDER BY "
-        + (f" currency {ordering}," if eth_like else "")
-        + f" {tx_id_col} {ordering}"
+        (f", currency {ordering} " if eth_like else "")
+        + f", {tx_id_col} {ordering} "
+        + (f", tx_reference {ordering}" if eth_like else "")
     )
 
-    return f"{query} {ordering_statement}" + ("" if with_tx_id else f" LIMIT {limit}")
+    ordering_statement = ordering_statement[1:]  # remove "," at the start
+
+    return f"{query} ORDER BY {ordering_statement}" + (
+        "" if with_tx_id else f" LIMIT {limit}"
+    )
 
 
 class Cassandra:
@@ -2432,6 +2442,7 @@ class Cassandra:
         else:
             secondary_id_group = None
 
+        tx_id_keys = "transaction_id" if is_eth_like(network) else "tx_id"
         directions = [is_outgoing] if is_outgoing is not None else [False, True]
         results = []
         """
@@ -2458,11 +2469,10 @@ class Cassandra:
                 else:
                     this_tx_id_lower_bound = page
 
-            # divide fetch_size by number of result sets
-            # at it must be 2
-            fs_junk = (
-                offset or 0
-            ) + fetch_size  # max(2 + (offset or 0), ceil(fs_it / 2))
+            # could maybe reduce to be more efficient?
+            fs_junk = (offset or 0) + fetch_size
+
+            from itertools import product
 
             cql_stmts = [
                 build_select_address_txs_statement(
@@ -2472,7 +2482,7 @@ class Cassandra:
                     item_id,
                     item_id_group,
                     secondary_id_group,
-                    include_assets,
+                    [include_asset],
                     direction,
                     this_tx_id_lower_bound,
                     this_tx_id_upper_bound,
@@ -2480,7 +2490,7 @@ class Cassandra:
                     ascending,
                     fs_junk,
                 )
-                for direction in directions
+                for direction, include_asset in product(directions, include_assets)
             ]
 
             async def fetch(stmt, tx_ids):
@@ -2490,15 +2500,17 @@ class Cassandra:
                     return res
 
                 if tx_ids is not None and len(tx_ids) > 0:
-                    self.logger.debug(tx_ids)
-                    tx_refs = [x[1] for x in tx_ids]
-                    tx_refs_tuples = [(x[0], x[1]) for x in tx_refs]
+                    before_dropping = len(res.current_rows)
+                    tx_refs_tuples = [(x[0], x[1][0], x[1][1]) for x in tx_ids]
                     res.current_rows = [
                         r
                         for r in res
-                        if (r["tx_reference"][0], r["tx_reference"][1])
+                        if (r[tx_id_keys], r["tx_reference"][0], r["tx_reference"][1])
                         in tx_refs_tuples
                     ]
+                    self.logger.debug(
+                        f"Filtering {before_dropping - len(res.current_rows)} because of unfitting tx_reference"
+                    )
 
                 return res
 
@@ -2506,15 +2518,14 @@ class Cassandra:
 
             h = [r.current_rows for r in await asyncio.gather(*aws)]
 
-            tx_id_keys = "transaction_id" if is_eth_like(network) else "tx_id"
             # collect and merge results
             more_results, page, offset = merge_address_txs_subquery_results(
                 self.logger,
                 h,
                 ascending,
-                fs_it if tx_ids is not None else None,
+                fs_it if (tx_ids is None) else None,
                 tx_id_keys,
-                fetched_limit=fs_junk if tx_ids is not None else None,
+                fetched_limit=fs_junk if (tx_ids is None) else None,
                 page=page,
                 offset=offset,
             )
@@ -2522,24 +2533,15 @@ class Cassandra:
             self.logger.debug(f"tx_id_lower_bound {tx_id_lower_bound}")
             self.logger.debug(f"tx_id_upper_bound {tx_id_upper_bound}")
 
-            # res_alt = await self.execute_async(network, "transformed", alternative_query)
-            # make sure tx_refs are filtered
-
-            # if tx_ids is not None and len(tx_ids) > 0:
-            #    tx_refs = [x[1] for x in tx_ids]
-            #    tx_refs_tuples = [(x[0], x[1]) for x in tx_refs]
-            #    res_alt.current_rows = [
-            #        r for r in res_alt if (r["tx_reference"][0], r["tx_reference"][1]) in tx_refs_tuples
-            #    ]
-
-            # print(f"Alternative time: {time() - now} seconds")
-
+            more_results_len = len(more_results)
             more_results = [
                 r
                 for r in more_results
                 if (tx_id_lower_bound is None or r[tx_id_keys] >= tx_id_lower_bound)
                 and (tx_id_upper_bound is None or r[tx_id_keys] <= tx_id_upper_bound)
             ]
+
+            assert more_results_len == len(more_results)
 
             self.logger.debug(f"list tx ordered page {page}:{offset}")
             self.logger.debug(f"more_results len {len(more_results)}")
