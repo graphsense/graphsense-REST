@@ -16,13 +16,13 @@ repos:
         exclude: |
             (?x)^(
                 openapi_server/.*|
-                tests/test_*.py
+                tests/.*
             )$
     -   id: end-of-file-fixer
         exclude: |
             (?x)^(
                 openapi_server/.*|
-                tests/test_.*.py
+                tests/.*
             )$
     -
         id: check-yaml
