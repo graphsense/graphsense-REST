@@ -1471,7 +1471,6 @@ class Cassandra:
         final_results = []
         fetch_size = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
 
-        res1Count = 0
         while len(final_results) < fetch_size:
             fs_it = fetch_size - len(final_results)
             results1, new_page = await self.list_address_txs_ordered(
@@ -1488,7 +1487,6 @@ class Cassandra:
             )
 
             self.logger.debug(f"results1 {len(results1)} {new_page}")
-            res1Count += len(results1)
 
             tx_id = "transaction_id" if is_eth_like(currency) else "tx_id"
 
@@ -1601,7 +1599,6 @@ class Cassandra:
             if page is None:
                 break
 
-        self.logger.error(f"went over {res1Count}")
         self.logger.debug(f"final_results len {len(final_results)}")
 
         return final_results, str(page) if page is not None else None
