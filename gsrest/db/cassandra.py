@@ -41,6 +41,7 @@ from gsrest.util.evm import bytes_to_hex, hex_str_to_bytes, strip_0x
 from gsrest.util.id_group import calculate_id_group_with_overflow
 from gsrest.util.node_balances import get_balances
 from gsrest.util.tron import partial_tron_to_partial_evm
+from itertools import product
 
 SMALL_PAGE_SIZE = 1000
 BIG_PAGE_SIZE = 5000
@@ -95,11 +96,9 @@ def page_from_hex(page):
 
 def transaction_ordering_key(tx_id_key, tx):
     ref = tx.get("tx_reference", [None, None])
-    asset = tx.get("currency", None)
     trace_index = ref[0] or 0
     log_index = ref[1] or 0
-    asset = asset or ""
-    return (tx[tx_id_key], -trace_index, -log_index, asset)
+    return (tx[tx_id_key], -trace_index, -log_index)
 
 
 def identity1(x):
@@ -239,7 +238,14 @@ def merge_address_txs_subquery_results(
             included in this results set,
             the last two form the page id for subsequent queries.
     """
-    # find the least common tx_id where we then cut the result sets
+    # find the least common tx_id where we then cut the result sets.
+    # We need this because we order by tx_id, but we make queries for specific
+    # (direction, asset) combinations. Without this logic (wlog ascending case),
+    # we could progress within one query to tx_id n while another result set is
+    # limited and has not yet loaded all txs for tx_ids < n. In this case these rows
+    # would be skipped if we simply took the next page's tx_id as the maximum of
+    # the tx_ids of the combined result sets. We cap all the result sets
+    # at the minimum over all the within-result-set maximums of the tx_ids.
     border_tx_id = None
     for results in result_sets:
         if not results:
@@ -2470,10 +2476,13 @@ class Cassandra:
                     this_tx_id_lower_bound = page
 
             # could maybe reduce to be more efficient?
-            fs_junk = (offset or 0) + fetch_size
+            fs_chunk = (offset or 0) + fetch_size
 
-            from itertools import product
-
+            # We have create separate queries for the directions and assets
+            # because in Cassandra the first cluster keys are direction and asset
+            # If we did this in one query, we would potentially only progress in
+            # one asset and direction wrt tx_id (our pagination key), but we want
+            # results orderd by tx_id, so we need to query all directions and assets
             cql_stmts = [
                 build_select_address_txs_statement(
                     network,
@@ -2488,7 +2497,7 @@ class Cassandra:
                     this_tx_id_upper_bound,
                     tx_ids,
                     ascending,
-                    fs_junk,
+                    fs_chunk,
                 )
                 for direction, include_asset in product(directions, include_assets)
             ]
@@ -2499,6 +2508,8 @@ class Cassandra:
                 if not is_eth_like(network):
                     return res
 
+                # Filtering on tx_ids in the cql query was very slow once and killed
+                # cassandra nodes the second time, so we filter here
                 if tx_ids is not None and len(tx_ids) > 0:
                     before_dropping = len(res.current_rows)
                     tx_refs_tuples = [(x[0], x[1][0], x[1][1]) for x in tx_ids]
@@ -2525,7 +2536,7 @@ class Cassandra:
                 ascending,
                 fs_it if (tx_ids is None) else None,
                 tx_id_keys,
-                fetched_limit=fs_junk if (tx_ids is None) else None,
+                fetched_limit=fs_chunk if (tx_ids is None) else None,
                 page=page,
                 offset=offset,
             )
@@ -2547,6 +2558,9 @@ class Cassandra:
             self.logger.debug(f"more_results len {len(more_results)}")
 
             results.extend(more_results)
+
+            # This loop is only executed once for non-tx_id queries
+            # (query 2 of address links)
             if page is None or tx_ids:
                 # no more data expected end loop
                 break

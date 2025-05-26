@@ -104,4 +104,6 @@ dev = [
     "testcontainers[cassandra,postgres]>=4.8.2",
     "tox-uv>=1.16.0",
     "tox>=4.23.2",
+    "graphsense-python>=1.9.4",
+    "tqdm>=4.67.1",
 ]

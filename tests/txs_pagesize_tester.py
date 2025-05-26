@@ -16,7 +16,7 @@ def txs_pagesize_tester(currency, id, **kwargs):
         host=os.environ.get("API_URL", "http://localhost:9000")
     )
 
-    configuration.api_key["api_key"] = os.environ.get("API_KEY", None)
+    configuration.api_key["api_key"] = os.environ.get("API_KEY", "dummy")
 
     # Enter a context with an instance of the API client
     with graphsense.ApiClient(configuration) as api_client:

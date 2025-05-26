@@ -1,4 +1,5 @@
 from txs_pagesize_tester import txs_pagesize_tester
+from tqdm import tqdm
 
 pagesizes = [100, 53, 7, 1]
 
@@ -256,7 +257,7 @@ test_sets = [
 
 
 for order in ["desc", "asc"]:
-    for kwargs in test_sets:
+    for kwargs in tqdm(test_sets):
         direction_set = [None]
         if "neighbor" not in kwargs:
             direction_set = [None, "out", "in"]

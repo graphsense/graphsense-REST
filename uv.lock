@@ -1259,6 +1259,19 @@ wheels = [
 ]
 
 [[package]]
+name = "graphsense-python"
+version = "1.9.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "python-dateutil" },
+    { name = "urllib3" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/de/aa/7f6418ff324d15e18136f91ff11d56bc09479967bab80a25608b70758b40/graphsense_python-1.9.4.tar.gz", hash = "sha256:dccfeabcbb77be6c5a26798f9636107851e1312a12beb7951529aa22460d1ceb", size = 76209 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/7e/86/7969233bd39712496328c0b40a04d0f1ca037f4202bf464fdfaac56dbed6/graphsense_python-1.9.4-py3-none-any.whl", hash = "sha256:995e595eb2e08c29b6a951bb2097680156b4e4e9f1a04646e174512f076d328b", size = 217190 },
+]
+
+[[package]]
 name = "greenlet"
 version = "3.1.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1338,6 +1351,7 @@ dependencies = [
 [package.dev-dependencies]
 dev = [
     { name = "aiohttp-devtools" },
+    { name = "graphsense-python" },
     { name = "gunicorn" },
     { name = "pre-commit" },
     { name = "pytest" },
@@ -1348,6 +1362,7 @@ dev = [
     { name = "testcontainers" },
     { name = "tox" },
     { name = "tox-uv" },
+    { name = "tqdm" },
 ]
 
 [package.metadata]
@@ -1370,6 +1385,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "aiohttp-devtools", specifier = ">=1.1.2" },
+    { name = "graphsense-python", specifier = ">=1.9.4" },
     { name = "gunicorn", specifier = ">=23.0.0" },
     { name = "pre-commit", specifier = ">=4.0.1" },
     { name = "pytest", specifier = ">=8.3.4" },
@@ -1380,6 +1396,7 @@ dev = [
     { name = "testcontainers", extras = ["cassandra", "postgres"], specifier = ">=4.8.2" },
     { name = "tox", specifier = ">=4.23.2" },
     { name = "tox-uv", specifier = ">=1.16.0" },
+    { name = "tqdm", specifier = ">=4.67.1" },
 ]
 
 [[package]]
@@ -3147,6 +3164,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/ed/5e/c3d2a45ab5465dddbbc267a589c9cfce23b91750d49af10738a08c98534e/tox_uv-1.16.0.tar.gz", hash = "sha256:71b2e2fa6c35c1360b91a302df1d65b3e5a1f656b321c5ebf7b84545804c9f01", size = 16337 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ad/8d/1baa9f725ddd4824708759cf7b74bc43379f5f7feb079fde0629d7b32b3e/tox_uv-1.16.0-py3-none-any.whl", hash = "sha256:e6f0b525a687e745ab878d07cbf5c7e85d582028d4a7c8935f95e84350651432", size = 13661 },
+]
+
+[[package]]
+name = "tqdm"
+version = "4.67.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "colorama", marker = "platform_system == 'Windows'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a8/4b/29b4ef32e036bb34e4ab51796dd745cdba7ed47ad142a9f4a1eb8e0c744d/tqdm-4.67.1.tar.gz", hash = "sha256:f8aef9c52c08c13a65f30ea34f4e5aac3fd1a34959879d7e59e63027286627f2", size = 169737 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d0/30/dc54f88dd4a2b5dc8a0279bdd7270e735851848b762aeb1c1184ed1f6b14/tqdm-4.67.1-py3-none-any.whl", hash = "sha256:26445eca388f82e72884e0d580d5464cd801a3ea01e63e5601bdff9ba6a48de2", size = 78540 },
 ]
 
 [[package]]
