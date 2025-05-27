@@ -5,6 +5,7 @@ import time
 from collections import UserDict, namedtuple
 from datetime import datetime
 from functools import partial
+from itertools import product
 from math import floor
 from pprint import PrettyPrinter
 from typing import Optional, Sequence, Tuple
@@ -41,7 +42,6 @@ from gsrest.util.evm import bytes_to_hex, hex_str_to_bytes, strip_0x
 from gsrest.util.id_group import calculate_id_group_with_overflow
 from gsrest.util.node_balances import get_balances
 from gsrest.util.tron import partial_tron_to_partial_evm
-from itertools import product
 
 SMALL_PAGE_SIZE = 1000
 BIG_PAGE_SIZE = 5000
@@ -307,7 +307,7 @@ def merge_address_txs_subquery_results(
     return results, border_tx_id, same_key_offset
 
 
-def build_select_address_txs_statement_old(
+def build_select_address_txs_statement(
     network: str,
     node_type: NodeType,
     cols: Optional[Sequence[str]],
@@ -368,80 +368,6 @@ def build_select_address_txs_statement_old(
     )
 
     return f"{query} {ordering_statement} LIMIT {limit}"
-
-
-def build_select_address_txs_statement(
-    network: str,
-    node_type: NodeType,
-    cols: Optional[Sequence[str]],
-    item_id: int,
-    item_id_group: int,
-    secondary_id_group: list[int],
-    include_assets: list[str],
-    direction: bool,  # the reason this is no list is that cassandra can still sort
-    lower_bound: Optional[int],
-    upper_bound: Optional[int],
-    tx_ids: Optional[list[tuple[int]]],
-    ascending: bool,
-    limit: int,
-) -> str:
-    # prebuild useful helpers and conditions
-    with_tx_id = tx_ids is not None
-    eth_like = is_eth_like(network)
-    tx_id_col = get_tx_id_column_name(network)
-
-    # Select and shared where clause
-    # Build select statement
-    columns = ",".join(cols) if cols is not None else "*"
-
-    def unique_elements_as_cassandralist(list_: list):
-        return "(" + str(list(set(list_)))[1:-1] + ")"
-
-    query = (
-        f"SELECT {columns} from {node_type}_transactions "
-        f"WHERE {node_type}_id = {item_id} "
-        f"AND {node_type}_id_group = {item_id_group} "
-        f"AND is_outgoing = {str(direction).lower()} "
-    )
-
-    # conditional where clause, loop independent
-    if eth_like:
-        query += wc(
-            f"{node_type}_id_secondary_group in {unique_elements_as_cassandralist(list(range(secondary_id_group+1)))}",
-            eth_like,
-        )
-
-    query += wc(
-        f"currency in {unique_elements_as_cassandralist(include_assets)}", eth_like
-    )
-    query += wc(
-        f"{tx_id_col} >= {lower_bound}",
-        not with_tx_id and lower_bound is not None,
-    )
-    query += wc(
-        f"{tx_id_col} <= {upper_bound}",
-        not with_tx_id and upper_bound is not None,
-    )
-
-    if with_tx_id:
-        query += wc(
-            f"{tx_id_col} in {unique_elements_as_cassandralist([x[0] for x in tx_ids])}",
-            True,
-        )
-
-    ordering = "ASC" if ascending else "DESC"
-
-    ordering_statement = (
-        (f", currency {ordering} " if eth_like else "")
-        + f", {tx_id_col} {ordering} "
-        + (f", tx_reference {ordering}" if eth_like else "")
-    )
-
-    ordering_statement = ordering_statement[1:]  # remove "," at the start
-
-    return f"{query} ORDER BY {ordering_statement}" + (
-        "" if with_tx_id else f" LIMIT {limit}"
-    )
 
 
 class Cassandra:
@@ -2546,7 +2472,7 @@ class Cassandra:
 
             fs_junk = max(2 + (offset or 0), ceil(fs_it / (len(include_assets) + 2)))
 
-            cql_stmt = build_select_address_txs_statement_old(
+            cql_stmt = build_select_address_txs_statement(
                 network,
                 node_type,
                 cols,
@@ -2657,7 +2583,8 @@ class Cassandra:
                 fetch only incoming, if None fetch both directions
             include_assets (Sequence[Tuple[str, bool]]): a list of tuples with
                 assets to include
-            page (Optional[int]): a page id (tx id bound)
+            page (Optional[str]): a page id in format tx_id:secondary_id:offset for eth-like networks
+                or tx_id:offset for others
             fetch_size (int): how much to fetch per page
             cols (Optional[Sequence[str]], optional): which columns to select
                 None means *
@@ -2684,12 +2611,44 @@ class Cassandra:
                 ascending=ascending,
             )
 
+        # get first and last tx id for the node
+        if node_type == NodeType.ADDRESS:
+            data = await self.get_address(network, id)
+        elif node_type == NodeType.CLUSTER:
+            data = await self.get_entity(network, id)
+        else:
+            raise BadUserInputException(
+                f"Node type {node_type} not supported for address transactions"
+            )
+
+        first_tx = data.get("first_tx_id")
+        last_tx = data.get("last_tx_id")
+
+        def get_block_from_tx_id(id_):
+            return id_ >> 32
+
+        def get_secondary_id_group_from_block(block):
+            return block // self.parameters[network]["block_bucket_size_address_txs"]
+
+        def secondary_id_from_tx_id(tx_id):
+            block = get_block_from_tx_id(tx_id)
+            return get_secondary_id_group_from_block(block)
+
         try:
-            (page, offset) = page.split(":") if page is not None else (None, None)
-            page = int(page) if page is not None else None
-            offset = int(offset) if offset is not None else None
+            if is_eth_like(network) and tx_ids is None:
+                (page, secondary_id, offset) = (
+                    page.split(":") if page is not None else (None, None, None)
+                )
+                page = int(page) if page is not None else None
+                secondary_id = int(secondary_id) if secondary_id is not None else None
+                offset = int(offset) if offset is not None else None
+            else:
+                (page, offset) = page.split(":") if page is not None else (None, None)
+                page = int(page) if page is not None else None
+                offset = int(offset) if offset is not None else None
+                secondary_id = None
         except ValueError:
-            raise BadUserInputException(f"Page {page} is not an integer")
+            raise BadUserInputException(f"Page {page} is not in the correct format")
 
         if node_type == NodeType.ADDRESS:
             item_id, item_id_group = await self.get_address_id_id_group(network, id)
@@ -2699,16 +2658,43 @@ class Cassandra:
             item_id = id
             item_id_group = self.get_id_group(network, id)
 
+        item_id_secondary_group = [0]
         if is_eth_like(network):
-            secondary_id_group = await self.get_id_secondary_group_eth(
+            sec_max = await self.get_id_secondary_group_eth(
                 network, "address_transactions", item_id_group
             )
-        else:
-            secondary_id_group = None
+            sec_min = 0
 
-        tx_id_keys = "transaction_id" if is_eth_like(network) else "tx_id"
+            # restrict to first and last tx
+            sec_min = max(sec_min, secondary_id_from_tx_id(first_tx))
+            sec_max = min(sec_max, secondary_id_from_tx_id(last_tx))
+
+            # restrict to border tx_id parameters given
+            if tx_id_lower_bound:
+                sec_min = max(sec_min, secondary_id_from_tx_id(tx_id_lower_bound))
+            if tx_id_upper_bound:
+                sec_max = min(sec_max, secondary_id_from_tx_id(tx_id_upper_bound))
+
+            if tx_ids is None:
+                # For pagination, we only need the current secondary_id
+                if secondary_id is not None:
+                    item_id_secondary_group = [secondary_id]
+                else:
+                    # Start with the appropriate secondary_id based on sort order
+                    item_id_secondary_group = [sec_max if not ascending else sec_min]
+            else:
+                item_id_secondary_group = list(range(sec_min, sec_max + 1))
+
         directions = [is_outgoing] if is_outgoing is not None else [False, True]
         results = []
+
+        # Track the current secondary_id for eth-like networks
+        current_secondary_id = (
+            item_id_secondary_group[0]
+            if is_eth_like(network) and tx_ids is None
+            else None
+        )
+
         """
             Keep retrieving pages until the demanded fetch_size is fulfilled
             or there are no more pages
@@ -2733,68 +2719,120 @@ class Cassandra:
                 else:
                     this_tx_id_lower_bound = page
 
-            # Get more data if there is offset because the offset is dropped from the result
-            fs_chunk = (offset or 0) + fetch_size
+            # prebuild useful conditions, dependent on loop
+            has_upper_bound = this_tx_id_upper_bound is not None
+            has_lower_bound = this_tx_id_lower_bound is not None
+
+            # divide fetch_size by number of result sets
+            # at it must be 2
+            fs_chunk = (offset or 0) + fs_it
+
+            cql_stmt = build_select_address_txs_statement(
+                network,
+                node_type,
+                cols,
+                with_lower_bound=has_lower_bound,
+                with_upper_bound=has_upper_bound,
+                limit=fs_chunk,
+                ascending=ascending,
+                with_tx_id=(tx_ids is not None),
+            )
+
+            # Use current_secondary_id for eth-like networks without tx_ids
+            if is_eth_like(network) and tx_ids is None:
+                current_item_id_secondary_group = [current_secondary_id]
+            else:
+                current_item_id_secondary_group = item_id_secondary_group
 
             # We have create separate queries for the directions and assets
             # because in Cassandra the first cluster keys are direction and asset
             # If we did this in one query, we would potentially only progress in
             # one asset and direction wrt tx_id (our pagination key), but we want
             # results orderd by tx_id, so we need to query all directions and assets
-            cql_stmts = [
-                build_select_address_txs_statement(
-                    network,
-                    node_type,
-                    cols,
-                    item_id,
-                    item_id_group,
-                    secondary_id_group,
-                    [include_asset],
-                    direction,
-                    this_tx_id_lower_bound,
-                    this_tx_id_upper_bound,
-                    tx_ids,
-                    ascending,
-                    fs_chunk,
-                )
-                for direction, include_asset in product(directions, include_assets)
-            ]
+            if self.parameters[network].get("block_bucket_size_address_txs") is None:
+                params_chunks = [
+                    {
+                        "id": item_id,
+                        "g_id": item_id_group,
+                        "tx_id_lower_bound": this_tx_id_lower_bound,
+                        "tx_id_upper_bound": this_tx_id_upper_bound,
+                        "s_d_group": s_d_group,
+                        "currency": asset,
+                        "is_outgoing": is_outgoing,
+                        "tx_id": tx_id,
+                        "tx_ref": tx_ref,
+                    }
+                    for is_outgoing, asset, s_d_group, (tx_id, tx_ref) in product(
+                        directions,
+                        include_assets,
+                        current_item_id_secondary_group,
+                        [(0, None)] if tx_ids is None else tx_ids,
+                    )
+                ]
+            else:
+                if tx_ids:
+                    secondary_ids_with_tx_ids = [
+                        (
+                            secondary_id_from_tx_id(tx_id),
+                            tx_id,
+                            tx_ref,
+                        )
+                        for (tx_id, tx_ref) in tx_ids
+                    ]
+                else:
+                    secondary_ids_with_tx_ids = [
+                        (
+                            secondary_id,
+                            0,
+                            None,
+                        )
+                        for secondary_id in current_item_id_secondary_group
+                    ]
+                params_chunks = [
+                    {
+                        "id": item_id,
+                        "g_id": item_id_group,
+                        "tx_id_lower_bound": this_tx_id_lower_bound,
+                        "tx_id_upper_bound": this_tx_id_upper_bound,
+                        "s_d_group": s_d_group,
+                        "currency": asset,
+                        "is_outgoing": is_outgoing,
+                        "tx_id": tx_id,
+                        "tx_ref": tx_ref,
+                    }
+                    for is_outgoing, asset, (s_d_group, tx_id, tx_ref) in product(
+                        directions,
+                        include_assets,
+                        secondary_ids_with_tx_ids,
+                    )
+                ]
 
-            async def fetch(stmt, tx_ids):
-                res = await self.execute_async(network, "transformed", stmt)
+            def tx_ref_match(a, b):
+                return a[0] == b[0] and a[1] == b[1]
 
-                if not is_eth_like(network):
+            async def fetch(stmt, params):
+                res = await self.execute_async(network, "transformed", cql_stmt, params)
+                if params["tx_ref"] is None:
                     return res
 
                 # Filtering on tx_ids in the cql query was very slow once and killed
                 # cassandra nodes the second time, so we filter here
-                if tx_ids is not None and len(tx_ids) > 0:
-                    before_dropping = len(res.current_rows)
-                    tx_refs_tuples = [(x[0], x[1][0], x[1][1]) for x in tx_ids]
-                    res.current_rows = [
-                        r
-                        for r in res
-                        if (r[tx_id_keys], r["tx_reference"][0], r["tx_reference"][1])
-                        in tx_refs_tuples
-                    ]
-                    self.logger.debug(
-                        f"Filtering {before_dropping - len(res.current_rows)} because of unfitting tx_reference"
-                    )
-
+                res.current_rows = [
+                    r for r in res if tx_ref_match(r["tx_reference"], params["tx_ref"])
+                ]
                 return res
 
-            aws = [fetch(stmt, tx_ids) for stmt in cql_stmts]
+            aws = [fetch(cql_stmt, p) for p in params_chunks]
 
-            h = [r.current_rows for r in await asyncio.gather(*aws)]
-
+            tx_id_keys = "transaction_id" if is_eth_like(network) else "tx_id"
             # collect and merge results
             more_results, page, offset = merge_address_txs_subquery_results(
                 self.logger,
-                h,
+                [r.current_rows for r in await asyncio.gather(*aws)],
                 ascending,
-                fs_it if (tx_ids is None) else None,
+                fs_it,
                 tx_id_keys,
-                fetched_limit=fs_chunk if (tx_ids is None) else None,
+                fetched_limit=fs_chunk,
                 page=page,
                 offset=offset,
             )
@@ -2802,7 +2840,6 @@ class Cassandra:
             self.logger.debug(f"tx_id_lower_bound {tx_id_lower_bound}")
             self.logger.debug(f"tx_id_upper_bound {tx_id_upper_bound}")
 
-            more_results_len = len(more_results)
             more_results = [
                 r
                 for r in more_results
@@ -2810,18 +2847,40 @@ class Cassandra:
                 and (tx_id_upper_bound is None or r[tx_id_keys] <= tx_id_upper_bound)
             ]
 
-            assert more_results_len == len(more_results)
-
             self.logger.debug(f"list tx ordered page {page}:{offset}")
             self.logger.debug(f"more_results len {len(more_results)}")
 
             results.extend(more_results)
 
-            # This loop is only executed once for non-tx_id queries
-            # (query 2 of address links)
-            if page is None or tx_ids:
-                # no more data expected end loop
+            if tx_ids:
+                # tx_ids case - no pagination needed
                 break
+
+            if page is None:
+                # Current secondary_id_group is exhausted
+                if is_eth_like(network):
+                    # Move to next secondary_id_group
+                    if not ascending:
+                        next_secondary_id = current_secondary_id - 1
+                        if next_secondary_id < sec_min:
+                            break  # No more secondary_id_groups
+                    else:
+                        next_secondary_id = current_secondary_id + 1
+                        if next_secondary_id > sec_max:
+                            break  # No more secondary_id_groups
+
+                    current_secondary_id = next_secondary_id
+                    # Reset offset when moving to new secondary_id_group
+                    offset = None
+                else:
+                    # No more data expected for non-eth networks
+                    break
+
+        if is_eth_like(network) and tx_ids is None:
+            return (
+                results,
+                f"{page}:{current_secondary_id}:{offset}" if page is not None else None,
+            )
         return results, f"{page}:{offset}" if page is not None else None
 
     async def list_txs_by_node_type_eth(

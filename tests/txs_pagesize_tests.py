@@ -1,6 +1,7 @@
-from txs_pagesize_tester import txs_pagesize_tester
-from tqdm import tqdm
 from time import time
+
+from tqdm import tqdm
+from txs_pagesize_tester import txs_pagesize_tester
 
 pagesizes = [100, 53, 7, 1]
 
