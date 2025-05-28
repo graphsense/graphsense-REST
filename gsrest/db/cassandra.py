@@ -1520,8 +1520,17 @@ class Cassandra:
                     ]
                 else:
 
+                    def get_address_from_io(x):
+                        address_wrapped = x.address
+                        if address_wrapped is None:
+                            return None
+
+                        assert len(address_wrapped) == 1
+                        return address_wrapped[0]
+
                     async def has_cluster_id_in_ios(cluster_id, ios):
-                        addresses_io = sum([x.address for x in ios], [])
+                        addresses_io = [get_address_from_io(x) for x in ios]
+                        addresses_io = [x for x in addresses_io if x is not None]
                         # get cluster ids for all the addresses
                         cluster_ids_io = [
                             await self.get_address_entity_id(currency, address)
