@@ -1,6 +1,6 @@
 [project]
 name = "gsrest"
-version = "1.11.2rc4"
+version = "1.11.2rc5"
 description = "GraphSense API REST API"
 readme = "README.md"
 changelog = "CHANGELOG.md"
@@ -53,6 +53,10 @@ commands=
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
+markers = [
+    "regression: mark test as regression test",
+]
+addopts = "-m 'not regression'"
 
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.

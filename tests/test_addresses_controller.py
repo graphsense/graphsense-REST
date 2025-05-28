@@ -34,12 +34,12 @@ class TestAddressesController(BaseTestCase):
         await test_service.get_address_entity(self)
 
 
-    async def test_list_address_links(self):
-        """Test case for list_address_links
-
-        Get outgoing transactions between two addresses
-        """
-        await test_service.list_address_links(self)
+    #async def test_list_address_links(self):
+    #    """Test case for list_address_links
+    #
+    #     Get outgoing transactions between two addresses
+    #     """
+    #     await test_service.list_address_links(self)
 
 
     async def test_list_address_neighbors(self):

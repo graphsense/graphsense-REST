@@ -2,8 +2,8 @@ all: format lint
 
 -include .env
 
-GS_REST_SERVICE_VERSIONM ?= "25.05.2rc4"
-GS_REST_SERVICE_VERSION ?= "1.11.2rc4"
+GS_REST_SERVICE_VERSIONM ?= "25.05.2rc5"
+GS_REST_SERVICE_VERSION ?= "1.11.2rc5"
 GS_REST_DEV_PORT ?= 9000
 NUM_WORKERS ?= 1
 NUM_THREADS ?= 1
@@ -13,6 +13,9 @@ test:
 
 test-all-env:
 	uv run tox
+
+test-regression:
+	uv run pytest -m "regression"
 
 lint:
 	uv run ruff check .

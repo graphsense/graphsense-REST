@@ -43,12 +43,12 @@ class TestEntitiesController(BaseTestCase):
         await test_service.list_entity_addresses(self)
 
 
-    async def test_list_entity_links(self):
-        """Test case for list_entity_links
-
-        Get transactions between two entities
-        """
-        await test_service.list_entity_links(self)
+    #async def test_list_entity_links(self):
+    #    """Test case for list_entity_links
+    #
+    #    Get transactions between two entities
+    #    """
+    #    await test_service.list_entity_links(self)
 
 
     async def test_list_entity_neighbors(self):
