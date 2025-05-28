@@ -11,9 +11,6 @@ NUM_THREADS ?= 1
 test:
 	uv run pytest -x -rx -vv
 
-test-all-env:
-	uv run tox
-
 test-regression:
 	uv run pytest -m "regression"
 

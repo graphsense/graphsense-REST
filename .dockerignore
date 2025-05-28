@@ -1,6 +1,5 @@
 .travis.yaml
 .openapi-generator-ignore
-tox.ini
 git_push.sh
 test-requirements.txt
 
@@ -42,7 +41,6 @@ pip-delete-this-directory.txt
 
 # Unit test / coverage reports
 htmlcov/
-.tox/
 .coverage
 .coverage.*
 .cache

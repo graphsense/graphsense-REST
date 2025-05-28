@@ -29,26 +29,6 @@ dependencies = [
     "tagpack-tool>=25.4.0",
 ]
 
-[tool.tox]
-legacy_tox_ini = """
-[tox]
-skipsdist=True
-envlist = py310,py311,py312
-;requires=tox-venv
-
-[gh-actions]
-python =
-    3.10: py310
-    3.11: py311
-    3.12: py312
-
-[testenv]
-runner = uv-venv-lock-runner
-uv_sync_flags=--python={env_python}
-passenv=*
-commands=
-    pytest -x -rx -vv --cov=openapi_server
-"""
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
@@ -76,7 +56,6 @@ exclude = [
     ".pytype",
     ".ruff_cache",
     ".svn",
-    ".tox",
     ".venv",
     ".vscode",
     "__pypackages__",
@@ -106,8 +85,6 @@ dev = [
     "pytest>=8.3.4",
     "ruff>=0.8.1",
     "testcontainers[cassandra,postgres]>=4.8.2",
-    "tox-uv>=1.16.0",
-    "tox>=4.23.2",
     "graphsense-python>=1.9.4",
     "tqdm>=4.67.1",
 ]
