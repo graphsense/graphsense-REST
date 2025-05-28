@@ -16,13 +16,13 @@ repos:
         exclude: |
             (?x)^(
                 openapi_server/.*|
-                tests/.*
+                tests/test_*.py
             )$
     -   id: end-of-file-fixer
         exclude: |
             (?x)^(
                 openapi_server/.*|
-                tests/.*
+                tests/test_.*.py
             )$
     -
         id: check-yaml
@@ -54,15 +54,15 @@ repos:
     - id: uv-lock
 -   repo: local
     hooks:
-    - id: pytest-check
-      name: pytest-check
-      entry: make test
-      language: system
-      pass_filenames: false
-      always_run: true
     - id: generate-openapi-server
       name: Generate OpenAPI Server
       entry: make generate-openapi-server
+      language: system
+      pass_filenames: false
+      always_run: true
+    - id: pytest-check
+      name: pytest-check
+      entry: make test
       language: system
       pass_filenames: false
       always_run: true

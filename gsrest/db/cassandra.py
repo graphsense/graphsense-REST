@@ -315,7 +315,7 @@ def build_select_address_txs_statement(
     with_upper_bound: bool,
     with_tx_id: bool,
     ascending: bool,
-    limit: int,
+    limit: Optional[int],
 ) -> str:
     # prebuild useful helpers and conditions
     eth_like = is_eth_like(network)
@@ -367,7 +367,9 @@ def build_select_address_txs_statement(
         + f" {tx_id_col} {ordering}"
     )
 
-    return f"{query} {ordering_statement} LIMIT {limit}"
+    limit = "" if limit is None else f"LIMIT {limit}"
+
+    return f"{query} {ordering_statement} {limit}"
 
 
 class Cassandra:
@@ -1389,6 +1391,9 @@ class Cassandra:
             include_assets.append(currency.upper())
         else:
             include_assets = [currency.upper()]
+
+        # todo possible easy optimization is to get this range for both
+        # nodes and then calculate the overlap.
 
         tx_id_lower_bound, tx_id_upper_bound = await self.resolve_tx_id_range_by_block(
             currency, min_height, max_height
@@ -2723,9 +2728,7 @@ class Cassandra:
             has_upper_bound = this_tx_id_upper_bound is not None
             has_lower_bound = this_tx_id_lower_bound is not None
 
-            # divide fetch_size by number of result sets
-            # at it must be 2
-            fs_chunk = (offset or 0) + fs_it
+            fs_chunk = (offset or 0) + fetch_size
 
             cql_stmt = build_select_address_txs_statement(
                 network,
@@ -2733,7 +2736,7 @@ class Cassandra:
                 cols,
                 with_lower_bound=has_lower_bound,
                 with_upper_bound=has_upper_bound,
-                limit=fs_chunk,
+                limit=fs_chunk if tx_ids is None else None,
                 ascending=ascending,
                 with_tx_id=(tx_ids is not None),
             )
