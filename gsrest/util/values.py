@@ -29,10 +29,24 @@ def map_rates_for_peged_tokens(rates, token_config):
             {"code": "eur", "value": r["eur"] / r["usd"]},
             {"code": "usd", "value": 1},
         ]
+    elif peg == "eur":
+        if len(rates) != 2:
+            raise Exception(
+                "Rates structure is expected " f"to be a list of length 2: {rates}"
+            )
+        r = {i["code"]: i["value"] for i in rates}
+
+        return [
+            {"code": "eur", "value": 1},
+            {"code": "usd", "value": r["usd"] / r["eur"]},
+        ]
+
     elif is_eth_like(peg):
         return rates
     else:
-        raise Exception("Currently only tokens pegged to ether or usd are supported")
+        raise Exception(
+            "Currently only tokens pegged to ether, euro or usd are supported"
+        )
 
 
 def convert_token_values_map(currency, value_map, rates, token_configs):
