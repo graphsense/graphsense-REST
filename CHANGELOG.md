@@ -4,13 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
-## [25.05.1/1.11.2rc1] - 2025-05-26
+## [25.06.0/1.11.2] - 2025-06-02
 
 ### added
 - added database.list_address_txs_ordered_legacy config to switch back to old list_address_txs_ordered function used e.g. in address and entity links in case of issues with the new one.
 
 ### fixed
 - Rework and speed up slow list_address_txs_ordered function which means faster link functions and neighbor search.
+- fixed on ios without addresses on links endpoint
 
 ## [25.05.1/1.11.1] - 2025-05-15
 
