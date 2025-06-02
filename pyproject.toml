@@ -26,7 +26,7 @@ dependencies = [
     "openapi-schema-validator>=0.2.3",
     "python-dateutil>=2.9.0",
     "swagger-ui-bundle>=0.0.9",
-    "tagpack-tool>=25.4.0",
+    "tagpack-tool>=25.6.0",
 ]
 
 

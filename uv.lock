@@ -1360,7 +1360,7 @@ requires-dist = [
     { name = "openapi-schema-validator", specifier = ">=0.2.3" },
     { name = "python-dateutil", specifier = ">=2.9.0" },
     { name = "swagger-ui-bundle", specifier = ">=0.0.9" },
-    { name = "tagpack-tool", specifier = ">=25.4.0" },
+    { name = "tagpack-tool", specifier = ">=25.6.0" },
 ]
 
 [package.metadata.requires-dev]
@@ -3002,7 +3002,7 @@ wheels = [
 
 [[package]]
 name = "tagpack-tool"
-version = "25.4.0"
+version = "25.6.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anytree" },
@@ -3026,9 +3026,9 @@ dependencies = [
     { name = "tabulate" },
     { name = "typer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/32/a9/3c56591f588cd3d40f4039877df8c0a9b57327a3ad2b5fbc8cffb8522ec6/tagpack_tool-25.4.0.tar.gz", hash = "sha256:eb3d2460e42b122975d27358f561e8429a4958cf638c044094f20f666cd8778b", size = 332635 }
+sdist = { url = "https://files.pythonhosted.org/packages/14/62/54b47fd6831a51715910b1d05e89ea3dabd0dfa35ea0b81757d8c59aff0b/tagpack_tool-25.6.0.tar.gz", hash = "sha256:e56b3f051dd22ffb579cc8a21aafb0a7f30e4d7a2fca80fdfacd458ede346ae5", size = 332758 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/0a/b1/1e84240aa895478bed356056c3a86951e1b86bd1f8c927982c35ae672112/tagpack_tool-25.4.0-py3-none-any.whl", hash = "sha256:cf5f37bf2a478c52b3ba54ec966f6725f41f753dac582037cc4ad554ca3efb5d", size = 107263 },
+    { url = "https://files.pythonhosted.org/packages/c5/67/dc4fc993d506e4bbdbd2ea05ad73a402823e1113a0ce512d5ff5fcf257f9/tagpack_tool-25.6.0-py3-none-any.whl", hash = "sha256:faa9a7604faed110e81fc174a3dc87921a1f15db0b697f556c1d18b69f0ff39c", size = 107270 },
 ]
 
 [[package]]
