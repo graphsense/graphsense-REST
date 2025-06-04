@@ -235,7 +235,8 @@ async def get_tx(
 
         try:
             tindexS = postfix.strip("IT")
-            token_tx_id = int(tindexS) or token_tx_id
+            if token_tx_id is None:
+                token_tx_id = int(tindexS)
         except ValueError:
             raise BadUserInputException(f"Token index: {tindexS} is not an integer.")
 
