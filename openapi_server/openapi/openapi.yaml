@@ -1880,6 +1880,42 @@ paths:
       tags:
         - txs
       x-openapi-router-controller: openapi_server.controllers.txs_controller
+  /{currency}/txs/{tx_hash}/swaps:
+    get:
+      operationId: get_tx_swaps
+      parameters:
+        - description: The cryptocurrency code (e.g., btc)
+          example: btc
+          explode: false
+          in: path
+          name: currency
+          required: true
+          schema:
+            format: string
+            type: string
+          style: simple
+        - description: The transaction hash
+          example: 04d92601677d62a985310b61a301e74870fa942c8be0648e16b1db23b996a8cd
+          explode: false
+          in: path
+          name: tx_hash
+          required: true
+          schema:
+            $ref: '#/components/schemas/tx_hash'
+          style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/external_swap'
+                type: array
+          description: OK
+      summary: Returns swap information extracted from a specific transaction
+      tags:
+        - txs
+      x-openapi-router-controller: openapi_server.controllers.txs_controller
   /{currency}/txs/{tx_hash}/{io}:
     get:
       operationId: get_tx_io
@@ -3115,6 +3151,54 @@ components:
         - output_index
         - tx_hash
       title: tx_ref
+      type: object
+    external_swap:
+      example:
+        swap_log: swap_log
+        swapper: swapper
+        to_amount: to_amount
+        from_amount: from_amount
+        to_token: to_token
+        from_token: from_token
+        version: version
+      properties:
+        swapper:
+          description: Address of the swapper
+          title: swapper
+          type: string
+        from_amount:
+          description: Amount of tokens swapped from
+          title: from_amount
+          type: string
+        to_amount:
+          description: Amount of tokens swapped to
+          title: to_amount
+          type: string
+        from_token:
+          description: Address of the token swapped from
+          title: from_token
+          type: string
+        to_token:
+          description: Address of the token swapped to
+          nullable: true
+          title: to_token
+          type: string
+        version:
+          description: Version information
+          title: version
+          type: string
+        swap_log:
+          description: Log information about the swap
+          title: swap_log
+          type: string
+      required:
+        - from_amount
+        - from_token
+        - swap_log
+        - swapper
+        - to_amount
+        - version
+      title: external_swap
       type: object
     currency_stats:
       example:

@@ -14,6 +14,7 @@ from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.tx_ref import TxRef
 from openapi_server.models.tx_utxo import TxUtxo
 from openapi_server.models.tx_value import TxValue
+import gsrest.service.swaps_service as swaps_service
 
 
 def get_type_account(row):
@@ -321,3 +322,10 @@ async def list_matching_txs(request, currency, expression):
         for row in results
     ]
     return [tx for tx in txs if tx.startswith(expression)]
+
+
+async def get_tx_swaps(request, currency, tx_hash):
+    """
+    Delegate to swaps_service for swap extraction from transaction.
+    """
+    return await swaps_service.get_tx_swaps(request, currency, tx_hash)

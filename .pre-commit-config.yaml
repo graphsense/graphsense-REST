@@ -48,7 +48,7 @@ repos:
     -   id: check-docstring-first
 - repo: https://github.com/astral-sh/uv-pre-commit
   # uv version.
-  rev: 0.5.6
+  rev: 0.7.1
   hooks:
     # Update the uv lockfile
     - id: uv-lock

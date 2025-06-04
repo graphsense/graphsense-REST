@@ -22,6 +22,7 @@ dependencies = [
     "cassandra-driver>=3.27.0",
     "connexion[swagger-ui]>=2.6.0,<3.0",
     "eth-event>=1.2.3",
+    "graphsense-lib[swaps]",
     "lz4>=4.3.2",
     "openapi-schema-validator>=0.2.3",
     "python-dateutil>=2.9.0",
@@ -73,6 +74,9 @@ exclude = [
 
 [tool.ruff.lint]
 extend-select = ["T201"]
+
+[tool.uv.sources]
+graphsense-lib = { git = "https://github.com/graphsense/graphsense-lib", branch = "feature/swaps" }
 
 [dependency-groups]
 dev = [

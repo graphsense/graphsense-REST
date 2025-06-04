@@ -536,6 +536,24 @@ paths:
       summary: Returns in which other transaction's outputs the asked transaction spent. Think backwards references is the transaction graph. This endpoint is only available for utxo like currencies.
       tags:
         - txs
+  /{currency}/txs/{tx_hash}/swaps:
+    get:
+      operationId: get_tx_swaps
+      parameters:
+        - $ref: '#/components/parameters/currency'
+        - $ref: '#/components/parameters/tx_hash'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/external_swap'
+      summary: Returns swap information extracted from a specific transaction
+      tags:
+        - txs
   /{currency}/rates/{height}:
     get:
       operationId: get_exchange_rates
@@ -1246,6 +1264,38 @@ components:
           type: integer
         tx_hash:
           type: string
+    external_swap:
+      type: object
+      required:
+        - swapper
+        - from_amount
+        - to_amount
+        - from_token
+        - version
+        - swap_log
+      properties:
+        swapper:
+          type: string
+          description: Address of the swapper
+        from_amount:
+          type: string
+          description: Amount of tokens swapped from
+        to_amount:
+          type: string
+          description: Amount of tokens swapped to
+        from_token:
+          type: string
+          description: Address of the token swapped from
+        to_token:
+          type: string
+          nullable: true
+          description: Address of the token swapped to
+        version:
+          type: string
+          description: Version information
+        swap_log:
+          type: string
+          description: Log information about the swap
     currency_stats:
       title: statistics of a cryptocurrency
       type: object
