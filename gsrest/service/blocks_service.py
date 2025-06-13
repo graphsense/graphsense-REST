@@ -90,17 +90,26 @@ async def get_block_by_date(request, currency, date):
     ts = int(date.timestamp())
 
     if use_linear_search:
+        """
+        Hacky, expensive method to circumvent the need of having all the blocks
+        in the database.
+        """
+
+        AVERAGE_BLOCKTIME_SECONDS = {
+            "btc": 600,
+            "eth": 12,
+        }
+
         x = await db.get_block_by_date_allow_filtering(currency, ts)
 
         if x:
             block = x["block_id"]
-
             block_before = block - 1
-            block_before_ts = await db.get_block_timestamp(currency, block_before)
+            block_before_ts = x["timestamp"] - AVERAGE_BLOCKTIME_SECONDS[currency]
 
             return BlockAtDate(
                 before_block=block_before,
-                before_timestamp=block_before_ts["timestamp"],
+                before_timestamp=block_before_ts,
                 after_block=block,
                 after_timestamp=x["timestamp"],
             )
