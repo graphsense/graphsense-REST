@@ -57,13 +57,10 @@ ENV NUM_THREADS=
 ENV CONFIG_FILE=./instance/config.yaml
 ENV GIT_PYTHON_REFRESH=quiet
 
-# install sudo as root
-RUN apk add --update sudo
+USER dockeruser
 
 WORKDIR /srv/graphsense-rest
 RUN mkdir -p gsrest/plugins
-
-USER dockeruser
 
 # RUN find gsrest/plugins -name requirements.txt -exec uv pip install -r {} \;
 
