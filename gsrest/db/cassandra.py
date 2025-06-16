@@ -866,6 +866,19 @@ class Cassandra:
             )
         ).one()
 
+    async def get_block_below_block_allow_filtering(
+        self, currency, block_id: int
+    ) -> int:
+        query = "SELECT max(block_id) as block_id, timestamp FROM block WHERE block_id < %s allow filtering"
+        return (
+            await self.execute_async(
+                currency,
+                "raw",
+                query,
+                [block_id],
+            )
+        ).one()
+
     async def list_block_txs(self, currency, height):
         tx_ids = await self.list_block_txs_ids(currency, height)
         if tx_ids is None:

@@ -37,7 +37,7 @@ build-docker:
 	docker build -t graphsense-rest .
 
 serve-docker:
-	docker run --rm -it --network='host' -e NUM_THREADS=1 -e NUM_WORKERS=1 -v "${PWD}/instance/config.yaml:/config.yaml:Z" -e CONFIG_FILE=/config.yaml localhost/graphsense-rest:latest
+	docker run --rm -it --network='host' -e NUM_THREADS=1 -e NUM_WORKERS=1 -v "${PWD}/instance/config.yaml:/config.yaml:Z" -e CONFIG_FILE=/config.yaml graphsense-rest:latest
 
 generate-openapi-server: update-package-version
 	docker run --rm   \
