@@ -1313,7 +1313,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/0c/0a/ec64821a3ca6a8f14
 
 [[package]]
 name = "gsrest"
-version = "1.11.3"
+version = "1.12.0rc1"
 source = { virtual = "." }
 dependencies = [
     { name = "aiohttp-cors" },
@@ -1360,7 +1360,7 @@ requires-dist = [
     { name = "openapi-schema-validator", specifier = ">=0.2.3" },
     { name = "python-dateutil", specifier = ">=2.9.0" },
     { name = "swagger-ui-bundle", specifier = ">=0.0.9" },
-    { name = "tagpack-tool", git = "https://github.com/graphsense/graphsense-tagpack-tool?rev=v25.07.1rc1" },
+    { name = "tagpack-tool", git = "https://github.com/graphsense/graphsense-tagpack-tool?rev=v25.07.1rc3" },
 ]
 
 [package.metadata.requires-dev]
@@ -3002,8 +3002,8 @@ wheels = [
 
 [[package]]
 name = "tagpack-tool"
-version = "25.7.1rc1"
-source = { git = "https://github.com/graphsense/graphsense-tagpack-tool?rev=v25.07.1rc1#32f9d3dbe2e4fc0d701c7adde1759cd5ca2127ce" }
+version = "25.7.1rc3"
+source = { git = "https://github.com/graphsense/graphsense-tagpack-tool?rev=v25.07.1rc3#72e28024526a179332c69525d94ae9932a0dfddf" }
 dependencies = [
     { name = "anytree" },
     { name = "asyncpg" },

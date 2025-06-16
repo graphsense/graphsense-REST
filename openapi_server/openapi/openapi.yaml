@@ -5,7 +5,7 @@ info:
     name: Iknaio Cryptoasset Analytics GmbH
   description: GraphSense API provides programmatic access to various ledgers' addresses, entities, blocks, transactions and tags for automated and highly efficient forensics tasks.
   title: GraphSense API
-  version: 1.11.3
+  version: 1.12.0rc1
 servers:
   - url: https://api.ikna.io
 paths:
@@ -226,13 +226,14 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/user_reported_tag'
+        required: true
         x-body-name: body
       responses:
         "200":
           description: Success
         "400":
           description: Disabled or wrong input
-      summary: User report a missing annotation.
+      summary: Users can use this endpoint to report a missing annotation.
       tags:
         - tags
       x-openapi-router-controller: openapi_server.controllers.tags_controller

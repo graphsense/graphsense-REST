@@ -387,8 +387,8 @@ async def list_taxonomies(request: web.Request, ) -> web.Response:
         raise web.HTTPInternalServerError()
 
 
-async def report_tag(request: web.Request, body=None) -> web.Response:
-    """User report a missing annotation.
+async def report_tag(request: web.Request, body) -> web.Response:
+    """Users can use this endpoint to report a missing annotation.
 
     
 

@@ -1,6 +1,6 @@
 [project]
 name = "gsrest"
-version = "1.11.3"
+version = "1.12.0rc1"
 description = "GraphSense API REST API"
 readme = "README.md"
 changelog = "CHANGELOG.md"
@@ -26,7 +26,7 @@ dependencies = [
     "openapi-schema-validator>=0.2.3",
     "python-dateutil>=2.9.0",
     "swagger-ui-bundle>=0.0.9",
-    "tagpack-tool>=25.6.0",
+    "tagpack-tool>=25.7.1",
 ]
 
 
@@ -75,7 +75,7 @@ exclude = [
 extend-select = ["T201"]
 
 [tool.uv.sources]
-tagpack-tool = { git = "https://github.com/graphsense/graphsense-tagpack-tool", rev = "v25.07.1rc1" }
+tagpack-tool = { git = "https://github.com/graphsense/graphsense-tagpack-tool", rev = "v25.07.1rc3" }
 
 [dependency-groups]
 dev = [

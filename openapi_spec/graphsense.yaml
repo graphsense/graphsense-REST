@@ -5,7 +5,7 @@ info:
   contact:
     name: Iknaio Cryptoasset Analytics GmbH
     email: contact@ikna.io
-  version: "1.11.3"
+  version: "1.12.0rc1"
 servers:
   - url: 'https://api.ikna.io'
 paths:
@@ -660,10 +660,11 @@ paths:
   /tags/report-tag:
     post:
       operationId: report_tag
-      summary: User report a missing annotation.
+      summary: Users can use this endpoint to report a missing annotation.
       tags:
         - tags
       requestBody:
+        required: true
         content:
           application/json:
             schema:
