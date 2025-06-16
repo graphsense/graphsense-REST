@@ -218,6 +218,25 @@ paths:
       tags:
         - tags
       x-openapi-router-controller: openapi_server.controllers.tags_controller
+  /tags/report-tag:
+    post:
+      operationId: report_tag
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user_reported_tag'
+        x-body-name: body
+      responses:
+        "200":
+          description: Success
+        "400":
+          description: Disabled or wrong input
+      summary: User report a missing annotation.
+      tags:
+        - tags
+      x-openapi-router-controller: openapi_server.controllers.tags_controller
+      x-codegen-request-body-name: body
   /tags/taxonomies:
     get:
       operationId: list_taxonomies
@@ -2874,6 +2893,25 @@ components:
         type: integer
       style: form
   schemas:
+    user_reported_tag:
+      properties:
+        address:
+          type: string
+        network:
+          type: string
+        label:
+          type: string
+        actor:
+          type: string
+        description:
+          type: string
+      required:
+        - actor
+        - address
+        - description
+        - label
+        - network
+      type: object
     tag_cloud_entry:
       example:
         cnt: 2

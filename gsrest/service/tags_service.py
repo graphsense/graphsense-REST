@@ -2,9 +2,10 @@ import asyncio
 from typing import Callable, List, Optional
 
 from tagstore.db import ActorPublic, TagPublic, TagstoreDbAsync, Taxonomies
+from tagstore.db.queries import UserReportedAddressTag
 
 from gsrest.db import get_cached_is_abuse, get_cached_taxonomy_concept_label
-from gsrest.errors import NotFoundException
+from gsrest.errors import FeatureNotAvailableException, NotFoundException
 from gsrest.service.common_service import get_tagstore_access_groups, try_get_cluster_id
 from openapi_server.models.actor import Actor
 from openapi_server.models.actor_context import ActorContext
@@ -220,3 +221,24 @@ async def list_taxonomies(request):
         )
         for k, v in taxs
     ]
+
+
+async def report_tag(request, body):
+    reporting_enabled = request.app["config"].get("enable-user-tag-reporting", False)
+
+    if reporting_enabled:
+        tsdb = TagstoreDbAsync(request.app["gs-tagstore"])
+
+        nt = UserReportedAddressTag(
+            address=body.address,
+            network=body.network,
+            actor=body.actor,
+            label=body.label,
+            description=body.description,
+        )
+
+        await tsdb.add_user_reported_tag(nt)
+    else:
+        raise FeatureNotAvailableException(
+            "The report tag feature is disabled on this endpoint."
+        )

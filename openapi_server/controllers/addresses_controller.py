@@ -66,7 +66,9 @@ async def get_address(request: web.Request, currency, address, include_actors=No
                     request.app['plugin_contexts'][plugin.__module__]
                 plugin.before_response(context, request, result)
 
-        if isinstance(result, list):
+        if result is None:
+            result = {}
+        elif isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
@@ -80,6 +82,9 @@ async def get_address(request: web.Request, currency, address, include_actors=No
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=e.get_user_msg())
     except BadUserInputException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=e.get_user_msg())
+    except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
     except Exception as e:
@@ -138,7 +143,9 @@ async def get_address_entity(request: web.Request, currency, address, include_ac
                     request.app['plugin_contexts'][plugin.__module__]
                 plugin.before_response(context, request, result)
 
-        if isinstance(result, list):
+        if result is None:
+            result = {}
+        elif isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
@@ -152,6 +159,9 @@ async def get_address_entity(request: web.Request, currency, address, include_ac
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=e.get_user_msg())
     except BadUserInputException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=e.get_user_msg())
+    except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
     except Exception as e:
@@ -210,7 +220,9 @@ async def get_tag_summary_by_address(request: web.Request, currency, address, in
                     request.app['plugin_contexts'][plugin.__module__]
                 plugin.before_response(context, request, result)
 
-        if isinstance(result, list):
+        if result is None:
+            result = {}
+        elif isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
@@ -224,6 +236,9 @@ async def get_tag_summary_by_address(request: web.Request, currency, address, in
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=e.get_user_msg())
     except BadUserInputException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=e.get_user_msg())
+    except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
     except Exception as e:
@@ -292,7 +307,9 @@ async def list_address_links(request: web.Request, currency, address, neighbor, 
                     request.app['plugin_contexts'][plugin.__module__]
                 plugin.before_response(context, request, result)
 
-        if isinstance(result, list):
+        if result is None:
+            result = {}
+        elif isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
@@ -306,6 +323,9 @@ async def list_address_links(request: web.Request, currency, address, neighbor, 
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=e.get_user_msg())
     except BadUserInputException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=e.get_user_msg())
+    except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
     except Exception as e:
@@ -374,7 +394,9 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
                     request.app['plugin_contexts'][plugin.__module__]
                 plugin.before_response(context, request, result)
 
-        if isinstance(result, list):
+        if result is None:
+            result = {}
+        elif isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
@@ -388,6 +410,9 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=e.get_user_msg())
     except BadUserInputException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=e.get_user_msg())
+    except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
     except Exception as e:
@@ -458,7 +483,9 @@ async def list_address_txs(request: web.Request, currency, address, direction=No
                     request.app['plugin_contexts'][plugin.__module__]
                 plugin.before_response(context, request, result)
 
-        if isinstance(result, list):
+        if result is None:
+            result = {}
+        elif isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
@@ -472,6 +499,9 @@ async def list_address_txs(request: web.Request, currency, address, direction=No
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=e.get_user_msg())
     except BadUserInputException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=e.get_user_msg())
+    except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
     except Exception as e:
@@ -534,7 +564,9 @@ async def list_tags_by_address(request: web.Request, currency, address, page=Non
                     request.app['plugin_contexts'][plugin.__module__]
                 plugin.before_response(context, request, result)
 
-        if isinstance(result, list):
+        if result is None:
+            result = {}
+        elif isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
@@ -548,6 +580,9 @@ async def list_tags_by_address(request: web.Request, currency, address, page=Non
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=e.get_user_msg())
     except BadUserInputException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=e.get_user_msg())
+    except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
     except Exception as e:

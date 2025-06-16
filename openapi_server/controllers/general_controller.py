@@ -55,7 +55,9 @@ async def get_statistics(request: web.Request, ) -> web.Response:
                     request.app['plugin_contexts'][plugin.__module__]
                 plugin.before_response(context, request, result)
 
-        if isinstance(result, list):
+        if result is None:
+            result = {}
+        elif isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
@@ -69,6 +71,9 @@ async def get_statistics(request: web.Request, ) -> web.Response:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=e.get_user_msg())
     except BadUserInputException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=e.get_user_msg())
+    except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
     except Exception as e:
@@ -127,7 +132,9 @@ async def search(request: web.Request, q, currency=None, limit=None) -> web.Resp
                     request.app['plugin_contexts'][plugin.__module__]
                 plugin.before_response(context, request, result)
 
-        if isinstance(result, list):
+        if result is None:
+            result = {}
+        elif isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
@@ -141,6 +148,9 @@ async def search(request: web.Request, q, currency=None, limit=None) -> web.Resp
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=e.get_user_msg())
     except BadUserInputException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=e.get_user_msg())
+    except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
     except Exception as e:

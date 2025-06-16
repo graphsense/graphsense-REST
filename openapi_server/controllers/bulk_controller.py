@@ -60,6 +60,9 @@ async def bulk_csv(request: web.Request, currency, operation, num_pages, body) -
     except BadUserInputException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
+    except FeatureNotAvailableException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=e.get_user_msg())
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")
@@ -115,6 +118,9 @@ async def bulk_json(request: web.Request, currency, operation, num_pages, body) 
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=e.get_user_msg())
     except BadUserInputException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=e.get_user_msg())
+    except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
     except Exception as e:

@@ -657,6 +657,22 @@ paths:
       summary: Returns the supported concepts of a taxonomy
       tags:
         - tags
+  /tags/report-tag:
+    post:
+      operationId: report_tag
+      summary: User report a missing annotation.
+      tags:
+        - tags
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/user_reported_tag"
+      responses:
+        "200":
+          description: Success
+        "400":
+          description: Disabled or wrong input
   /{currency}/bulk.csv/{operation}:
     post:
       operationId: bulk_csv
@@ -1124,6 +1140,25 @@ components:
       description: Number of pages to retrieve for operations with list response
       example: 1
   schemas:
+    user_reported_tag:
+      type: object
+      required:
+        - address
+        - network
+        - label
+        - actor
+        - description
+      properties:
+        address:
+          type: string
+        network:
+          type: string
+        label:
+          type: string
+        actor:
+          type: string
+        description:
+          type: string
     tag_cloud_entry:
       type: object
       required:

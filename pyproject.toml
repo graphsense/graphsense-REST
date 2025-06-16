@@ -74,6 +74,9 @@ exclude = [
 [tool.ruff.lint]
 extend-select = ["T201"]
 
+[tool.uv.sources]
+tagpack-tool = { git = "https://github.com/graphsense/graphsense-tagpack-tool", rev = "v25.07.1rc1" }
+
 [dependency-groups]
 dev = [
     "aiohttp-devtools>=1.1.2",

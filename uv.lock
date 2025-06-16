@@ -1360,7 +1360,7 @@ requires-dist = [
     { name = "openapi-schema-validator", specifier = ">=0.2.3" },
     { name = "python-dateutil", specifier = ">=2.9.0" },
     { name = "swagger-ui-bundle", specifier = ">=0.0.9" },
-    { name = "tagpack-tool", specifier = ">=25.6.0" },
+    { name = "tagpack-tool", git = "https://github.com/graphsense/graphsense-tagpack-tool?rev=v25.07.1rc1" },
 ]
 
 [package.metadata.requires-dev]
@@ -3002,8 +3002,8 @@ wheels = [
 
 [[package]]
 name = "tagpack-tool"
-version = "25.6.0"
-source = { registry = "https://pypi.org/simple" }
+version = "25.7.1rc1"
+source = { git = "https://github.com/graphsense/graphsense-tagpack-tool?rev=v25.07.1rc1#32f9d3dbe2e4fc0d701c7adde1759cd5ca2127ce" }
 dependencies = [
     { name = "anytree" },
     { name = "asyncpg" },
@@ -3025,10 +3025,6 @@ dependencies = [
     { name = "sqlmodel" },
     { name = "tabulate" },
     { name = "typer" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/14/62/54b47fd6831a51715910b1d05e89ea3dabd0dfa35ea0b81757d8c59aff0b/tagpack_tool-25.6.0.tar.gz", hash = "sha256:e56b3f051dd22ffb579cc8a21aafb0a7f30e4d7a2fca80fdfacd458ede346ae5", size = 332758 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/c5/67/dc4fc993d506e4bbdbd2ea05ad73a402823e1113a0ce512d5ff5fcf257f9/tagpack_tool-25.6.0-py3-none-any.whl", hash = "sha256:faa9a7604faed110e81fc174a3dc87921a1f15db0b697f556c1d18b69f0ff39c", size = 107270 },
 ]
 
 [[package]]
