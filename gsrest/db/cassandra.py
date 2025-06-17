@@ -1318,6 +1318,7 @@ class Cassandra:
         min_height=None,
         max_height=None,
         order=None,
+        token_currency=None,
         page=None,
         pagesize=None,
     ):
@@ -1329,6 +1330,7 @@ class Cassandra:
             min_height=min_height,
             max_height=max_height,
             order=order,
+            token_currency=token_currency,
             page=page,
             pagesize=pagesize,
         )
@@ -1341,6 +1343,7 @@ class Cassandra:
         min_height=None,
         max_height=None,
         order=None,
+        token_currency=None,
         page=None,
         pagesize=None,
     ):
@@ -1352,6 +1355,7 @@ class Cassandra:
             min_height=min_height,
             max_height=max_height,
             order=order,
+            token_currency=token_currency,
             page=page,
             pagesize=pagesize,
         )
@@ -1365,6 +1369,7 @@ class Cassandra:
         min_height=None,
         max_height=None,
         order=None,
+        token_currency=None,
         page=None,
         pagesize=None,
     ):
@@ -1398,16 +1403,22 @@ class Cassandra:
             first_value = "output_value"
             second_value = "input_value"
 
-        if is_eth_like(currency):
-            token_config = self.get_token_configuration(currency)
-            include_assets = list(token_config.keys())
-            include_assets.append(currency.upper())
+        if token_currency is not None:
+            include_assets = [token_currency.upper()]
         else:
-            include_assets = [currency.upper()]
+            if is_eth_like(currency):
+                token_config = self.get_token_configuration(currency)
+                include_assets = list(token_config.keys())
+                include_assets.append(currency.upper())
+            else:
+                include_assets = [currency.upper()]
 
-        tx_id_lower_bound, tx_id_upper_bound = await self.resolve_tx_id_range_by_block(
-            currency, min_height, max_height
-        )
+            (
+                tx_id_lower_bound,
+                tx_id_upper_bound,
+            ) = await self.resolve_tx_id_range_by_block(
+                currency, min_height, max_height
+            )
 
         # Get the transaction ID range overlap for both nodes
         src_first_tx_id = src_node["first_tx_id"]

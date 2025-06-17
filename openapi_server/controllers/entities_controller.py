@@ -255,7 +255,7 @@ async def list_entity_addresses(request: web.Request, currency, entity, page=Non
         raise web.HTTPInternalServerError()
 
 
-async def list_entity_links(request: web.Request, currency, entity, neighbor, min_height=None, max_height=None, order=None, page=None, pagesize=None) -> web.Response:
+async def list_entity_links(request: web.Request, currency, entity, neighbor, min_height=None, max_height=None, min_date=None, max_date=None, order=None, token_currency=None, page=None, pagesize=None) -> web.Response:
     """Get transactions between two entities
 
     
@@ -270,14 +270,22 @@ async def list_entity_links(request: web.Request, currency, entity, neighbor, mi
     :type min_height: int
     :param max_height: Return transactions up to (including) given height
     :type max_height: int
+    :param min_date: min date of txs
+    :type min_date: str
+    :param max_date: max date of txs
+    :type max_date: str
     :param order: Sorting order
     :type order: str
+    :param token_currency: Return transactions of given token or base currency
+    :type token_currency: str
     :param page: Resumption token for retrieving the next page
     :type page: str
     :param pagesize: Number of items returned in a single page
     :type pagesize: int
 
     """
+    min_date = util.deserialize_datetime(min_date) if min_date is not None else None
+    max_date = util.deserialize_datetime(max_date) if max_date is not None else None
 
     for plugin in request.app['plugins']:
         if hasattr(plugin, 'before_request'):
@@ -300,11 +308,11 @@ async def list_entity_links(request: web.Request, currency, entity, neighbor, mi
     request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
-        if 'currency' in ['','currency','entity','neighbor','min_height','max_height','order','page','pagesize']:
+        if 'currency' in ['','currency','entity','neighbor','min_height','max_height','min_date','max_date','order','token_currency','page','pagesize']:
             if currency is not None:
                 currency = currency.lower()
         result = service.list_entity_links(request
-                ,currency=currency,entity=entity,neighbor=neighbor,min_height=min_height,max_height=max_height,order=order,page=page,pagesize=pagesize)
+                ,currency=currency,entity=entity,neighbor=neighbor,min_height=min_height,max_height=max_height,min_date=min_date,max_date=max_date,order=order,token_currency=token_currency,page=page,pagesize=pagesize)
         result = await result
 
         for plugin in request.app['plugins']:
@@ -431,7 +439,7 @@ async def list_entity_neighbors(request: web.Request, currency, entity, directio
         raise web.HTTPInternalServerError()
 
 
-async def list_entity_txs(request: web.Request, currency, entity, direction=None, min_height=None, max_height=None, order=None, token_currency=None, page=None, pagesize=None) -> web.Response:
+async def list_entity_txs(request: web.Request, currency, entity, direction=None, min_height=None, max_height=None, min_date=None, max_date=None, order=None, token_currency=None, page=None, pagesize=None) -> web.Response:
     """Get all transactions an entity has been involved in
 
     
@@ -446,9 +454,13 @@ async def list_entity_txs(request: web.Request, currency, entity, direction=None
     :type min_height: int
     :param max_height: Return transactions up to (including) given height
     :type max_height: int
+    :param min_date: min date of txs
+    :type min_date: str
+    :param max_date: max date of txs
+    :type max_date: str
     :param order: Sorting order
     :type order: str
-    :param token_currency: Return transactions of given token currency
+    :param token_currency: Return transactions of given token or base currency
     :type token_currency: str
     :param page: Resumption token for retrieving the next page
     :type page: str
@@ -456,6 +468,8 @@ async def list_entity_txs(request: web.Request, currency, entity, direction=None
     :type pagesize: int
 
     """
+    min_date = util.deserialize_datetime(min_date) if min_date is not None else None
+    max_date = util.deserialize_datetime(max_date) if max_date is not None else None
 
     for plugin in request.app['plugins']:
         if hasattr(plugin, 'before_request'):
@@ -478,11 +492,11 @@ async def list_entity_txs(request: web.Request, currency, entity, direction=None
     request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
-        if 'currency' in ['','currency','entity','direction','min_height','max_height','order','token_currency','page','pagesize']:
+        if 'currency' in ['','currency','entity','direction','min_height','max_height','min_date','max_date','order','token_currency','page','pagesize']:
             if currency is not None:
                 currency = currency.lower()
         result = service.list_entity_txs(request
-                ,currency=currency,entity=entity,direction=direction,min_height=min_height,max_height=max_height,order=order,token_currency=token_currency,page=page,pagesize=pagesize)
+                ,currency=currency,entity=entity,direction=direction,min_height=min_height,max_height=max_height,min_date=min_date,max_date=max_date,order=order,token_currency=token_currency,page=page,pagesize=pagesize)
         result = await result
 
         for plugin in request.app['plugins']:

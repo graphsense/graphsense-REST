@@ -151,6 +151,8 @@ paths:
         - $ref: '#/components/parameters/direction_txs'
         - $ref: '#/components/parameters/min_height'
         - $ref: '#/components/parameters/max_height'
+        - $ref: '#/components/parameters/min_date'
+        - $ref: '#/components/parameters/max_date'
         - $ref: '#/components/parameters/sorting_order'
         - $ref: '#/components/parameters/token_currency'
         - $ref: '#/components/parameters/page'
@@ -255,7 +257,10 @@ paths:
         - $ref: '#/components/parameters/neighbor'
         - $ref: '#/components/parameters/min_height'
         - $ref: '#/components/parameters/max_height'
+        - $ref: '#/components/parameters/min_date'
+        - $ref: '#/components/parameters/max_date'
         - $ref: '#/components/parameters/sorting_order'
+        - $ref: '#/components/parameters/token_currency'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pagesize'
       responses:
@@ -342,6 +347,8 @@ paths:
         - $ref: '#/components/parameters/direction_txs'
         - $ref: '#/components/parameters/min_height'
         - $ref: '#/components/parameters/max_height'
+        - $ref: '#/components/parameters/min_date'
+        - $ref: '#/components/parameters/max_date'
         - $ref: '#/components/parameters/sorting_order'
         - $ref: '#/components/parameters/token_currency'
         - $ref: '#/components/parameters/page'
@@ -368,7 +375,10 @@ paths:
         - $ref: '#/components/parameters/entity_neighbor'
         - $ref: '#/components/parameters/min_height'
         - $ref: '#/components/parameters/max_height'
+        - $ref: '#/components/parameters/min_date'
+        - $ref: '#/components/parameters/max_date'
         - $ref: '#/components/parameters/sorting_order'
+        - $ref: '#/components/parameters/token_currency'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pagesize'
       responses:
@@ -836,6 +846,22 @@ components:
         $ref: '#/components/schemas/height'
       description: Return transactions up to (including) given height
       example: 2
+    min_date:
+      in: query
+      name: min_date
+      required: false
+      schema:
+        $ref: '#/components/schemas/dateTime'
+      description: min date of txs
+      example: '2017-07-21T17:32:28Z'
+    max_date:
+      in: query
+      name: max_date
+      required: false
+      schema:
+        $ref: '#/components/schemas/dateTime'
+      description: max date of txs
+      example: '2017-07-21T17:32:28Z'
     sorting_order:
       in: query
       name: order
@@ -852,7 +878,7 @@ components:
       required: false
       schema:
         type: string
-      description: Return transactions of given token currency
+      description: Return transactions of given token or base currency
       example: WETH
     io:
       in: path

@@ -7,6 +7,7 @@ from tagstore.db import TagstoreDbAsync
 import gsrest.service.common_service as common
 from gsrest.db.node_type import NodeType
 from gsrest.errors import BadUserInputException, ClusterNotFoundException
+from gsrest.service.blocks_service import get_min_max_height
 from gsrest.service.common_service import get_address, get_tagstore_access_groups
 from gsrest.service.rates_service import get_rates
 from gsrest.service.tags_service import (
@@ -667,18 +668,24 @@ async def list_entity_txs(
     direction,
     min_height=None,
     max_height=None,
+    min_date=None,
+    max_date=None,
     order="desc",
     token_currency=None,
     page=None,
     pagesize=None,
 ):
+    min_b, max_b = await get_min_max_height(
+        request, currency, min_height, max_height, min_date, max_date
+    )
+
     db = request.app["db"]
     results, paging_state = await db.list_entity_txs(
         currency=currency,
         entity=entity,
         direction=direction,
-        min_height=min_height,
-        max_height=max_height,
+        min_height=min_b,
+        max_height=max_b,
         order=order,
         token_currency=token_currency,
         page=page,
@@ -697,18 +704,26 @@ async def list_entity_links(
     neighbor,
     min_height=None,
     max_height=None,
+    min_date=None,
+    max_date=None,
     order="desc",
+    token_currency=None,
     page=None,
     pagesize=None,
 ):
+    min_b, max_b = await get_min_max_height(
+        request, currency, min_height, max_height, min_date, max_date
+    )
+
     db = request.app["db"]
     result = await db.list_entity_links(
         currency,
         entity,
         neighbor,
-        min_height=min_height,
-        max_height=max_height,
+        min_height=min_b,
+        max_height=max_b,
         order=order,
+        token_currency=token_currency,
         page=page,
         pagesize=pagesize,
     )

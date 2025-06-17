@@ -416,6 +416,24 @@ paths:
           schema:
             $ref: '#/components/schemas/height'
           style: form
+        - description: min date of txs
+          example: 2017-07-21T17:32:28Z
+          explode: true
+          in: query
+          name: min_date
+          required: false
+          schema:
+            $ref: '#/components/schemas/dateTime'
+          style: form
+        - description: max date of txs
+          example: 2017-07-21T17:32:28Z
+          explode: true
+          in: query
+          name: max_date
+          required: false
+          schema:
+            $ref: '#/components/schemas/dateTime'
+          style: form
         - description: Sorting order
           example: desc
           explode: true
@@ -427,6 +445,15 @@ paths:
             enum:
               - asc
               - desc
+            type: string
+          style: form
+        - description: Return transactions of given token or base currency
+          example: WETH
+          explode: true
+          in: query
+          name: token_currency
+          required: false
+          schema:
             type: string
           style: form
         - description: Resumption token for retrieving the next page
@@ -719,6 +746,24 @@ paths:
           schema:
             $ref: '#/components/schemas/height'
           style: form
+        - description: min date of txs
+          example: 2017-07-21T17:32:28Z
+          explode: true
+          in: query
+          name: min_date
+          required: false
+          schema:
+            $ref: '#/components/schemas/dateTime'
+          style: form
+        - description: max date of txs
+          example: 2017-07-21T17:32:28Z
+          explode: true
+          in: query
+          name: max_date
+          required: false
+          schema:
+            $ref: '#/components/schemas/dateTime'
+          style: form
         - description: Sorting order
           example: desc
           explode: true
@@ -732,7 +777,7 @@ paths:
               - desc
             type: string
           style: form
-        - description: Return transactions of given token currency
+        - description: Return transactions of given token or base currency
           example: WETH
           explode: true
           in: query
@@ -1207,6 +1252,24 @@ paths:
           schema:
             $ref: '#/components/schemas/height'
           style: form
+        - description: min date of txs
+          example: 2017-07-21T17:32:28Z
+          explode: true
+          in: query
+          name: min_date
+          required: false
+          schema:
+            $ref: '#/components/schemas/dateTime'
+          style: form
+        - description: max date of txs
+          example: 2017-07-21T17:32:28Z
+          explode: true
+          in: query
+          name: max_date
+          required: false
+          schema:
+            $ref: '#/components/schemas/dateTime'
+          style: form
         - description: Sorting order
           example: desc
           explode: true
@@ -1218,6 +1281,15 @@ paths:
             enum:
               - asc
               - desc
+            type: string
+          style: form
+        - description: Return transactions of given token or base currency
+          example: WETH
+          explode: true
+          in: query
+          name: token_currency
+          required: false
+          schema:
             type: string
           style: form
         - description: Resumption token for retrieving the next page
@@ -1572,6 +1644,24 @@ paths:
           schema:
             $ref: '#/components/schemas/height'
           style: form
+        - description: min date of txs
+          example: 2017-07-21T17:32:28Z
+          explode: true
+          in: query
+          name: min_date
+          required: false
+          schema:
+            $ref: '#/components/schemas/dateTime'
+          style: form
+        - description: max date of txs
+          example: 2017-07-21T17:32:28Z
+          explode: true
+          in: query
+          name: max_date
+          required: false
+          schema:
+            $ref: '#/components/schemas/dateTime'
+          style: form
         - description: Sorting order
           example: desc
           explode: true
@@ -1585,7 +1675,7 @@ paths:
               - desc
             type: string
           style: form
-        - description: Return transactions of given token currency
+        - description: Return transactions of given token or base currency
           example: WETH
           explode: true
           in: query
@@ -2532,6 +2622,26 @@ components:
       schema:
         $ref: '#/components/schemas/height'
       style: form
+    min_date:
+      description: min date of txs
+      example: 2017-07-21T17:32:28Z
+      explode: true
+      in: query
+      name: min_date
+      required: false
+      schema:
+        $ref: '#/components/schemas/dateTime'
+      style: form
+    max_date:
+      description: max date of txs
+      example: 2017-07-21T17:32:28Z
+      explode: true
+      in: query
+      name: max_date
+      required: false
+      schema:
+        $ref: '#/components/schemas/dateTime'
+      style: form
     sorting_order:
       description: Sorting order
       example: desc
@@ -2547,7 +2657,7 @@ components:
         type: string
       style: form
     token_currency:
-      description: Return transactions of given token currency
+      description: Return transactions of given token or base currency
       example: WETH
       explode: true
       in: query

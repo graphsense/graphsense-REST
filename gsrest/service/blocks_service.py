@@ -1,3 +1,6 @@
+from datetime import datetime
+from typing import Optional, Tuple
+
 from async_lru import alru_cache
 
 from gsrest.errors import BlockNotFoundException
@@ -75,6 +78,25 @@ async def list_block_txs(request, currency, height):
         )
         for tx in txs
     ]
+
+
+async def get_min_max_height(
+    request,
+    network,
+    min_height: Optional[int],
+    max_height: Optional[int],
+    min_date: Optional[datetime],
+    max_date: Optional[datetime],
+) -> Tuple[Optional[int], Optional[int]]:
+    if min_height is None and min_date is not None:
+        bspec_min = await get_block_by_date(request, network, min_date)
+        min_height = bspec_min.before_block
+
+    if max_height is None and max_date is not None:
+        bspec_max = await get_block_by_date(request, network, max_date)
+        max_height = bspec_max.before_block
+
+    return (min_height, max_height)
 
 
 @alru_cache(maxsize=1000)

@@ -100,7 +100,7 @@ async def get_block_by_date(request: web.Request, currency, date) -> web.Respons
     :type date: str
 
     """
-    date = util.deserialize_datetime(date)
+    date = util.deserialize_datetime(date) if date is not None else None
 
     for plugin in request.app['plugins']:
         if hasattr(plugin, 'before_request'):

@@ -70,10 +70,10 @@ async def {{operationId}}(request: web.Request, {{#allParams}}{{paramName}}{{^re
     {{#allParams}}
         {{^isContainer}}
             {{#isDate}}
-    {{paramName}} = util.deserialize_date({{paramName}})
+    {{paramName}} = util.deserialize_date({{paramName}}) if {{paramName}} is not None else None
             {{/isDate}}
             {{#isDateTime}}
-    {{paramName}} = util.deserialize_datetime({{paramName}})
+    {{paramName}} = util.deserialize_datetime({{paramName}}) if {{paramName}} is not None else None
             {{/isDateTime}}
             {{^isPrimitiveType}}
                 {{^isFile}}
