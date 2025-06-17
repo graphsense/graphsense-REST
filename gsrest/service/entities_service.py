@@ -30,9 +30,9 @@ from openapi_server.models.neighbor_entity import NeighborEntity
 from openapi_server.models.tx_summary import TxSummary
 
 MAX_DEPTH = 7
-TAGS_PAGE_SIZE = 100
+# TAGS_PAGE_SIZE = 100
 SEARCH_TIMEOUT = 300
-PAGE_SIZE_GET_ALL_TAGS = 10000
+# PAGE_SIZE_GET_ALL_TAGS = 10000
 
 
 def from_row(currency, row, rates, token_config, best_tag=None, count=0, actors=None):
@@ -95,7 +95,7 @@ async def list_address_tags_by_entity_internal(
 async def list_address_tags_by_entity(
     request, currency, entity, page=None, pagesize=None
 ):
-    pagesize = min(pagesize or TAGS_PAGE_SIZE, TAGS_PAGE_SIZE)
+    # pagesize = min(pagesize or TAGS_PAGE_SIZE, TAGS_PAGE_SIZE)
     return await list_address_tags_by_entity_internal(
         request=request, currency=currency, entity=entity, page=page, pagesize=pagesize
     )

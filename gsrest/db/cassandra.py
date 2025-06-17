@@ -1413,12 +1413,10 @@ class Cassandra:
             else:
                 include_assets = [currency.upper()]
 
-            (
-                tx_id_lower_bound,
-                tx_id_upper_bound,
-            ) = await self.resolve_tx_id_range_by_block(
-                currency, min_height, max_height
-            )
+        (
+            tx_id_lower_bound,
+            tx_id_upper_bound,
+        ) = await self.resolve_tx_id_range_by_block(currency, min_height, max_height)
 
         # Get the transaction ID range overlap for both nodes
         src_first_tx_id = src_node["first_tx_id"]
