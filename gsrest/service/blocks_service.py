@@ -3,7 +3,7 @@ from typing import Optional, Tuple
 
 from async_lru import alru_cache
 
-from gsrest.errors import BlockNotFoundException
+from gsrest.errors import BlockNotFoundException, BadUserInputException
 from gsrest.service.rates_service import get_rates
 from gsrest.service.txs_service import from_row
 from gsrest.util import is_eth_like
@@ -88,6 +88,16 @@ async def get_min_max_height(
     min_date: Optional[datetime],
     max_date: Optional[datetime],
 ) -> Tuple[Optional[int], Optional[int]]:
+    if min_date is not None and min_height is not None:
+        raise BadUserInputException(
+            "Both min_height and min_date parameters are specified. Please chose one."
+        )
+
+    if max_date is not None and max_height is not None:
+        raise BadUserInputException(
+            "Both max_height and max_date parameters are specified. Please chose one."
+        )
+
     if min_height is None and min_date is not None:
         bspec_min = await get_block_by_date(request, network, min_date)
         min_height = bspec_min.before_block
