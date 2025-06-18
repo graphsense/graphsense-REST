@@ -3,7 +3,7 @@ from typing import Optional, Tuple
 
 from async_lru import alru_cache
 
-from gsrest.errors import BlockNotFoundException, BadUserInputException
+from gsrest.errors import BadUserInputException, BlockNotFoundException
 from gsrest.service.rates_service import get_rates
 from gsrest.service.txs_service import from_row
 from gsrest.util import is_eth_like
