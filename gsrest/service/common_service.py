@@ -114,6 +114,12 @@ async def txs_from_rows(request, currency, rows, token_config):
 
 async def get_address(request, currency, address, include_actors=True):
     address_canonical = cannonicalize_address(currency, address)
+
+    if len(address_canonical) == 0:
+        raise BadUserInputException(
+            f"{address} does not look like a valid {currency} address"
+        )
+
     db = request.app["db"]
     try:
         result = await db.get_address(currency, address_canonical)
