@@ -12,7 +12,7 @@ test:
 	uv run pytest -x -rx -vv
 
 test-regression:
-	uv run pytest -m "regression"
+	uv run pytest -m "regression" -s
 
 lint:
 	uv run ruff check .
