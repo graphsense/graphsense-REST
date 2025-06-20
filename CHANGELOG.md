@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### added
 - token_currency filter option for links endpoint
 - min/max_date for all endpoints supporting min/max_height to directly filter by date
+- added user reported tags endpoint to submit new tags
 
 
 ## [25.06.1/1.11.3] - 2025-06-04
