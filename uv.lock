@@ -1427,7 +1427,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/0c/0a/ec64821a3ca6a8f14
 
 [[package]]
 name = "gsrest"
-version = "1.12.0rc6"
+version = "1.12.0"
 source = { virtual = "." }
 dependencies = [
     { name = "aiohttp-cors" },
@@ -3149,6 +3149,16 @@ name = "safe-pysha3"
 version = "1.0.4"
 source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/fd/73/67ba7ed2177b0b17d10665418fb5deafa03d76b8d4b2cb30883b81b00edf/safe-pysha3-1.0.4.tar.gz", hash = "sha256:e429146b1edd198b2ca934a2046a65656c5d31b0ec894bbd6055127f4deaff17", size = 827688 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/71/8b/b8ff4b406526bf1b17b4df3fd5f19625d8252ff49ea030a376c13072b043/safe_pysha3-1.0.4-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:91282e6197cb69d309d87c3682d4926b0316be1146c4e8845b1a8c685173da57", size = 188909 },
+    { url = "https://files.pythonhosted.org/packages/58/32/ea3cb628334ef793014fdc29fb4a74df273d37fd9c99e094171fe5d0c057/safe_pysha3-1.0.4-cp310-cp310-musllinux_1_2_x86_64.whl", hash = "sha256:db16291ea5702dd080e3d3bd65e60aa8c50fb75ccbb58fb4342f44b2bb4dea4f", size = 182864 },
+    { url = "https://files.pythonhosted.org/packages/e3/e5/3a4d4edd5ed4013c463c3eafe7d2a2e7067c9bd574dfce5fceec0414beb9/safe_pysha3-1.0.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:9e6253f44cc665d5a07c0bdff84ec9545e28410fac26295f0fac30fdce6245b0", size = 190188 },
+    { url = "https://files.pythonhosted.org/packages/b1/a4/c85447525e820fcd95e53b2f20696170b02d0ac073bf9c41927c8bff39e2/safe_pysha3-1.0.4-cp311-cp311-musllinux_1_2_x86_64.whl", hash = "sha256:3251f444cf3fd0cffadd71fd3f66cec0354c3c6f5553916c1d7f73fd99c2732b", size = 184231 },
+    { url = "https://files.pythonhosted.org/packages/a2/f9/435b5dd88cc14d983ff1e7b26ddd3621791a0918e580fcb083a166e990a3/safe_pysha3-1.0.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:941d3c3b19c71c764121e950f44df9bfed5b31d84d04bd1620e9a046a9cb6e17", size = 190419 },
+    { url = "https://files.pythonhosted.org/packages/49/c6/4540238e4d0fc325e3f5b077f289182536b0355b0bdac4459a65ec20902f/safe_pysha3-1.0.4-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:c9f8bb82919a4afcefb9a034809b5f17b58e99b37da90937da2d366cd76bcca4", size = 184468 },
+    { url = "https://files.pythonhosted.org/packages/c7/97/812d5bbf90f0c5ef97503f17d19ec3a7e17e7d0e6910182119e601c5e879/safe_pysha3-1.0.4-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:cde1eb8c19cd8f0a6e6bbf4903ed5119e700d1d856392435f31d5fed953c1f0a", size = 190534 },
+    { url = "https://files.pythonhosted.org/packages/db/49/cdb76dd9592117169a4503f50cfa228ca745408ef0412a116638b4b6b262/safe_pysha3-1.0.4-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:224bc7b1fce08301cb4af7dd3d6c48ce1dfc7e97b9c0f1ac8d62aafb92e62a15", size = 367215 },
+]
 
 [[package]]
 name = "setuptools"
