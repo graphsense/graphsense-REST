@@ -5,6 +5,7 @@ from testcontainers.postgres import PostgresContainer
 from tests import BaseTestCase
 from tests.cassandra.insert import load_test_data as cas_load_test_data
 from tests.tagstore.insert import load_test_data as tags_load_test_data
+from os import environ
 
 postgres = PostgresContainer("postgres:16-alpine")
 cassandra = CassandraContainer("cassandra:4.1.4")
@@ -12,6 +13,10 @@ cassandra = CassandraContainer("cassandra:4.1.4")
 
 @pytest.fixture(scope="session", autouse=True)
 def gs_rest_db_setup(request):
+    SKIP_REST_CONTAINER_SETUP = environ.get("SKIP_REST_CONTAINER_SETUP", False)
+    if SKIP_REST_CONTAINER_SETUP:
+        return
+
     postgres.start()
     cassandra.start()
 
