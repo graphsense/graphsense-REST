@@ -2,6 +2,7 @@ import logging
 from typing import List
 
 from graphsenselib.datatypes.abi import decode_logs_dict
+from graphsenselib.utils.accountmodel import hex_to_bytes
 from graphsenselib.utils.defi import ExternalSwap, get_swap_from_decoded_logs
 
 from gsrest.errors import (
@@ -38,7 +39,7 @@ async def get_tx_swaps(request, currency: str, tx_hash: str) -> List[ExternalSwa
 
     # Get tx to get block_id
     try:
-        tx_hash_bytes = bytes.fromhex(tx_hash.replace("0x", ""))
+        tx_hash_bytes = hex_to_bytes(tx_hash)
         tx = await db.get_tx_by_hash(currency, tx_hash_bytes)
     except ValueError:
         raise BadUserInputException(

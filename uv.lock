@@ -1570,8 +1570,8 @@ yaml = [
 
 [[package]]
 name = "graphsense-lib"
-version = "2.4.11.post1.dev11+gd800ead"
-source = { git = "https://github.com/graphsense/graphsense-lib?branch=feature%2Fswaps#d800ead4dc9931c5d40dd723a356e370dde2eea1" }
+version = "2.4.11.post1.dev13+gf86fa92"
+source = { git = "https://github.com/graphsense/graphsense-lib?branch=feature%2Fswaps#f86fa92adee3a5954de4a0672f9d5b6d6a5470ba" }
 dependencies = [
     { name = "base58" },
     { name = "bitarray" },
@@ -1677,11 +1677,8 @@ dependencies = [
     { name = "aiohttp-cors" },
     { name = "aiohttp-jinja2" },
     { name = "async-lru" },
-    { name = "base58" },
-    { name = "cashaddress" },
     { name = "cassandra-driver" },
     { name = "connexion", extra = ["swagger-ui"] },
-    { name = "eth-event" },
     { name = "graphsense-lib", extra = ["swaps"] },
     { name = "lz4" },
     { name = "openapi-schema-validator" },
@@ -1710,11 +1707,8 @@ requires-dist = [
     { name = "aiohttp-cors", specifier = ">=0.7.0" },
     { name = "aiohttp-jinja2", specifier = ">=1.5.0" },
     { name = "async-lru", specifier = ">=2.0.4" },
-    { name = "base58", specifier = ">=2.1" },
-    { name = "cashaddress", specifier = ">=1.0.6,<1.1" },
     { name = "cassandra-driver", specifier = ">=3.27.0" },
     { name = "connexion", extras = ["swagger-ui"], specifier = ">=2.6.0,<3.0" },
-    { name = "eth-event", specifier = ">=1.2.3" },
     { name = "graphsense-lib", extras = ["swaps"], git = "https://github.com/graphsense/graphsense-lib?branch=feature%2Fswaps" },
     { name = "lz4", specifier = ">=4.3.2" },
     { name = "openapi-schema-validator", specifier = ">=0.2.3" },
