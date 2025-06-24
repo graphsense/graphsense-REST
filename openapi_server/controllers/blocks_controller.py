@@ -60,7 +60,9 @@ async def get_block(request: web.Request, currency, height) -> web.Response:
                     request.app['plugin_contexts'][plugin.__module__]
                 plugin.before_response(context, request, result)
 
-        if isinstance(result, list):
+        if result is None:
+            result = {}
+        elif isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
@@ -74,6 +76,9 @@ async def get_block(request: web.Request, currency, height) -> web.Response:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=e.get_user_msg())
     except BadUserInputException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=e.get_user_msg())
+    except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
     except Exception as e:
@@ -95,7 +100,7 @@ async def get_block_by_date(request: web.Request, currency, date) -> web.Respons
     :type date: str
 
     """
-    date = util.deserialize_datetime(date)
+    date = util.deserialize_datetime(date) if date is not None else None
 
     for plugin in request.app['plugins']:
         if hasattr(plugin, 'before_request'):
@@ -131,7 +136,9 @@ async def get_block_by_date(request: web.Request, currency, date) -> web.Respons
                     request.app['plugin_contexts'][plugin.__module__]
                 plugin.before_response(context, request, result)
 
-        if isinstance(result, list):
+        if result is None:
+            result = {}
+        elif isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
@@ -145,6 +152,9 @@ async def get_block_by_date(request: web.Request, currency, date) -> web.Respons
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=e.get_user_msg())
     except BadUserInputException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=e.get_user_msg())
+    except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
     except Exception as e:
@@ -201,7 +211,9 @@ async def list_block_txs(request: web.Request, currency, height) -> web.Response
                     request.app['plugin_contexts'][plugin.__module__]
                 plugin.before_response(context, request, result)
 
-        if isinstance(result, list):
+        if result is None:
+            result = {}
+        elif isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
@@ -215,6 +227,9 @@ async def list_block_txs(request: web.Request, currency, height) -> web.Response
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=e.get_user_msg())
     except BadUserInputException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=e.get_user_msg())
+    except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
     except Exception as e:

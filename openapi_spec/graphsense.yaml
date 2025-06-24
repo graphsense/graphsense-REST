@@ -5,7 +5,7 @@ info:
   contact:
     name: Iknaio Cryptoasset Analytics GmbH
     email: contact@ikna.io
-  version: "1.11.2"
+  version: "1.12.0"
 servers:
   - url: 'https://api.ikna.io'
 paths:
@@ -151,6 +151,8 @@ paths:
         - $ref: '#/components/parameters/direction_txs'
         - $ref: '#/components/parameters/min_height'
         - $ref: '#/components/parameters/max_height'
+        - $ref: '#/components/parameters/min_date'
+        - $ref: '#/components/parameters/max_date'
         - $ref: '#/components/parameters/sorting_order'
         - $ref: '#/components/parameters/token_currency'
         - $ref: '#/components/parameters/page'
@@ -255,7 +257,10 @@ paths:
         - $ref: '#/components/parameters/neighbor'
         - $ref: '#/components/parameters/min_height'
         - $ref: '#/components/parameters/max_height'
+        - $ref: '#/components/parameters/min_date'
+        - $ref: '#/components/parameters/max_date'
         - $ref: '#/components/parameters/sorting_order'
+        - $ref: '#/components/parameters/token_currency'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pagesize'
       responses:
@@ -342,6 +347,8 @@ paths:
         - $ref: '#/components/parameters/direction_txs'
         - $ref: '#/components/parameters/min_height'
         - $ref: '#/components/parameters/max_height'
+        - $ref: '#/components/parameters/min_date'
+        - $ref: '#/components/parameters/max_date'
         - $ref: '#/components/parameters/sorting_order'
         - $ref: '#/components/parameters/token_currency'
         - $ref: '#/components/parameters/page'
@@ -368,7 +375,10 @@ paths:
         - $ref: '#/components/parameters/entity_neighbor'
         - $ref: '#/components/parameters/min_height'
         - $ref: '#/components/parameters/max_height'
+        - $ref: '#/components/parameters/min_date'
+        - $ref: '#/components/parameters/max_date'
         - $ref: '#/components/parameters/sorting_order'
+        - $ref: '#/components/parameters/token_currency'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pagesize'
       responses:
@@ -675,6 +685,23 @@ paths:
       summary: Returns the supported concepts of a taxonomy
       tags:
         - tags
+  /tags/report-tag:
+    post:
+      operationId: report_tag
+      summary: Users can use this endpoint to report a missing annotation.
+      tags:
+        - tags
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/user_reported_tag"
+      responses:
+        "200":
+          description: Success
+        "400":
+          description: Disabled or wrong input
   /{currency}/bulk.csv/{operation}:
     post:
       operationId: bulk_csv
@@ -837,6 +864,22 @@ components:
         $ref: '#/components/schemas/height'
       description: Return transactions up to (including) given height
       example: 2
+    min_date:
+      in: query
+      name: min_date
+      required: false
+      schema:
+        $ref: '#/components/schemas/dateTime'
+      description: min date of txs
+      example: '2017-07-21T17:32:28Z'
+    max_date:
+      in: query
+      name: max_date
+      required: false
+      schema:
+        $ref: '#/components/schemas/dateTime'
+      description: max date of txs
+      example: '2017-07-21T17:32:28Z'
     sorting_order:
       in: query
       name: order
@@ -853,7 +896,7 @@ components:
       required: false
       schema:
         type: string
-      description: Return transactions of given token currency
+      description: Return transactions of given token or base currency
       example: WETH
     io:
       in: path
@@ -1142,6 +1185,25 @@ components:
       description: Number of pages to retrieve for operations with list response
       example: 1
   schemas:
+    user_reported_tag:
+      type: object
+      required:
+        - address
+        - network
+        - label
+        - actor
+        - description
+      properties:
+        address:
+          type: string
+        network:
+          type: string
+        label:
+          type: string
+        actor:
+          type: string
+        description:
+          type: string
     tag_cloud_entry:
       type: object
       required:

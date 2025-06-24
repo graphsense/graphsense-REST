@@ -47,6 +47,41 @@ SMALL_PAGE_SIZE = 1000
 BIG_PAGE_SIZE = 5000
 SEARCH_PAGE_SIZE = 100
 
+MAX_HEX_STRING_LENGTH = 64
+
+
+def create_upper_bound(s, is_string_not_hex=False):
+    """Create upper bound for range query by incrementing last character"""
+    if not s:
+        return s
+
+    if is_string_not_hex:
+        chars = list(s)
+        chars[-1] = chr(ord(chars[-1]) + 1)
+        return "".join(chars)
+
+    if all([x == "f" for x in strip_0x(s)]):
+        return s + MAX_HEX_STRING_LENGTH * "f"
+    else:
+        has_0x = s != strip_0x(s)
+
+        stripped_len_before = len(strip_0x(s))
+        num = int(s, 16) + 1  # drops leading 0s
+        hex_ = hex(num)[2:]  # drop 0x
+        len_after = len(hex_)
+        chars_to_pad = stripped_len_before - len_after
+        padded = chars_to_pad * "0" + hex_
+        if has_0x:
+            return "0x" + padded
+        else:
+            return padded
+
+
+def is_hexadecimal(s):
+    """Check if a string is a valid hexadecimal number."""
+    s = strip_0x(s)
+    return all(c in "0123456789abcdefABCDEF" for c in s)
+
 
 def getDateFromKeyspaceName(x):
     datePart = x.split("_")[-1]
@@ -198,7 +233,7 @@ def wc(cl, cond):
 SUBTX_IDENT_SEPERATOR_CHAR = "_"
 
 
-def get_tx_idenifier(row, type_overwrite=None):
+def get_tx_identifier(row, type_overwrite=None):
     # trace_tx = row.get("is_tx_trace", False)
     h = row["tx_hash"].hex()
     if type_overwrite == "internal" or row["type"] == "internal":  # and not trace_tx:
@@ -866,6 +901,19 @@ class Cassandra:
             )
         ).one()
 
+    async def get_block_below_block_allow_filtering(
+        self, currency, block_id: int
+    ) -> int:
+        query = "SELECT max(block_id) as block_id, timestamp FROM block WHERE block_id < %s allow filtering"
+        return (
+            await self.execute_async(
+                currency,
+                "raw",
+                query,
+                [block_id],
+            )
+        ).one()
+
     async def list_block_txs(self, currency, height):
         tx_ids = await self.list_block_txs_ids(currency, height)
         if tx_ids is None:
@@ -1305,6 +1353,7 @@ class Cassandra:
         min_height=None,
         max_height=None,
         order=None,
+        token_currency=None,
         page=None,
         pagesize=None,
     ):
@@ -1316,6 +1365,7 @@ class Cassandra:
             min_height=min_height,
             max_height=max_height,
             order=order,
+            token_currency=token_currency,
             page=page,
             pagesize=pagesize,
         )
@@ -1328,6 +1378,7 @@ class Cassandra:
         min_height=None,
         max_height=None,
         order=None,
+        token_currency=None,
         page=None,
         pagesize=None,
     ):
@@ -1339,6 +1390,7 @@ class Cassandra:
             min_height=min_height,
             max_height=max_height,
             order=order,
+            token_currency=token_currency,
             page=page,
             pagesize=pagesize,
         )
@@ -1352,6 +1404,7 @@ class Cassandra:
         min_height=None,
         max_height=None,
         order=None,
+        token_currency=None,
         page=None,
         pagesize=None,
     ):
@@ -1385,16 +1438,20 @@ class Cassandra:
             first_value = "output_value"
             second_value = "input_value"
 
-        if is_eth_like(currency):
-            token_config = self.get_token_configuration(currency)
-            include_assets = list(token_config.keys())
-            include_assets.append(currency.upper())
+        if token_currency is not None:
+            include_assets = [token_currency.upper()]
         else:
-            include_assets = [currency.upper()]
+            if is_eth_like(currency):
+                token_config = self.get_token_configuration(currency)
+                include_assets = list(token_config.keys())
+                include_assets.append(currency.upper())
+            else:
+                include_assets = [currency.upper()]
 
-        tx_id_lower_bound, tx_id_upper_bound = await self.resolve_tx_id_range_by_block(
-            currency, min_height, max_height
-        )
+        (
+            tx_id_lower_bound,
+            tx_id_upper_bound,
+        ) = await self.resolve_tx_id_range_by_block(currency, min_height, max_height)
 
         # Get the transaction ID range overlap for both nodes
         src_first_tx_id = src_node["first_tx_id"]
@@ -1572,10 +1629,14 @@ class Cassandra:
         prefix = prefix[: prefix_lengths["address"]]
 
         if is_eth_like(currency):
+            if not is_hexadecimal(expression):
+                return []
+
             # eth addresses are case insensitive
             expression = expression.lower()
             norm = address_to_user_format
             prefix = prefix.upper()
+
         else:
             expression = expression_orginal
         rows = []
@@ -1583,44 +1644,65 @@ class Cassandra:
         if len(prefix) < 1:
             return []
 
-        async def collect(query):
-            paging_state = None
-            while len(rows) < limit:
-                result = await self.execute_async(
-                    currency, "transformed", query, [prefix], paging_state=paging_state
-                )
-                if result.is_empty():
-                    break
-                rows.extend(
-                    [
-                        norm(currency, row["address"])
-                        for row in result.current_rows
-                        if postprocess_address(
-                            norm(currency, row["address"])
-                        ).startswith(expression)
-                    ]
-                )
-                paging_state = result.paging_state
-                if paging_state is None:
-                    break
+        async def collect(query, params):
+            result = await self.execute_async(currency, "transformed", query, params)
+            rows.extend([norm(currency, row["address"]) for row in result.current_rows])
+
+        # Use the expression that would actually be stored in the database
+        query_expression = (
+            expression_orginal if not is_eth_like(currency) else expression
+        )
+
+        upper_bound = create_upper_bound(
+            query_expression, is_string_not_hex=not is_eth_like(currency)
+        )
+
+        if is_eth_like(currency) and len(query_expression) % 2 != 0:
+            query_expression = query_expression + "0"
+
+        if is_eth_like(currency) and len(upper_bound) % 2 != 0:
+            upper_bound = upper_bound + "0"
 
         query = (
             "SELECT address FROM address_ids_by_address_prefix "
-            "WHERE address_prefix = %s"
+            "WHERE address_prefix = %s AND address >= %s AND address < %s"
+            "LIMIT %s"
         )
+        if is_eth_like(currency):
+            params = [
+                prefix,
+                hex_str_to_bytes(strip_0x(query_expression)),
+                hex_str_to_bytes(strip_0x(upper_bound)),
+                limit,
+            ]
+        else:
+            params = [prefix, query_expression, upper_bound, limit]
 
-        await collect(query)
+        await collect(query, params)
 
         if len(rows) < limit:
-            query = "SELECT address FROM new_addresses " "WHERE address_prefix = %s"
+            remaining_limit = limit - len(rows)
+            query = (
+                "SELECT address FROM new_addresses "
+                "WHERE address_prefix = %s AND address >= %s AND address < %s LIMIT %s"
+            )
+            if is_eth_like(currency):
+                params = [
+                    prefix,
+                    hex_str_to_bytes(strip_0x(query_expression)),
+                    hex_str_to_bytes(strip_0x(upper_bound)),
+                    remaining_limit,
+                ]
+            else:
+                params = [prefix, query_expression, upper_bound, remaining_limit]
             if self.parameters[currency]["use_delta_updater_v1"]:
                 try:
-                    await collect(query)
+                    await collect(query, params)
                 except InvalidRequest as e:
                     if "new_addresses" not in str(e):
                         raise e
             rows = sorted(rows)
-        return rows[0:limit]
+        return rows
 
     @eth
     async def get_entity(self, currency, entity):
@@ -1969,51 +2051,62 @@ class Cassandra:
         # should be safe for btc txs too. They are hex encoded.
         # so 0x should never be content. For base58 encoded btc adresses
         # there also no 0 character used.
-        if expression.startswith("0x"):
-            expression = expression[2:]
+        expression = strip_0x(expression)
+
+        if not is_hexadecimal(expression):
+            return []
 
         if len(expression) < prefix_lengths["tx"]:
             return []
+
+        expression_lower = expression.lower()
+        upper_bound = create_upper_bound(expression_lower)
+
+        if len(expression_lower) % 2 != 0:
+            expression_lower = expression_lower + "0"
+
+        if len(upper_bound) % 2 != 0:
+            upper_bound = upper_bound + "0"
 
         if is_eth_like(currency):
             prefix = expression[: prefix_lengths["tx"]].upper()
             kind = "transformed"
             key = "transaction"
+
             query = (
                 "SELECT transaction from transaction_ids_by_transaction_"
-                "prefix where transaction_prefix = %s"
+                "prefix WHERE transaction_prefix = %s AND transaction >= %s AND transaction < %s LIMIT %s"
             )
+            params = [
+                prefix,
+                hex_str_to_bytes(strip_0x(expression_lower)),
+                hex_str_to_bytes(strip_0x(upper_bound)),
+                limit,
+            ]
         else:
             prefix = expression[: prefix_lengths["tx"]]
             kind = "raw"
             key = "tx_hash"
-            query = "SELECT tx_hash from transaction_by_tx_prefix where " "tx_prefix=%s"
 
-        paging_state = True
-        rows = []
-        while paging_state and len(rows) < limit:
-            if paging_state is True:
-                paging_state = None
-            result = await self.execute_async(
-                currency, kind, query, [prefix], paging_state=paging_state
+            query = (
+                "SELECT tx_hash from transaction_by_tx_prefix WHERE "
+                "tx_prefix = %s AND tx_hash >= %s AND tx_hash < %s LIMIT %s"
             )
-            if result.is_empty():
-                break
-
-            # fix leading zero handling, assumption all tx hashes are 32 bytes
-            # which is true for btc-like currencies and ethereum
-            txs = [row[key].rjust(32, b"\x00").hex() for row in result.current_rows]
-
-            rows += [
-                tx
-                for tx in txs
-                if tx.startswith(expression)
-                or tx.lstrip("0").startswith(expression.lstrip("0"))
+            params = [
+                prefix,
+                hex_str_to_bytes(strip_0x(expression_lower)),
+                hex_str_to_bytes(strip_0x(upper_bound)),
+                limit,
             ]
 
-            paging_state = result.paging_state
+        result = await self.execute_async(currency, kind, query, params)
 
-        out_rows = rows[0:limit]
+        if result.is_empty():
+            return []
+
+        # fix leading zero handling, assumption all tx hashes are 32 bytes
+        # which is true for btc-like currencies and ethereum
+        rows = [row[key].rjust(32, b"\x00").hex() for row in result.current_rows]
 
         # also show internal txs and token txs when only on result is left
         if is_eth_like(currency) and len(rows) == 1:
@@ -2023,13 +2116,13 @@ class Cassandra:
             # smallest trace is equivalent to tx itself so filter
             traces = (await self.fetch_transaction_traces(currency, tx))[1:]
             ids = list(
-                {get_tx_idenifier(x) for x in token_txs}.union(
-                    {get_tx_idenifier(x, type_overwrite="internal") for x in traces}
+                {get_tx_identifier(x) for x in token_txs}.union(
+                    {get_tx_identifier(x, type_overwrite="internal") for x in traces}
                 )
             )
-            out_rows.extend(ids)
+            rows.extend(ids)
 
-        return out_rows
+        return rows
 
     def scrub_prefix(self, currency, expression):
         if isinstance(expression, bytes):

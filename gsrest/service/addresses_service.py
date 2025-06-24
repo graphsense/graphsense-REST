@@ -11,6 +11,7 @@ from gsrest.errors import (
     ClusterNotFoundException,
     DBInconsistencyException,
 )
+from gsrest.service.blocks_service import get_min_max_height
 from gsrest.service.common_service import (
     cannonicalize_address,
     get_tagstore_access_groups,
@@ -177,20 +178,26 @@ async def list_address_txs(
     address,
     min_height=None,
     max_height=None,
+    min_date=None,
+    max_date=None,
     direction=None,
     order="desc",
     token_currency=None,
     page=None,
     pagesize=None,
 ):
+    min_b, max_b = await get_min_max_height(
+        request, currency, min_height, max_height, min_date, max_date
+    )
+
     address = cannonicalize_address(currency, address)
     db = request.app["db"]
     results, paging_state = await db.list_address_txs(
         currency=currency,
         address=address,
         direction=direction,
-        min_height=min_height,
-        max_height=max_height,
+        min_height=min_b,
+        max_height=max_b,
         order=order,
         token_currency=token_currency,
         page=page,
@@ -272,10 +279,17 @@ async def list_address_links(
     neighbor,
     min_height=None,
     max_height=None,
+    min_date=None,
+    max_date=None,
     order="desc",
+    token_currency=None,
     page=None,
     pagesize=None,
 ):
+    min_b, max_b = await get_min_max_height(
+        request, currency, min_height, max_height, min_date, max_date
+    )
+
     address = cannonicalize_address(currency, address)
     neighbor = cannonicalize_address(currency, neighbor)
     db = request.app["db"]
@@ -283,9 +297,10 @@ async def list_address_links(
         currency,
         address,
         neighbor,
-        min_height=min_height,
-        max_height=max_height,
+        min_height=min_b,
+        max_height=max_b,
         order=order,
+        token_currency=token_currency,
         page=page,
         pagesize=pagesize,
     )

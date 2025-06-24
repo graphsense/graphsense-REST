@@ -1,6 +1,9 @@
+from datetime import datetime
+from typing import Optional, Tuple
+
 from async_lru import alru_cache
 
-from gsrest.errors import BlockNotFoundException
+from gsrest.errors import BadUserInputException, BlockNotFoundException
 from gsrest.service.rates_service import get_rates
 from gsrest.service.txs_service import from_row
 from gsrest.util import is_eth_like
@@ -77,6 +80,35 @@ async def list_block_txs(request, currency, height):
     ]
 
 
+async def get_min_max_height(
+    request,
+    network,
+    min_height: Optional[int],
+    max_height: Optional[int],
+    min_date: Optional[datetime],
+    max_date: Optional[datetime],
+) -> Tuple[Optional[int], Optional[int]]:
+    if min_date is not None and min_height is not None:
+        raise BadUserInputException(
+            "Both min_height and min_date parameters are specified. Please chose one."
+        )
+
+    if max_date is not None and max_height is not None:
+        raise BadUserInputException(
+            "Both max_height and max_date parameters are specified. Please chose one."
+        )
+
+    if min_height is None and min_date is not None:
+        bspec_min = await get_block_by_date(request, network, min_date)
+        min_height = bspec_min.before_block
+
+    if max_height is None and max_date is not None:
+        bspec_max = await get_block_by_date(request, network, max_date)
+        max_height = bspec_max.before_block
+
+    return (min_height, max_height)
+
+
 @alru_cache(maxsize=1000)
 async def find_block_by_ts(get_timestamp, currency, ts, start, end):
     return await find_insertion_point_async(get_timestamp, ts, low=start, high=end)
@@ -90,17 +122,22 @@ async def get_block_by_date(request, currency, date):
     ts = int(date.timestamp())
 
     if use_linear_search:
+        """
+        Expensive method to circumvent the need of having all the blocks
+        in the database.
+        """
+
         x = await db.get_block_by_date_allow_filtering(currency, ts)
 
         if x:
             block = x["block_id"]
-
-            block_before = block - 1
-            block_before_ts = await db.get_block_timestamp(currency, block_before)
+            block_before = await db.get_block_below_block_allow_filtering(
+                currency, block
+            )
 
             return BlockAtDate(
-                before_block=block_before,
-                before_timestamp=block_before_ts["timestamp"],
+                before_block=block_before["block_id"],
+                before_timestamp=block_before["timestamp"],
                 after_block=block,
                 after_timestamp=x["timestamp"],
             )

@@ -15,7 +15,15 @@ def load_test_data(db_url: str):
     init_database(engine)
 
     exec_cli_command(
-        ["actorpack", "insert", str(DATA_DIR_A), "-u", db_url, "--no_strict_check"]
+        [
+            "actorpack",
+            "insert",
+            str(DATA_DIR_A),
+            "-u",
+            db_url,
+            "--no_strict_check",
+            "--no_git",
+        ]
     )
 
     tps = [

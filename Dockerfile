@@ -41,8 +41,14 @@ RUN uv sync --frozen --no-dev
 RUN uv pip install gunicorn pip
 
 FROM python:3.11-alpine3.20
-COPY --from=builder /srv/graphsense-rest/ /srv/graphsense-rest/
-COPY docker/gunicorn-conf.py /srv/graphsense-rest/gunicorn-conf.py
+
+
+RUN apk add --update sudo
+RUN adduser -S -D -u 10000 dockeruser
+
+COPY --from=builder --chown=dockeruser:dockeruser /srv/graphsense-rest/ /srv/graphsense-rest/
+COPY --chown=dockeruser:dockeruser docker/gunicorn-conf.py /srv/graphsense-rest/gunicorn-conf.py
+
 
 ENV PATH="/srv/graphsense-rest/.venv/bin:$PATH"
 ENV PYTHONPATH=/srv/graphsense-rest
@@ -51,15 +57,10 @@ ENV NUM_THREADS=
 ENV CONFIG_FILE=./instance/config.yaml
 ENV GIT_PYTHON_REFRESH=quiet
 
-# install sudo as root
-RUN apk add --update sudo
+USER dockeruser
 
 WORKDIR /srv/graphsense-rest
 RUN mkdir -p gsrest/plugins
-
-RUN adduser -S -D -u 10000 dockeruser
-RUN chown -R dockeruser /srv/graphsense-rest
-USER dockeruser
 
 # RUN find gsrest/plugins -name requirements.txt -exec uv pip install -r {} \;
 

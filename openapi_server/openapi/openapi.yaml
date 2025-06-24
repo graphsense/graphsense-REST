@@ -5,7 +5,7 @@ info:
     name: Iknaio Cryptoasset Analytics GmbH
   description: GraphSense API provides programmatic access to various ledgers' addresses, entities, blocks, transactions and tags for automated and highly efficient forensics tasks.
   title: GraphSense API
-  version: 1.11.2
+  version: 1.12.0
 servers:
   - url: https://api.ikna.io
 paths:
@@ -218,6 +218,26 @@ paths:
       tags:
         - tags
       x-openapi-router-controller: openapi_server.controllers.tags_controller
+  /tags/report-tag:
+    post:
+      operationId: report_tag
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user_reported_tag'
+        required: true
+        x-body-name: body
+      responses:
+        "200":
+          description: Success
+        "400":
+          description: Disabled or wrong input
+      summary: Users can use this endpoint to report a missing annotation.
+      tags:
+        - tags
+      x-openapi-router-controller: openapi_server.controllers.tags_controller
+      x-codegen-request-body-name: body
   /tags/taxonomies:
     get:
       operationId: list_taxonomies
@@ -396,6 +416,24 @@ paths:
           schema:
             $ref: '#/components/schemas/height'
           style: form
+        - description: min date of txs
+          example: 2017-07-21T17:32:28Z
+          explode: true
+          in: query
+          name: min_date
+          required: false
+          schema:
+            $ref: '#/components/schemas/dateTime'
+          style: form
+        - description: max date of txs
+          example: 2017-07-21T17:32:28Z
+          explode: true
+          in: query
+          name: max_date
+          required: false
+          schema:
+            $ref: '#/components/schemas/dateTime'
+          style: form
         - description: Sorting order
           example: desc
           explode: true
@@ -407,6 +445,15 @@ paths:
             enum:
               - asc
               - desc
+            type: string
+          style: form
+        - description: Return transactions of given token or base currency
+          example: WETH
+          explode: true
+          in: query
+          name: token_currency
+          required: false
+          schema:
             type: string
           style: form
         - description: Resumption token for retrieving the next page
@@ -699,6 +746,24 @@ paths:
           schema:
             $ref: '#/components/schemas/height'
           style: form
+        - description: min date of txs
+          example: 2017-07-21T17:32:28Z
+          explode: true
+          in: query
+          name: min_date
+          required: false
+          schema:
+            $ref: '#/components/schemas/dateTime'
+          style: form
+        - description: max date of txs
+          example: 2017-07-21T17:32:28Z
+          explode: true
+          in: query
+          name: max_date
+          required: false
+          schema:
+            $ref: '#/components/schemas/dateTime'
+          style: form
         - description: Sorting order
           example: desc
           explode: true
@@ -712,7 +777,7 @@ paths:
               - desc
             type: string
           style: form
-        - description: Return transactions of given token currency
+        - description: Return transactions of given token or base currency
           example: WETH
           explode: true
           in: query
@@ -1187,6 +1252,24 @@ paths:
           schema:
             $ref: '#/components/schemas/height'
           style: form
+        - description: min date of txs
+          example: 2017-07-21T17:32:28Z
+          explode: true
+          in: query
+          name: min_date
+          required: false
+          schema:
+            $ref: '#/components/schemas/dateTime'
+          style: form
+        - description: max date of txs
+          example: 2017-07-21T17:32:28Z
+          explode: true
+          in: query
+          name: max_date
+          required: false
+          schema:
+            $ref: '#/components/schemas/dateTime'
+          style: form
         - description: Sorting order
           example: desc
           explode: true
@@ -1198,6 +1281,15 @@ paths:
             enum:
               - asc
               - desc
+            type: string
+          style: form
+        - description: Return transactions of given token or base currency
+          example: WETH
+          explode: true
+          in: query
+          name: token_currency
+          required: false
+          schema:
             type: string
           style: form
         - description: Resumption token for retrieving the next page
@@ -1552,6 +1644,24 @@ paths:
           schema:
             $ref: '#/components/schemas/height'
           style: form
+        - description: min date of txs
+          example: 2017-07-21T17:32:28Z
+          explode: true
+          in: query
+          name: min_date
+          required: false
+          schema:
+            $ref: '#/components/schemas/dateTime'
+          style: form
+        - description: max date of txs
+          example: 2017-07-21T17:32:28Z
+          explode: true
+          in: query
+          name: max_date
+          required: false
+          schema:
+            $ref: '#/components/schemas/dateTime'
+          style: form
         - description: Sorting order
           example: desc
           explode: true
@@ -1565,7 +1675,7 @@ paths:
               - desc
             type: string
           style: form
-        - description: Return transactions of given token currency
+        - description: Return transactions of given token or base currency
           example: WETH
           explode: true
           in: query
@@ -2548,6 +2658,26 @@ components:
       schema:
         $ref: '#/components/schemas/height'
       style: form
+    min_date:
+      description: min date of txs
+      example: 2017-07-21T17:32:28Z
+      explode: true
+      in: query
+      name: min_date
+      required: false
+      schema:
+        $ref: '#/components/schemas/dateTime'
+      style: form
+    max_date:
+      description: max date of txs
+      example: 2017-07-21T17:32:28Z
+      explode: true
+      in: query
+      name: max_date
+      required: false
+      schema:
+        $ref: '#/components/schemas/dateTime'
+      style: form
     sorting_order:
       description: Sorting order
       example: desc
@@ -2563,7 +2693,7 @@ components:
         type: string
       style: form
     token_currency:
-      description: Return transactions of given token currency
+      description: Return transactions of given token or base currency
       example: WETH
       explode: true
       in: query
@@ -2910,6 +3040,25 @@ components:
         type: integer
       style: form
   schemas:
+    user_reported_tag:
+      properties:
+        address:
+          type: string
+        network:
+          type: string
+        label:
+          type: string
+        actor:
+          type: string
+        description:
+          type: string
+      required:
+        - actor
+        - address
+        - description
+        - label
+        - network
+      type: object
     tag_cloud_entry:
       example:
         cnt: 2

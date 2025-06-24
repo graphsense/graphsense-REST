@@ -1,11 +1,19 @@
 import asyncio
+import logging
+
 from typing import Callable, List, Optional
 
 from tagstore.db import ActorPublic, TagPublic, TagstoreDbAsync, Taxonomies
+from tagstore.db.queries import UserReportedAddressTag
+from tagstore.db import TagAlreadyExistsException
 
 from gsrest.db import get_cached_is_abuse, get_cached_taxonomy_concept_label
-from gsrest.errors import NotFoundException
-from gsrest.service.common_service import get_tagstore_access_groups, try_get_cluster_id
+from gsrest.errors import FeatureNotAvailableException, NotFoundException
+from gsrest.service.common_service import (
+    get_tagstore_access_groups,
+    get_user_tags_acl_group,
+    try_get_cluster_id,
+)
 from openapi_server.models.actor import Actor
 from openapi_server.models.actor_context import ActorContext
 from openapi_server.models.address_tag import AddressTag
@@ -13,6 +21,9 @@ from openapi_server.models.address_tags import AddressTags
 from openapi_server.models.concept import Concept
 from openapi_server.models.labeled_item_ref import LabeledItemRef
 from openapi_server.models.taxonomy import Taxonomy
+
+
+logger = logging.getLogger(__name__)
 
 
 def address_tag_from_PublicTag(
@@ -220,3 +231,28 @@ async def list_taxonomies(request):
         )
         for k, v in taxs
     ]
+
+
+async def report_tag(request, body):
+    reporting_enabled = request.app["config"].get("enable-user-tag-reporting", False)
+    tag_acl_group = get_user_tags_acl_group(request)
+
+    if reporting_enabled:
+        tsdb = TagstoreDbAsync(request.app["gs-tagstore"])
+
+        nt = UserReportedAddressTag(
+            address=body.address,
+            network=body.network,
+            actor=body.actor,
+            label=body.label,
+            description=body.description,
+        )
+
+        try:
+            await tsdb.add_user_reported_tag(nt, acl_group=tag_acl_group)
+        except TagAlreadyExistsException:
+            logger.info("Tag already exists, ignoring insert.")
+    else:
+        raise FeatureNotAvailableException(
+            "The report tag feature is disabled on this endpoint."
+        )

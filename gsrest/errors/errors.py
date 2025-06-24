@@ -75,3 +75,7 @@ class ClusterNotFoundException(NotFoundException):
 
 class BadUserInputException(UserFacingExceptions):
     """this exception should be used if the user input is not valid."""
+
+
+class FeatureNotAvailableException(UserFacingExceptions):
+    """this exception should be used if a requested feature is not available in the current instance."""

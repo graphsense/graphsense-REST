@@ -64,7 +64,9 @@ async def get_spending_txs(request: web.Request, currency, tx_hash, io_index=Non
                     request.app['plugin_contexts'][plugin.__module__]
                 plugin.before_response(context, request, result)
 
-        if isinstance(result, list):
+        if result is None:
+            result = {}
+        elif isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
@@ -78,6 +80,9 @@ async def get_spending_txs(request: web.Request, currency, tx_hash, io_index=Non
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=e.get_user_msg())
     except BadUserInputException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=e.get_user_msg())
+    except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
     except Exception as e:
@@ -136,7 +141,9 @@ async def get_spent_in_txs(request: web.Request, currency, tx_hash, io_index=Non
                     request.app['plugin_contexts'][plugin.__module__]
                 plugin.before_response(context, request, result)
 
-        if isinstance(result, list):
+        if result is None:
+            result = {}
+        elif isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
@@ -150,6 +157,9 @@ async def get_spent_in_txs(request: web.Request, currency, tx_hash, io_index=Non
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=e.get_user_msg())
     except BadUserInputException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=e.get_user_msg())
+    except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
     except Exception as e:
@@ -214,7 +224,9 @@ async def get_tx(request: web.Request, currency, tx_hash, include_io=None, inclu
                     request.app['plugin_contexts'][plugin.__module__]
                 plugin.before_response(context, request, result)
 
-        if isinstance(result, list):
+        if result is None:
+            result = {}
+        elif isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
@@ -228,6 +240,9 @@ async def get_tx(request: web.Request, currency, tx_hash, include_io=None, inclu
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=e.get_user_msg())
     except BadUserInputException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=e.get_user_msg())
+    except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
     except Exception as e:
@@ -290,7 +305,9 @@ async def get_tx_io(request: web.Request, currency, tx_hash, io, include_nonstan
                     request.app['plugin_contexts'][plugin.__module__]
                 plugin.before_response(context, request, result)
 
-        if isinstance(result, list):
+        if result is None:
+            result = {}
+        elif isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
@@ -304,6 +321,9 @@ async def get_tx_io(request: web.Request, currency, tx_hash, io, include_nonstan
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=e.get_user_msg())
     except BadUserInputException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=e.get_user_msg())
+    except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
     except Exception as e:
@@ -360,7 +380,9 @@ async def get_tx_swaps(request: web.Request, currency, tx_hash) -> web.Response:
                     request.app['plugin_contexts'][plugin.__module__]
                 plugin.before_response(context, request, result)
 
-        if isinstance(result, list):
+        if result is None:
+            result = {}
+        elif isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
@@ -374,6 +396,9 @@ async def get_tx_swaps(request: web.Request, currency, tx_hash) -> web.Response:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=e.get_user_msg())
     except BadUserInputException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=e.get_user_msg())
+    except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
     except Exception as e:
@@ -430,7 +455,9 @@ async def list_token_txs(request: web.Request, currency, tx_hash) -> web.Respons
                     request.app['plugin_contexts'][plugin.__module__]
                 plugin.before_response(context, request, result)
 
-        if isinstance(result, list):
+        if result is None:
+            result = {}
+        elif isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
@@ -444,6 +471,9 @@ async def list_token_txs(request: web.Request, currency, tx_hash) -> web.Respons
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=e.get_user_msg())
     except BadUserInputException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=e.get_user_msg())
+    except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
     except Exception as e:

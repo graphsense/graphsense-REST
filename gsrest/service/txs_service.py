@@ -1,6 +1,6 @@
 from typing import Optional
 
-from gsrest.db.cassandra import SUBTX_IDENT_SEPERATOR_CHAR, get_tx_idenifier
+from gsrest.db.cassandra import SUBTX_IDENT_SEPERATOR_CHAR, get_tx_identifier
 from gsrest.errors import (
     BadUserInputException,
     NotFoundException,
@@ -39,7 +39,7 @@ def tx_account_from_row(currency, row, rates, token_config):
         currency=currency if "token_tx_id" not in row else row["currency"].lower(),
         network=currency,
         tx_type=get_type_account(row),
-        identifier=get_tx_idenifier(row),
+        identifier=get_tx_identifier(row),
         tx_hash=row["tx_hash"].hex(),
         timestamp=get_first_key_present(row, timestamp_keys),
         height=height,
@@ -236,7 +236,8 @@ async def get_tx(
 
         try:
             tindexS = postfix.strip("IT")
-            token_tx_id = int(tindexS) or token_tx_id
+            if token_tx_id is None:
+                token_tx_id = int(tindexS)
         except ValueError:
             raise BadUserInputException(f"Token index: {tindexS} is not an integer.")
 

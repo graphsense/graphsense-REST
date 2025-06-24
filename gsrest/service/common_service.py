@@ -47,12 +47,16 @@ async def try_get_cluster_id(db, network, address) -> Optional[int]:
         return None
 
 
+def get_user_tags_acl_group(request) -> str:
+    return request.app["config"].get("user-tag-reporting-acl-group", "develop")
+
+
 def get_tagstore_access_groups(request):
     return (
         ["public"]
         if not request.app["request_config"]["show_private_tags"]
         else ["public", "private"]
-    )
+    ) + [get_user_tags_acl_group(request)]
 
 
 def address_from_row(currency, row, rates, token_config, actors):
@@ -110,6 +114,12 @@ async def txs_from_rows(request, currency, rows, token_config):
 
 async def get_address(request, currency, address, include_actors=True):
     address_canonical = cannonicalize_address(currency, address)
+
+    if len(address_canonical) == 0:
+        raise BadUserInputException(
+            f"{address} does not look like a valid {currency} address"
+        )
+
     db = request.app["db"]
     try:
         result = await db.get_address(currency, address_canonical)

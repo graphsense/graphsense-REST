@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
+## [25.07.0/1.12.0] - 2025-06-??
+
+### added
+- token_currency filter option for links endpoint
+- min/max_date for all endpoints supporting min/max_height to directly filter by date
+- added user reported tags endpoint to submit new tags
+
+
+## [25.06.1/1.11.3] - 2025-06-04
+
+### fixed
+- bug loading with _T0 zero index logs or token txs.
+
 ## [25.06.0/1.11.2] - 2025-06-02
 
 ### added

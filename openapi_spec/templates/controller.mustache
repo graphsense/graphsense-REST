@@ -70,10 +70,10 @@ async def {{operationId}}(request: web.Request, {{#allParams}}{{paramName}}{{^re
     {{#allParams}}
         {{^isContainer}}
             {{#isDate}}
-    {{paramName}} = util.deserialize_date({{paramName}})
+    {{paramName}} = util.deserialize_date({{paramName}}) if {{paramName}} is not None else None
             {{/isDate}}
             {{#isDateTime}}
-    {{paramName}} = util.deserialize_datetime({{paramName}})
+    {{paramName}} = util.deserialize_datetime({{paramName}}) if {{paramName}} is not None else None
             {{/isDateTime}}
             {{^isPrimitiveType}}
                 {{^isFile}}
@@ -146,7 +146,9 @@ async def {{operationId}}(request: web.Request, {{#allParams}}{{paramName}}{{^re
                     request.app['plugin_contexts'][plugin.__module__]
                 plugin.before_response(context, request, result)
 
-        if isinstance(result, list):
+        if result is None:
+            result = {}
+        elif isinstance(result, list):
             result = [d.to_dict() for d in result]
         else:
             result = result.to_dict()
@@ -161,6 +163,9 @@ async def {{operationId}}(request: web.Request, {{#allParams}}{{paramName}}{{^re
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPNotFound(text=e.get_user_msg())
     except BadUserInputException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPBadRequest(text=e.get_user_msg())
+    except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
     except Exception as e:

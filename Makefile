@@ -2,8 +2,8 @@ all: format lint
 
 -include .env
 
-GS_REST_SERVICE_VERSIONM ?= "25.06.0"
-GS_REST_SERVICE_VERSION ?= "1.11.2"
+GS_REST_SERVICE_VERSIONM ?= "25.07.0"
+GS_REST_SERVICE_VERSION ?= "1.12.0"
 GS_REST_DEV_PORT ?= 9000
 NUM_WORKERS ?= 1
 NUM_THREADS ?= 1
@@ -12,7 +12,7 @@ test:
 	uv run pytest -x -rx -vv
 
 test-regression:
-	uv run pytest -m "regression"
+	@export SKIP_REST_CONTAINER_SETUP=True && uv run pytest -m "regression" -s
 
 lint:
 	uv run ruff check .
@@ -37,7 +37,7 @@ build-docker:
 	docker build -t graphsense-rest .
 
 serve-docker:
-	docker run --rm -it --network='host' -e NUM_THREADS=1 -e NUM_WORKERS=1 -v "${PWD}/instance/config.yaml:/config.yaml:Z" -e CONFIG_FILE=/config.yaml localhost/graphsense-rest:latest
+	docker run --rm -it --network='host' -e NUM_THREADS=1 -e NUM_WORKERS=1 -v "${PWD}/instance/config.yaml:/config.yaml:Z" -e CONFIG_FILE=/config.yaml graphsense-rest:latest
 
 generate-openapi-server: update-package-version
 	docker run --rm   \
