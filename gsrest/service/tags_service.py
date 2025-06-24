@@ -1,11 +1,15 @@
 import asyncio
 import logging
-
 from typing import Callable, List, Optional
 
-from tagstore.db import ActorPublic, TagPublic, TagstoreDbAsync, Taxonomies
+from tagstore.db import (
+    ActorPublic,
+    TagAlreadyExistsException,
+    TagPublic,
+    TagstoreDbAsync,
+    Taxonomies,
+)
 from tagstore.db.queries import UserReportedAddressTag
-from tagstore.db import TagAlreadyExistsException
 
 from gsrest.db import get_cached_is_abuse, get_cached_taxonomy_concept_label
 from gsrest.errors import FeatureNotAvailableException, NotFoundException
@@ -21,7 +25,6 @@ from openapi_server.models.address_tags import AddressTags
 from openapi_server.models.concept import Concept
 from openapi_server.models.labeled_item_ref import LabeledItemRef
 from openapi_server.models.taxonomy import Taxonomy
-
 
 logger = logging.getLogger(__name__)
 

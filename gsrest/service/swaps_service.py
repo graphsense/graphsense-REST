@@ -1,13 +1,14 @@
-from typing import List
 import logging
+from typing import List
+
+from graphsenselib.datatypes.abi import decode_logs_dict
+from graphsenselib.utils.defi import ExternalSwap, get_swap_from_decoded_logs
 
 from gsrest.errors import (
     BadUserInputException,
     TransactionNotFoundException,
 )
 from gsrest.util import is_eth_like
-from graphsenselib.datatypes.abi import decode_logs_dict
-from graphsenselib.utils.defi import get_swap_from_decoded_logs, ExternalSwap
 
 logger = logging.getLogger(__name__)
 

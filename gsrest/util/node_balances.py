@@ -2,8 +2,7 @@ import asyncio
 
 import aiohttp
 from async_lru import alru_cache
-
-from gsrest.util.evm import eth_address_to_hex, strip_0x
+from graphsenselib.utils.accountmodel import eth_address_to_hex, strip_0x
 
 
 def create_token_request(contract_address: str, account: str, block: str = "latest"):

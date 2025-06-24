@@ -407,7 +407,7 @@ async def list_address_tags_by_entity(test_case):
 
 
 async def list_entity_neighbors(test_case):
-    basepath = "/{currency}/entities/{entity}/neighbors" "?direction={direction}"
+    basepath = "/{currency}/entities/{entity}/neighbors?direction={direction}"
     path = basepath + "&include_labels={include_labels}"
     path_actors = path + "&include_actors={include_actors}"
     ewton = entityWithTagsOutNeighbors.to_dict()

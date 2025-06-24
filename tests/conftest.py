@@ -1,3 +1,5 @@
+from os import environ
+
 import pytest
 from testcontainers.cassandra import CassandraContainer
 from testcontainers.postgres import PostgresContainer
@@ -5,7 +7,6 @@ from testcontainers.postgres import PostgresContainer
 from tests import BaseTestCase
 from tests.cassandra.insert import load_test_data as cas_load_test_data
 from tests.tagstore.insert import load_test_data as tags_load_test_data
-from os import environ
 
 postgres = PostgresContainer("postgres:16-alpine")
 cassandra = CassandraContainer("cassandra:4.1.4")

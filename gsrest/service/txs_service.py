@@ -1,5 +1,8 @@
 from typing import Optional
 
+from graphsenselib.utils.address import address_to_user_format
+
+import gsrest.service.swaps_service as swaps_service
 from gsrest.db.cassandra import SUBTX_IDENT_SEPERATOR_CHAR, get_tx_identifier
 from gsrest.errors import (
     BadUserInputException,
@@ -8,13 +11,11 @@ from gsrest.errors import (
 )
 from gsrest.service.rates_service import get_rates
 from gsrest.util import get_first_key_present, is_eth_like
-from gsrest.util.address import address_to_user_format
 from gsrest.util.values import convert_token_value, convert_value
 from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.tx_ref import TxRef
 from openapi_server.models.tx_utxo import TxUtxo
 from openapi_server.models.tx_value import TxValue
-import gsrest.service.swaps_service as swaps_service
 
 
 def get_type_account(row):

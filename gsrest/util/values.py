@@ -21,7 +21,7 @@ def map_rates_for_peged_tokens(rates, token_config):
     if peg == "usd":
         if len(rates) != 2:
             raise Exception(
-                "Rates structure is expected " f"to be a list of length 2: {rates}"
+                f"Rates structure is expected to be a list of length 2: {rates}"
             )
         r = {i["code"]: i["value"] for i in rates}
 
@@ -32,7 +32,7 @@ def map_rates_for_peged_tokens(rates, token_config):
     elif peg == "eur":
         if len(rates) != 2:
             raise Exception(
-                "Rates structure is expected " f"to be a list of length 2: {rates}"
+                f"Rates structure is expected to be a list of length 2: {rates}"
             )
         r = {i["code"]: i["value"] for i in rates}
 

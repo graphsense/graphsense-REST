@@ -1,5 +1,6 @@
+from graphsenselib.utils.address import address_to_user_format
+
 from gsrest.db.node_type import NodeType
-from gsrest.util.address import address_to_user_format
 
 
 class BadConfigError(Exception):
@@ -40,11 +41,7 @@ class BlockNotFoundException(NotFoundException):
 class TransactionNotFoundException(NotFoundException):
     def __init__(self, network, tx_hash, token_id=None):
         msg = (
-            (
-                f"Token transaction {tx_hash}:{token_id} "
-                f"in network {network} not "
-                "found"
-            )
+            (f"Token transaction {tx_hash}:{token_id} in network {network} not found")
             if token_id
             else f"Transaction {tx_hash} not found in network {network}"
         )
@@ -63,9 +60,7 @@ class AddressNotFoundException(NotFoundException):
         address = address_to_user_format(network, address)
         reason = " because it has no external transactions" if no_external_txs else ""
 
-        super().__init__(
-            f"Address {address} not found in network " f"{network}{reason}"
-        )
+        super().__init__(f"Address {address} not found in network {network}{reason}")
 
 
 class ClusterNotFoundException(NotFoundException):

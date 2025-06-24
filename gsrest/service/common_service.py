@@ -1,9 +1,10 @@
 import asyncio
 from typing import Optional
 
+import graphsenselib.utils.address
+from graphsenselib.utils.address import address_to_user_format
 from tagstore.db import TagstoreDbAsync
 
-import gsrest.util.address
 from gsrest.db.node_type import NodeType
 from gsrest.errors import (
     AddressNotFoundException,
@@ -13,7 +14,6 @@ from gsrest.errors import (
 from gsrest.service.rates_service import get_rates, list_rates
 from gsrest.service.txs_service import tx_account_from_row
 from gsrest.util import get_first_key_present, is_eth_like
-from gsrest.util.address import address_to_user_format
 from gsrest.util.values import (
     convert_token_values_map,
     convert_value,
@@ -30,7 +30,7 @@ from openapi_server.models.tx_summary import TxSummary
 
 def cannonicalize_address(currency, address):
     try:
-        return gsrest.util.address.cannonicalize_address(currency, address)
+        return graphsenselib.utils.address.cannonicalize_address(currency, address)
     except ValueError:
         raise BadUserInputException(
             "The address provided does not look"

@@ -2,6 +2,7 @@ import asyncio
 import importlib
 import time
 
+from graphsenselib.utils.address import address_to_user_format
 from tagstore.db import TagstoreDbAsync
 
 import gsrest.service.common_service as common
@@ -14,7 +15,6 @@ from gsrest.service.tags_service import (
     address_tag_from_PublicTag,
     get_address_tag_result,
 )
-from gsrest.util.address import address_to_user_format
 from gsrest.util.values import (
     convert_token_values_map,
     convert_value,

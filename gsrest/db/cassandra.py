@@ -21,6 +21,11 @@ from cassandra.cluster import (
 from cassandra.policies import DCAwareRoundRobinPolicy, TokenAwarePolicy
 from cassandra.protocol import ProtocolException
 from cassandra.query import SimpleStatement, ValueSequence, dict_factory
+from graphsenselib.datatypes.abi import decode_logs_db
+from graphsenselib.utils.account import calculate_id_group_with_overflow
+from graphsenselib.utils.accountmodel import bytes_to_hex, hex_str_to_bytes, strip_0x
+from graphsenselib.utils.address import address_to_user_format
+from graphsenselib.utils.tron import partial_tron_to_partial_evm
 
 from gsrest.db.node_type import NodeType
 from gsrest.errors import (
@@ -36,18 +41,22 @@ from gsrest.errors import (
     nodeNotFoundException,
 )
 from gsrest.util import is_eth_like
-from gsrest.util.address import address_to_user_format
-from gsrest.util.eth_logs import decode_db_logs
-from gsrest.util.evm import bytes_to_hex, hex_str_to_bytes, strip_0x
-from gsrest.util.id_group import calculate_id_group_with_overflow
+
+# from gsrest.util.eth_logs import decode_db_logs
 from gsrest.util.node_balances import get_balances
-from gsrest.util.tron import partial_tron_to_partial_evm
 
 SMALL_PAGE_SIZE = 1000
 BIG_PAGE_SIZE = 5000
 SEARCH_PAGE_SIZE = 100
 
 MAX_HEX_STRING_LENGTH = 64
+
+
+def try_partial_tron_to_partial_evm(addr_prefix):
+    try:
+        return partial_tron_to_partial_evm(addr_prefix)
+    except ValueError:
+        return ""
 
 
 def create_upper_bound(s, is_string_not_hex=False):
@@ -113,7 +122,7 @@ def tx_hash_from_hex(tx_hash_str: str) -> bytes:
         return bytes_from_hex(tx_hash_str)
     except ValueError:
         raise BadUserInputException(
-            f"{tx_hash_str} does not look like a valid " "transaction hash."
+            f"{tx_hash_str} does not look like a valid transaction hash."
         )
 
 
@@ -173,18 +182,18 @@ def one(result):
 
 
 def build_token_tx(token_currency, tx, token_tx, log):
-    token_from = token_tx["data"].get("from", "decoding error")
-    token_to = token_tx["data"].get("to", "decoding error")
-    value = token_tx["data"].get("value", "decoding error")
+    token_from = token_tx["parameters"].get("from", "decoding error")
+    token_to = token_tx["parameters"].get("to", "decoding error")
+    value = token_tx["parameters"].get("value", "decoding error")
     return {
         "currency": token_currency,
         "block_id": tx["block_id"],
         "block_timestamp": tx["block_timestamp"],
         "tx_hash": tx["tx_hash"],
-        "from_address": hex_str_to_bytes(strip_0x(token_from["value"])),
-        "to_address": hex_str_to_bytes(strip_0x(token_to["value"])),
+        "from_address": hex_str_to_bytes(strip_0x(token_from)),
+        "to_address": hex_str_to_bytes(strip_0x(token_to)),
         "token_tx_id": log["log_index"],
-        "value": value["value"],
+        "value": value,
         "type": "erc20",
     }
 
@@ -501,7 +510,7 @@ class Cassandra:
             self.connect()
 
     def check_keyspace(self, keyspace):
-        query = "SELECT * FROM system_schema.keyspaces " "where keyspace_name = %s"
+        query = "SELECT * FROM system_schema.keyspaces where keyspace_name = %s"
         result = self.session.execute(query, [keyspace])
         if one(result) is None:
             raise BadConfigError("Keyspace {} does not exist".format(keyspace))
@@ -568,7 +577,7 @@ class Cassandra:
                 item[timestamp_col] = block["timestamp"]
             else:
                 self.logger.warning(
-                    f"Could not load block {item[block_id_col]}, " "to fix timestamp."
+                    f"Could not load block {item[block_id_col]}, to fix timestamp."
                 )
 
     def load_parameters(self, keyspace):
@@ -615,9 +624,7 @@ class Cassandra:
             "log_index" in [x["column_name"] for x in result]
         ) and keyspace == "eth"
 
-        query = (
-            "SELECT table_name FROM system_schema.tables " "WHERE keyspace_name = %s ;"
-        )
+        query = "SELECT table_name FROM system_schema.tables WHERE keyspace_name = %s ;"
         result = self.session.execute(query, (keyspace_name,))
         self.parameters[currency]["use_delta_updater_v1"] = "new_addresses" in [
             x["table_name"] for x in result
@@ -714,7 +721,7 @@ class Cassandra:
             if "Invalid value for the paging state" not in str(e):
                 raise e
             raise BadUserInputException(
-                "Invalid value for page. Please use handle from " "previous requests."
+                "Invalid value for page. Please use handle from previous requests."
             )
         if not autopaging:
             return result
@@ -866,7 +873,7 @@ class Cassandra:
 
     @eth
     async def get_block(self, currency, height):
-        query = "SELECT * FROM block WHERE block_id_group = %s " "AND block_id = %s"
+        query = "SELECT * FROM block WHERE block_id_group = %s AND block_id = %s"
         return (
             await self.execute_async(
                 currency,
@@ -879,7 +886,7 @@ class Cassandra:
     @alru_cache(maxsize=10000)
     async def get_block_timestamp(self, currency, height):
         query = (
-            "SELECT timestamp FROM block WHERE block_id_group = %s " "AND block_id = %s"
+            "SELECT timestamp FROM block WHERE block_id_group = %s AND block_id = %s"
         )
         return (
             await self.execute_async(
@@ -1126,8 +1133,7 @@ class Cassandra:
     async def list_block_txs_ids(self, currency, height):
         height_group = self.get_block_id_group(currency, height)
         query = (
-            "SELECT txs FROM block_transactions "
-            "WHERE block_id_group=%s and block_id=%s"
+            "SELECT txs FROM block_transactions WHERE block_id_group=%s and block_id=%s"
         )
         result = await self.execute_async(
             currency, "raw", query, [height_group, int(height)]
@@ -1190,9 +1196,7 @@ class Cassandra:
         if is_eth_like(currency):
             prefix = prefix.upper()
         prefix_length = self.get_prefix_lengths(currency)["address"]
-        query = (
-            "SELECT * FROM new_addresses " "WHERE address_prefix = %s AND address = %s"
-        )
+        query = "SELECT * FROM new_addresses WHERE address_prefix = %s AND address = %s"
         try:
             result = await self.execute_async(
                 currency, "transformed", query, [prefix[:prefix_length], address]
@@ -1309,9 +1313,7 @@ class Cassandra:
         address_id, address_id_group = await self.get_address_id_id_group(
             currency, address
         )
-        query = (
-            "SELECT * FROM address WHERE address_id = %s" " AND address_id_group = %s"
-        )
+        query = "SELECT * FROM address WHERE address_id = %s AND address_id_group = %s"
         result = await self.execute_async(
             currency, "transformed", query, [address_id, address_id_group]
         )
@@ -1618,7 +1620,7 @@ class Cassandra:
 
         postprocess_address = identity1
         if currency == "trx":
-            postprocess_address = partial_tron_to_partial_evm
+            postprocess_address = try_partial_tron_to_partial_evm
 
         expression = postprocess_address(expression)
 
@@ -1708,9 +1710,7 @@ class Cassandra:
     async def get_entity(self, currency, entity):
         entity_id_group = self.get_id_group(currency, entity)
         entity = int(entity)
-        query = (
-            "SELECT * FROM cluster " "WHERE cluster_id_group = %s AND cluster_id = %s "
-        )
+        query = "SELECT * FROM cluster WHERE cluster_id_group = %s AND cluster_id = %s "
         result = await self.execute_async(
             currency, "transformed", query, [entity_id_group, entity]
         )
@@ -1776,9 +1776,7 @@ class Cassandra:
             (self.get_id_group(currency, row["address_id"]), row["address_id"])
             for row in results.current_rows
         ]
-        query = (
-            "SELECT * FROM address WHERE " "address_id_group = %s and address_id = %s"
-        )
+        query = "SELECT * FROM address WHERE address_id_group = %s and address_id = %s"
         result = await self.concurrent_with_args(currency, "transformed", query, params)
 
         return await self.finish_addresses(currency, result), to_hex(
@@ -1973,13 +1971,13 @@ class Cassandra:
         r = await self.fetch_token_transactions(currency, tx, log_index)
         if len(r) != 1:
             raise NotFoundException(
-                f"Found {len(r)} logs for token " f"tx {tx['tx_hash']}:" f"{log_index}"
+                f"Found {len(r)} logs for token tx {tx['tx_hash']}:{log_index}"
             )
         return r[0]
 
     async def fetch_token_transactions(self, currency, tx, log_index=None):
         transfer_topic = bytes_from_hex(
-            "0xddf252ad1be2c89b69c2b068fc378da" "a952ba7f163c4a11628f55a4df523b3ef"
+            "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
         )
         token_tx_logs = await self.get_logs_in_block_eth(
             currency, tx["block_id"], topic=transfer_topic, log_index=log_index
@@ -1994,7 +1992,7 @@ class Cassandra:
             for tt in token_tx_logs.current_rows
             if tt["address"] in supported_tokens and tt["tx_hash"] == tx["tx_hash"]
         ]
-        decoded_token_txs = zip(decode_db_logs(logs_to_decode), logs_to_decode)
+        decoded_token_txs = decode_logs_db(logs_to_decode)
 
         return [
             build_token_tx(
@@ -2008,7 +2006,7 @@ class Cassandra:
         result = r.current_rows
         if len(result) != 1:
             raise NotFoundException(
-                f"Found {len(result)} trace in " f"tx {tx['tx_hash']}:" f"{trace_index}"
+                f"Found {len(result)} trace in tx {tx['tx_hash']}:{trace_index}"
             )
         return result[0]
 
@@ -2021,7 +2019,7 @@ class Cassandra:
         self, currency, block_id, topic=None, log_index=None
     ):
         block_group = self.get_block_id_group(currency, block_id)
-        query = "SELECT * from log where " "block_id_group=%s and block_id=%s"
+        query = "SELECT * from log where block_id_group=%s and block_id=%s"
         params = [block_group, block_id]
 
         if topic is not None:
@@ -2036,7 +2034,7 @@ class Cassandra:
 
     async def get_traces_in_block(self, currency, block_id, trace_index=None):
         block_group = self.get_block_id_group(currency, block_id)
-        query = "SELECT * from trace where " "block_id_group=%s and block_id=%s"
+        query = "SELECT * from trace where block_id_group=%s and block_id=%s"
 
         params = [block_group, block_id]
         if trace_index is not None:
@@ -2162,7 +2160,7 @@ class Cassandra:
             params = [tx_hash[: prefix["tx"]], bytearray.fromhex(tx_hash)]
         except ValueError:
             raise BadUserInputException(
-                f"{tx_hash} does not look like a valid " "transaction hash."
+                f"{tx_hash} does not look like a valid transaction hash."
             )
         statement = (
             "SELECT tx_id from transaction_by_tx_prefix where "
@@ -2176,7 +2174,7 @@ class Cassandra:
         if not result:
             raise DBInconsistencyException(
                 f"transaction {tx_hash} with id {result['tx_id']} in network "
-                f'{currency} not found'
+                f"{currency} not found"
             )
         return result
 
@@ -2185,7 +2183,7 @@ class Cassandra:
         self, currency, ids, filter_empty=True, include_token_txs=False
     ):
         params = ([self.get_tx_id_group(currency, id), id] for id in ids)
-        statement = "SELECT * FROM transaction WHERE " "tx_id_group = %s and tx_id = %s"
+        statement = "SELECT * FROM transaction WHERE tx_id_group = %s and tx_id = %s"
         return await self.concurrent_with_args(
             currency, "raw", statement, params, filter_empty=filter_empty
         )
@@ -2193,7 +2191,7 @@ class Cassandra:
     @eth
     async def get_tx_by_id(self, currency, id):
         params = [self.get_tx_id_group(currency, id), id]
-        statement = "SELECT * FROM transaction WHERE " "tx_id_group = %s and tx_id = %s"
+        statement = "SELECT * FROM transaction WHERE tx_id_group = %s and tx_id = %s"
         return (await self.execute_async(currency, "raw", statement, params)).one()
 
     async def finish_entities(self, currency, rows, with_txs=True):
@@ -2409,7 +2407,7 @@ class Cassandra:
 
     async def get_block_eth(self, currency, height):
         block_group = self.get_block_id_group(currency, height)
-        query = "SELECT * FROM block WHERE block_id_group = %s and" " block_id = %s"
+        query = "SELECT * FROM block WHERE block_id_group = %s and block_id = %s"
         return (
             await self.execute_async(currency, "raw", query, [block_group, height])
         ).one()
@@ -2419,9 +2417,7 @@ class Cassandra:
     async def get_entity_eth(self, currency, entity):
         # mockup entity by address
         id_group = self.get_id_group(currency, entity)
-        query = (
-            "SELECT * FROM address WHERE " "address_id_group = %s AND address_id = %s"
-        )
+        query = "SELECT * FROM address WHERE address_id_group = %s AND address_id = %s"
         result = await self.execute_async(
             currency, "transformed", query, [id_group, entity]
         )
@@ -3199,7 +3195,7 @@ class Cassandra:
             params = [tx_hash.hex()[: prefix["tx"]], tx_hash]
         except ValueError:
             raise BadUserInputException(
-                f"{tx_hash} does not look like a valid " "transaction hash."
+                f"{tx_hash} does not look like a valid transaction hash."
             )
         statement = (
             "SELECT tx_hash, block_id, block_timestamp, value, "

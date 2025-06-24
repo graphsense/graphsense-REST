@@ -1,6 +1,7 @@
 import asyncio
 from typing import List, Optional, Tuple
 
+from graphsenselib.utils.address import address_to_user_format
 from tagstore.algorithms.tag_digest import TagDigest, compute_tag_digest
 from tagstore.db import TagPublic, TagstoreDbAsync
 
@@ -24,7 +25,6 @@ from gsrest.service.tags_service import (
     get_address_tag_result,
 )
 from gsrest.util import is_eth_like
-from gsrest.util.address import address_to_user_format
 from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.address_tags import AddressTags
 from openapi_server.models.address_txs import AddressTxs

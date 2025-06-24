@@ -5,7 +5,7 @@ from openapi_server.models.tx_account import TxAccount
 block = Block(
     height=1,
     currency="btc",
-    block_hash="00000000839a8e6886ab5951d76f" "411475428afc90947ee320161bbf18eb6048",
+    block_hash="00000000839a8e6886ab5951d76f411475428afc90947ee320161bbf18eb6048",
     no_txs=1,
     timestamp=1231469665,
 )
@@ -13,7 +13,7 @@ block = Block(
 block2 = Block(
     height=2,
     currency="btc",
-    block_hash="000000006a625f06636b8bb6ac7b9" "60a8d03705d1ace08b1a19da3fdcc99ddbd",
+    block_hash="000000006a625f06636b8bb6ac7b960a8d03705d1ace08b1a19da3fdcc99ddbd",
     no_txs=1,
     timestamp=1231469744,
 )

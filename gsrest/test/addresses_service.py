@@ -1,11 +1,12 @@
 import copy
 import itertools
 
+from graphsenselib.utils.tron import evm_to_tron_address_string
+
 import gsrest.test.tags_service as ts
 from gsrest.service.rates_service import list_rates
 from gsrest.test.txs_service import tx1_eth, tx2_eth, tx4_eth, tx22_eth
 from gsrest.util import omit
-from gsrest.util.tron import evm_to_tron_address_string
 from gsrest.util.values import convert_value, make_values
 from openapi_server.models.address import Address
 from openapi_server.models.address_tag import AddressTag
@@ -23,7 +24,7 @@ from openapi_server.models.tx_summary import TxSummary
 address = Address(
     currency="btc",
     first_tx=TxSummary(
-        tx_hash="04d92601677d62a985310b61a301e74870fa942c" "8be0648e16b1db23b996a8cd",
+        tx_hash="04d92601677d62a985310b61a301e74870fa942c8be0648e16b1db23b996a8cd",
         height=1,
         timestamp=1361497172,
     ),
@@ -33,7 +34,7 @@ address = Address(
     no_outgoing_txs=267,
     total_received=make_values(usd=2543214.5, value=40412296129, eur=2130676.5),
     last_tx=TxSummary(
-        tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea" "5b94b304d438a8225850f05b45ae5",
+        tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea5b94b304d438a8225850f05b45ae5",
         height=1,
         timestamp=1361497172,
     ),
@@ -54,13 +55,13 @@ address2 = Address(
     total_spent=make_values(value=1260000, usd=103.8, eur=88.46),
     first_tx=TxSummary(
         timestamp=1361497172,
-        tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea5b94b304d438a822585" "0f05b45ae5",
+        tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea5b94b304d438a8225850f05b45ae5",
         height=1,
     ),
     total_received=make_values(eur=70.96, usd=82.79, value=1260000),
     in_degree=1,
     last_tx=TxSummary(
-        tx_hash="6e7456a7a0e4cc2c4ade617e4e950ece015c00add338be345ce2b" "544e5a86322",
+        tx_hash="6e7456a7a0e4cc2c4ade617e4e950ece015c00add338be345ce2b544e5a86322",
         timestamp=1510347493,
         height=2,
     ),
@@ -77,7 +78,7 @@ addressWithoutTags.tags = []
 address3 = Address(
     first_tx=TxSummary(
         timestamp=1361497172,
-        tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea" "5b94b304d438a8225850f05b45ae5",
+        tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea5b94b304d438a8225850f05b45ae5",
         height=1,
     ),
     out_degree=1,
@@ -90,7 +91,7 @@ address3 = Address(
     no_outgoing_txs=1,
     total_spent=make_values(value=6896, usd=0.45, eur=0.39),
     last_tx=TxSummary(
-        tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea" "5b94b304d438a8225850f05b45ae5",
+        tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea5b94b304d438a8225850f05b45ae5",
         timestamp=1361497172,
         height=1,
     ),
@@ -103,7 +104,7 @@ addressE = Address(
     currency="btc",
     entity=17642138,
     last_tx=TxSummary(
-        tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea" "5b94b304d438a8225850f05b45ae5",
+        tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea5b94b304d438a8225850f05b45ae5",
         height=1,
         timestamp=1361497172,
     ),
@@ -113,7 +114,7 @@ addressE = Address(
     first_tx=TxSummary(
         timestamp=1361497172,
         height=1,
-        tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea" "5b94b304d438a8225850f05b45ae5",
+        tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea5b94b304d438a8225850f05b45ae5",
     ),
     total_received=make_values(value=87789282, eur=114.86, usd=142.18),
     total_spent=make_values(value=87789282, eur=114.86, usd=142.18),
@@ -128,12 +129,12 @@ addressF = Address(
     currency="btc",
     entity=10164852,
     last_tx=TxSummary(
-        tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea" "5b94b304d438a8225850f05b45ae5",
+        tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea5b94b304d438a8225850f05b45ae5",
         height=1,
         timestamp=1361497172,
     ),
     first_tx=TxSummary(
-        tx_hash="04d92601677d62a985310b61a301e74870fa942c" "8be0648e16b1db23b996a8cd",
+        tx_hash="04d92601677d62a985310b61a301e74870fa942c8be0648e16b1db23b996a8cd",
         height=1,
         timestamp=1361497172,
     ),
@@ -152,12 +153,12 @@ addressB = Address(
     currency="btc",
     entity=67065,
     first_tx=TxSummary(
-        tx_hash="04d92601677d62a985310b61a301e74870fa942c" "8be0648e16b1db23b996a8cd",
+        tx_hash="04d92601677d62a985310b61a301e74870fa942c8be0648e16b1db23b996a8cd",
         height=1,
         timestamp=1361497172,
     ),
     last_tx=TxSummary(
-        tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea" "5b94b304d438a8225850f05b45ae5",
+        tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea5b94b304d438a8225850f05b45ae5",
         height=1,
         timestamp=1361497172,
     ),
@@ -176,12 +177,12 @@ addressD = Address(
     currency="btc",
     entity=17642138,
     first_tx=TxSummary(
-        tx_hash="04d92601677d62a985310b61a301e74870fa942c" "8be0648e16b1db23b996a8cd",
+        tx_hash="04d92601677d62a985310b61a301e74870fa942c8be0648e16b1db23b996a8cd",
         height=1,
         timestamp=1361497172,
     ),
     last_tx=TxSummary(
-        tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea" "5b94b304d438a8225850f05b45ae5",
+        tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea5b94b304d438a8225850f05b45ae5",
         height=1,
         timestamp=1361497172,
     ),
@@ -197,7 +198,7 @@ addressD = Address(
 
 addressWithTotalSpent0 = Address(
     first_tx=TxSummary(
-        tx_hash="04d92601677d62a985310b61a301e74870fa942c" "8be0648e16b1db23b996a8cd",
+        tx_hash="04d92601677d62a985310b61a301e74870fa942c8be0648e16b1db23b996a8cd",
         height=1,
         timestamp=1361497172,
     ),
@@ -208,7 +209,7 @@ addressWithTotalSpent0 = Address(
     no_outgoing_txs=267,
     total_received=make_values(usd=0.11, value=18099, eur=0.1),
     last_tx=TxSummary(
-        tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea" "5b94b304d438a8225850f05b45ae5",
+        tx_hash="bd01b57a50bdee0fb34ce77f5c62a664cea5b94b304d438a8225850f05b45ae5",
         height=1,
         timestamp=1361497172,
     ),
@@ -1069,7 +1070,7 @@ async def get_address_entity(test_case):
         path, None, currency="eth", address=non_existent_address, include_tags=True
     )
     assert result.status == 404
-    assert ("Address 0x40a197b01cdef4c77196045eaffac80f25be00fe" " not found") in body
+    assert ("Address 0x40a197b01cdef4c77196045eaffac80f25be00fe not found") in body
 
 
 async def list_address_links(test_case):
@@ -1141,7 +1142,7 @@ async def list_address_links(test_case):
     test_case.assertEqual(Links(links=[]).to_dict(), result)
 
     # test order parameter
-    path = "/{currency}/addresses/{address}/links?" "neighbor={neighbor}&order={order}"
+    path = "/{currency}/addresses/{address}/links?neighbor={neighbor}&order={order}"
     result = await test_case.request(
         path,
         currency="eth",
