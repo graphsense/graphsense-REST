@@ -14,44 +14,48 @@ class ExternalSwap(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, swapper: str=None, from_amount: str=None, to_amount: str=None, from_token: str=None, to_token: str=None, version: str=None, swap_log: str=None):
+    def __init__(self, from_address: str=None, to_address: str=None, from_asset: str=None, to_asset: str=None, from_amount: str=None, to_amount: str=None, from_payment: str=None, to_payment: str=None):
         """ExternalSwap - a model defined in OpenAPI
 
-        :param swapper: The swapper of this ExternalSwap.
+        :param from_address: The from_address of this ExternalSwap.
+        :param to_address: The to_address of this ExternalSwap.
+        :param from_asset: The from_asset of this ExternalSwap.
+        :param to_asset: The to_asset of this ExternalSwap.
         :param from_amount: The from_amount of this ExternalSwap.
         :param to_amount: The to_amount of this ExternalSwap.
-        :param from_token: The from_token of this ExternalSwap.
-        :param to_token: The to_token of this ExternalSwap.
-        :param version: The version of this ExternalSwap.
-        :param swap_log: The swap_log of this ExternalSwap.
+        :param from_payment: The from_payment of this ExternalSwap.
+        :param to_payment: The to_payment of this ExternalSwap.
         """
         self.openapi_types = {
-            'swapper': str,
+            'from_address': str,
+            'to_address': str,
+            'from_asset': str,
+            'to_asset': str,
             'from_amount': str,
             'to_amount': str,
-            'from_token': str,
-            'to_token': str,
-            'version': str,
-            'swap_log': str
+            'from_payment': str,
+            'to_payment': str
         }
 
         self.attribute_map = {
-            'swapper': 'swapper',
+            'from_address': 'from_address',
+            'to_address': 'to_address',
+            'from_asset': 'from_asset',
+            'to_asset': 'to_asset',
             'from_amount': 'from_amount',
             'to_amount': 'to_amount',
-            'from_token': 'from_token',
-            'to_token': 'to_token',
-            'version': 'version',
-            'swap_log': 'swap_log'
+            'from_payment': 'from_payment',
+            'to_payment': 'to_payment'
         }
 
-        self._swapper = swapper
+        self._from_address = from_address
+        self._to_address = to_address
+        self._from_asset = from_asset
+        self._to_asset = to_asset
         self._from_amount = from_amount
         self._to_amount = to_amount
-        self._from_token = from_token
-        self._to_token = to_token
-        self._version = version
-        self._swap_log = swap_log
+        self._from_payment = from_payment
+        self._to_payment = to_payment
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'ExternalSwap':
@@ -70,45 +74,121 @@ class ExternalSwap(Model):
         """
         if not shallow:
             return Model.to_dict(self)
-        return { 'swapper': self._swapper,
+        return { 'from_address': self._from_address,
+            'to_address': self._to_address,
+            'from_asset': self._from_asset,
+            'to_asset': self._to_asset,
             'from_amount': self._from_amount,
             'to_amount': self._to_amount,
-            'from_token': self._from_token,
-            'to_token': self._to_token,
-            'version': self._version,
-            'swap_log': self._swap_log }
+            'from_payment': self._from_payment,
+            'to_payment': self._to_payment }
 
 
     @property
-    def swapper(self):
-        """Gets the swapper of this ExternalSwap.
+    def from_address(self):
+        """Gets the from_address of this ExternalSwap.
 
-        Address of the swapper
+        Provider of the input assets of the external swap
 
-        :return: The swapper of this ExternalSwap.
+        :return: The from_address of this ExternalSwap.
         :rtype: str
         """
-        return self._swapper
+        return self._from_address
 
-    @swapper.setter
-    def swapper(self, swapper):
-        """Sets the swapper of this ExternalSwap.
+    @from_address.setter
+    def from_address(self, from_address):
+        """Sets the from_address of this ExternalSwap.
 
-        Address of the swapper
+        Provider of the input assets of the external swap
 
-        :param swapper: The swapper of this ExternalSwap.
-        :type swapper: str
+        :param from_address: The from_address of this ExternalSwap.
+        :type from_address: str
         """
-        if swapper is None:
-            raise BadUserInputException("Invalid value for `swapper`, must not be `None`")
+        if from_address is None:
+            raise BadUserInputException("Invalid value for `from_address`, must not be `None`")
 
-        self._swapper = swapper
+        self._from_address = from_address
+
+    @property
+    def to_address(self):
+        """Gets the to_address of this ExternalSwap.
+
+        Receiver of the output assets of the external swap
+
+        :return: The to_address of this ExternalSwap.
+        :rtype: str
+        """
+        return self._to_address
+
+    @to_address.setter
+    def to_address(self, to_address):
+        """Sets the to_address of this ExternalSwap.
+
+        Receiver of the output assets of the external swap
+
+        :param to_address: The to_address of this ExternalSwap.
+        :type to_address: str
+        """
+        if to_address is None:
+            raise BadUserInputException("Invalid value for `to_address`, must not be `None`")
+
+        self._to_address = to_address
+
+    @property
+    def from_asset(self):
+        """Gets the from_asset of this ExternalSwap.
+
+        Asset swapped from
+
+        :return: The from_asset of this ExternalSwap.
+        :rtype: str
+        """
+        return self._from_asset
+
+    @from_asset.setter
+    def from_asset(self, from_asset):
+        """Sets the from_asset of this ExternalSwap.
+
+        Asset swapped from
+
+        :param from_asset: The from_asset of this ExternalSwap.
+        :type from_asset: str
+        """
+        if from_asset is None:
+            raise BadUserInputException("Invalid value for `from_asset`, must not be `None`")
+
+        self._from_asset = from_asset
+
+    @property
+    def to_asset(self):
+        """Gets the to_asset of this ExternalSwap.
+
+        Asset swapped to
+
+        :return: The to_asset of this ExternalSwap.
+        :rtype: str
+        """
+        return self._to_asset
+
+    @to_asset.setter
+    def to_asset(self, to_asset):
+        """Sets the to_asset of this ExternalSwap.
+
+        Asset swapped to
+
+        :param to_asset: The to_asset of this ExternalSwap.
+        :type to_asset: str
+        """
+        if to_asset is None:
+            raise BadUserInputException("Invalid value for `to_asset`, must not be `None`")
+
+        self._to_asset = to_asset
 
     @property
     def from_amount(self):
         """Gets the from_amount of this ExternalSwap.
 
-        Amount of tokens swapped from
+        Amount of asset swapped from
 
         :return: The from_amount of this ExternalSwap.
         :rtype: str
@@ -119,7 +199,7 @@ class ExternalSwap(Model):
     def from_amount(self, from_amount):
         """Sets the from_amount of this ExternalSwap.
 
-        Amount of tokens swapped from
+        Amount of asset swapped from
 
         :param from_amount: The from_amount of this ExternalSwap.
         :type from_amount: str
@@ -133,7 +213,7 @@ class ExternalSwap(Model):
     def to_amount(self):
         """Gets the to_amount of this ExternalSwap.
 
-        Amount of tokens swapped to
+        Amount of asset swapped to
 
         :return: The to_amount of this ExternalSwap.
         :rtype: str
@@ -144,7 +224,7 @@ class ExternalSwap(Model):
     def to_amount(self, to_amount):
         """Sets the to_amount of this ExternalSwap.
 
-        Amount of tokens swapped to
+        Amount of asset swapped to
 
         :param to_amount: The to_amount of this ExternalSwap.
         :type to_amount: str
@@ -155,99 +235,51 @@ class ExternalSwap(Model):
         self._to_amount = to_amount
 
     @property
-    def from_token(self):
-        """Gets the from_token of this ExternalSwap.
+    def from_payment(self):
+        """Gets the from_payment of this ExternalSwap.
 
-        Address of the token swapped from
+        Log or trace information about input transfer
 
-        :return: The from_token of this ExternalSwap.
+        :return: The from_payment of this ExternalSwap.
         :rtype: str
         """
-        return self._from_token
+        return self._from_payment
 
-    @from_token.setter
-    def from_token(self, from_token):
-        """Sets the from_token of this ExternalSwap.
+    @from_payment.setter
+    def from_payment(self, from_payment):
+        """Sets the from_payment of this ExternalSwap.
 
-        Address of the token swapped from
+        Log or trace information about input transfer
 
-        :param from_token: The from_token of this ExternalSwap.
-        :type from_token: str
+        :param from_payment: The from_payment of this ExternalSwap.
+        :type from_payment: str
         """
-        if from_token is None:
-            raise BadUserInputException("Invalid value for `from_token`, must not be `None`")
+        if from_payment is None:
+            raise BadUserInputException("Invalid value for `from_payment`, must not be `None`")
 
-        self._from_token = from_token
+        self._from_payment = from_payment
 
     @property
-    def to_token(self):
-        """Gets the to_token of this ExternalSwap.
+    def to_payment(self):
+        """Gets the to_payment of this ExternalSwap.
 
-        Address of the token swapped to
+        Log or trace information about output transfer
 
-        :return: The to_token of this ExternalSwap.
+        :return: The to_payment of this ExternalSwap.
         :rtype: str
         """
-        return self._to_token
+        return self._to_payment
 
-    @to_token.setter
-    def to_token(self, to_token):
-        """Sets the to_token of this ExternalSwap.
+    @to_payment.setter
+    def to_payment(self, to_payment):
+        """Sets the to_payment of this ExternalSwap.
 
-        Address of the token swapped to
+        Log or trace information about output transfer
 
-        :param to_token: The to_token of this ExternalSwap.
-        :type to_token: str
+        :param to_payment: The to_payment of this ExternalSwap.
+        :type to_payment: str
         """
+        if to_payment is None:
+            raise BadUserInputException("Invalid value for `to_payment`, must not be `None`")
 
-        self._to_token = to_token
-
-    @property
-    def version(self):
-        """Gets the version of this ExternalSwap.
-
-        Version information
-
-        :return: The version of this ExternalSwap.
-        :rtype: str
-        """
-        return self._version
-
-    @version.setter
-    def version(self, version):
-        """Sets the version of this ExternalSwap.
-
-        Version information
-
-        :param version: The version of this ExternalSwap.
-        :type version: str
-        """
-        if version is None:
-            raise BadUserInputException("Invalid value for `version`, must not be `None`")
-
-        self._version = version
-
-    @property
-    def swap_log(self):
-        """Gets the swap_log of this ExternalSwap.
-
-        Log information about the swap
-
-        :return: The swap_log of this ExternalSwap.
-        :rtype: str
-        """
-        return self._swap_log
-
-    @swap_log.setter
-    def swap_log(self, swap_log):
-        """Sets the swap_log of this ExternalSwap.
-
-        Log information about the swap
-
-        :param swap_log: The swap_log of this ExternalSwap.
-        :type swap_log: str
-        """
-        if swap_log is None:
-            raise BadUserInputException("Invalid value for `swap_log`, must not be `None`")
-
-        self._swap_log = swap_log
+        self._to_payment = to_payment

@@ -3154,50 +3154,56 @@ components:
       type: object
     external_swap:
       example:
-        swap_log: swap_log
-        swapper: swapper
         to_amount: to_amount
+        from_asset: from_asset
         from_amount: from_amount
-        to_token: to_token
-        from_token: from_token
-        version: version
+        from_payment: from_payment
+        to_asset: to_asset
+        to_address: to_address
+        from_address: from_address
+        to_payment: to_payment
       properties:
-        swapper:
-          description: Address of the swapper
-          title: swapper
+        from_address:
+          description: Provider of the input assets of the external swap
+          title: from_address
+          type: string
+        to_address:
+          description: Receiver of the output assets of the external swap
+          title: to_address
+          type: string
+        from_asset:
+          description: Asset swapped from
+          title: from_asset
+          type: string
+        to_asset:
+          description: Asset swapped to
+          title: to_asset
           type: string
         from_amount:
-          description: Amount of tokens swapped from
+          description: Amount of asset swapped from
           title: from_amount
           type: string
         to_amount:
-          description: Amount of tokens swapped to
+          description: Amount of asset swapped to
           title: to_amount
           type: string
-        from_token:
-          description: Address of the token swapped from
-          title: from_token
+        from_payment:
+          description: Log or trace information about input transfer
+          title: from_payment
           type: string
-        to_token:
-          description: Address of the token swapped to
-          nullable: true
-          title: to_token
-          type: string
-        version:
-          description: Version information
-          title: version
-          type: string
-        swap_log:
-          description: Log information about the swap
-          title: swap_log
+        to_payment:
+          description: Log or trace information about output transfer
+          title: to_payment
           type: string
       required:
+        - from_address
         - from_amount
-        - from_token
-        - swap_log
-        - swapper
+        - from_asset
+        - from_payment
+        - to_address
         - to_amount
-        - version
+        - to_asset
+        - to_payment
       title: external_swap
       type: object
     currency_stats:

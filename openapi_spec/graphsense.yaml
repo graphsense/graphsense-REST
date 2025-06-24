@@ -1267,35 +1267,39 @@ components:
     external_swap:
       type: object
       required:
-        - swapper
+        - from_address
+        - to_address
+        - from_asset
+        - to_asset
         - from_amount
         - to_amount
-        - from_token
-        - version
-        - swap_log
+        - from_payment
+        - to_payment
       properties:
-        swapper:
+        from_address:
           type: string
-          description: Address of the swapper
+          description: Provider of the input assets of the external swap
+        to_address:
+          type: string
+          description: Receiver of the output assets of the external swap
+        from_asset:
+          type: string
+          description: Asset swapped from
+        to_asset:
+          type: string
+          description: Asset swapped to
         from_amount:
           type: string
-          description: Amount of tokens swapped from
+          description: Amount of asset swapped from
         to_amount:
           type: string
-          description: Amount of tokens swapped to
-        from_token:
+          description: Amount of asset swapped to
+        from_payment:
           type: string
-          description: Address of the token swapped from
-        to_token:
+          description: Log or trace information about input transfer
+        to_payment :
           type: string
-          nullable: true
-          description: Address of the token swapped to
-        version:
-          type: string
-          description: Version information
-        swap_log:
-          type: string
-          description: Log information about the swap
+          description: Log or trace information about output transfer
     currency_stats:
       title: statistics of a cryptocurrency
       type: object
