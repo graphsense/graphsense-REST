@@ -1894,6 +1894,42 @@ paths:
       tags:
         - txs
       x-openapi-router-controller: openapi_server.controllers.txs_controller
+  /{currency}/txs/{tx_hash}/conversions:
+    get:
+      operationId: get_tx_conversions
+      parameters:
+        - description: The cryptocurrency code (e.g., btc)
+          example: btc
+          explode: false
+          in: path
+          name: currency
+          required: true
+          schema:
+            format: string
+            type: string
+          style: simple
+        - description: The transaction hash
+          example: 04d92601677d62a985310b61a301e74870fa942c8be0648e16b1db23b996a8cd
+          explode: false
+          in: path
+          name: tx_hash
+          required: true
+          schema:
+            $ref: '#/components/schemas/tx_hash'
+          style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/external_conversions'
+                type: array
+          description: OK
+      summary: Returns conversion information (swaps or bridging txs) extracted from a specific transaction
+      tags:
+        - txs
+      x-openapi-router-controller: openapi_server.controllers.txs_controller
   /{currency}/txs/{tx_hash}/spending:
     get:
       operationId: get_spending_txs
@@ -1987,42 +2023,6 @@ paths:
                 type: array
           description: OK
       summary: Returns in which other transactions, outputs from the asked transaction are spent. Think forward references in the transaction graph. This endpoint is only available for utxo like currencies.
-      tags:
-        - txs
-      x-openapi-router-controller: openapi_server.controllers.txs_controller
-  /{currency}/txs/{tx_hash}/swaps:
-    get:
-      operationId: get_tx_swaps
-      parameters:
-        - description: The cryptocurrency code (e.g., btc)
-          example: btc
-          explode: false
-          in: path
-          name: currency
-          required: true
-          schema:
-            format: string
-            type: string
-          style: simple
-        - description: The transaction hash
-          example: 04d92601677d62a985310b61a301e74870fa942c8be0648e16b1db23b996a8cd
-          explode: false
-          in: path
-          name: tx_hash
-          required: true
-          schema:
-            $ref: '#/components/schemas/tx_hash'
-          style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: '#/components/schemas/external_swap'
-                type: array
-          description: OK
-      summary: Returns swap information extracted from a specific transaction
       tags:
         - txs
       x-openapi-router-controller: openapi_server.controllers.txs_controller
@@ -3301,59 +3301,79 @@ components:
         - tx_hash
       title: tx_ref
       type: object
-    external_swap:
+    external_conversions:
       example:
+        from_network: from_network
         to_amount: to_amount
         from_asset: from_asset
+        conversion_type: dex_swap
         from_amount: from_amount
         from_payment: from_payment
         to_asset: to_asset
         to_address: to_address
         from_address: from_address
         to_payment: to_payment
+        to_network: to_network
       properties:
+        conversion_type:
+          enum:
+            - dex_swap
+            - bridge_tx
+          title: conversion_type
+          type: string
         from_address:
-          description: Provider of the input assets of the external swap
+          description: Provider of the input assets of the external conversion
           title: from_address
           type: string
         to_address:
-          description: Receiver of the output assets of the external swap
+          description: Receiver of the output assets of the external conversion
           title: to_address
           type: string
         from_asset:
-          description: Asset swapped from
+          description: Asset converted from
           title: from_asset
           type: string
         to_asset:
-          description: Asset swapped to
+          description: Asset converted to
           title: to_asset
           type: string
         from_amount:
-          description: Amount of asset swapped from
+          description: Amount of asset converted from
           title: from_amount
           type: string
         to_amount:
-          description: Amount of asset swapped to
+          description: Amount of asset converted to
           title: to_amount
           type: string
         from_payment:
-          description: Log or trace information about input transfer
+          description: Initial payment starting the conversion process
           title: from_payment
           type: string
         to_payment:
-          description: Log or trace information about output transfer
+          description: Output payment ending the conversion process
           title: to_payment
           type: string
+        from_network:
+          description: Network where the initial payment took place
+          title: from_network
+          type: string
+        to_network:
+          description: Network where the concluding payment took place
+          title: to_network
+          type: string
       required:
+        - conversion_type
         - from_address
         - from_amount
         - from_asset
+        - from_network
         - from_payment
         - to_address
         - to_amount
         - to_asset
+        - to_network
         - to_payment
-      title: external_swap
+      title: external_conversions
       type: object
     currency_stats:
       example:

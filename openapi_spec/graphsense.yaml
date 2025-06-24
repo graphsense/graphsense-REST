@@ -546,9 +546,9 @@ paths:
       summary: Returns in which other transaction's outputs the asked transaction spent. Think backwards references is the transaction graph. This endpoint is only available for utxo like currencies.
       tags:
         - txs
-  /{currency}/txs/{tx_hash}/swaps:
+  /{currency}/txs/{tx_hash}/conversions:
     get:
-      operationId: get_tx_swaps
+      operationId: get_tx_conversions
       parameters:
         - $ref: '#/components/parameters/currency'
         - $ref: '#/components/parameters/tx_hash'
@@ -560,8 +560,8 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/external_swap'
-      summary: Returns swap information extracted from a specific transaction
+                  $ref: '#/components/schemas/external_conversions'
+      summary: Returns conversion information (swaps or bridging txs) extracted from a specific transaction
       tags:
         - txs
   /{currency}/rates/{height}:
@@ -1326,7 +1326,7 @@ components:
           type: integer
         tx_hash:
           type: string
-    external_swap:
+    external_conversions:
       type: object
       required:
         - from_address
@@ -1337,31 +1337,45 @@ components:
         - to_amount
         - from_payment
         - to_payment
+        - conversion_type
+        - from_network
+        - to_network
       properties:
+        conversion_type:
+          type: string
+          enum:
+            - dex_swap
+            - bridge_tx
         from_address:
           type: string
-          description: Provider of the input assets of the external swap
+          description: Provider of the input assets of the external conversion
         to_address:
           type: string
-          description: Receiver of the output assets of the external swap
+          description: Receiver of the output assets of the external conversion
         from_asset:
           type: string
-          description: Asset swapped from
+          description: Asset converted from
         to_asset:
           type: string
-          description: Asset swapped to
+          description: Asset converted to
         from_amount:
           type: string
-          description: Amount of asset swapped from
+          description: Amount of asset converted from
         to_amount:
           type: string
-          description: Amount of asset swapped to
+          description: Amount of asset converted to
         from_payment:
           type: string
-          description: Log or trace information about input transfer
-        to_payment :
+          description: Initial payment starting the conversion process
+        to_payment:
           type: string
-          description: Log or trace information about output transfer
+          description: Output payment ending the conversion process
+        from_network:
+          type: string
+          description: Network where the initial payment took place
+        to_network:
+          type: string
+          description: Network where the concluding payment took place
     currency_stats:
       title: statistics of a cryptocurrency
       type: object

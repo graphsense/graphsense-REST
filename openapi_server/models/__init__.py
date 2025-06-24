@@ -16,7 +16,7 @@ from openapi_server.models.concept import Concept
 from openapi_server.models.currency_stats import CurrencyStats
 from openapi_server.models.entity import Entity
 from openapi_server.models.entity_addresses import EntityAddresses
-from openapi_server.models.external_swap import ExternalSwap
+from openapi_server.models.external_conversions import ExternalConversions
 from openapi_server.models.label_summary import LabelSummary
 from openapi_server.models.labeled_item_ref import LabeledItemRef
 from openapi_server.models.link import Link

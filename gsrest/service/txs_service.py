@@ -1,9 +1,13 @@
 from typing import Optional
 
 from graphsenselib.utils.address import address_to_user_format
+from graphsenselib.utils.transactions import (
+    SubTransactionIdentifier,
+    SubTransactionType,
+)
 
 import gsrest.service.swaps_service as swaps_service
-from gsrest.db.cassandra import SUBTX_IDENT_SEPERATOR_CHAR, get_tx_identifier
+from gsrest.db.cassandra import get_tx_identifier
 from gsrest.errors import (
     BadUserInputException,
     NotFoundException,
@@ -221,28 +225,40 @@ async def get_tx(
     db = request.app["db"]
 
     trace_index = None
-
     tx_ident = tx_hash
 
-    if f"{SUBTX_IDENT_SEPERATOR_CHAR}I" in tx_hash:
-        h, postfix, *_ = tx_hash.split(SUBTX_IDENT_SEPERATOR_CHAR)
-        try:
-            tindexS = postfix.strip("IT")
-            trace_index = int(tindexS)
-        except ValueError:
-            raise BadUserInputException(f"Trace index: {tindexS} is not an integer.")
-        tx_hash = h
-    elif f"{SUBTX_IDENT_SEPERATOR_CHAR}T" in tx_hash:
-        h, postfix, *_ = tx_hash.split(SUBTX_IDENT_SEPERATOR_CHAR)
+    try:
+        subtxIdent = SubTransactionIdentifier.from_string(tx_hash)
+    except ValueError as e:
+        raise BadUserInputException(str(e))
 
-        try:
-            tindexS = postfix.strip("IT")
-            if token_tx_id is None:
-                token_tx_id = int(tindexS)
-        except ValueError:
-            raise BadUserInputException(f"Token index: {tindexS} is not an integer.")
+    if subtxIdent.tx_type == SubTransactionType.InternalTx:
+        tx_hash = subtxIdent.tx_hash
+        trace_index = subtxIdent.sub_index
+    elif subtxIdent.tx_type == SubTransactionType.ERC20:
+        tx_hash = subtxIdent.tx_hash
+        if token_tx_id is None:
+            token_tx_id = subtxIdent.sub_index
 
-        tx_hash = h
+    # if f"{SUBTX_IDENT_SEPERATOR_CHAR}I" in tx_hash:
+    #     h, postfix, *_ = tx_hash.split(SUBTX_IDENT_SEPERATOR_CHAR)
+    #     try:
+    #         tindexS = postfix.strip("IT")
+    #         trace_index = int(tindexS)
+    #     except ValueError:
+    #         raise BadUserInputException(f"Trace index: {tindexS} is not an integer.")
+    #     tx_hash = h
+    # elif f"{SUBTX_IDENT_SEPERATOR_CHAR}T" in tx_hash:
+    #     h, postfix, *_ = tx_hash.split(SUBTX_IDENT_SEPERATOR_CHAR)
+
+    #     try:
+    #         tindexS = postfix.strip("IT")
+    #         if token_tx_id is None:
+    #             token_tx_id = int(tindexS)
+    #     except ValueError:
+    #         raise BadUserInputException(f"Token index: {tindexS} is not an integer.")
+
+    #     tx_hash = h
 
     if token_tx_id is not None:
         if is_eth_like(currency):
@@ -326,8 +342,8 @@ async def list_matching_txs(request, currency, expression):
     return [tx for tx in txs if tx.startswith(expression)]
 
 
-async def get_tx_swaps(request, currency, tx_hash):
+async def get_tx_conversions(request, currency, tx_hash):
     """
     Delegate to swaps_service for swap extraction from transaction.
     """
-    return await swaps_service.get_tx_swaps(request, currency, tx_hash)
+    return await swaps_service.get_tx_dex_swap_conversions(request, currency, tx_hash)

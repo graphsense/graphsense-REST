@@ -10,11 +10,32 @@ from gsrest.errors import (
     TransactionNotFoundException,
 )
 from gsrest.util import is_eth_like
+from openapi_server.models.external_conversions import ExternalConversions
 
 logger = logging.getLogger(__name__)
 
 
-async def get_tx_swaps(request, currency: str, tx_hash: str) -> List[ExternalSwap]:
+def conversion_from_external_swap(
+    network: str, swap: ExternalSwap
+) -> ExternalConversions:
+    return ExternalConversions(
+        conversion_type="dex_swap",
+        from_address=swap.fromAddress,
+        to_address=swap.toAddress,
+        from_asset=swap.fromAsset,
+        to_asset=swap.toAsset,
+        from_amount=hex(swap.fromAmount),
+        to_amount=hex(swap.toAmount),
+        from_payment=swap.fromPayment,
+        to_payment=swap.toPayment,
+        from_network=network,
+        to_network=network,
+    )
+
+
+async def get_tx_dex_swap_conversions(
+    request, currency: str, tx_hash: str
+) -> List[ExternalSwap]:
     """
     Extract swap information from a single transaction hash.
 
@@ -76,7 +97,7 @@ async def get_tx_swaps(request, currency: str, tx_hash: str) -> List[ExternalSwa
 
         if swap:
             logger.info(f"Found swap in transaction {tx_hash}: {swap}")
-            return [swap]
+            return [conversion_from_external_swap(currency, swap)]
         else:
             logger.info(f"No swaps found in transaction {tx_hash}")
             return []

@@ -1570,8 +1570,8 @@ yaml = [
 
 [[package]]
 name = "graphsense-lib"
-version = "2.4.11.post1.dev13+gf86fa92"
-source = { git = "https://github.com/graphsense/graphsense-lib?branch=feature%2Fswaps#f86fa92adee3a5954de4a0672f9d5b6d6a5470ba" }
+version = "2.4.11.post1.dev16+g0c71511"
+source = { git = "https://github.com/graphsense/graphsense-lib?branch=feature%2Fswaps#0c71511f0b4089fffa2b6373d8ba8b34dd7cdd68" }
 dependencies = [
     { name = "base58" },
     { name = "bitarray" },

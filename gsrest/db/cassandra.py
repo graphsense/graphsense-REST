@@ -25,6 +25,10 @@ from graphsenselib.datatypes.abi import decode_logs_db
 from graphsenselib.utils.account import calculate_id_group_with_overflow
 from graphsenselib.utils.accountmodel import bytes_to_hex, hex_str_to_bytes, strip_0x
 from graphsenselib.utils.address import address_to_user_format
+from graphsenselib.utils.transactions import (
+    SubTransactionIdentifier,
+    SubTransactionType,
+)
 from graphsenselib.utils.tron import partial_tron_to_partial_evm
 
 from gsrest.db.node_type import NodeType
@@ -239,22 +243,25 @@ def wc(cl, cond):
     return f"AND {cl} " if cond else ""
 
 
-SUBTX_IDENT_SEPERATOR_CHAR = "_"
-
-
-def get_tx_identifier(row, type_overwrite=None):
+def get_tx_identifier(row, type_overwrite=None) -> str:
     # trace_tx = row.get("is_tx_trace", False)
     h = row["tx_hash"].hex()
+
     if type_overwrite == "internal" or row["type"] == "internal":  # and not trace_tx:
-        return f"{h}{SUBTX_IDENT_SEPERATOR_CHAR}I{row['trace_index']}"
-    # elif type_overwrite == "internal" or row["type"] == "internal" and trace_tx:
-    #     return h
+        t_type = SubTransactionType.InternalTx
+        sub_tx = row["trace_index"]
     elif type_overwrite == "erc20" or row["type"] == "erc20":
-        return f"{h}{SUBTX_IDENT_SEPERATOR_CHAR}T{row['token_tx_id']}"
+        t_type = SubTransactionType.ERC20
+        sub_tx = row["token_tx_id"]
     elif type_overwrite == "external" or row["type"] == "external":
-        return h
+        t_type = SubTransactionType.ExternalTx
+        sub_tx = None
     else:
         raise Exception(f"Unknown transaction type {row}")
+
+    return SubTransactionIdentifier(
+        tx_hash=h, tx_type=t_type, sub_index=sub_tx
+    ).to_string()
 
 
 def merge_address_txs_subquery_results(
