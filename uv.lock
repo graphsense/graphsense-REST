@@ -1552,7 +1552,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/0c/0a/ec64821a3ca6a8f14
 
 [[package]]
 name = "gsrest"
-version = "1.13.0"
+version = "1.13.0.dev1"
 source = { virtual = "." }
 dependencies = [
     { name = "aiohttp-cors" },
