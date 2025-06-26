@@ -18,6 +18,7 @@ from cassandra.cluster import (
     ExecutionProfile,
     NoHostAvailable,
 )
+from cassandra.auth import PlainTextAuthProvider
 from cassandra.policies import DCAwareRoundRobinPolicy, TokenAwarePolicy
 from cassandra.protocol import ProtocolException
 from cassandra.query import SimpleStatement, ValueSequence, dict_factory
@@ -497,12 +498,21 @@ class Cassandra:
                 load_balancing_policy=TokenAwarePolicy(DCAwareRoundRobinPolicy()),
                 consistency_level=cl,
             )
+
+            auth_provider = None
+            if "username" in self.config:
+                auth_provider = PlainTextAuthProvider(
+                    username=self.config["username"],
+                    password=self.config.get("password", ""),
+                )
+
             self.cluster = Cluster(
                 self.config["nodes"],
                 port=int(self.config.get("port", 9042)),
                 protocol_version=5,
                 connect_timeout=60,
                 execution_profiles={EXEC_PROFILE_DEFAULT: exec_prof},
+                auth_provider=auth_provider,
             )
             self.session = self.cluster.connect()
             # self.session.row_factory = dict_factory
