@@ -77,7 +77,7 @@ async def get_tx_dex_swap_conversions(
     traces_result = await db.get_traces_in_block(currency, block_id)
 
     # Filter logs and traces for our specific transaction
-    tx_logs = [
+    tx_logs_raw = [
         log for log in logs_result.current_rows if log["tx_hash"] == tx["tx_hash"]
     ]
     tx_traces = [
@@ -86,14 +86,16 @@ async def get_tx_dex_swap_conversions(
         if trace["tx_hash"] == tx["tx_hash"]
     ]
 
-    if not tx_logs:
+    if not tx_logs_raw:
         logger.info(f"No logs found for transaction {tx_hash}")
         return []
 
     try:
-        decoded_logs = decode_logs_dict(tx_logs)
-        decoded_log_data = [decoded_log for decoded_log, _ in decoded_logs]
-        swap = get_swap_from_decoded_logs(decoded_log_data, tx_logs, tx_traces)
+        decoded_logs_and_logs = decode_logs_dict(tx_logs_raw)
+        decoded_log_data, tx_logs_raw_filtered = zip(*decoded_logs_and_logs)
+        swap = get_swap_from_decoded_logs(
+            decoded_log_data, tx_logs_raw_filtered, tx_traces
+        )
 
         if swap:
             logger.info(f"Found swap in transaction {tx_hash}: {swap}")
