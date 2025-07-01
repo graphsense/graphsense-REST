@@ -4,7 +4,6 @@ from typing import List
 from graphsenselib.datatypes.abi import decode_logs_dict
 from graphsenselib.utils.accountmodel import hex_to_bytes
 from graphsenselib.utils.defi import ExternalSwap, get_swap_from_decoded_logs
-
 from gsrest.errors import (
     BadUserInputException,
     TransactionNotFoundException,
@@ -57,7 +56,6 @@ async def get_tx_dex_swap_conversions(
         )
 
     db = request.app["db"]
-
     # Get tx to get block_id
     try:
         tx_hash_bytes = hex_to_bytes(tx_hash)
@@ -70,21 +68,9 @@ async def get_tx_dex_swap_conversions(
     if not tx:
         raise TransactionNotFoundException(currency, tx_hash)
 
-    block_id = tx["block_id"]
-
     # todo wasteful but for now okay
-    logs_result = await db.get_logs_in_block_eth(currency, block_id)
-    traces_result = await db.get_traces_in_block(currency, block_id)
-
-    # Filter logs and traces for our specific transaction
-    tx_logs_raw = [
-        log for log in logs_result.current_rows if log["tx_hash"] == tx["tx_hash"]
-    ]
-    tx_traces = [
-        trace
-        for trace in traces_result.current_rows
-        if trace["tx_hash"] == tx["tx_hash"]
-    ]
+    tx_logs_raw = await db.fetch_transaction_logs(currency, tx)
+    tx_traces = await db.fetch_transaction_traces(currency, tx)
 
     if not tx_logs_raw:
         logger.info(f"No logs found for transaction {tx_hash}")
