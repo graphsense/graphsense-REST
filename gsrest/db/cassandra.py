@@ -1997,7 +1997,11 @@ class Cassandra:
             "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
         )
         token_tx_logs = await self.get_logs_in_block_eth(
-            currency, tx["block_id"], topic=transfer_topic, log_index=log_index
+            currency,
+            tx["block_id"],
+            topic=transfer_topic,
+            log_index=log_index,
+            tx_hash=tx["tx_hash"],
         )
         supported_tokens = {
             v["token_address"]: v
@@ -2019,7 +2023,9 @@ class Cassandra:
         ]
 
     async def fetch_transaction_trace(self, currency, tx, trace_index):
-        r = await self.get_traces_in_block(currency, tx["block_id"], trace_index)
+        r = await self.get_traces_in_block(
+            currency, tx["block_id"], trace_index, tx_hash=tx["tx_hash"]
+        )
         result = r.current_rows
         if len(result) != 1:
             raise NotFoundException(
@@ -2028,12 +2034,19 @@ class Cassandra:
         return result[0]
 
     async def fetch_transaction_traces(self, currency, tx):
-        r = await self.get_traces_in_block(currency, tx["block_id"])
-        result = r.current_rows
-        return [x for x in result if x["tx_hash"] == tx["tx_hash"]]
+        result = await self.get_traces_in_block(
+            currency, tx["block_id"], tx_hash=tx["tx_hash"]
+        )
+        return result.current_rows
+
+    async def fetch_transaction_logs(self, currency, tx):
+        result = await self.get_logs_in_block_eth(
+            currency, tx["block_id"], tx_hash=tx["tx_hash"]
+        )
+        return result.current_rows
 
     async def get_logs_in_block_eth(
-        self, currency, block_id, topic=None, log_index=None
+        self, currency, block_id, topic=None, log_index=None, tx_hash=None
     ):
         block_group = self.get_block_id_group(currency, block_id)
         query = "SELECT * from log where block_id_group=%s and block_id=%s"
@@ -2047,9 +2060,15 @@ class Cassandra:
             query += " and log_index=%s"
             params += [log_index]
 
+        if tx_hash is not None:
+            query += " and tx_hash=%s ALLOW FILTERING"
+            params += [tx_hash]
+
         return await self.execute_async(currency, "raw", query, params)
 
-    async def get_traces_in_block(self, currency, block_id, trace_index=None):
+    async def get_traces_in_block(
+        self, currency, block_id, trace_index=None, tx_hash=None
+    ):
         block_group = self.get_block_id_group(currency, block_id)
         query = "SELECT * from trace where block_id_group=%s and block_id=%s"
 
@@ -2057,6 +2076,10 @@ class Cassandra:
         if trace_index is not None:
             query += " and trace_index=%s"
             params += [trace_index]
+
+        if tx_hash is not None:
+            query += " and tx_hash=%s ALLOW FILTERING"
+            params += [tx_hash]
 
         return await self.execute_async(currency, "raw", query, params)
 
