@@ -12,13 +12,13 @@ from typing import Optional, Sequence, Tuple
 
 from async_lru import alru_cache
 from cassandra import ConsistencyLevel, InvalidRequest
+from cassandra.auth import PlainTextAuthProvider
 from cassandra.cluster import (
     EXEC_PROFILE_DEFAULT,
     Cluster,
     ExecutionProfile,
     NoHostAvailable,
 )
-from cassandra.auth import PlainTextAuthProvider
 from cassandra.policies import DCAwareRoundRobinPolicy, TokenAwarePolicy
 from cassandra.protocol import ProtocolException
 from cassandra.query import SimpleStatement, ValueSequence, dict_factory

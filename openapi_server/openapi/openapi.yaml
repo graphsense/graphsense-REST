@@ -5,7 +5,7 @@ info:
     name: Iknaio Cryptoasset Analytics GmbH
   description: GraphSense API provides programmatic access to various ledgers' addresses, entities, blocks, transactions and tags for automated and highly efficient forensics tasks.
   title: GraphSense API
-  version: 1.13.0dev2
+  version: 1.13.0dev3
 servers:
   - url: https://api.ikna.io
 paths:
@@ -3306,13 +3306,13 @@ components:
         from_network: from_network
         to_amount: to_amount
         from_asset: from_asset
+        from_asset_transfer: from_asset_transfer
         conversion_type: dex_swap
         from_amount: from_amount
-        from_payment: from_payment
+        to_asset_transfer: to_asset_transfer
         to_asset: to_asset
         to_address: to_address
         from_address: from_address
-        to_payment: to_payment
         to_network: to_network
       properties:
         conversion_type:
@@ -3345,13 +3345,13 @@ components:
           description: Amount of asset converted to
           title: to_amount
           type: string
-        from_payment:
-          description: Initial payment starting the conversion process
-          title: from_payment
+        from_asset_transfer:
+          description: Initial asset transfer starting the conversion process
+          title: from_asset_transfer
           type: string
-        to_payment:
-          description: Output payment ending the conversion process
-          title: to_payment
+        to_asset_transfer:
+          description: Output asset transfer ending the conversion process
+          title: to_asset_transfer
           type: string
         from_network:
           description: Network where the initial payment took place
@@ -3366,13 +3366,13 @@ components:
         - from_address
         - from_amount
         - from_asset
+        - from_asset_transfer
         - from_network
-        - from_payment
         - to_address
         - to_amount
         - to_asset
+        - to_asset_transfer
         - to_network
-        - to_payment
       title: external_conversions
       type: object
     currency_stats:

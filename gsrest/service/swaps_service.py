@@ -4,6 +4,7 @@ from typing import List
 from graphsenselib.datatypes.abi import decode_logs_dict
 from graphsenselib.utils.accountmodel import hex_to_bytes
 from graphsenselib.utils.defi import ExternalSwap, get_swap_from_decoded_logs
+
 from gsrest.errors import (
     BadUserInputException,
     TransactionNotFoundException,
@@ -25,8 +26,8 @@ def conversion_from_external_swap(
         to_asset=swap.toAsset,
         from_amount=hex(swap.fromAmount),
         to_amount=hex(swap.toAmount),
-        from_payment=swap.fromPayment,
-        to_payment=swap.toPayment,
+        from_asset_transfer=swap.fromPayment,
+        to_asset_transfer=swap.toPayment,
         from_network=network,
         to_network=network,
     )

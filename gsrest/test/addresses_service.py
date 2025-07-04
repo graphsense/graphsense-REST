@@ -1174,17 +1174,17 @@ async def list_address_links(test_case):
         (
             2,
             2,
-            ["af6e0004", "af6e0003"],  # noqa: E131
+            ["af6e0004", "af6e0003"],
         ),
         (
             3,
             1,
-            ["af6e0004"],  # noqa: E131
+            ["af6e0004"],
         ),
         (
             4,
             0,
-            [],  # noqa: E131
+            [],
         ),
     ]:
         result = await test_case.request(

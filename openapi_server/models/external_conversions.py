@@ -14,7 +14,7 @@ class ExternalConversions(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, conversion_type: str=None, from_address: str=None, to_address: str=None, from_asset: str=None, to_asset: str=None, from_amount: str=None, to_amount: str=None, from_payment: str=None, to_payment: str=None, from_network: str=None, to_network: str=None):
+    def __init__(self, conversion_type: str=None, from_address: str=None, to_address: str=None, from_asset: str=None, to_asset: str=None, from_amount: str=None, to_amount: str=None, from_asset_transfer: str=None, to_asset_transfer: str=None, from_network: str=None, to_network: str=None):
         """ExternalConversions - a model defined in OpenAPI
 
         :param conversion_type: The conversion_type of this ExternalConversions.
@@ -24,8 +24,8 @@ class ExternalConversions(Model):
         :param to_asset: The to_asset of this ExternalConversions.
         :param from_amount: The from_amount of this ExternalConversions.
         :param to_amount: The to_amount of this ExternalConversions.
-        :param from_payment: The from_payment of this ExternalConversions.
-        :param to_payment: The to_payment of this ExternalConversions.
+        :param from_asset_transfer: The from_asset_transfer of this ExternalConversions.
+        :param to_asset_transfer: The to_asset_transfer of this ExternalConversions.
         :param from_network: The from_network of this ExternalConversions.
         :param to_network: The to_network of this ExternalConversions.
         """
@@ -37,8 +37,8 @@ class ExternalConversions(Model):
             'to_asset': str,
             'from_amount': str,
             'to_amount': str,
-            'from_payment': str,
-            'to_payment': str,
+            'from_asset_transfer': str,
+            'to_asset_transfer': str,
             'from_network': str,
             'to_network': str
         }
@@ -51,8 +51,8 @@ class ExternalConversions(Model):
             'to_asset': 'to_asset',
             'from_amount': 'from_amount',
             'to_amount': 'to_amount',
-            'from_payment': 'from_payment',
-            'to_payment': 'to_payment',
+            'from_asset_transfer': 'from_asset_transfer',
+            'to_asset_transfer': 'to_asset_transfer',
             'from_network': 'from_network',
             'to_network': 'to_network'
         }
@@ -64,8 +64,8 @@ class ExternalConversions(Model):
         self._to_asset = to_asset
         self._from_amount = from_amount
         self._to_amount = to_amount
-        self._from_payment = from_payment
-        self._to_payment = to_payment
+        self._from_asset_transfer = from_asset_transfer
+        self._to_asset_transfer = to_asset_transfer
         self._from_network = from_network
         self._to_network = to_network
 
@@ -93,8 +93,8 @@ class ExternalConversions(Model):
             'to_asset': self._to_asset,
             'from_amount': self._from_amount,
             'to_amount': self._to_amount,
-            'from_payment': self._from_payment,
-            'to_payment': self._to_payment,
+            'from_asset_transfer': self._from_asset_transfer,
+            'to_asset_transfer': self._to_asset_transfer,
             'from_network': self._from_network,
             'to_network': self._to_network }
 
@@ -277,54 +277,54 @@ class ExternalConversions(Model):
         self._to_amount = to_amount
 
     @property
-    def from_payment(self):
-        """Gets the from_payment of this ExternalConversions.
+    def from_asset_transfer(self):
+        """Gets the from_asset_transfer of this ExternalConversions.
 
-        Initial payment starting the conversion process
+        Initial asset transfer starting the conversion process
 
-        :return: The from_payment of this ExternalConversions.
+        :return: The from_asset_transfer of this ExternalConversions.
         :rtype: str
         """
-        return self._from_payment
+        return self._from_asset_transfer
 
-    @from_payment.setter
-    def from_payment(self, from_payment):
-        """Sets the from_payment of this ExternalConversions.
+    @from_asset_transfer.setter
+    def from_asset_transfer(self, from_asset_transfer):
+        """Sets the from_asset_transfer of this ExternalConversions.
 
-        Initial payment starting the conversion process
+        Initial asset transfer starting the conversion process
 
-        :param from_payment: The from_payment of this ExternalConversions.
-        :type from_payment: str
+        :param from_asset_transfer: The from_asset_transfer of this ExternalConversions.
+        :type from_asset_transfer: str
         """
-        if from_payment is None:
-            raise BadUserInputException("Invalid value for `from_payment`, must not be `None`")
+        if from_asset_transfer is None:
+            raise BadUserInputException("Invalid value for `from_asset_transfer`, must not be `None`")
 
-        self._from_payment = from_payment
+        self._from_asset_transfer = from_asset_transfer
 
     @property
-    def to_payment(self):
-        """Gets the to_payment of this ExternalConversions.
+    def to_asset_transfer(self):
+        """Gets the to_asset_transfer of this ExternalConversions.
 
-        Output payment ending the conversion process
+        Output asset transfer ending the conversion process
 
-        :return: The to_payment of this ExternalConversions.
+        :return: The to_asset_transfer of this ExternalConversions.
         :rtype: str
         """
-        return self._to_payment
+        return self._to_asset_transfer
 
-    @to_payment.setter
-    def to_payment(self, to_payment):
-        """Sets the to_payment of this ExternalConversions.
+    @to_asset_transfer.setter
+    def to_asset_transfer(self, to_asset_transfer):
+        """Sets the to_asset_transfer of this ExternalConversions.
 
-        Output payment ending the conversion process
+        Output asset transfer ending the conversion process
 
-        :param to_payment: The to_payment of this ExternalConversions.
-        :type to_payment: str
+        :param to_asset_transfer: The to_asset_transfer of this ExternalConversions.
+        :type to_asset_transfer: str
         """
-        if to_payment is None:
-            raise BadUserInputException("Invalid value for `to_payment`, must not be `None`")
+        if to_asset_transfer is None:
+            raise BadUserInputException("Invalid value for `to_asset_transfer`, must not be `None`")
 
-        self._to_payment = to_payment
+        self._to_asset_transfer = to_asset_transfer
 
     @property
     def from_network(self):

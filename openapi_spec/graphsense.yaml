@@ -5,7 +5,7 @@ info:
   contact:
     name: Iknaio Cryptoasset Analytics GmbH
     email: contact@ikna.io
-  version: "1.13.0dev2"
+  version: "1.13.0dev3"
 servers:
   - url: 'https://api.ikna.io'
 paths:
@@ -1335,8 +1335,8 @@ components:
         - to_asset
         - from_amount
         - to_amount
-        - from_payment
-        - to_payment
+        - from_asset_transfer
+        - to_asset_transfer
         - conversion_type
         - from_network
         - to_network
@@ -1364,12 +1364,12 @@ components:
         to_amount:
           type: string
           description: Amount of asset converted to
-        from_payment:
+        from_asset_transfer:
           type: string
-          description: Initial payment starting the conversion process
-        to_payment:
+          description: Initial asset transfer starting the conversion process
+        to_asset_transfer:
           type: string
-          description: Output payment ending the conversion process
+          description: Output asset transfer ending the conversion process
         from_network:
           type: string
           description: Network where the initial payment took place
