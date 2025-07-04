@@ -6,9 +6,13 @@ import os
 import aiohttp_cors
 import connexion
 import yaml
+from graphsenselib.config import AppConfig
+from graphsenselib.utils.slack import SlackLogHandler
 
 import gsrest.db
 from gsrest.plugins import get_subclass
+from typing import Optional
+
 
 CONFIG_FILE = "./instance/config.yaml"
 
@@ -22,7 +26,7 @@ def load_config(config_file):
     return config
 
 
-def setup_logging(logger, config):
+def setup_logging(logger, slack_exception_hook, config):
     level = config.get("level", "INFO").upper()
     level = getattr(logging, level)
     FORMAT = "%(asctime)s %(message)s"
@@ -40,6 +44,13 @@ def setup_logging(logger, config):
                 "%(name)s:%(filename)s:%(lineno)d %(message)s"
             )
         )
+
+    if slack_exception_hook is not None:
+        for h in slack_exception_hook.hooks:
+            slack_handler = SlackLogHandler(h)
+            slack_handler.setLevel("ERROR")
+            logger.addHandler(slack_handler)
+
     smtp = config.get("smtp", None)
     if not smtp:
         return
@@ -67,12 +78,18 @@ def factory(config_file=None, validate_responses=False):
     if not config_file:
         config_file = CONFIG_FILE
     config = load_config(config_file)
+
+    gslibConfig = AppConfig()
+    gslibConfig.load()
     # app.app.logger.info(f'reading config from {config_file}')
-    return factory_internal(config, validate_responses=validate_responses)
+    return factory_internal(config, gslibConfig, validate_responses=validate_responses)
 
 
-def factory_internal(config, validate_responses=False):
+def factory_internal(
+    config, gslibConfig: Optional[AppConfig], validate_responses=False
+):
     options = {"swagger_ui": True, "serve_spec": True}
+
     specification_dir = os.path.join(
         os.path.dirname(__file__), "../openapi_server/openapi"
     )
@@ -93,8 +110,20 @@ def factory_internal(config, validate_responses=False):
     )
 
     # set config
+    if gslibConfig is not None:
+        slack_exception_hook = gslibConfig.get_slack_hooks_by_topic("exceptions")
+
+        slack_info_hook = gslibConfig.get_slack_hooks_by_topic("info")
+    else:
+        slack_exception_hook = None
+        slack_info_hook = None
+
+    config["slack_info_hook"] = slack_info_hook
+
     app.app["config"] = config
-    setup_logging(app.app.logger, app.app["config"].get("logging", {}))
+    setup_logging(
+        app.app.logger, slack_exception_hook, app.app["config"].get("logging", {})
+    )
     with open(os.path.join(specification_dir, openapi_yaml)) as yaml_file:
         app.app["openapi"] = yaml.safe_load(yaml_file)
 

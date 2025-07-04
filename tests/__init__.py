@@ -19,7 +19,7 @@ class BaseTestCase(AioHTTPTestCase):
     ):
         logging.getLogger("connexion.operation").setLevel("ERROR")
 
-        return factory_internal(self.config, validate_responses=True).app
+        return factory_internal(self.config, None, validate_responses=True).app
 
     async def requestOnly(self, path, body, **kwargs):
         headers = {

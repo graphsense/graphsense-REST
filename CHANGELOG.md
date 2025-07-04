@@ -4,7 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
-## [25.07.0/1.12.0] - 2025-06-??
+## [25.08.0/1.13.0] - 2025-07-??
+
+### added
+- /txs/{tx_hash}/conversions enables to identify dex_swap inputs and outputs created in a transactions
+- error notifications can now be done via slack
+- slack can also be uses to get notifications for certain events, eg. when users report new tags
+
+
+## [25.07.0/1.12.0] - 2025-06-27
 
 ### added
 - token_currency filter option for links endpoint

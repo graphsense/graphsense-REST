@@ -2,6 +2,7 @@ import asyncio
 import logging
 from typing import Callable, List, Optional
 
+from graphsenselib.utils.slack import send_message_to_slack
 from tagstore.db import (
     ActorPublic,
     TagAlreadyExistsException,
@@ -237,7 +238,8 @@ async def list_taxonomies(request):
 
 
 async def report_tag(request, body):
-    reporting_enabled = request.app["config"].get("enable-user-tag-reporting", False)
+    config = request.app["config"]
+    reporting_enabled = config.get("enable-user-tag-reporting", False)
     tag_acl_group = get_user_tags_acl_group(request)
 
     if reporting_enabled:
@@ -255,6 +257,19 @@ async def report_tag(request, body):
             await tsdb.add_user_reported_tag(nt, acl_group=tag_acl_group)
         except TagAlreadyExistsException:
             logger.info("Tag already exists, ignoring insert.")
+
+        info_hook = config.get("slack_info_hook")
+
+        if info_hook is not None:
+            for h in info_hook.hooks:
+                try:
+                    send_message_to_slack(
+                        f"User Reported new Tag: {str(nt)} to ACL Group {tag_acl_group}",
+                        h,
+                    )
+                except Exception as e:
+                    logger.error(f"Failed to send tag reported slack info: {e}")
+
     else:
         raise FeatureNotAvailableException(
             "The report tag feature is disabled on this endpoint."
