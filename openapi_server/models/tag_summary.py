@@ -16,11 +16,12 @@ class TagSummary(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, broad_category: str=None, tag_count: int=None, best_actor: str=None, best_label: str=None, label_summary: Dict[str, LabelSummary]=None, concept_tag_cloud: Dict[str, TagCloudEntry]=None):
+    def __init__(self, broad_category: str=None, tag_count: int=None, tag_count_indirect: int=None, best_actor: str=None, best_label: str=None, label_summary: Dict[str, LabelSummary]=None, concept_tag_cloud: Dict[str, TagCloudEntry]=None):
         """TagSummary - a model defined in OpenAPI
 
         :param broad_category: The broad_category of this TagSummary.
         :param tag_count: The tag_count of this TagSummary.
+        :param tag_count_indirect: The tag_count_indirect of this TagSummary.
         :param best_actor: The best_actor of this TagSummary.
         :param best_label: The best_label of this TagSummary.
         :param label_summary: The label_summary of this TagSummary.
@@ -29,6 +30,7 @@ class TagSummary(Model):
         self.openapi_types = {
             'broad_category': str,
             'tag_count': int,
+            'tag_count_indirect': int,
             'best_actor': str,
             'best_label': str,
             'label_summary': Dict[str, LabelSummary],
@@ -38,6 +40,7 @@ class TagSummary(Model):
         self.attribute_map = {
             'broad_category': 'broad_category',
             'tag_count': 'tag_count',
+            'tag_count_indirect': 'tag_count_indirect',
             'best_actor': 'best_actor',
             'best_label': 'best_label',
             'label_summary': 'label_summary',
@@ -46,6 +49,7 @@ class TagSummary(Model):
 
         self._broad_category = broad_category
         self._tag_count = tag_count
+        self._tag_count_indirect = tag_count_indirect
         self._best_actor = best_actor
         self._best_label = best_label
         self._label_summary = label_summary
@@ -70,6 +74,7 @@ class TagSummary(Model):
             return Model.to_dict(self)
         return { 'broad_category': self._broad_category,
             'tag_count': self._tag_count,
+            'tag_count_indirect': self._tag_count_indirect,
             'best_actor': self._best_actor,
             'best_label': self._best_label,
             'label_summary': self._label_summary,
@@ -121,6 +126,27 @@ class TagSummary(Model):
             raise BadUserInputException("Invalid value for `tag_count`, must not be `None`")
 
         self._tag_count = tag_count
+
+    @property
+    def tag_count_indirect(self):
+        """Gets the tag_count_indirect of this TagSummary.
+
+
+        :return: The tag_count_indirect of this TagSummary.
+        :rtype: int
+        """
+        return self._tag_count_indirect
+
+    @tag_count_indirect.setter
+    def tag_count_indirect(self, tag_count_indirect):
+        """Sets the tag_count_indirect of this TagSummary.
+
+
+        :param tag_count_indirect: The tag_count_indirect of this TagSummary.
+        :type tag_count_indirect: int
+        """
+
+        self._tag_count_indirect = tag_count_indirect
 
     @property
     def best_actor(self):

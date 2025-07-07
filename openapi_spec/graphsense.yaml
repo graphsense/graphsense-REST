@@ -5,7 +5,7 @@ info:
   contact:
     name: Iknaio Cryptoasset Analytics GmbH
     email: contact@ikna.io
-  version: "1.13.0dev5"
+  version: "1.13.0dev6"
 servers:
   - url: 'https://api.ikna.io'
 paths:
@@ -1267,6 +1267,8 @@ components:
           type: string
         tag_count:
           type: integer
+        tag_count_indirect:
+          type: integer
         best_actor:
           type: string
         best_label:
@@ -2379,6 +2381,9 @@ components:
         peg_currency:
           type: string
           description: is set if token is a stablecoin. It holds the thicker symbol of the currency the tokens is pegged to.
+        contract_address:
+          type: string
+          description: the contract address of the token on the blockchain. This is only set for tokens that are not native to the blockchain.
     token_configs:
       type: object
       required:

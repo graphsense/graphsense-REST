@@ -2,6 +2,7 @@ import importlib
 import logging
 import logging.handlers
 import os
+from typing import Optional
 
 import aiohttp_cors
 import connexion
@@ -11,8 +12,6 @@ from graphsenselib.utils.slack import SlackLogHandler
 
 import gsrest.db
 from gsrest.plugins import get_subclass
-from typing import Optional
-
 
 CONFIG_FILE = "./instance/config.yaml"
 

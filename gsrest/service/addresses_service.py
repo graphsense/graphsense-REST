@@ -39,6 +39,7 @@ def tagSummary_from_tagDigest(td: TagDigest):
     return TagSummary(
         broad_category=td.broad_concept,
         tag_count=td.nr_tags,
+        tag_count_indirect=td.nr_tags_indirect,
         best_actor=td.best_actor,
         best_label=td.best_label,
         concept_tag_cloud={

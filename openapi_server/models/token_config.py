@@ -14,28 +14,32 @@ class TokenConfig(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, ticker: str=None, decimals: int=None, peg_currency: str=None):
+    def __init__(self, ticker: str=None, decimals: int=None, peg_currency: str=None, contract_address: str=None):
         """TokenConfig - a model defined in OpenAPI
 
         :param ticker: The ticker of this TokenConfig.
         :param decimals: The decimals of this TokenConfig.
         :param peg_currency: The peg_currency of this TokenConfig.
+        :param contract_address: The contract_address of this TokenConfig.
         """
         self.openapi_types = {
             'ticker': str,
             'decimals': int,
-            'peg_currency': str
+            'peg_currency': str,
+            'contract_address': str
         }
 
         self.attribute_map = {
             'ticker': 'ticker',
             'decimals': 'decimals',
-            'peg_currency': 'peg_currency'
+            'peg_currency': 'peg_currency',
+            'contract_address': 'contract_address'
         }
 
         self._ticker = ticker
         self._decimals = decimals
         self._peg_currency = peg_currency
+        self._contract_address = contract_address
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'TokenConfig':
@@ -56,7 +60,8 @@ class TokenConfig(Model):
             return Model.to_dict(self)
         return { 'ticker': self._ticker,
             'decimals': self._decimals,
-            'peg_currency': self._peg_currency }
+            'peg_currency': self._peg_currency,
+            'contract_address': self._contract_address }
 
 
     @property
@@ -131,3 +136,26 @@ class TokenConfig(Model):
         """
 
         self._peg_currency = peg_currency
+
+    @property
+    def contract_address(self):
+        """Gets the contract_address of this TokenConfig.
+
+        the contract address of the token on the blockchain. This is only set for tokens that are not native to the blockchain.
+
+        :return: The contract_address of this TokenConfig.
+        :rtype: str
+        """
+        return self._contract_address
+
+    @contract_address.setter
+    def contract_address(self, contract_address):
+        """Sets the contract_address of this TokenConfig.
+
+        the contract address of the token on the blockchain. This is only set for tokens that are not native to the blockchain.
+
+        :param contract_address: The contract_address of this TokenConfig.
+        :type contract_address: str
+        """
+
+        self._contract_address = contract_address

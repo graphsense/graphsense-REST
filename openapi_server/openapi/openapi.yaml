@@ -5,7 +5,7 @@ info:
     name: Iknaio Cryptoasset Analytics GmbH
   description: GraphSense API provides programmatic access to various ledgers' addresses, entities, blocks, transactions and tags for automated and highly efficient forensics tasks.
   title: GraphSense API
-  version: 1.13.0dev5
+  version: 1.13.0dev6
 servers:
   - url: https://api.ikna.io
 paths:
@@ -3061,8 +3061,8 @@ components:
       type: object
     tag_cloud_entry:
       example:
-        cnt: 2
-        weighted: 7.061401241503109
+        cnt: 7
+        weighted: 9.301444243932576
       properties:
         cnt:
           title: cnt
@@ -3087,11 +3087,11 @@ components:
         creators:
           - creators
           - creators
-        confidence: 1.4658129805029452
-        count: 6
+        confidence: 5.962133916683182
+        count: 1
         label: label
-        relevance: 5.962133916683182
-        lastmod: 5
+        relevance: 5.637376656633329
+        lastmod: 2
       properties:
         label:
           title: label
@@ -3146,10 +3146,11 @@ components:
       example:
         tag_count: 0
         best_actor: best_actor
+        tag_count_indirect: 6
         concept_tag_cloud:
           key:
-            cnt: 2
-            weighted: 7.061401241503109
+            cnt: 7
+            weighted: 9.301444243932576
         label_summary:
           key:
             inherited_from: cluster
@@ -3162,11 +3163,11 @@ components:
             creators:
               - creators
               - creators
-            confidence: 1.4658129805029452
-            count: 6
+            confidence: 5.962133916683182
+            count: 1
             label: label
-            relevance: 5.962133916683182
-            lastmod: 5
+            relevance: 5.637376656633329
+            lastmod: 2
         best_label: best_label
         broad_category: broad_category
       properties:
@@ -3175,6 +3176,9 @@ components:
           type: string
         tag_count:
           title: tag_count
+          type: integer
+        tag_count_indirect:
+          title: tag_count_indirect
           type: integer
         best_actor:
           title: best_actor
@@ -5897,6 +5901,7 @@ components:
       example:
         ticker: ticker
         decimals: 0
+        contract_address: contract_address
         peg_currency: peg_currency
       properties:
         ticker:
@@ -5911,6 +5916,10 @@ components:
           description: is set if token is a stablecoin. It holds the thicker symbol of the currency the tokens is pegged to.
           title: peg_currency
           type: string
+        contract_address:
+          description: the contract address of the token on the blockchain. This is only set for tokens that are not native to the blockchain.
+          title: contract_address
+          type: string
       required:
         - decimals
         - ticker
@@ -5921,9 +5930,11 @@ components:
         token_configs:
           - ticker: ticker
             decimals: 0
+            contract_address: contract_address
             peg_currency: peg_currency
           - ticker: ticker
             decimals: 0
+            contract_address: contract_address
             peg_currency: peg_currency
       properties:
         token_configs:
