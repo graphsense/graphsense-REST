@@ -102,7 +102,8 @@ def from_row(
         tx_hash=row["tx_hash"].hex(),
         coinbase=coinbase,
         height=row["block_id"],
-        no_inputs=0 if not row["inputs"] else len(row["inputs"]),
+        no_inputs=(0 if not row["inputs"] else len(row["inputs"]))
+        + (1 if coinbase else 0),
         no_outputs=0 if not row["outputs"] else len(row["outputs"]),
         inputs=inputs,
         outputs=io_from_rows(
