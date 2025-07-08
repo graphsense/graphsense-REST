@@ -95,8 +95,7 @@ def from_row(
     total_output = convert_value(currency, row["total_output"], rates)
 
     if coinbase:
-        if total_input is None or total_input == 0:
-            total_input = total_output
+        total_input = total_output
 
     return TxUtxo(
         currency=currency,

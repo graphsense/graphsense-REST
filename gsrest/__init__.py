@@ -25,7 +25,9 @@ def load_config(config_file):
     return config
 
 
-def setup_logging(logger, slack_exception_hook, config):
+def setup_logging(
+    logger, slack_exception_hook, default_environment: Optional[str], config
+):
     level = config.get("level", "INFO").upper()
     level = getattr(logging, level)
     FORMAT = "%(asctime)s %(message)s"
@@ -46,7 +48,7 @@ def setup_logging(logger, slack_exception_hook, config):
 
     if slack_exception_hook is not None:
         for h in slack_exception_hook.hooks:
-            slack_handler = SlackLogHandler(h)
+            slack_handler = SlackLogHandler(h, environment=default_environment)
             slack_handler.setLevel("ERROR")
             logger.addHandler(slack_handler)
 
@@ -111,17 +113,23 @@ def factory_internal(
     # set config
     if gslibConfig is not None:
         slack_exception_hook = gslibConfig.get_slack_hooks_by_topic("exceptions")
-
         slack_info_hook = gslibConfig.get_slack_hooks_by_topic("info")
+        default_environment = (
+            config.get("environment", None) or gslibConfig.default_environment
+        )
     else:
         slack_exception_hook = None
         slack_info_hook = None
+        default_environment = config.get("environment", None)
 
     config["slack_info_hook"] = slack_info_hook
 
     app.app["config"] = config
     setup_logging(
-        app.app.logger, slack_exception_hook, app.app["config"].get("logging", {})
+        app.app.logger,
+        slack_exception_hook,
+        default_environment,
+        app.app["config"].get("logging", {}),
     )
     with open(os.path.join(specification_dir, openapi_yaml)) as yaml_file:
         app.app["openapi"] = yaml.safe_load(yaml_file)

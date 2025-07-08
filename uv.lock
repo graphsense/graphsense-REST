@@ -1570,7 +1570,7 @@ yaml = [
 
 [[package]]
 name = "graphsense-lib"
-version = "2.5.2"
+version = "2.5.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "base58" },
@@ -1592,9 +1592,9 @@ dependencies = [
     { name = "simplejson" },
     { name = "tenacity" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/50/59/3bbee91ec7f01738abc470fb672505ebb5d772ce31ac25ddb4b8ee22e6e4/graphsense_lib-2.5.2.tar.gz", hash = "sha256:398f151b697932da20e2212fb41be283636d0ac653d4289ff870d26f23e39403", size = 12080540 }
+sdist = { url = "https://files.pythonhosted.org/packages/d8/4f/24c6e9590a9e27e51b83d3ba3136df6348b5aa3b1d7e87cc0247d107e2f6/graphsense_lib-2.5.3.tar.gz", hash = "sha256:e01dfc8bff578251936ea52fe62a7c2e836a0d16897a1595123c15cdaec48760", size = 12080546 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8d/45/901080a03c63429cb2cdc9c11308a0ce41e115164823ef210fe907889246/graphsense_lib-2.5.2-py3-none-any.whl", hash = "sha256:9bd0e59bbc18f8a365d59bb0fc17549b26f4feaf28889c340a9582d8fb9158e7", size = 511175 },
+    { url = "https://files.pythonhosted.org/packages/35/ff/d66f603386a9ee80bbbcf93c9e22216f8513aa137ea6936945dff9720e23/graphsense_lib-2.5.3-py3-none-any.whl", hash = "sha256:01cdf9127a1bd21d9bd8438faa55f4323c9f5a2699110e254a648df5ea10a749", size = 511264 },
 ]
 
 [package.optional-dependencies]
@@ -1676,7 +1676,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/0c/0a/ec64821a3ca6a8f14
 
 [[package]]
 name = "gsrest"
-version = "1.13.0.dev7"
+version = "1.13.0.dev8"
 source = { virtual = "." }
 dependencies = [
     { name = "aiohttp-cors" },
@@ -1714,7 +1714,7 @@ requires-dist = [
     { name = "async-lru", specifier = ">=2.0.4" },
     { name = "cassandra-driver", specifier = ">=3.27.0" },
     { name = "connexion", extras = ["swagger-ui"], specifier = ">=2.6.0" },
-    { name = "graphsense-lib", extras = ["swaps"], specifier = ">=2.5.2" },
+    { name = "graphsense-lib", extras = ["swaps"], specifier = ">=2.5.3" },
     { name = "lz4", specifier = ">=4.3.2" },
     { name = "openapi-schema-validator", specifier = ">=0.2.3" },
     { name = "python-dateutil", specifier = ">=2.9.0" },
