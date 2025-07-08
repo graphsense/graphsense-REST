@@ -70,22 +70,42 @@ def from_row(
     if is_eth_like(currency):
         return tx_account_from_row(currency, row, rates, token_config)
 
+    coinbase = row.get("coinbase", False)
+
+    inputs = io_from_rows(
+        currency,
+        row,
+        "inputs",
+        rates,
+        include_io,
+        include_nonstandard_io,
+        include_io_index,
+    )
+
+    if coinbase and (inputs is None or inputs == []):
+        inputs = [
+            TxValue(
+                address=["coinbase"],
+                value=convert_value(currency, row["total_output"], rates),
+                index=None if not include_io_index else 0,
+            )
+        ]
+
+    total_input = convert_value(currency, row["total_input"], rates)
+    total_output = convert_value(currency, row["total_output"], rates)
+
+    if coinbase:
+        if total_input is None or total_input == 0:
+            total_input = total_output
+
     return TxUtxo(
         currency=currency,
         tx_hash=row["tx_hash"].hex(),
-        coinbase=row["coinbase"],
+        coinbase=coinbase,
         height=row["block_id"],
         no_inputs=0 if not row["inputs"] else len(row["inputs"]),
         no_outputs=0 if not row["outputs"] else len(row["outputs"]),
-        inputs=io_from_rows(
-            currency,
-            row,
-            "inputs",
-            rates,
-            include_io,
-            include_nonstandard_io,
-            include_io_index,
-        ),
+        inputs=inputs,
         outputs=io_from_rows(
             currency,
             row,
@@ -96,8 +116,8 @@ def from_row(
             include_io_index,
         ),
         timestamp=row["timestamp"],
-        total_input=convert_value(currency, row["total_input"], rates),
-        total_output=convert_value(currency, row["total_output"], rates),
+        total_input=total_input,
+        total_output=total_output,
     )
 
 
@@ -239,26 +259,6 @@ async def get_tx(
         tx_hash = subtxIdent.tx_hash
         if token_tx_id is None:
             token_tx_id = subtxIdent.sub_index
-
-    # if f"{SUBTX_IDENT_SEPERATOR_CHAR}I" in tx_hash:
-    #     h, postfix, *_ = tx_hash.split(SUBTX_IDENT_SEPERATOR_CHAR)
-    #     try:
-    #         tindexS = postfix.strip("IT")
-    #         trace_index = int(tindexS)
-    #     except ValueError:
-    #         raise BadUserInputException(f"Trace index: {tindexS} is not an integer.")
-    #     tx_hash = h
-    # elif f"{SUBTX_IDENT_SEPERATOR_CHAR}T" in tx_hash:
-    #     h, postfix, *_ = tx_hash.split(SUBTX_IDENT_SEPERATOR_CHAR)
-
-    #     try:
-    #         tindexS = postfix.strip("IT")
-    #         if token_tx_id is None:
-    #             token_tx_id = int(tindexS)
-    #     except ValueError:
-    #         raise BadUserInputException(f"Token index: {tindexS} is not an integer.")
-
-    #     tx_hash = h
 
     if token_tx_id is not None:
         if is_eth_like(currency):

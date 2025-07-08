@@ -1585,7 +1585,13 @@ class Cassandra:
                 if node_type == NodeType.ADDRESS:
 
                     async def has_address_in_ios(address, ios):
-                        addresses_io = sum([x.address for x in ios], [])
+                        if ios is None and address == "coinbase":
+                            return True
+                        if ios is None:
+                            return False
+
+                        addresses_io = sum([x.address or [] for x in ios], [])
+
                         return address in addresses_io
 
                     final_results = [

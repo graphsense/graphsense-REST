@@ -212,6 +212,7 @@ async def get_tx(test_case):
     tx = tx1.to_dict()
     tx.pop("inputs")
     tx.pop("outputs")
+
     test_case.assertEqual(tx, result)
     result = await test_case.request(
         path, currency="eth", tx_hash="af6e0000", include_io=True
