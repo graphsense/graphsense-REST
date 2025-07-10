@@ -35,11 +35,11 @@ async def search_by_currency(request, currency, q, limit=10):
     r = SearchResultByCurrency(currency=currency, addresses=[], txs=[])
 
     if len(q) >= 3:
-        without_txtype_postfix = q.split("_")[0]
         [txs, addresses] = await asyncio.gather(
-            db.list_matching_txs(currency, without_txtype_postfix, limit),
+            db.list_matching_txs(currency, q, limit),
             db.list_matching_addresses(currency, q, limit=limit),
         )
+
     else:
         txs = []
         addresses = []

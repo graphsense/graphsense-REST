@@ -2090,6 +2090,9 @@ class Cassandra:
         return await self.execute_async(currency, "raw", query, params)
 
     async def list_matching_txs(self, currency, expression, limit):
+        expression_original = expression
+        expression = expression.split("_")[0]
+
         prefix_lengths = self.get_prefix_lengths(currency)
 
         # should be safe for btc txs too. They are hex encoded.
@@ -2165,6 +2168,16 @@ class Cassandra:
                 )
             )
             rows.extend(ids)
+
+        if "_" in expression_original:
+            if expression_original.startswith("0x"):
+                expression_original = expression_original[2:]
+            len_expression = len(expression_original)
+            rows = [
+                row
+                for row in rows
+                if row[:len_expression].lower() == expression_original.lower()
+            ]
 
         return rows
 
