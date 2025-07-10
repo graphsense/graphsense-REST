@@ -12,8 +12,8 @@ logger = logging.getLogger(__name__)
 
 
 new_endpoint = "http://localhost:9000"
-current_endpoint = "https://api.ikna.io"
-current_key = os.environ.get("GS_API_KEY")
+current_endpoint = "https://api.test.ikna.io"
+current_key = os.environ.get("GS_API_KEY_TEST")
 
 headers = {
     "Content-Type": "application/json",
@@ -56,6 +56,15 @@ def get_data_from_new_endpoint(endpoint: str) -> tuple[Dict[str, Any], float]:
 def compare_outputs(current_data: Dict[str, Any], new_data: Dict[str, Any]) -> Dict[
     str, Any]:
     """Compare outputs with detailed differences."""
+    
+    if isinstance(current_data, list):
+        current_data = {
+            "items": current_data
+        }
+    if isinstance(new_data, list):
+        new_data = {
+            "items": new_data}
+    
     result = {
         "are_equal": False,
         "differences": [],
@@ -175,14 +184,14 @@ def test_search():
     call_2 = "search?q=0x00000&limit=100"
     call_3 = "search?q=TCxZGE&limit=100"
     # todo find out why traces and tokens order is not deterministic
-    #call_4 = "search?q=dbd6a65731ab62a68d3d89015a7557ae9376c4693b6e90e0e3c23c903aa89858_T198&limit=100"
+    call_4 = "search?q=dbd6a65731ab62a68d3d89015a7557ae9376c4693b6e90e0e3c23c903aa89858_T198&limit=100"
     call_5 = "search?q=0xfffff" # check possibly wrong "overflow"
     call_6 = "search?q=0xfffff01"
     call_7 = "search?q=0xfffff0193483022348723" # no results
 
     calls = [
         call_1, call_2, call_3, 
-        #call_4, 
+        call_4, 
         call_5, call_6, call_7
     ]
     for call in calls:

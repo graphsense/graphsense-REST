@@ -2106,11 +2106,13 @@ class Cassandra:
         if len(expression) < prefix_lengths["tx"]:
             return []
 
-        expression_lower = expression.lower()
-        upper_bound = create_upper_bound(expression_lower)
+        expression_normalized = expression.lower()
 
-        if len(expression_lower) % 2 != 0:
-            expression_lower = expression_lower + "0"
+        lower_bound = expression_normalized
+        upper_bound = create_upper_bound(expression_normalized)
+
+        if len(lower_bound) % 2 != 0:
+            lower_bound = lower_bound + "0"
 
         if len(upper_bound) % 2 != 0:
             upper_bound = upper_bound + "0"
@@ -2126,7 +2128,7 @@ class Cassandra:
             )
             params = [
                 prefix,
-                hex_str_to_bytes(strip_0x(expression_lower)),
+                hex_str_to_bytes(strip_0x(lower_bound)),
                 hex_str_to_bytes(strip_0x(upper_bound)),
                 limit,
             ]
@@ -2141,7 +2143,7 @@ class Cassandra:
             )
             params = [
                 prefix,
-                hex_str_to_bytes(strip_0x(expression_lower)),
+                hex_str_to_bytes(strip_0x(lower_bound)),
                 hex_str_to_bytes(strip_0x(upper_bound)),
                 limit,
             ]
@@ -2170,13 +2172,15 @@ class Cassandra:
             rows.extend(ids)
 
         if "_" in expression_original:
-            if expression_original.startswith("0x"):
-                expression_original = expression_original[2:]
-            len_expression = len(expression_original)
+            postfix = expression_original.split("_")[1]
+            expression_normalized_postfix = (
+                expression_normalized + "_" + postfix.lower()
+            )
+            len_expression = len(expression_normalized_postfix)
             rows = [
                 row
                 for row in rows
-                if row[:len_expression].lower() == expression_original.lower()
+                if row[:len_expression].lower() == expression_normalized_postfix
             ]
 
         return rows
