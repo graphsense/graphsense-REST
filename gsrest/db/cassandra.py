@@ -2169,19 +2169,18 @@ class Cassandra:
                     {get_tx_identifier(x, type_overwrite="internal") for x in traces}
                 )
             )
+            if "_" in expression_original:
+                postfix = expression_original.split("_")[1]
+                expression_normalized_postfix = (
+                    expression_normalized + "_" + postfix.lower()
+                )
+                len_expression = len(expression_normalized_postfix)
+                ids = [
+                    id_
+                    for id_ in ids
+                    if id_[:len_expression].lower() == expression_normalized_postfix
+                ]
             rows.extend(ids)
-
-        if "_" in expression_original:
-            postfix = expression_original.split("_")[1]
-            expression_normalized_postfix = (
-                expression_normalized + "_" + postfix.lower()
-            )
-            len_expression = len(expression_normalized_postfix)
-            rows = [
-                row
-                for row in rows
-                if row[:len_expression].lower() == expression_normalized_postfix
-            ]
 
         return rows
 

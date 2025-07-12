@@ -214,8 +214,14 @@ async def get_trace_txs(request, currency, tx, trace_index=None):
             result["from_address"] = result["caller_address"]
             result["to_address"] = result["transferto_address"]
             result["value"] = result["call_value"]
+            is_external = False
         else:
             result["contract_creation"] = result["trace_type"] == "create"
+            is_external = (
+                result["trace_address"] is None or result["trace_address"].strip() == ""
+            )
+            if is_external:
+                result["type"] = "external"
             # is_tx_trace = (
             #     result["trace_address"] is None or result["trace_address"].strip() == ""
             # )
