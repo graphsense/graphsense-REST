@@ -40,7 +40,7 @@ request_field_prefix = "_request_"
 
 async def bulk(request, currency, operation, body, num_pages, form="csv"):
     try:
-        the_stack = stack(request, currency, operation, body, num_pages, form)
+        the_stack = await stack(request, currency, operation, body, num_pages, form)
     except TypeError as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         text = (
@@ -194,7 +194,7 @@ async def wrap(
     return flat
 
 
-def stack(request, currency, operation, body, num_pages, format):
+async def stack(request, currency, operation, body, num_pages, format):
     for api in apis:
         try:
             mod = importlib.import_module(f"gsrest.service.{api}_service")
@@ -252,7 +252,8 @@ def stack(request, currency, operation, body, num_pages, format):
 
         aws.append(aw)
 
-    return asyncio.as_completed(aws)
+    results = await asyncio.gather(*aws)
+    return results
 
 
 async def to_csv(stack, logger):
@@ -314,15 +315,14 @@ async def to_csv(stack, logger):
     rows_to_infer_header = []
     regular_rows = 0
     ops_rest = []
-    for op in stack:
+    for rows in stack:
         if regular_rows < NR_REGULAR_ROWS_USED_TO_INFER_HEADER:
-            rows = await op
             rows_to_infer_header.extend(rows)
             regular_rows += sum(
                 1 for r in rows if info_field not in r and error_field not in r
             )
         else:
-            ops_rest.append(op)
+            ops_rest.append(rows)
 
     # Infer header
     headerfields = sorted(
@@ -345,8 +345,7 @@ async def to_csv(stack, logger):
         yield write_csv_row(csv, wr, row, headerfields)
 
     # write the rest
-    for op in ops_rest:
-        rows = await op
+    for rows in ops_rest:
         for row in rows:
             yield write_csv_row(csv, wr, row, headerfields)
 
@@ -354,11 +353,7 @@ async def to_csv(stack, logger):
 async def to_json(stack, logger):
     started = False
     yield "["
-    for op in stack:
-        try:
-            rows = await op
-        except NotFoundException:
-            continue
+    for rows in stack:
         if started and rows:
             yield ","
         else:
