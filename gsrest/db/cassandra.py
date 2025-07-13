@@ -1809,6 +1809,8 @@ class Cassandra:
     async def list_neighbors(
         self, currency, id, is_outgoing, node_type: NodeType, targets, page, pagesize
     ):
+        pagesize = min(pagesize or SMALL_PAGE_SIZE, SMALL_PAGE_SIZE)
+
         orig_node_type = node_type
         orig_id = id
         if node_type == NodeType.ADDRESS:
