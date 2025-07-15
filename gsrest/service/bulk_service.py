@@ -40,7 +40,7 @@ request_field_prefix = "_request_"
 
 async def bulk(request, currency, operation, body, num_pages, form="csv"):
     try:
-        the_stack = await stack(request, currency, operation, body, num_pages, form)
+        the_stack = stack(request, currency, operation, body, num_pages, form)
     except TypeError as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         text = (
@@ -194,7 +194,8 @@ async def wrap(
     return flat
 
 
-async def stack(request, currency, operation, body, num_pages, format):
+def stack(request, currency, operation, body, num_pages, format):
+    # Find the operation first
     for api in apis:
         try:
             mod = importlib.import_module(f"gsrest.service.{api}_service")
@@ -206,12 +207,8 @@ async def stack(request, currency, operation, body, num_pages, format):
             raise NotFoundException(f"API {api} not found")
         except AttributeError:
             raise NotFoundException(f"{api}.{operation} not found")
-    aws = []
 
-    max_concurrency_bulk_operation = request.app["config"]["database"].get(
-        f"max_concurrency_bulk_{operation_name}", 10
-    )
-
+    # Validate inputs upfront before creating generator
     params = {}
     keys = {}
     check = {"request": None, "currency": currency}
@@ -234,6 +231,30 @@ async def stack(request, currency, operation, body, num_pages, format):
         raise TypeError("Keys need to be passed as list")
     inspect.getcallargs(operation, **check)
 
+    # Now create the async generator
+    return _stack_generator(
+        request,
+        currency,
+        operation,
+        operation_name,
+        params,
+        keys,
+        ln,
+        num_pages,
+        format,
+    )
+
+
+async def _stack_generator(
+    request, currency, operation, operation_name, params, keys, ln, num_pages, format
+):
+    """Internal generator function for stack results"""
+    aws = []
+
+    max_concurrency_bulk_operation = request.app["config"]["database"].get(
+        f"max_concurrency_bulk_{operation_name}", 10
+    )
+
     if operation_name in ["list_entity_txs", "list_entity_addresses"]:
         context = asyncio.Semaphore(max_concurrency_bulk_operation)
     else:
@@ -249,11 +270,15 @@ async def stack(request, currency, operation, body, num_pages, format):
         aw = wrap(
             request, operation, currency, params, the_keys, num_pages, format, context
         )
-
         aws.append(aw)
 
-    results = await asyncio.gather(*aws)
-    return results
+    # has to return in order
+    tasks = [asyncio.create_task(aw) for aw in aws]
+    for t in tasks:
+        try:
+            yield await t
+        except NotFoundException:
+            continue
 
 
 async def to_csv(stack, logger):
@@ -314,15 +339,15 @@ async def to_csv(stack, logger):
     NR_REGULAR_ROWS_USED_TO_INFER_HEADER = 100
     rows_to_infer_header = []
     regular_rows = 0
-    ops_rest = []
-    for rows in stack:
+    rows_rest = []
+    async for rows in stack:
         if regular_rows < NR_REGULAR_ROWS_USED_TO_INFER_HEADER:
             rows_to_infer_header.extend(rows)
             regular_rows += sum(
                 1 for r in rows if info_field not in r and error_field not in r
             )
         else:
-            ops_rest.append(rows)
+            rows_rest.append(rows)
 
     # Infer header
     headerfields = sorted(
@@ -345,7 +370,7 @@ async def to_csv(stack, logger):
         yield write_csv_row(csv, wr, row, headerfields)
 
     # write the rest
-    for rows in ops_rest:
+    for rows in rows_rest:
         for row in rows:
             yield write_csv_row(csv, wr, row, headerfields)
 
@@ -353,7 +378,7 @@ async def to_csv(stack, logger):
 async def to_json(stack, logger):
     started = False
     yield "["
-    for rows in stack:
+    async for rows in stack:
         if started and rows:
             yield ","
         else:
