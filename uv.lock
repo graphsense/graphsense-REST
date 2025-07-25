@@ -1713,12 +1713,13 @@ yaml = [
 
 [[package]]
 name = "graphsense-ethereum-etl"
-version = "2.4.4"
-source = { registry = "https://pypi.org/simple" }
+version = "2.4.5"
+source = { directory = "../../ethereum-etl" }
 dependencies = [
     { name = "base58" },
     { name = "click" },
     { name = "eth-abi" },
+    { name = "eth-typing" },
     { name = "eth-utils" },
     { name = "ethereum-dasm" },
     { name = "python-dateutil" },
@@ -1726,10 +1727,32 @@ dependencies = [
     { name = "urllib3" },
     { name = "web3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ee/8f/fde461044493ee8080e0d6c09e42b4b9621e9b83a550f0422fd773a66d66/graphsense_ethereum_etl-2.4.4.tar.gz", hash = "sha256:607944c2f7afa77f02b38ab095882c04a7056b8a2d82db4e267a578e9162fbbc", size = 342619, upload-time = "2025-07-10T12:15:58.657Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/e9/d7/05133b5ffd3bf6e51617666feec48737b9ffcc709005aa79c6f84038552a/graphsense_ethereum_etl-2.4.4-py3-none-any.whl", hash = "sha256:86c4c8aa10183cb163ad6a580d09a84f611402f1cae26669cc69a9cf52caef78", size = 441319, upload-time = "2025-07-10T12:15:57.308Z" },
+
+[package.metadata]
+requires-dist = [
+    { name = "base58" },
+    { name = "boto3", marker = "extra == 'streaming-kinesis'", specifier = "==1.24.11" },
+    { name = "botocore", marker = "extra == 'streaming-kinesis'", specifier = "==1.27.11" },
+    { name = "click", specifier = ">=8.0.4,<9" },
+    { name = "eth-abi", specifier = ">=3.0.0" },
+    { name = "eth-typing", specifier = "<5.0.0" },
+    { name = "eth-utils", specifier = ">=1.10" },
+    { name = "ethereum-dasm", specifier = "==0.1.4" },
+    { name = "google-cloud-pubsub", marker = "extra == 'streaming'", specifier = ">=2.13.0" },
+    { name = "google-cloud-storage", marker = "extra == 'streaming'", specifier = ">=1.33.0" },
+    { name = "grpcio", marker = "extra == 'streaming'", specifier = ">=1.49.0" },
+    { name = "kafka-python", marker = "extra == 'streaming'", specifier = "==2.0.2" },
+    { name = "libcst", marker = "extra == 'streaming'", specifier = "==0.3.21" },
+    { name = "pg8000", marker = "extra == 'streaming'", specifier = "==1.16.6" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.0.0" },
+    { name = "python-dateutil", specifier = ">=2.8.0,<3" },
+    { name = "requests" },
+    { name = "sqlalchemy", marker = "extra == 'streaming'", specifier = "==1.4" },
+    { name = "timeout-decorator", marker = "extra == 'streaming'", specifier = "==0.4.1" },
+    { name = "urllib3", specifier = "<2" },
+    { name = "web3", specifier = ">=6,<7" },
 ]
+provides-extras = ["streaming", "streaming-kinesis", "dev"]
 
 [[package]]
 name = "graphsense-lib"
@@ -1779,8 +1802,8 @@ requires-dist = [
     { name = "filelock", specifier = ">=3.8.0" },
     { name = "goodconf", extras = ["yaml"], specifier = ">=3.0.0" },
     { name = "graphsense-bitcoin-etl", marker = "extra == 'ingest'", specifier = "==1.5.4" },
-    { name = "graphsense-ethereum-etl" },
-    { name = "graphsense-ethereum-etl", marker = "extra == 'ingest'", specifier = ">=2.4.5" },
+    { name = "graphsense-ethereum-etl", directory = "../../ethereum-etl" },
+    { name = "graphsense-ethereum-etl", marker = "extra == 'ingest'", directory = "../../ethereum-etl" },
     { name = "graphsense-lib", extras = ["ingest"], marker = "extra == 'all'" },
     { name = "graphsense-lib", extras = ["swaps"], marker = "extra == 'all'" },
     { name = "graphsense-python", marker = "extra == 'swaps'" },

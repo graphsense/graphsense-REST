@@ -346,4 +346,4 @@ async def get_tx_conversions(request, currency, tx_hash):
     """
     Delegate to swaps_service for swap extraction from transaction.
     """
-    return await swaps_service.get_tx_dex_swap_conversions(request, currency, tx_hash)
+    return await swaps_service.get_conversions(request, currency, tx_hash)

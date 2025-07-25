@@ -5,6 +5,10 @@ from graphsenselib.datatypes.abi import decode_logs_dict
 from graphsenselib.utils.accountmodel import hex_to_bytes
 from graphsenselib.defi import ExternalSwap, Bridge
 from graphsenselib.defi.conversions import get_conversions_from_decoded_logs
+from graphsenselib.utils.transactions import (
+    SubTransactionIdentifier,
+    SubTransactionType,
+)
 
 from gsrest.errors import (
     BadUserInputException,
@@ -50,8 +54,8 @@ def conversion_from_bridge(bridge: Bridge) -> ExternalConversions:
     )
 
 
-async def get_tx_dex_swap_conversions(
-    request, currency: str, tx_hash: str
+async def get_conversions(
+    request, currency: str, identifier: str
 ) -> List[ExternalSwap]:
     """
     Extract swap information from a single transaction hash.
@@ -72,6 +76,9 @@ async def get_tx_dex_swap_conversions(
         raise BadUserInputException(
             f"Swap extraction is only supported for EVM-like networks, not {currency}"
         )
+
+    tx_obj = SubTransactionIdentifier.from_string(identifier)
+    tx_hash = tx_obj.tx_hash
 
     db = request.app["db"]
     # Get tx to get block_id
@@ -101,9 +108,22 @@ async def get_tx_dex_swap_conversions(
             currency, tx, decoded_log_data, tx_logs_raw_filtered, tx_traces
         )
 
+        # if it is a raw tx hash without a subtx, dont filter, otherwise
+        # filter the conversions to the ones that have either fromPayment or toPayment as identifier
+
+        if tx_obj.tx_type is SubTransactionType.ExternalTx:
+            filtered_conversions = conversions_gslib
+        else:
+            filtered_conversions = [
+                c
+                for c in conversions_gslib
+                if c.fromPayment.lower() == tx_obj.to_string().lower()
+                or c.toPayment.lower() == tx_obj.to_string().lower()
+            ]
+
         conversions = []
 
-        for conversion in conversions_gslib:
+        for conversion in filtered_conversions:
             if isinstance(conversion, ExternalSwap):
                 conversions.append(conversion_from_external_swap(currency, conversion))
             elif isinstance(conversion, Bridge):
@@ -114,7 +134,7 @@ async def get_tx_dex_swap_conversions(
         return conversions
 
     except Exception as e:
-        logger.warning(f"Failed to process transaction {tx_hash}: {e}")
+        logger.warning(f"Failed to process transaction {identifier}: {e}")
         raise BadUserInputException(
             f"Failed to extract conversion data from transaction: {str(e)}"
         )
