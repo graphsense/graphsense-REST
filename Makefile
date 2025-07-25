@@ -22,7 +22,7 @@ format:
 	uv run ruff format
 
 install-dev:
-	uv sync --all-extras --dev
+	uv sync --all-extras --dev --force-reinstall
 
 pre-commit:
 	uv run pre-commit run --all-files

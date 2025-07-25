@@ -27,6 +27,8 @@ dependencies = [
     "tagpack-tool>=25.7.7",
 ]
 
+[tool.uv.sources]
+graphsense-lib = { path="../graphsense-lib"}
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
