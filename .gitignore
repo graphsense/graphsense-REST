@@ -89,6 +89,7 @@ gsrest/plugins
 
 # IDE
 .idea
+.vscode
 
 .ruff_cache/
 local

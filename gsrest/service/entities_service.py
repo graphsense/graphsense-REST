@@ -6,8 +6,8 @@ from graphsenselib.utils.address import address_to_user_format
 from tagstore.db import TagstoreDbAsync
 
 import gsrest.service.common_service as common
-from gsrest.db.node_type import NodeType
-from gsrest.errors import BadUserInputException, ClusterNotFoundException
+from graphsenselib.datatypes.common import NodeType
+from graphsenselib.errors import BadUserInputException, ClusterNotFoundException
 from gsrest.service.blocks_service import get_min_max_height
 from gsrest.service.common_service import get_address, get_tagstore_access_groups
 from gsrest.service.rates_service import get_rates

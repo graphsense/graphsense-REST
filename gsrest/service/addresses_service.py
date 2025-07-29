@@ -6,8 +6,8 @@ from tagstore.algorithms.tag_digest import TagDigest, compute_tag_digest
 from tagstore.db import TagPublic, TagstoreDbAsync
 
 import gsrest.service.common_service as common
-from gsrest.db.node_type import NodeType
-from gsrest.errors import (
+from graphsenselib.datatypes.common import NodeType
+from graphsenselib.errors import (
     AddressNotFoundException,
     ClusterNotFoundException,
     DBInconsistencyException,

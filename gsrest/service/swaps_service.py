@@ -10,7 +10,7 @@ from graphsenselib.utils.transactions import (
     SubTransactionType,
 )
 
-from gsrest.errors import (
+from graphsenselib.errors import (
     BadUserInputException,
     TransactionNotFoundException,
 )
