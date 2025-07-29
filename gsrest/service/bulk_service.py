@@ -10,7 +10,7 @@ from functools import reduce
 
 from aiohttp import web
 
-from gsrest.errors import BadUserInputException, NotFoundException
+from graphsenselib.errors import BadUserInputException, NotFoundException
 from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.entity import Entity
 from openapi_server.models.values import Values

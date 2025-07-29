@@ -1758,6 +1758,8 @@ provides-extras = ["streaming", "streaming-kinesis", "dev"]
 name = "graphsense-lib"
 source = { directory = "../graphsense-lib" }
 dependencies = [
+    { name = "aiohttp" },
+    { name = "async-lru" },
     { name = "base58" },
     { name = "bitarray" },
     { name = "cashaddress" },
@@ -1776,6 +1778,7 @@ dependencies = [
     { name = "rich" },
     { name = "setuptools" },
     { name = "simplejson" },
+    { name = "tagpack-tool" },
     { name = "tenacity" },
 ]
 
@@ -1789,6 +1792,8 @@ swaps = [
 
 [package.metadata]
 requires-dist = [
+    { name = "aiohttp", specifier = ">=3.8.0" },
+    { name = "async-lru", specifier = ">=2.0.4" },
     { name = "base58", specifier = ">=2.1" },
     { name = "bitarray", specifier = ">=2.9" },
     { name = "cashaddress", specifier = ">=1.0.6" },
@@ -1821,6 +1826,7 @@ requires-dist = [
     { name = "rich", specifier = ">=12.6.0,<13.0" },
     { name = "setuptools", specifier = "<80.9" },
     { name = "simplejson", specifier = ">=3.17.6" },
+    { name = "tagpack-tool", specifier = ">=25.7.8" },
     { name = "tenacity", specifier = ">=8.2.3" },
 ]
 provides-extras = ["ingest", "swaps", "all"]
@@ -1828,6 +1834,7 @@ provides-extras = ["ingest", "swaps", "all"]
 [package.metadata.requires-dev]
 dev = [
     { name = "grpcio-tools", specifier = ">=1.49.0" },
+    { name = "httpx", specifier = "<1.0.0" },
     { name = "pdbpp" },
     { name = "pre-commit" },
     { name = "pytest" },
@@ -4188,7 +4195,7 @@ wheels = [
 
 [[package]]
 name = "tagpack-tool"
-version = "25.7.7"
+version = "25.7.8"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anytree" },
@@ -4212,9 +4219,9 @@ dependencies = [
     { name = "tabulate" },
     { name = "typer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ad/ac/767def7bd8621e838215eca7705b057e70f41884fb5f2d0ab19a4362b83f/tagpack_tool-25.7.7.tar.gz", hash = "sha256:a37be0c0349ac34ff2eb2dd90984b77aa9dca97d9bfd6d5c57ca00d79212d048", size = 333585, upload-time = "2025-06-26T12:37:30.007Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/bc/b0/84623609eca10106ec0108119f45678d447f0d81dc43d8def03533559a48/tagpack_tool-25.7.8.tar.gz", hash = "sha256:551d9ccd334b7ca9efee7b3fcbe9fdc4ae36311cba9cb34a3912b5ac2c36bf83", size = 333663, upload-time = "2025-06-27T07:52:14.285Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/60/3c/78f4e5685670a0576fee5863dbd1a319e2332c48e94fb096073d5ca02db3/tagpack_tool-25.7.7-py3-none-any.whl", hash = "sha256:15aad9b8065c9c4a3fb11e26b92c6805fd01050dd6245de0715bb9cbed2f1d2e", size = 108177, upload-time = "2025-06-26T12:37:28.648Z" },
+    { url = "https://files.pythonhosted.org/packages/ef/96/52f900305c9b633d5f21bfe6bc1d5dce1c8715c4711ff00f7de1273e56a3/tagpack_tool-25.7.8-py3-none-any.whl", hash = "sha256:bb45ecfb3e52aebb973c032607b8947d933cf06721d220305ba7caa110cde68f", size = 108185, upload-time = "2025-06-27T07:52:13.253Z" },
 ]
 
 [[package]]

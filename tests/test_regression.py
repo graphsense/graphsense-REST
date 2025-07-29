@@ -56,7 +56,7 @@ def get_data_from_new_endpoint(endpoint: str) -> tuple[Dict[str, Any], float]:
 def compare_outputs(current_data: Dict[str, Any], new_data: Dict[str, Any]) -> Dict[
     str, Any]:
     """Compare outputs with detailed differences."""
-    
+
     if isinstance(current_data, list):
         current_data = {
             "items": current_data
@@ -64,7 +64,7 @@ def compare_outputs(current_data: Dict[str, Any], new_data: Dict[str, Any]) -> D
     if isinstance(new_data, list):
         new_data = {
             "items": new_data}
-    
+
     result = {
         "are_equal": False,
         "differences": [],
@@ -130,16 +130,23 @@ def compare_instances(call) -> Dict[str, Any]:
 def test_conversions():
     """Run the regression test and return the comparison result."""
 
-    call_1 = "eth/txs/0x76f4263391a7d72f66cb1f254e8643e37ca739ab2859b9e9cd5b5bda3194332b/conversions"
-    
+    call_1 = "eth/txs/0x76f4263391a7d72f66cb1f254e8643e37ca739ab2859b9e9cd5b5bda3194332b/conversions" # dex swap
+    call_2 = "eth/txs/0x6D65123E246D752DE3F39E0FDF5B788BAAD35A29B7E95B74C714E6C7C1EA61DD/conversions" # bridge eth to btc
+
+    call_3_send =    "eth/txs/0xD49764B134172947F5226038CD80C8068B76A1F785C6696A34ECDCF29C4D3C78/conversions"
+    call_3_receive = "eth/txs/0x5DA7B9D34173E74F1594726B718D0759D5877E14C3CAA8612838A109C196EEEE/conversions"
+    call_3_refund =  "eth/txs/0x9BD32A4E5B2BC63E858A04F2B8050A8168FBB6CA57A846769348BB1C1B862836/conversions"
+    # https://thorchain.net/address/0x19317e026ef473d44D746d364062539Ba7Cb0fa3
+
+
     calls = [
-        call_1
+        call_1, call_2, call_3_send, call_3_receive, call_3_refund
     ]
     for call in calls:
         logger.info(f"Testing call: {call}")
         comparison = compare_instances(call)
         assert comparison["are_equal"], f"Outputs differ for call: {call}"
-        
+
 @pytest.mark.regression
 def test_links():
     """Run the regression test and return the comparison result."""
@@ -190,8 +197,8 @@ def test_search():
     call_7 = "search?q=0xfffff0193483022348723" # no results
 
     calls = [
-        call_1, call_2, call_3, 
-        call_4, 
+        call_1, call_2, call_3,
+        call_4,
         call_5, call_6, call_7
     ]
     for call in calls:

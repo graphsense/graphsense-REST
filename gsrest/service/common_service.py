@@ -5,8 +5,8 @@ import graphsenselib.utils.address
 from graphsenselib.utils.address import address_to_user_format
 from tagstore.db import TagstoreDbAsync
 
-from gsrest.db.node_type import NodeType
-from gsrest.errors import (
+from graphsenselib.datatypes.common import NodeType
+from graphsenselib.errors import (
     AddressNotFoundException,
     BadUserInputException,
     NetworkNotFoundException,

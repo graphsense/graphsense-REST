@@ -12,8 +12,11 @@ from tagstore.db import (
 )
 from tagstore.db.queries import UserReportedAddressTag
 
-from gsrest.db import get_cached_is_abuse, get_cached_taxonomy_concept_label
-from gsrest.errors import FeatureNotAvailableException, NotFoundException
+from graphsenselib.db.asynchronous import (
+    get_cached_is_abuse,
+    get_cached_taxonomy_concept_label,
+)
+from graphsenselib.errors import FeatureNotAvailableException, NotFoundException
 from gsrest.service.common_service import (
     get_tagstore_access_groups,
     get_user_tags_acl_group,

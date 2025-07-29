@@ -8,8 +8,8 @@ GS_REST_DEV_PORT ?= 9000
 NUM_WORKERS ?= 1
 NUM_THREADS ?= 1
 
-test:
-	uv run pytest -x -rx -vv
+test: install-dev
+	uv run pytest -x -rx -vv -s
 
 test-regression:
 	@export SKIP_REST_CONTAINER_SETUP=True && uv run pytest -m "regression" -s

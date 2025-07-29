@@ -1,16 +1,15 @@
 import logging
 from typing import List
 
-from graphsenselib.datatypes.abi import decode_logs_dict
 from graphsenselib.utils.accountmodel import hex_to_bytes
 from graphsenselib.defi import ExternalSwap, Bridge
-from graphsenselib.defi.conversions import get_conversions_from_decoded_logs
+from graphsenselib.defi.conversions import get_conversions_from_db
 from graphsenselib.utils.transactions import (
     SubTransactionIdentifier,
     SubTransactionType,
 )
 
-from gsrest.errors import (
+from graphsenselib.errors import (
     BadUserInputException,
     TransactionNotFoundException,
 )
@@ -93,48 +92,36 @@ async def get_conversions(
     if not tx:
         raise TransactionNotFoundException(currency, tx_hash)
 
-    # todo wasteful but for now okay
-    tx_logs_raw = await db.fetch_transaction_logs(currency, tx)
-    tx_traces = await db.fetch_transaction_traces(currency, tx)
+    #try:
+        
+    conversions_gslib = await get_conversions_from_db(currency, db, tx)
 
-    if not tx_logs_raw:
-        logger.info(f"No logs found for transaction {tx_hash}")
-        return []
+    # if it is a raw tx hash without a subtx, dont filter, otherwise
+    # filter the conversions to the ones that have either fromPayment or toPayment as identifier
+    if tx_obj.tx_type is SubTransactionType.ExternalTx:
+        filtered_conversions = conversions_gslib
+    else:
+        filtered_conversions = [
+            c
+            for c in conversions_gslib
+            if c.fromPayment.lower() == tx_obj.to_string().lower()
+            or c.toPayment.lower() == tx_obj.to_string().lower()
+        ]
 
-    try:
-        decoded_logs_and_logs = decode_logs_dict(tx_logs_raw)
-        decoded_log_data, tx_logs_raw_filtered = zip(*decoded_logs_and_logs)
-        conversions_gslib = get_conversions_from_decoded_logs(
-            currency, tx, decoded_log_data, tx_logs_raw_filtered, tx_traces
-        )
+    conversions = []
 
-        # if it is a raw tx hash without a subtx, dont filter, otherwise
-        # filter the conversions to the ones that have either fromPayment or toPayment as identifier
-
-        if tx_obj.tx_type is SubTransactionType.ExternalTx:
-            filtered_conversions = conversions_gslib
+    for conversion in filtered_conversions:
+        if isinstance(conversion, ExternalSwap):
+            conversions.append(conversion_from_external_swap(currency, conversion))
+        elif isinstance(conversion, Bridge):
+            conversions.append(conversion_from_bridge(conversion))
         else:
-            filtered_conversions = [
-                c
-                for c in conversions_gslib
-                if c.fromPayment.lower() == tx_obj.to_string().lower()
-                or c.toPayment.lower() == tx_obj.to_string().lower()
-            ]
+            raise ValueError(f"Unknown conversion type: {type(conversion)}")
 
-        conversions = []
+    return conversions
 
-        for conversion in filtered_conversions:
-            if isinstance(conversion, ExternalSwap):
-                conversions.append(conversion_from_external_swap(currency, conversion))
-            elif isinstance(conversion, Bridge):
-                conversions.append(conversion_from_bridge(conversion))
-            else:
-                raise ValueError(f"Unknown conversion type: {type(conversion)}")
-
-        return conversions
-
-    except Exception as e:
-        logger.warning(f"Failed to process transaction {identifier}: {e}")
-        raise BadUserInputException(
-            f"Failed to extract conversion data from transaction: {str(e)}"
-        )
+    #except Exception as e:
+    #    logger.warning(f"Failed to process transaction {identifier}: {e}")
+    #    raise BadUserInputException(
+    #        f"Failed to extract conversion data from transaction: {str(e)}"
+    #    )

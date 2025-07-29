@@ -7,8 +7,8 @@ from graphsenselib.utils.transactions import (
 )
 
 import gsrest.service.swaps_service as swaps_service
-from gsrest.db.cassandra import get_tx_identifier
-from gsrest.errors import (
+from graphsenselib.db.asynchronous.cassandra import get_tx_identifier
+from graphsenselib.errors import (
     BadUserInputException,
     NotFoundException,
     TransactionNotFoundException,

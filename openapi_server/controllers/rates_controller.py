@@ -1,4 +1,4 @@
-from gsrest.errors import *
+from graphsenselib.errors import *
 
 from typing import List, Dict
 from aiohttp import web
