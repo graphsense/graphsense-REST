@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - error notifications can now be done via slack
 - slack can also be uses to get notifications for certain events, eg. when users report new tags
 
+### changed
+- added request local cache for heavy repetitive operations (get cluster id for tags, get best cluster tag), esp. improves bulk loads
+- added configurable parallelism limits to all bulk operations to avoid overloading the server.
+
 
 ## [25.07.0/1.12.0] - 2025-06-27
 

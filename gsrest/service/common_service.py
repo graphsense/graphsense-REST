@@ -28,6 +28,12 @@ from openapi_server.models.links import Links
 from openapi_server.models.tx_summary import TxSummary
 
 
+def get_request_cache(request):
+    if not hasattr(request, "_cache"):
+        request._cache = {}
+    return request._cache
+
+
 def cannonicalize_address(currency, address):
     try:
         return graphsenselib.utils.address.cannonicalize_address(currency, address)
@@ -38,13 +44,22 @@ def cannonicalize_address(currency, address):
         )
 
 
-async def try_get_cluster_id(db, network, address) -> Optional[int]:
+async def try_get_cluster_id(db, network, address, cache=None) -> Optional[int]:
+    key = f"cluster_id_{network}_{address}"
+    if cache is not None and key in cache:
+        return cache[key]
+
     try:
         network = network.lower()
         address_canonical = cannonicalize_address(network, address)
-        return await db.get_address_entity_id(network, address_canonical)
+        returnv = await db.get_address_entity_id(network, address_canonical)
     except (AddressNotFoundException, NetworkNotFoundException, BadUserInputException):
-        return None
+        returnv = None
+
+    if cache is not None:
+        cache[key] = returnv
+
+    return returnv
 
 
 def get_user_tags_acl_group(request) -> str:

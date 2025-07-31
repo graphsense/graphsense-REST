@@ -15,6 +15,15 @@ from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.entity import Entity
 from openapi_server.models.values import Values
 
+restrict_concurrency_on = [
+    "list_entity_txs",
+    "list_entity_addresses",
+    "list_tags_by_address",
+]
+default_concurrency_by_operation = {
+    "list_tags_by_address": 2,
+}
+
 
 @contextlib.asynccontextmanager
 async def asyncnullcontext():
@@ -209,7 +218,8 @@ def stack(request, currency, operation, body, num_pages, format):
     aws = []
 
     max_concurrency_bulk_operation = request.app["config"]["database"].get(
-        f"max_concurrency_bulk_{operation_name}", 10
+        f"max_concurrency_bulk_{operation_name}",
+        default_concurrency_by_operation.get(operation_name, 10),
     )
 
     params = {}
@@ -234,13 +244,13 @@ def stack(request, currency, operation, body, num_pages, format):
         raise TypeError("Keys need to be passed as list")
     inspect.getcallargs(operation, **check)
 
-    if operation_name in ["list_entity_txs", "list_entity_addresses"]:
-        context = asyncio.Semaphore(max_concurrency_bulk_operation)
-    else:
-        # async null context, does nothing
-        # https://stackoverflow.com/questions/61479059
-        # /it-there-any-default-asynchronious-null-context-manager-in-python3-7
-        context = contextlib.AsyncExitStack()
+    # if operation_name in restrict_concurrency_on:
+    context = asyncio.Semaphore(max_concurrency_bulk_operation)
+    # else:
+    #     # async null context, does nothing
+    #     # https://stackoverflow.com/questions/61479059
+    #     # /it-there-any-default-asynchronious-null-context-manager-in-python3-7
+    #     context = contextlib.AsyncExitStack()
 
     for i in range(0, ln):
         the_keys = {}
