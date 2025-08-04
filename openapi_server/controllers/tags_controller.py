@@ -81,6 +81,9 @@ async def get_actor(request: web.Request, actor) -> web.Response:
     except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
+    except GsTimeoutException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")
@@ -158,6 +161,9 @@ async def get_actor_tags(request: web.Request, actor, page=None, pagesize=None) 
     except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
+    except GsTimeoutException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")
@@ -235,6 +241,9 @@ async def list_address_tags(request: web.Request, label, page=None, pagesize=Non
     except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
+    except GsTimeoutException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")
@@ -308,6 +317,9 @@ async def list_concepts(request: web.Request, taxonomy) -> web.Response:
     except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
+    except GsTimeoutException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")
@@ -379,6 +391,9 @@ async def list_taxonomies(request: web.Request, ) -> web.Response:
     except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
+    except GsTimeoutException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")
@@ -453,6 +468,9 @@ async def report_tag(request: web.Request, body) -> web.Response:
     except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
+    except GsTimeoutException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")

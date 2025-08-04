@@ -85,6 +85,9 @@ async def get_spending_txs(request: web.Request, currency, tx_hash, io_index=Non
     except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
+    except GsTimeoutException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")
@@ -162,6 +165,9 @@ async def get_spent_in_txs(request: web.Request, currency, tx_hash, io_index=Non
     except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
+    except GsTimeoutException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")
@@ -245,6 +251,9 @@ async def get_tx(request: web.Request, currency, tx_hash, include_io=None, inclu
     except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
+    except GsTimeoutException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")
@@ -320,6 +329,9 @@ async def get_tx_conversions(request: web.Request, currency, tx_hash) -> web.Res
     except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
+    except GsTimeoutException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")
@@ -401,6 +413,9 @@ async def get_tx_io(request: web.Request, currency, tx_hash, io, include_nonstan
     except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
+    except GsTimeoutException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")
@@ -476,6 +491,9 @@ async def list_token_txs(request: web.Request, currency, tx_hash) -> web.Respons
     except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
+    except GsTimeoutException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")

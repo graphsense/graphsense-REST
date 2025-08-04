@@ -77,6 +77,9 @@ async def list_supported_tokens(request: web.Request, currency) -> web.Response:
     except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
+    except GsTimeoutException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")

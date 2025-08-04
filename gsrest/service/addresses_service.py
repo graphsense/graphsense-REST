@@ -11,6 +11,7 @@ from gsrest.errors import (
     AddressNotFoundException,
     ClusterNotFoundException,
     DBInconsistencyException,
+    # GsTimeoutException,
 )
 from gsrest.service.blocks_service import get_min_max_height
 from gsrest.service.common_service import (
@@ -312,17 +313,34 @@ async def list_address_links(
     address = cannonicalize_address(currency, address)
     neighbor = cannonicalize_address(currency, neighbor)
     db = request.app["db"]
-    result = await db.list_address_links(
-        currency,
-        address,
-        neighbor,
-        min_height=min_b,
-        max_height=max_b,
-        order=order,
-        token_currency=token_currency,
-        page=page,
-        pagesize=pagesize,
-    )
+
+    request_timeout = request.app["config"].get("address_links_request_timeout", 30)
+
+    try:
+        result = await asyncio.wait_for(
+            db.list_address_links(
+                currency,
+                address,
+                neighbor,
+                min_height=min_b,
+                max_height=max_b,
+                order=order,
+                token_currency=token_currency,
+                page=page,
+                pagesize=pagesize,
+            ),
+            timeout=request_timeout,
+        )
+    except asyncio.TimeoutError:
+        logger = request.app.logger
+        logger.error(
+            f"Timeout while fetching links for {currency}/{address} to {neighbor}"
+        )
+        # Raising GsTimeoutException does not end request processing, so we raise a generic exception
+        # to ensure the request is properly terminated.
+        raise Exception(
+            f"Timeout while fetching links for {currency}/{address} to {neighbor}"
+        )
 
     return await common.links_response(request, currency, result)
 
