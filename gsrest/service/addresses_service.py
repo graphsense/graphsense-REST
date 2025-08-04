@@ -332,10 +332,10 @@ async def list_address_links(
             timeout=request_timeout,
         )
     except asyncio.TimeoutError:
-        logger = request.app.logger
-        logger.error(
-            f"Timeout while fetching links for {currency}/{address} to {neighbor}"
-        )
+        # logger = request.app.logger
+        # logger.error(
+        #     f"Timeout while fetching links for {currency}/{address} to {neighbor}"
+        # )
         # Raising GsTimeoutException does not end request processing, so we raise a generic exception
         # to ensure the request is properly terminated.
         raise Exception(
