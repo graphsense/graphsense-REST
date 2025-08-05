@@ -26,8 +26,17 @@ async def get_connection(app):
     max_pool_time = ts_conf.get("pool_timeout", 300)
     mo = ts_conf.get("max_overflow", 10)
     recycle = ts_conf.get("pool_recycle", 3600)
+
+    enable_prepared_statements_cache = ts_conf.get(
+        "enable_prepared_statements_cache", False
+    )
     engine = get_db_engine_async(
-        ts_conf["url"],
+        ts_conf["url"]
+        + (
+            "?prepared_statement_cache_size=0"
+            if not enable_prepared_statements_cache
+            else ""
+        ),
         pool_size=int(max_conn),
         max_overflow=int(mo),
         pool_recycle=int(recycle),

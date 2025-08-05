@@ -87,6 +87,9 @@ async def _get_best_cluster_tag_raw(
         data = await tagstore_db.get_best_cluster_tag(
             clstr_id, currency.upper(), groups
         )
+        request.app.logger.info(
+            f"Fetched best cluster tag for {currency}/{address}/{clstr_id} from tagstore"
+        )
         cache[key] = data
         return clstr_id, data
 
