@@ -2,15 +2,15 @@ import asyncio
 from typing import Optional
 
 import graphsenselib.utils.address
-from graphsenselib.utils.address import address_to_user_format
-from tagstore.db import TagstoreDbAsync
-
-from gsrest.db.node_type import NodeType
-from gsrest.errors import (
+from graphsenselib.datatypes.common import NodeType
+from graphsenselib.errors import (
     AddressNotFoundException,
     BadUserInputException,
     NetworkNotFoundException,
 )
+from graphsenselib.utils.address import address_to_user_format
+from tagstore.db import TagstoreDbAsync
+
 from gsrest.service.rates_service import get_rates, list_rates
 from gsrest.service.txs_service import tx_account_from_row
 from gsrest.util import get_first_key_present, is_eth_like
@@ -63,7 +63,7 @@ async def try_get_cluster_id(db, network, address, cache=None) -> Optional[int]:
 
 
 def get_user_tags_acl_group(request) -> str:
-    return request.app["config"].get("user-tag-reporting-acl-group", "develop")
+    return request.app["config"].user_tag_reporting_acl_group
 
 
 def get_tagstore_access_groups(request):

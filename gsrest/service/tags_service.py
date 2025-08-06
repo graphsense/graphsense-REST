@@ -2,6 +2,7 @@ import asyncio
 import logging
 from typing import Callable, List, Optional
 
+from graphsenselib.errors import FeatureNotAvailableException, NotFoundException
 from graphsenselib.utils.slack import send_message_to_slack
 from tagstore.db import (
     ActorPublic,
@@ -12,8 +13,10 @@ from tagstore.db import (
 )
 from tagstore.db.queries import UserReportedAddressTag
 
-from gsrest.db import get_cached_is_abuse, get_cached_taxonomy_concept_label
-from gsrest.errors import FeatureNotAvailableException, NotFoundException
+from gsrest.db import (
+    get_cached_is_abuse,
+    get_cached_taxonomy_concept_label,
+)
 from gsrest.service.common_service import (
     get_tagstore_access_groups,
     get_user_tags_acl_group,
@@ -239,7 +242,7 @@ async def list_taxonomies(request):
 
 async def report_tag(request, body):
     config = request.app["config"]
-    reporting_enabled = config.get("enable-user-tag-reporting", False)
+    reporting_enabled = config.enable_user_tag_reporting
     tag_acl_group = get_user_tags_acl_group(request)
 
     if reporting_enabled:
@@ -258,7 +261,7 @@ async def report_tag(request, body):
         except TagAlreadyExistsException:
             logger.info("Tag already exists, ignoring insert.")
 
-        info_hook = config.get("slack_info_hook")
+        info_hook = config.slack_info_hook
 
         if info_hook is not None:
             for h in info_hook.hooks:

@@ -1,6 +1,6 @@
 [project]
 name = "gsrest"
-version = "1.13.3"
+version = "1.13.4dev1"
 description = "GraphSense API REST API"
 readme = "README.md"
 changelog = "CHANGELOG.md"
@@ -18,15 +18,14 @@ dependencies = [
     "aiohttp-jinja2>=1.5.0",
     "async-lru>=2.0.4",
     "cassandra-driver>=3.27.0",
-    "connexion[swagger-ui]>=2.6.0",
-    "graphsense-lib[swaps]>=2.5.3",
+    "connexion[swagger-ui]>=2.6.0<3",
+    "graphsense-lib[conversions]>=2.6.0",
     "lz4>=4.3.2",
     "openapi-schema-validator>=0.2.3",
     "python-dateutil>=2.9.0",
     "swagger-ui-bundle>=0.0.9",
     "tagpack-tool>=25.7.7",
 ]
-
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

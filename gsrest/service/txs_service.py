@@ -1,18 +1,18 @@
 from typing import Optional
 
+from graphsenselib.db.asynchronous.cassandra import get_tx_identifier
+from graphsenselib.errors import (
+    BadUserInputException,
+    NotFoundException,
+    TransactionNotFoundException,
+)
 from graphsenselib.utils.address import address_to_user_format
 from graphsenselib.utils.transactions import (
     SubTransactionIdentifier,
     SubTransactionType,
 )
 
-import gsrest.service.swaps_service as swaps_service
-from gsrest.db.cassandra import get_tx_identifier
-from gsrest.errors import (
-    BadUserInputException,
-    NotFoundException,
-    TransactionNotFoundException,
-)
+import gsrest.service.conversions_service as conversions_service
 from gsrest.service.rates_service import get_rates
 from gsrest.util import get_first_key_present, is_eth_like
 from gsrest.util.values import convert_token_value, convert_value
@@ -344,6 +344,6 @@ async def list_matching_txs(request, currency, expression):
 
 async def get_tx_conversions(request, currency, tx_hash):
     """
-    Delegate to swaps_service for swap extraction from transaction.
+    Delegate to conversions_service for swap extraction from transaction.
     """
-    return await swaps_service.get_tx_dex_swap_conversions(request, currency, tx_hash)
+    return await conversions_service.get_conversions(request, currency, tx_hash)

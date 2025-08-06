@@ -1,4 +1,5 @@
-from gsrest.errors import BlockNotFoundException
+from graphsenselib.errors import BlockNotFoundException
+
 from gsrest.service.stats_service import get_no_blocks
 from gsrest.util.values import map_rates_for_peged_tokens
 from openapi_server.models.rates import Rates

@@ -2,13 +2,13 @@ all: format lint
 
 -include .env
 
-GS_REST_SERVICE_VERSIONM ?= "25.08.3"
-GS_REST_SERVICE_VERSION ?= "1.13.3"
+GS_REST_SERVICE_VERSIONM ?= "25.08.4dev1"
+GS_REST_SERVICE_VERSION ?= "1.13.4dev1"
 GS_REST_DEV_PORT ?= 9000
 NUM_WORKERS ?= 1
 NUM_THREADS ?= 1
 
-test:
+test: install-dev
 	uv run pytest -x -rx -vv
 
 test-regression:
@@ -22,7 +22,7 @@ format:
 	uv run ruff format
 
 install-dev:
-	uv sync --all-extras --dev
+	uv sync --all-extras --dev --force-reinstall
 
 pre-commit:
 	uv run pre-commit run --all-files

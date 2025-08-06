@@ -3,6 +3,8 @@ import logging
 
 import pytest
 
+from gsrest.config import GSRestConfig
+
 # Register assert rewriting for nice diffs in tests
 # https://docs.pytest.org/en/stable/how-to/writing_plugins.html#assertion-rewriting
 # CAUTION THIS ONLY WORKS WHEN USING assert a == b not the unittest derived methods self.assertEqual...()
@@ -19,7 +21,9 @@ class BaseTestCase(AioHTTPTestCase):
     ):
         logging.getLogger("connexion.operation").setLevel("ERROR")
 
-        return factory_internal(self.config, None, validate_responses=True).app
+        return factory_internal(
+            GSRestConfig.from_dict(self.config), None, validate_responses=True
+        ).app
 
     async def requestOnly(self, path, body, **kwargs):
         headers = {
