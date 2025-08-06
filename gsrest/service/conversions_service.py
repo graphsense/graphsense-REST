@@ -94,7 +94,9 @@ async def get_conversions(
 
     # try:
 
-    conversions_gslib = await get_conversions_from_db(currency, db, tx)
+    conversions_gslib = await get_conversions_from_db(
+        currency, db, tx, include_bridging_actions=False
+    )
 
     # if it is a raw tx hash without a subtx, dont filter, otherwise
     # filter the conversions to the ones that have either fromPayment or toPayment as identifier
