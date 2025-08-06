@@ -87,6 +87,9 @@ async def get_address(request: web.Request, currency, address, include_actors=No
     except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
+    except GsTimeoutException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")
@@ -164,6 +167,9 @@ async def get_address_entity(request: web.Request, currency, address, include_ac
     except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
+    except GsTimeoutException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")
@@ -241,6 +247,9 @@ async def get_tag_summary_by_address(request: web.Request, currency, address, in
     except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
+    except GsTimeoutException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")
@@ -336,6 +345,9 @@ async def list_address_links(request: web.Request, currency, address, neighbor, 
     except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
+    except GsTimeoutException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")
@@ -423,6 +435,9 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
     except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
+    except GsTimeoutException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")
@@ -518,6 +533,9 @@ async def list_address_txs(request: web.Request, currency, address, direction=No
     except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
+    except GsTimeoutException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")
@@ -599,6 +617,9 @@ async def list_tags_by_address(request: web.Request, currency, address, page=Non
     except FeatureNotAvailableException as e:
         traceback.print_exception(type(e), e, e.__traceback__)
         raise web.HTTPBadRequest(text=e.get_user_msg())
+    except GsTimeoutException as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+        raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
         tb.append(f"Request URL: {request.url}")

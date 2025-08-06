@@ -11,10 +11,12 @@ from graphsenselib.errors import (
     AddressNotFoundException,
     ClusterNotFoundException,
     DBInconsistencyException,
+    # GsTimeoutException,
 )
 from gsrest.service.blocks_service import get_min_max_height
 from gsrest.service.common_service import (
     cannonicalize_address,
+    get_request_cache,
     get_tagstore_access_groups,
     try_get_cluster_id,
 )
@@ -69,11 +71,27 @@ async def _get_best_cluster_tag_raw(
     db = request.app["db"]
     tagstore_db = TagstoreDbAsync(request.app["gs-tagstore"])
 
-    clstr_id = await try_get_cluster_id(db, currency, address)
+    cache = get_request_cache(request)
 
-    return clstr_id, await tagstore_db.get_best_cluster_tag(
-        clstr_id, currency.upper(), get_tagstore_access_groups(request)
-    )
+    clstr_id = await try_get_cluster_id(db, currency, address, cache=cache)
+    groups = get_tagstore_access_groups(request)
+
+    key = f"best_cluster_tag_{clstr_id}_{currency.upper()}_" + "_".join(groups)
+
+    if key in cache:
+        request.app.logger.info(
+            f"Using cached best cluster tag for {currency}/{address}/{clstr_id}"
+        )
+        return clstr_id, cache[key]
+    else:
+        data = await tagstore_db.get_best_cluster_tag(
+            clstr_id, currency.upper(), groups
+        )
+        request.app.logger.info(
+            f"Fetched best cluster tag for {currency}/{address}/{clstr_id} from tagstore"
+        )
+        cache[key] = data
+        return clstr_id, data
 
 
 async def get_best_cluster_tag(request, currency, address) -> AddressTag | None:
@@ -147,7 +165,9 @@ async def list_tags_by_address(
     page = int(page) if page is not None else 0
     db = request.app["db"]
 
-    clstr_id = await try_get_cluster_id(db, currency, address)
+    cache = get_request_cache(request)
+
+    clstr_id = await try_get_cluster_id(db, currency, address, cache=cache)
 
     tags = [
         address_tag_from_PublicTag(request, pt, clstr_id)
@@ -164,8 +184,10 @@ async def list_tags_by_address(
     ]
 
     async def add_foreign_network_clusters(tag):
-        if tag.currency != currency:
-            tag.entity = await try_get_cluster_id(db, tag.currency, address)
+        if tag.currency.upper() != currency.upper():
+            tag.entity = await try_get_cluster_id(
+                db, tag.currency, address, cache=cache
+            )
         return tag
 
     tags = [await add_foreign_network_clusters(t) for t in tags]
@@ -294,17 +316,34 @@ async def list_address_links(
     address = cannonicalize_address(currency, address)
     neighbor = cannonicalize_address(currency, neighbor)
     db = request.app["db"]
-    result = await db.list_address_links(
-        currency,
-        address,
-        neighbor,
-        min_height=min_b,
-        max_height=max_b,
-        order=order,
-        token_currency=token_currency,
-        page=page,
-        pagesize=pagesize,
-    )
+
+    request_timeout = request.app["config"].get("address_links_request_timeout", 30)
+
+    try:
+        result = await asyncio.wait_for(
+            db.list_address_links(
+                currency,
+                address,
+                neighbor,
+                min_height=min_b,
+                max_height=max_b,
+                order=order,
+                token_currency=token_currency,
+                page=page,
+                pagesize=pagesize,
+            ),
+            timeout=request_timeout,
+        )
+    except asyncio.TimeoutError:
+        # logger = request.app.logger
+        # logger.error(
+        #     f"Timeout while fetching links for {currency}/{address} to {neighbor}"
+        # )
+        # Raising GsTimeoutException does not end request processing, so we raise a generic exception
+        # to ensure the request is properly terminated.
+        raise Exception(
+            f"Timeout while fetching links for {currency}/{address} to {neighbor}"
+        )
 
     return await common.links_response(request, currency, result)
 

@@ -4,12 +4,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
-## [25.08.0/1.13.0] - 2025-07-??
+## [25.08.3/1.13.3] - 2025-08-05
+
+### fixed
+- performance degradation with get_best_cluster tag (from 2 -> 12s after 5 queries) because of sqlalchemy/asyncpg prepared statement cache bug -> prepared_statement_cache_size=0 default now
+
+## [25.08.2/1.13.2] - 2025-08-04
+
+### fixed
+- Remove duplicate in error log.
+
+## [25.08.1/1.13.1] - 2025-08-04
+
+### fixed
+- request timeout handling for address links endpoint, to avoid server load on long running requests
+
+## [25.08.0/1.13.0] - 2025-08-01
 
 ### added
 - /txs/{tx_hash}/conversions enables to identify dex_swap inputs and outputs created in a transactions
 - error notifications can now be done via slack
 - slack can also be uses to get notifications for certain events, eg. when users report new tags
+
+### changed
+- added request local cache for heavy repetitive operations (get cluster id for tags, get best cluster tag), esp. improves bulk loads
+- added configurable parallelism limits to all bulk operations to avoid overloading the server.
 
 
 ## [25.07.0/1.12.0] - 2025-06-27

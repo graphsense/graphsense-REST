@@ -10,7 +10,7 @@ import yaml
 from graphsenselib.config import AppConfig
 from graphsenselib.utils.slack import SlackLogHandler
 
-import graphsenselib.db.asynchronous
+import gsrest.db
 from gsrest.plugins import get_subclass
 
 CONFIG_FILE = "./instance/config.yaml"
@@ -134,7 +134,7 @@ def factory_internal(
     with open(os.path.join(specification_dir, openapi_yaml)) as yaml_file:
         app.app["openapi"] = yaml.safe_load(yaml_file)
 
-    app.app.cleanup_ctx.append(graphsenselib.db.asynchronous.get_connection)
+    app.app.cleanup_ctx.append(gsrest.db.get_connection)
 
     origins = (
         app.app["config"]["ALLOWED_ORIGINS"]

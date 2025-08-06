@@ -12,7 +12,7 @@ from tagstore.db import (
 )
 from tagstore.db.queries import UserReportedAddressTag
 
-from graphsenselib.db.asynchronous import (
+from gsrest.db import (
     get_cached_is_abuse,
     get_cached_taxonomy_concept_label,
 )
