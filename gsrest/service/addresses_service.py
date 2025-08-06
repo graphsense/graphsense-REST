@@ -1,11 +1,6 @@
 import asyncio
 from typing import List, Optional, Tuple
 
-from graphsenselib.utils.address import address_to_user_format
-from tagstore.algorithms.tag_digest import TagDigest, compute_tag_digest
-from tagstore.db import TagPublic, TagstoreDbAsync
-
-import gsrest.service.common_service as common
 from graphsenselib.datatypes.common import NodeType
 from graphsenselib.errors import (
     AddressNotFoundException,
@@ -13,6 +8,11 @@ from graphsenselib.errors import (
     DBInconsistencyException,
     # GsTimeoutException,
 )
+from graphsenselib.utils.address import address_to_user_format
+from tagstore.algorithms.tag_digest import TagDigest, compute_tag_digest
+from tagstore.db import TagPublic, TagstoreDbAsync
+
+import gsrest.service.common_service as common
 from gsrest.service.blocks_service import get_min_max_height
 from gsrest.service.common_service import (
     cannonicalize_address,
@@ -317,7 +317,7 @@ async def list_address_links(
     neighbor = cannonicalize_address(currency, neighbor)
     db = request.app["db"]
 
-    request_timeout = request.app["config"].get("address_links_request_timeout", 30)
+    request_timeout = request.app["config"].address_links_request_timeout
 
     try:
         result = await asyncio.wait_for(

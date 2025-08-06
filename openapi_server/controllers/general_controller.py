@@ -28,7 +28,7 @@ async def get_statistics(request: web.Request, ) -> web.Response:
             request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
-        request.app['config'].get('show_private_tags', False)
+        request.app['config'].show_private_tags or False
     show_private_tags = bool(show_private_tags_conf)
     if show_private_tags:
         for (k,v) in show_private_tags_conf['on_header'].items():
@@ -108,7 +108,7 @@ async def search(request: web.Request, q, currency=None, limit=None) -> web.Resp
             request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
-        request.app['config'].get('show_private_tags', False)
+        request.app['config'].show_private_tags or False
     show_private_tags = bool(show_private_tags_conf)
     if show_private_tags:
         for (k,v) in show_private_tags_conf['on_header'].items():

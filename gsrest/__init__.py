@@ -11,6 +11,7 @@ from graphsenselib.config import AppConfig
 from graphsenselib.utils.slack import SlackLogHandler
 
 import gsrest.db
+from gsrest.config import GSRestConfig, LoggingConfig
 from gsrest.plugins import get_subclass
 
 CONFIG_FILE = "./instance/config.yaml"
@@ -26,9 +27,12 @@ def load_config(config_file):
 
 
 def setup_logging(
-    logger, slack_exception_hook, default_environment: Optional[str], config
+    logger,
+    slack_exception_hook,
+    default_environment: Optional[str],
+    logging_config: LoggingConfig,
 ):
-    level = config.get("level", "INFO").upper()
+    level = logging_config.level.upper()
     level = getattr(logging, level)
     FORMAT = "%(asctime)s %(message)s"
     logging.basicConfig(format=FORMAT)
@@ -52,33 +56,36 @@ def setup_logging(
             slack_handler.setLevel("ERROR")
             logger.addHandler(slack_handler)
 
-    smtp = config.get("smtp", None)
+    smtp = logging_config.smtp
     if not smtp:
         return
+
     credentials = None
     secure = None
-    if smtp.get("username", None) is not None:
-        credentials = (smtp.get("username"), smtp.get("password"))
-        if smtp.get("secure", None) is True:
+    if smtp.username is not None:
+        credentials = (smtp.username, smtp.password)
+        if smtp.secure is True:
             secure = ()
+
     handler = logging.handlers.SMTPHandler(
-        mailhost=(smtp.get("host"), smtp.get("port", None)),
-        fromaddr=smtp.get("from"),
-        toaddrs=smtp.get("to"),
-        subject=smtp.get("subject"),
+        mailhost=(smtp.host, smtp.port),
+        fromaddr=smtp.from_addr,
+        toaddrs=smtp.to,
+        subject=smtp.subject,
         credentials=credentials,
         secure=secure,
-        timeout=smtp.get("timeout", None),
+        timeout=smtp.timeout,
     )
 
-    handler.setLevel(getattr(logging, smtp.get("level", "CRITICAL")))
+    handler.setLevel(getattr(logging, smtp.level))
     logger.addHandler(handler)
 
 
 def factory(config_file=None, validate_responses=False):
     if not config_file:
         config_file = CONFIG_FILE
-    config = load_config(config_file)
+    raw_config = load_config(config_file)
+    config = GSRestConfig.from_dict(raw_config)
 
     gslibConfig = AppConfig()
     gslibConfig.load()
@@ -87,7 +94,7 @@ def factory(config_file=None, validate_responses=False):
 
 
 def factory_internal(
-    config, gslibConfig: Optional[AppConfig], validate_responses=False
+    config: GSRestConfig, gslibConfig: Optional[AppConfig], validate_responses=False
 ):
     options = {"swagger_ui": True, "serve_spec": True}
 
@@ -114,33 +121,27 @@ def factory_internal(
     if gslibConfig is not None:
         slack_exception_hook = gslibConfig.get_slack_hooks_by_topic("exceptions")
         slack_info_hook = gslibConfig.get_slack_hooks_by_topic("info")
-        default_environment = (
-            config.get("environment", None) or gslibConfig.default_environment
-        )
+        default_environment = config.environment or gslibConfig.default_environment
     else:
         slack_exception_hook = None
         slack_info_hook = None
-        default_environment = config.get("environment", None)
+        default_environment = config.environment
 
-    config["slack_info_hook"] = slack_info_hook
+    config.slack_info_hook = slack_info_hook
 
     app.app["config"] = config
     setup_logging(
         app.app.logger,
         slack_exception_hook,
         default_environment,
-        app.app["config"].get("logging", {}),
+        config.logging,
     )
     with open(os.path.join(specification_dir, openapi_yaml)) as yaml_file:
         app.app["openapi"] = yaml.safe_load(yaml_file)
 
     app.app.cleanup_ctx.append(gsrest.db.get_connection)
 
-    origins = (
-        app.app["config"]["ALLOWED_ORIGINS"]
-        if "ALLOWED_ORIGINS" in app.app["config"]
-        else "*"
-    )
+    origins = config.ALLOWED_ORIGINS if hasattr(config, "ALLOWED_ORIGINS") else "*"
 
     options = aiohttp_cors.ResourceOptions(
         allow_credentials=True,
@@ -161,15 +162,14 @@ def factory_internal(
     for route in list(app.app.router.routes()):
         cors.add(route)
 
-    app.app["config"]["hide_private_tags"] = app.app["config"].get(
-        "hide_private_tags", False
-    )
+    # Store the config object directly - no need to set individual values
+    app.app["config"] = config
 
     app.app["plugins"] = []
     app.app["plugin_contexts"] = {}
     app.app["request_config"] = {}
 
-    for name in app.app["config"].get("plugins", []):
+    for name in config.plugins:
         subcl = get_subclass(importlib.import_module(name))
         app.app["plugins"].append(subcl)
         app.app["plugin_contexts"][name] = {}
@@ -181,8 +181,10 @@ def factory_internal(
 
 def plugin_setup(plugin, name):
     def setup(app):
+        # Get plugin-specific config using the new method
+        plugin_config = app["config"].get_plugin_config(name)
         a = {
-            "config": app["config"].get(name, None),
+            "config": plugin_config,
             "context": app["plugin_contexts"][name],
         }
         return plugin.setup(a)

@@ -1,5 +1,11 @@
 from typing import Optional
 
+from graphsenselib.db.asynchronous.cassandra import get_tx_identifier
+from graphsenselib.errors import (
+    BadUserInputException,
+    NotFoundException,
+    TransactionNotFoundException,
+)
 from graphsenselib.utils.address import address_to_user_format
 from graphsenselib.utils.transactions import (
     SubTransactionIdentifier,
@@ -7,12 +13,6 @@ from graphsenselib.utils.transactions import (
 )
 
 import gsrest.service.swaps_service as swaps_service
-from graphsenselib.db.asynchronous.cassandra import get_tx_identifier
-from graphsenselib.errors import (
-    BadUserInputException,
-    NotFoundException,
-    TransactionNotFoundException,
-)
 from gsrest.service.rates_service import get_rates
 from gsrest.util import get_first_key_present, is_eth_like
 from gsrest.util.values import convert_token_value, convert_value

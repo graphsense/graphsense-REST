@@ -14,25 +14,24 @@ def get_cached_is_abuse(app, identifier) -> bool:
 
 
 async def get_connection(app):
-    config = app["config"]["database"]
-    driver = config["driver"].lower()
+    config = app["config"].database
+    driver = config.driver.lower()
     app.logger.info(f"Opening {driver} connection ...")
     mod = importlib.import_module("graphsenselib.db.asynchronous." + driver)
     cls = getattr(mod, driver.capitalize())
 
     app["db"] = cls(config, app.logger)
 
-    ts_conf = app["config"]["gs-tagstore"]
-    max_conn = ts_conf.get("pool_size", 50)
-    max_pool_time = ts_conf.get("pool_timeout", 300)
-    mo = ts_conf.get("max_overflow", 10)
-    recycle = ts_conf.get("pool_recycle", 3600)
+    ts_conf = app["config"].tagstore
+    max_conn = ts_conf.pool_size
+    max_pool_time = ts_conf.pool_timeout
+    mo = ts_conf.max_overflow
+    recycle = ts_conf.pool_recycle
 
-    enable_prepared_statements_cache = ts_conf.get(
-        "enable_prepared_statements_cache", False
-    )
+    enable_prepared_statements_cache = ts_conf.enable_prepared_statements_cache
+
     engine = get_db_engine_async(
-        ts_conf["url"]
+        ts_conf.url
         + (
             "?prepared_statement_cache_size=0"
             if not enable_prepared_statements_cache
@@ -71,4 +70,5 @@ async def get_connection(app):
         app.logger.info(engine.pool.status())
         app.logger.info("Closed Tagstore connection.")
     except Exception as x:
+        app.logger.error(x)
         app.logger.error(x)

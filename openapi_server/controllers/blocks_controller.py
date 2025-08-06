@@ -33,7 +33,7 @@ async def get_block(request: web.Request, currency, height) -> web.Response:
             request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
-        request.app['config'].get('show_private_tags', False)
+        request.app['config'].show_private_tags or False
     show_private_tags = bool(show_private_tags_conf)
     if show_private_tags:
         for (k,v) in show_private_tags_conf['on_header'].items():
@@ -112,7 +112,7 @@ async def get_block_by_date(request: web.Request, currency, date) -> web.Respons
             request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
-        request.app['config'].get('show_private_tags', False)
+        request.app['config'].show_private_tags or False
     show_private_tags = bool(show_private_tags_conf)
     if show_private_tags:
         for (k,v) in show_private_tags_conf['on_header'].items():
@@ -190,7 +190,7 @@ async def list_block_txs(request: web.Request, currency, height) -> web.Response
             request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
-        request.app['config'].get('show_private_tags', False)
+        request.app['config'].show_private_tags or False
     show_private_tags = bool(show_private_tags_conf)
     if show_private_tags:
         for (k,v) in show_private_tags_conf['on_header'].items():

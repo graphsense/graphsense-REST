@@ -41,7 +41,7 @@ async def get_entity(request: web.Request, currency, entity, exclude_best_addres
             request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
-        request.app['config'].get('show_private_tags', False)
+        request.app['config'].show_private_tags or False
     show_private_tags = bool(show_private_tags_conf)
     if show_private_tags:
         for (k,v) in show_private_tags_conf['on_header'].items():
@@ -123,7 +123,7 @@ async def list_address_tags_by_entity(request: web.Request, currency, entity, pa
             request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
-        request.app['config'].get('show_private_tags', False)
+        request.app['config'].show_private_tags or False
     show_private_tags = bool(show_private_tags_conf)
     if show_private_tags:
         for (k,v) in show_private_tags_conf['on_header'].items():
@@ -205,7 +205,7 @@ async def list_entity_addresses(request: web.Request, currency, entity, page=Non
             request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
-        request.app['config'].get('show_private_tags', False)
+        request.app['config'].show_private_tags or False
     show_private_tags = bool(show_private_tags_conf)
     if show_private_tags:
         for (k,v) in show_private_tags_conf['on_header'].items():
@@ -303,7 +303,7 @@ async def list_entity_links(request: web.Request, currency, entity, neighbor, mi
             request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
-        request.app['config'].get('show_private_tags', False)
+        request.app['config'].show_private_tags or False
     show_private_tags = bool(show_private_tags_conf)
     if show_private_tags:
         for (k,v) in show_private_tags_conf['on_header'].items():
@@ -395,7 +395,7 @@ async def list_entity_neighbors(request: web.Request, currency, entity, directio
             request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
-        request.app['config'].get('show_private_tags', False)
+        request.app['config'].show_private_tags or False
     show_private_tags = bool(show_private_tags_conf)
     if show_private_tags:
         for (k,v) in show_private_tags_conf['on_header'].items():
@@ -493,7 +493,7 @@ async def list_entity_txs(request: web.Request, currency, entity, direction=None
             request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
-        request.app['config'].get('show_private_tags', False)
+        request.app['config'].show_private_tags or False
     show_private_tags = bool(show_private_tags_conf)
     if show_private_tags:
         for (k,v) in show_private_tags_conf['on_header'].items():
@@ -583,7 +583,7 @@ async def search_entity_neighbors(request: web.Request, currency, entity, direct
             request = plugin.before_request(context, request)
 
     show_private_tags_conf = \
-        request.app['config'].get('show_private_tags', False)
+        request.app['config'].show_private_tags or False
     show_private_tags = bool(show_private_tags_conf)
     if show_private_tags:
         for (k,v) in show_private_tags_conf['on_header'].items():

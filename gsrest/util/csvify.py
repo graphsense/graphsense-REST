@@ -1,8 +1,8 @@
 from csv import DictWriter
 
+from graphsenselib.errors import BadUserInputException
 from werkzeug.datastructures import Headers
 
-from graphsenselib.errors import BadUserInputException
 from openapi_server.models.values import Values
 
 

@@ -1,18 +1,18 @@
 import logging
 from typing import List
 
-from graphsenselib.utils.accountmodel import hex_to_bytes
-from graphsenselib.defi import ExternalSwap, Bridge
+from graphsenselib.defi import Bridge, ExternalSwap
 from graphsenselib.defi.conversions import get_conversions_from_db
+from graphsenselib.errors import (
+    BadUserInputException,
+    TransactionNotFoundException,
+)
+from graphsenselib.utils.accountmodel import hex_to_bytes
 from graphsenselib.utils.transactions import (
     SubTransactionIdentifier,
     SubTransactionType,
 )
 
-from graphsenselib.errors import (
-    BadUserInputException,
-    TransactionNotFoundException,
-)
 from gsrest.util import is_eth_like
 from openapi_server.models.external_conversions import ExternalConversions
 
@@ -92,8 +92,8 @@ async def get_conversions(
     if not tx:
         raise TransactionNotFoundException(currency, tx_hash)
 
-    #try:
-        
+    # try:
+
     conversions_gslib = await get_conversions_from_db(currency, db, tx)
 
     # if it is a raw tx hash without a subtx, dont filter, otherwise
@@ -120,7 +120,7 @@ async def get_conversions(
 
     return conversions
 
-    #except Exception as e:
+    # except Exception as e:
     #    logger.warning(f"Failed to process transaction {identifier}: {e}")
     #    raise BadUserInputException(
     #        f"Failed to extract conversion data from transaction: {str(e)}"

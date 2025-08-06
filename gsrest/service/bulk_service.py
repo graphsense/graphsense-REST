@@ -9,8 +9,8 @@ from csv import Error as CSVError
 from functools import reduce
 
 from aiohttp import web
-
 from graphsenselib.errors import BadUserInputException, NotFoundException
+
 from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.entity import Entity
 from openapi_server.models.values import Values
@@ -217,8 +217,8 @@ def stack(request, currency, operation, body, num_pages, format):
             raise NotFoundException(f"{api}.{operation} not found")
     aws = []
 
-    max_concurrency_bulk_operation = request.app["config"]["database"].get(
-        f"max_concurrency_bulk_{operation_name}",
+    max_concurrency_bulk_operation = request.app["config"].get_max_concurrency_bulk(
+        operation_name,
         default_concurrency_by_operation.get(operation_name, 10),
     )
 

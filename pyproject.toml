@@ -1,6 +1,6 @@
 [project]
 name = "gsrest"
-version = "1.13.3"
+version = "1.13.4dev1"
 description = "GraphSense API REST API"
 readme = "README.md"
 changelog = "CHANGELOG.md"
@@ -28,7 +28,7 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-graphsense-lib = { git = "https://github.com/graphsense/graphsense-lib", rev = "v25.08.0dev6" }
+graphsense-lib = { git = "https://github.com/graphsense/graphsense-lib", rev = "v25.08.0dev8" }
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
