@@ -19,6 +19,7 @@ async def get_connection(app):
     app.logger.info(f"Opening {driver} connection ...")
     mod = importlib.import_module("graphsenselib.db.asynchronous." + driver)
     cls = getattr(mod, driver.capitalize())
+
     app["db"] = cls(config, app.logger)
 
     ts_conf = app["config"]["gs-tagstore"]
