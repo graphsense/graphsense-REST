@@ -64,6 +64,12 @@ class GSRestConfig(BaseSettings):
         alias="enable-user-tag-reporting",
         description="Enable user tag reporting functionality",
     )
+
+    block_by_date_use_linear_search: bool = Field(
+        default=False,
+        description="Use linear search for block by date queries",
+    )
+
     plugins: List[str] = Field(
         default_factory=list, description="List of plugin modules to load"
     )
