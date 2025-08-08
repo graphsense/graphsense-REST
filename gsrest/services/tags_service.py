@@ -78,8 +78,8 @@ class TagsService:
 
     def _address_tag_from_public_tag(
         self,
-        pt: "TagPublic",
-        entity: Optional[int],  # noqa: F821
+        pt: "TagPublic",  # noqa: F821
+        entity: Optional[int],
     ) -> AddressTag:
         abuse = next(
             (x for x in pt.concepts if self.concepts_service.get_is_abuse(x)), None
