@@ -6,13 +6,6 @@ from graphsenselib.config.config import SlackTopic
 from graphsenselib.errors import FeatureNotAvailableException, NotFoundException
 from graphsenselib.utils.address import address_to_user_format
 from graphsenselib.utils.slack import send_message_to_slack
-from tagstore.algorithms.tag_digest import TagDigest, compute_tag_digest
-from tagstore.db import (
-    ActorPublic,
-    TagAlreadyExistsException,
-    TagPublic,
-    Taxonomies,
-)
 
 from gsrest.services.common import (
     cannonicalize_address,
@@ -59,7 +52,7 @@ class TagstoreProtocol(Protocol):
     ) -> List[LabeledItemRef]: ...
     async def get_tags_by_subjectid(
         self, address: str, offset: int, limit: Optional[int], groups: List[str]
-    ) -> List[TagPublic]: ...
+    ) -> List["TagPublic"]: ...  # noqa: F821
     async def get_best_cluster_tag(
         self, cluster_id: int, currency: str, groups: List[str]
     ) -> Optional[Any]: ...
@@ -84,7 +77,9 @@ class TagsService:
         self.logger = logger
 
     def _address_tag_from_public_tag(
-        self, pt: TagPublic, entity: Optional[int]
+        self,
+        pt: "TagPublic",
+        entity: Optional[int],  # noqa: F821
     ) -> AddressTag:
         abuse = next(
             (x for x in pt.concepts if self.concepts_service.get_is_abuse(x)), None
@@ -123,7 +118,7 @@ class TagsService:
         pagesize: Optional[int] = None,
         include_best_cluster_tag: bool = False,
         cache: Optional[Dict[str, Any]] = None,
-    ) -> List[TagPublic]:
+    ) -> List["TagPublic"]:  # noqa: F821
         address = address_to_user_format(currency, address)
         page = page or 0
 
@@ -149,7 +144,7 @@ class TagsService:
 
         return tags
 
-    def _tag_summary_from_tag_digest(self, td: TagDigest) -> TagSummary:
+    def _tag_summary_from_tag_digest(self, td: "TagDigest") -> TagSummary:  # noqa: F821
         return TagSummary(
             broad_category=td.broad_concept,
             tag_count=td.nr_tags,
@@ -183,6 +178,14 @@ class TagsService:
         tagstore_groups: List[str],
         include_best_cluster_tag: bool = False,
     ) -> TagSummary:
+        try:
+            from tagstore.algorithms.tag_digest import compute_tag_digest
+        except ImportError as e:
+            raise ImportError(
+                "tagstore is required for tag digest computation. "
+                "Please install it with: uv pip install tagstore"
+            ) from e
+
         address_canonical = cannonicalize_address(currency, address)
 
         tags = await self.list_tags_by_address_raw(
@@ -229,13 +232,23 @@ class TagsService:
         )
 
     async def _get_entities_dict(
-        self, db: Any, tags: List[TagPublic]
+        self,
+        db: Any,
+        tags: List["TagPublic"],  # noqa: F821
     ) -> Dict[Tuple[str, str], Any]:
         queryItems = list({(t.identifier, t.network) for t in tags})
         entityQueries = [try_get_cluster_id(db, n, i) for i, n in queryItems]
         return {q: d for q, d in zip(queryItems, await asyncio.gather(*entityQueries))}
 
-    def _actor_from_actor_public(self, ap: ActorPublic) -> Actor:
+    def _actor_from_actor_public(self, ap: "ActorPublic") -> Actor:  # noqa: F821
+        try:
+            from tagstore.db import Taxonomies
+        except ImportError as e:
+            raise ImportError(
+                "tagstore is required for actor operations. "
+                "Please install it with: uv pip install tagstore"
+            ) from e
+
         has_context = (
             ap.additional_uris
             or ap.image_links
@@ -362,6 +375,14 @@ class TagsService:
         )
 
     async def list_concepts(self, taxonomy: str) -> List[Concept]:
+        try:
+            from tagstore.db import Taxonomies
+        except ImportError as e:
+            raise ImportError(
+                "tagstore is required for taxonomy operations. "
+                "Please install it with: uv pip install tagstore"
+            ) from e
+
         taxonomy = taxonomy.lower().strip()
 
         # for backwards comp.
@@ -416,6 +437,14 @@ class TagsService:
     async def report_tag(
         self, data: Any, config: TagInsertConfigProtocol, tag_acl_group: str
     ) -> None:
+        try:
+            from tagstore.db import TagAlreadyExistsException
+        except ImportError as e:
+            raise ImportError(
+                "tagstore is required for tag reporting. "
+                "Please install it with: uv pip install tagstore"
+            ) from e
+
         reporting_enabled = config.enable_user_tag_reporting
 
         if reporting_enabled:
