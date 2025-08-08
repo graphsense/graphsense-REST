@@ -422,9 +422,12 @@ def pydantic_links_to_openapi(pydantic_links: PydanticLinks) -> Links:
             openapi_links.append(pydantic_link_utxo_to_openapi(link))
         elif isinstance(link, PydanticAddressTxUtxo):
             openapi_links.append(pydantic_address_tx_utxo_to_openapi(link))
+        elif isinstance(link, PydanticTxAccount):
+            openapi_links.append(pydantic_tx_account_to_openapi(link))
         else:
-            # Fallback for other link types
-            openapi_links.append(link)
+            raise NotImplementedError(
+                f"Unsupported link type: {type(link)}"
+            )
 
     return Links(next_page=pydantic_links.next_page, links=openapi_links)
 

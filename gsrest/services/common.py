@@ -534,7 +534,7 @@ async def links_response(
     if is_eth_like(currency):
         # For ETH-like currencies, process as transactions
         tx_results = await txs_from_rows(
-            currency, links, rates_service, token_config, txs_service
+            currency, links, rates_service, token_config
         )
         return Links(links=tx_results, next_page=next_page)
     else:
