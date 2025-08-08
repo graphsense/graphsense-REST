@@ -1,5 +1,5 @@
-from gsrest.services.common import convert_value as internal_convert_value
-from gsrest.services.common import make_values as internal_make_values
+from graphsenselib.db.asynchronous.services.common import convert_value as internal_convert_value
+from graphsenselib.db.asynchronous.services.common import make_values as internal_make_values
 from gsrest.translators import pydantic_values_to_openapi
 
 
