@@ -85,3 +85,6 @@ dev = [
     "graphsense-python>=1.9.4",
     "tqdm>=4.67.1",
 ]
+
+[tool.uv.sources]
+graphsense-lib = { path = "../graphsense-lib" }

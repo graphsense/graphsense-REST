@@ -18,7 +18,7 @@ class Tx(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, tx_type: str='account', currency: str=None, tx_hash: str=None, coinbase: bool=None, height: int=None, no_inputs: int=None, no_outputs: int=None, inputs: List[TxValue]=None, outputs: List[TxValue]=None, timestamp: int=None, total_input: Values=None, total_output: Values=None, identifier: str=None, token_tx_id: int=None, network: str=None, value: Values=None, from_address: str=None, to_address: str=None, contract_creation: bool=None):
+    def __init__(self, tx_type: str='account', currency: str=None, tx_hash: str=None, coinbase: bool=None, height: int=None, no_inputs: int=None, no_outputs: int=None, inputs: List[TxValue]=None, outputs: List[TxValue]=None, timestamp: int=None, total_input: Values=None, total_output: Values=None, identifier: str=None, token_tx_id: int=None, network: str=None, value: Values=None, from_address: str=None, to_address: str=None, contract_creation: bool=None, is_external: bool=None):
         """Tx - a model defined in OpenAPI
 
         :param tx_type: The tx_type of this Tx.
@@ -40,6 +40,7 @@ class Tx(Model):
         :param from_address: The from_address of this Tx.
         :param to_address: The to_address of this Tx.
         :param contract_creation: The contract_creation of this Tx.
+        :param is_external: The is_external of this Tx.
         """
         self.openapi_types = {
             'tx_type': str,
@@ -60,7 +61,8 @@ class Tx(Model):
             'value': Values,
             'from_address': str,
             'to_address': str,
-            'contract_creation': bool
+            'contract_creation': bool,
+            'is_external': bool
         }
 
         self.attribute_map = {
@@ -82,7 +84,8 @@ class Tx(Model):
             'value': 'value',
             'from_address': 'from_address',
             'to_address': 'to_address',
-            'contract_creation': 'contract_creation'
+            'contract_creation': 'contract_creation',
+            'is_external': 'is_external'
         }
 
         self._tx_type = tx_type
@@ -104,6 +107,7 @@ class Tx(Model):
         self._from_address = from_address
         self._to_address = to_address
         self._contract_creation = contract_creation
+        self._is_external = is_external
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'Tx':
@@ -140,7 +144,8 @@ class Tx(Model):
             'value': self._value,
             'from_address': self._from_address,
             'to_address': self._to_address,
-            'contract_creation': self._contract_creation }
+            'contract_creation': self._contract_creation,
+            'is_external': self._is_external }
 
 
     @property
@@ -603,3 +608,26 @@ class Tx(Model):
         """
 
         self._contract_creation = contract_creation
+
+    @property
+    def is_external(self):
+        """Gets the is_external of this Tx.
+
+        Indicates if this transaction is an external transaction for an eth like currency.
+
+        :return: The is_external of this Tx.
+        :rtype: bool
+        """
+        return self._is_external
+
+    @is_external.setter
+    def is_external(self, is_external):
+        """Sets the is_external of this Tx.
+
+        Indicates if this transaction is an external transaction for an eth like currency.
+
+        :param is_external: The is_external of this Tx.
+        :type is_external: bool
+        """
+
+        self._is_external = is_external
