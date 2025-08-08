@@ -5,6 +5,7 @@ from graphsenselib.datatypes.common import NodeType
 from graphsenselib.errors import ClusterNotFoundException
 from graphsenselib.utils.address import address_to_user_format
 
+from gsrest.services.blocks_service import BlocksService
 from gsrest.services.common import (
     address_from_row,
     convert_token_values_map,
@@ -26,6 +27,8 @@ from gsrest.services.models import (
     NeighborEntity,
     TxSummary,
 )
+from gsrest.services.rates_service import RatesService
+from gsrest.services.tags_service import TagsService
 
 
 class DatabaseProtocol(Protocol):
@@ -75,16 +78,25 @@ class TagstoreProtocol(Protocol):
         limit: Optional[int],
         groups: List[str],
     ) -> List[Any]: ...
+    async def get_best_cluster_tag(
+        self, cluster_id: int, currency: str, groups: List[str]
+    ) -> Optional[Any]: ...
+    async def get_nr_tags_by_clusterid(
+        self, cluster_id: int, currency: str, groups: List[str]
+    ) -> int: ...
+    async def get_actors_by_clusterid(
+        self, cluster_id: int, currency: str, groups: List[str]
+    ) -> List[Any]: ...
 
 
 class EntitiesService:
     def __init__(
         self,
         db: DatabaseProtocol,
-        tagstore: Any,
-        tags_service: Any,
-        blocks_service: Any,
-        rates_service: Any,
+        tagstore: TagstoreProtocol,
+        tags_service: TagsService,
+        blocks_service: BlocksService,
+        rates_service: RatesService,
         logger: Any,
     ):
         self.db = db

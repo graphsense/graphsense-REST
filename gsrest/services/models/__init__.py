@@ -130,10 +130,6 @@ class RatesResponse(BaseModel):
     height: int
     rates: List[Rate]
 
-    @classmethod
-    def from_rate_list(cls, rate_list: List[Rate]) -> "RatesResponse":
-        return cls(rates=rate_list)
-
 
 class AddressTx(BaseModel):
     tx_hash: str
@@ -142,8 +138,6 @@ class AddressTx(BaseModel):
     coinbase: bool
     total_input: Values
     total_output: Values
-
-
 
 
 class AddressTagResult(BaseModel):
@@ -330,9 +324,11 @@ class LinkUtxo(BaseModel):
     input_value: Values
     output_value: Values
 
+
 class Links(BaseModel):
     next_page: Optional[str] = None
     links: List[Union[LinkUtxo, TxAccount]]
+
 
 class AddressTxUtxo(BaseModel):
     currency: str

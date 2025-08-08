@@ -13,7 +13,6 @@ from tagstore.db import (
     TagPublic,
     Taxonomies,
 )
-from tagstore.db.queries import UserReportedAddressTag
 
 from gsrest.services.common import (
     cannonicalize_address,
@@ -36,20 +35,12 @@ from gsrest.services.models import (
 logger = logging.getLogger(__name__)
 
 
-class TagInsertProtocol(Protocol):
+class TagInsertConfigProtocol(Protocol):
     enable_user_tag_reporting: bool
     slack_info_hook: Dict[str, SlackTopic]
 
 
 class TagstoreProtocol(Protocol):
-    async def get_tags_by_address(
-        self,
-        address: str,
-        currency: str,
-        offset: int,
-        limit: Optional[int],
-        groups: List[str],
-    ) -> List[Any]: ...
     async def get_actor_by_id(
         self, actor_id: str, include_tag_count: bool = True
     ) -> Optional[Any]: ...
@@ -66,6 +57,12 @@ class TagstoreProtocol(Protocol):
     async def get_actors_by_subjectid(
         self, subject_id: str, groups: List[str]
     ) -> List[LabeledItemRef]: ...
+    async def get_tags_by_subjectid(
+        self, address: str, offset: int, limit: Optional[int], groups: List[str]
+    ) -> List[TagPublic]: ...
+    async def get_best_cluster_tag(
+        self, cluster_id: int, currency: str, groups: List[str]
+    ) -> Optional[Any]: ...
 
 
 class ConceptProtocol(Protocol):
@@ -417,18 +414,12 @@ class TagsService:
         ]
 
     async def report_tag(
-        self, body: Any, config: TagInsertProtocol, tag_acl_group: str
+        self, data: Any, config: TagInsertConfigProtocol, tag_acl_group: str
     ) -> None:
         reporting_enabled = config.enable_user_tag_reporting
 
         if reporting_enabled:
-            nt = UserReportedAddressTag(
-                address=body.address,
-                network=body.network,
-                actor=body.actor,
-                label=body.label,
-                description=body.description,
-            )
+            nt = data
 
             try:
                 await self.tagstore.add_user_reported_tag(nt, acl_group=tag_acl_group)

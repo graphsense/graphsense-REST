@@ -21,13 +21,11 @@ class StatsServiceProtocol(Protocol):
 
 
 class RatesService:
-    def __init__(self, db: DatabaseProtocol, logger: Any):
+    def __init__(
+        self, db: DatabaseProtocol, stats_service: StatsServiceProtocol, logger: Any
+    ):
         self.db = db
         self.logger = logger
-        self._stats_service = None
-
-    def set_stats_service(self, stats_service: StatsServiceProtocol):
-        """Set stats service to avoid circular dependency"""
         self._stats_service = stats_service
 
     async def get_rates(
@@ -63,10 +61,6 @@ class RatesService:
         #     return RatesResponse.from_rate_list(rates_data)
         # else:
         return RatesResponse(height=height, rates=rates_data)
-
-    async def get_exchange_rates(self, currency: str, height: int) -> RatesResponse:
-        rates = await self.get_rates(currency, height)
-        return RatesResponse(height=height, rates=rates.rates)
 
     async def list_rates(
         self, currency: str, heights: List[int]

@@ -6,7 +6,7 @@ from openapi_server.models.rates import Rates
 async def get_exchange_rates(request, currency, height) -> Rates:
     services = get_service_container(request)
 
-    pydantic_result = await services.rates_service.get_exchange_rates(currency, height)
+    pydantic_result = await services.rates_service.get_rates(currency, height)
 
     return pydantic_rates_to_openapi(pydantic_result)
 

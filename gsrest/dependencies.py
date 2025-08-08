@@ -5,7 +5,6 @@ from tagstore.db import TagstoreDbAsync, Taxonomies
 from gsrest.config import GSRestConfig
 from gsrest.services.addresses_service import AddressesService
 from gsrest.services.blocks_service import BlocksService
-from gsrest.services.conversions_service import ConversionsService
 from gsrest.services.entities_service import EntitiesService
 from gsrest.services.general_service import GeneralService
 from gsrest.services.rates_service import RatesService
@@ -57,11 +56,13 @@ class ServiceContainer:
         self.category_cache_service = concepts_cache_service
 
         # Initialize services with dependencies
-        self._rates_service = RatesService(db=db, logger=logger)
-        self._tokens_service = TokensService(db=db, logger=logger)
         self._stats_service = StatsService(
             db=db, tagstore=self.tagstore_db, logger=logger
         )
+        self._rates_service = RatesService(
+            db=db, stats_service=self._stats_service, logger=logger
+        )
+        self._tokens_service = TokensService(db=db, logger=logger)
 
         self._tags_service = TagsService(
             db=db,
@@ -84,16 +85,6 @@ class ServiceContainer:
             stats_service=self._stats_service,
             logger=logger,
         )
-        self._conversions_service = ConversionsService(logger=logger)
-        self._addresses_service = AddressesService(
-            db=db,
-            tagstore=self.tagstore_db,
-            tags_service=self._tags_service,
-            entities_service=None,  # Will be set later to avoid circular dependency
-            blocks_service=self._blocks_service,
-            rates_service=self._rates_service,
-            logger=logger,
-        )
         self._entities_service = EntitiesService(
             db=db,
             tagstore=self.tagstore_db,
@@ -103,11 +94,15 @@ class ServiceContainer:
             logger=logger,
         )
 
-        # Set up circular dependency
-        self._rates_service.set_stats_service(self._stats_service)
-
-        # Set circular dependency for addresses service
-        self._addresses_service.entities_service = self._entities_service
+        self._addresses_service = AddressesService(
+            db=db,
+            tagstore=self.tagstore_db,
+            tags_service=self._tags_service,
+            entities_service=self._entities_service,
+            blocks_service=self._blocks_service,
+            rates_service=self._rates_service,
+            logger=logger,
+        )
 
     @property
     def tags_service(self) -> TagsService:
@@ -138,20 +133,12 @@ class ServiceContainer:
         return self._general_service
 
     @property
-    def conversions_service(self) -> ConversionsService:
-        return self._conversions_service
-
-    @property
     def addresses_service(self) -> AddressesService:
         return self._addresses_service
 
     @property
     def entities_service(self) -> EntitiesService:
         return self._entities_service
-
-    @property
-    def cache_service(self) -> ConceptProtocol:
-        return self._cache_service
 
 
 def get_service_container(request) -> ServiceContainer:

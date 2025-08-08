@@ -2,6 +2,7 @@ from typing import Optional
 
 from gsrest.dependencies import get_service_container
 from gsrest.translators import (
+    pydantic_external_conversions_to_openapi,
     pydantic_tx_account_to_openapi,
     pydantic_tx_ref_to_openapi,
     pydantic_tx_to_openapi,
@@ -69,4 +70,5 @@ async def list_matching_txs(request, currency, expression):
 
 async def get_tx_conversions(request, currency, tx_hash):
     services = get_service_container(request)
-    return await services.txs_service.get_tx_conversions(currency, tx_hash)
+    result = await services.txs_service.get_conversions(currency, tx_hash)
+    return pydantic_external_conversions_to_openapi(result)

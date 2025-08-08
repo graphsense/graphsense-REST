@@ -35,17 +35,6 @@ class RatesServiceProtocol(Protocol):
     async def get_rates(self, currency: str, height: Optional[int] = None) -> Any: ...
 
 
-class TxsServiceProtocol(Protocol):
-    async def _from_row(
-        self,
-        currency: str,
-        row: Dict[str, Any],
-        rates: Dict[str, float],
-        token_config: Dict[str, Any],
-        include_io: bool = False,
-    ) -> Any: ...
-
-
 @alru_cache(maxsize=1000)
 async def find_block_by_ts(get_timestamp, currency, ts, start, end):
     return await find_insertion_point_async(get_timestamp, ts, low=start, high=end)

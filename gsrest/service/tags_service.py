@@ -1,3 +1,5 @@
+from tagstore.db.queries import UserReportedAddressTag
+
 from gsrest.dependencies import (
     get_service_container,
     get_tagstore_access_groups,
@@ -63,4 +65,12 @@ async def report_tag(request, body):
     config = request.app["config"]
     tag_acl_group = get_user_tags_acl_group(request)
 
-    await services.tags_service.report_tag(body, config, tag_acl_group)
+    tag_to_report = UserReportedAddressTag(
+        address=body.address,
+        network=body.network,
+        actor=body.actor,
+        label=body.label,
+        description=body.description,
+    )
+
+    await services.tags_service.report_tag(tag_to_report, config, tag_acl_group)
