@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional, Protocol, Tuple
 from async_lru import alru_cache
 from graphsenselib.errors import BadUserInputException, BlockNotFoundException
 
+from gsrest.config import GSRestConfig
 from gsrest.services.common import is_eth_like, std_tx_from_row
 from gsrest.services.models import Block, BlockAtDate
 
@@ -72,7 +73,7 @@ class BlocksService:
         self,
         db: DatabaseProtocol,
         rates_service: RatesServiceProtocol,
-        config: Any,
+        config: GSRestConfig,
         logger: Any,
     ):
         self.db = db
@@ -153,9 +154,7 @@ class BlocksService:
         return (min_height, max_height)
 
     async def get_block_by_date(self, currency: str, date: datetime) -> BlockAtDate:
-        use_linear_search = self.config.database.get(
-            "block_by_date_use_linear_search", False
-        )
+        use_linear_search = self.config.block_by_date_use_linear_search
         ts = int(date.timestamp())
 
         if use_linear_search:

@@ -144,18 +144,6 @@ class AddressTx(BaseModel):
     total_output: Values
 
 
-class Link(BaseModel):
-    tx_hash: str
-    height: int
-    timestamp: int
-    input_value: Values
-    output_value: Values
-    token_values: Optional[Dict[str, Values]] = None
-
-
-class Links(BaseModel):
-    next_page: Optional[str] = None
-    links: List[Link]
 
 
 class AddressTagResult(BaseModel):
@@ -182,7 +170,7 @@ class NeighborEntities(BaseModel):
 
 
 class NeighborAddress(BaseModel):
-    labels: List[str]
+    labels: Optional[List[str]]
     value: Values
     token_values: Optional[Dict[str, Values]] = None
     no_txs: int
@@ -334,6 +322,7 @@ class ExternalConversions(BaseModel):
 
 
 class LinkUtxo(BaseModel):
+    tx_type: str = "utxo"
     tx_hash: str
     height: int
     currency: str
@@ -341,6 +330,9 @@ class LinkUtxo(BaseModel):
     input_value: Values
     output_value: Values
 
+class Links(BaseModel):
+    next_page: Optional[str] = None
+    links: List[Union[LinkUtxo, TxAccount]]
 
 class AddressTxUtxo(BaseModel):
     currency: str
@@ -375,7 +367,7 @@ class TagCloudEntry(BaseModel):
 class LabelSummary(BaseModel):
     label: str
     count: int
-    confidence: Optional[str] = None
+    confidence: Optional[float] = None
     relevance: float
     creators: List[str] = Field(default_factory=list)
     sources: List[str] = Field(default_factory=list)

@@ -64,6 +64,7 @@ class ServiceContainer:
         )
 
         self._tags_service = TagsService(
+            db=db,
             tagstore=self.tagstore_db,
             concepts_cache_service=self.category_cache_service,
             logger=logger,

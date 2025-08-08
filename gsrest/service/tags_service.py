@@ -25,7 +25,7 @@ async def get_actor_tags(request, actor, page=None, pagesize=None):
     tagstore_groups = get_tagstore_access_groups(request)
 
     pydantic_result = await services.tags_service.get_actor_tags(
-        actor, tagstore_groups, request.app["db"], page, pagesize
+        actor, tagstore_groups, page, pagesize
     )
 
     return pydantic_address_tag_result_to_openapi(pydantic_result)
@@ -36,7 +36,7 @@ async def list_address_tags(request, label, page=None, pagesize=None):
     tagstore_groups = get_tagstore_access_groups(request)
 
     pydantic_result = await services.tags_service.list_address_tags_by_label(
-        label, tagstore_groups, request.app["db"], page, pagesize
+        label, tagstore_groups, page, pagesize
     )
 
     return pydantic_address_tag_result_to_openapi(pydantic_result)

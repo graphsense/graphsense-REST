@@ -76,11 +76,13 @@ class ConceptProtocol(Protocol):
 class TagsService:
     def __init__(
         self,
+        db: Any,
         tagstore: TagstoreProtocol,
         concepts_cache_service: ConceptProtocol,
         logger: Any,
     ):
         self.tagstore = tagstore
+        self.db = db
         self.concepts_service = concepts_cache_service
         self.logger = logger
 
@@ -186,7 +188,7 @@ class TagsService:
     ) -> TagSummary:
         address_canonical = cannonicalize_address(currency, address)
 
-        tags = await self.tags_service.list_tags_by_address_raw(
+        tags = await self.list_tags_by_address_raw(
             currency,
             address_canonical,
             tagstore_groups,
@@ -296,7 +298,6 @@ class TagsService:
         self,
         actor_id: str,
         tagstore_groups: List[str],
-        db: Any,
         page: Optional[int] = None,
         pagesize: Optional[int] = None,
     ) -> AddressTagResult:
@@ -309,7 +310,7 @@ class TagsService:
             groups=tagstore_groups,
         )
 
-        tag_entities = await self._get_entities_dict(db, tags)
+        tag_entities = await self._get_entities_dict(self.db, tags)
 
         return self._get_address_tag_result(
             page,
@@ -326,7 +327,6 @@ class TagsService:
         self,
         label: str,
         tagstore_groups: List[str],
-        db: Any,
         page: Optional[int] = None,
         pagesize: Optional[int] = None,
     ) -> AddressTagResult:
@@ -339,7 +339,7 @@ class TagsService:
             groups=tagstore_groups,
         )
 
-        tag_entities = await self._get_entities_dict(db, tags)
+        tag_entities = await self._get_entities_dict(self.db, tags)
 
         return self._get_address_tag_result(
             page,
