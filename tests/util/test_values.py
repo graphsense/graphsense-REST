@@ -1,4 +1,4 @@
-from gsrest.util.values import convert_value
+from gsrest.util.values_legacy import convert_value
 
 
 def test_converted_value():

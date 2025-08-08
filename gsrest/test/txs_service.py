@@ -1,4 +1,4 @@
-from gsrest.util.values import make_values
+from gsrest.util.values_legacy import make_values
 from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.tx_utxo import TxUtxo
 from openapi_server.models.tx_value import TxValue

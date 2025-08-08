@@ -17,7 +17,7 @@ from gsrest.test.addresses_service import (
     eth_entityWithTokens,
 )
 from gsrest.test.txs_service import tx1_eth, tx2_eth, tx4_eth, tx22_eth
-from gsrest.util.values import convert_value, make_values
+from gsrest.util.values_legacy import convert_value, make_values
 from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.address_tx_utxo import AddressTxUtxo
 from openapi_server.models.address_txs import AddressTxs

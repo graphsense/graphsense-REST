@@ -12,6 +12,7 @@ from graphsenselib.utils.slack import SlackLogHandler
 
 import gsrest.db
 from gsrest.config import GSRestConfig, LoggingConfig
+from gsrest.dependencies import ConceptsCacheService, ServiceContainer
 from gsrest.plugins import get_subclass
 
 CONFIG_FILE = "./instance/config.yaml"
@@ -140,6 +141,19 @@ def factory_internal(
         app.app["openapi"] = yaml.safe_load(yaml_file)
 
     app.app.cleanup_ctx.append(gsrest.db.get_connection)
+
+    # Initialize service container after db connection is established
+    async def setup_services(app):
+        app["services"] = ServiceContainer(
+            config=app["config"],
+            db=app["db"],
+            tagstore_engine=app["gs-tagstore"],
+            concepts_cache_service=ConceptsCacheService(app, app.logger),
+            logger=app.logger,
+        )
+        yield
+
+    app.app.cleanup_ctx.append(setup_services)
 
     origins = config.ALLOWED_ORIGINS if hasattr(config, "ALLOWED_ORIGINS") else "*"
 
