@@ -1,17 +1,21 @@
 from typing import Any
 
-from tagstore.db import TagstoreDbAsync, Taxonomies
-
-from gsrest.config import GSRestConfig
 from graphsenselib.db.asynchronous.services.addresses_service import AddressesService
 from graphsenselib.db.asynchronous.services.blocks_service import BlocksService
 from graphsenselib.db.asynchronous.services.entities_service import EntitiesService
 from graphsenselib.db.asynchronous.services.general_service import GeneralService
 from graphsenselib.db.asynchronous.services.rates_service import RatesService
 from graphsenselib.db.asynchronous.services.stats_service import StatsService
-from graphsenselib.db.asynchronous.services.tags_service import ConceptProtocol, TagsService
+from graphsenselib.db.asynchronous.services.tags_service import (
+    ConceptProtocol,
+    TagsService,
+)
 from graphsenselib.db.asynchronous.services.tokens_service import TokensService
 from graphsenselib.db.asynchronous.services.txs_service import TxsService
+from tagstore.db import TagstoreDbAsync, Taxonomies
+
+from gsrest.config import GSRestConfig
+
 
 class ConceptsCacheService(ConceptProtocol):
     def __init__(self, app: Any, logger: Any):

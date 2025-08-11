@@ -1,11 +1,11 @@
 import copy
 import itertools
 
+from graphsenselib.db.asynchronous.services.common import omit
 from graphsenselib.utils.tron import evm_to_tron_address_string
 
 import gsrest.test.tags_service as ts
 from gsrest.service.rates_service import list_rates
-from graphsenselib.db.asynchronous.services.common import omit
 from gsrest.test.txs_service import tx1_eth, tx2_eth, tx4_eth, tx22_eth
 from gsrest.util.values_legacy import convert_value, make_values
 from openapi_server.models.address import Address
