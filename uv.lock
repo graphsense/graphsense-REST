@@ -1959,8 +1959,8 @@ wheels = [
 
 [[package]]
 name = "graphsense-lib"
-version = "2.6.1rc9"
-source = { git = "https://github.com/graphsense/graphsense-lib?rev=v2.6.1rc9#ff6f17756190e7746a018c7bc5dc009a1ec05791" }
+version = "2.6.1rc10"
+source = { git = "https://github.com/graphsense/graphsense-lib?rev=v2.6.1rc10#56e80eca2a2349fc2c02878a4b2aa653dee0cba9" }
 dependencies = [
     { name = "aiohttp" },
     { name = "async-lru" },
@@ -2103,7 +2103,7 @@ requires-dist = [
     { name = "async-lru", specifier = ">=2.0.4" },
     { name = "cassandra-driver", specifier = ">=3.27.0" },
     { name = "connexion", extras = ["swagger-ui"], specifier = ">=2.6.0,<3" },
-    { name = "graphsense-lib", extras = ["conversions"], git = "https://github.com/graphsense/graphsense-lib?rev=v2.6.1rc9" },
+    { name = "graphsense-lib", extras = ["conversions"], git = "https://github.com/graphsense/graphsense-lib?rev=v2.6.1rc10" },
     { name = "lz4", specifier = ">=4.3.2" },
     { name = "openapi-schema-validator", specifier = ">=0.2.3" },
     { name = "python-dateutil", specifier = ">=2.9.0" },
