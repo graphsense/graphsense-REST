@@ -1,13 +1,13 @@
 import copy
 import itertools
 
+from graphsenselib.utils.rest_utils import omit
 from graphsenselib.utils.tron import evm_to_tron_address_string
 
 import gsrest.test.tags_service as ts
 from gsrest.service.rates_service import list_rates
 from gsrest.test.txs_service import tx1_eth, tx2_eth, tx4_eth, tx22_eth
-from gsrest.util import omit
-from gsrest.util.values import convert_value, make_values
+from gsrest.util.values_legacy import convert_value, make_values
 from openapi_server.models.address import Address
 from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.address_tx_utxo import AddressTxUtxo
@@ -487,6 +487,7 @@ async def get_address(test_case):
     result = await test_case.request(
         path, currency="btc", address=addressWithoutTags.address, include_tags=True
     )
+
     assert addressWithoutTags.to_dict() == result
 
     result = await test_case.request(

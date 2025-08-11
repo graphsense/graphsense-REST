@@ -1,48 +1,26 @@
-from graphsenselib.errors import BlockNotFoundException
-
-from gsrest.service.stats_service import get_no_blocks
-from gsrest.util.values import map_rates_for_peged_tokens
+from gsrest.dependencies import get_service_container
+from gsrest.translators import pydantic_rates_to_openapi
 from openapi_server.models.rates import Rates
 
 
-async def get_exchange_rates(request, currency, height):
-    rates = await get_rates(request, currency, height)
-    return Rates(height=height, rates=rates["rates"])
+async def get_exchange_rates(request, currency, height) -> Rates:
+    services = get_service_container(request)
+
+    pydantic_result = await services.rates_service.get_rates(currency, height)
+
+    return pydantic_rates_to_openapi(pydantic_result)
 
 
 async def get_rates(request, currency, height=None):
-    if height is None:
-        height = (await get_no_blocks(request, currency)) - 1
+    services = get_service_container(request)
 
-    db = request.app["db"]
-    if ":" in currency:
-        network, currency, *rest = currency.split(":")
-    else:
-        network, currency = (currency, currency)
+    rates_response = await services.rates_service.get_rates(currency, height)
 
-    token_config = db.get_token_configuration(network)
-    if token_config is not None and currency.upper() in token_config:
-        # create pseudo rates for eth stable coin tokens.
-        r = await db.get_rates(network, height)
-        # this avoids changing original rates if cached
-        # otherwise results are wrong.
-        r = r.copy()
-        r["rates"] = map_rates_for_peged_tokens(
-            r["rates"], token_config[currency.upper()]
-        )
-    else:
-        r = await db.get_rates(currency, height)
-
-    if r is None:
-        raise BlockNotFoundException(currency, height)
-    return r
+    # Return in the original format for backward compatibility
+    return {"rates": rates_response.rates}
 
 
 async def list_rates(request, currency, heights):
-    db = request.app["db"]
-    rates = await db.list_rates(currency, heights)
+    services = get_service_container(request)
 
-    height_rates = dict()  # key: height, value: {'eur': 0, 'usd':0}
-    for rate in rates:
-        height_rates[rate["block_id"]] = rate["rates"]
-    return height_rates
+    return await services.rates_service.list_rates(currency, heights)

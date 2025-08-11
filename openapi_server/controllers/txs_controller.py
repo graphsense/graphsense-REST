@@ -6,6 +6,8 @@ import traceback
 import json
 import re
 
+from gsrest.dependencies import get_username
+
 from openapi_server.models.external_conversions import ExternalConversions
 from openapi_server.models.tx import Tx
 from openapi_server.models.tx_account import TxAccount
@@ -90,7 +92,10 @@ async def get_spending_txs(request: web.Request, currency, tx_hash, io_index=Non
         raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
-        tb.append(f"Request URL: {request.url}")
+
+        user = get_username(request) or "unknown"
+        
+        tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
@@ -170,7 +175,10 @@ async def get_spent_in_txs(request: web.Request, currency, tx_hash, io_index=Non
         raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
-        tb.append(f"Request URL: {request.url}")
+
+        user = get_username(request) or "unknown"
+        
+        tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
@@ -256,7 +264,10 @@ async def get_tx(request: web.Request, currency, tx_hash, include_io=None, inclu
         raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
-        tb.append(f"Request URL: {request.url}")
+
+        user = get_username(request) or "unknown"
+        
+        tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
@@ -334,7 +345,10 @@ async def get_tx_conversions(request: web.Request, currency, tx_hash) -> web.Res
         raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
-        tb.append(f"Request URL: {request.url}")
+
+        user = get_username(request) or "unknown"
+        
+        tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
@@ -418,7 +432,10 @@ async def get_tx_io(request: web.Request, currency, tx_hash, io, include_nonstan
         raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
-        tb.append(f"Request URL: {request.url}")
+
+        user = get_username(request) or "unknown"
+        
+        tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
@@ -496,7 +513,10 @@ async def list_token_txs(request: web.Request, currency, tx_hash) -> web.Respons
         raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
-        tb.append(f"Request URL: {request.url}")
+
+        user = get_username(request) or "unknown"
+        
+        tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()

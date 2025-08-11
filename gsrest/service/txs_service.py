@@ -1,236 +1,13 @@
 from typing import Optional
 
-from graphsenselib.db.asynchronous.cassandra import get_tx_identifier
-from graphsenselib.errors import (
-    BadUserInputException,
-    NotFoundException,
-    TransactionNotFoundException,
+from gsrest.dependencies import get_service_container
+from gsrest.translators import (
+    pydantic_external_conversions_to_openapi,
+    pydantic_tx_account_to_openapi,
+    pydantic_tx_ref_to_openapi,
+    pydantic_tx_to_openapi,
+    pydantic_tx_value_to_openapi,
 )
-from graphsenselib.utils.address import address_to_user_format
-from graphsenselib.utils.transactions import (
-    SubTransactionIdentifier,
-    SubTransactionType,
-)
-
-import gsrest.service.conversions_service as conversions_service
-from gsrest.service.rates_service import get_rates
-from gsrest.util import get_first_key_present, is_eth_like
-from gsrest.util.values import convert_token_value, convert_value
-from openapi_server.models.tx_account import TxAccount
-from openapi_server.models.tx_ref import TxRef
-from openapi_server.models.tx_utxo import TxUtxo
-from openapi_server.models.tx_value import TxValue
-
-
-def get_type_account(row):
-    if row["type"] == "internal":
-        return "account"
-    elif row["type"] == "erc20":
-        return "account"
-    elif row["type"] == "external":
-        return "account"
-    else:
-        raise Exception(f"Unknown transaction type {row}")
-
-
-def tx_account_from_row(currency, row, rates, token_config):
-    height_keys = ["height", "block_id"]
-    timestamp_keys = ["timestamp", "block_timestamp"]
-    height = get_first_key_present(row, height_keys)
-
-    r = rates[height] if isinstance(rates, dict) else rates
-
-    return TxAccount(
-        currency=currency if "token_tx_id" not in row else row["currency"].lower(),
-        network=currency,
-        tx_type=get_type_account(row),
-        identifier=get_tx_identifier(row),
-        tx_hash=row["tx_hash"].hex(),
-        timestamp=get_first_key_present(row, timestamp_keys),
-        height=height,
-        from_address=address_to_user_format(currency, row["from_address"]),
-        to_address=address_to_user_format(currency, row["to_address"]),
-        token_tx_id=row.get("token_tx_id", None),
-        contract_creation=row.get("contract_creation", None),
-        value=convert_value(currency, row["value"], r)
-        if "token_tx_id" not in row
-        else convert_token_value(row["value"], r, token_config[row["currency"]]),
-    )
-
-
-def from_row(
-    currency,
-    row,
-    rates,
-    token_config,
-    include_io=False,
-    include_nonstandard_io=False,
-    include_io_index=False,
-):
-    if is_eth_like(currency):
-        return tx_account_from_row(currency, row, rates, token_config)
-
-    coinbase = row.get("coinbase", False)
-
-    inputs = io_from_rows(
-        currency,
-        row,
-        "inputs",
-        rates,
-        include_io,
-        include_nonstandard_io,
-        include_io_index,
-    )
-
-    if coinbase and (inputs is None or inputs == []):
-        inputs = [
-            TxValue(
-                address=["coinbase"],
-                value=convert_value(currency, row["total_output"], rates),
-                index=None if not include_io_index else 0,
-            )
-        ]
-
-    total_input = convert_value(currency, row["total_input"], rates)
-    total_output = convert_value(currency, row["total_output"], rates)
-
-    if coinbase:
-        total_input = total_output
-
-    return TxUtxo(
-        currency=currency,
-        tx_hash=row["tx_hash"].hex(),
-        coinbase=coinbase,
-        height=row["block_id"],
-        no_inputs=(0 if not row["inputs"] else len(row["inputs"]))
-        + (1 if coinbase else 0),
-        no_outputs=0 if not row["outputs"] else len(row["outputs"]),
-        inputs=inputs,
-        outputs=io_from_rows(
-            currency,
-            row,
-            "outputs",
-            rates,
-            include_io,
-            include_nonstandard_io,
-            include_io_index,
-        ),
-        timestamp=row["timestamp"],
-        total_input=total_input,
-        total_output=total_output,
-    )
-
-
-async def get_spent_in_txs(
-    request, currency: str, tx_hash: str, io_index: Optional[int]
-):
-    db = request.app["db"]
-    results = await db.get_spent_in_txs(currency, tx_hash, io_index=io_index)
-    results = [
-        TxRef(
-            input_index=t["spending_input_index"],
-            output_index=t["spent_output_index"],
-            tx_hash=t["spending_tx_hash"].hex(),
-        )
-        for t in results.current_rows
-    ]
-    return results
-
-
-async def get_spending_txs(
-    request, currency: str, tx_hash: str, io_index: Optional[int]
-):
-    db = request.app["db"]
-    results = await db.get_spending_txs(currency, tx_hash, io_index=io_index)
-    results = [
-        TxRef(
-            input_index=t["spending_input_index"],
-            output_index=t["spent_output_index"],
-            tx_hash=t["spent_tx_hash"].hex(),
-        )
-        for t in results.current_rows
-    ]
-    return results
-
-
-def io_from_rows(
-    currency, values, key, rates, include_io, include_nonstandard_io, include_io_index
-):
-    if not include_io:
-        return None
-    if key not in values:
-        return None
-    if not values[key]:
-        return []
-
-    results = []
-    for idx, i in enumerate(values[key]):
-        if i.address is not None:
-            results.append(
-                TxValue(
-                    address=i.address,
-                    value=convert_value(currency, i.value, rates),
-                    index=idx if include_io_index else None,
-                )
-            )
-        elif include_nonstandard_io:
-            results.append(
-                TxValue(
-                    address=[],
-                    value=convert_value(currency, i.value, rates),
-                    index=idx if include_io_index else None,
-                )
-            )
-    return results
-
-
-async def list_token_txs(request, currency, tx_hash, token_tx_id=None):
-    db = request.app["db"]
-    results = await db.list_token_txs(currency, tx_hash, log_index=token_tx_id)
-
-    results = [
-        from_row(
-            currency,
-            result,
-            (await get_rates(request, currency, result["block_id"]))["rates"],
-            db.get_token_configuration(currency),
-        )
-        for result in results
-    ]
-
-    return results
-
-
-async def get_trace_txs(request, currency, tx, trace_index=None):
-    db = request.app["db"]
-    result = await db.fetch_transaction_trace(currency, tx, trace_index)
-
-    if result and result["tx_hash"] == tx["tx_hash"]:
-        result["type"] = "internal"
-        result["timestamp"] = tx["block_timestamp"]
-        result["is_tx_trace"] = False
-
-        if currency == "trx":
-            result["from_address"] = result["caller_address"]
-            result["to_address"] = result["transferto_address"]
-            result["value"] = result["call_value"]
-        else:
-            result["contract_creation"] = result["trace_type"] == "create"
-            # is_tx_trace = (
-            #     result["trace_address"] is None or result["trace_address"].strip() == ""
-            # )
-            # result["is_tx_trace"] = is_tx_trace
-            # if is_tx_trace:
-            #     result["type"] = "external"
-
-        return from_row(
-            currency,
-            result,
-            (await get_rates(request, currency, result["block_id"]))["rates"],
-            db.get_token_configuration(currency),
-        )
-    else:
-        return None
 
 
 async def get_tx(
@@ -242,108 +19,56 @@ async def get_tx(
     include_nonstandard_io=False,
     include_io_index=False,
 ):
-    db = request.app["db"]
-
-    trace_index = None
-    tx_ident = tx_hash
-
-    try:
-        subtxIdent = SubTransactionIdentifier.from_string(tx_hash)
-    except ValueError as e:
-        raise BadUserInputException(str(e))
-
-    if subtxIdent.tx_type == SubTransactionType.InternalTx:
-        tx_hash = subtxIdent.tx_hash
-        trace_index = subtxIdent.sub_index
-    elif subtxIdent.tx_type == SubTransactionType.ERC20:
-        tx_hash = subtxIdent.tx_hash
-        if token_tx_id is None:
-            token_tx_id = subtxIdent.sub_index
-
-    if token_tx_id is not None:
-        if is_eth_like(currency):
-            results = await list_token_txs(
-                request, currency, tx_hash, token_tx_id=token_tx_id
-            )
-
-            if len(results):
-                return results[0]
-            else:
-                raise TransactionNotFoundException(currency, tx_ident, token_tx_id)
-        else:
-            raise BadUserInputException(
-                f"{currency} does not support token transactions."
-            )
-    elif trace_index is not None:
-        if is_eth_like(currency):
-            tx = await db.get_tx(currency, tx_hash)
-            res = await get_trace_txs(request, currency, tx, trace_index)
-
-            if res:
-                return res
-            else:
-                raise TransactionNotFoundException(currency, tx_ident, token_tx_id)
-
-        else:
-            raise BadUserInputException(
-                f"{currency} does not support trace transactions."
-            )
-    else:
-        result = await db.get_tx(currency, tx_hash)
-        rates = (await get_rates(request, currency, result["block_id"]))["rates"]
-
-        if result:
-            result["type"] = "external"
-
-        result = from_row(
-            currency,
-            result,
-            rates,
-            db.get_token_configuration(currency),
-            include_io,
-            include_nonstandard_io,
-            include_io_index,
-        )
-        return result
+    services = get_service_container(request)
+    result = await services.txs_service.get_tx(
+        currency,
+        tx_hash,
+        token_tx_id,
+        include_io,
+        include_nonstandard_io,
+        include_io_index,
+    )
+    return pydantic_tx_to_openapi(result)
 
 
 async def get_tx_io(
     request, currency, tx_hash, io, include_nonstandard_io, include_io_index
 ):
-    if is_eth_like(currency):
-        raise NotFoundException("get_tx_io not implemented for ETH")
-    result = await get_tx(
-        request,
-        currency,
-        tx_hash,
-        include_io=True,
-        include_nonstandard_io=include_nonstandard_io,
-        include_io_index=include_io_index,
+    services = get_service_container(request)
+    result = await services.txs_service.get_tx_io(
+        currency, tx_hash, io, include_nonstandard_io, include_io_index
     )
-    return getattr(result, io)
+    return [pydantic_tx_value_to_openapi(tx_value) for tx_value in result or []]
+
+
+async def list_token_txs(request, currency, tx_hash, token_tx_id=None):
+    services = get_service_container(request)
+    results = await services.txs_service.list_token_txs(currency, tx_hash, token_tx_id)
+    return [pydantic_tx_account_to_openapi(tx) for tx in results]
+
+
+async def get_spent_in_txs(
+    request, currency: str, tx_hash: str, io_index: Optional[int]
+):
+    services = get_service_container(request)
+    results = await services.txs_service.get_spent_in_txs(currency, tx_hash, io_index)
+    return [pydantic_tx_ref_to_openapi(tx_ref) for tx_ref in results]
+
+
+async def get_spending_txs(
+    request, currency: str, tx_hash: str, io_index: Optional[int]
+):
+    services = get_service_container(request)
+    results = await services.txs_service.get_spending_txs(currency, tx_hash, io_index)
+    return [pydantic_tx_ref_to_openapi(tx_ref) for tx_ref in results]
 
 
 async def list_matching_txs(request, currency, expression):
-    db = request.app["db"]
-    results = await db.list_matching_txs(currency, expression)
-
-    leading_zeros = 0
-    pos = 0
-    # leading zeros will be lost when casting to int
-    while expression[pos] == "0":
-        pos += 1
-        leading_zeros += 1
-
-    txs = [
-        "0" * leading_zeros
-        + str(hex(int.from_bytes(row["tx_hash"], byteorder="big")))[2:]
-        for row in results
-    ]
-    return [tx for tx in txs if tx.startswith(expression)]
+    services = get_service_container(request)
+    return await services.txs_service.list_matching_txs(currency, expression)
 
 
 async def get_tx_conversions(request, currency, tx_hash):
-    """
-    Delegate to conversions_service for swap extraction from transaction.
-    """
-    return await conversions_service.get_conversions(request, currency, tx_hash)
+    services = get_service_container(request)
+    result = await services.txs_service.get_conversions(currency, tx_hash)
+    return [pydantic_external_conversions_to_openapi(conv) for conv in result]

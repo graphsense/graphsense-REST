@@ -2,149 +2,46 @@ import asyncio
 import importlib
 import time
 
-from graphsenselib.datatypes.common import NodeType
-from graphsenselib.errors import BadUserInputException, ClusterNotFoundException
-from graphsenselib.utils.address import address_to_user_format
-from tagstore.db import TagstoreDbAsync
+from graphsenselib.errors import BadUserInputException
 
-import gsrest.service.common_service as common
-from gsrest.service.blocks_service import get_min_max_height
-from gsrest.service.common_service import get_address, get_tagstore_access_groups
-from gsrest.service.rates_service import get_rates
-from gsrest.service.tags_service import (
-    address_tag_from_PublicTag,
-    get_address_tag_result,
+from gsrest.dependencies import get_service_container, get_tagstore_access_groups
+from gsrest.translators import (
+    pydantic_address_tag_result_to_openapi,
+    pydantic_address_to_openapi,
+    pydantic_address_txs_to_openapi,
+    pydantic_entity_addresses_to_openapi,
+    pydantic_entity_to_openapi,
+    pydantic_links_to_openapi,
+    pydantic_neighbor_entities_to_openapi,
 )
-from gsrest.util.values import (
-    convert_token_values_map,
-    convert_value,
-    to_values,
-    to_values_tokens,
-)
-from openapi_server.models.address_txs import AddressTxs
-from openapi_server.models.entity import Entity
-from openapi_server.models.entity_addresses import EntityAddresses
-from openapi_server.models.labeled_item_ref import LabeledItemRef
-from openapi_server.models.neighbor_entities import NeighborEntities
-from openapi_server.models.neighbor_entity import NeighborEntity
-from openapi_server.models.tx_summary import TxSummary
 
 MAX_DEPTH = 7
-# TAGS_PAGE_SIZE = 100
 SEARCH_TIMEOUT = 300
-# PAGE_SIZE_GET_ALL_TAGS = 10000
 
 
-def from_row(currency, row, rates, token_config, best_tag=None, count=0, actors=None):
-    return Entity(
-        currency=currency,
-        entity=row["cluster_id"],
-        root_address=address_to_user_format(currency, row["root_address"]),
-        first_tx=TxSummary(
-            row["first_tx"].height,
-            row["first_tx"].timestamp,
-            row["first_tx"].tx_hash.hex(),
-        ),
-        last_tx=TxSummary(
-            row["last_tx"].height,
-            row["last_tx"].timestamp,
-            row["last_tx"].tx_hash.hex(),
-        ),
-        no_addresses=row["no_addresses"],
-        no_incoming_txs=row["no_incoming_txs"],
-        no_outgoing_txs=row["no_outgoing_txs"],
-        total_received=to_values(row["total_received"]),
-        total_tokens_received=to_values_tokens(row.get("total_tokens_received", None)),
-        total_spent=to_values(row["total_spent"]),
-        total_tokens_spent=to_values_tokens(row.get("total_tokens_spent", None)),
-        in_degree=row["in_degree"],
-        out_degree=row["out_degree"],
-        balance=convert_value(currency, row["balance"], rates),
-        token_balances=convert_token_values_map(
-            currency, row.get("token_balances", None), rates, token_config
-        ),
-        best_address_tag=best_tag,
-        no_address_tags=count,
-        actors=actors if actors else None,
-    )
-
-
-async def list_address_tags_by_entity_internal(
-    request, currency, entity, page=None, pagesize=None
-):
-    tsdb = TagstoreDbAsync(request.app["gs-tagstore"])
-
-    page = int(page) if page is not None else 0
-
-    tags = [
-        address_tag_from_PublicTag(request, pt, int(entity))
-        for pt in (
-            await tsdb.get_tags_by_clusterid(
-                int(entity),
-                currency.upper(),
-                page * (pagesize or 0),
-                pagesize,
-                get_tagstore_access_groups(request),
-            )
-        )
-    ]
-
-    return get_address_tag_result(page, pagesize, tags)
-
-
-async def list_address_tags_by_entity(
-    request, currency, entity, page=None, pagesize=None
-):
-    # pagesize = min(pagesize or TAGS_PAGE_SIZE, TAGS_PAGE_SIZE)
-    return await list_address_tags_by_entity_internal(
-        request=request, currency=currency, entity=entity, page=page, pagesize=pagesize
-    )
-
-
+# Updated functions using new service layer
 async def get_entity(
     request, currency, entity, exclude_best_address_tag=False, include_actors=False
 ):
-    db = request.app["db"]
-    tagstore_db = TagstoreDbAsync(request.app["gs-tagstore"])
+    services = get_service_container(request)
     tagstore_groups = get_tagstore_access_groups(request)
 
-    result = await db.get_entity(currency, entity)
-
-    if result is None:
-        raise ClusterNotFoundException(currency, entity)
-
-    best_tag = None
-    count = 0
-    if not exclude_best_address_tag:
-        tag = await tagstore_db.get_best_cluster_tag(
-            int(entity), currency.upper(), tagstore_groups
-        )
-
-        if tag is not None:
-            best_tag = address_tag_from_PublicTag(request, tag, int(entity))
-
-    count = await tagstore_db.get_nr_tags_by_clusterid(
-        int(entity), currency.upper(), tagstore_groups
+    pydantic_result = await services.entities_service.get_entity(
+        currency, entity, exclude_best_address_tag, include_actors, tagstore_groups
     )
 
-    actors = None
-    if include_actors:
-        actor_res = await tagstore_db.get_actors_by_clusterid(
-            int(entity), currency.upper(), tagstore_groups
-        )
-        actors = [LabeledItemRef(id=a.id, label=a.label) for a in actor_res]
+    return pydantic_entity_to_openapi(pydantic_result)
 
-    request.app.logger.debug(f"result address {result}")
-    rates = (await get_rates(request, currency))["rates"]
-    return from_row(
-        currency,
-        result,
-        rates,
-        db.get_token_configuration(currency),
-        best_tag,
-        count,
-        actors,
+
+async def list_entity_addresses(request, currency, entity, page=None, pagesize=None):
+    services = get_service_container(request)
+    tagstore_groups = get_tagstore_access_groups(request)
+
+    pydantic_result = await services.entities_service.list_entity_addresses(
+        currency, entity, tagstore_groups, page, pagesize
     )
+
+    return pydantic_entity_addresses_to_openapi(pydantic_result)
 
 
 async def list_entity_neighbors(
@@ -160,80 +57,117 @@ async def list_entity_neighbors(
     exclude_best_address_tag=False,
     include_actors=False,
 ):
-    results, paging_state = await common.list_neighbors(
-        request,
+    services = get_service_container(request)
+    tagstore_groups = get_tagstore_access_groups(request)
+
+    pydantic_result = await services.entities_service.list_entity_neighbors(
         currency,
         entity,
         direction,
-        NodeType.CLUSTER,
+        tagstore_groups,
         only_ids,
         include_labels,
+        include_actors,
+        relations_only,
+        exclude_best_address_tag,
         page,
         pagesize,
     )
-    is_outgoing = "out" in direction
-    dst = "dst" if is_outgoing else "src"
-    relations = []
-    if results is None:
-        return NeighborEntities(neighbors=[])
-    if not relations_only:
-        aws = [
-            get_entity(
-                request,
-                currency,
-                row[dst + "_cluster_id"],
-                exclude_best_address_tag=exclude_best_address_tag,
-                include_actors=include_actors,
-            )
-            for row in results
-        ]
 
-        nodes = await asyncio.gather(*aws)
-    else:
-        nodes = [r[dst + "_cluster_id"] for r in results]
-
-    for row, node in zip(results, nodes):
-        nb = NeighborEntity(
-            labels=row["labels"],
-            value=row["value"],
-            token_values=row.get("token_values", None),
-            no_txs=row["no_transactions"],
-            entity=node,
-        )
-        relations.append(nb)
-
-    return NeighborEntities(next_page=paging_state, neighbors=relations)
+    return pydantic_neighbor_entities_to_openapi(pydantic_result)
 
 
-async def list_entity_addresses(request, currency, entity, page=None, pagesize=None):
-    tsdb = TagstoreDbAsync(request.app["gs-tagstore"])
-    ts_groups = get_tagstore_access_groups(request)
-    db = request.app["db"]
-    addresses, paging_state = await db.list_entity_addresses(
-        currency, entity, page, pagesize
+async def list_entity_links(
+    request,
+    currency,
+    entity,
+    neighbor,
+    min_height=None,
+    max_height=None,
+    min_date=None,
+    max_date=None,
+    order="desc",
+    token_currency=None,
+    page=None,
+    pagesize=None,
+):
+    services = get_service_container(request)
+
+    pydantic_result = await services.entities_service.list_entity_links(
+        currency,
+        entity,
+        neighbor,
+        min_height,
+        max_height,
+        min_date,
+        max_date,
+        order,
+        token_currency,
+        page,
+        pagesize,
     )
 
-    rates = (await get_rates(request, currency))["rates"]
-    addresses = [
-        common.address_from_row(
-            currency,
-            row,
-            rates,
-            db.get_token_configuration(currency),
-            [
-                LabeledItemRef(id=a.id, label=a.label)
-                for a in (
-                    await tsdb.get_actors_by_subjectid(
-                        address_to_user_format(currency, row["address"]), ts_groups
-                    )
-                )
-            ],
-        )
-        for row in addresses
-    ]
-    return EntityAddresses(next_page=paging_state, addresses=addresses)
+    return pydantic_links_to_openapi(pydantic_result)
 
 
+async def list_address_tags_by_entity(
+    request, currency, entity, page=None, pagesize=None
+):
+    services = get_service_container(request)
+    tagstore_groups = get_tagstore_access_groups(request)
+
+    pydantic_result = await services.entities_service.list_address_tags_by_entity(
+        currency, entity, tagstore_groups, page, pagesize
+    )
+
+    return pydantic_address_tag_result_to_openapi(pydantic_result)
+
+
+async def list_entity_txs(
+    request,
+    currency,
+    entity,
+    min_height=None,
+    max_height=None,
+    min_date=None,
+    max_date=None,
+    direction=None,
+    order="desc",
+    token_currency=None,
+    page=None,
+    pagesize=None,
+):
+    services = get_service_container(request)
+
+    pydantic_result = await services.entities_service.list_entity_txs(
+        currency,
+        entity,
+        min_height,
+        max_height,
+        min_date,
+        max_date,
+        direction,
+        order,
+        token_currency,
+        page,
+        pagesize,
+    )
+
+    return pydantic_address_txs_to_openapi(pydantic_result)
+
+
+async def get_address(request, currency, address, include_actors=True):
+    services = get_service_container(request)
+    tagstore_groups = get_tagstore_access_groups(request)
+
+    pydantic_result = await services.addresses_service.get_address(
+        currency, address, tagstore_groups, include_actors
+    )
+
+    return pydantic_address_to_openapi(pydantic_result)
+
+
+# Search Implementations using the new service layer
 async def search_entity_neighbors(
     request,
     currency,
@@ -659,73 +593,3 @@ async def recursive_search(
         paths.append(obj)
 
     return paths
-
-
-async def list_entity_txs(
-    request,
-    currency,
-    entity,
-    direction,
-    min_height=None,
-    max_height=None,
-    min_date=None,
-    max_date=None,
-    order="desc",
-    token_currency=None,
-    page=None,
-    pagesize=None,
-):
-    min_b, max_b = await get_min_max_height(
-        request, currency, min_height, max_height, min_date, max_date
-    )
-
-    db = request.app["db"]
-    results, paging_state = await db.list_entity_txs(
-        currency=currency,
-        entity=entity,
-        direction=direction,
-        min_height=min_b,
-        max_height=max_b,
-        order=order,
-        token_currency=token_currency,
-        page=page,
-        pagesize=pagesize,
-    )
-    entity_txs = await common.txs_from_rows(
-        request, currency, results, db.get_token_configuration(currency)
-    )
-    return AddressTxs(next_page=paging_state, address_txs=entity_txs)
-
-
-async def list_entity_links(
-    request,
-    currency,
-    entity,
-    neighbor,
-    min_height=None,
-    max_height=None,
-    min_date=None,
-    max_date=None,
-    order="desc",
-    token_currency=None,
-    page=None,
-    pagesize=None,
-):
-    min_b, max_b = await get_min_max_height(
-        request, currency, min_height, max_height, min_date, max_date
-    )
-
-    db = request.app["db"]
-    result = await db.list_entity_links(
-        currency,
-        entity,
-        neighbor,
-        min_height=min_b,
-        max_height=max_b,
-        order=order,
-        token_currency=token_currency,
-        page=page,
-        pagesize=pagesize,
-    )
-
-    return await common.links_response(request, currency, result)

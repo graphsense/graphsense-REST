@@ -6,6 +6,8 @@ import traceback
 import json
 import re
 
+from gsrest.dependencies import get_username
+
 import gsrest.service.bulk_service as service
 from openapi_server import util
 
@@ -68,7 +70,10 @@ async def bulk_csv(request: web.Request, currency, operation, num_pages, body) -
         raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
-        tb.append(f"Request URL: {request.url}")
+
+        user = get_username(request) or "unknown"
+        
+        tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
@@ -131,7 +136,10 @@ async def bulk_json(request: web.Request, currency, operation, num_pages, body) 
         raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
-        tb.append(f"Request URL: {request.url}")
+
+        user = get_username(request) or "unknown"
+        
+        tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()

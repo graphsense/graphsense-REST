@@ -1,16 +1,8 @@
 import importlib
-from typing import Optional
 
-from tagstore.db import TagstoreDbAsync, Taxonomies
 from tagstore.db.database import get_db_engine_async
 
-
-def get_cached_taxonomy_concept_label(app, tax, identifier) -> Optional[str]:
-    return app["taxonomy-cache"]["labels"][tax].get(identifier, None)
-
-
-def get_cached_is_abuse(app, identifier) -> bool:
-    return identifier in app["taxonomy-cache"]["abuse"]
+from gsrest.dependencies import ConceptsCacheService
 
 
 async def get_connection(app):
@@ -45,15 +37,7 @@ async def get_connection(app):
     )
 
     # fetch taxonomy lookup
-    tagstore_db = TagstoreDbAsync(engine)
-    taxs = await tagstore_db.get_taxonomies({Taxonomies.CONCEPT, Taxonomies.COUNTRY})
-    app["taxonomy-cache"] = {
-        "labels": {
-            Taxonomies.CONCEPT: {x.id: x.label for x in taxs.concept},
-            Taxonomies.COUNTRY: {x.id: x.label for x in taxs.country},
-        },
-        "abuse": {x.id for x in taxs.concept if x.is_abuse},
-    }
+    await ConceptsCacheService.setup_cache(engine, app)
 
     app["gs-tagstore"] = engine
 

@@ -6,6 +6,8 @@ import traceback
 import json
 import re
 
+from gsrest.dependencies import get_username
+
 from openapi_server.models.address import Address
 from openapi_server.models.address_tags import AddressTags
 from openapi_server.models.address_txs import AddressTxs
@@ -92,7 +94,10 @@ async def get_address(request: web.Request, currency, address, include_actors=No
         raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
-        tb.append(f"Request URL: {request.url}")
+
+        user = get_username(request) or "unknown"
+        
+        tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
@@ -172,7 +177,10 @@ async def get_address_entity(request: web.Request, currency, address, include_ac
         raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
-        tb.append(f"Request URL: {request.url}")
+
+        user = get_username(request) or "unknown"
+        
+        tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
@@ -252,7 +260,10 @@ async def get_tag_summary_by_address(request: web.Request, currency, address, in
         raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
-        tb.append(f"Request URL: {request.url}")
+
+        user = get_username(request) or "unknown"
+        
+        tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
@@ -350,7 +361,10 @@ async def list_address_links(request: web.Request, currency, address, neighbor, 
         raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
-        tb.append(f"Request URL: {request.url}")
+
+        user = get_username(request) or "unknown"
+        
+        tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
@@ -440,7 +454,10 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
         raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
-        tb.append(f"Request URL: {request.url}")
+
+        user = get_username(request) or "unknown"
+        
+        tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
@@ -538,7 +555,10 @@ async def list_address_txs(request: web.Request, currency, address, direction=No
         raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
-        tb.append(f"Request URL: {request.url}")
+
+        user = get_username(request) or "unknown"
+        
+        tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
@@ -622,7 +642,10 @@ async def list_tags_by_address(request: web.Request, currency, address, page=Non
         raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
-        tb.append(f"Request URL: {request.url}")
+
+        user = get_username(request) or "unknown"
+        
+        tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()

@@ -1,4 +1,4 @@
-from gsrest.util.values import make_values
+from gsrest.util.values_legacy import make_values
 from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.tx_utxo import TxUtxo
 from openapi_server.models.tx_value import TxValue
@@ -101,7 +101,9 @@ tx1_eth = TxAccount(
     to_address="0xd6cc43ac66902302074a19e52bacc68d15421551",
     identifier="af6e0000",
     value=make_values(eur=123.0, usd=246.0, value=123000000000000000000),
+    is_external=True,
 )
+
 
 tx2_eth = TxAccount(
     tx_hash="af6e0003",
@@ -113,6 +115,7 @@ tx2_eth = TxAccount(
     to_address="0x123456",
     identifier="af6e0003",
     value=make_values(eur=123.0, usd=246.0, value=123000000000000000000),
+    is_external=True,
 )
 
 tx22_eth = TxAccount(
@@ -125,6 +128,7 @@ tx22_eth = TxAccount(
     from_address="0xabcdef",
     to_address="0x123456",
     value=make_values(eur=124.0, usd=248.0, value=124000000000000000000),
+    is_external=True,
 )
 
 tx3_eth = TxAccount(
@@ -137,6 +141,7 @@ tx3_eth = TxAccount(
     from_address="0xabcdef",
     to_address="0x123456",
     value=make_values(eur=234.0, usd=468.0, value=234000000000000000000),
+    is_external=True,
 )
 
 tx4_eth = TxAccount(
@@ -149,7 +154,29 @@ tx4_eth = TxAccount(
     from_address="0xabcdef",
     to_address="0x123456",
     value=make_values(eur=234.0, usd=468.0, value=234000000000000000000),
+    is_external=True,
 )
+
+
+tx1_eth_with_identifier = TxAccount(**tx1_eth.to_dict())
+tx1_eth_with_identifier.identifier = "af6e0000_I0"
+tx1_eth_with_identifier.contract_creation = False
+
+tx2_eth_with_identifier = TxAccount(tx2_eth.to_dict())
+tx2_eth_with_identifier.identifier = "af6e0003_I1"
+tx2_eth_with_identifier.contract_creation = False
+
+tx22_eth_with_identifier = TxAccount(tx22_eth.to_dict())
+tx22_eth_with_identifier.identifier = "af6e0004_I0"
+tx22_eth_with_identifier.contract_creation = False
+
+tx3_eth_with_identifier = TxAccount(tx3_eth.to_dict())
+tx3_eth_with_identifier.identifier = "ab188013_I1"
+tx3_eth_with_identifier.contract_creation = False
+
+tx4_eth_with_identifier = TxAccount(tx4_eth.to_dict())
+tx4_eth_with_identifier.identifier = "123456_I0"
+tx4_eth_with_identifier.contract_creation = False
 
 # {'tx_type': 'account',
 # 'token_tx_id': 1,
@@ -214,10 +241,16 @@ async def get_tx(test_case):
     tx.pop("outputs")
 
     test_case.assertEqual(tx, result)
+
     result = await test_case.request(
         path, currency="eth", tx_hash="af6e0000", include_io=True
     )
-    test_case.assertEqual(tx1_eth.to_dict(), result)
+    test_case.assertEqual(tx1_eth_with_identifier.to_dict(), result)
+
+    result = await test_case.request(
+        path, currency="eth", tx_hash="af6e0000_I0", include_io=True
+    )
+    test_case.assertEqual(tx1_eth_with_identifier.to_dict(), result)
 
     path = "/{currency}/txs/{tx_hash}?token_tx_id=1"
     result = await test_case.request(path, currency="eth", tx_hash="0xaf6e0003")

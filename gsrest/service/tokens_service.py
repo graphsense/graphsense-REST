@@ -1,25 +1,10 @@
-from graphsenselib.utils.address import address_to_user_format
-
-from gsrest.util import is_eth_like
-from openapi_server.models.token_config import TokenConfig
-from openapi_server.models.token_configs import TokenConfigs
+from gsrest.dependencies import get_service_container
+from gsrest.translators import pydantic_token_configs_to_openapi
 
 
 async def list_supported_tokens(request, currency):
-    db = request.app["db"]
-    if is_eth_like(currency):
-        return TokenConfigs(
-            [
-                TokenConfig(
-                    ticker=k.lower(),
-                    decimals=v["decimals"],
-                    peg_currency=v["peg_currency"].lower(),
-                    contract_address=address_to_user_format(
-                        currency, v["token_address"]
-                    ),
-                )
-                for k, v in db.get_token_configuration(currency).items()
-            ]
-        )
-    else:
-        return TokenConfigs([])
+    services = get_service_container(request)
+
+    pydantic_result = await services.tokens_service.list_supported_tokens(currency)
+
+    return pydantic_token_configs_to_openapi(pydantic_result)

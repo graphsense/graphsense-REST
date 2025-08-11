@@ -6,11 +6,14 @@ import traceback
 import json
 import re
 
+from gsrest.dependencies import get_username
+
 from openapi_server.models.actor import Actor
 from openapi_server.models.address_tags import AddressTags
 from openapi_server.models.concept import Concept
 from openapi_server.models.taxonomy import Taxonomy
 from openapi_server.models.user_reported_tag import UserReportedTag
+from openapi_server.models.user_tag_report_response import UserTagReportResponse
 import gsrest.service.tags_service as service
 from openapi_server import util
 
@@ -86,7 +89,10 @@ async def get_actor(request: web.Request, actor) -> web.Response:
         raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
-        tb.append(f"Request URL: {request.url}")
+
+        user = get_username(request) or "unknown"
+        
+        tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
@@ -166,7 +172,10 @@ async def get_actor_tags(request: web.Request, actor, page=None, pagesize=None) 
         raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
-        tb.append(f"Request URL: {request.url}")
+
+        user = get_username(request) or "unknown"
+        
+        tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
@@ -246,7 +255,10 @@ async def list_address_tags(request: web.Request, label, page=None, pagesize=Non
         raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
-        tb.append(f"Request URL: {request.url}")
+
+        user = get_username(request) or "unknown"
+        
+        tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
@@ -322,7 +334,10 @@ async def list_concepts(request: web.Request, taxonomy) -> web.Response:
         raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
-        tb.append(f"Request URL: {request.url}")
+
+        user = get_username(request) or "unknown"
+        
+        tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
@@ -396,7 +411,10 @@ async def list_taxonomies(request: web.Request, ) -> web.Response:
         raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
-        tb.append(f"Request URL: {request.url}")
+
+        user = get_username(request) or "unknown"
+        
+        tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
@@ -473,7 +491,10 @@ async def report_tag(request: web.Request, body) -> web.Response:
         raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
-        tb.append(f"Request URL: {request.url}")
+
+        user = get_username(request) or "unknown"
+        
+        tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()

@@ -6,6 +6,8 @@ import traceback
 import json
 import re
 
+from gsrest.dependencies import get_username
+
 from openapi_server.models.address_tags import AddressTags
 from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.entity import Entity
@@ -94,7 +96,10 @@ async def get_entity(request: web.Request, currency, entity, exclude_best_addres
         raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
-        tb.append(f"Request URL: {request.url}")
+
+        user = get_username(request) or "unknown"
+        
+        tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
@@ -176,7 +181,10 @@ async def list_address_tags_by_entity(request: web.Request, currency, entity, pa
         raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
-        tb.append(f"Request URL: {request.url}")
+
+        user = get_username(request) or "unknown"
+        
+        tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
@@ -258,7 +266,10 @@ async def list_entity_addresses(request: web.Request, currency, entity, page=Non
         raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
-        tb.append(f"Request URL: {request.url}")
+
+        user = get_username(request) or "unknown"
+        
+        tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
@@ -356,7 +367,10 @@ async def list_entity_links(request: web.Request, currency, entity, neighbor, mi
         raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
-        tb.append(f"Request URL: {request.url}")
+
+        user = get_username(request) or "unknown"
+        
+        tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
@@ -448,7 +462,10 @@ async def list_entity_neighbors(request: web.Request, currency, entity, directio
         raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
-        tb.append(f"Request URL: {request.url}")
+
+        user = get_username(request) or "unknown"
+        
+        tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
@@ -546,7 +563,10 @@ async def list_entity_txs(request: web.Request, currency, entity, direction=None
         raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
-        tb.append(f"Request URL: {request.url}")
+
+        user = get_username(request) or "unknown"
+        
+        tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
@@ -636,7 +656,10 @@ async def search_entity_neighbors(request: web.Request, currency, entity, direct
         raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
-        tb.append(f"Request URL: {request.url}")
+
+        user = get_username(request) or "unknown"
+        
+        tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
