@@ -17,7 +17,7 @@ class Link(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, tx_type: str='account', tx_hash: str=None, currency: str=None, height: int=None, timestamp: int=None, input_value: Values=None, output_value: Values=None, identifier: str=None, token_tx_id: int=None, network: str=None, value: Values=None, from_address: str=None, to_address: str=None, contract_creation: bool=None):
+    def __init__(self, tx_type: str='account', tx_hash: str=None, currency: str=None, height: int=None, timestamp: int=None, input_value: Values=None, output_value: Values=None, identifier: str=None, token_tx_id: int=None, network: str=None, value: Values=None, from_address: str=None, to_address: str=None, contract_creation: bool=None, is_external: bool=None):
         """Link - a model defined in OpenAPI
 
         :param tx_type: The tx_type of this Link.
@@ -34,6 +34,7 @@ class Link(Model):
         :param from_address: The from_address of this Link.
         :param to_address: The to_address of this Link.
         :param contract_creation: The contract_creation of this Link.
+        :param is_external: The is_external of this Link.
         """
         self.openapi_types = {
             'tx_type': str,
@@ -49,7 +50,8 @@ class Link(Model):
             'value': Values,
             'from_address': str,
             'to_address': str,
-            'contract_creation': bool
+            'contract_creation': bool,
+            'is_external': bool
         }
 
         self.attribute_map = {
@@ -66,7 +68,8 @@ class Link(Model):
             'value': 'value',
             'from_address': 'from_address',
             'to_address': 'to_address',
-            'contract_creation': 'contract_creation'
+            'contract_creation': 'contract_creation',
+            'is_external': 'is_external'
         }
 
         self._tx_type = tx_type
@@ -83,6 +86,7 @@ class Link(Model):
         self._from_address = from_address
         self._to_address = to_address
         self._contract_creation = contract_creation
+        self._is_external = is_external
 
     @classmethod
     def from_dict(cls, dikt: dict) -> 'Link':
@@ -114,7 +118,8 @@ class Link(Model):
             'value': self._value,
             'from_address': self._from_address,
             'to_address': self._to_address,
-            'contract_creation': self._contract_creation }
+            'contract_creation': self._contract_creation,
+            'is_external': self._is_external }
 
 
     @property
@@ -456,3 +461,26 @@ class Link(Model):
         """
 
         self._contract_creation = contract_creation
+
+    @property
+    def is_external(self):
+        """Gets the is_external of this Link.
+
+        Indicates if this transaction is an external transaction for an eth like currency.
+
+        :return: The is_external of this Link.
+        :rtype: bool
+        """
+        return self._is_external
+
+    @is_external.setter
+    def is_external(self, is_external):
+        """Sets the is_external of this Link.
+
+        Indicates if this transaction is an external transaction for an eth like currency.
+
+        :param is_external: The is_external of this Link.
+        :type is_external: bool
+        """
+
+        self._is_external = is_external

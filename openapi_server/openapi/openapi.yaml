@@ -5492,10 +5492,12 @@ components:
     tx_account:
       example:
         identifier: identifier
-        contract_creation: true
-        currency: btc
+        is_external: true
         tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
         to_address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
+        network: btc
+        contract_creation: true
+        currency: btc
         tx_type: account
         value:
           fiat_values:
@@ -5506,7 +5508,6 @@ components:
           value: 6
         from_address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
         token_tx_id: 0
-        network: btc
         height: 47
         timestamp: 1616376371
       properties:
@@ -5566,6 +5567,10 @@ components:
         contract_creation:
           description: Indicates if this transaction created a new contract. Recipient address is the address of the new contract.
           title: contract_creation
+          type: boolean
+        is_external:
+          description: Indicates if this transaction is an external transaction for an eth like currency.
+          title: is_external
           type: boolean
       required:
         - currency
