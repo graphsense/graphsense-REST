@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 from graphsenselib.db.asynchronous.services.addresses_service import AddressesService
 from graphsenselib.db.asynchronous.services.blocks_service import BlocksService
@@ -165,3 +165,8 @@ def get_tagstore_access_groups(request):
         if not request.app["request_config"]["show_private_tags"]
         else ["public", "private"]
     ) + [get_user_tags_acl_group(request)]
+
+
+def get_username(request) -> Optional[str]:
+    """Extract username from request, if available"""
+    return request.headers.get("X-Consumer-Username", None)

@@ -700,6 +700,10 @@ paths:
       responses:
         "200":
           description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user_tag_report_response"
         "400":
           description: Disabled or wrong input
   /{currency}/bulk.csv/{operation}:
@@ -1185,6 +1189,12 @@ components:
       description: Number of pages to retrieve for operations with list response
       example: 1
   schemas:
+    user_tag_report_response:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Id of the reported tag
     user_reported_tag:
       type: object
       required:

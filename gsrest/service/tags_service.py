@@ -4,6 +4,7 @@ from gsrest.dependencies import (
     get_service_container,
     get_tagstore_access_groups,
     get_user_tags_acl_group,
+    get_username,
 )
 from gsrest.translators import (
     pydantic_actor_to_openapi,
@@ -11,6 +12,7 @@ from gsrest.translators import (
     pydantic_concept_to_openapi,
     pydantic_taxonomy_to_openapi,
 )
+from openapi_server.models.user_tag_report_response import UserTagReportResponse
 
 
 # Updated functions using new service layer
@@ -71,6 +73,9 @@ async def report_tag(request, body):
         actor=body.actor,
         label=body.label,
         description=body.description,
+        user=get_username(request),
     )
 
-    await services.tags_service.report_tag(tag_to_report, config, tag_acl_group)
+    derId = await services.tags_service.report_tag(tag_to_report, config, tag_acl_group)
+
+    return UserTagReportResponse(id=derId)

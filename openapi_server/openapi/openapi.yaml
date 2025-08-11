@@ -230,6 +230,10 @@ paths:
         x-body-name: body
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user_tag_report_response'
           description: Success
         "400":
           description: Disabled or wrong input
@@ -3040,6 +3044,16 @@ components:
         type: integer
       style: form
   schemas:
+    user_tag_report_response:
+      example:
+        id: id
+      properties:
+        id:
+          description: Id of the reported tag
+          title: id
+          type: string
+      title: user_tag_report_response
+      type: object
     user_reported_tag:
       properties:
         address:

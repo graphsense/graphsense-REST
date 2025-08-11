@@ -6,6 +6,8 @@ import traceback
 import json
 import re
 
+from gsrest.dependencies import get_username
+
 from openapi_server.models.block import Block
 from openapi_server.models.block_at_date import BlockAtDate
 from openapi_server.models.tx import Tx
@@ -86,7 +88,10 @@ async def get_block(request: web.Request, currency, height) -> web.Response:
         raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
-        tb.append(f"Request URL: {request.url}")
+
+        user = get_username(request) or "unknown"
+        
+        tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
@@ -165,7 +170,10 @@ async def get_block_by_date(request: web.Request, currency, date) -> web.Respons
         raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
-        tb.append(f"Request URL: {request.url}")
+
+        user = get_username(request) or "unknown"
+        
+        tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()
@@ -243,7 +251,10 @@ async def list_block_txs(request: web.Request, currency, height) -> web.Response
         raise web.HTTPRequestTimeout()
     except Exception as e:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
-        tb.append(f"Request URL: {request.url}")
+
+        user = get_username(request) or "unknown"
+        
+        tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
         raise web.HTTPInternalServerError()

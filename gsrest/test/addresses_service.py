@@ -1,7 +1,7 @@
 import copy
 import itertools
 
-from graphsenselib.db.asynchronous.services.common import omit
+from graphsenselib.utils.rest_utils import omit
 from graphsenselib.utils.tron import evm_to_tron_address_string
 
 import gsrest.test.tags_service as ts

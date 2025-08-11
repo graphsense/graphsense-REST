@@ -24,7 +24,7 @@ dependencies = [
     "openapi-schema-validator>=0.2.3",
     "python-dateutil>=2.9.0",
     "swagger-ui-bundle>=0.0.9",
-    "tagpack-tool>=25.7.7",
+    "tagpack-tool>=25.8.0",
 ]
 
 [tool.pytest.ini_options]
@@ -72,7 +72,7 @@ exclude = [
 extend-select = ["T201"]
 
 [tool.uv.sources]
-graphsense-lib = { git = "https://github.com/graphsense/graphsense-lib", rev = "5c7fb0adb14374a6bc7e4b7ca01715405b5cd1ab" }
+graphsense-lib = { git = "https://github.com/graphsense/graphsense-lib", rev = "v2.6.1rc9" }
 
 [dependency-groups]
 dev = [
