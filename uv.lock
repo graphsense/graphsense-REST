@@ -1849,7 +1849,8 @@ wheels = [
 
 [[package]]
 name = "graphsense-lib"
-source = { directory = "../graphsense-lib" }
+version = "2.6.1rc5.post1.dev3+g5c7fb0a"
+source = { git = "https://github.com/graphsense/graphsense-lib?rev=5c7fb0adb14374a6bc7e4b7ca01715405b5cd1ab#5c7fb0adb14374a6bc7e4b7ca01715405b5cd1ab" }
 dependencies = [
     { name = "aiohttp" },
     { name = "async-lru" },
@@ -1880,70 +1881,6 @@ conversions = [
     { name = "matplotlib" },
     { name = "networkx", version = "3.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "networkx", version = "3.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "aiohttp", specifier = ">=3.8.0" },
-    { name = "async-lru", specifier = ">=2.0.4" },
-    { name = "base58", specifier = ">=2.1" },
-    { name = "bitarray", specifier = ">=2.9" },
-    { name = "cashaddress", specifier = ">=1.0.6" },
-    { name = "cassandra-driver", specifier = ">=3.27.0" },
-    { name = "chainside-btcpy", marker = "extra == 'ingest'", specifier = ">=0.6" },
-    { name = "click", specifier = ">=8.0.3" },
-    { name = "deltalake", marker = "extra == 'ingest'", specifier = "~=0.22.3" },
-    { name = "duckdb", marker = "extra == 'ingest'", specifier = ">=1.0.0" },
-    { name = "eth-event", specifier = ">=1.2.3" },
-    { name = "eth-hash", specifier = ">=0.3.0" },
-    { name = "filelock", specifier = ">=3.8.0" },
-    { name = "goodconf", extras = ["yaml"], specifier = ">=3.0.0" },
-    { name = "graphsense-bitcoin-etl", marker = "extra == 'ingest'", specifier = "==1.5.4" },
-    { name = "graphsense-ethereum-etl" },
-    { name = "graphsense-ethereum-etl", marker = "extra == 'ingest'", specifier = ">=2.4.5" },
-    { name = "graphsense-lib", extras = ["conversions"], marker = "extra == 'all'" },
-    { name = "graphsense-lib", extras = ["ingest"], marker = "extra == 'all'" },
-    { name = "grpcio", marker = "extra == 'ingest'", specifier = ">=1.49.0" },
-    { name = "importlib-metadata", marker = "python_full_version < '3.8'" },
-    { name = "lz4", marker = "extra == 'ingest'", specifier = ">=4.3.2" },
-    { name = "matplotlib", marker = "extra == 'conversions'" },
-    { name = "methodtools", specifier = ">=0.4" },
-    { name = "networkx", marker = "extra == 'conversions'", specifier = ">=3.2.1" },
-    { name = "pandas", specifier = ">=1.4.1" },
-    { name = "parsy", specifier = ">=2.0,<3.0" },
-    { name = "pyarrow", marker = "extra == 'ingest'", specifier = ">=16.0.0,<17.0.0" },
-    { name = "pydantic", specifier = ">=2.0.0" },
-    { name = "requests", specifier = ">=2.27.1" },
-    { name = "rich", specifier = ">=12.6.0,<13.0" },
-    { name = "setuptools", specifier = "<80.9" },
-    { name = "simplejson", specifier = ">=3.17.6" },
-    { name = "tagpack-tool", specifier = ">=25.7.8" },
-    { name = "tenacity", specifier = ">=8.2.3" },
-]
-provides-extras = ["ingest", "conversions", "all"]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "grpcio-tools", specifier = ">=1.49.0" },
-    { name = "httpx", specifier = "<1.0.0" },
-    { name = "pdbpp" },
-    { name = "pre-commit" },
-    { name = "pytest" },
-    { name = "pytest-cov" },
-    { name = "pytest-vcr" },
-    { name = "ruff", specifier = ">=0.9.2" },
-    { name = "setuptools", specifier = "<80.9" },
-    { name = "setuptools-scm" },
-    { name = "testcontainers", extras = ["cassandra"], specifier = ">=4.9.1" },
-    { name = "vcrpy" },
-]
-testing = [
-    { name = "pytest" },
-    { name = "pytest-cov" },
-    { name = "pytest-vcr" },
-    { name = "setuptools", specifier = "<80.9" },
-    { name = "testcontainers", extras = ["cassandra"], specifier = ">=4.9.1" },
-    { name = "vcrpy" },
 ]
 
 [[package]]
@@ -2056,7 +1993,7 @@ requires-dist = [
     { name = "async-lru", specifier = ">=2.0.4" },
     { name = "cassandra-driver", specifier = ">=3.27.0" },
     { name = "connexion", extras = ["swagger-ui"], specifier = ">=2.6.0,<3" },
-    { name = "graphsense-lib", extras = ["conversions"], directory = "../graphsense-lib" },
+    { name = "graphsense-lib", extras = ["conversions"], git = "https://github.com/graphsense/graphsense-lib?rev=5c7fb0adb14374a6bc7e4b7ca01715405b5cd1ab" },
     { name = "lz4", specifier = ">=4.3.2" },
     { name = "openapi-schema-validator", specifier = ">=0.2.3" },
     { name = "python-dateutil", specifier = ">=2.9.0" },

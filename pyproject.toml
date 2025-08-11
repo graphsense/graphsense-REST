@@ -71,6 +71,9 @@ exclude = [
 [tool.ruff.lint]
 extend-select = ["T201"]
 
+[tool.uv.sources]
+graphsense-lib = { git = "https://github.com/graphsense/graphsense-lib", rev = "5c7fb0adb14374a6bc7e4b7ca01715405b5cd1ab" }
+
 [dependency-groups]
 dev = [
     "aiohttp-devtools>=1.1.2",
@@ -85,6 +88,3 @@ dev = [
     "graphsense-python>=1.9.4",
     "tqdm>=4.67.1",
 ]
-
-[tool.uv.sources]
-graphsense-lib = { path = "../graphsense-lib" }
