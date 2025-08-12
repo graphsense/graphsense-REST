@@ -28,6 +28,7 @@ from openapi_server.models.neighbor_entities import NeighborEntities
 from openapi_server.models.neighbor_entity import NeighborEntity
 from openapi_server.models.rate import Rate
 from openapi_server.models.rates import Rates
+from openapi_server.models.related_address import RelatedAddress
 from openapi_server.models.search_result import SearchResult
 from openapi_server.models.search_result_by_currency import SearchResultByCurrency
 from openapi_server.models.search_result_leaf import SearchResultLeaf

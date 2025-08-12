@@ -5,7 +5,7 @@ info:
     name: Iknaio Cryptoasset Analytics GmbH
   description: GraphSense API provides programmatic access to various ledgers' addresses, entities, blocks, transactions and tags for automated and highly efficient forensics tasks.
   title: GraphSense API
-  version: 1.13.4dev3
+  version: 1.14.0dev1
 servers:
   - url: https://api.ikna.io
 paths:
@@ -585,6 +585,73 @@ paths:
                 $ref: '#/components/schemas/neighbor_addresses'
           description: OK
       summary: Get an address's neighbors in the address graph
+      tags:
+        - addresses
+      x-openapi-router-controller: openapi_server.controllers.addresses_controller
+  /{currency}/addresses/{address}/related_addresses:
+    get:
+      operationId: list_related_addresses
+      parameters:
+        - description: The cryptocurrency code (e.g., btc)
+          example: btc
+          explode: false
+          in: path
+          name: currency
+          required: true
+          schema:
+            format: string
+            type: string
+          style: simple
+        - description: The cryptocurrency address
+          example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
+          explode: false
+          in: path
+          name: address
+          required: true
+          schema:
+            $ref: '#/components/schemas/address_id'
+          style: simple
+        - description: what type of related addresses to return
+          example: address
+          explode: true
+          in: query
+          name: address_relation_type
+          required: false
+          schema:
+            default: all
+            enum:
+              - pubkey
+              - all
+            type: string
+          style: form
+        - description: Resumption token for retrieving the next page
+          example: ""
+          explode: true
+          in: query
+          name: page
+          required: false
+          schema:
+            type: string
+          style: form
+        - description: Number of items returned in a single page
+          example: 10
+          explode: true
+          in: query
+          name: pagesize
+          required: false
+          schema:
+            format: int32
+            minimum: 1
+            type: integer
+          style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/related_address'
+          description: OK
+      summary: Get related addresses to the input address
       tags:
         - addresses
       x-openapi-router-controller: openapi_server.controllers.addresses_controller
@@ -2881,17 +2948,18 @@ components:
       schema:
         type: integer
       style: form
-    tag_level:
-      description: Whether tags on the address or entity level are requested
+    address_relation_type:
+      description: what type of related addresses to return
       example: address
       explode: true
       in: query
-      name: level
-      required: true
+      name: address_relation_type
+      required: false
       schema:
+        default: all
         enum:
-          - address
-          - entity
+          - pubkey
+          - all
         type: string
       style: form
     search_key:
@@ -3504,6 +3572,37 @@ components:
         - no_txs
         - timestamp
       title: block
+      type: object
+    related_address:
+      example:
+        address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
+        currency: btc
+        relation_type: pubkey
+      properties:
+        address:
+          description: Address
+          example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
+          title: address
+          type: string
+        currency:
+          description: crypto currency code
+          example: btc
+          title: currency
+          type: string
+        relation_type:
+          description: Type of the related address
+          enum:
+            - pubkey
+            - address
+            - entity
+          example: pubkey
+          title: relation_type
+          type: string
+      required:
+        - address
+        - currency
+        - relation_type
+      title: related_address
       type: object
     address:
       example:

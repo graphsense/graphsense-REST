@@ -1959,8 +1959,8 @@ wheels = [
 
 [[package]]
 name = "graphsense-lib"
-version = "2.6.1rc11"
-source = { git = "https://github.com/graphsense/graphsense-lib?rev=v2.6.1rc11#3937b0e8cd2efbbd9c6cd9e61e2c860b6ed0c70a" }
+version = "2.6.1rc15"
+source = { git = "https://github.com/graphsense/graphsense-lib?rev=v2.6.1rc15#50b13ad238b477bee707651537f51175358e213f" }
 dependencies = [
     { name = "aiohttp" },
     { name = "async-lru" },
@@ -2065,7 +2065,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/0c/0a/ec64821a3ca6a8f14
 
 [[package]]
 name = "gsrest"
-version = "1.13.4.dev3"
+version = "1.14.0.dev1"
 source = { virtual = "." }
 dependencies = [
     { name = "aiohttp-cors" },
@@ -2103,7 +2103,7 @@ requires-dist = [
     { name = "async-lru", specifier = ">=2.0.4" },
     { name = "cassandra-driver", specifier = ">=3.27.0" },
     { name = "connexion", extras = ["swagger-ui"], specifier = ">=2.6.0,<3" },
-    { name = "graphsense-lib", extras = ["conversions"], git = "https://github.com/graphsense/graphsense-lib?rev=v2.6.1rc11" },
+    { name = "graphsense-lib", extras = ["conversions"], git = "https://github.com/graphsense/graphsense-lib?rev=v2.6.1rc15" },
     { name = "lz4", specifier = ">=4.3.2" },
     { name = "openapi-schema-validator", specifier = ">=0.2.3" },
     { name = "python-dateutil", specifier = ">=2.9.0" },

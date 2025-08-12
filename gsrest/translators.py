@@ -1,3 +1,4 @@
+import sys
 from typing import Union
 
 from graphsenselib.db.asynchronous.services.models import Actor as PydanticActor
@@ -26,6 +27,9 @@ from graphsenselib.db.asynchronous.services.models import (
     BlockAtDate as PydanticBlockAtDate,
 )
 from graphsenselib.db.asynchronous.services.models import Concept as PydanticConcept
+from graphsenselib.db.asynchronous.services.models import (
+    CrossChainPubkeyRelatedAddress as PydanticCrossChainPubkeyRelatedAddress,
+)
 from graphsenselib.db.asynchronous.services.models import (
     CurrencyStats as PydanticCurrencyStats,
 )
@@ -100,6 +104,7 @@ from graphsenselib.db.asynchronous.services.models import (
 from graphsenselib.db.asynchronous.services.models import (
     Values as PydanticValues,
 )
+from graphsenselib.utils import camel_to_snake_case
 
 from openapi_server.models.actor import Actor
 from openapi_server.models.actor_context import ActorContext
@@ -124,6 +129,9 @@ from openapi_server.models.neighbor_addresses import NeighborAddresses
 from openapi_server.models.neighbor_entities import NeighborEntities
 from openapi_server.models.neighbor_entity import NeighborEntity
 from openapi_server.models.rates import Rates
+from openapi_server.models.related_address import (
+    RelatedAddress as CrossChainPubkeyRelatedAddress,
+)
 from openapi_server.models.search_result import SearchResult
 from openapi_server.models.search_result_by_currency import SearchResultByCurrency
 from openapi_server.models.stats import Stats
@@ -689,4 +697,57 @@ def pydantic_neighbor_entity_to_openapi(
         entity=pydantic_entity_to_openapi(pydantic_neighbor.entity)
         if isinstance(pydantic_neighbor.entity, PydanticEntity)
         else pydantic_neighbor.entity,
+    )
+
+
+def pydantic_cross_chain_pubkey_related_address_to_openapi(
+    pydantic_address: PydanticCrossChainPubkeyRelatedAddress,
+) -> CrossChainPubkeyRelatedAddress:
+    """Convert Pydantic CrossChainPubkeyRelatedAddress to OpenAPI CrossChainPubkeyRelatedAddress"""
+    return CrossChainPubkeyRelatedAddress(
+        currency=pydantic_address.network,
+        address=pydantic_address.address,
+        relation_type="pubkey",
+    )
+
+
+def pydantic_to_openapi(pydantic_obj):
+    """Generic function to convert Pydantic objects to OpenAPI objects based on type"""
+
+    # Handle lists
+    if isinstance(pydantic_obj, list):
+        return [pydantic_to_openapi(item) for item in pydantic_obj]
+
+    # Handle primitive types (strings, numbers, booleans, None)
+    if pydantic_obj is None or isinstance(pydantic_obj, (str, int, float, bool)):
+        return pydantic_obj
+
+    obj_type = type(pydantic_obj)
+
+    # Try to find function dynamically based on type name
+    type_name = obj_type.__name__
+
+    # Convert PascalCase to snake_case and construct function name
+
+    snake_case_name = camel_to_snake_case(type_name)
+    function_name = f"pydantic_{snake_case_name}_to_openapi"
+
+    # Check if function exists in current module
+    current_module = sys.modules[__name__]
+    if hasattr(current_module, function_name):
+        converter_function = getattr(current_module, function_name)
+        return converter_function(pydantic_obj)
+
+    # Fallback to explicit type mapping
+    type_mapping = {}
+
+    if obj_type in type_mapping:
+        return type_mapping[obj_type](pydantic_obj)
+
+    # Handle union types for Tx (TxAccount or TxUtxo)
+    if isinstance(pydantic_obj, (PydanticTxAccount, PydanticTxUtxo)):
+        return pydantic_tx_to_openapi(pydantic_obj)
+
+    raise NotImplementedError(
+        f"No translator found for type: {obj_type} expected function: {function_name}"
     )

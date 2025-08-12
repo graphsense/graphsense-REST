@@ -1,20 +1,41 @@
+from graphsenselib.errors import BadUserInputException
+
 from gsrest.dependencies import (
     get_request_cache,
     get_service_container,
     get_tagstore_access_groups,
 )
 from gsrest.translators import (
-    pydantic_address_tag_result_to_openapi,
-    pydantic_address_to_openapi,
-    pydantic_address_txs_to_openapi,
-    pydantic_entity_to_openapi,
-    pydantic_links_to_openapi,
-    pydantic_neighbor_addresses_to_openapi,
-    pydantic_tag_summary_to_openapi,
+    pydantic_to_openapi,
 )
 
-
 # Updated functions using new service layer
+
+
+async def list_related_addresses(
+    request,
+    currency: str,
+    address: str,
+    address_relation_type: str,
+    page: str,
+    pagesize: int,
+):
+    services = get_service_container(request)
+
+    if address_relation_type not in ["pubkey", "all"]:
+        raise BadUserInputException(
+            "Invalid address_relation_type. Must be 'pubkey' or 'all'."
+        )
+
+    pydantic_result = (
+        await services.addresses_service.get_cross_chain_pubkey_related_addresses(
+            address, network=currency
+        )
+    )
+
+    return pydantic_to_openapi(pydantic_result)
+
+
 async def get_tag_summary_by_address(
     request, currency, address, include_best_cluster_tag=False
 ):
@@ -25,7 +46,7 @@ async def get_tag_summary_by_address(
         currency, address, tagstore_groups, include_best_cluster_tag
     )
 
-    return pydantic_tag_summary_to_openapi(pydantic_result)
+    return pydantic_to_openapi(pydantic_result)
 
 
 async def get_address(request, currency, address, include_actors=True):
@@ -36,7 +57,7 @@ async def get_address(request, currency, address, include_actors=True):
         currency, address, tagstore_groups, include_actors
     )
 
-    return pydantic_address_to_openapi(pydantic_result)
+    return pydantic_to_openapi(pydantic_result)
 
 
 async def list_tags_by_address(
@@ -56,7 +77,7 @@ async def list_tags_by_address(
         include_best_cluster_tag,
     )
 
-    return pydantic_address_tag_result_to_openapi(pydantic_result)
+    return pydantic_to_openapi(pydantic_result)
 
 
 async def list_address_txs(
@@ -89,7 +110,7 @@ async def list_address_txs(
         pagesize,
     )
 
-    return pydantic_address_txs_to_openapi(pydantic_result)
+    return pydantic_to_openapi(pydantic_result)
 
 
 async def list_address_neighbors(
@@ -118,7 +139,7 @@ async def list_address_neighbors(
         pagesize,
     )
 
-    return pydantic_neighbor_addresses_to_openapi(pydantic_result)
+    return pydantic_to_openapi(pydantic_result)
 
 
 async def list_address_links(
@@ -153,7 +174,7 @@ async def list_address_links(
         request_timeout,
     )
 
-    return pydantic_links_to_openapi(pydantic_result)
+    return pydantic_to_openapi(pydantic_result)
 
 
 async def get_address_entity(request, currency, address, include_actors=True):
@@ -164,4 +185,4 @@ async def get_address_entity(request, currency, address, include_actors=True):
         currency, address, include_actors, tagstore_groups
     )
 
-    return pydantic_entity_to_openapi(pydantic_result)
+    return pydantic_to_openapi(pydantic_result)
