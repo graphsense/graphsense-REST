@@ -5,7 +5,7 @@ info:
   contact:
     name: Iknaio Cryptoasset Analytics GmbH
     email: contact@ikna.io
-  version: "1.14.0dev2"
+  version: "1.14.0dev3"
 servers:
   - url: 'https://api.ikna.io'
 paths:
@@ -1499,8 +1499,6 @@ components:
           type: string
           enum:
             - pubkey
-            - address
-            - entity
           description: Type of the related address
           example: pubkey
     address:

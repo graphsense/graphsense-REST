@@ -129,7 +129,7 @@ class RelatedAddress(Model):
         :param relation_type: The relation_type of this RelatedAddress.
         :type relation_type: str
         """
-        allowed_values = ["pubkey", "address", "entity"]  # noqa: E501
+        allowed_values = ["pubkey"]  # noqa: E501
         if relation_type not in allowed_values:
             raise BadUserInputException(
                 "Invalid value for `relation_type` ({0}), must be one of {1}"
