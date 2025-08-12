@@ -5,7 +5,7 @@ info:
   contact:
     name: Iknaio Cryptoasset Analytics GmbH
     email: contact@ikna.io
-  version: "1.14.0dev1"
+  version: "1.14.0dev2"
 servers:
   - url: 'https://api.ikna.io'
 paths:
@@ -291,7 +291,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/related_address'
+                $ref: '#/components/schemas/related_addresses'
       summary: Get related addresses to the input address
       tags:
       - addresses
@@ -1065,11 +1065,10 @@ components:
       name: address_relation_type
       required: false
       schema:
-        default: all
+        default: pubkey
         type: string
         enum:
           - pubkey
-          - all
       example: address
       description: what type of related addresses to return
     search_key:
@@ -1474,6 +1473,17 @@ components:
           example: 11
         timestamp:
           $ref: '#/components/schemas/timestamp'
+    related_addresses:
+      type: object
+      required:
+        - related_addresses
+      properties:
+        related_addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/related_address'
+        next_page:
+          $ref: '#/components/schemas/next_page'
     related_address:
       type: object
       required:

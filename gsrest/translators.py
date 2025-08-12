@@ -31,6 +31,9 @@ from graphsenselib.db.asynchronous.services.models import (
     CrossChainPubkeyRelatedAddress as PydanticCrossChainPubkeyRelatedAddress,
 )
 from graphsenselib.db.asynchronous.services.models import (
+    CrossChainPubkeyRelatedAddresses as PydanticCrossChainPubkeyRelatedAddresses,
+)
+from graphsenselib.db.asynchronous.services.models import (
     CurrencyStats as PydanticCurrencyStats,
 )
 from graphsenselib.db.asynchronous.services.models import (
@@ -131,6 +134,9 @@ from openapi_server.models.neighbor_entity import NeighborEntity
 from openapi_server.models.rates import Rates
 from openapi_server.models.related_address import (
     RelatedAddress as CrossChainPubkeyRelatedAddress,
+)
+from openapi_server.models.related_addresses import (
+    RelatedAddresses as CrossChainPubkeyRelatedAddresses,
 )
 from openapi_server.models.search_result import SearchResult
 from openapi_server.models.search_result_by_currency import SearchResultByCurrency
@@ -708,6 +714,19 @@ def pydantic_cross_chain_pubkey_related_address_to_openapi(
         currency=pydantic_address.network,
         address=pydantic_address.address,
         relation_type="pubkey",
+    )
+
+
+def pydantic_cross_chain_pubkey_related_addresses_to_openapi(
+    pydantic_addresses: PydanticCrossChainPubkeyRelatedAddresses,
+) -> CrossChainPubkeyRelatedAddresses:
+    """Convert Pydantic CrossChainPubkeyRelatedAddresses to OpenAPI CrossChainPubkeyRelatedAddresses"""
+    return CrossChainPubkeyRelatedAddresses(
+        related_addresses=[
+            pydantic_cross_chain_pubkey_related_address_to_openapi(address)
+            for address in pydantic_addresses.addresses
+        ],
+        next_page=pydantic_addresses.next_page,
     )
 
 

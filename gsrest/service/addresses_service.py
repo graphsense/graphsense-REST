@@ -1,3 +1,5 @@
+from typing import Optional
+
 from graphsenselib.errors import BadUserInputException
 
 from gsrest.dependencies import (
@@ -17,19 +19,23 @@ async def list_related_addresses(
     currency: str,
     address: str,
     address_relation_type: str,
-    page: str,
-    pagesize: int,
+    page: Optional[int] = None,
+    pagesize: Optional[int] = None,
 ):
     services = get_service_container(request)
 
-    if address_relation_type not in ["pubkey", "all"]:
-        raise BadUserInputException(
-            "Invalid address_relation_type. Must be 'pubkey' or 'all'."
-        )
+    if page is not None and isinstance(page, str):
+        try:
+            page = int(page)
+        except ValueError:
+            raise BadUserInputException("Page must be an integer.")
+
+    if address_relation_type not in ["pubkey"]:
+        raise BadUserInputException("Invalid address_relation_type. Must be 'pubkey'")
 
     pydantic_result = (
         await services.addresses_service.get_cross_chain_pubkey_related_addresses(
-            address, network=currency
+            address, network=currency, page=page, pagesize=pagesize
         )
     )
 

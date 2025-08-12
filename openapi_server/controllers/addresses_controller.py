@@ -14,7 +14,7 @@ from openapi_server.models.address_txs import AddressTxs
 from openapi_server.models.entity import Entity
 from openapi_server.models.links import Links
 from openapi_server.models.neighbor_addresses import NeighborAddresses
-from openapi_server.models.related_address import RelatedAddress
+from openapi_server.models.related_addresses import RelatedAddresses
 from openapi_server.models.tag_summary import TagSummary
 import gsrest.service.addresses_service as service
 from openapi_server import util

@@ -5,7 +5,7 @@ info:
     name: Iknaio Cryptoasset Analytics GmbH
   description: GraphSense API provides programmatic access to various ledgers' addresses, entities, blocks, transactions and tags for automated and highly efficient forensics tasks.
   title: GraphSense API
-  version: 1.14.0dev1
+  version: 1.14.0dev2
 servers:
   - url: https://api.ikna.io
 paths:
@@ -618,10 +618,9 @@ paths:
           name: address_relation_type
           required: false
           schema:
-            default: all
+            default: pubkey
             enum:
               - pubkey
-              - all
             type: string
           style: form
         - description: Resumption token for retrieving the next page
@@ -649,7 +648,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/related_address'
+                $ref: '#/components/schemas/related_addresses'
           description: OK
       summary: Get related addresses to the input address
       tags:
@@ -2956,10 +2955,9 @@ components:
       name: address_relation_type
       required: false
       schema:
-        default: all
+        default: pubkey
         enum:
           - pubkey
-          - all
         type: string
       style: form
     search_key:
@@ -3573,6 +3571,30 @@ components:
         - timestamp
       title: block
       type: object
+    related_addresses:
+      example:
+        next_page: next_page
+        related_addresses:
+          - address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
+            currency: btc
+            relation_type: pubkey
+          - address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
+            currency: btc
+            relation_type: pubkey
+      properties:
+        related_addresses:
+          items:
+            $ref: '#/components/schemas/related_address'
+          title: related_addresses
+          type: array
+        next_page:
+          format: string
+          title: next_page
+          type: string
+      required:
+        - related_addresses
+      title: related_addresses
+      type: object
     related_address:
       example:
         address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
@@ -3582,7 +3604,7 @@ components:
         address:
           description: Address
           example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
-          title: address
+          title: address_id
           type: string
         currency:
           description: crypto currency code
@@ -3691,7 +3713,7 @@ components:
         address:
           description: Address
           example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
-          title: address
+          title: address_id
           type: string
         entity:
           description: Entity id
@@ -3901,7 +3923,7 @@ components:
         root_address:
           description: Address
           example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
-          title: address
+          title: address_id
           type: string
         balance:
           $ref: '#/components/schemas/values'
@@ -4356,7 +4378,7 @@ components:
     address_id:
       description: Address
       example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
-      title: address
+      title: address_id
       type: string
     entity_id:
       description: Entity id
@@ -5670,12 +5692,12 @@ components:
         from_address:
           description: Address
           example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
-          title: address
+          title: address_id
           type: string
         to_address:
           description: Address
           example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
-          title: address
+          title: address_id
           type: string
         contract_creation:
           description: Indicates if this transaction created a new contract. Recipient address is the address of the new contract.
@@ -6070,7 +6092,7 @@ components:
         address:
           description: Address
           example: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
-          title: address
+          title: address_id
           type: string
         entity:
           description: Entity id
