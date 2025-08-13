@@ -1,12 +1,26 @@
 from pathlib import Path
 
+from graphsenselib.tagpack.cli import cli
+from graphsenselib.tagstore.db.database import (
+    get_db_engine,
+    init_database,
+    with_session,
+)
 from sqlmodel import text
-from tagpack.cli import exec_cli_command
-from tagstore.db.database import get_db_engine, init_database, with_session
 
 DATA_DIR_TP = Path(__file__).parent.resolve() / "data" / "packs"
 DATA_DIR_A = Path(__file__).parent.resolve() / "data" / "actors"
 DATA_SQL = Path(__file__).parent.resolve() / "data" / "data.sql"
+
+
+def exec_cli_command(args):
+    from click.testing import CliRunner
+
+    runner = CliRunner()
+    result = runner.invoke(cli, args, catch_exceptions=False)
+    if result.exception:
+        raise result.exception
+    return result
 
 
 def load_test_data(db_url: str):
@@ -21,8 +35,8 @@ def load_test_data(db_url: str):
             str(DATA_DIR_A),
             "-u",
             db_url,
-            "--no_strict_check",
-            "--no_git",
+            "--no-strict-check",
+            "--no-git",
         ]
     )
 
@@ -40,15 +54,15 @@ def load_test_data(db_url: str):
                 str(DATA_DIR_TP / tpf),
                 "-u",
                 db_url,
-                "--no_strict_check",
-                "--no_git",
+                "--no-strict-check",
+                "--no-git",
             ]
             + (["--public"] if public else [])
         )
 
     with with_session(engine) as session:
         with open(DATA_SQL) as f:
-            session.execute(text(f.read()))
+            session.exec(text(f.read()))
             session.commit()
 
-    exec_cli_command(["tagstore", "refresh_views", "-u", db_url])
+    exec_cli_command(["tagstore", "refresh-views", "-u", db_url])

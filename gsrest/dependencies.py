@@ -12,7 +12,7 @@ from graphsenselib.db.asynchronous.services.tags_service import (
 )
 from graphsenselib.db.asynchronous.services.tokens_service import TokensService
 from graphsenselib.db.asynchronous.services.txs_service import TxsService
-from tagstore.db import TagstoreDbAsync, Taxonomies
+from graphsenselib.tagstore.db import TagstoreDbAsync, Taxonomies
 
 from gsrest.config import GSRestConfig
 

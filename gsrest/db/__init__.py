@@ -1,6 +1,6 @@
 import importlib
 
-from tagstore.db.database import get_db_engine_async
+from graphsenselib.tagstore.db.database import get_db_engine_async
 
 from gsrest.dependencies import ConceptsCacheService
 

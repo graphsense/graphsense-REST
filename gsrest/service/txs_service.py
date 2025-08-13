@@ -20,6 +20,7 @@ async def get_tx(
     include_io_index=False,
 ):
     services = get_service_container(request)
+
     result = await services.txs_service.get_tx(
         currency,
         tx_hash,
