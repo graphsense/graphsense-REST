@@ -33,6 +33,7 @@ async def get_connection(app):
         max_overflow=int(mo),
         pool_recycle=int(recycle),
         pool_timeout=int(max_pool_time),
+        pool_pre_ping=True,  # resolves error on shutdown https://github.com/MagicStack/asyncpg/issues/309
         # echo=True,
     )
 
