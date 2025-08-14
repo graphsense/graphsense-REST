@@ -613,7 +613,7 @@ async def list_address_txs(test_case):
     test_case.assertEqual(
         address_txs.to_dict()["address_txs"][2:3], result["address_txs"]
     )
-    test_case.assertEqual(result.get("next_page", None), None)
+    test_case.assertEqual(None, result.get("next_page", None))
 
     path_with_order = path + "?order={order}"
     _reversed = list(reversed(address_txs.to_dict()["address_txs"]))

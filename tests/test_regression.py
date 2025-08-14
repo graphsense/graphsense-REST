@@ -159,11 +159,12 @@ def test_links():
     call_6 = "eth/entities/276182118/links?neighbor=81071666&pagesize=100"  # old time 45s 3.5 seconds new
     call_7 = "eth/entities/225414228/links?neighbor=31455019&pagesize=100"  # 2 huge addresses
     call_8 = "btc/entities/2647118/links?neighbor=109578&pagesize=100"  # btc
+    call_8_1 = "btc/entities/2647118/links?neighbor=109578&pagesize=1" # tests cutoff for btc
     call_9 = "btc/addresses/bc1qm34lsc65zpw79lxes69zkqmk6ee3ewf0j77s3h/links?neighbor=bc1qc82pdh5zy8kk6gc0t0kjpggu9pg80zewsmy4ac&order=desc&pagesize=100"
     call_10 = "trx/addresses/TCz47XgC9TjCeF4UzfB6qZbM9LTF9s1tG7/links?neighbor=TT8oWoMeoziArGXsPej6EYF5TN4WSUhvfu&order=desc&pagesize=2&page=264825815160586363:137:1"
-    call_11 = "trx/addresses/TCz47XgC9TjCeF4UzfB6qZbM9LTF9s1tG7/links?neighbor=TT8oWoMeoziArGXsPej6EYF5TN4WSUhvfu&order=desc&pagesize=2"
+    call_11 = "trx/addresses/TCz47XgC9TjCeF4UzfB6qZbM9LTF9s1tG7/links?neighbor=TT8oWoMeoziArGXsPej6EYF5TN4WSUhvfu&order=desc&pagesize=2" # tests cutoff for trx
     calls = [
-        call_0, call_2, call_5, call_6, call_7, call_8, call_9,
+        call_0, call_2, call_5, call_6, call_7, call_8, call_8_1, call_9,
         call_10, call_11
     ]
     for call in calls:
