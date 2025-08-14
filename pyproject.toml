@@ -69,7 +69,7 @@ exclude = [
 extend-select = ["T201"]
 
 [tool.uv.sources]
-graphsense-lib = { git = "https://github.com/graphsense/graphsense-lib", rev = "v2.7.0rc2" }
+graphsense-lib = { git = "https://github.com/graphsense/graphsense-lib", rev = "v2.7.0rc3" }
 
 [dependency-groups]
 dev = [
