@@ -64,7 +64,10 @@ class GSRestConfig(BaseSettings):
         alias="enable-user-tag-reporting",
         description="Enable user tag reporting functionality",
     )
-
+    include_bridging_actions: bool = Field(
+        default=False,
+        description="Include bridging actions in tx conversions",
+    )
     block_by_date_use_linear_search: bool = Field(
         default=False,
         description="Use linear search for block by date queries",

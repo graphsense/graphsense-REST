@@ -71,5 +71,8 @@ async def list_matching_txs(request, currency, expression):
 
 async def get_tx_conversions(request, currency, tx_hash):
     services = get_service_container(request)
-    result = await services.txs_service.get_conversions(currency, tx_hash)
+    include_bridging_actions = request.app["config"].include_bridging_actions
+    result = await services.txs_service.get_conversions(
+        currency, tx_hash, include_bridging_actions=include_bridging_actions
+    )
     return [pydantic_external_conversion_to_openapi(conv) for conv in result]
