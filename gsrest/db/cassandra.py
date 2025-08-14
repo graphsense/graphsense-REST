@@ -55,6 +55,7 @@ BIG_PAGE_SIZE = 5000
 SEARCH_PAGE_SIZE = 100
 
 MAX_HEX_STRING_LENGTH = 64
+FETCH_SIZE_MIN = 100
 
 
 def try_partial_tron_to_partial_evm(addr_prefix):
@@ -1649,15 +1650,19 @@ class Cassandra:
         expression_orginal = expression
 
         postprocess_address = identity1
+        currency_for_prefixscrub = currency
+
         if currency == "trx":
             postprocess_address = try_partial_tron_to_partial_evm
+            currency_for_prefixscrub = "eth"
 
         expression = postprocess_address(expression)
 
         if len(expression) < prefix_lengths["address"]:
             return []
         norm = identity2
-        prefix = self.scrub_prefix(currency, expression)
+
+        prefix = self.scrub_prefix(currency_for_prefixscrub, expression)
         prefix = prefix[: prefix_lengths["address"]]
 
         if is_eth_like(currency):
