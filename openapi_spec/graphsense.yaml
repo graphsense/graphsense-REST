@@ -579,7 +579,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/external_conversions'
+                  $ref: '#/components/schemas/external_conversion'
       summary: Returns conversion information (swaps or bridging txs) extracted from a specific transaction
       tags:
         - txs
@@ -1357,7 +1357,7 @@ components:
           type: integer
         tx_hash:
           type: string
-    external_conversions:
+    external_conversion:
       type: object
       required:
         - from_address
@@ -1371,6 +1371,8 @@ components:
         - conversion_type
         - from_network
         - to_network
+        - from_is_supported_asset
+        - to_is_supported_asset
       properties:
         conversion_type:
           type: string
@@ -1407,6 +1409,12 @@ components:
         to_network:
           type: string
           description: Network where the concluding payment took place
+        from_is_supported_asset:
+          type: boolean
+          description: Whether the from asset is a supported asset
+        to_is_supported_asset:
+          type: boolean
+          description: Whether the to asset is a supported asset
     currency_stats:
       title: statistics of a cryptocurrency
       type: object

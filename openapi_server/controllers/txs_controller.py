@@ -8,7 +8,7 @@ import re
 
 from gsrest.dependencies import get_username
 
-from openapi_server.models.external_conversions import ExternalConversions
+from openapi_server.models.external_conversion import ExternalConversion
 from openapi_server.models.tx import Tx
 from openapi_server.models.tx_account import TxAccount
 from openapi_server.models.tx_ref import TxRef

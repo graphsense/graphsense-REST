@@ -1993,7 +1993,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/external_conversions'
+                  $ref: '#/components/schemas/external_conversion'
                 type: array
           description: OK
       summary: Returns conversion information (swaps or bridging txs) extracted from a specific transaction
@@ -3385,19 +3385,21 @@ components:
         - tx_hash
       title: tx_ref
       type: object
-    external_conversions:
+    external_conversion:
       example:
+        from_amount: from_amount
+        to_asset_transfer: to_asset_transfer
+        to_asset: to_asset
+        to_address: to_address
+        from_is_supported_asset: true
+        to_is_supported_asset: true
+        to_network: to_network
         from_network: from_network
         to_amount: to_amount
         from_asset: from_asset
         from_asset_transfer: from_asset_transfer
         conversion_type: dex_swap
-        from_amount: from_amount
-        to_asset_transfer: to_asset_transfer
-        to_asset: to_asset
-        to_address: to_address
         from_address: from_address
-        to_network: to_network
       properties:
         conversion_type:
           enum:
@@ -3445,19 +3447,29 @@ components:
           description: Network where the concluding payment took place
           title: to_network
           type: string
+        from_is_supported_asset:
+          description: Whether the from asset is a supported asset
+          title: from_is_supported_asset
+          type: boolean
+        to_is_supported_asset:
+          description: Whether the to asset is a supported asset
+          title: to_is_supported_asset
+          type: boolean
       required:
         - conversion_type
         - from_address
         - from_amount
         - from_asset
         - from_asset_transfer
+        - from_is_supported_asset
         - from_network
         - to_address
         - to_amount
         - to_asset
         - to_asset_transfer
+        - to_is_supported_asset
         - to_network
-      title: external_conversions
+      title: external_conversion
       type: object
     currency_stats:
       example:

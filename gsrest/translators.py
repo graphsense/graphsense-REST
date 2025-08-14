@@ -43,7 +43,7 @@ from graphsenselib.db.asynchronous.services.models import (
     EntityAddresses as PydanticEntityAddresses,
 )
 from graphsenselib.db.asynchronous.services.models import (
-    ExternalConversions as PydanticExternalConversions,
+    ExternalConversion as PydanticExternalConversion,
 )
 from graphsenselib.db.asynchronous.services.models import (
     LabeledItemRef as PydanticLabeledItemRef,
@@ -122,7 +122,7 @@ from openapi_server.models.concept import Concept
 from openapi_server.models.currency_stats import CurrencyStats
 from openapi_server.models.entity import Entity
 from openapi_server.models.entity_addresses import EntityAddresses
-from openapi_server.models.external_conversions import ExternalConversions
+from openapi_server.models.external_conversion import ExternalConversion
 from openapi_server.models.label_summary import LabelSummary
 from openapi_server.models.labeled_item_ref import LabeledItemRef
 from openapi_server.models.link_utxo import LinkUtxo
@@ -580,11 +580,11 @@ def pydantic_taxonomy_to_openapi(pydantic_taxonomy: PydanticTaxonomy) -> Taxonom
     return Taxonomy(taxonomy=pydantic_taxonomy.taxonomy, uri=pydantic_taxonomy.uri)
 
 
-def pydantic_external_conversions_to_openapi(
-    pydantic_conversion: PydanticExternalConversions,
-) -> ExternalConversions:
+def pydantic_external_conversion_to_openapi(
+    pydantic_conversion: PydanticExternalConversion,
+) -> ExternalConversion:
     """Convert Pydantic ExternalConversions to OpenAPI ExternalConversions"""
-    return ExternalConversions(
+    return ExternalConversion(
         conversion_type=pydantic_conversion.conversion_type,
         from_address=pydantic_conversion.from_address,
         to_address=pydantic_conversion.to_address,
@@ -596,6 +596,8 @@ def pydantic_external_conversions_to_openapi(
         to_asset_transfer=pydantic_conversion.to_asset_transfer,
         from_network=pydantic_conversion.from_network,
         to_network=pydantic_conversion.to_network,
+        from_is_supported_asset=pydantic_conversion.from_is_supported_asset,
+        to_is_supported_asset=pydantic_conversion.to_is_supported_asset,
     )
 
 
