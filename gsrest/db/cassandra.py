@@ -1510,7 +1510,7 @@ class Cassandra:
                 include_assets=include_assets,
                 ascending=ascending,
                 page=page,
-                fetch_size=max(FETCH_SIZE_MIN, fs_it),
+                fetch_size=fs_it,
             )
 
             self.logger.debug(f"results1 {len(results1)} {new_page}")
@@ -2915,7 +2915,7 @@ class Cassandra:
             has_upper_bound = this_tx_id_upper_bound is not None
             has_lower_bound = this_tx_id_lower_bound is not None
 
-            fs_chunk = max(FETCH_SIZE_MIN, (offset or 0) + fetch_size)
+            fs_chunk = (offset or 0) + fetch_size
 
             cql_stmt = build_select_address_txs_statement(
                 network,
