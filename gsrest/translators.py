@@ -584,8 +584,14 @@ def pydantic_external_conversion_to_openapi(
     pydantic_conversion: PydanticExternalConversion,
 ) -> ExternalConversion:
     """Convert Pydantic ExternalConversions to OpenAPI ExternalConversions"""
+    ctype = "dex_swap"
+    if pydantic_conversion.conversion_type == "swap":
+        ctype = "dex_swap"
+    elif pydantic_conversion.conversion_type == "bridge":
+        ctype = "bridge_tx"
+
     return ExternalConversion(
-        conversion_type=pydantic_conversion.conversion_type,
+        conversion_type=ctype,
         from_address=pydantic_conversion.from_address,
         to_address=pydantic_conversion.to_address,
         from_asset=pydantic_conversion.from_asset,
