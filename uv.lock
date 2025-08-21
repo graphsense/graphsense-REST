@@ -1691,8 +1691,8 @@ wheels = [
 
 [[package]]
 name = "graphsense-lib"
-version = "2.7.0rc9"
-source = { git = "https://github.com/graphsense/graphsense-lib?rev=v2.7.0rc9#9ffca7ccdb87fa42bd84af07e801eb2b830dc963" }
+version = "2.7.0rc13"
+source = { git = "https://github.com/graphsense/graphsense-lib?rev=v2.7.0rc13#92d369fcd8640d751370e4189db30d9f6579503c" }
 dependencies = [
     { name = "aiohttp" },
     { name = "async-lru" },
@@ -1842,7 +1842,7 @@ requires-dist = [
     { name = "aiohttp-jinja2", specifier = ">=1.5.0" },
     { name = "async-lru", specifier = ">=2.0.4" },
     { name = "connexion", extras = ["swagger-ui"], specifier = ">=2.6.0,<3" },
-    { name = "graphsense-lib", extras = ["conversions", "tagpacks"], git = "https://github.com/graphsense/graphsense-lib?rev=v2.7.0rc9" },
+    { name = "graphsense-lib", extras = ["conversions", "tagpacks"], git = "https://github.com/graphsense/graphsense-lib?rev=v2.7.0rc13" },
     { name = "openapi-schema-validator", specifier = ">=0.2.3" },
     { name = "python-dateutil", specifier = ">=2.9.0" },
     { name = "swagger-ui-bundle", specifier = ">=0.0.9" },
