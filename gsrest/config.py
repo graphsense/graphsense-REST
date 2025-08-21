@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from graphsenselib.config.cassandra_async_config import CassandraConfig
 from graphsenselib.config.config import SlackTopic
@@ -64,9 +64,9 @@ class GSRestConfig(BaseSettings):
         alias="enable-user-tag-reporting",
         description="Enable user tag reporting functionality",
     )
-    include_bridging_actions: bool = Field(
-        default=False,
-        description="Include bridging actions in tx conversions",
+    included_bridges: Tuple[str, ...] = Field(
+        default_factory=tuple,
+        description="Included bridges in tx conversions",
     )
     block_by_date_use_linear_search: bool = Field(
         default=False,

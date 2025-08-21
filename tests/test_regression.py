@@ -207,11 +207,12 @@ def test_search():
     call_5 = "search?q=0xfffff" # check possibly wrong "overflow"
     call_6 = "search?q=0xfffff01"
     call_7 = "search?q=0xfffff0193483022348723" # no results
+    call_8 = "search?q=0x42D529A72CECD6ECE546D5AC0D2A6C2A9407876B66478A33917D8928833433F"
 
     calls = [
         call_1, call_2, call_3,
         call_4,
-        call_5, call_6, call_7
+        call_5, call_6, call_7, call_8
     ]
     for call in calls:
         logger.info(f"Testing call: {call}")
