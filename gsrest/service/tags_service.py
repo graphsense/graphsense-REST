@@ -1,3 +1,4 @@
+from graphsenselib.errors import BadUserInputException
 from graphsenselib.tagstore.db.queries import UserReportedAddressTag
 
 from gsrest.dependencies import (
@@ -15,6 +16,16 @@ from gsrest.translators import (
 from openapi_server.models.user_tag_report_response import UserTagReportResponse
 
 
+def parse_page_int(page):
+    if isinstance(page, str):
+        try:
+            page = int(page)
+        except ValueError:
+            raise BadUserInputException("Invalid page number")
+
+    return page
+
+
 # Updated functions using new service layer
 async def get_actor(request, actor):
     services = get_service_container(request)
@@ -28,6 +39,8 @@ async def get_actor_tags(request, actor, page=None, pagesize=None):
     services = get_service_container(request)
     tagstore_groups = get_tagstore_access_groups(request)
 
+    page = parse_page_int(page)
+
     pydantic_result = await services.tags_service.get_actor_tags(
         actor, tagstore_groups, page, pagesize
     )
@@ -38,6 +51,8 @@ async def get_actor_tags(request, actor, page=None, pagesize=None):
 async def list_address_tags(request, label, page=None, pagesize=None):
     services = get_service_container(request)
     tagstore_groups = get_tagstore_access_groups(request)
+
+    page = parse_page_int(page)
 
     pydantic_result = await services.tags_service.list_address_tags_by_label(
         label, tagstore_groups, page, pagesize
