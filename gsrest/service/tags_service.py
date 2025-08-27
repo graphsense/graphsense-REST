@@ -1,4 +1,3 @@
-from graphsenselib.errors import BadUserInputException
 from graphsenselib.tagstore.db.queries import UserReportedAddressTag
 
 from gsrest.dependencies import (
