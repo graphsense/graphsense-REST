@@ -161,7 +161,7 @@ def pydantic_txs_to_openapi(pydantic_txs: PydanticTxs) -> Txs:
     """Convert Pydantic Txs to OpenAPI Txs"""
     return Txs(
         txs=[pydantic_tx_to_openapi(tx) for tx in pydantic_txs.txs],
-        next_page=pydantic_txs.next_page,
+        next_page=str(pydantic_txs.next_page) if pydantic_txs.next_page is not None else None,
     )
 
 
