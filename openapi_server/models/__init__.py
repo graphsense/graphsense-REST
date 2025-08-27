@@ -52,6 +52,7 @@ from openapi_server.models.tx_ref import TxRef
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.tx_utxo import TxUtxo
 from openapi_server.models.tx_value import TxValue
+from openapi_server.models.txs import Txs
 from openapi_server.models.user_reported_tag import UserReportedTag
 from openapi_server.models.user_tag_report_response import UserTagReportResponse
 from openapi_server.models.values import Values

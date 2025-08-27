@@ -5,7 +5,7 @@ import time
 from graphsenselib.errors import BadUserInputException
 
 from gsrest.dependencies import get_service_container, get_tagstore_access_groups
-from gsrest.service.tags_service import parse_page_int
+from gsrest.service.tags_service import parse_page_int_optional
 from gsrest.translators import (
     pydantic_address_tag_result_to_openapi,
     pydantic_address_to_openapi,
@@ -117,7 +117,7 @@ async def list_address_tags_by_entity(
     services = get_service_container(request)
     tagstore_groups = get_tagstore_access_groups(request)
 
-    page = parse_page_int(page)
+    page = parse_page_int_optional(page)
 
     pydantic_result = await services.entities_service.list_address_tags_by_entity(
         currency, entity, tagstore_groups, page, pagesize

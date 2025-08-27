@@ -95,6 +95,7 @@ from graphsenselib.db.asynchronous.services.models import (
 from graphsenselib.db.asynchronous.services.models import (
     TxRef as PydanticTxRef,
 )
+from graphsenselib.db.asynchronous.services.models import Txs as PydanticTxs
 from graphsenselib.db.asynchronous.services.models import (
     TxSummary as PydanticTxSummary,
 )
@@ -152,7 +153,16 @@ from openapi_server.models.tx_ref import TxRef
 from openapi_server.models.tx_summary import TxSummary
 from openapi_server.models.tx_utxo import TxUtxo
 from openapi_server.models.tx_value import TxValue
+from openapi_server.models.txs import Txs
 from openapi_server.models.values import Values
+
+
+def pydantic_txs_to_openapi(pydantic_txs: PydanticTxs) -> Txs:
+    """Convert Pydantic Txs to OpenAPI Txs"""
+    return Txs(
+        txs=[pydantic_tx_to_openapi(tx) for tx in pydantic_txs.txs],
+        next_page=pydantic_txs.next_page,
+    )
 
 
 def pydantic_token_configs_to_openapi(

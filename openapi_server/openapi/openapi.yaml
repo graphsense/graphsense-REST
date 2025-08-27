@@ -5,7 +5,7 @@ info:
     name: Iknaio Cryptoasset Analytics GmbH
   description: GraphSense API provides programmatic access to various ledgers' addresses, entities, blocks, transactions and tags for automated and highly efficient forensics tasks.
   title: GraphSense API
-  version: 1.14.0dev6
+  version: 1.14.0dev9
 servers:
   - url: https://api.ikna.io
 paths:
@@ -612,7 +612,7 @@ paths:
             $ref: '#/components/schemas/address_id'
           style: simple
         - description: what type of related addresses to return
-          example: address
+          example: pubkey
           explode: true
           in: query
           name: address_relation_type
@@ -1855,6 +1855,7 @@ paths:
       x-openapi-router-controller: openapi_server.controllers.tokens_controller
   /{currency}/token_txs/{tx_hash}:
     get:
+      deprecated: true
       operationId: list_token_txs
       parameters:
         - description: The cryptocurrency code (e.g., btc)
@@ -1997,6 +1998,78 @@ paths:
                 type: array
           description: OK
       summary: Returns conversion information (swaps or bridging txs) extracted from a specific transaction
+      tags:
+        - txs
+      x-openapi-router-controller: openapi_server.controllers.txs_controller
+  /{currency}/txs/{tx_hash}/flows:
+    get:
+      operationId: list_tx_flows
+      parameters:
+        - description: The cryptocurrency code (e.g., btc)
+          example: btc
+          explode: false
+          in: path
+          name: currency
+          required: true
+          schema:
+            format: string
+            type: string
+          style: simple
+        - description: The transaction hash
+          example: 04d92601677d62a985310b61a301e74870fa942c8be0648e16b1db23b996a8cd
+          explode: false
+          in: path
+          name: tx_hash
+          required: true
+          schema:
+            $ref: '#/components/schemas/tx_hash'
+          style: simple
+        - description: Whether to strip zero-value transactions from the response
+          explode: true
+          in: query
+          name: strip_zero_value_txs
+          required: false
+          schema:
+            default: false
+            type: boolean
+          style: form
+        - description: Whether to include only token transactions
+          explode: true
+          in: query
+          name: only_token_txs
+          required: false
+          schema:
+            default: false
+            type: boolean
+          style: form
+        - description: Resumption token for retrieving the next page
+          example: ""
+          explode: true
+          in: query
+          name: page
+          required: false
+          schema:
+            type: string
+          style: form
+        - description: Number of items returned in a single page
+          example: 10
+          explode: true
+          in: query
+          name: pagesize
+          required: false
+          schema:
+            format: int32
+            minimum: 1
+            type: integer
+          style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/txs'
+          description: OK
+      summary: Returns all asset flows / Internal txs and token flows within a given transaction
       tags:
         - txs
       x-openapi-router-controller: openapi_server.controllers.txs_controller
@@ -2835,6 +2908,26 @@ components:
       schema:
         $ref: '#/components/schemas/tx_hash'
       style: simple
+    only_token_txs:
+      description: Whether to include only token transactions
+      explode: true
+      in: query
+      name: only_token_txs
+      required: false
+      schema:
+        default: false
+        type: boolean
+      style: form
+    strip_zero_value_txs:
+      description: Whether to strip zero-value transactions from the response
+      explode: true
+      in: query
+      name: strip_zero_value_txs
+      required: false
+      schema:
+        default: false
+        type: boolean
+      style: form
     io_index:
       description: index of the input or output in question
       example: 0
@@ -2949,7 +3042,7 @@ components:
       style: form
     address_relation_type:
       description: what type of related addresses to return
-      example: address
+      example: pubkey
       explode: true
       in: query
       name: address_relation_type
@@ -5735,6 +5828,27 @@ components:
       items:
         $ref: '#/components/schemas/tx_account'
       type: array
+    txs:
+      example:
+        next_page: next_page
+        txs:
+          - null
+          - null
+      properties:
+        next_page:
+          format: string
+          title: next_page
+          type: string
+        txs:
+          description: A list of transaction model transactions
+          items:
+            $ref: '#/components/schemas/tx'
+          title: txs
+          type: array
+      required:
+        - txs
+      title: txs
+      type: object
     address_txs:
       example:
         next_page: next_page

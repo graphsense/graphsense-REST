@@ -7,6 +7,7 @@ from gsrest.dependencies import (
     get_service_container,
     get_tagstore_access_groups,
 )
+from gsrest.service import parse_page_int_optional
 from gsrest.translators import (
     pydantic_to_openapi,
 )
@@ -24,11 +25,7 @@ async def list_related_addresses(
 ):
     services = get_service_container(request)
 
-    if page is not None and isinstance(page, str):
-        try:
-            page = int(page)
-        except ValueError:
-            raise BadUserInputException("Page must be an integer.")
+    page = parse_page_int_optional(page)
 
     if address_relation_type not in ["pubkey"]:
         raise BadUserInputException("Invalid address_relation_type. Must be 'pubkey'")

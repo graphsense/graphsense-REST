@@ -5,7 +5,7 @@ info:
   contact:
     name: Iknaio Cryptoasset Analytics GmbH
     email: contact@ikna.io
-  version: "1.14.0dev6"
+  version: "1.14.0dev9"
 servers:
   - url: 'https://api.ikna.io'
 paths:
@@ -482,6 +482,7 @@ paths:
         - txs
   /{currency}/token_txs/{tx_hash}:
     get:
+      deprecated: true
       operationId: list_token_txs
       parameters:
         - $ref: '#/components/parameters/currency'
@@ -581,6 +582,26 @@ paths:
                 items:
                   $ref: '#/components/schemas/external_conversion'
       summary: Returns conversion information (swaps or bridging txs) extracted from a specific transaction
+      tags:
+        - txs
+  /{currency}/txs/{tx_hash}/flows:
+    get:
+      operationId: list_tx_flows
+      parameters:
+        - $ref: '#/components/parameters/currency'
+        - $ref: '#/components/parameters/tx_hash'
+        - $ref: '#/components/parameters/strip_zero_value_txs'
+        - $ref: '#/components/parameters/only_token_txs'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pagesize'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/txs'
+      summary: Returns all asset flows / Internal txs and token flows within a given transaction
       tags:
         - txs
   /{currency}/rates/{height}:
@@ -970,6 +991,22 @@ components:
         $ref: '#/components/schemas/tx_hash'
       description: The transaction hash
       example: 04d92601677d62a985310b61a301e74870fa942c8be0648e16b1db23b996a8cd
+    only_token_txs:
+      in: query
+      name: only_token_txs
+      required: false
+      schema:
+        type: boolean
+        default: false
+      description: Whether to include only token transactions
+    strip_zero_value_txs:
+      in: query
+      name: strip_zero_value_txs
+      required: false
+      schema:
+        type: boolean
+        default: false
+      description: Whether to strip zero-value transactions from the response
     io_index:
       in: query
       name: io_index
@@ -1069,7 +1106,7 @@ components:
         type: string
         enum:
           - pubkey
-      example: address
+      example: pubkey
       description: what type of related addresses to return
     search_key:
       in: query
@@ -2258,6 +2295,18 @@ components:
       description: A list of account model transactions
       items:
         $ref: '#/components/schemas/tx_account'
+    txs:
+      type: object
+      required:
+        - txs
+      properties:
+        next_page:
+          $ref: '#/components/schemas/next_page'
+        txs:
+          type: array
+          description: A list of transaction model transactions
+          items:
+            $ref: '#/components/schemas/tx'
     address_txs:
       type: object
       required:
