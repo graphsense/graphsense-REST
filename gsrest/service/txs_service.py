@@ -81,7 +81,14 @@ async def get_tx_conversions(request, currency, tx_hash):
 
 
 async def list_tx_flows(
-    request, currency, tx_hash, strip_zero_value_txs, only_token_txs, page, pagesize
+    request,
+    currency: str,
+    tx_hash: str,
+    strip_zero_value_txs: bool,
+    only_token_txs: bool,
+    token_currency: Optional[str],
+    page: Optional[int],
+    pagesize: Optional[int],
 ):
     services = get_service_container(request)
 
@@ -105,6 +112,7 @@ async def list_tx_flows(
         include_token_txs=include_token_txs,
         include_internal_txs=include_internal_txs,
         include_base_transaction=include_base_tx,
+        asset=token_currency,
         page=page,
         page_size=pagesize,
     )

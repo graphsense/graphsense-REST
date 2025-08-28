@@ -523,7 +523,7 @@ async def list_token_txs(request: web.Request, currency, tx_hash) -> web.Respons
         raise web.HTTPInternalServerError()
 
 
-async def list_tx_flows(request: web.Request, currency, tx_hash, strip_zero_value_txs=None, only_token_txs=None, page=None, pagesize=None) -> web.Response:
+async def list_tx_flows(request: web.Request, currency, tx_hash, strip_zero_value_txs=None, only_token_txs=None, token_currency=None, page=None, pagesize=None) -> web.Response:
     """Returns all asset flows / Internal txs and token flows within a given transaction
 
     
@@ -536,6 +536,8 @@ async def list_tx_flows(request: web.Request, currency, tx_hash, strip_zero_valu
     :type strip_zero_value_txs: bool
     :param only_token_txs: Whether to include only token transactions
     :type only_token_txs: bool
+    :param token_currency: Return transactions of given token or base currency
+    :type token_currency: str
     :param page: Resumption token for retrieving the next page
     :type page: str
     :param pagesize: Number of items returned in a single page
@@ -564,11 +566,11 @@ async def list_tx_flows(request: web.Request, currency, tx_hash, strip_zero_valu
     request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
-        if 'currency' in ['','currency','tx_hash','strip_zero_value_txs','only_token_txs','page','pagesize']:
+        if 'currency' in ['','currency','tx_hash','strip_zero_value_txs','only_token_txs','token_currency','page','pagesize']:
             if currency is not None:
                 currency = currency.lower()
         result = service.list_tx_flows(request
-                ,currency=currency,tx_hash=tx_hash,strip_zero_value_txs=strip_zero_value_txs,only_token_txs=only_token_txs,page=page,pagesize=pagesize)
+                ,currency=currency,tx_hash=tx_hash,strip_zero_value_txs=strip_zero_value_txs,only_token_txs=only_token_txs,token_currency=token_currency,page=page,pagesize=pagesize)
         result = await result
 
         for plugin in request.app['plugins']:

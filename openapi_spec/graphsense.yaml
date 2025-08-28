@@ -592,6 +592,7 @@ paths:
         - $ref: '#/components/parameters/tx_hash'
         - $ref: '#/components/parameters/strip_zero_value_txs'
         - $ref: '#/components/parameters/only_token_txs'
+        - $ref: '#/components/parameters/token_currency'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pagesize'
       responses:
