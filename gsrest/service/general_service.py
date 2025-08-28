@@ -31,7 +31,7 @@ async def search(request, q, currency=None, limit=10):
     tagstore_groups = get_tagstore_access_groups(request)
 
     pydantic_result = await services.general_service.search(
-        q, tagstore_groups, currency, limit
+        q, tagstore_groups, currency, limit, include_sub_tx_identifiers=False
     )
 
     return pydantic_search_result_to_openapi(pydantic_result)

@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### changed
 - deprecated /{currency}/token_txs/{tx_hash} is replaced by /{currency}/txs/{tx_hash}/flows?only_token_txs=true
+- search endpoint does not return sub txs anymore, use tx_hash flows to resolve if needed.
 
 ## [25.08.3/1.13.3] - 2025-08-05
 
