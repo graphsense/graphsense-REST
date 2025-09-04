@@ -1691,8 +1691,8 @@ wheels = [
 
 [[package]]
 name = "graphsense-lib"
-version = "2.7.0rc23"
-source = { git = "https://github.com/graphsense/graphsense-lib?rev=v2.7.0rc23#87735049eac55de95f3f28082225f709fdec8d05" }
+version = "2.7.0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
     { name = "async-lru" },
@@ -1708,6 +1708,7 @@ dependencies = [
     { name = "filelock" },
     { name = "goodconf", extra = ["yaml"] },
     { name = "graphsense-ethereum-etl" },
+    { name = "httpx" },
     { name = "methodtools" },
     { name = "pandas" },
     { name = "parsy" },
@@ -1717,6 +1718,10 @@ dependencies = [
     { name = "setuptools" },
     { name = "simplejson" },
     { name = "tenacity" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/cd/3e/2c8c93b8c3450db5d09991c4fd481f2dfe28484ec7cb25adf5884335b734/graphsense_lib-2.7.0.tar.gz", hash = "sha256:16de2cbfafc020909623611cef176f0e3a32427b2ebcdf3032dc890e688294c2", size = 12506148 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/41/5a/05812c2e237b44ba6419a71c4c3131aa405a5eae3dec95d6c9439f0f8f98/graphsense_lib-2.7.0-py3-none-any.whl", hash = "sha256:602c410d7f56dda6fc891b8e029125feedc7013636001a1d9c2c01221c8007ab", size = 696293 },
 ]
 
 [package.optional-dependencies]
@@ -1842,7 +1847,7 @@ requires-dist = [
     { name = "aiohttp-jinja2", specifier = ">=1.5.0" },
     { name = "async-lru", specifier = ">=2.0.4" },
     { name = "connexion", extras = ["swagger-ui"], specifier = ">=2.6.0,<3" },
-    { name = "graphsense-lib", extras = ["conversions", "tagpacks"], git = "https://github.com/graphsense/graphsense-lib?rev=v2.7.0rc23" },
+    { name = "graphsense-lib", extras = ["conversions", "tagpacks"], specifier = ">=2.7.0" },
     { name = "openapi-schema-validator", specifier = ">=0.2.3" },
     { name = "python-dateutil", specifier = ">=2.9.0" },
     { name = "swagger-ui-bundle", specifier = ">=0.0.9" },
