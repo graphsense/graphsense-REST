@@ -35,6 +35,8 @@ jobs:
       id-token: write
 
     steps:
+      - name: Ensure Version Alignment
+        run: make ensure-versions-alignment
       - name: Checkout repository
         uses: actions/checkout@v3
 

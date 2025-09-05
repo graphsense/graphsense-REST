@@ -68,3 +68,9 @@ repos:
       language: system
       pass_filenames: false
       always_run: true
+    - id: version-alignment
+      name: Ensure Version Alignment
+      entry: make ensure-versions-alignment
+      language: system
+      pass_filenames: false
+      always_run: true

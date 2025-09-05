@@ -69,10 +69,14 @@ update-package-version: update-openapi-version
 update-openapi-version:
 	sed -i '/^info:/,/^  version:/s/^\(\s*version:\s*\).*/\1$(GS_REST_SERVICE_VERSION)/' openapi_spec/graphsense.yaml
 
-tag-version:
+
+ensure-versions-alignment:
+	python scripts/ensure_versions_alignment.py
+
+tag-version: ensure-versions-alignment
 	-git diff --exit-code && git diff --staged --exit-code && git tag -a v$(GS_REST_SERVICE_VERSIONM) -m 'Release v$(GS_REST_SERVICE_VERSION)' || (echo "Repo is dirty please commit first" && exit 1)
 	git diff --exit-code && git diff --staged --exit-code && git tag -a v$(GS_REST_SERVICE_VERSION) -m 'Release v$(GS_REST_SERVICE_VERSION)' || (echo "Repo is dirty please commit first" && exit 1)
 
 
 
-.PHONY: format lint test test-all-env run-codegen serve generate-openapi-server get-openapi-spec-from-upstream serve-docker pre-commit install-dev update-openapi-version tag-version generate-python-client
+.PHONY: format lint test test-all-env ensure-versions-alignment run-codegen serve generate-openapi-server get-openapi-spec-from-upstream serve-docker pre-commit install-dev update-openapi-version tag-version generate-python-client

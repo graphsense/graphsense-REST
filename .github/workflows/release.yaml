@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+      - name: Ensure Version Alignment
+        run: make ensure-versions-alignment
       - name: Filter CHANGELOG
         run: |
           sed  '1,/## \[/d;/## \[/Q' CHANGELOG.md > CHANGELOG_LATEST.md
