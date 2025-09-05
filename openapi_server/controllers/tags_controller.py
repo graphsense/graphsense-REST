@@ -91,7 +91,7 @@ async def get_actor(request: web.Request, actor) -> web.Response:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
 
         user = get_username(request) or "unknown"
-        
+
         tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
@@ -174,7 +174,7 @@ async def get_actor_tags(request: web.Request, actor, page=None, pagesize=None) 
         tb = traceback.format_exception(type(e), e, e.__traceback__)
 
         user = get_username(request) or "unknown"
-        
+
         tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
@@ -257,7 +257,7 @@ async def list_address_tags(request: web.Request, label, page=None, pagesize=Non
         tb = traceback.format_exception(type(e), e, e.__traceback__)
 
         user = get_username(request) or "unknown"
-        
+
         tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
@@ -336,7 +336,7 @@ async def list_concepts(request: web.Request, taxonomy) -> web.Response:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
 
         user = get_username(request) or "unknown"
-        
+
         tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
@@ -413,7 +413,7 @@ async def list_taxonomies(request: web.Request, ) -> web.Response:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
 
         user = get_username(request) or "unknown"
-        
+
         tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
@@ -493,7 +493,7 @@ async def report_tag(request: web.Request, body) -> web.Response:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
 
         user = get_username(request) or "unknown"
-        
+
         tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)

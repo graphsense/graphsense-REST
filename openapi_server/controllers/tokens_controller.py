@@ -86,7 +86,7 @@ async def list_supported_tokens(request: web.Request, currency) -> web.Response:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
 
         user = get_username(request) or "unknown"
-        
+
         tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)

@@ -97,7 +97,7 @@ async def get_address(request: web.Request, currency, address, include_actors=No
         tb = traceback.format_exception(type(e), e, e.__traceback__)
 
         user = get_username(request) or "unknown"
-        
+
         tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
@@ -180,7 +180,7 @@ async def get_address_entity(request: web.Request, currency, address, include_ac
         tb = traceback.format_exception(type(e), e, e.__traceback__)
 
         user = get_username(request) or "unknown"
-        
+
         tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
@@ -263,7 +263,7 @@ async def get_tag_summary_by_address(request: web.Request, currency, address, in
         tb = traceback.format_exception(type(e), e, e.__traceback__)
 
         user = get_username(request) or "unknown"
-        
+
         tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
@@ -364,7 +364,7 @@ async def list_address_links(request: web.Request, currency, address, neighbor, 
         tb = traceback.format_exception(type(e), e, e.__traceback__)
 
         user = get_username(request) or "unknown"
-        
+
         tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
@@ -457,7 +457,7 @@ async def list_address_neighbors(request: web.Request, currency, address, direct
         tb = traceback.format_exception(type(e), e, e.__traceback__)
 
         user = get_username(request) or "unknown"
-        
+
         tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
@@ -558,7 +558,7 @@ async def list_address_txs(request: web.Request, currency, address, direction=No
         tb = traceback.format_exception(type(e), e, e.__traceback__)
 
         user = get_username(request) or "unknown"
-        
+
         tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
@@ -645,7 +645,7 @@ async def list_related_addresses(request: web.Request, currency, address, addres
         tb = traceback.format_exception(type(e), e, e.__traceback__)
 
         user = get_username(request) or "unknown"
-        
+
         tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
@@ -732,7 +732,7 @@ async def list_tags_by_address(request: web.Request, currency, address, page=Non
         tb = traceback.format_exception(type(e), e, e.__traceback__)
 
         user = get_username(request) or "unknown"
-        
+
         tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)

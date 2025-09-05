@@ -47,7 +47,7 @@ Name | Type | Description  | Notes
 {{/defaultValue}}{{/requiredParams}}{{#requiredParams}}{{#defaultValue}} **{{paramName}}** | {{^baseType}}**{{dataType}}**{{/baseType}}{{#baseType}}[**{{dataType}}**]({{baseType}}.md){{/baseType}}| {{description}} | defaults to {{{.}}}
 {{/defaultValue}}{{/requiredParams}}{{#optionalParams}} **{{paramName}}** | {{^baseType}}**{{dataType}}**{{/baseType}}{{#baseType}}[**{{dataType}}**]({{baseType}}.md){{/baseType}}| {{description}} | [optional]{{#defaultValue}} if omitted the server will use the default value of {{{.}}}{{/defaultValue}}
 {{/optionalParams}}
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True. 
+**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
 **async_req** | **bool** | Execute request asynchronously | [optional] default is False.
 
 ### Return type

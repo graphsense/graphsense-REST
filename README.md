@@ -112,6 +112,29 @@ REST log messages can be delivered via mail. See `instance/config.yaml.template`
 
 ## Development
 
+### Setup Development Environment
+
+We use pre-commit hooks to ensure code quality and consistency. After setting up the project, install the pre-commit hooks:
+
+```bash
+make install-dev
+pre-commit install
+```
+
+This will automatically run code formatting, linting, and other checks before each commit. The hooks include:
+
+- **Code formatting** with [ruff][ruff]
+- **Linting** to catch potential issues
+- **Import sorting** to maintain consistent import order
+- **YAML/JSON validation** for configuration files
+- **Code Generation** of the clients as well as server stub
+
+You can manually run all pre-commit hooks on all files:
+
+```bash
+pre-commit run --all-files
+```
+
 ### Generate server stub
 Install version 4.44.2 or higher of yq (https://github.com/mikefarah/yq/) and run the following command to generate the server stub:
 
@@ -158,3 +181,4 @@ the rest interface for testing is defined in `conftest.py` as a pytest fixture.
 [gunicorn]: https://gunicorn.org/#docs
 [docker]: https://www.docker.com
 [uv]: https://docs.astral.sh/uv/getting-started/installation/
+[ruff]: https://docs.astral.sh/ruff/

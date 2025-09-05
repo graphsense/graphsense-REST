@@ -65,7 +65,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **currency** | **str**| The cryptocurrency code (e.g., btc) |
  **height** | **Height**| The block height |
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True. 
+**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
 **async_req** | **bool** | Execute request asynchronously | [optional] default is False.
 
 ### Return type
@@ -150,7 +150,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **currency** | **str**| The cryptocurrency code (e.g., btc) |
  **date** | **datetime**| The time of the block |
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True. 
+**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
 **async_req** | **bool** | Execute request asynchronously | [optional] default is False.
 
 ### Return type
@@ -236,7 +236,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **currency** | **str**| The cryptocurrency code (e.g., btc) |
  **height** | **Height**| The block height |
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True. 
+**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
 **async_req** | **bool** | Execute request asynchronously | [optional] default is False.
 
 ### Return type

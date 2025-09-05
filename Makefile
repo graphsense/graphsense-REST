@@ -24,6 +24,7 @@ format:
 
 install-dev:
 	uv sync --all-extras --dev --force-reinstall
+	pre-commit install
 
 pre-commit:
 	uv run pre-commit run --all-files

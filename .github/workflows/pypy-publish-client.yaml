@@ -24,7 +24,7 @@ jobs:
     strategy:
       matrix:
         python: ["3.10"]
-    
+
     defaults:
       run:
         working-directory: clients/python

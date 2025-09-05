@@ -81,7 +81,7 @@ Name | Type | Description  | Notes
  **entity** | **int**| The entity ID |
  **exclude_best_address_tag** | **bool**| Whether to exclude the best address tag | [optional] if omitted the server will use the default value of False
  **include_actors** | **bool**| Whether to include information about the actor behind the address | [optional] if omitted the server will use the default value of False
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True. 
+**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
 **async_req** | **bool** | Execute request asynchronously | [optional] default is False.
 
 ### Return type
@@ -179,7 +179,7 @@ Name | Type | Description  | Notes
  **entity** | **int**| The entity ID |
  **page** | **str**| Resumption token for retrieving the next page | [optional]
  **pagesize** | **int**| Number of items returned in a single page | [optional]
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True. 
+**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
 **async_req** | **bool** | Execute request asynchronously | [optional] default is False.
 
 ### Return type
@@ -277,7 +277,7 @@ Name | Type | Description  | Notes
  **entity** | **int**| The entity ID |
  **page** | **str**| Resumption token for retrieving the next page | [optional]
  **pagesize** | **int**| Number of items returned in a single page | [optional]
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True. 
+**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
 **async_req** | **bool** | Execute request asynchronously | [optional] default is False.
 
 ### Return type
@@ -390,7 +390,7 @@ Name | Type | Description  | Notes
  **token_currency** | **str**| Return transactions of given token or base currency | [optional]
  **page** | **str**| Resumption token for retrieving the next page | [optional]
  **pagesize** | **int**| Number of items returned in a single page | [optional]
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True. 
+**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
 **async_req** | **bool** | Execute request asynchronously | [optional] default is False.
 
 ### Return type
@@ -500,7 +500,7 @@ Name | Type | Description  | Notes
  **include_actors** | **bool**| Whether to include information about the actor behind the address | [optional] if omitted the server will use the default value of False
  **page** | **str**| Resumption token for retrieving the next page | [optional]
  **pagesize** | **int**| Number of items returned in a single page | [optional]
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True. 
+**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
 **async_req** | **bool** | Execute request asynchronously | [optional] default is False.
 
 ### Return type
@@ -613,7 +613,7 @@ Name | Type | Description  | Notes
  **token_currency** | **str**| Return transactions of given token or base currency | [optional]
  **page** | **str**| Resumption token for retrieving the next page | [optional]
  **pagesize** | **int**| Number of items returned in a single page | [optional]
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True. 
+**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
 **async_req** | **bool** | Execute request asynchronously | [optional] default is False.
 
 ### Return type
@@ -721,7 +721,7 @@ Name | Type | Description  | Notes
  **depth** | **int**| How many hops should the transaction graph be searched |
  **breadth** | **int**| How many siblings of each neighbor should be tried | [optional] if omitted the server will use the default value of 16
  **skip_num_addresses** | **int**| Skip entities containing more addresses | [optional]
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True. 
+**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
 **async_req** | **bool** | Execute request asynchronously | [optional] default is False.
 
 ### Return type

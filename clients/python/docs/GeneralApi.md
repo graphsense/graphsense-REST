@@ -46,7 +46,7 @@ with graphsense.ApiClient() as api_client:
 
 ### Parameters
 This endpoint does not need any parameter.
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True. 
+**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
 **async_req** | **bool** | Execute request asynchronously | [optional] default is False.
 
 ### Return type
@@ -142,7 +142,7 @@ Name | Type | Description  | Notes
  **q** | **str**| It can be (the beginning of) an address, a transaction or a label |
  **currency** | **str**| The cryptocurrency (e.g., btc) | [optional]
  **limit** | **int**| Maximum number of search results | [optional] if omitted the server will use the default value of 10
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True. 
+**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
 **async_req** | **bool** | Execute request asynchronously | [optional] default is False.
 
 ### Return type

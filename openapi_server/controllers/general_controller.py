@@ -85,7 +85,7 @@ async def get_statistics(request: web.Request, ) -> web.Response:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
 
         user = get_username(request) or "unknown"
-        
+
         tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
@@ -168,7 +168,7 @@ async def search(request: web.Request, q, currency=None, limit=None) -> web.Resp
         tb = traceback.format_exception(type(e), e, e.__traceback__)
 
         user = get_username(request) or "unknown"
-        
+
         tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)

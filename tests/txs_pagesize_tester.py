@@ -61,9 +61,9 @@ def txs_pagesize_tester(currency, id, **kwargs):
                 if hasattr(api_response, "links")
                 else api_response.address_txs
             )
-            assert len(resp) <= kwargs["pagesize"], (
-                f"response length bigger than pagesize {len(resp)}"
-            )
+            assert (
+                len(resp) <= kwargs["pagesize"]
+            ), f"response length bigger than pagesize {len(resp)}"
             for tx in resp:
                 # print(f'{tx}')
                 timestamps.append(tx.timestamp)

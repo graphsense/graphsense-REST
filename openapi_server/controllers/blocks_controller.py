@@ -90,7 +90,7 @@ async def get_block(request: web.Request, currency, height) -> web.Response:
         tb = traceback.format_exception(type(e), e, e.__traceback__)
 
         user = get_username(request) or "unknown"
-        
+
         tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
@@ -172,7 +172,7 @@ async def get_block_by_date(request: web.Request, currency, date) -> web.Respons
         tb = traceback.format_exception(type(e), e, e.__traceback__)
 
         user = get_username(request) or "unknown"
-        
+
         tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)
@@ -253,7 +253,7 @@ async def list_block_txs(request: web.Request, currency, height) -> web.Response
         tb = traceback.format_exception(type(e), e, e.__traceback__)
 
         user = get_username(request) or "unknown"
-        
+
         tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)

@@ -42,7 +42,7 @@ with graphsense.ApiClient(configuration) as api_client:
     api_instance = bulk_api.BulkApi(api_client)
     currency = "btc" # str | The cryptocurrency (e.g., btc)
     operation = "get_block" # str | The operation to execute in bulk
-    body = {"height": [1, 2, 3]} 
+    body = {"height": [1, 2, 3]}
 
     # example passing only required values which don't have defaults set
     try:
@@ -74,7 +74,7 @@ Name | Type | Description  | Notes
  **operation** | **str**| The operation to execute in bulk |
  **body** | **{str: (bool, date, datetime, dict, float, int, list, str, none_type)}**| Map of the operation&#39;s parameter names to (arrays of) values |
  **num_pages** | **int**| Number of pages to be retrieved per bulked request |
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True. 
+**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
 **async_req** | **bool** | Execute request asynchronously | [optional] default is False.
 
 ### Return type
@@ -139,7 +139,7 @@ with graphsense.ApiClient(configuration) as api_client:
     api_instance = bulk_api.BulkApi(api_client)
     currency = "btc" # str | The cryptocurrency (e.g., btc)
     operation = "get_block" # str | The operation to execute in bulk
-    body = {"height": [1, 2, 3]} 
+    body = {"height": [1, 2, 3]}
 
     # example passing only required values which don't have defaults set
     try:
@@ -159,7 +159,7 @@ Name | Type | Description  | Notes
  **operation** | **str**| The operation to execute in bulk |
  **body** | **{str: (bool, date, datetime, dict, float, int, list, str, none_type)}**| Map of the operation&#39;s parameter names to (arrays of) values |
  **num_pages** | **int**| Number of pages to be retrieved per bulked request |
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True. 
+**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
 **async_req** | **bool** | Execute request asynchronously | [optional] default is False.
 
 ### Return type
@@ -188,4 +188,3 @@ Name | Type | Description  | Notes
 **200** | OK |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

@@ -88,7 +88,7 @@ async def get_exchange_rates(request: web.Request, currency, height) -> web.Resp
         tb = traceback.format_exception(type(e), e, e.__traceback__)
 
         user = get_username(request) or "unknown"
-        
+
         tb.append(f"Request URL: {request.url} from user: {user}")
         tb = "\n".join(tb)
         request.app.logger.error(tb)

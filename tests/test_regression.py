@@ -137,7 +137,7 @@ def test_conversions():
     call_3_receive = "eth/txs/0x5DA7B9D34173E74F1594726B718D0759D5877E14C3CAA8612838A109C196EEEE/conversions"
     call_3_refund =  "eth/txs/0x9BD32A4E5B2BC63E858A04F2B8050A8168FBB6CA57A846769348BB1C1B862836/conversions"
     call_4_eth_to_token = "eth/txs/0x42D529A72CECD6ECE546D5AC0D2A6C2A9407876B66478A33917D8928833433F8/conversions"
-    
+
     call_4_eth_to_btc_thorchain = "eth/txs/0x16ed29f9bf9914ea3b62e4e94829eaef10118d04e82849a285ef8a5700defa1a/conversions"
     # https://thorchain.net/address/0x19317e026ef473d44D746d364062539Ba7Cb0fa3
 

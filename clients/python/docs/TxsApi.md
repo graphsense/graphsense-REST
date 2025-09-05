@@ -79,7 +79,7 @@ Name | Type | Description  | Notes
  **currency** | **str**| The cryptocurrency code (e.g., btc) |
  **tx_hash** | **str**| The transaction hash |
  **io_index** | **int**| index of the input or output in question | [optional]
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True. 
+**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
 **async_req** | **bool** | Execute request asynchronously | [optional] default is False.
 
 ### Return type
@@ -175,7 +175,7 @@ Name | Type | Description  | Notes
  **currency** | **str**| The cryptocurrency code (e.g., btc) |
  **tx_hash** | **str**| The transaction hash |
  **io_index** | **int**| index of the input or output in question | [optional]
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True. 
+**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
 **async_req** | **bool** | Execute request asynchronously | [optional] default is False.
 
 ### Return type
@@ -277,7 +277,7 @@ Name | Type | Description  | Notes
  **include_nonstandard_io** | **bool**| Whether to include non-standard inputs/outputs such as OP_RETURN of a transaction (UTXO only) | [optional] if omitted the server will use the default value of False
  **include_io_index** | **bool**| Whether to include the index of inputs/outputs of a transaction (UTXO only) | [optional] if omitted the server will use the default value of False
  **token_tx_id** | **int**| Select a specific token_transaction (Account model only) | [optional]
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True. 
+**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
 **async_req** | **bool** | Execute request asynchronously | [optional] default is False.
 
 ### Return type
@@ -362,7 +362,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **currency** | **str**| The cryptocurrency code (e.g., btc) |
  **tx_hash** | **str**| The transaction hash |
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True. 
+**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
 **async_req** | **bool** | Execute request asynchronously | [optional] default is False.
 
 ### Return type
@@ -462,7 +462,7 @@ Name | Type | Description  | Notes
  **io** | **str**| Input or outpus values of a transaction |
  **include_nonstandard_io** | **bool**| Whether to include non-standard inputs/outputs such as OP_RETURN of a transaction (UTXO only) | [optional] if omitted the server will use the default value of False
  **include_io_index** | **bool**| Whether to include the index of inputs/outputs of a transaction (UTXO only) | [optional] if omitted the server will use the default value of False
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True. 
+**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
 **async_req** | **bool** | Execute request asynchronously | [optional] default is False.
 
 ### Return type
@@ -547,7 +547,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **currency** | **str**| The cryptocurrency code (e.g., btc) |
  **tx_hash** | **str**| The transaction hash |
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True. 
+**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
 **async_req** | **bool** | Execute request asynchronously | [optional] default is False.
 
 ### Return type
@@ -651,7 +651,7 @@ Name | Type | Description  | Notes
  **token_currency** | **str**| Return transactions of given token or base currency | [optional]
  **page** | **str**| Resumption token for retrieving the next page | [optional]
  **pagesize** | **int**| Number of items returned in a single page | [optional]
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True. 
+**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
 **async_req** | **bool** | Execute request asynchronously | [optional] default is False.
 
 ### Return type
