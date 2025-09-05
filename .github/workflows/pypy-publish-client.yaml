@@ -1,0 +1,45 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Upload Python Package
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - v[0-9].[0-9]+.[0-9]+
+# on:
+#   release:
+#     types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.10"]
+    
+    defaults:
+      run:
+        working-directory: clients/python
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install the latest version of uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        version: "latest"
+    # - name: fix openssl legacy mode
+    #   run: sudo sed -i '/^default = default_sect/a legacy = legacy_sect' /etc/ssl/openssl.cnf &&  sudo sed -i 's/#openssl_conf/openssl_conf/g' /etc/ssl/openssl.cnf && sudo sed -i '/^\[default_sect\]/a activate = 1\n\[legacy_sect\]\nactivate = 1' /etc/ssl/openssl.cnf
+    - name: Install requirements
+      run: uv sync --python=${{ matrix.python }}
+    - name: Build wheel
+      run: make build
+    - name: Publish package
+      run: uv publish --token ${{ secrets.PYPI_API_TOKEN }}

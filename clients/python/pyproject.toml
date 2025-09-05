@@ -1,0 +1,33 @@
+[project]
+name = "graphsense-python"
+version = "1.14.0rc1"
+description = "GraphSense API"
+readme = { file = "README.md", content-type = "text/markdown; charset=UTF-8; variant=GFM" }
+requires-python = ">=3.6"
+dependencies = [
+    "urllib3 >= 1.25.3",
+    "python-dateutil>= 2.5.3",
+]
+keywords = ["OpenAPI", "OpenAPI-Generator", "GraphSense API"]
+authors = [
+    { name = "Iknaio Cryptoasset Analytics GmbH", email = "contact@ikna.io" }
+]
+maintainers = [
+    { name = "Iknaio Cryptoasset Analytics GmbH", email = "contact@ikna.io" }
+]
+
+[project.urls]
+Homepage = "https://graphsense.github.io/"
+Source = "https://github.com/graphsense/graphsense-REST/clients/python"
+Changelog = "https://github.com/graphsense/blob/master/CHANGELOG.md"
+"Bug Tracker" = "https://github.com/graphsense/graphsense-python/issues"
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+exclude = ["test", "tests", "clients"]
+
+[tool.setuptools]
+include-package-data = true

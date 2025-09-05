@@ -39,6 +39,11 @@ build-docker:
 serve-docker:
 	docker run --rm -it --network='host' -e NUM_THREADS=1 -e NUM_WORKERS=1 -v "${PWD}/instance/config.yaml:/config.yaml:Z" -e CONFIG_FILE=/config.yaml graphsense-rest:latest
 
+run-codegen: generate-python-client generate-openapi-server
+
+generate-python-client: update-package-version
+	cd clients/python; make generate-openapi-client
+
 generate-openapi-server: update-package-version
 	docker run --rm   \
 		-v "${PWD}:/build:Z" \
@@ -58,6 +63,7 @@ run-designer:
 
 update-package-version: update-openapi-version
 	sed -i -r 's/(version = ).*/\1$(GS_REST_SERVICE_VERSION)/' pyproject.toml
+	sed -i -r 's/(version = ).*/\1$(GS_REST_SERVICE_VERSION)/' clients/python/pyproject.toml
 
 update-openapi-version:
 	sed -i '/^info:/,/^  version:/s/^\(\s*version:\s*\).*/\1$(GS_REST_SERVICE_VERSION)/' openapi_spec/graphsense.yaml
@@ -68,4 +74,4 @@ tag-version:
 
 
 
-.PHONY: format lint test test-all-env serve generate-openapi-server get-openapi-spec-from-upstream serve-docker pre-commit install-dev update-openapi-version tag-version
+.PHONY: format lint test test-all-env run-codegen serve generate-openapi-server get-openapi-spec-from-upstream serve-docker pre-commit install-dev update-openapi-version tag-version generate-python-client

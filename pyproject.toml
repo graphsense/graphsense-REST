@@ -1,28 +1,40 @@
 [project]
 name = "gsrest"
-version = "1.14.0dev9"
+version = "1.14.0rc1"
 description = "GraphSense API REST API"
 readme = "README.md"
-changelog = "CHANGELOG.md"
-licence = "LICENSE"
 keywords = ["OpenAPI", "GraphSense API"]
 requires-python = ">=3.10"
-url = 'https://github.com/graphsense/graphsense-REST/'
+license = {file = "LICENSE"}
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
 dependencies = [
     "aiohttp-cors>=0.7.0",
     "aiohttp-jinja2>=1.5.0",
     "async-lru>=2.0.4",
-    "connexion[swagger-ui]>=2.6.0<3",
+    "connexion[swagger-ui] >=2.6.0, <3",
     "graphsense-lib[conversions,tagpacks]>=2.7.0",
     "openapi-schema-validator>=0.2.3",
     "python-dateutil>=2.9.0",
     "swagger-ui-bundle>=0.0.9",
 ]
+
+[project.urls]
+Homepage = "https://github.com/graphsense/graphsense-REST/"
+Repository = "https://github.com/graphsense/graphsense-REST/"
+Changelog = "https://github.com/graphsense/graphsense-REST/blob/master/CHANGELOG.md"
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+exclude = ["clients*", "tests*", "openapi_server*"]
+
+[tool.setuptools]
+include-package-data = false
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
@@ -31,6 +43,15 @@ markers = [
     "regression: mark test as regression test",
 ]
 addopts = "-m 'not regression'"
+testpaths = [
+    "tests",
+    "gsrest",
+]
+norecursedirs = [
+    "clients",
+    "build",
+    "dist",
+]
 
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
@@ -62,7 +83,8 @@ exclude = [
     "venv",
     "openapi_server",
     "tests/test_*.py",
-    "setup.py"
+    "setup.py",
+    "clients/**"
 ]
 
 [tool.ruff.lint]
