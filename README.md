@@ -26,7 +26,7 @@ pip install graphsense-python
 
 For detailed usage instructions and examples, see the [Python client documentation](./clients/python/README.md).
 
-## Setup
+## REST Interface - Setup
 
 Copy the configuration file template `instance/config.yaml.template`
 
