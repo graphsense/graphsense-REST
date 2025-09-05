@@ -115,7 +115,9 @@ class TxsApi(object):
         self.get_spending_txs = _Endpoint(
             settings={
                 'response_type': ([TxRef],),
-                'auth': [],
+                'auth': [
+                    'api_key'
+                ],
                 'endpoint_path': '/{currency}/txs/{tx_hash}/spending',
                 'operation_id': 'get_spending_txs',
                 'http_method': 'GET',
@@ -247,7 +249,9 @@ class TxsApi(object):
         self.get_spent_in_txs = _Endpoint(
             settings={
                 'response_type': ([TxRef],),
-                'auth': [],
+                'auth': [
+                    'api_key'
+                ],
                 'endpoint_path': '/{currency}/txs/{tx_hash}/spent_in',
                 'operation_id': 'get_spent_in_txs',
                 'http_method': 'GET',
@@ -382,7 +386,9 @@ class TxsApi(object):
         self.get_tx = _Endpoint(
             settings={
                 'response_type': (Tx,),
-                'auth': [],
+                'auth': [
+                    'api_key'
+                ],
                 'endpoint_path': '/{currency}/txs/{tx_hash}',
                 'operation_id': 'get_tx',
                 'http_method': 'GET',
@@ -528,7 +534,9 @@ class TxsApi(object):
         self.get_tx_conversions = _Endpoint(
             settings={
                 'response_type': ([ExternalConversion],),
-                'auth': [],
+                'auth': [
+                    'api_key'
+                ],
                 'endpoint_path': '/{currency}/txs/{tx_hash}/conversions',
                 'operation_id': 'get_tx_conversions',
                 'http_method': 'GET',
@@ -660,7 +668,9 @@ class TxsApi(object):
         self.get_tx_io = _Endpoint(
             settings={
                 'response_type': (TxValues,),
-                'auth': [],
+                'auth': [
+                    'api_key'
+                ],
                 'endpoint_path': '/{currency}/txs/{tx_hash}/{io}',
                 'operation_id': 'get_tx_io',
                 'http_method': 'GET',
@@ -808,7 +818,9 @@ class TxsApi(object):
         self.list_token_txs = _Endpoint(
             settings={
                 'response_type': (TxsAccount,),
-                'auth': [],
+                'auth': [
+                    'api_key'
+                ],
                 'endpoint_path': '/{currency}/token_txs/{tx_hash}',
                 'operation_id': 'list_token_txs',
                 'http_method': 'GET',
@@ -939,7 +951,9 @@ class TxsApi(object):
         self.list_tx_flows = _Endpoint(
             settings={
                 'response_type': (Txs,),
-                'auth': [],
+                'auth': [
+                    'api_key'
+                ],
                 'endpoint_path': '/{currency}/txs/{tx_hash}/flows',
                 'operation_id': 'list_tx_flows',
                 'http_method': 'GET',

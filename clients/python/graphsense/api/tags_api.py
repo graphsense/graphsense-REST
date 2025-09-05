@@ -110,7 +110,9 @@ class TagsApi(object):
         self.get_actor = _Endpoint(
             settings={
                 'response_type': (Actor,),
-                'auth': [],
+                'auth': [
+                    'api_key'
+                ],
                 'endpoint_path': '/tags/actors/{actor}',
                 'operation_id': 'get_actor',
                 'http_method': 'GET',
@@ -228,7 +230,9 @@ class TagsApi(object):
         self.get_actor_tags = _Endpoint(
             settings={
                 'response_type': (AddressTags,),
-                'auth': [],
+                'auth': [
+                    'api_key'
+                ],
                 'endpoint_path': '/tags/actors/{actor}/tags',
                 'operation_id': 'get_actor_tags',
                 'http_method': 'GET',
@@ -361,7 +365,9 @@ class TagsApi(object):
         self.list_address_tags = _Endpoint(
             settings={
                 'response_type': (AddressTags,),
-                'auth': [],
+                'auth': [
+                    'api_key'
+                ],
                 'endpoint_path': '/tags',
                 'operation_id': 'list_address_tags',
                 'http_method': 'GET',
@@ -492,7 +498,9 @@ class TagsApi(object):
         self.list_concepts = _Endpoint(
             settings={
                 'response_type': ([Concept],),
-                'auth': [],
+                'auth': [
+                    'api_key'
+                ],
                 'endpoint_path': '/tags/taxonomies/{taxonomy}/concepts',
                 'operation_id': 'list_concepts',
                 'http_method': 'GET',
@@ -603,7 +611,9 @@ class TagsApi(object):
         self.list_taxonomies = _Endpoint(
             settings={
                 'response_type': ([Taxonomy],),
-                'auth': [],
+                'auth': [
+                    'api_key'
+                ],
                 'endpoint_path': '/tags/taxonomies',
                 'operation_id': 'list_taxonomies',
                 'http_method': 'GET',
@@ -712,7 +722,9 @@ class TagsApi(object):
         self.report_tag = _Endpoint(
             settings={
                 'response_type': (UserTagReportResponse,),
-                'auth': [],
+                'auth': [
+                    'api_key'
+                ],
                 'endpoint_path': '/tags/report-tag',
                 'operation_id': 'report_tag',
                 'http_method': 'POST',

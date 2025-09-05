@@ -1691,7 +1691,7 @@ wheels = [
 
 [[package]]
 name = "graphsense-lib"
-version = "2.7.0"
+version = "2.7.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
@@ -1719,9 +1719,9 @@ dependencies = [
     { name = "simplejson" },
     { name = "tenacity" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/cd/3e/2c8c93b8c3450db5d09991c4fd481f2dfe28484ec7cb25adf5884335b734/graphsense_lib-2.7.0.tar.gz", hash = "sha256:16de2cbfafc020909623611cef176f0e3a32427b2ebcdf3032dc890e688294c2", size = 12506148 }
+sdist = { url = "https://files.pythonhosted.org/packages/ee/31/d3b9375b9e9b513824663fe87428b4b9991f62b6395e967713d2a4151310/graphsense_lib-2.7.1.tar.gz", hash = "sha256:8e86d2017be03a696df6c5582a5cb2531766cf412ae30a7ce6eb6fb1f7e53672", size = 12506864 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/41/5a/05812c2e237b44ba6419a71c4c3131aa405a5eae3dec95d6c9439f0f8f98/graphsense_lib-2.7.0-py3-none-any.whl", hash = "sha256:602c410d7f56dda6fc891b8e029125feedc7013636001a1d9c2c01221c8007ab", size = 696293 },
+    { url = "https://files.pythonhosted.org/packages/62/88/cffc5ffd3612150a15481a76b44785206efe58244e880a019af9fc4b9d50/graphsense_lib-2.7.1-py3-none-any.whl", hash = "sha256:09863d6cd739035cf25b17fd8a57ff8ae8eb12dc5429f9b29d26697b3a2f8066", size = 696978 },
 ]
 
 [package.optional-dependencies]
@@ -1813,8 +1813,8 @@ wheels = [
 
 [[package]]
 name = "gsrest"
-version = "1.14.0.dev9"
-source = { virtual = "." }
+version = "1.14.0rc1"
+source = { editable = "." }
 dependencies = [
     { name = "aiohttp-cors" },
     { name = "aiohttp-jinja2" },
@@ -1847,7 +1847,7 @@ requires-dist = [
     { name = "aiohttp-jinja2", specifier = ">=1.5.0" },
     { name = "async-lru", specifier = ">=2.0.4" },
     { name = "connexion", extras = ["swagger-ui"], specifier = ">=2.6.0,<3" },
-    { name = "graphsense-lib", extras = ["conversions", "tagpacks"], specifier = ">=2.7.0" },
+    { name = "graphsense-lib", extras = ["conversions", "tagpacks"], specifier = ">=2.7.1" },
     { name = "openapi-schema-validator", specifier = ">=0.2.3" },
     { name = "python-dateutil", specifier = ">=2.9.0" },
     { name = "swagger-ui-bundle", specifier = ">=0.0.9" },

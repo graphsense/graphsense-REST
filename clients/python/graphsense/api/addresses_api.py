@@ -118,7 +118,9 @@ class AddressesApi(object):
         self.get_address = _Endpoint(
             settings={
                 'response_type': (Address,),
-                'auth': [],
+                'auth': [
+                    'api_key'
+                ],
                 'endpoint_path': '/{currency}/addresses/{address}',
                 'operation_id': 'get_address',
                 'http_method': 'GET',
@@ -250,7 +252,9 @@ class AddressesApi(object):
         self.get_address_entity = _Endpoint(
             settings={
                 'response_type': (Entity,),
-                'auth': [],
+                'auth': [
+                    'api_key'
+                ],
                 'endpoint_path': '/{currency}/addresses/{address}/entity',
                 'operation_id': 'get_address_entity',
                 'http_method': 'GET',
@@ -382,7 +386,9 @@ class AddressesApi(object):
         self.get_tag_summary_by_address = _Endpoint(
             settings={
                 'response_type': (TagSummary,),
-                'auth': [],
+                'auth': [
+                    'api_key'
+                ],
                 'endpoint_path': '/{currency}/addresses/{address}/tag_summary',
                 'operation_id': 'get_tag_summary_by_address',
                 'http_method': 'GET',
@@ -525,7 +531,9 @@ class AddressesApi(object):
         self.list_address_links = _Endpoint(
             settings={
                 'response_type': (Links,),
-                'auth': [],
+                'auth': [
+                    'api_key'
+                ],
                 'endpoint_path': '/{currency}/addresses/{address}/links',
                 'operation_id': 'list_address_links',
                 'http_method': 'GET',
@@ -717,7 +725,9 @@ class AddressesApi(object):
         self.list_address_neighbors = _Endpoint(
             settings={
                 'response_type': (NeighborAddresses,),
-                'auth': [],
+                'auth': [
+                    'api_key'
+                ],
                 'endpoint_path': '/{currency}/addresses/{address}/neighbors',
                 'operation_id': 'list_address_neighbors',
                 'http_method': 'GET',
@@ -895,7 +905,9 @@ class AddressesApi(object):
         self.list_address_txs = _Endpoint(
             settings={
                 'response_type': (AddressTxs,),
-                'auth': [],
+                'auth': [
+                    'api_key'
+                ],
                 'endpoint_path': '/{currency}/addresses/{address}/txs',
                 'operation_id': 'list_address_txs',
                 'http_method': 'GET',
@@ -1086,7 +1098,9 @@ class AddressesApi(object):
         self.list_related_addresses = _Endpoint(
             settings={
                 'response_type': (RelatedAddresses,),
-                'auth': [],
+                'auth': [
+                    'api_key'
+                ],
                 'endpoint_path': '/{currency}/addresses/{address}/related_addresses',
                 'operation_id': 'list_related_addresses',
                 'http_method': 'GET',
@@ -1240,7 +1254,9 @@ class AddressesApi(object):
         self.list_tags_by_address = _Endpoint(
             settings={
                 'response_type': (AddressTags,),
-                'auth': [],
+                'auth': [
+                    'api_key'
+                ],
                 'endpoint_path': '/{currency}/addresses/{address}/tags',
                 'operation_id': 'list_tags_by_address',
                 'http_method': 'GET',

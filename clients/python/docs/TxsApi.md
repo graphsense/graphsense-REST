@@ -20,6 +20,7 @@ Returns in which other transaction's outputs the asked transaction spent. Think 
 
 ### Example
 
+* Api Key Authentication (api_key):
 ```python
 import time
 from dateutil.parser import parse as dateutil_parser
@@ -33,9 +34,19 @@ configuration = graphsense.Configuration(
     host = "https://api.ikna.io"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: api_key
+configuration.api_key['api_key'] = 'YOUR_API_KEY'
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['api_key'] = 'Bearer'
 
 # Enter a context with an instance of the API client
-with graphsense.ApiClient() as api_client:
+with graphsense.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = txs_api.TxsApi(api_client)
     currency = "btc" # str | The cryptocurrency code (e.g., btc)
@@ -83,7 +94,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[api_key](../README.md#api_key)
 
 ### HTTP request headers
 
@@ -105,6 +116,7 @@ Returns in which other transactions, outputs from the asked transaction are spen
 
 ### Example
 
+* Api Key Authentication (api_key):
 ```python
 import time
 from dateutil.parser import parse as dateutil_parser
@@ -118,9 +130,19 @@ configuration = graphsense.Configuration(
     host = "https://api.ikna.io"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: api_key
+configuration.api_key['api_key'] = 'YOUR_API_KEY'
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['api_key'] = 'Bearer'
 
 # Enter a context with an instance of the API client
-with graphsense.ApiClient() as api_client:
+with graphsense.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = txs_api.TxsApi(api_client)
     currency = "btc" # str | The cryptocurrency code (e.g., btc)
@@ -168,7 +190,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[api_key](../README.md#api_key)
 
 ### HTTP request headers
 
@@ -190,6 +212,7 @@ Returns details of a specific transaction identified by its hash
 
 ### Example
 
+* Api Key Authentication (api_key):
 ```python
 import time
 from dateutil.parser import parse as dateutil_parser
@@ -203,9 +226,19 @@ configuration = graphsense.Configuration(
     host = "https://api.ikna.io"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: api_key
+configuration.api_key['api_key'] = 'YOUR_API_KEY'
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['api_key'] = 'Bearer'
 
 # Enter a context with an instance of the API client
-with graphsense.ApiClient() as api_client:
+with graphsense.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = txs_api.TxsApi(api_client)
     currency = "btc" # str | The cryptocurrency code (e.g., btc)
@@ -259,7 +292,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[api_key](../README.md#api_key)
 
 ### HTTP request headers
 
@@ -281,6 +314,7 @@ Returns conversion information (swaps or bridging txs) extracted from a specific
 
 ### Example
 
+* Api Key Authentication (api_key):
 ```python
 import time
 from dateutil.parser import parse as dateutil_parser
@@ -294,9 +328,19 @@ configuration = graphsense.Configuration(
     host = "https://api.ikna.io"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: api_key
+configuration.api_key['api_key'] = 'YOUR_API_KEY'
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['api_key'] = 'Bearer'
 
 # Enter a context with an instance of the API client
-with graphsense.ApiClient() as api_client:
+with graphsense.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = txs_api.TxsApi(api_client)
     currency = "btc" # str | The cryptocurrency code (e.g., btc)
@@ -333,7 +377,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[api_key](../README.md#api_key)
 
 ### HTTP request headers
 
@@ -355,6 +399,7 @@ Returns input/output values of a specific transaction identified by its hash
 
 ### Example
 
+* Api Key Authentication (api_key):
 ```python
 import time
 from dateutil.parser import parse as dateutil_parser
@@ -368,9 +413,19 @@ configuration = graphsense.Configuration(
     host = "https://api.ikna.io"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: api_key
+configuration.api_key['api_key'] = 'YOUR_API_KEY'
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['api_key'] = 'Bearer'
 
 # Enter a context with an instance of the API client
-with graphsense.ApiClient() as api_client:
+with graphsense.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = txs_api.TxsApi(api_client)
     currency = "btc" # str | The cryptocurrency code (e.g., btc)
@@ -422,7 +477,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[api_key](../README.md#api_key)
 
 ### HTTP request headers
 
@@ -444,6 +499,7 @@ Returns all token transactions in a given transaction
 
 ### Example
 
+* Api Key Authentication (api_key):
 ```python
 import time
 from dateutil.parser import parse as dateutil_parser
@@ -457,9 +513,19 @@ configuration = graphsense.Configuration(
     host = "https://api.ikna.io"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: api_key
+configuration.api_key['api_key'] = 'YOUR_API_KEY'
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['api_key'] = 'Bearer'
 
 # Enter a context with an instance of the API client
-with graphsense.ApiClient() as api_client:
+with graphsense.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = txs_api.TxsApi(api_client)
     currency = "btc" # str | The cryptocurrency code (e.g., btc)
@@ -496,7 +562,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[api_key](../README.md#api_key)
 
 ### HTTP request headers
 
@@ -518,6 +584,7 @@ Returns all asset flows / Internal txs and token flows within a given transactio
 
 ### Example
 
+* Api Key Authentication (api_key):
 ```python
 import time
 from dateutil.parser import parse as dateutil_parser
@@ -531,9 +598,19 @@ configuration = graphsense.Configuration(
     host = "https://api.ikna.io"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: api_key
+configuration.api_key['api_key'] = 'YOUR_API_KEY'
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['api_key'] = 'Bearer'
 
 # Enter a context with an instance of the API client
-with graphsense.ApiClient() as api_client:
+with graphsense.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = txs_api.TxsApi(api_client)
     currency = "btc" # str | The cryptocurrency code (e.g., btc)
@@ -589,7 +666,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[api_key](../README.md#api_key)
 
 ### HTTP request headers
 

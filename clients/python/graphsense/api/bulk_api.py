@@ -116,7 +116,9 @@ class BulkApi(object):
         self.bulk_csv = _Endpoint(
             settings={
                 'response_type': (str,),
-                'auth': [],
+                'auth': [
+                    'api_key'
+                ],
                 'endpoint_path': '/{currency}/bulk.csv/{operation}',
                 'operation_id': 'bulk_csv',
                 'http_method': 'POST',
@@ -289,7 +291,9 @@ class BulkApi(object):
         self.bulk_json = _Endpoint(
             settings={
                 'response_type': ([{str: (bool, date, datetime, dict, float, int, list, str, none_type)}],),
-                'auth': [],
+                'auth': [
+                    'api_key'
+                ],
                 'endpoint_path': '/{currency}/bulk.json/{operation}',
                 'operation_id': 'bulk_json',
                 'http_method': 'POST',

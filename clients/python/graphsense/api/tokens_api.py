@@ -105,7 +105,9 @@ class TokensApi(object):
         self.list_supported_tokens = _Endpoint(
             settings={
                 'response_type': (TokenConfigs,),
-                'auth': [],
+                'auth': [
+                    'api_key'
+                ],
                 'endpoint_path': '/{currency}/supported_tokens',
                 'operation_id': 'list_supported_tokens',
                 'http_method': 'GET',

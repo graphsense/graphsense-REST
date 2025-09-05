@@ -17,9 +17,8 @@ Python >= 3.6
 If the python package is hosted on a repository, you can install directly using:
 
 ```sh
-pip install git+https://github.com/graphsense/graphsense-python.git
+pip install git+https://github.com/graphsense/graphsense-REST.git#subdirectory=clients/python
 ```
-(you may need to run `pip` with root permission: `sudo pip install git+https://github.com/graphsense/graphsense-python.git`)
 
 Then import the package:
 ```python
@@ -65,6 +64,16 @@ configuration = graphsense.Configuration(
     host = "https://api.ikna.io"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: api_key
+configuration.api_key['api_key'] = 'YOUR_API_KEY'
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['api_key'] = 'Bearer'
 
 
 # Enter a context with an instance of the API client
@@ -196,7 +205,13 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Authorization
 
- All endpoints do not require authorization.
+
+## api_key
+
+- **Type**: API key
+- **API key parameter name**: Authorization
+- **Location**: HTTP header
+
 
 ## Examples
 
@@ -223,6 +238,6 @@ Run the jupyter notebooks
 This python package has been generated from [Graphsense's OpenAPI specification](https://api.ikna.io) hosted by [Iknaio Cryptoasset Analytics GmbH](https://ikna.io) using this command:
 
 ```
-make GS_REST_SERVICE_URL="https://api.ikna.io" generate-openapi-client
+make generate-openapi-client
 ```
 

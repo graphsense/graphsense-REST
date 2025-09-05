@@ -19,6 +19,7 @@ Returns an actor given its unique id or (unique) label
 
 ### Example
 
+* Api Key Authentication (api_key):
 ```python
 import time
 from dateutil.parser import parse as dateutil_parser
@@ -32,9 +33,19 @@ configuration = graphsense.Configuration(
     host = "https://api.ikna.io"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: api_key
+configuration.api_key['api_key'] = 'YOUR_API_KEY'
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['api_key'] = 'Bearer'
 
 # Enter a context with an instance of the API client
-with graphsense.ApiClient() as api_client:
+with graphsense.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = tags_api.TagsApi(api_client)
     actor = "binance" # str | actor id
@@ -69,7 +80,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[api_key](../README.md#api_key)
 
 ### HTTP request headers
 
@@ -91,6 +102,7 @@ Returns the address tags for a given actor
 
 ### Example
 
+* Api Key Authentication (api_key):
 ```python
 import time
 from dateutil.parser import parse as dateutil_parser
@@ -104,9 +116,19 @@ configuration = graphsense.Configuration(
     host = "https://api.ikna.io"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: api_key
+configuration.api_key['api_key'] = 'YOUR_API_KEY'
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['api_key'] = 'Bearer'
 
 # Enter a context with an instance of the API client
-with graphsense.ApiClient() as api_client:
+with graphsense.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = tags_api.TagsApi(api_client)
     actor = "binance" # str | actor id
@@ -154,7 +176,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[api_key](../README.md#api_key)
 
 ### HTTP request headers
 
@@ -176,6 +198,7 @@ Returns address tags associated with a given label
 
 ### Example
 
+* Api Key Authentication (api_key):
 ```python
 import time
 from dateutil.parser import parse as dateutil_parser
@@ -189,9 +212,19 @@ configuration = graphsense.Configuration(
     host = "https://api.ikna.io"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: api_key
+configuration.api_key['api_key'] = 'YOUR_API_KEY'
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['api_key'] = 'Bearer'
 
 # Enter a context with an instance of the API client
-with graphsense.ApiClient() as api_client:
+with graphsense.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = tags_api.TagsApi(api_client)
     label = "cimedy" # str | The label of an entity
@@ -239,7 +272,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[api_key](../README.md#api_key)
 
 ### HTTP request headers
 
@@ -261,6 +294,7 @@ Returns the supported concepts of a taxonomy
 
 ### Example
 
+* Api Key Authentication (api_key):
 ```python
 import time
 from dateutil.parser import parse as dateutil_parser
@@ -274,9 +308,19 @@ configuration = graphsense.Configuration(
     host = "https://api.ikna.io"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: api_key
+configuration.api_key['api_key'] = 'YOUR_API_KEY'
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['api_key'] = 'Bearer'
 
 # Enter a context with an instance of the API client
-with graphsense.ApiClient() as api_client:
+with graphsense.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = tags_api.TagsApi(api_client)
     taxonomy = "concept" # str | The taxonomy
@@ -311,7 +355,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[api_key](../README.md#api_key)
 
 ### HTTP request headers
 
@@ -333,6 +377,7 @@ Returns the supported taxonomies
 
 ### Example
 
+* Api Key Authentication (api_key):
 ```python
 import time
 from dateutil.parser import parse as dateutil_parser
@@ -346,9 +391,19 @@ configuration = graphsense.Configuration(
     host = "https://api.ikna.io"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: api_key
+configuration.api_key['api_key'] = 'YOUR_API_KEY'
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['api_key'] = 'Bearer'
 
 # Enter a context with an instance of the API client
-with graphsense.ApiClient() as api_client:
+with graphsense.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = tags_api.TagsApi(api_client)
 
@@ -379,7 +434,7 @@ This endpoint does not need any parameter.
 
 ### Authorization
 
-No authorization required
+[api_key](../README.md#api_key)
 
 ### HTTP request headers
 
@@ -401,6 +456,7 @@ Users can use this endpoint to report a missing annotation.
 
 ### Example
 
+* Api Key Authentication (api_key):
 ```python
 import time
 from dateutil.parser import parse as dateutil_parser
@@ -415,9 +471,19 @@ configuration = graphsense.Configuration(
     host = "https://api.ikna.io"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: api_key
+configuration.api_key['api_key'] = 'YOUR_API_KEY'
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['api_key'] = 'Bearer'
 
 # Enter a context with an instance of the API client
-with graphsense.ApiClient() as api_client:
+with graphsense.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = tags_api.TagsApi(api_client)
     user_reported_tag = UserReportedTag(
@@ -458,7 +524,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[api_key](../README.md#api_key)
 
 ### HTTP request headers
 
