@@ -18,9 +18,9 @@ maintainers = [
 
 [project.urls]
 Homepage = "https://graphsense.github.io/"
-Source = "https://github.com/graphsense/graphsense-REST/clients/python"
-Changelog = "https://github.com/graphsense/blob/master/CHANGELOG.md"
-"Bug Tracker" = "https://github.com/graphsense/graphsense-python/issues"
+Source = "https://github.com/graphsense/graphsense-REST/tree/master/clients/python"
+Changelog = "https://github.com/graphsense/graphsense-REST/tree/master/CHANGELOG.md"
+"Bug Tracker" = "https://github.com/graphsense/graphsense-rest/issues"
 
 [build-system]
 requires = ["setuptools", "wheel"]
