@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### added
 - /{currency}/txs/{tx_hash}/flows enables to fetch all sub transactions created during the execution of a transaction (for evm chains token and internal transactions)
 - /{currency}/addresses/{address}/related_addresses to fetch related addresses to fetch clustered addresses by different algorithms.
+- python client code with generation from https://github.com/graphsense/graphsense-python
 
 ### changed
 - deprecated /{currency}/token_txs/{tx_hash} is replaced by /{currency}/txs/{tx_hash}/flows?only_token_txs=true

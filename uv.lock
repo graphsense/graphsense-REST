@@ -1813,7 +1813,7 @@ wheels = [
 
 [[package]]
 name = "gsrest"
-version = "1.14.0rc3"
+version = "1.14.0"
 source = { editable = "." }
 dependencies = [
     { name = "aiohttp-cors" },
