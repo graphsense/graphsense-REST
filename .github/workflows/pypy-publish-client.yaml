@@ -40,6 +40,6 @@ jobs:
     - name: Install requirements
       run: uv sync --python=${{ matrix.python }}
     - name: Build wheel
-      run: make build
+      run: uv build
     - name: Publish package
       run: uv publish --token ${{ secrets.PYPI_API_TOKEN }}
