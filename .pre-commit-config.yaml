@@ -54,9 +54,9 @@ repos:
     - id: uv-lock
 -   repo: local
     hooks:
-    - id: generate-openapi-server
-      name: Generate OpenAPI Server
-      entry: make generate-openapi-server
+    - id: codegen
+      name: Ensure Generated Code is up to date
+      entry: make run-codegen
       language: system
       pass_filenames: false
       always_run: true
@@ -66,11 +66,3 @@ repos:
       language: system
       pass_filenames: false
       always_run: true
--   repo: local
-    hooks:
-    -   id: codegen
-        name: Ensure Generated Code is up to date
-        entry: make run-codegen
-        language: system
-        pass_filenames: false
-        always_run: true
