@@ -5,7 +5,8 @@ description = "GraphSense API REST API"
 readme = "README.md"
 keywords = ["OpenAPI", "GraphSense API"]
 requires-python = ">=3.10"
-license = {file = "LICENSE"}
+license-files = ["LICENSE"]
+license = "MIT"
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
@@ -31,7 +32,8 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-exclude = ["clients*", "tests*", "openapi_server*", "scripts*"]
+include = ["gsrest*", "openapi_server*"]
+exclude = ["clients*", "tests*", "scripts*", "gsrest.test", "gsrest.test.*"]
 
 [tool.setuptools]
 include-package-data = false
