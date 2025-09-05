@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [25.08.3/1.13.3] - 2025-09-01
+## [25.09.0/1.14.0] - 2025-09-01
 ### added
 - /{currency}/txs/{tx_hash}/flows enables to fetch all sub transactions created during the execution of a transaction (for evm chains token and internal transactions)
 - /{currency}/addresses/{address}/related_addresses to fetch related addresses to fetch clustered addresses by different algorithms.
@@ -11,6 +11,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### changed
 - deprecated /{currency}/token_txs/{tx_hash} is replaced by /{currency}/txs/{tx_hash}/flows?only_token_txs=true
 - search endpoint does not return sub txs anymore, use tx_hash flows to resolve if needed.
+
+## [25.08.4/1.13.4] - 2025-08-14
+
+### fixed
+- search bug for trx addresses
 
 ## [25.08.3/1.13.3] - 2025-08-05
 
