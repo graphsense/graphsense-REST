@@ -29,5 +29,10 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools.packages.find]
 exclude = ["test", "tests", "clients"]
 
+[dependency-groups]
+dev = [
+    "pypandoc>=1.14",
+]
+
 [tool.setuptools]
 include-package-data = true

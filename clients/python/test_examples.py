@@ -6,7 +6,7 @@ from io import StringIO
 from contextlib import redirect_stdout
 
 pattern = "*Api"
-api_key = os.environ.get('API_KEY')
+api_key = os.environ.get('GS_API_KEY')
 replace = os.environ.get('REPLACE_API_URL')
 
 for fil in glob.glob("./docs/"+pattern+".md"):
