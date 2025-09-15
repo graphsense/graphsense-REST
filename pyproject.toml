@@ -1,6 +1,6 @@
 [project]
 name = "gsrest"
-version = "1.14.0"
+version = "1.14.1"
 description = "GraphSense API REST API"
 readme = "README.md"
 keywords = ["OpenAPI", "GraphSense API"]
@@ -16,7 +16,7 @@ dependencies = [
     "aiohttp-jinja2>=1.5.0",
     "async-lru>=2.0.4",
     "connexion[swagger-ui] >=2.6.0, <3",
-    "graphsense-lib[conversions,tagpacks]>=2.7.1",
+    "graphsense-lib[conversions,tagpacks]>=2.7.2",
     "openapi-schema-validator>=0.2.3",
     "python-dateutil>=2.9.0",
     "swagger-ui-bundle>=0.0.9",
