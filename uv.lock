@@ -1658,7 +1658,7 @@ yaml = [
 
 [[package]]
 name = "graphsense-lib"
-version = "2.7.2"
+version = "2.7.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
@@ -1687,9 +1687,9 @@ dependencies = [
     { name = "simplejson" },
     { name = "tenacity" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9b/d9/d628e937228a52aa34caa4ef3c2d3d1010f831cd2ba53de29a9ea79eebdd/graphsense_lib-2.7.2.tar.gz", hash = "sha256:32461d7b381dd96ff9b2e3419c6e762d6cba477655405c4e24d89c92d7706505", size = 12538745 }
+sdist = { url = "https://files.pythonhosted.org/packages/72/a7/7fc393e96e663814f18186b8726065d95539b2432313281dda6dff18578d/graphsense_lib-2.7.5.tar.gz", hash = "sha256:452e3b6e68c6f8b8655e6fc9e2d01dd516d0c0e659d944729853abbc51a67007", size = 12544033 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/bd/e7/c3b59b184f8edb944a62e7052b9e7c87f351a35101091bbc29ce00e74643/graphsense_lib-2.7.2-py3-none-any.whl", hash = "sha256:ec1e3a40fe3070c6f1efec446efbe137de4c2af47e18927df969be6ba08b14eb", size = 702658 },
+    { url = "https://files.pythonhosted.org/packages/f0/81/402ca166246f6c197929cb9f9a5ef6e050c2d6d2de3a915b08fc28bc6bd7/graphsense_lib-2.7.5-py3-none-any.whl", hash = "sha256:781c06614d4eb08464fae60c5453100b3695257116855b7827576be00f292d06", size = 702801 },
 ]
 
 [package.optional-dependencies]
@@ -1781,7 +1781,7 @@ wheels = [
 
 [[package]]
 name = "gsrest"
-version = "1.14.1"
+version = "1.14.2"
 source = { editable = "." }
 dependencies = [
     { name = "aiohttp-cors" },
@@ -1815,7 +1815,7 @@ requires-dist = [
     { name = "aiohttp-jinja2", specifier = ">=1.5.0" },
     { name = "async-lru", specifier = ">=2.0.4" },
     { name = "connexion", extras = ["swagger-ui"], specifier = ">=2.6.0,<3" },
-    { name = "graphsense-lib", extras = ["conversions", "tagpacks"], specifier = ">=2.7.2" },
+    { name = "graphsense-lib", extras = ["conversions", "tagpacks"], specifier = ">=2.7.5" },
     { name = "openapi-schema-validator", specifier = ">=0.2.3" },
     { name = "python-dateutil", specifier = ">=2.9.0" },
     { name = "swagger-ui-bundle", specifier = ">=0.0.9" },

@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [25.09.2/1.14.2] - 2025-10-02
+### fixed
+- failing wormhole requests (gslib 2.7.5)
+
 ## [25.09.1/1.14.1] - 2025-09-15
 ### fixed
 - failing thorchain requests (gslib 2.7.2)
