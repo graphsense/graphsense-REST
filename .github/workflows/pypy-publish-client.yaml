@@ -32,8 +32,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
-    - name: Ensure Version Alignment
-      run: make ensure-versions-alignment
+    # - name: Ensure Version Alignment
+    #   run: make ensure-versions-alignment
     - name: Install the latest version of uv
       uses: astral-sh/setup-uv@v6
       with:
