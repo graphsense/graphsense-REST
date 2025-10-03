@@ -1264,7 +1264,7 @@ name = "exceptiongroup"
 version = "1.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/0b/9f/a65090624ecf468cdca03533906e7c69ed7588582240cfe7cc9e770b50eb/exceptiongroup-1.3.0.tar.gz", hash = "sha256:b241f5885f560bc56a59ee63ca4c6a8bfa46ae4ad651af316d4e81817bb9fd88", size = 29749 }
 wheels = [
@@ -1752,7 +1752,7 @@ yaml = [
 
 [[package]]
 name = "graphsense-lib"
-version = "2.7.6"
+version = "2.7.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
@@ -1781,9 +1781,9 @@ dependencies = [
     { name = "simplejson" },
     { name = "tenacity" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ca/33/7060f006d23cb95b173c5edba21af7fd2efcc1e6c41441b8760f96b32dca/graphsense_lib-2.7.6.tar.gz", hash = "sha256:502a67064b989aa0a91b085cf8e80a613ea03a3906da4f96d178181e1d5b3b8e", size = 12545079 }
+sdist = { url = "https://files.pythonhosted.org/packages/03/6c/87a3333a52eff5431c912e84478d9fa9d5e65476ad81319cf78c7e67a22e/graphsense_lib-2.7.7.tar.gz", hash = "sha256:a4ec92bc362c46644f3240349e171995c7414f7aa9d42aa520e568b21d0d6f85", size = 12545083 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/cf/6f/ad100990f0752fe534436b850828b8d3da7747e0d0e8343d4fbb22e18faf/graphsense_lib-2.7.6-py3-none-any.whl", hash = "sha256:b9e5b7d0942a619eb762d664460baec364a51b9d5db48f451c6b4672a34adb6f", size = 703851 },
+    { url = "https://files.pythonhosted.org/packages/1a/a7/8e0dea23405e0d092fff0f080888c6ee0783b5a88cadabca6709a5c258b3/graphsense_lib-2.7.7-py3-none-any.whl", hash = "sha256:057078233b7a7da132cb3ab71ac83a93ac79714e59d9b98cddbd88d8035e7946", size = 703898 },
 ]
 
 [package.optional-dependencies]
@@ -1811,15 +1811,15 @@ tagpacks = [
 
 [[package]]
 name = "graphsense-python"
-version = "1.14.0"
+version = "1.14.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "python-dateutil" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e0/37/281579d9155347f3f6f0c941cca84490fd510fad2849b7fc1c5bd368b0a1/graphsense_python-1.14.0.tar.gz", hash = "sha256:d2ebc3d9d47297523986150498d9bc37303b03ae5fc08c4f3724da91c504175a", size = 79996 }
+sdist = { url = "https://files.pythonhosted.org/packages/9c/ad/15c430d2e4a2a345fb68b41d597ae84f7a2be1b2d39a96cb200c4ad32849/graphsense_python-1.14.3.tar.gz", hash = "sha256:336e5f096c1abb76ed394f6b367cd53ddcef871cec347892af1dddb8304c98d5", size = 79909 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/84/f1/88a7ffd0331bfb5cd8cada5426bb4c3711a1f7692434458b1f1f822303b8/graphsense_python-1.14.0-py3-none-any.whl", hash = "sha256:8a80b5b3c04c87559328fd7ce0490394a1fd5614d4b119fd728fa7a5fe0c42fb", size = 234771 },
+    { url = "https://files.pythonhosted.org/packages/b3/a9/2ae16e03c1e79e3d35c0c588e93393e7ef0c37b8b899864c3268420501d6/graphsense_python-1.14.3-py3-none-any.whl", hash = "sha256:efeff6e3207c6ef3b369241695273b6b1086b77c591016f14fb4c306a9cb0d94", size = 234796 },
 ]
 
 [[package]]
