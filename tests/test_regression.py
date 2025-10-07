@@ -141,10 +141,14 @@ def test_conversions():
     call_4_eth_to_btc_thorchain = "eth/txs/0x16ed29f9bf9914ea3b62e4e94829eaef10118d04e82849a285ef8a5700defa1a/conversions"
     # https://thorchain.net/address/0x19317e026ef473d44D746d364062539Ba7Cb0fa3
 
+    # thor 2nd endpoint
+    call_5 = "eth/txs/ce09a43f14088aa5ab1e2366609678c03f4b1023b5e372c6a208201601a9270f/conversions"
+
+    call_6 = "eth/txs/250bb9fd01c35f36b96eeac039de3841013c9ac63a74788976900a713ccd2695/conversions" # swap that has trace0 trace_address == None
 
     calls = [
         call_1, call_2, call_3_send, call_3_receive, call_3_refund, call_4_eth_to_token,
-        call_4_eth_to_btc_thorchain
+        call_4_eth_to_btc_thorchain, call_5, call_6
     ]
     for call in calls:
         logger.info(f"Testing call: {call}")
