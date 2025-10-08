@@ -26,12 +26,16 @@ async def search_by_currency(request, currency, q, limit=10):
     return pydantic_search_result_by_currency_to_openapi(pydantic_result)
 
 
-async def search(request, q, currency=None, limit=10):
+async def search(request, q, currency=None, limit=10, include_sub_tx_identifiers=False):
     services = get_service_container(request)
     tagstore_groups = get_tagstore_access_groups(request)
 
     pydantic_result = await services.general_service.search(
-        q, tagstore_groups, currency, limit, include_sub_tx_identifiers=False
+        q,
+        tagstore_groups,
+        currency,
+        limit,
+        include_sub_tx_identifiers=include_sub_tx_identifiers,
     )
 
     return pydantic_search_result_to_openapi(pydantic_result)

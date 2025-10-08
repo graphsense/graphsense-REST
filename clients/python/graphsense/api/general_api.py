@@ -160,6 +160,7 @@ class GeneralApi(object):
             Keyword Args:
                 currency (str): The cryptocurrency (e.g., btc). [optional]
                 limit (int): Maximum number of search results. [optional] if omitted the server will use the default value of 10
+                include_sub_tx_identifiers (bool): Whether to include sub-transaction identifiers. [optional] if omitted the server will use the default value of False
                 _return_http_data_only (bool): response data without head status
                     code and headers. Default is True.
                 _preload_content (bool): if False, the urllib3.HTTPResponse object
@@ -224,6 +225,7 @@ class GeneralApi(object):
                     'q',
                     'currency',
                     'limit',
+                    'include_sub_tx_identifiers',
                 ],
                 'required': [
                     'q',
@@ -257,16 +259,20 @@ class GeneralApi(object):
                         (str,),
                     'limit':
                         (int,),
+                    'include_sub_tx_identifiers':
+                        (bool,),
                 },
                 'attribute_map': {
                     'q': 'q',
                     'currency': 'currency',
                     'limit': 'limit',
+                    'include_sub_tx_identifiers': 'include_sub_tx_identifiers',
                 },
                 'location_map': {
                     'q': 'query',
                     'currency': 'query',
                     'limit': 'query',
+                    'include_sub_tx_identifiers': 'query',
                 },
                 'collection_format_map': {
                 }
