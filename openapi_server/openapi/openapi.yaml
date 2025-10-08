@@ -45,6 +45,16 @@ paths:
             maximum: 100
             type: integer
           style: form
+        - description: Whether to include sub-transaction identifiers
+          example: true
+          explode: true
+          in: query
+          name: include_sub_tx_identifiers
+          required: false
+          schema:
+            default: false
+            type: boolean
+          style: form
       responses:
         "200":
           content:
@@ -3166,6 +3176,17 @@ components:
         format: int32
         maximum: 100
         type: integer
+      style: form
+    include_sub_tx_identifiers:
+      description: Whether to include sub-transaction identifiers
+      example: true
+      explode: true
+      in: query
+      name: include_sub_tx_identifiers
+      required: false
+      schema:
+        default: false
+        type: boolean
       style: form
     operation:
       description: The operation to execute in bulk

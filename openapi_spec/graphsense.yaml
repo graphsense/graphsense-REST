@@ -29,6 +29,7 @@ paths:
         - $ref: '#/components/parameters/currency_query'
         - $ref: '#/components/parameters/search_query'
         - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/include_sub_tx_identifiers'
       responses:
         "200":
           description: OK
@@ -1205,6 +1206,15 @@ components:
         maximum: 100
       description: Maximum number of search results
       example: 10
+    include_sub_tx_identifiers:
+      in: query
+      name: include_sub_tx_identifiers
+      required: false
+      schema:
+        type: boolean
+        default: false
+      description: Whether to include sub-transaction identifiers
+      example: true
     operation:
       in: path
       name: operation
