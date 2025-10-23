@@ -63,6 +63,8 @@ class AddressTag(ModelComposed):
     allowed_values = {
         ('inherited_from',): {
             'CLUSTER': "cluster",
+            'PUBKEY': "pubkey",
+            'PUBKEY_AND_CLUSTER': "pubkey_and_cluster",
         },
     }
 
@@ -196,7 +198,7 @@ class AddressTag(ModelComposed):
             lastmod (int): Last modified. [optional]  # noqa: E501
             confidence (str): Confidence name. [optional]  # noqa: E501
             confidence_level (int): Confidence level. [optional]  # noqa: E501
-            inherited_from (str): if the tag was inherited from cluster. [optional] if omitted the server will use the default value of "cluster"  # noqa: E501
+            inherited_from (str): if the tag was inherited from cluster. [optional]  # noqa: E501
             entity (int): Entity id. [optional]  # noqa: E501
         """
 
@@ -314,7 +316,7 @@ class AddressTag(ModelComposed):
             lastmod (int): Last modified. [optional]  # noqa: E501
             confidence (str): Confidence name. [optional]  # noqa: E501
             confidence_level (int): Confidence level. [optional]  # noqa: E501
-            inherited_from (str): if the tag was inherited from cluster. [optional] if omitted the server will use the default value of "cluster"  # noqa: E501
+            inherited_from (str): if the tag was inherited from cluster. [optional]  # noqa: E501
             entity (int): Entity id. [optional]  # noqa: E501
         """
 

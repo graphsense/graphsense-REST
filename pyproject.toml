@@ -83,7 +83,8 @@ exclude = [
     "node_modules",
     "site-packages",
     "venv",
-    "openapi_server",
+    "openapi_server*",
+    "openapi_server/**",
     "tests/test_*.py",
     "setup.py",
     "clients/**"
@@ -91,6 +92,9 @@ exclude = [
 
 [tool.ruff.lint]
 extend-select = ["T201"]
+
+[tool.uv.sources]
+graphsense-lib = { git = "https://github.com/graphsense/graphsense-lib", rev = "v2.8.0-dev7" }
 
 [dependency-groups]
 dev = [

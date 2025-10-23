@@ -293,7 +293,7 @@ class LabelSummary(Model):
         :param inherited_from: The inherited_from of this LabelSummary.
         :type inherited_from: str
         """
-        allowed_values = ["cluster"]  # noqa: E501
+        allowed_values = ["cluster", "pubkey", "pubkey_and_cluster"]  # noqa: E501
         if inherited_from not in allowed_values:
             raise BadUserInputException(
                 "Invalid value for `inherited_from` ({0}), must be one of {1}"

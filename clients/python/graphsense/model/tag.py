@@ -57,6 +57,8 @@ class Tag(ModelNormal):
     allowed_values = {
         ('inherited_from',): {
             'CLUSTER': "cluster",
+            'PUBKEY': "pubkey",
+            'PUBKEY_AND_CLUSTER': "pubkey_and_cluster",
         },
     }
 
@@ -187,7 +189,7 @@ class Tag(ModelNormal):
             lastmod (int): Last modified. [optional]  # noqa: E501
             confidence (str): Confidence name. [optional]  # noqa: E501
             confidence_level (int): Confidence level. [optional]  # noqa: E501
-            inherited_from (str): if the tag was inherited from cluster. [optional] if omitted the server will use the default value of "cluster"  # noqa: E501
+            inherited_from (str): if the tag was inherited from cluster. [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)
@@ -294,7 +296,7 @@ class Tag(ModelNormal):
             lastmod (int): Last modified. [optional]  # noqa: E501
             confidence (str): Confidence name. [optional]  # noqa: E501
             confidence_level (int): Confidence level. [optional]  # noqa: E501
-            inherited_from (str): if the tag was inherited from cluster. [optional] if omitted the server will use the default value of "cluster"  # noqa: E501
+            inherited_from (str): if the tag was inherited from cluster. [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)

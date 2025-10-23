@@ -12,8 +12,8 @@ This script checks versions in:
 Exits with non-zero code if versions are misaligned.
 """
 
-import sys
 import re
+import sys
 from pathlib import Path
 
 files = [

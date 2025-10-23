@@ -54,6 +54,10 @@ class GSRestConfig(BaseSettings):
     address_links_request_timeout: float = Field(
         default=30, description="Timeout for address links requests endpoint"
     )
+    include_pubkey_derived_tags: bool = Field(
+        default=True,
+        description="Include pubkey derived tags in tag summaries and lists",
+    )
     user_tag_reporting_acl_group: str = Field(
         default="develop",
         alias="user-tag-reporting-acl-group",
@@ -63,6 +67,10 @@ class GSRestConfig(BaseSettings):
         default=False,
         alias="enable-user-tag-reporting",
         description="Enable user tag reporting functionality",
+    )
+    privacy_preserving_tag_notifications: bool = Field(
+        default=True,
+        description="Enable privacy preserving tag notifications",
     )
     included_bridges: Tuple[str, ...] = Field(
         default_factory=tuple,

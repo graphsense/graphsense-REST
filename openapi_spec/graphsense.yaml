@@ -1331,6 +1331,8 @@ components:
           type: string
           enum:
             - cluster
+            - pubkey
+            - pubkey_and_cluster
           description: if the tag was inherited from cluster
     tag_summary:
       type: object
@@ -1776,6 +1778,8 @@ components:
           type: string
           enum:
             - cluster
+            - pubkey
+            - pubkey_and_cluster
           description: if the tag was inherited from cluster
         tag_type:
           type: string

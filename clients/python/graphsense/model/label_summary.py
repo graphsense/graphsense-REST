@@ -57,6 +57,8 @@ class LabelSummary(ModelNormal):
     allowed_values = {
         ('inherited_from',): {
             'CLUSTER': "cluster",
+            'PUBKEY': "pubkey",
+            'PUBKEY_AND_CLUSTER': "pubkey_and_cluster",
         },
     }
 
@@ -163,7 +165,7 @@ class LabelSummary(ModelNormal):
                                 Animal class but this time we won't travel
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
-            inherited_from (str): if the tag was inherited from cluster. [optional] if omitted the server will use the default value of "cluster"  # noqa: E501
+            inherited_from (str): if the tag was inherited from cluster. [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)
@@ -263,7 +265,7 @@ class LabelSummary(ModelNormal):
                                 Animal class but this time we won't travel
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
-            inherited_from (str): if the tag was inherited from cluster. [optional] if omitted the server will use the default value of "cluster"  # noqa: E501
+            inherited_from (str): if the tag was inherited from cluster. [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)

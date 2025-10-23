@@ -1,5 +1,4 @@
 from openapi_server.models.address_tag import AddressTag
-from openapi_server.models.address_tags import AddressTags
 from openapi_server.models.concept import Concept
 
 base_tagpack_src = ""
@@ -415,10 +414,12 @@ async def list_address_tags(test_case):
         path_with_page, label="isolinks", pagesize=1, page=result["next_page"]
     )
     assert [t2] == result["address_tags"]
-    result = await test_case.request(
-        path_with_page, label="isolinks", pagesize=1, page=result["next_page"]
-    )
-    test_case.assertEqual(AddressTags(address_tags=[]).to_dict(), result)
+
+    assert result.get("next_page") is None
+    # result = await test_case.request(
+    #     path_with_page, label="isolinks", pagesize=1, page=result["next_page"]
+    # )
+    # test_case.assertEqual(AddressTags(address_tags=[]).to_dict(), result)
 
     result = await test_case.request(path, label="TagA")
     assert [eth_tag3.to_dict()] == result["address_tags"]

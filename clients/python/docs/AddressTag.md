@@ -21,7 +21,7 @@ Name | Type | Description | Notes
 **lastmod** | **int** | Last modified | [optional] 
 **confidence** | **str** | Confidence name | [optional] 
 **confidence_level** | **int** | Confidence level | [optional] 
-**inherited_from** | **str** | if the tag was inherited from cluster | [optional]  if omitted the server will use the default value of "cluster"
+**inherited_from** | **str** | if the tag was inherited from cluster | [optional] 
 **entity** | **int** | Entity id | [optional] 
 **any string name** | **bool, date, datetime, dict, float, int, list, str, none_type** | any string name can be used but the value must be the correct type | [optional]
 

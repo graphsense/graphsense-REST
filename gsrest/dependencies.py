@@ -90,7 +90,6 @@ class ServiceContainer:
         )
         self._entities_service = EntitiesService(
             db=db,
-            tagstore=self.tagstore_db,
             tags_service=self._tags_service,
             blocks_service=self._blocks_service,
             rates_service=self._rates_service,
@@ -99,7 +98,6 @@ class ServiceContainer:
 
         self._addresses_service = AddressesService(
             db=db,
-            tagstore=self.tagstore_db,
             tags_service=self._tags_service,
             entities_service=self._entities_service,
             blocks_service=self._blocks_service,
