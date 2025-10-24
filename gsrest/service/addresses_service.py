@@ -44,7 +44,11 @@ async def get_tag_summary_by_address(
 ):
     services = get_service_container(request)
     tagstore_groups = get_tagstore_access_groups(request)
-    include_pubkey_derived_tags = request.app["config"].include_pubkey_derived_tags
+    config = request.app["config"]
+    include_pubkey_derived_tags = config.include_pubkey_derived_tags
+    tag_summary_only_propagate_high_confidence_actors = (
+        config.tag_summary_only_propagate_high_confidence_actors
+    )
 
     pydantic_result = await services.addresses_service.get_tag_summary_by_address(
         currency,
@@ -52,6 +56,7 @@ async def get_tag_summary_by_address(
         tagstore_groups,
         include_best_cluster_tag,
         include_pubkey_derived_tags=include_pubkey_derived_tags,
+        only_propagate_high_confidence_actors=tag_summary_only_propagate_high_confidence_actors,
     )
 
     return pydantic_to_openapi(pydantic_result)

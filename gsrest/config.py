@@ -58,6 +58,10 @@ class GSRestConfig(BaseSettings):
         default=True,
         description="Include pubkey derived tags in tag summaries and lists",
     )
+    tag_summary_only_propagate_high_confidence_actors: bool = Field(
+        default=True,
+        description="Only propagate high confidence actors in tag summaries",
+    )
     user_tag_reporting_acl_group: str = Field(
         default="develop",
         alias="user-tag-reporting-acl-group",
