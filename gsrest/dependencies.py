@@ -15,6 +15,10 @@ from graphsenselib.db.asynchronous.services.txs_service import TxsService
 from graphsenselib.tagstore.db import TagstoreDbAsync, Taxonomies
 
 from gsrest.config import GSRestConfig
+from gsrest.plugins.builtin.obfuscate_tags.obfuscate_tags import (
+    GROUPS_HEADER_NAME,
+    OBFUSCATION_MARKER_GROUP,
+)
 
 
 class ConceptsCacheService(ConceptProtocol):
@@ -168,3 +172,7 @@ def get_tagstore_access_groups(request):
 def get_username(request) -> Optional[str]:
     """Extract username from request, if available"""
     return request.headers.get("X-Consumer-Username", None)
+
+
+def should_obfuscate_private_tags(request) -> bool:
+    return request.headers.get(GROUPS_HEADER_NAME, "") == OBFUSCATION_MARKER_GROUP

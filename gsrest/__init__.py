@@ -14,6 +14,7 @@ import gsrest.db
 from gsrest.config import GSRestConfig, LoggingConfig
 from gsrest.dependencies import ConceptsCacheService, ServiceContainer
 from gsrest.plugins import get_subclass
+from gsrest.plugins.builtin.obfuscate_tags.obfuscate_tags import ObfuscateTags
 
 CONFIG_FILE = "./instance/config.yaml"
 
@@ -183,7 +184,26 @@ def factory_internal(
     app.app["plugin_contexts"] = {}
     app.app["request_config"] = {}
 
+    obfuscate_private_tags = any(
+        1 for name in config.plugins if name.endswith("obfuscate_tags")
+    )
+
+    if obfuscate_private_tags:
+        app.app.logger.warning(
+            "Tag obfuscation plugin enabled, using built-in version. Skipping load of external plugin."
+        )
+        builtinPlugin = ObfuscateTags
+        name = f"{builtinPlugin.__module__}"
+        app.app["plugins"].append(builtinPlugin)
+        app.app["plugin_contexts"][name] = {}
+        if hasattr(builtinPlugin, "setup"):
+            app.app.cleanup_ctx.append(plugin_setup(builtinPlugin, name))
+
     for name in config.plugins:
+        if name.endswith("obfuscate_tags"):
+            # already loaded builtin plugin
+            continue
+
         subcl = get_subclass(importlib.import_module(name))
         app.app["plugins"].append(subcl)
         app.app["plugin_contexts"][name] = {}

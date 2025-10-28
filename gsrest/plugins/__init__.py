@@ -4,11 +4,13 @@ import inspect
 
 
 class Plugin(abc.ABC):
-    @abc.abstractclassmethod
+    @classmethod
+    @abc.abstractmethod
     def before_request(cls, context, request: web.Request):
         return request
 
-    @abc.abstractclassmethod
+    @classmethod
+    @abc.abstractmethod
     def before_response(cls, context, request: web.Request, result):
         return
 

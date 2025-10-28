@@ -1,11 +1,13 @@
 from typing import Optional
 
 from graphsenselib.errors import BadUserInputException
+from graphsenselib.tagstore.algorithms.obfuscate import obfuscate_tag_if_not_public
 
 from gsrest.dependencies import (
     get_request_cache,
     get_service_container,
     get_tagstore_access_groups,
+    should_obfuscate_private_tags,
 )
 from gsrest.service import parse_page_int_optional
 from gsrest.translators import (
@@ -57,6 +59,11 @@ async def get_tag_summary_by_address(
         include_best_cluster_tag,
         include_pubkey_derived_tags=include_pubkey_derived_tags,
         only_propagate_high_confidence_actors=tag_summary_only_propagate_high_confidence_actors,
+        tag_transformer=(
+            None
+            if not should_obfuscate_private_tags(request)
+            else obfuscate_tag_if_not_public
+        ),
     )
 
     return pydantic_to_openapi(pydantic_result)
