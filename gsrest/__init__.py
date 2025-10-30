@@ -14,7 +14,7 @@ import gsrest.db
 from gsrest.config import GSRestConfig, LoggingConfig
 from gsrest.dependencies import ConceptsCacheService, ServiceContainer
 from gsrest.plugins import get_subclass
-from gsrest.plugins.builtin.obfuscate_tags.obfuscate_tags import ObfuscateTags
+from gsrest.builtin.plugins.obfuscate_tags.obfuscate_tags import ObfuscateTags
 
 CONFIG_FILE = "./instance/config.yaml"
 

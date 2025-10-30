@@ -15,7 +15,7 @@ from graphsenselib.db.asynchronous.services.txs_service import TxsService
 from graphsenselib.tagstore.db import TagstoreDbAsync, Taxonomies
 
 from gsrest.config import GSRestConfig
-from gsrest.plugins.builtin.obfuscate_tags.obfuscate_tags import (
+from gsrest.builtin.plugins.obfuscate_tags.obfuscate_tags import (
     GROUPS_HEADER_NAME,
     OBFUSCATION_MARKER_GROUP,
 )
