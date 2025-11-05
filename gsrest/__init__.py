@@ -11,10 +11,10 @@ from graphsenselib.config import AppConfig
 from graphsenselib.utils.slack import SlackLogHandler
 
 import gsrest.db
+from gsrest.builtin.plugins.obfuscate_tags.obfuscate_tags import ObfuscateTags
 from gsrest.config import GSRestConfig, LoggingConfig
 from gsrest.dependencies import ConceptsCacheService, ServiceContainer
 from gsrest.plugins import get_subclass
-from gsrest.builtin.plugins.obfuscate_tags.obfuscate_tags import ObfuscateTags
 
 CONFIG_FILE = "./instance/config.yaml"
 
@@ -195,7 +195,9 @@ def factory_internal(
         builtinPlugin = ObfuscateTags
         name = f"{builtinPlugin.__module__}"
         app.app["plugins"].append(builtinPlugin)
-        app.app["plugin_contexts"][name] = {}
+        app.app["plugin_contexts"][name] = {
+            "config": app.app["config"].get_plugin_config(name)
+        }
         if hasattr(builtinPlugin, "setup"):
             app.app.cleanup_ctx.append(plugin_setup(builtinPlugin, name))
 

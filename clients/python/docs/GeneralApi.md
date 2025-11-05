@@ -115,7 +115,11 @@ with graphsense.ApiClient(configuration) as api_client:
     q = "foo" # str | It can be (the beginning of) an address, a transaction or a label
     currency = "btc" # str | The cryptocurrency (e.g., btc) (optional)
     limit = 10 # int | Maximum number of search results (optional) if omitted the server will use the default value of 10
-    include_sub_tx_identifiers = True # bool | Whether to include sub-transaction identifiers (optional) if omitted the server will use the default value of False
+    include_sub_tx_identifiers = False # bool | Whether to include sub-transaction identifiers (optional) if omitted the server will use the default value of False
+    include_labels = True # bool | Whether to include labels (optional) if omitted the server will use the default value of True
+    include_actors = True # bool | Whether to include actors (optional) if omitted the server will use the default value of True
+    include_txs = True # bool | Whether to include transactions (optional) if omitted the server will use the default value of True
+    include_addresses = True # bool | Whether to include addresses (optional) if omitted the server will use the default value of True
 
     # example passing only required values which don't have defaults set
     try:
@@ -129,7 +133,7 @@ with graphsense.ApiClient(configuration) as api_client:
     # and optional values
     try:
         # Returns matching addresses, transactions and labels
-        api_response = api_instance.search(q, currency=currency, limit=limit, include_sub_tx_identifiers=include_sub_tx_identifiers)
+        api_response = api_instance.search(q, currency=currency, limit=limit, include_sub_tx_identifiers=include_sub_tx_identifiers, include_labels=include_labels, include_actors=include_actors, include_txs=include_txs, include_addresses=include_addresses)
         pprint(api_response)
     except graphsense.ApiException as e:
         print("Exception when calling GeneralApi->search: %s\n" % e)
@@ -144,6 +148,10 @@ Name | Type | Description  | Notes
  **currency** | **str**| The cryptocurrency (e.g., btc) | [optional]
  **limit** | **int**| Maximum number of search results | [optional] if omitted the server will use the default value of 10
  **include_sub_tx_identifiers** | **bool**| Whether to include sub-transaction identifiers | [optional] if omitted the server will use the default value of False
+ **include_labels** | **bool**| Whether to include labels | [optional] if omitted the server will use the default value of True
+ **include_actors** | **bool**| Whether to include actors | [optional] if omitted the server will use the default value of True
+ **include_txs** | **bool**| Whether to include transactions | [optional] if omitted the server will use the default value of True
+ **include_addresses** | **bool**| Whether to include addresses | [optional] if omitted the server will use the default value of True
 **_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
 **async_req** | **bool** | Execute request asynchronously | [optional] default is False.
 

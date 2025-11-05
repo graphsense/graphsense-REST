@@ -92,7 +92,7 @@ async def get_statistics(request: web.Request, ) -> web.Response:
         raise web.HTTPInternalServerError()
 
 
-async def search(request: web.Request, q, currency=None, limit=None, include_sub_tx_identifiers=None) -> web.Response:
+async def search(request: web.Request, q, currency=None, limit=None, include_sub_tx_identifiers=None, include_labels=None, include_actors=None, include_txs=None, include_addresses=None) -> web.Response:
     """Returns matching addresses, transactions and labels
 
     
@@ -105,6 +105,14 @@ async def search(request: web.Request, q, currency=None, limit=None, include_sub
     :type limit: int
     :param include_sub_tx_identifiers: Whether to include sub-transaction identifiers
     :type include_sub_tx_identifiers: bool
+    :param include_labels: Whether to include labels
+    :type include_labels: bool
+    :param include_actors: Whether to include actors
+    :type include_actors: bool
+    :param include_txs: Whether to include transactions
+    :type include_txs: bool
+    :param include_addresses: Whether to include addresses
+    :type include_addresses: bool
 
     """
 
@@ -129,11 +137,11 @@ async def search(request: web.Request, q, currency=None, limit=None, include_sub
     request.app['request_config']['show_private_tags'] = show_private_tags
 
     try:
-        if 'currency' in ['','q','currency','limit','include_sub_tx_identifiers']:
+        if 'currency' in ['','q','currency','limit','include_sub_tx_identifiers','include_labels','include_actors','include_txs','include_addresses']:
             if currency is not None:
                 currency = currency.lower()
         result = service.search(request
-                ,q=q,currency=currency,limit=limit,include_sub_tx_identifiers=include_sub_tx_identifiers)
+                ,q=q,currency=currency,limit=limit,include_sub_tx_identifiers=include_sub_tx_identifiers,include_labels=include_labels,include_actors=include_actors,include_txs=include_txs,include_addresses=include_addresses)
         result = await result
 
         for plugin in request.app['plugins']:

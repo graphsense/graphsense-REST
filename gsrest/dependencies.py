@@ -14,11 +14,11 @@ from graphsenselib.db.asynchronous.services.tokens_service import TokensService
 from graphsenselib.db.asynchronous.services.txs_service import TxsService
 from graphsenselib.tagstore.db import TagstoreDbAsync, Taxonomies
 
-from gsrest.config import GSRestConfig
 from gsrest.builtin.plugins.obfuscate_tags.obfuscate_tags import (
     GROUPS_HEADER_NAME,
     OBFUSCATION_MARKER_GROUP,
 )
+from gsrest.config import GSRestConfig
 
 
 class ConceptsCacheService(ConceptProtocol):

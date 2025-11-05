@@ -5,7 +5,7 @@ info:
     name: Iknaio Cryptoasset Analytics GmbH
   description: GraphSense API provides programmatic access to various ledgers' addresses, entities, blocks, transactions and tags for automated and highly efficient forensics tasks.
   title: GraphSense API
-  version: 1.15.0-rc2
+  version: 1.15.0-rc3
 servers:
   - url: https://api.ikna.io
 paths:
@@ -46,13 +46,53 @@ paths:
             type: integer
           style: form
         - description: Whether to include sub-transaction identifiers
-          example: true
+          example: false
           explode: true
           in: query
           name: include_sub_tx_identifiers
           required: false
           schema:
             default: false
+            type: boolean
+          style: form
+        - description: Whether to include labels
+          example: true
+          explode: true
+          in: query
+          name: include_labels
+          required: false
+          schema:
+            default: true
+            type: boolean
+          style: form
+        - description: Whether to include actors
+          example: true
+          explode: true
+          in: query
+          name: include_actors
+          required: false
+          schema:
+            default: true
+            type: boolean
+          style: form
+        - description: Whether to include transactions
+          example: true
+          explode: true
+          in: query
+          name: include_txs
+          required: false
+          schema:
+            default: true
+            type: boolean
+          style: form
+        - description: Whether to include addresses
+          example: true
+          explode: true
+          in: query
+          name: include_addresses
+          required: false
+          schema:
+            default: true
             type: boolean
           style: form
       responses:
@@ -1512,6 +1552,7 @@ paths:
       x-openapi-router-controller: openapi_server.controllers.entities_controller
   /{currency}/entities/{entity}/search:
     get:
+      deprecated: true
       operationId: search_entity_neighbors
       parameters:
         - description: The cryptocurrency code (e.g., btc)
@@ -3179,13 +3220,57 @@ components:
       style: form
     include_sub_tx_identifiers:
       description: Whether to include sub-transaction identifiers
-      example: true
+      example: false
       explode: true
       in: query
       name: include_sub_tx_identifiers
       required: false
       schema:
         default: false
+        type: boolean
+      style: form
+    include_labels_in_search:
+      description: Whether to include labels
+      example: true
+      explode: true
+      in: query
+      name: include_labels
+      required: false
+      schema:
+        default: true
+        type: boolean
+      style: form
+    include_actors_in_search:
+      description: Whether to include actors
+      example: true
+      explode: true
+      in: query
+      name: include_actors
+      required: false
+      schema:
+        default: true
+        type: boolean
+      style: form
+    include_txs_in_search:
+      description: Whether to include transactions
+      example: true
+      explode: true
+      in: query
+      name: include_txs
+      required: false
+      schema:
+        default: true
+        type: boolean
+      style: form
+    include_addresses_in_search:
+      description: Whether to include addresses
+      example: true
+      explode: true
+      in: query
+      name: include_addresses
+      required: false
+      schema:
+        default: true
         type: boolean
       style: form
     operation:

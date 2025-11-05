@@ -161,6 +161,10 @@ class GeneralApi(object):
                 currency (str): The cryptocurrency (e.g., btc). [optional]
                 limit (int): Maximum number of search results. [optional] if omitted the server will use the default value of 10
                 include_sub_tx_identifiers (bool): Whether to include sub-transaction identifiers. [optional] if omitted the server will use the default value of False
+                include_labels (bool): Whether to include labels. [optional] if omitted the server will use the default value of True
+                include_actors (bool): Whether to include actors. [optional] if omitted the server will use the default value of True
+                include_txs (bool): Whether to include transactions. [optional] if omitted the server will use the default value of True
+                include_addresses (bool): Whether to include addresses. [optional] if omitted the server will use the default value of True
                 _return_http_data_only (bool): response data without head status
                     code and headers. Default is True.
                 _preload_content (bool): if False, the urllib3.HTTPResponse object
@@ -226,6 +230,10 @@ class GeneralApi(object):
                     'currency',
                     'limit',
                     'include_sub_tx_identifiers',
+                    'include_labels',
+                    'include_actors',
+                    'include_txs',
+                    'include_addresses',
                 ],
                 'required': [
                     'q',
@@ -261,18 +269,34 @@ class GeneralApi(object):
                         (int,),
                     'include_sub_tx_identifiers':
                         (bool,),
+                    'include_labels':
+                        (bool,),
+                    'include_actors':
+                        (bool,),
+                    'include_txs':
+                        (bool,),
+                    'include_addresses':
+                        (bool,),
                 },
                 'attribute_map': {
                     'q': 'q',
                     'currency': 'currency',
                     'limit': 'limit',
                     'include_sub_tx_identifiers': 'include_sub_tx_identifiers',
+                    'include_labels': 'include_labels',
+                    'include_actors': 'include_actors',
+                    'include_txs': 'include_txs',
+                    'include_addresses': 'include_addresses',
                 },
                 'location_map': {
                     'q': 'query',
                     'currency': 'query',
                     'limit': 'query',
                     'include_sub_tx_identifiers': 'query',
+                    'include_labels': 'query',
+                    'include_actors': 'query',
+                    'include_txs': 'query',
+                    'include_addresses': 'query',
                 },
                 'collection_format_map': {
                 }

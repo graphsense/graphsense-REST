@@ -5,7 +5,7 @@ info:
   contact:
     name: Iknaio Cryptoasset Analytics GmbH
     email: contact@ikna.io
-  version: "1.15.0-rc2"
+  version: "1.15.0-rc3"
 servers:
   - url: 'https://api.ikna.io'
 paths:
@@ -30,6 +30,10 @@ paths:
         - $ref: '#/components/parameters/search_query'
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/include_sub_tx_identifiers'
+        - $ref: '#/components/parameters/include_labels_in_search'
+        - $ref: '#/components/parameters/include_actors_in_search'
+        - $ref: '#/components/parameters/include_txs_in_search'
+        - $ref: '#/components/parameters/include_addresses_in_search'
       responses:
         "200":
           description: OK
@@ -435,6 +439,7 @@ paths:
   /{currency}/entities/{entity}/search:
     get:
       operationId: search_entity_neighbors
+      deprecated: true
       parameters:
         - $ref: '#/components/parameters/currency'
         - $ref: '#/components/parameters/entity'
@@ -1214,6 +1219,42 @@ components:
         type: boolean
         default: false
       description: Whether to include sub-transaction identifiers
+      example: false
+    include_labels_in_search:
+      in: query
+      name: include_labels
+      required: false
+      schema:
+        type: boolean
+        default: true
+      description: Whether to include labels
+      example: true
+    include_actors_in_search:
+      in: query
+      name: include_actors
+      required: false
+      schema:
+        type: boolean
+        default: true
+      description: Whether to include actors
+      example: true
+    include_txs_in_search:
+      in: query
+      name: include_txs
+      required: false
+      schema:
+        type: boolean
+        default: true
+      description: Whether to include transactions
+      example: true
+    include_addresses_in_search:
+      in: query
+      name: include_addresses
+      required: false
+      schema:
+        type: boolean
+        default: true
+      description: Whether to include addresses
       example: true
     operation:
       in: path

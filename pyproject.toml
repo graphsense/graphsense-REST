@@ -1,6 +1,6 @@
 [project]
 name = "gsrest"
-version = "1.15.0-rc2"
+version = "1.15.0-rc3"
 description = "GraphSense API REST API"
 readme = "README.md"
 keywords = ["OpenAPI", "GraphSense API"]
@@ -94,7 +94,7 @@ exclude = [
 extend-select = ["T201"]
 
 [tool.uv.sources]
-graphsense-lib = { git = "https://github.com/graphsense/graphsense-lib", rev = "v2.8.0-rc5" }
+graphsense-lib = { git = "https://github.com/graphsense/graphsense-lib", rev = "v2.8.0-rc7" }
 
 [dependency-groups]
 dev = [
