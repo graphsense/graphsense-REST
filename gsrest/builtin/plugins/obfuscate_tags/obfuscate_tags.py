@@ -33,6 +33,8 @@ def obfuscate_tagpack_uri_by_rule(rule, tags):
             obfuscate_tagpack_uri_by_rule(rule, tag)
     else:
         # use regex in rule to check if uri needs to be redacted
+        if tags.tagpack_uri is None:
+            return
         pattern = re.compile(rule)
         if pattern.match(tags.tagpack_uri):
             tags.tagpack_uri = ""
