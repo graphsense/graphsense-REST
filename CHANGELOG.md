@@ -3,12 +3,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [25.11.0/1.5.0] - 2025-11-07
+## [25.11.0/1.5.0] - 2025-11-06
 ### changed
-- harmonize tagpack obfuscation handling
+- harmonize tagpack obfuscation handling (tag obfuscator now a builtin plugin)
 - better search features (search with postfixes), scoped search that allows to enable/disable features.
 - stricter actor propagation handling
 - tags are now derived from addresses with the same pubkey (if feature is enabled)
+- bumped to graphsenselib 2.8.0
 
 
 ## [25.09.4/1.14.4] - 2025-10-03
