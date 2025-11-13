@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [25.11.1/1.5.1] - 2025-11-13
+### changed
+- bumped to graphsenselib 2.8.1
+
 ## [25.11.0/1.5.0] - 2025-11-06
 ### changed
 - harmonize tagpack obfuscation handling (tag obfuscator now a builtin plugin)
@@ -10,7 +14,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - stricter actor propagation handling
 - tags are now derived from addresses with the same pubkey (if feature is enabled)
 - bumped to graphsenselib 2.8.0
-
 
 ## [25.09.4/1.14.4] - 2025-10-03
 ### fixed
