@@ -1,6 +1,6 @@
 [project]
 name = "gsrest"
-version = "1.15.1"
+version = "1.15.2"
 description = "GraphSense API REST API"
 readme = "README.md"
 keywords = ["OpenAPI", "GraphSense API"]
@@ -16,7 +16,7 @@ dependencies = [
     "aiohttp-jinja2>=1.5.0",
     "async-lru>=2.0.4",
     "connexion[swagger-ui] >=2.6.0, <3",
-    "graphsense-lib[conversions,tagpacks]>=2.8.1",
+    "graphsense-lib[conversions,tagpacks]>=2.8.3",
     "openapi-schema-validator>=0.2.3",
     "python-dateutil>=2.9.0",
     "swagger-ui-bundle>=0.0.9",
@@ -92,9 +92,6 @@ exclude = [
 
 [tool.ruff.lint]
 extend-select = ["T201"]
-
-[tool.uv.sources]
-graphsense-lib = { git = "https://github.com/graphsense/graphsense-lib", rev = "v2.8.3rc2" }
 
 [dependency-groups]
 dev = [
