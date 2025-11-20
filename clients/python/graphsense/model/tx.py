@@ -99,6 +99,7 @@ class Tx(ModelComposed):
             'inputs': (TxValues,),  # noqa: E501
             'outputs': (TxValues,),  # noqa: E501
             'token_tx_id': (int,),  # noqa: E501
+            'fee': (Values,),  # noqa: E501
             'contract_creation': (bool,),  # noqa: E501
             'is_external': (bool,),  # noqa: E501
             'currency': (str,),  # noqa: E501
@@ -135,6 +136,7 @@ class Tx(ModelComposed):
         'inputs': 'inputs',  # noqa: E501
         'outputs': 'outputs',  # noqa: E501
         'token_tx_id': 'token_tx_id',  # noqa: E501
+        'fee': 'fee',  # noqa: E501
         'contract_creation': 'contract_creation',  # noqa: E501
         'is_external': 'is_external',  # noqa: E501
         'currency': 'currency',  # noqa: E501
@@ -196,6 +198,7 @@ class Tx(ModelComposed):
             inputs (TxValues): [optional]  # noqa: E501
             outputs (TxValues): [optional]  # noqa: E501
             token_tx_id (int): identifies a specific token transaction within a tx_hash, (deprecated) use identifier instead in encapsulates all information that uniquely identifies the transaction. [optional]  # noqa: E501
+            fee (Values): [optional]  # noqa: E501
             contract_creation (bool): Indicates if this transaction created a new contract. Recipient address is the address of the new contract.. [optional]  # noqa: E501
             is_external (bool): Indicates if this transaction is an external transaction for an eth like currency.. [optional]  # noqa: E501
             currency (str): crypto currency code. [optional]  # noqa: E501
@@ -316,6 +319,7 @@ class Tx(ModelComposed):
             inputs (TxValues): [optional]  # noqa: E501
             outputs (TxValues): [optional]  # noqa: E501
             token_tx_id (int): identifies a specific token transaction within a tx_hash, (deprecated) use identifier instead in encapsulates all information that uniquely identifies the transaction. [optional]  # noqa: E501
+            fee (Values): [optional]  # noqa: E501
             contract_creation (bool): Indicates if this transaction created a new contract. Recipient address is the address of the new contract.. [optional]  # noqa: E501
             is_external (bool): Indicates if this transaction is an external transaction for an eth like currency.. [optional]  # noqa: E501
             currency (str): crypto currency code. [optional]  # noqa: E501

@@ -18,7 +18,7 @@ class Tx(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, tx_type: str='account', currency: str=None, tx_hash: str=None, coinbase: bool=None, height: int=None, no_inputs: int=None, no_outputs: int=None, inputs: List[TxValue]=None, outputs: List[TxValue]=None, timestamp: int=None, total_input: Values=None, total_output: Values=None, identifier: str=None, token_tx_id: int=None, network: str=None, value: Values=None, from_address: str=None, to_address: str=None, contract_creation: bool=None, is_external: bool=None):
+    def __init__(self, tx_type: str='account', currency: str=None, tx_hash: str=None, coinbase: bool=None, height: int=None, no_inputs: int=None, no_outputs: int=None, inputs: List[TxValue]=None, outputs: List[TxValue]=None, timestamp: int=None, total_input: Values=None, total_output: Values=None, identifier: str=None, token_tx_id: int=None, network: str=None, value: Values=None, fee: Values=None, from_address: str=None, to_address: str=None, contract_creation: bool=None, is_external: bool=None):
         """Tx - a model defined in OpenAPI
 
         :param tx_type: The tx_type of this Tx.
@@ -37,6 +37,7 @@ class Tx(Model):
         :param token_tx_id: The token_tx_id of this Tx.
         :param network: The network of this Tx.
         :param value: The value of this Tx.
+        :param fee: The fee of this Tx.
         :param from_address: The from_address of this Tx.
         :param to_address: The to_address of this Tx.
         :param contract_creation: The contract_creation of this Tx.
@@ -59,6 +60,7 @@ class Tx(Model):
             'token_tx_id': int,
             'network': str,
             'value': Values,
+            'fee': Values,
             'from_address': str,
             'to_address': str,
             'contract_creation': bool,
@@ -82,6 +84,7 @@ class Tx(Model):
             'token_tx_id': 'token_tx_id',
             'network': 'network',
             'value': 'value',
+            'fee': 'fee',
             'from_address': 'from_address',
             'to_address': 'to_address',
             'contract_creation': 'contract_creation',
@@ -104,6 +107,7 @@ class Tx(Model):
         self._token_tx_id = token_tx_id
         self._network = network
         self._value = value
+        self._fee = fee
         self._from_address = from_address
         self._to_address = to_address
         self._contract_creation = contract_creation
@@ -142,6 +146,7 @@ class Tx(Model):
             'token_tx_id': self._token_tx_id,
             'network': self._network,
             'value': self._value,
+            'fee': self._fee,
             'from_address': self._from_address,
             'to_address': self._to_address,
             'contract_creation': self._contract_creation,
@@ -535,6 +540,27 @@ class Tx(Model):
             raise BadUserInputException("Invalid value for `value`, must not be `None`")
 
         self._value = value
+
+    @property
+    def fee(self):
+        """Gets the fee of this Tx.
+
+
+        :return: The fee of this Tx.
+        :rtype: Values
+        """
+        return self._fee
+
+    @fee.setter
+    def fee(self, fee):
+        """Sets the fee of this Tx.
+
+
+        :param fee: The fee of this Tx.
+        :type fee: Values
+        """
+
+        self._fee = fee
 
     @property
     def from_address(self):

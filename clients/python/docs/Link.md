@@ -6,6 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **tx_type** | **str** |  | defaults to "account"
 **token_tx_id** | **int** | identifies a specific token transaction within a tx_hash, (deprecated) use identifier instead in encapsulates all information that uniquely identifies the transaction | [optional] 
+**fee** | [**Values**](Values.md) |  | [optional] 
 **contract_creation** | **bool** | Indicates if this transaction created a new contract. Recipient address is the address of the new contract. | [optional] 
 **is_external** | **bool** | Indicates if this transaction is an external transaction for an eth like currency. | [optional] 
 **tx_hash** | **str** | Transaction hash | [optional] 

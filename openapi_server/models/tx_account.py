@@ -15,7 +15,7 @@ class TxAccount(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, tx_type: str='account', identifier: str=None, token_tx_id: int=None, currency: str=None, network: str=None, tx_hash: str=None, height: int=None, timestamp: int=None, value: Values=None, from_address: str=None, to_address: str=None, contract_creation: bool=None, is_external: bool=None):
+    def __init__(self, tx_type: str='account', identifier: str=None, token_tx_id: int=None, currency: str=None, network: str=None, tx_hash: str=None, height: int=None, timestamp: int=None, value: Values=None, fee: Values=None, from_address: str=None, to_address: str=None, contract_creation: bool=None, is_external: bool=None):
         """TxAccount - a model defined in OpenAPI
 
         :param tx_type: The tx_type of this TxAccount.
@@ -27,6 +27,7 @@ class TxAccount(Model):
         :param height: The height of this TxAccount.
         :param timestamp: The timestamp of this TxAccount.
         :param value: The value of this TxAccount.
+        :param fee: The fee of this TxAccount.
         :param from_address: The from_address of this TxAccount.
         :param to_address: The to_address of this TxAccount.
         :param contract_creation: The contract_creation of this TxAccount.
@@ -42,6 +43,7 @@ class TxAccount(Model):
             'height': int,
             'timestamp': int,
             'value': Values,
+            'fee': Values,
             'from_address': str,
             'to_address': str,
             'contract_creation': bool,
@@ -58,6 +60,7 @@ class TxAccount(Model):
             'height': 'height',
             'timestamp': 'timestamp',
             'value': 'value',
+            'fee': 'fee',
             'from_address': 'from_address',
             'to_address': 'to_address',
             'contract_creation': 'contract_creation',
@@ -73,6 +76,7 @@ class TxAccount(Model):
         self._height = height
         self._timestamp = timestamp
         self._value = value
+        self._fee = fee
         self._from_address = from_address
         self._to_address = to_address
         self._contract_creation = contract_creation
@@ -104,6 +108,7 @@ class TxAccount(Model):
             'height': self._height,
             'timestamp': self._timestamp,
             'value': self._value,
+            'fee': self._fee,
             'from_address': self._from_address,
             'to_address': self._to_address,
             'contract_creation': self._contract_creation,
@@ -330,6 +335,27 @@ class TxAccount(Model):
             raise BadUserInputException("Invalid value for `value`, must not be `None`")
 
         self._value = value
+
+    @property
+    def fee(self):
+        """Gets the fee of this TxAccount.
+
+
+        :return: The fee of this TxAccount.
+        :rtype: Values
+        """
+        return self._fee
+
+    @fee.setter
+    def fee(self, fee):
+        """Sets the fee of this TxAccount.
+
+
+        :param fee: The fee of this TxAccount.
+        :type fee: Values
+        """
+
+        self._fee = fee
 
     @property
     def from_address(self):

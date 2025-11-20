@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 **inputs** | [**TxValues**](TxValues.md) |  | [optional] 
 **outputs** | [**TxValues**](TxValues.md) |  | [optional] 
 **token_tx_id** | **int** | identifies a specific token transaction within a tx_hash, (deprecated) use identifier instead in encapsulates all information that uniquely identifies the transaction | [optional] 
+**fee** | [**Values**](Values.md) |  | [optional] 
 **contract_creation** | **bool** | Indicates if this transaction created a new contract. Recipient address is the address of the new contract. | [optional] 
 **is_external** | **bool** | Indicates if this transaction is an external transaction for an eth like currency. | [optional] 
 **currency** | **str** | crypto currency code | [optional] 

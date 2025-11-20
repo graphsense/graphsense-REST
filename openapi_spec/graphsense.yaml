@@ -2336,6 +2336,8 @@ components:
           $ref: '#/components/schemas/timestamp'
         value:
           $ref: '#/components/schemas/values'
+        fee:
+          $ref: '#/components/schemas/values'
         from_address:
           $ref: '#/components/schemas/address_id'
         to_address:

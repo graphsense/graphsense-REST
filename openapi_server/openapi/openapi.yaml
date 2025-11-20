@@ -5849,6 +5849,13 @@ components:
     tx_account:
       example:
         identifier: identifier
+        fee:
+          fiat_values:
+            - code: code
+              value: 0.8008282
+            - code: code
+              value: 0.8008282
+          value: 6
         is_external: true
         tx_hash: cb0baba9617e18c90b1014614b19e4101593c233ce5b58d91033173d2c7244fd
         to_address: 1Archive1n2C579dMsAu3iC6tWzuQJz8dN
@@ -5910,6 +5917,8 @@ components:
           title: timestamp
           type: integer
         value:
+          $ref: '#/components/schemas/values'
+        fee:
           $ref: '#/components/schemas/values'
         from_address:
           description: Address

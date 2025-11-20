@@ -220,6 +220,9 @@ def pydantic_tx_account_to_openapi(pydantic_tx: PydanticTxAccount) -> TxAccount:
         token_tx_id=pydantic_tx.token_tx_id,
         contract_creation=pydantic_tx.contract_creation,
         value=pydantic_values_to_openapi(pydantic_tx.value),
+        fee=pydantic_values_to_openapi(pydantic_tx.fee)
+        if pydantic_tx.fee is not None
+        else None,
         is_external=pydantic_tx.is_external,
     )
 

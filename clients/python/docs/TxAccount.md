@@ -15,6 +15,7 @@ Name | Type | Description | Notes
 **to_address** | **str** | Address | 
 **tx_type** | **str** |  | defaults to "account"
 **token_tx_id** | **int** | identifies a specific token transaction within a tx_hash, (deprecated) use identifier instead in encapsulates all information that uniquely identifies the transaction | [optional] 
+**fee** | [**Values**](Values.md) |  | [optional] 
 **contract_creation** | **bool** | Indicates if this transaction created a new contract. Recipient address is the address of the new contract. | [optional] 
 **is_external** | **bool** | Indicates if this transaction is an external transaction for an eth like currency. | [optional] 
 **any string name** | **bool, date, datetime, dict, float, int, list, str, none_type** | any string name can be used but the value must be the correct type | [optional]

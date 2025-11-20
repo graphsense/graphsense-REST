@@ -17,7 +17,7 @@ class Link(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, tx_type: str='account', tx_hash: str=None, currency: str=None, height: int=None, timestamp: int=None, input_value: Values=None, output_value: Values=None, identifier: str=None, token_tx_id: int=None, network: str=None, value: Values=None, from_address: str=None, to_address: str=None, contract_creation: bool=None, is_external: bool=None):
+    def __init__(self, tx_type: str='account', tx_hash: str=None, currency: str=None, height: int=None, timestamp: int=None, input_value: Values=None, output_value: Values=None, identifier: str=None, token_tx_id: int=None, network: str=None, value: Values=None, fee: Values=None, from_address: str=None, to_address: str=None, contract_creation: bool=None, is_external: bool=None):
         """Link - a model defined in OpenAPI
 
         :param tx_type: The tx_type of this Link.
@@ -31,6 +31,7 @@ class Link(Model):
         :param token_tx_id: The token_tx_id of this Link.
         :param network: The network of this Link.
         :param value: The value of this Link.
+        :param fee: The fee of this Link.
         :param from_address: The from_address of this Link.
         :param to_address: The to_address of this Link.
         :param contract_creation: The contract_creation of this Link.
@@ -48,6 +49,7 @@ class Link(Model):
             'token_tx_id': int,
             'network': str,
             'value': Values,
+            'fee': Values,
             'from_address': str,
             'to_address': str,
             'contract_creation': bool,
@@ -66,6 +68,7 @@ class Link(Model):
             'token_tx_id': 'token_tx_id',
             'network': 'network',
             'value': 'value',
+            'fee': 'fee',
             'from_address': 'from_address',
             'to_address': 'to_address',
             'contract_creation': 'contract_creation',
@@ -83,6 +86,7 @@ class Link(Model):
         self._token_tx_id = token_tx_id
         self._network = network
         self._value = value
+        self._fee = fee
         self._from_address = from_address
         self._to_address = to_address
         self._contract_creation = contract_creation
@@ -116,6 +120,7 @@ class Link(Model):
             'token_tx_id': self._token_tx_id,
             'network': self._network,
             'value': self._value,
+            'fee': self._fee,
             'from_address': self._from_address,
             'to_address': self._to_address,
             'contract_creation': self._contract_creation,
@@ -388,6 +393,27 @@ class Link(Model):
             raise BadUserInputException("Invalid value for `value`, must not be `None`")
 
         self._value = value
+
+    @property
+    def fee(self):
+        """Gets the fee of this Link.
+
+
+        :return: The fee of this Link.
+        :rtype: Values
+        """
+        return self._fee
+
+    @fee.setter
+    def fee(self, fee):
+        """Sets the fee of this Link.
+
+
+        :param fee: The fee of this Link.
+        :type fee: Values
+        """
+
+        self._fee = fee
 
     @property
     def from_address(self):
