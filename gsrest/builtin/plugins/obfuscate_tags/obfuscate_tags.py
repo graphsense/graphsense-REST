@@ -21,8 +21,16 @@ from openapi_server.models.search_result_level6 import SearchResultLevel6
 from functools import partial
 
 GROUPS_HEADER_NAME = "X-Consumer-Groups"
-NO_OBFUSCATION_MARKER_GROUP = "private"
+NO_OBFUSCATION_MARKER_PATTERN = re.compile(r"(private|tags-private)")
 OBFUSCATION_MARKER_GROUP = "obfuscate"
+
+
+def has_no_obfuscation_group(groups):
+    """Check if any group matches the no obfuscation pattern."""
+    for group in groups:
+        if NO_OBFUSCATION_MARKER_PATTERN.match(group):
+            return True
+    return False
 
 
 def obfuscate_tagpack_uri_by_rule(rule, tags):
@@ -57,7 +65,7 @@ class ObfuscateTags(Plugin):
             x.strip() for x in request.headers.get(GROUPS_HEADER_NAME, "").split(",")
         ]
 
-        if NO_OBFUSCATION_MARKER_GROUP in groups:
+        if has_no_obfuscation_group(groups):
             return request
         if "include_labels=true" in request.query_string.lower():
             return request
@@ -96,7 +104,7 @@ class ObfuscateTags(Plugin):
                 partial(obfuscate_tagpack_uri_by_rule, obfuscate_tagpack_uri_rule),
             )
 
-        if NO_OBFUSCATION_MARKER_GROUP in groups:
+        if has_no_obfuscation_group(groups):
             return
 
         else:
