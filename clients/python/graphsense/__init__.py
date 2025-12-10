@@ -10,7 +10,7 @@
 """
 
 
-__version__ = "1.15.3rc1"
+__version__ = "1.15.3"
 
 # import ApiClient
 from graphsense.api_client import ApiClient

@@ -39,6 +39,7 @@ def gs_rest_db_setup(request):
             "driver": "cassandra",
             "port": cas_port,
             "nodes": [cas_host],
+            "strict_data_validation": False,
             "currencies": {
                 "btc": {
                     "raw": "resttest_btc_raw",
