@@ -91,7 +91,7 @@ class TagAccessLoggerTagstoreProxy:
         """Determine if this result should be logged based on data type"""
 
         if not result:
-            return False
+            return False, False
 
         # Check if result is a PublicTag
         if isinstance(result, TagPublic):
@@ -108,7 +108,7 @@ class TagAccessLoggerTagstoreProxy:
             except (TypeError, StopIteration):
                 pass
 
-        return False
+        return False, False
 
     async def _log_tag_access(self, method_name: str, tag: TagPublic, *args, **kwargs):
         """Log tag access information to Redis"""
