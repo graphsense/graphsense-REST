@@ -1,4 +1,5 @@
-from typing import Any, Optional
+import time
+from typing import Any, Optional, Tuple
 
 from graphsenselib.db.asynchronous.services.addresses_service import AddressesService
 from graphsenselib.db.asynchronous.services.blocks_service import BlocksService
@@ -13,6 +14,7 @@ from graphsenselib.db.asynchronous.services.tags_service import (
 from graphsenselib.db.asynchronous.services.tokens_service import TokensService
 from graphsenselib.db.asynchronous.services.txs_service import TxsService
 from graphsenselib.tagstore.db import TagstoreDbAsync, Taxonomies
+from graphsenselib.tagstore.db.queries import TagPublic
 
 from gsrest.builtin.plugins.obfuscate_tags.obfuscate_tags import (
     GROUPS_HEADER_NAME,
@@ -47,6 +49,78 @@ class ConceptsCacheService(ConceptProtocol):
         }
 
 
+class TagAccessLoggerTagstoreProxy:
+    """Adds logging for which tags are accessed from the tagstore
+    it intercepts calls to the tagstore DB
+    and logs returned tags to redis.
+    """
+
+    def __init__(
+        self, tagstore_db: TagstoreDbAsync, redis_client: Any, key_prefix: str
+    ):
+        self.tagstore_db = tagstore_db
+        self.redis_client = redis_client
+        self.key_prefix = key_prefix
+
+    def __getattr__(self, name):
+        """Proxy all method calls to the underlying tagstore_db"""
+        attr = getattr(self.tagstore_db, name)
+
+        if callable(attr):
+
+            async def wrapper(*args, **kwargs):
+                # Call the original method
+                result = await attr(*args, **kwargs)
+
+                # Log tag access if this method returns TagPublic objects
+                should_log, is_list = self._should_log_result(result)
+                if self.redis_client and should_log:
+                    if is_list:
+                        for tag in result:
+                            await self._log_tag_access(name, tag, *args, **kwargs)
+                    else:
+                        await self._log_tag_access(name, result, *args, **kwargs)
+
+                return result
+
+            return wrapper
+        else:
+            return attr
+
+    def _should_log_result(self, result: Any) -> Tuple[bool, bool]:
+        """Determine if this result should be logged based on data type"""
+
+        if not result:
+            return False
+
+        # Check if result is a PublicTag
+        if isinstance(result, TagPublic):
+            return True, False
+
+        # Check if result is a list of TagPublic objects
+        if hasattr(result, "__iter__") and not isinstance(result, str):
+            try:
+                # Check if all items in the iterable are TagPublic objects
+                for item in result:
+                    if isinstance(item, TagPublic):
+                        return True, True
+                    break  # Only check first item for performance
+            except (TypeError, StopIteration):
+                pass
+
+        return False
+
+    async def _log_tag_access(self, method_name: str, tag: TagPublic, *args, **kwargs):
+        """Log tag access information to Redis"""
+
+        current_time = time.localtime()
+        timestamp = time.strftime("%Y-%m-%d", current_time)
+        key = "|".join(
+            (self.key_prefix, timestamp, tag.creator, tag.network, tag.identifier)
+        )
+        await self.redis_client.incr(key)
+
+
 class ServiceContainer:
     def __init__(
         self,
@@ -55,10 +129,17 @@ class ServiceContainer:
         tagstore_engine: any,
         concepts_cache_service: ConceptsCacheService,
         logger: any,
+        redis_client: Optional[Any] = None,
+        log_tag_access_prefix: Optional[str] = None,
     ):
+        tsdb = TagstoreDbAsync(tagstore_engine)
         self.config = config
         self.db = db
-        self.tagstore_db = TagstoreDbAsync(tagstore_engine)
+        self.tagstore_db = (
+            TagAccessLoggerTagstoreProxy(tsdb, redis_client, log_tag_access_prefix)
+            if log_tag_access_prefix
+            else tsdb
+        )
         self.logger = logger
         self.category_cache_service = concepts_cache_service
 

@@ -145,12 +145,28 @@ def factory_internal(
 
     # Initialize service container after db connection is established
     async def setup_services(app):
+        config = app["config"]
+        if config.tag_access_logger and config.tag_access_logger.enabled:
+            app.logger.info("Tag access logging is enabled.")
+            from redis import asyncio as aioredis
+
+            redis_url = config.tag_access_logger.redis_url or "redis://localhost"
+            app.logger.info(
+                f"Connecting to Redis at {redis_url} for tag access logging."
+            )
+            redis_client = await aioredis.from_url(redis_url)
+            log_tag_access_prefix = config.tag_access_logger.prefix
+        else:
+            redis_client = None
+            log_tag_access_prefix = None
         app["services"] = ServiceContainer(
-            config=app["config"],
+            config=config,
             db=app["db"],
             tagstore_engine=app["gs-tagstore"],
             concepts_cache_service=ConceptsCacheService(app, app.logger),
             logger=app.logger,
+            redis_client=redis_client,
+            log_tag_access_prefix=log_tag_access_prefix,
         )
         yield
 
