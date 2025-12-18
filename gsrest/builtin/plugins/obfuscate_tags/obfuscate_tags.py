@@ -1,4 +1,5 @@
 import re
+from functools import partial
 
 from aiohttp import web
 from graphsenselib.tagstore.algorithms.obfuscate import (
@@ -18,7 +19,6 @@ from openapi_server.models.search_result_level3 import SearchResultLevel3
 from openapi_server.models.search_result_level4 import SearchResultLevel4
 from openapi_server.models.search_result_level5 import SearchResultLevel5
 from openapi_server.models.search_result_level6 import SearchResultLevel6
-from functools import partial
 
 GROUPS_HEADER_NAME = "X-Consumer-Groups"
 NO_OBFUSCATION_MARKER_PATTERN = re.compile(r"(private|tags-private)")

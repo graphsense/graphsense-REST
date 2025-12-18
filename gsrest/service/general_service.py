@@ -1,11 +1,11 @@
+from graphsenselib.db.asynchronous.services.models import SearchRequestConfig
+
 from gsrest.dependencies import get_service_container, get_tagstore_access_groups
 from gsrest.translators import (
     pydantic_search_result_by_currency_to_openapi,
     pydantic_search_result_to_openapi,
     pydantic_stats_to_openapi,
 )
-
-from graphsenselib.db.asynchronous.services.models import SearchRequestConfig
 
 
 async def get_statistics(request):

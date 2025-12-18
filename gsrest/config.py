@@ -29,6 +29,17 @@ class LoggingConfig(BaseSettings):
     )
 
 
+class TagAccessLoggerConfig(BaseSettings):
+    enabled: bool = Field(default=False, description="Enable tag access logging")
+    prefix: str = Field(
+        default="tag_access",
+        description="Prefix for Redis keys used in tag access logging",
+    )
+    redis_url: Optional[str] = Field(
+        default=None, description="Redis URL for tag access logging"
+    )
+
+
 class GSRestConfig(BaseSettings):
     model_config = ConfigDict(env_prefix="GSREST_", case_sensitive=False, extra="allow")
 
@@ -90,6 +101,10 @@ class GSRestConfig(BaseSettings):
     )
     slack_info_hook: Dict[str, SlackTopic] = Field(
         default_factory=dict, description="Slack info hook"
+    )
+
+    tag_access_logger: Optional[TagAccessLoggerConfig] = Field(
+        default=None, description="Tag access logger configuration"
     )
 
     def get_plugin_config(self, plugin_name: str) -> Optional[Dict[str, Any]]:
