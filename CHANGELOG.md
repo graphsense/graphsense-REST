@@ -3,23 +3,27 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [25.11.4/1.5.4] - 2025-12-11
+## [25.11.5/1.15.5] - 2025-12-11
+### removed
+-  removed "Content-Disposition" header from bulk endpoints
+
+## [25.11.4/1.15.4] - 2025-12-11
 ### changed
 -  bumped to graphsenselib 2.8.9
 
-## [25.11.3/1.5.3] - 2025-12-10
+## [25.11.3/1.15.3] - 2025-12-10
 ### changed
 -  bumped to graphsenselib 2.8.7
 
-## [25.11.2/1.5.2] - 2025-11-20
+## [25.11.2/1.15.2] - 2025-11-20
 ### changed
 - added fee field to AccountTxs
 
-## [25.11.1/1.5.1] - 2025-11-13
+## [25.11.1/1.15.1] - 2025-11-13
 ### changed
 - bumped to graphsenselib 2.8.1
 
-## [25.11.0/1.5.0] - 2025-11-06
+## [25.11.0/1.15.0] - 2025-11-06
 ### changed
 - harmonize tagpack obfuscation handling (tag obfuscator now a builtin plugin)
 - better search features (search with postfixes), scoped search that allows to enable/disable features.
