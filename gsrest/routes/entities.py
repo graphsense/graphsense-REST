@@ -1,0 +1,392 @@
+"""Entity API routes"""
+
+from typing import Optional
+
+from fastapi import APIRouter, Depends, Path, Query, Request
+
+from gsrest.dependencies import ServiceContainer
+from gsrest.routes.base import (
+    get_services,
+    get_tagstore_access_groups,
+    parse_comma_separated_ints,
+    parse_comma_separated_strings,
+    parse_datetime,
+    to_json_response,
+)
+import gsrest.service.entities_service as service
+
+router = APIRouter()
+
+
+def _normalize_page(page: Optional[str]) -> Optional[str]:
+    """Convert empty string to None for pagination parameter."""
+    if page is not None and page.strip() == "":
+        return None
+    return page
+
+
+class RequestAdapter:
+    """Adapter to make FastAPI Request compatible with existing service layer"""
+
+    def __init__(
+        self,
+        fastapi_request: Request,
+        services: ServiceContainer,
+        tagstore_groups: list[str],
+        show_private_tags: bool = None,
+    ):
+        self._fastapi_request = fastapi_request
+        self._services = services
+        self._tagstore_groups = tagstore_groups
+        # Auto-detect show_private_tags from tagstore_groups if not explicitly set
+        if show_private_tags is None:
+            self._show_private_tags = "private" in tagstore_groups
+        else:
+            self._show_private_tags = show_private_tags
+        self._cache = {}
+        self.logger = None
+
+    @property
+    def app(self):
+        return self
+
+    def __getitem__(self, key):
+        if key == "services":
+            return self._services
+        elif key == "config":
+            return self._fastapi_request.app.state.config
+        elif key == "request_config":
+            return {"show_private_tags": self._show_private_tags}
+        raise KeyError(key)
+
+    @property
+    def headers(self):
+        return self._fastapi_request.headers
+
+
+def _apply_plugin_hooks(request: Request, result):
+    """Apply plugin response hooks"""
+    plugins = getattr(request.app.state, "plugins", [])
+    plugin_contexts = getattr(request.app.state, "plugin_contexts", {})
+    for plugin in plugins:
+        if hasattr(plugin, "before_response"):
+            ctx = plugin_contexts.get(plugin.__module__, {})
+            plugin.before_response(ctx, request, result)
+
+
+@router.get(
+    "/entities/{entity}",
+    summary="Get an entity",
+    operation_id="get_entity",
+)
+async def get_entity(
+    request: Request,
+    currency: str = Path(..., description="The cryptocurrency code (e.g., btc)"),
+    entity: int = Path(..., description="The entity ID"),
+    exclude_best_address_tag: Optional[bool] = Query(
+        None, description="Whether to exclude best address tag"
+    ),
+    include_actors: bool = Query(
+        False, description="Whether to include actor information"
+    ),
+    services: ServiceContainer = Depends(get_services),
+    tagstore_groups: list[str] = Depends(get_tagstore_access_groups),
+):
+    """Get an entity"""
+    currency = currency.lower()
+    adapted_request = RequestAdapter(request, services, tagstore_groups)
+
+    result = await service.get_entity(
+        adapted_request,
+        currency=currency,
+        entity=entity,
+        exclude_best_address_tag=exclude_best_address_tag,
+        include_actors=include_actors,
+    )
+
+    _apply_plugin_hooks(request, result)
+    return to_json_response(result)
+
+
+@router.get(
+    "/entities/{entity}/addresses",
+    summary="Get an entity's addresses",
+    operation_id="list_entity_addresses",
+)
+async def list_entity_addresses(
+    request: Request,
+    currency: str = Path(..., description="The cryptocurrency code (e.g., btc)"),
+    entity: int = Path(..., description="The entity ID"),
+    page: Optional[str] = Query(
+        None, description="Resumption token for retrieving the next page"
+    ),
+    pagesize: Optional[int] = Query(
+        None, description="Number of items returned in a single page"
+    ),
+    services: ServiceContainer = Depends(get_services),
+    tagstore_groups: list[str] = Depends(get_tagstore_access_groups),
+):
+    """Get an entity's addresses"""
+    currency = currency.lower()
+    adapted_request = RequestAdapter(request, services, tagstore_groups)
+
+    result = await service.list_entity_addresses(
+        adapted_request,
+        currency=currency,
+        entity=entity,
+        page=_normalize_page(page),
+        pagesize=pagesize,
+    )
+
+    _apply_plugin_hooks(request, result)
+    return to_json_response(result)
+
+
+@router.get(
+    "/entities/{entity}/neighbors",
+    summary="Get an entity's neighbors in the entity graph",
+    operation_id="list_entity_neighbors",
+)
+async def list_entity_neighbors(
+    request: Request,
+    currency: str = Path(..., description="The cryptocurrency code (e.g., btc)"),
+    entity: int = Path(..., description="The entity ID"),
+    direction: str = Query(..., description="Incoming or outgoing neighbors"),
+    only_ids: Optional[str] = Query(
+        None, description="Restrict result to given set of comma separated IDs"
+    ),
+    include_labels: Optional[bool] = Query(
+        None, description="Whether to include labels"
+    ),
+    page: Optional[str] = Query(
+        None, description="Resumption token for retrieving the next page"
+    ),
+    pagesize: Optional[int] = Query(
+        None, description="Number of items returned in a single page"
+    ),
+    relations_only: Optional[bool] = Query(
+        None, description="Return only relations without entity details"
+    ),
+    exclude_best_address_tag: Optional[bool] = Query(
+        None, description="Whether to exclude best address tag"
+    ),
+    include_actors: bool = Query(
+        False, description="Whether to include actor information"
+    ),
+    services: ServiceContainer = Depends(get_services),
+    tagstore_groups: list[str] = Depends(get_tagstore_access_groups),
+):
+    """Get an entity's neighbors in the entity graph"""
+    currency = currency.lower()
+    adapted_request = RequestAdapter(request, services, tagstore_groups)
+
+    result = await service.list_entity_neighbors(
+        adapted_request,
+        currency=currency,
+        entity=entity,
+        direction=direction,
+        only_ids=parse_comma_separated_ints(only_ids),
+        include_labels=include_labels,
+        page=_normalize_page(page),
+        pagesize=pagesize,
+        relations_only=relations_only,
+        exclude_best_address_tag=exclude_best_address_tag,
+        include_actors=include_actors,
+    )
+
+    _apply_plugin_hooks(request, result)
+    return to_json_response(result)
+
+
+@router.get(
+    "/entities/{entity}/links",
+    summary="Get transactions between two entities",
+    operation_id="list_entity_links",
+)
+async def list_entity_links(
+    request: Request,
+    currency: str = Path(..., description="The cryptocurrency code (e.g., btc)"),
+    entity: int = Path(..., description="The entity ID"),
+    neighbor: int = Query(..., description="Neighbor entity ID"),
+    min_height: Optional[int] = Query(
+        None, description="Return transactions starting from given height"
+    ),
+    max_height: Optional[int] = Query(
+        None, description="Return transactions up to (including) given height"
+    ),
+    min_date: Optional[str] = Query(None, description="Min date of txs"),
+    max_date: Optional[str] = Query(None, description="Max date of txs"),
+    order: Optional[str] = Query(None, description="Sorting order"),
+    token_currency: Optional[str] = Query(
+        None, description="Return transactions of given token or base currency"
+    ),
+    page: Optional[str] = Query(
+        None, description="Resumption token for retrieving the next page"
+    ),
+    pagesize: Optional[int] = Query(
+        None, description="Number of items returned in a single page"
+    ),
+    services: ServiceContainer = Depends(get_services),
+    tagstore_groups: list[str] = Depends(get_tagstore_access_groups),
+):
+    """Get transactions between two entities"""
+    currency = currency.lower()
+    min_date_parsed = parse_datetime(min_date)
+    max_date_parsed = parse_datetime(max_date)
+
+    adapted_request = RequestAdapter(request, services, tagstore_groups)
+
+    result = await service.list_entity_links(
+        adapted_request,
+        currency=currency,
+        entity=entity,
+        neighbor=neighbor,
+        min_height=min_height,
+        max_height=max_height,
+        min_date=min_date_parsed,
+        max_date=max_date_parsed,
+        order=order,
+        token_currency=token_currency,
+        page=_normalize_page(page),
+        pagesize=pagesize,
+    )
+
+    _apply_plugin_hooks(request, result)
+    return to_json_response(result)
+
+
+@router.get(
+    "/entities/{entity}/tags",
+    summary="Get address tags for a given entity",
+    operation_id="list_address_tags_by_entity",
+)
+async def list_address_tags_by_entity(
+    request: Request,
+    currency: str = Path(..., description="The cryptocurrency code (e.g., btc)"),
+    entity: int = Path(..., description="The entity ID"),
+    page: Optional[str] = Query(
+        None, description="Resumption token for retrieving the next page"
+    ),
+    pagesize: Optional[int] = Query(
+        None, description="Number of items returned in a single page"
+    ),
+    services: ServiceContainer = Depends(get_services),
+    tagstore_groups: list[str] = Depends(get_tagstore_access_groups),
+):
+    """Get address tags for a given entity"""
+    currency = currency.lower()
+    adapted_request = RequestAdapter(request, services, tagstore_groups)
+
+    result = await service.list_address_tags_by_entity(
+        adapted_request,
+        currency=currency,
+        entity=entity,
+        page=_normalize_page(page),
+        pagesize=pagesize,
+    )
+
+    _apply_plugin_hooks(request, result)
+    return to_json_response(result)
+
+
+@router.get(
+    "/entities/{entity}/txs",
+    summary="Get all transactions an entity has been involved in",
+    operation_id="list_entity_txs",
+)
+async def list_entity_txs(
+    request: Request,
+    currency: str = Path(..., description="The cryptocurrency code (e.g., btc)"),
+    entity: int = Path(..., description="The entity ID"),
+    direction: Optional[str] = Query(
+        None, description="Incoming or outgoing transactions"
+    ),
+    min_height: Optional[int] = Query(
+        None, description="Return transactions starting from given height"
+    ),
+    max_height: Optional[int] = Query(
+        None, description="Return transactions up to (including) given height"
+    ),
+    min_date: Optional[str] = Query(None, description="Min date of txs"),
+    max_date: Optional[str] = Query(None, description="Max date of txs"),
+    order: Optional[str] = Query(None, description="Sorting order"),
+    token_currency: Optional[str] = Query(
+        None, description="Return transactions of given token or base currency"
+    ),
+    page: Optional[str] = Query(
+        None, description="Resumption token for retrieving the next page"
+    ),
+    pagesize: Optional[int] = Query(
+        None, description="Number of items returned in a single page"
+    ),
+    services: ServiceContainer = Depends(get_services),
+    tagstore_groups: list[str] = Depends(get_tagstore_access_groups),
+):
+    """Get all transactions an entity has been involved in"""
+    currency = currency.lower()
+    min_date_parsed = parse_datetime(min_date)
+    max_date_parsed = parse_datetime(max_date)
+
+    adapted_request = RequestAdapter(request, services, tagstore_groups)
+
+    result = await service.list_entity_txs(
+        adapted_request,
+        currency=currency,
+        entity=entity,
+        min_height=min_height,
+        max_height=max_height,
+        min_date=min_date_parsed,
+        max_date=max_date_parsed,
+        direction=direction,
+        order=order,
+        token_currency=token_currency,
+        page=_normalize_page(page),
+        pagesize=pagesize,
+    )
+
+    _apply_plugin_hooks(request, result)
+    return to_json_response(result)
+
+
+@router.get(
+    "/entities/{entity}/search",
+    summary="Search neighbors of an entity",
+    operation_id="search_entity_neighbors",
+)
+async def search_entity_neighbors(
+    request: Request,
+    currency: str = Path(..., description="The cryptocurrency code (e.g., btc)"),
+    entity: int = Path(..., description="The entity ID"),
+    direction: str = Query(..., description="Incoming or outgoing neighbors"),
+    key: str = Query(..., description="Search key"),
+    value: str = Query(..., description="Comma separated search values"),
+    depth: int = Query(..., description="Search depth"),
+    breadth: int = Query(..., description="Search breadth"),
+    skip_num_addresses: Optional[int] = Query(
+        None, description="Skip entities with more than N addresses"
+    ),
+    services: ServiceContainer = Depends(get_services),
+    tagstore_groups: list[str] = Depends(get_tagstore_access_groups),
+):
+    """Search neighbors of an entity"""
+    currency = currency.lower()
+    adapted_request = RequestAdapter(request, services, tagstore_groups)
+    # Add logger for search service
+    import logging
+
+    adapted_request.logger = logging.getLogger(__name__)
+
+    result = await service.search_entity_neighbors(
+        adapted_request,
+        currency=currency,
+        entity=entity,
+        direction=direction,
+        key=key,
+        value=parse_comma_separated_strings(value) or [],
+        depth=depth,
+        breadth=breadth,
+        skip_num_addresses=skip_num_addresses,
+    )
+
+    _apply_plugin_hooks(request, result)
+    return to_json_response(result)
