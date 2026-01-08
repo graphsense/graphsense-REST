@@ -302,7 +302,6 @@ class TestFastAPIMigrationBulk:
     def test_bulk_json_get_address(self):
         """Test bulk JSON get_address endpoint."""
         body = {"address": ["1Archive1n2C579dMsAu3iC6tWzuQJz8dN"]}
-        # Note: num_pages is required by old server, FastAPI has default
         result = self.compare_bulk_endpoint("btc/bulk.json/get_address?num_pages=1", body)
 
         logger.info(f"  bulk get_address: old={result['old_time']:.3f}s, new={result['new_time']:.3f}s")
