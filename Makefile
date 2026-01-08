@@ -34,6 +34,15 @@ serve-old:
 serve:
 	uv run adev runserver -p ${GS_REST_DEV_PORT} --root . --app-factory main gsrest/__init__.py
 
+serve-fastapi:
+	uv run uvicorn gsrest.app:create_app --factory --host localhost --port ${GS_REST_DEV_PORT} --reload
+
+test-migration:
+	@echo "Run old server on port 9001: GS_REST_DEV_PORT=9001 make serve"
+	@echo "Run FastAPI server on port 9002: GS_REST_DEV_PORT=9002 make serve-fastapi"
+	@echo "Then run: OLD_SERVER=http://localhost:9001 NEW_SERVER=http://localhost:9002 uv run pytest -m migration -v -s"
+	OLD_SERVER=http://localhost:9001 NEW_SERVER=http://localhost:9002 uv run pytest -m "migration" -v -s
+
 build-docker:
 	docker build -t graphsense-rest .
 
