@@ -6,6 +6,7 @@ from gsrest.dependencies import ServiceContainer
 from gsrest.routes.base import (
     get_services,
     get_tagstore_access_groups,
+    parse_datetime,
     to_json_response,
 )
 import gsrest.service.blocks_service as service
@@ -119,7 +120,7 @@ async def get_block_by_date(
     result = await service.get_block_by_date(
         adapted_request,
         currency=currency,
-        date=date,
+        date=parse_datetime(date),
     )
 
     _apply_plugin_hooks(request, result)
