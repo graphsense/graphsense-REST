@@ -5,10 +5,6 @@ import json
 from aiohttp import web
 from aiohttp.test_utils import unittest_run_loop
 
-from openapi_server.models.tx import Tx
-from openapi_server.models.tx_account import TxAccount
-from openapi_server.models.tx_ref import TxRef
-from openapi_server.models.tx_value import TxValue
 from tests import BaseTestCase
 import gsrest.test.txs_service as test_service
 

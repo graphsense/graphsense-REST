@@ -5,7 +5,6 @@ import json
 from aiohttp import web
 from aiohttp.test_utils import unittest_run_loop
 
-from openapi_server.models.token_configs import TokenConfigs
 from tests import BaseTestCase
 import gsrest.test.tokens_service as test_service
 

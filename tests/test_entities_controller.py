@@ -5,13 +5,6 @@ import json
 from aiohttp import web
 from aiohttp.test_utils import unittest_run_loop
 
-from openapi_server.models.address_tags import AddressTags
-from openapi_server.models.address_txs import AddressTxs
-from openapi_server.models.entity import Entity
-from openapi_server.models.entity_addresses import EntityAddresses
-from openapi_server.models.links import Links
-from openapi_server.models.neighbor_entities import NeighborEntities
-from openapi_server.models.search_result_level1 import SearchResultLevel1
 from tests import BaseTestCase
 import gsrest.test.entities_service as test_service
 

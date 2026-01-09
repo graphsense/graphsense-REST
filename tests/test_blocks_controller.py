@@ -5,8 +5,6 @@ import json
 from aiohttp import web
 from aiohttp.test_utils import unittest_run_loop
 
-from openapi_server.models.block import Block
-from openapi_server.models.tx import Tx
 from tests import BaseTestCase
 import gsrest.test.blocks_service as test_service
 

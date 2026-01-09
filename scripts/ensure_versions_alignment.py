@@ -6,8 +6,7 @@ Script to ensure version alignment across multiple files in the GraphSense REST 
 This script checks versions in:
 - pyproject.toml (root)
 - clients/python/pyproject.toml
-- openapi_spec/graphsense.yaml
-- openapi_server/openapi/openapi.yaml
+- Makefile
 
 Exits with non-zero code if versions are misaligned.
 """
@@ -19,15 +18,11 @@ from pathlib import Path
 files = [
     Path("pyproject.toml"),
     Path("clients/python/pyproject.toml"),
-    Path("openapi_spec/graphsense.yaml"),
-    Path("openapi_server/openapi/openapi.yaml"),
     Path("Makefile"),
 ]
 
 regex_patterns = {
     r"pyproject\.toml$": r'version\s*=\s*"([^"\n]+)"$',
-    r"graphsense\.yaml$": r'version:\s*"([^"\n]+)"$',
-    r"openapi\.yaml$": r"version:\s*([^\n]+)$",
     r"Makefile$": r'GS_REST_SERVICE_VERSION\s*\?=\s*"([^"\n]+)"$',
 }
 

@@ -1,8 +1,10 @@
 -include .env
 
+OPENAPI_URL ?= http://localhost:9000/openapi.json
+
 generate-openapi-client:
-	@echo "Downloading openapi.json..."
-	cp ../../openapi_spec/graphsense.yaml openapi.json.tmp
+	@echo "Downloading openapi.json from $(OPENAPI_URL)..."
+	curl -s $(OPENAPI_URL) > openapi.json.tmp
 	@echo "Modifying server URL to production..."
 	python scripts/openapi_spec_add_auth.py openapi.json.tmp https://api.ikna.io > openapi.json.modified
 # 	jq '.servers[0].url = "https://api.ikna.io"' openapi.json.tmp > openapi.json.modified

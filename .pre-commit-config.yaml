@@ -56,12 +56,6 @@ repos:
     - id: uv-lock
 -   repo: local
     hooks:
-    - id: codegen
-      name: Ensure Generated Code is up to date
-      entry: make run-codegen
-      language: system
-      pass_filenames: false
-      always_run: true
     - id: pytest-check
       name: pytest-check
       entry: make test

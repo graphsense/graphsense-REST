@@ -5,10 +5,6 @@ import json
 from aiohttp import web
 from aiohttp.test_utils import unittest_run_loop
 
-from openapi_server.models.actor import Actor
-from openapi_server.models.address_tags import AddressTags
-from openapi_server.models.concept import Concept
-from openapi_server.models.taxonomy import Taxonomy
 from tests import BaseTestCase
 import gsrest.test.tags_service as test_service
 

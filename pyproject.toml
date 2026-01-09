@@ -12,18 +12,14 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "aiohttp-cors>=0.7.0",
-    "aiohttp-jinja2>=1.5.0",
     "asgi-lifespan>=2.1.0",
     "async-lru>=2.0.4",
-    "connexion[swagger-ui] >=2.6.0, <3",
     "fastapi>=0.115.0",
     "graphsense-lib[conversions,tagpacks]>=2.8.9",
     "httpx>=0.27.0",
     "openapi-schema-validator>=0.2.3",
     "python-dateutil>=2.9.0",
     "redis>=7.1.0",
-    "swagger-ui-bundle>=0.0.9",
     "uvicorn[standard]>=0.32.0",
 ]
 
@@ -37,7 +33,7 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["gsrest*", "openapi_server*"]
+include = ["gsrest*", "openapi_server.models*"]
 exclude = ["clients*", "tests*", "scripts*", "gsrest.test", "gsrest.test.*"]
 
 [tool.setuptools]
@@ -89,8 +85,6 @@ exclude = [
     "node_modules",
     "site-packages",
     "venv",
-    "openapi_server*",
-    "openapi_server/**",
     "tests/test_*.py",
     "setup.py",
     "clients/**"
@@ -101,10 +95,9 @@ extend-select = ["T201"]
 
 [dependency-groups]
 dev = [
-    "aiohttp-devtools>=1.1.2",
     "gunicorn>=23.0.0",
     "pre-commit>=4.0.1",
-    "pytest-aiohttp>=1.0.5",
+    "pytest-asyncio>=1.2.0",
     "pytest-cov>=6.0.0",
     "pytest-icdiff>=0.9",
     "pytest>=8.3.4",
