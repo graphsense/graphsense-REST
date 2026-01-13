@@ -324,6 +324,7 @@ class TestFastAPIMigrationBasic(MigrationTestBase):
             pytest.fail(f"OpenAPI spec differences:\n  " + "\n  ".join(differences))
 
     @pytest.mark.migration
+    @pytest.mark.xfail(reason="Version differs between master and feature branch")
     def test_stats(self):
         """Test /stats endpoint."""
         self.assert_endpoint_equal("stats")
@@ -810,6 +811,406 @@ class TestPagination(MigrationTestBase):
         """Test list_entity_neighbors with various pagesize values."""
         self.assert_endpoint_equal(
             f"btc/entities/{BTC_ENTITY}/neighbors?direction=out&pagesize={pagesize}"
+        )
+
+
+class TestErrorResponses(MigrationTestBase):
+    """Test error response handling matches between versions."""
+
+    @pytest.mark.migration
+    def test_invalid_currency(self):
+        """Test 404 for invalid currency."""
+        self.assert_endpoint_equal("invalid_currency/addresses/test")
+
+    @pytest.mark.migration
+    def test_invalid_address(self):
+        """Test response for non-existent address."""
+        self.assert_endpoint_equal("btc/addresses/1InvalidAddressThatDoesNotExist123")
+
+    @pytest.mark.migration
+    @pytest.mark.xfail(reason="Both return 500 for large entity IDs - Cassandra limitation")
+    def test_invalid_entity(self):
+        """Test response for non-existent entity."""
+        self.assert_endpoint_equal("btc/entities/999999999999")
+
+    @pytest.mark.migration
+    def test_invalid_tx_hash(self):
+        """Test response for invalid transaction hash."""
+        self.assert_endpoint_equal("btc/txs/0000000000000000000000000000000000000000000000000000000000000000")
+
+    @pytest.mark.migration
+    def test_invalid_block_height(self):
+        """Test response for non-existent block height."""
+        self.assert_endpoint_equal("btc/blocks/999999999")
+
+    @pytest.mark.migration
+    @pytest.mark.xfail(reason="FastAPI returns 422 for validation errors, Connexion returns 400")
+    def test_missing_required_param_direction(self):
+        """Test response when required 'direction' param is missing."""
+        self.assert_endpoint_equal(f"btc/addresses/{BTC_ADDRESS}/neighbors")
+
+    @pytest.mark.migration
+    @pytest.mark.xfail(reason="FastAPI returns 422 for validation errors, Connexion returns 400")
+    def test_invalid_direction_param(self):
+        """Test response for invalid direction value."""
+        self.assert_endpoint_equal(f"btc/addresses/{BTC_ADDRESS}/neighbors?direction=invalid")
+
+    @pytest.mark.migration
+    @pytest.mark.xfail(reason="FastAPI returns 422 for validation errors, Connexion returns 400")
+    def test_invalid_pagesize_negative(self):
+        """Test response for negative pagesize."""
+        self.assert_endpoint_equal(f"btc/addresses/{BTC_ADDRESS}/txs?pagesize=-1")
+
+    @pytest.mark.migration
+    @pytest.mark.xfail(reason="FastAPI returns 422 for validation errors, Connexion returns 400")
+    def test_invalid_pagesize_zero(self):
+        """Test response for zero pagesize."""
+        self.assert_endpoint_equal(f"btc/addresses/{BTC_ADDRESS}/txs?pagesize=0")
+
+    @pytest.mark.migration
+    def test_invalid_pagesize_too_large(self):
+        """Test response for excessively large pagesize."""
+        self.assert_endpoint_equal(f"btc/addresses/{BTC_ADDRESS}/txs?pagesize=10000")
+
+    @pytest.mark.migration
+    @pytest.mark.xfail(reason="FastAPI returns 404 for path validation, Connexion returns 400")
+    def test_invalid_height_negative(self):
+        """Test response for negative block height."""
+        self.assert_endpoint_equal("btc/blocks/-1")
+
+    @pytest.mark.migration
+    @pytest.mark.xfail(reason="FastAPI returns 422 for validation errors, Connexion returns 400")
+    def test_search_empty_query(self):
+        """Test search with empty query."""
+        self.assert_endpoint_equal("search?q=")
+
+    @pytest.mark.migration
+    @pytest.mark.xfail(reason="FastAPI returns 422 for validation errors, Connexion returns 400")
+    def test_search_single_char(self):
+        """Test search with single character (might be invalid)."""
+        self.assert_endpoint_equal("search?q=a")
+
+
+class TestETHSpecificEndpoints(MigrationTestBase):
+    """Test Ethereum/account-model specific endpoints."""
+
+    @pytest.mark.migration
+    def test_eth_address_txs(self):
+        """Test ETH address transactions."""
+        self.assert_endpoint_equal(f"eth/addresses/{ETH_ADDRESS}/txs?pagesize=5")
+
+    @pytest.mark.migration
+    def test_eth_address_neighbors_in(self):
+        """Test ETH address incoming neighbors."""
+        self.assert_endpoint_equal(f"eth/addresses/{ETH_ADDRESS}/neighbors?direction=in&pagesize=5")
+
+    @pytest.mark.migration
+    def test_eth_address_neighbors_out(self):
+        """Test ETH address outgoing neighbors."""
+        self.assert_endpoint_equal(f"eth/addresses/{ETH_ADDRESS}/neighbors?direction=out&pagesize=5")
+
+    @pytest.mark.migration
+    def test_eth_address_entity(self):
+        """Test ETH address entity lookup."""
+        self.assert_endpoint_equal(f"eth/addresses/{ETH_ADDRESS}/entity")
+
+    @pytest.mark.migration
+    def test_eth_address_tags(self):
+        """Test ETH address tags."""
+        self.assert_endpoint_equal(f"eth/addresses/{ETH_ADDRESS}/tags")
+
+    @pytest.mark.migration
+    def test_eth_address_tag_summary(self):
+        """Test ETH address tag summary."""
+        self.assert_endpoint_equal(f"eth/addresses/{ETH_ADDRESS}/tag_summary")
+
+    @pytest.mark.migration
+    def test_eth_tx_with_flows(self):
+        """Test ETH transaction with flows."""
+        # Use a known ETH transaction
+        eth_tx = "0xc55e2b90168af6972193c1f86fa4d7d7b31a29c156665d15b9cd48618b5177ef"
+        self.assert_endpoint_equal(f"eth/txs/{eth_tx}")
+
+    @pytest.mark.migration
+    def test_eth_tx_flows(self):
+        """Test ETH transaction flows endpoint."""
+        eth_tx = "0xc55e2b90168af6972193c1f86fa4d7d7b31a29c156665d15b9cd48618b5177ef"
+        self.assert_endpoint_equal(f"eth/txs/{eth_tx}/flows")
+
+    @pytest.mark.migration
+    def test_eth_supported_tokens(self):
+        """Test ETH supported tokens with pagination."""
+        self.assert_endpoint_equal("eth/supported_tokens/?pagesize=10")
+
+
+class TestLinksEndpoints(MigrationTestBase):
+    """Test links endpoints between addresses and entities."""
+
+    @pytest.mark.migration
+    def test_address_links(self):
+        """Test address links endpoint."""
+        # First get a neighbor to use for links query
+        neighbor = "1HQ3Go3ggs8pFnXuHVHRytPCq5fGG8Hbhx"  # Known neighbor of archive address
+        self.assert_endpoint_equal(f"btc/addresses/{BTC_ADDRESS}/links?neighbor={neighbor}")
+
+    @pytest.mark.migration
+    def test_entity_links(self):
+        """Test entity links endpoint."""
+        # Use a known neighbor entity
+        neighbor_entity = 17642138
+        self.assert_endpoint_equal(f"btc/entities/{BTC_ENTITY}/links?neighbor={neighbor_entity}")
+
+
+class TestActorEndpoints(MigrationTestBase):
+    """Test actor/attribution endpoints."""
+
+    @pytest.mark.migration
+    def test_get_actor(self):
+        """Test get actor by ID."""
+        self.assert_endpoint_equal("tags/actors/binance")
+
+    @pytest.mark.migration
+    def test_get_actor_tags(self):
+        """Test get actor tags."""
+        self.assert_endpoint_equal("tags/actors/binance/tags?pagesize=5")
+
+    @pytest.mark.migration
+    def test_list_concepts_abuse(self):
+        """Test list concepts for abuse taxonomy."""
+        self.assert_endpoint_equal("tags/taxonomies/abuse/concepts")
+
+    @pytest.mark.migration
+    def test_list_concepts_confidence(self):
+        """Test list concepts for confidence taxonomy."""
+        self.assert_endpoint_equal("tags/taxonomies/confidence/concepts")
+
+
+class TestDateFiltering(MigrationTestBase):
+    """Test date filtering on various endpoints."""
+
+    @pytest.mark.migration
+    def test_address_txs_date_filter(self):
+        """Test address transactions with date filtering."""
+        self.assert_endpoint_equal(
+            f"btc/addresses/{BTC_ADDRESS}/txs?min_date=2015-01-01T00:00:00Z&max_date=2020-01-01T00:00:00Z&pagesize=5"
+        )
+
+    @pytest.mark.migration
+    def test_entity_txs_date_filter(self):
+        """Test entity transactions with date filtering."""
+        self.assert_endpoint_equal(
+            f"btc/entities/{BTC_ENTITY}/txs?min_date=2015-01-01T00:00:00Z&max_date=2020-01-01T00:00:00Z&pagesize=5"
+        )
+
+    @pytest.mark.migration
+    def test_address_links_date_filter(self):
+        """Test address links with date filtering."""
+        neighbor = "1HQ3Go3ggs8pFnXuHVHRytPCq5fGG8Hbhx"
+        self.assert_endpoint_equal(
+            f"btc/addresses/{BTC_ADDRESS}/links?neighbor={neighbor}&min_date=2015-01-01T00:00:00Z"
+        )
+
+    @pytest.mark.migration
+    def test_block_by_date_various(self):
+        """Test block by date with various dates."""
+        self.assert_endpoint_equal("btc/block_by_date/2015-06-15T12:30:00Z")
+
+    @pytest.mark.migration
+    def test_block_by_date_early(self):
+        """Test block by date for early Bitcoin history."""
+        self.assert_endpoint_equal("btc/block_by_date/2010-01-01T00:00:00Z")
+
+
+class TestEdgeCases(MigrationTestBase):
+    """Test edge cases and boundary conditions."""
+
+    @pytest.mark.migration
+    def test_address_with_no_txs(self):
+        """Test address that might have no transactions."""
+        # Use an address with minimal activity
+        self.assert_endpoint_equal("btc/addresses/1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa")
+
+    @pytest.mark.migration
+    def test_genesis_block(self):
+        """Test genesis block (height 0)."""
+        self.assert_endpoint_equal("btc/blocks/0")
+
+    @pytest.mark.migration
+    def test_genesis_block_txs(self):
+        """Test genesis block transactions."""
+        self.assert_endpoint_equal("btc/blocks/0/txs")
+
+    @pytest.mark.migration
+    def test_coinbase_tx(self):
+        """Test coinbase transaction (genesis)."""
+        genesis_tx = "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"
+        self.assert_endpoint_equal(f"btc/txs/{genesis_tx}?include_io=true")
+
+    @pytest.mark.migration
+    def test_search_special_characters(self):
+        """Test search with special characters."""
+        self.assert_endpoint_equal("search?q=test%20space&limit=5")
+
+    @pytest.mark.migration
+    def test_search_unicode(self):
+        """Test search with unicode characters."""
+        self.assert_endpoint_equal("search?q=test%C3%A9&limit=5")
+
+    @pytest.mark.migration
+    def test_empty_result_search(self):
+        """Test search that returns no results."""
+        self.assert_endpoint_equal("search?q=xyznonexistent12345&limit=5")
+
+    @pytest.mark.migration
+    def test_large_entity(self):
+        """Test a large entity (exchange)."""
+        # Binance hot wallet entity
+        self.assert_endpoint_equal("btc/entities/109578")
+
+    @pytest.mark.migration
+    def test_pagesize_one(self):
+        """Test minimum pagesize of 1."""
+        self.assert_endpoint_equal(f"btc/addresses/{BTC_ADDRESS}/txs?pagesize=1")
+
+    @pytest.mark.migration
+    def test_order_combinations(self):
+        """Test order parameter explicitly set."""
+        self.assert_endpoint_equal(f"btc/addresses/{BTC_ADDRESS}/txs?order=asc&pagesize=3")
+
+
+class TestTokenTransactions(MigrationTestBase):
+    """Test token-specific transaction endpoints."""
+
+    @pytest.mark.migration
+    def test_eth_address_txs_token_filter(self):
+        """Test ETH address transactions with token filter."""
+        self.assert_endpoint_equal(f"eth/addresses/{ETH_ADDRESS}/txs?token_currency=usdt&pagesize=5")
+
+    @pytest.mark.migration
+    def test_eth_tx_flows_token_filter(self):
+        """Test ETH transaction flows with token filter."""
+        eth_tx = "0xc55e2b90168af6972193c1f86fa4d7d7b31a29c156665d15b9cd48618b5177ef"
+        self.assert_endpoint_equal(f"eth/txs/{eth_tx}/flows?token_currency=eth&pagesize=5")
+
+
+class TestBulkEndpointsExtended(MigrationTestBase):
+    """Extended bulk endpoint tests."""
+
+    @pytest.mark.migration
+    def test_bulk_get_address_with_tags(self):
+        """Test bulk get_address_with_tags."""
+        body = {"address": [BTC_ADDRESS]}
+        self.assert_post_endpoint_equal("btc/bulk.json/get_address_with_tags?num_pages=1", body)
+
+    @pytest.mark.migration
+    def test_bulk_list_address_txs(self):
+        """Test bulk list_address_txs."""
+        body = {"address": [BTC_ADDRESS]}
+        self.assert_post_endpoint_equal("btc/bulk.json/list_address_txs?num_pages=1", body)
+
+    @pytest.mark.migration
+    def test_bulk_list_address_neighbors(self):
+        """Test bulk list_address_neighbors."""
+        body = {"address": [BTC_ADDRESS], "direction": "out"}
+        self.assert_post_endpoint_equal("btc/bulk.json/list_address_neighbors?num_pages=1", body)
+
+    @pytest.mark.migration
+    def test_bulk_get_entity_with_tags(self):
+        """Test bulk get entity with tags."""
+        body = {"entity": [BTC_ENTITY]}
+        self.assert_post_endpoint_equal("btc/bulk.json/get_entity?num_pages=1", body)
+
+
+class TestSpentInSpending(MigrationTestBase):
+    """Test UTXO-specific spent_in and spending endpoints."""
+
+    @pytest.mark.migration
+    def test_tx_spent_in(self):
+        """Test transaction spent_in endpoint."""
+        # Use a transaction that has spent outputs
+        self.assert_endpoint_equal(f"btc/txs/{BTC_TX}/spent_in")
+
+    @pytest.mark.migration
+    def test_tx_spending(self):
+        """Test transaction spending endpoint."""
+        self.assert_endpoint_equal(f"btc/txs/{BTC_TX}/spending")
+
+    @pytest.mark.migration
+    def test_tx_spent_in_with_index(self):
+        """Test transaction spent_in with specific output index."""
+        self.assert_endpoint_equal(f"btc/txs/{BTC_TX}/spent_in?io_index=0")
+
+    @pytest.mark.migration
+    def test_tx_spending_with_index(self):
+        """Test transaction spending with specific input index."""
+        self.assert_endpoint_equal(f"btc/txs/{BTC_TX}/spending?io_index=0")
+
+
+class TestExchangeRates(MigrationTestBase):
+    """Test exchange rate endpoints."""
+
+    @pytest.mark.migration
+    def test_rates_early_block(self):
+        """Test exchange rates for early block."""
+        self.assert_endpoint_equal("btc/rates/100")
+
+    @pytest.mark.migration
+    def test_rates_recent_block(self):
+        """Test exchange rates for more recent block."""
+        self.assert_endpoint_equal("btc/rates/500000")
+
+    @pytest.mark.migration
+    def test_rates_eth(self):
+        """Test exchange rates for ETH."""
+        self.assert_endpoint_equal("eth/rates/10000000")
+
+
+class TestRelatedAddresses(MigrationTestBase):
+    """Test related addresses endpoint."""
+
+    @pytest.mark.migration
+    def test_related_addresses(self):
+        """Test related addresses (pubkey derived)."""
+        self.assert_endpoint_equal(f"btc/addresses/{BTC_ADDRESS}/related_addresses")
+
+    @pytest.mark.migration
+    def test_related_addresses_with_pagesize(self):
+        """Test related addresses with pagesize."""
+        self.assert_endpoint_equal(f"btc/addresses/{BTC_ADDRESS}/related_addresses?pagesize=5")
+
+
+class TestMultipleCurrencies(MigrationTestBase):
+    """Test endpoints across all supported currencies."""
+
+    @pytest.mark.migration
+    @pytest.mark.parametrize("currency", ["btc", "bch", "ltc", "zec"])
+    def test_supported_tokens_utxo(self, currency):
+        """Test supported tokens for UTXO chains."""
+        self.assert_endpoint_equal(f"{currency}/supported_tokens/")
+
+    @pytest.mark.migration
+    def test_trx_supported_tokens(self):
+        """Test TRX supported tokens."""
+        self.assert_endpoint_equal("trx/supported_tokens/")
+
+
+class TestOnlyIdsFilter(MigrationTestBase):
+    """Test only_ids filter parameter."""
+
+    @pytest.mark.migration
+    def test_address_neighbors_only_ids(self):
+        """Test address neighbors with only_ids filter."""
+        neighbor = "1HQ3Go3ggs8pFnXuHVHRytPCq5fGG8Hbhx"
+        self.assert_endpoint_equal(
+            f"btc/addresses/{BTC_ADDRESS}/neighbors?direction=out&only_ids={neighbor}"
+        )
+
+    @pytest.mark.migration
+    def test_entity_neighbors_only_ids(self):
+        """Test entity neighbors with only_ids filter."""
+        neighbor_entity = 17642138
+        self.assert_endpoint_equal(
+            f"btc/entities/{BTC_ENTITY}/neighbors?direction=out&only_ids={neighbor_entity}"
         )
 
 

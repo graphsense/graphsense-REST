@@ -1,6 +1,6 @@
 """Entity API routes"""
 
-from typing import Optional
+from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, Path, Query, Request
 
@@ -121,7 +121,7 @@ async def list_entity_addresses(
         None, description="Resumption token for retrieving the next page"
     ),
     pagesize: Optional[int] = Query(
-        None, description="Number of items returned in a single page"
+        None, ge=1, description="Number of items returned in a single page"
     ),
     services: ServiceContainer = Depends(get_services),
     tagstore_groups: list[str] = Depends(get_tagstore_access_groups),
@@ -151,7 +151,9 @@ async def list_entity_neighbors(
     request: Request,
     currency: str = Path(..., description="The cryptocurrency code (e.g., btc)"),
     entity: int = Path(..., description="The entity ID"),
-    direction: str = Query(..., description="Incoming or outgoing neighbors"),
+    direction: Literal["in", "out"] = Query(
+        ..., description="Incoming or outgoing neighbors"
+    ),
     only_ids: Optional[str] = Query(
         None, description="Restrict result to given set of comma separated IDs"
     ),
@@ -162,7 +164,7 @@ async def list_entity_neighbors(
         None, description="Resumption token for retrieving the next page"
     ),
     pagesize: Optional[int] = Query(
-        None, description="Number of items returned in a single page"
+        None, ge=1, description="Number of items returned in a single page"
     ),
     relations_only: Optional[bool] = Query(
         None, description="Return only relations without entity details"
@@ -224,7 +226,7 @@ async def list_entity_links(
         None, description="Resumption token for retrieving the next page"
     ),
     pagesize: Optional[int] = Query(
-        None, description="Number of items returned in a single page"
+        None, ge=1, description="Number of items returned in a single page"
     ),
     services: ServiceContainer = Depends(get_services),
     tagstore_groups: list[str] = Depends(get_tagstore_access_groups),
@@ -268,7 +270,7 @@ async def list_address_tags_by_entity(
         None, description="Resumption token for retrieving the next page"
     ),
     pagesize: Optional[int] = Query(
-        None, description="Number of items returned in a single page"
+        None, ge=1, description="Number of items returned in a single page"
     ),
     services: ServiceContainer = Depends(get_services),
     tagstore_groups: list[str] = Depends(get_tagstore_access_groups),
@@ -317,7 +319,7 @@ async def list_entity_txs(
         None, description="Resumption token for retrieving the next page"
     ),
     pagesize: Optional[int] = Query(
-        None, description="Number of items returned in a single page"
+        None, ge=1, description="Number of items returned in a single page"
     ),
     services: ServiceContainer = Depends(get_services),
     tagstore_groups: list[str] = Depends(get_tagstore_access_groups),
@@ -357,7 +359,9 @@ async def search_entity_neighbors(
     request: Request,
     currency: str = Path(..., description="The cryptocurrency code (e.g., btc)"),
     entity: int = Path(..., description="The entity ID"),
-    direction: str = Query(..., description="Incoming or outgoing neighbors"),
+    direction: Literal["in", "out"] = Query(
+        ..., description="Incoming or outgoing neighbors"
+    ),
     key: str = Query(..., description="Search key"),
     value: str = Query(..., description="Comma separated search values"),
     depth: int = Query(..., description="Search depth"),

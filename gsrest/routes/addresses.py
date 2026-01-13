@@ -1,6 +1,6 @@
 """Address API routes"""
 
-from typing import Optional
+from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, Path, Query, Request
 
@@ -176,7 +176,7 @@ async def list_tags_by_address(
         None, description="Resumption token for retrieving the next page"
     ),
     pagesize: Optional[int] = Query(
-        None, description="Number of items returned in a single page"
+        None, ge=1, description="Number of items returned in a single page"
     ),
     include_best_cluster_tag: Optional[bool] = Query(
         None,
@@ -230,7 +230,7 @@ async def list_address_txs(
         None, description="Resumption token for retrieving the next page"
     ),
     pagesize: Optional[int] = Query(
-        None, description="Number of items returned in a single page"
+        None, ge=1, description="Number of items returned in a single page"
     ),
     services: ServiceContainer = Depends(get_services),
     tagstore_groups: list[str] = Depends(get_tagstore_access_groups),
@@ -270,7 +270,9 @@ async def list_address_neighbors(
     request: Request,
     currency: str = Path(..., description="The cryptocurrency code (e.g., btc)"),
     address: str = Path(..., description="The cryptocurrency address"),
-    direction: str = Query(..., description="Incoming or outgoing neighbors"),
+    direction: Literal["in", "out"] = Query(
+        ..., description="Incoming or outgoing neighbors"
+    ),
     only_ids: Optional[str] = Query(
         None, description="Restrict result to given set of comma separated addresses"
     ),
@@ -284,7 +286,7 @@ async def list_address_neighbors(
         None, description="Resumption token for retrieving the next page"
     ),
     pagesize: Optional[int] = Query(
-        None, description="Number of items returned in a single page"
+        None, ge=1, description="Number of items returned in a single page"
     ),
     services: ServiceContainer = Depends(get_services),
     tagstore_groups: list[str] = Depends(get_tagstore_access_groups),
@@ -335,7 +337,7 @@ async def list_address_links(
         None, description="Resumption token for retrieving the next page"
     ),
     pagesize: Optional[int] = Query(
-        None, description="Number of items returned in a single page"
+        None, ge=1, description="Number of items returned in a single page"
     ),
     services: ServiceContainer = Depends(get_services),
     tagstore_groups: list[str] = Depends(get_tagstore_access_groups),
@@ -375,14 +377,14 @@ async def list_related_addresses(
     request: Request,
     currency: str = Path(..., description="The cryptocurrency code (e.g., btc)"),
     address: str = Path(..., description="The cryptocurrency address"),
-    address_relation_type: Optional[str] = Query(
-        None, description="What type of related addresses to return"
+    address_relation_type: Literal["pubkey"] = Query(
+        "pubkey", description="What type of related addresses to return"
     ),
     page: Optional[str] = Query(
         None, description="Resumption token for retrieving the next page"
     ),
     pagesize: Optional[int] = Query(
-        None, description="Number of items returned in a single page"
+        None, ge=1, description="Number of items returned in a single page"
     ),
     services: ServiceContainer = Depends(get_services),
     tagstore_groups: list[str] = Depends(get_tagstore_access_groups),

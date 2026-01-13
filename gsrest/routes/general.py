@@ -95,7 +95,9 @@ async def get_statistics(
 )
 async def search(
     request: Request,
-    q: str = Query(..., description="Search query (address, transaction, or label)"),
+    q: str = Query(
+        ..., min_length=2, description="Search query (address, transaction, or label)"
+    ),
     currency: Optional[str] = Query(None, description="The cryptocurrency (e.g., btc)"),
     limit: int = Query(10, description="Maximum number of search results"),
     include_sub_tx_identifiers: bool = Query(

@@ -96,7 +96,7 @@ async def list_address_tags(
         None, description="Resumption token for retrieving the next page"
     ),
     pagesize: Optional[int] = Query(
-        None, description="Number of items returned in a single page"
+        None, ge=1, description="Number of items returned in a single page"
     ),
     services: ServiceContainer = Depends(get_services),
     tagstore_groups: list[str] = Depends(get_tagstore_access_groups),
@@ -156,7 +156,7 @@ async def get_actor_tags(
         None, description="Resumption token for retrieving the next page"
     ),
     pagesize: Optional[int] = Query(
-        None, description="Number of items returned in a single page"
+        None, ge=1, description="Number of items returned in a single page"
     ),
     services: ServiceContainer = Depends(get_services),
     tagstore_groups: list[str] = Depends(get_tagstore_access_groups),
