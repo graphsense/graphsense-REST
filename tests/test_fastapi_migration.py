@@ -1214,6 +1214,144 @@ class TestOnlyIdsFilter(MigrationTestBase):
         )
 
 
+class TestConversions(MigrationTestBase):
+    """Test DeFi conversion endpoints (from regression tests)."""
+
+    @pytest.mark.migration
+    def test_eth_dex_swap_conversion(self):
+        """Test ETH DEX swap conversion."""
+        tx = "0x76f4263391a7d72f66cb1f254e8643e37ca739ab2859b9e9cd5b5bda3194332b"
+        self.assert_endpoint_equal(f"eth/txs/{tx}/conversions")
+
+    @pytest.mark.migration
+    def test_eth_bridge_conversion(self):
+        """Test ETH bridge conversion (eth to btc)."""
+        tx = "0x6D65123E246D752DE3F39E0FDF5B788BAAD35A29B7E95B74C714E6C7C1EA61DD"
+        self.assert_endpoint_equal(f"eth/txs/{tx}/conversions")
+
+    @pytest.mark.migration
+    def test_eth_to_token_conversion(self):
+        """Test ETH to token conversion."""
+        tx = "0x42D529A72CECD6ECE546D5AC0D2A6C2A9407876B66478A33917D8928833433F8"
+        self.assert_endpoint_equal(f"eth/txs/{tx}/conversions")
+
+    @pytest.mark.migration
+    def test_eth_thorchain_conversion(self):
+        """Test ETH to BTC via Thorchain."""
+        tx = "0x16ed29f9bf9914ea3b62e4e94829eaef10118d04e82849a285ef8a5700defa1a"
+        self.assert_endpoint_equal(f"eth/txs/{tx}/conversions")
+
+
+class TestLinksExtended(MigrationTestBase):
+    """Extended link tests (from regression tests)."""
+
+    @pytest.mark.migration
+    def test_eth_entity_links_with_pagination(self):
+        """Test ETH entity links with pagination."""
+        self.assert_endpoint_equal(
+            "eth/entities/316592288/links?neighbor=31455019&pagesize=100"
+        )
+
+    @pytest.mark.migration
+    def test_eth_address_links_with_pagination(self):
+        """Test ETH address links with pagination."""
+        self.assert_endpoint_equal(
+            "eth/addresses/0x8ccec5bfb049af5dd2916853a14974b0a9f47e4d/links?neighbor=0x453290aaf6dca3cee4325bad3f52b1346b6213a7&pagesize=100"
+        )
+
+    @pytest.mark.migration
+    def test_btc_entity_links_small_pagesize(self):
+        """Test BTC entity links with small pagesize (tests cutoff)."""
+        self.assert_endpoint_equal(
+            "btc/entities/2647118/links?neighbor=109578&pagesize=1"
+        )
+
+    @pytest.mark.migration
+    def test_btc_address_links_with_order(self):
+        """Test BTC address links with order parameter."""
+        self.assert_endpoint_equal(
+            "btc/addresses/bc1qm34lsc65zpw79lxes69zkqmk6ee3ewf0j77s3h/links?neighbor=bc1qc82pdh5zy8kk6gc0t0kjpggu9pg80zewsmy4ac&order=desc&pagesize=100"
+        )
+
+
+class TestTRXEndpoints(MigrationTestBase):
+    """Test Tron-specific endpoints."""
+
+    # Known TRX address (Tether)
+    TRX_ADDRESS = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"
+
+    @pytest.mark.migration
+    def test_trx_address(self):
+        """Test TRX address endpoint."""
+        self.assert_endpoint_equal(f"trx/addresses/{self.TRX_ADDRESS}")
+
+    @pytest.mark.migration
+    def test_trx_address_txs(self):
+        """Test TRX address transactions."""
+        self.assert_endpoint_equal(f"trx/addresses/{self.TRX_ADDRESS}/txs?pagesize=5")
+
+    @pytest.mark.migration
+    def test_trx_address_neighbors(self):
+        """Test TRX address neighbors."""
+        self.assert_endpoint_equal(
+            f"trx/addresses/{self.TRX_ADDRESS}/neighbors?direction=out&pagesize=5"
+        )
+
+    @pytest.mark.migration
+    def test_trx_address_links_with_pagination(self):
+        """Test TRX address links with pagination (from regression tests)."""
+        self.assert_endpoint_equal(
+            "trx/addresses/TCz47XgC9TjCeF4UzfB6qZbM9LTF9s1tG7/links?neighbor=TT8oWoMeoziArGXsPej6EYF5TN4WSUhvfu&order=desc&pagesize=2"
+        )
+
+
+class TestSearchExtended(MigrationTestBase):
+    """Extended search tests (from regression tests)."""
+
+    @pytest.mark.migration
+    def test_search_btc_prefix(self):
+        """Test search with BTC address prefix."""
+        self.assert_endpoint_equal("search?q=bc1qasd&limit=100&currency=btc")
+
+    @pytest.mark.migration
+    def test_search_eth_prefix(self):
+        """Test search with ETH address prefix."""
+        self.assert_endpoint_equal("search?q=0x00000&limit=100")
+
+    @pytest.mark.migration
+    def test_search_trx_prefix(self):
+        """Test search with TRX address prefix."""
+        self.assert_endpoint_equal("search?q=TCxZGE&limit=100")
+
+    @pytest.mark.migration
+    def test_search_overflow_check(self):
+        """Test search with potentially overflowing hex."""
+        self.assert_endpoint_equal("search?q=0xfffff")
+
+    @pytest.mark.migration
+    def test_search_no_results(self):
+        """Test search with query that returns no results."""
+        self.assert_endpoint_equal("search?q=0xfffff0193483022348723")
+
+
+class TestTxsListExtended(MigrationTestBase):
+    """Extended transaction list tests (from regression tests)."""
+
+    @pytest.mark.migration
+    def test_eth_address_txs_with_height_filter(self):
+        """Test ETH address transactions with height filter."""
+        self.assert_endpoint_equal(
+            "eth/addresses/0x10c318b1d817396a8a66016438ac9dfb615ffcf1/txs?pagesize=100&min_height=7957441&order=desc"
+        )
+
+    @pytest.mark.migration
+    def test_eth_large_address_txs(self):
+        """Test ETH large address (Tether) transactions with filters."""
+        self.assert_endpoint_equal(
+            f"eth/addresses/{ETH_ADDRESS}/txs?min_height=20698064&max_height=22567324&order=asc&pagesize=5"
+        )
+
+
 if __name__ == "__main__":
     # Quick manual test
     check_servers_available()
