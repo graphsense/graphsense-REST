@@ -7,7 +7,6 @@ from gsrest.routes.base import (
     RequestAdapter,
     apply_plugin_hooks,
     get_services,
-    get_tagstore_access_groups,
     parse_datetime,
     to_json_response,
 )
@@ -26,11 +25,11 @@ async def get_block(
     currency: str = Path(..., description="The cryptocurrency code (e.g., btc)"),
     height: int = Path(..., description="The block height"),
     services: ServiceContainer = Depends(get_services),
-    tagstore_groups: list[str] = Depends(get_tagstore_access_groups),
 ):
     """Get a block by its height"""
     currency = currency.lower()
-    adapted_request = RequestAdapter(request, services, tagstore_groups)
+    # Blocks don't have tags - skip tagstore_groups dependency overhead
+    adapted_request = RequestAdapter(request, services, [])
 
     result = await service.get_block(
         adapted_request,
@@ -52,11 +51,11 @@ async def list_block_txs(
     currency: str = Path(..., description="The cryptocurrency code (e.g., btc)"),
     height: int = Path(..., description="The block height"),
     services: ServiceContainer = Depends(get_services),
-    tagstore_groups: list[str] = Depends(get_tagstore_access_groups),
 ):
     """Get block transactions"""
     currency = currency.lower()
-    adapted_request = RequestAdapter(request, services, tagstore_groups)
+    # Blocks don't have tags - skip tagstore_groups dependency overhead
+    adapted_request = RequestAdapter(request, services, [])
 
     result = await service.list_block_txs(
         adapted_request,
@@ -78,11 +77,11 @@ async def get_block_by_date(
     currency: str = Path(..., description="The cryptocurrency code (e.g., btc)"),
     date: str = Path(..., description="The date (YYYY-MM-DD)"),
     services: ServiceContainer = Depends(get_services),
-    tagstore_groups: list[str] = Depends(get_tagstore_access_groups),
 ):
     """Get block by date"""
     currency = currency.lower()
-    adapted_request = RequestAdapter(request, services, tagstore_groups)
+    # Blocks don't have tags - skip tagstore_groups dependency overhead
+    adapted_request = RequestAdapter(request, services, [])
 
     result = await service.get_block_by_date(
         adapted_request,
