@@ -16,7 +16,7 @@ from fastapi.responses import StreamingResponse
 from graphsenselib.errors import BadUserInputException, NotFoundException
 
 from gsrest.dependencies import ServiceContainer
-from gsrest.routes.base import get_services, get_tagstore_access_groups
+from gsrest.routes.base import RequestAdapter, get_services, get_tagstore_access_groups
 from openapi_server.models.address_tag import AddressTag
 from openapi_server.models.entity import Entity
 from openapi_server.models.values import Values
@@ -38,45 +38,6 @@ apis = ["addresses", "entities", "blocks", "txs", "rates", "tags"]
 error_field = "_error"
 info_field = "_info"
 request_field_prefix = "_request_"
-
-
-class RequestAdapter:
-    """Adapter to make FastAPI Request compatible with existing service layer"""
-
-    def __init__(
-        self,
-        fastapi_request: Request,
-        services: ServiceContainer,
-        tagstore_groups: list[str],
-        show_private_tags: bool = None,
-    ):
-        self._fastapi_request = fastapi_request
-        self._services = services
-        self._tagstore_groups = tagstore_groups
-        # Auto-detect show_private_tags from tagstore_groups if not explicitly set
-        if show_private_tags is None:
-            self._show_private_tags = "private" in tagstore_groups
-        else:
-            self._show_private_tags = show_private_tags
-        self._cache = {}
-        self.logger = logger
-
-    @property
-    def app(self):
-        return self
-
-    def __getitem__(self, key):
-        if key == "services":
-            return self._services
-        elif key == "config":
-            return self._fastapi_request.app.state.config
-        elif key == "request_config":
-            return {"show_private_tags": self._show_private_tags}
-        raise KeyError(key)
-
-    @property
-    def headers(self):
-        return self._fastapi_request.headers
 
 
 class writer:

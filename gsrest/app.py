@@ -276,6 +276,69 @@ async def lifespan(app: FastAPI):
     await teardown_database(app)
 
 
+def _register_exception_handlers(app: FastAPI):
+    """Register common exception handlers on the app"""
+
+    @app.exception_handler(NotFoundException)
+    async def not_found_handler(request: Request, exc: NotFoundException):
+        return JSONResponse(
+            status_code=404,
+            content={"detail": exc.get_user_msg()},
+        )
+
+    @app.exception_handler(BadUserInputException)
+    async def bad_input_handler(request: Request, exc: BadUserInputException):
+        return JSONResponse(
+            status_code=400,
+            content={"detail": exc.get_user_msg()},
+        )
+
+    @app.exception_handler(FeatureNotAvailableException)
+    async def feature_not_available_handler(
+        request: Request, exc: FeatureNotAvailableException
+    ):
+        return JSONResponse(
+            status_code=400,
+            content={"detail": exc.get_user_msg()},
+        )
+
+    @app.exception_handler(GsTimeoutException)
+    async def timeout_handler(request: Request, exc: GsTimeoutException):
+        return JSONResponse(
+            status_code=408,
+            content={"detail": "Request timeout"},
+        )
+
+
+def _register_routers(app: FastAPI):
+    """Register all API routers on the app"""
+    app.include_router(general.router, tags=["general"])
+    app.include_router(tags.router, tags=["tags"])
+    app.include_router(addresses.router, prefix="/{currency}", tags=["addresses"])
+    app.include_router(blocks.router, prefix="/{currency}", tags=["blocks"])
+    app.include_router(entities.router, prefix="/{currency}", tags=["entities"])
+    app.include_router(txs.router, prefix="/{currency}", tags=["txs"])
+    app.include_router(rates.router, prefix="/{currency}", tags=["rates"])
+    app.include_router(tokens.router, prefix="/{currency}", tags=["tokens"])
+    app.include_router(bulk.router, prefix="/{currency}", tags=["bulk"])
+
+
+def _setup_cors_middleware(app: FastAPI, config: GSRestConfig):
+    """Setup CORS middleware on the app"""
+    origins = config.ALLOWED_ORIGINS
+    if isinstance(origins, str):
+        origins = [origins] if origins != "*" else ["*"]
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+        expose_headers=["*"],
+    )
+
+
 def create_app(
     config_file: str = None,
     validate_responses: bool = False,
@@ -323,21 +386,8 @@ def create_app(
 
     app.state.config = config
 
-    # CORS middleware
-    origins = config.ALLOWED_ORIGINS
-    if isinstance(origins, str):
-        origins = [origins] if origins != "*" else ["*"]
-
-    logger.info(f"ALLOWED_ORIGINS: {origins}")
-
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=origins,
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-        expose_headers=["*"],
-    )
+    logger.info(f"ALLOWED_ORIGINS: {config.ALLOWED_ORIGINS}")
+    _setup_cors_middleware(app, config)
 
     # Plugin middleware
     app.add_middleware(PluginMiddleware)
@@ -345,47 +395,8 @@ def create_app(
     # Empty params middleware (must be after PluginMiddleware to run first)
     app.add_middleware(EmptyQueryParamsMiddleware)
 
-    # Register exception handlers
-    @app.exception_handler(NotFoundException)
-    async def not_found_handler(request: Request, exc: NotFoundException):
-        return JSONResponse(
-            status_code=404,
-            content={"detail": exc.get_user_msg()},
-        )
-
-    @app.exception_handler(BadUserInputException)
-    async def bad_input_handler(request: Request, exc: BadUserInputException):
-        return JSONResponse(
-            status_code=400,
-            content={"detail": exc.get_user_msg()},
-        )
-
-    @app.exception_handler(FeatureNotAvailableException)
-    async def feature_not_available_handler(
-        request: Request, exc: FeatureNotAvailableException
-    ):
-        return JSONResponse(
-            status_code=400,
-            content={"detail": exc.get_user_msg()},
-        )
-
-    @app.exception_handler(GsTimeoutException)
-    async def timeout_handler(request: Request, exc: GsTimeoutException):
-        return JSONResponse(
-            status_code=408,
-            content={"detail": "Request timeout"},
-        )
-
-    # Register routers
-    app.include_router(general.router, tags=["general"])
-    app.include_router(tags.router, tags=["tags"])
-    app.include_router(addresses.router, prefix="/{currency}", tags=["addresses"])
-    app.include_router(blocks.router, prefix="/{currency}", tags=["blocks"])
-    app.include_router(entities.router, prefix="/{currency}", tags=["entities"])
-    app.include_router(txs.router, prefix="/{currency}", tags=["txs"])
-    app.include_router(rates.router, prefix="/{currency}", tags=["rates"])
-    app.include_router(tokens.router, prefix="/{currency}", tags=["tokens"])
-    app.include_router(bulk.router, prefix="/{currency}", tags=["bulk"])
+    _register_exception_handlers(app)
+    _register_routers(app)
 
     return app
 
@@ -402,50 +413,10 @@ def create_app_from_dict(config_dict: dict) -> FastAPI:
 
     app.state.config = config
 
-    # CORS middleware
-    origins = config.ALLOWED_ORIGINS
-    if isinstance(origins, str):
-        origins = [origins] if origins != "*" else ["*"]
-
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=origins,
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-        expose_headers=["*"],
-    )
-
+    _setup_cors_middleware(app, config)
     app.add_middleware(PluginMiddleware)
 
-    # Exception handlers
-    @app.exception_handler(NotFoundException)
-    async def not_found_handler(request: Request, exc: NotFoundException):
-        return JSONResponse(status_code=404, content={"detail": exc.get_user_msg()})
-
-    @app.exception_handler(BadUserInputException)
-    async def bad_input_handler(request: Request, exc: BadUserInputException):
-        return JSONResponse(status_code=400, content={"detail": exc.get_user_msg()})
-
-    @app.exception_handler(FeatureNotAvailableException)
-    async def feature_not_available_handler(
-        request: Request, exc: FeatureNotAvailableException
-    ):
-        return JSONResponse(status_code=400, content={"detail": exc.get_user_msg()})
-
-    @app.exception_handler(GsTimeoutException)
-    async def timeout_handler(request: Request, exc: GsTimeoutException):
-        return JSONResponse(status_code=408, content={"detail": "Request timeout"})
-
-    # Register routers
-    app.include_router(general.router, tags=["general"])
-    app.include_router(tags.router, tags=["tags"])
-    app.include_router(addresses.router, prefix="/{currency}", tags=["addresses"])
-    app.include_router(blocks.router, prefix="/{currency}", tags=["blocks"])
-    app.include_router(entities.router, prefix="/{currency}", tags=["entities"])
-    app.include_router(txs.router, prefix="/{currency}", tags=["txs"])
-    app.include_router(rates.router, prefix="/{currency}", tags=["rates"])
-    app.include_router(tokens.router, prefix="/{currency}", tags=["tokens"])
-    app.include_router(bulk.router, prefix="/{currency}", tags=["bulk"])
+    _register_exception_handlers(app)
+    _register_routers(app)
 
     return app

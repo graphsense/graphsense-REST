@@ -6,6 +6,8 @@ from fastapi import APIRouter, Depends, Path, Query, Request
 
 from gsrest.dependencies import ServiceContainer
 from gsrest.routes.base import (
+    RequestAdapter,
+    apply_plugin_hooks,
     get_services,
     get_tagstore_access_groups,
     parse_comma_separated_strings,
@@ -22,54 +24,6 @@ def _normalize_page(page: Optional[str]) -> Optional[str]:
     if page is not None and page.strip() == "":
         return None
     return page
-
-
-class RequestAdapter:
-    """Adapter to make FastAPI Request compatible with existing service layer"""
-
-    def __init__(
-        self,
-        fastapi_request: Request,
-        services: ServiceContainer,
-        tagstore_groups: list[str],
-        show_private_tags: bool = None,
-    ):
-        self._fastapi_request = fastapi_request
-        self._services = services
-        self._tagstore_groups = tagstore_groups
-        # Auto-detect show_private_tags from tagstore_groups if not explicitly set
-        if show_private_tags is None:
-            self._show_private_tags = "private" in tagstore_groups
-        else:
-            self._show_private_tags = show_private_tags
-        self._cache = {}
-
-    @property
-    def app(self):
-        return self
-
-    def __getitem__(self, key):
-        if key == "services":
-            return self._services
-        elif key == "config":
-            return self._fastapi_request.app.state.config
-        elif key == "request_config":
-            return {"show_private_tags": self._show_private_tags}
-        raise KeyError(key)
-
-    @property
-    def headers(self):
-        return self._fastapi_request.headers
-
-
-def _apply_plugin_hooks(request: Request, result):
-    """Apply plugin response hooks"""
-    plugins = getattr(request.app.state, "plugins", [])
-    plugin_contexts = getattr(request.app.state, "plugin_contexts", {})
-    for plugin in plugins:
-        if hasattr(plugin, "before_response"):
-            ctx = plugin_contexts.get(plugin.__module__, {})
-            plugin.before_response(ctx, request, result)
 
 
 @router.get(
@@ -98,7 +52,7 @@ async def get_address(
         include_actors=include_actors,
     )
 
-    _apply_plugin_hooks(request, result)
+    apply_plugin_hooks(request, result)
     return to_json_response(result)
 
 
@@ -128,7 +82,7 @@ async def get_address_entity(
         include_actors=include_actors,
     )
 
-    _apply_plugin_hooks(request, result)
+    apply_plugin_hooks(request, result)
     return to_json_response(result)
 
 
@@ -159,7 +113,7 @@ async def get_tag_summary_by_address(
         include_best_cluster_tag=include_best_cluster_tag,
     )
 
-    _apply_plugin_hooks(request, result)
+    apply_plugin_hooks(request, result)
     return to_json_response(result)
 
 
@@ -198,7 +152,7 @@ async def list_tags_by_address(
         include_best_cluster_tag=include_best_cluster_tag,
     )
 
-    _apply_plugin_hooks(request, result)
+    apply_plugin_hooks(request, result)
     return to_json_response(result)
 
 
@@ -257,7 +211,7 @@ async def list_address_txs(
         pagesize=pagesize,
     )
 
-    _apply_plugin_hooks(request, result)
+    apply_plugin_hooks(request, result)
     return to_json_response(result)
 
 
@@ -307,7 +261,7 @@ async def list_address_neighbors(
         pagesize=pagesize,
     )
 
-    _apply_plugin_hooks(request, result)
+    apply_plugin_hooks(request, result)
     return to_json_response(result)
 
 
@@ -364,7 +318,7 @@ async def list_address_links(
         pagesize=pagesize,
     )
 
-    _apply_plugin_hooks(request, result)
+    apply_plugin_hooks(request, result)
     return to_json_response(result)
 
 
@@ -402,5 +356,5 @@ async def list_related_addresses(
         pagesize=pagesize,
     )
 
-    _apply_plugin_hooks(request, result)
+    apply_plugin_hooks(request, result)
     return to_json_response(result)

@@ -1,5 +1,6 @@
 """Base utilities for FastAPI routes"""
 
+import logging
 import re
 from datetime import datetime
 from functools import wraps
@@ -9,6 +10,76 @@ from fastapi import Depends, Header, Request
 
 from gsrest.config import GSRestConfig
 from gsrest.dependencies import ServiceContainer
+
+logger = logging.getLogger(__name__)
+
+
+class RequestAdapter:
+    """Adapter to make FastAPI Request compatible with existing service layer.
+
+    This adapter provides a unified interface that the service layer expects,
+    bridging FastAPI's Request object with the legacy aiohttp-style access patterns.
+    """
+
+    def __init__(
+        self,
+        fastapi_request: Request,
+        services: ServiceContainer,
+        tagstore_groups: list[str],
+        show_private_tags: bool = None,
+        username: Optional[str] = None,
+    ):
+        self._fastapi_request = fastapi_request
+        self._services = services
+        self._tagstore_groups = tagstore_groups
+        self._username = username
+        self._cache = {}
+        self.logger = logger
+
+        # Auto-detect show_private_tags from tagstore_groups if not explicitly set
+        if show_private_tags is None:
+            self._show_private_tags = "private" in tagstore_groups
+        else:
+            self._show_private_tags = show_private_tags
+
+    @property
+    def app(self):
+        return self
+
+    def __getitem__(self, key):
+        if key == "services":
+            return self._services
+        elif key == "config":
+            return self._fastapi_request.app.state.config
+        elif key == "request_config":
+            return {"show_private_tags": self._show_private_tags}
+        elif key == "openapi":
+            # Used by general_service for version info
+            # Try to get from generated OpenAPI schema, fall back to app version
+            schema = getattr(self._fastapi_request.app.state, "openapi_schema", None)
+            if schema:
+                return schema
+            # Fallback: construct minimal openapi info from app
+            return {"info": {"version": self._fastapi_request.app.version}}
+        raise KeyError(key)
+
+    @property
+    def headers(self):
+        return self._fastapi_request.headers
+
+
+def apply_plugin_hooks(request: Request, result):
+    """Apply plugin response hooks to a result.
+
+    This function iterates through registered plugins and calls their
+    before_response hooks, allowing plugins to modify the response.
+    """
+    plugins = getattr(request.app.state, "plugins", [])
+    plugin_contexts = getattr(request.app.state, "plugin_contexts", {})
+    for plugin in plugins:
+        if hasattr(plugin, "before_response"):
+            ctx = plugin_contexts.get(plugin.__module__, {})
+            plugin.before_response(ctx, request, result)
 
 
 def get_config(request: Request) -> GSRestConfig:
