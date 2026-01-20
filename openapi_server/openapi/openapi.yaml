@@ -1324,6 +1324,7 @@ paths:
       x-openapi-router-controller: openapi_server.controllers.entities_controller
   /{currency}/entities/{entity}/links:
     get:
+      deprecated: true
       operationId: list_entity_links
       parameters:
         - description: The cryptocurrency code (e.g., btc)
@@ -1448,6 +1449,7 @@ paths:
       x-openapi-router-controller: openapi_server.controllers.entities_controller
   /{currency}/entities/{entity}/neighbors:
     get:
+      deprecated: true
       operationId: list_entity_neighbors
       parameters:
         - description: The cryptocurrency code (e.g., btc)
@@ -1657,6 +1659,7 @@ paths:
       x-openapi-router-controller: openapi_server.controllers.entities_controller
   /{currency}/entities/{entity}/tags:
     get:
+      deprecated: true
       operationId: list_address_tags_by_entity
       parameters:
         - description: The cryptocurrency code (e.g., btc)
@@ -1714,6 +1717,7 @@ paths:
       x-openapi-router-controller: openapi_server.controllers.entities_controller
   /{currency}/entities/{entity}/txs:
     get:
+      deprecated: true
       operationId: list_entity_txs
       parameters:
         - description: The cryptocurrency code (e.g., btc)

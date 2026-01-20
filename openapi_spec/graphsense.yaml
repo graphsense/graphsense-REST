@@ -321,6 +321,7 @@ paths:
   /{currency}/entities/{entity}/tags:
     get:
       operationId: list_address_tags_by_entity
+      deprecated: true
       parameters:
         - $ref: '#/components/parameters/currency'
         - $ref: '#/components/parameters/entity'
@@ -342,6 +343,7 @@ paths:
   /{currency}/entities/{entity}/neighbors:
     get:
       operationId: list_entity_neighbors
+      deprecated: true
       parameters:
         - $ref: '#/components/parameters/currency'
         - $ref: '#/components/parameters/entity'
@@ -365,6 +367,7 @@ paths:
   /{currency}/entities/{entity}/txs:
     get:
       operationId: list_entity_txs
+      deprecated: true
       parameters:
         - $ref: '#/components/parameters/currency'
         - $ref: '#/components/parameters/entity'
@@ -393,6 +396,7 @@ paths:
   /{currency}/entities/{entity}/links:
     get:
       operationId: list_entity_links
+      deprecated: true
       parameters:
         - $ref: '#/components/parameters/currency'
         - $ref: '#/components/parameters/entity'
