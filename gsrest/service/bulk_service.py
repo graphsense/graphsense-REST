@@ -67,10 +67,7 @@ async def bulk(request, currency, operation, body, num_pages, form="csv"):
     response = web.StreamResponse(
         status=200,
         reason="OK",
-        headers={
-            "Content-Type": mimetype,
-            "Content-Disposition": f"attachment; filename=bulk.{form}",
-        },
+        headers={"Content-Type": mimetype},
     )
 
     response.enable_chunked_encoding()
