@@ -349,7 +349,6 @@ async def bulk_csv(
     return StreamingResponse(
         generate(),
         media_type="text/csv",
-        headers={"Content-Disposition": "attachment; filename=bulk.csv"},
     )
 
 
@@ -389,5 +388,4 @@ async def bulk_json(
     return StreamingResponse(
         generate(),
         media_type="application/json",
-        headers={"Content-Disposition": "attachment; filename=bulk.json"},
     )

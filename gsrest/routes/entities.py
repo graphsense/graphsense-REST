@@ -99,6 +99,7 @@ async def list_entity_addresses(
     "/entities/{entity}/neighbors",
     summary="Get an entity's neighbors in the entity graph",
     operation_id="list_entity_neighbors",
+    deprecated=True,
 )
 async def list_entity_neighbors(
     request: Request,
@@ -157,6 +158,7 @@ async def list_entity_neighbors(
     "/entities/{entity}/links",
     summary="Get transactions between two entities",
     operation_id="list_entity_links",
+    deprecated=True,
 )
 async def list_entity_links(
     request: Request,
@@ -214,6 +216,7 @@ async def list_entity_links(
     "/entities/{entity}/tags",
     summary="Get address tags for a given entity",
     operation_id="list_address_tags_by_entity",
+    deprecated=True,
 )
 async def list_address_tags_by_entity(
     request: Request,
@@ -248,6 +251,7 @@ async def list_address_tags_by_entity(
     "/entities/{entity}/txs",
     summary="Get all transactions an entity has been involved in",
     operation_id="list_entity_txs",
+    deprecated=True,
 )
 async def list_entity_txs(
     request: Request,
