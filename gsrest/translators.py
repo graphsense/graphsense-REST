@@ -1,13 +1,17 @@
-import sys
-from typing import Union
+"""Simplified translation layer for converting graphsenselib models to API models.
+
+This module provides conversion functions from graphsenselib Pydantic models
+to the slim gsrest.models Pydantic models, using model_validate for automatic
+conversion where possible.
+"""
+
+from typing import Any, Union
 
 from graphsenselib.db.asynchronous.services.models import Actor as PydanticActor
 from graphsenselib.db.asynchronous.services.models import (
     ActorContext as PydanticActorContext,
 )
-from graphsenselib.db.asynchronous.services.models import (
-    Address as PydanticAddress,
-)
+from graphsenselib.db.asynchronous.services.models import Address as PydanticAddress
 from graphsenselib.db.asynchronous.services.models import (
     AddressTag as PydanticAddressTag,
 )
@@ -20,9 +24,7 @@ from graphsenselib.db.asynchronous.services.models import (
 from graphsenselib.db.asynchronous.services.models import (
     AddressTxUtxo as PydanticAddressTxUtxo,
 )
-from graphsenselib.db.asynchronous.services.models import (
-    Block as PydanticBlock,
-)
+from graphsenselib.db.asynchronous.services.models import Block as PydanticBlock
 from graphsenselib.db.asynchronous.services.models import (
     BlockAtDate as PydanticBlockAtDate,
 )
@@ -36,9 +38,7 @@ from graphsenselib.db.asynchronous.services.models import (
 from graphsenselib.db.asynchronous.services.models import (
     CurrencyStats as PydanticCurrencyStats,
 )
-from graphsenselib.db.asynchronous.services.models import (
-    Entity as PydanticEntity,
-)
+from graphsenselib.db.asynchronous.services.models import Entity as PydanticEntity
 from graphsenselib.db.asynchronous.services.models import (
     EntityAddresses as PydanticEntityAddresses,
 )
@@ -46,14 +46,9 @@ from graphsenselib.db.asynchronous.services.models import (
     ExternalConversion as PydanticExternalConversion,
 )
 from graphsenselib.db.asynchronous.services.models import (
-    LabeledItemRef as PydanticLabeledItemRef,
-)
-from graphsenselib.db.asynchronous.services.models import (
     LabelSummary as PydanticLabelSummary,
 )
-from graphsenselib.db.asynchronous.services.models import (
-    Links as PydanticLinks,
-)
+from graphsenselib.db.asynchronous.services.models import Links as PydanticLinks
 from graphsenselib.db.asynchronous.services.models import LinkUtxo as PydanticLinkUtxo
 from graphsenselib.db.asynchronous.services.models import (
     NeighborAddress as PydanticNeighborAddress,
@@ -67,18 +62,11 @@ from graphsenselib.db.asynchronous.services.models import (
 from graphsenselib.db.asynchronous.services.models import (
     NeighborEntity as PydanticNeighborEntity,
 )
-from graphsenselib.db.asynchronous.services.models import (
-    RatesResponse as PydanticRates,
-)
+from graphsenselib.db.asynchronous.services.models import RatesResponse as PydanticRates
 from graphsenselib.db.asynchronous.services.models import (
     SearchResult as PydanticSearchResult,
 )
-from graphsenselib.db.asynchronous.services.models import (
-    SearchResultByCurrency as PydanticSearchResultByCurrency,
-)
-from graphsenselib.db.asynchronous.services.models import (
-    Stats as PydanticStats,
-)
+from graphsenselib.db.asynchronous.services.models import Stats as PydanticStats
 from graphsenselib.db.asynchronous.services.models import (
     TagCloudEntry as PydanticTagCloudEntry,
 )
@@ -89,90 +77,366 @@ from graphsenselib.db.asynchronous.services.models import Taxonomy as PydanticTa
 from graphsenselib.db.asynchronous.services.models import (
     TokenConfigs as PydanticTokenConfigs,
 )
-from graphsenselib.db.asynchronous.services.models import (
-    TxAccount as PydanticTxAccount,
-)
-from graphsenselib.db.asynchronous.services.models import (
-    TxRef as PydanticTxRef,
-)
+from graphsenselib.db.asynchronous.services.models import TxAccount as PydanticTxAccount
 from graphsenselib.db.asynchronous.services.models import Txs as PydanticTxs
-from graphsenselib.db.asynchronous.services.models import (
-    TxSummary as PydanticTxSummary,
-)
-from graphsenselib.db.asynchronous.services.models import (
-    TxUtxo as PydanticTxUtxo,
-)
-from graphsenselib.db.asynchronous.services.models import (
-    TxValue as PydanticTxValue,
-)
-from graphsenselib.db.asynchronous.services.models import (
-    Values as PydanticValues,
-)
-from graphsenselib.utils import camel_to_snake_case
+from graphsenselib.db.asynchronous.services.models import TxUtxo as PydanticTxUtxo
+from graphsenselib.db.asynchronous.services.models import Values as PydanticValues
 
-from openapi_server.models.actor import Actor
-from openapi_server.models.actor_context import ActorContext
-from openapi_server.models.address import Address
-from openapi_server.models.address_tag import AddressTag
-from openapi_server.models.address_tags import AddressTags
-from openapi_server.models.address_tx_utxo import AddressTxUtxo
-from openapi_server.models.address_txs import AddressTxs
-from openapi_server.models.block import Block
-from openapi_server.models.block_at_date import BlockAtDate
-from openapi_server.models.concept import Concept
-from openapi_server.models.currency_stats import CurrencyStats
-from openapi_server.models.entity import Entity
-from openapi_server.models.entity_addresses import EntityAddresses
-from openapi_server.models.external_conversion import ExternalConversion
-from openapi_server.models.label_summary import LabelSummary
-from openapi_server.models.labeled_item_ref import LabeledItemRef
-from openapi_server.models.link_utxo import LinkUtxo
-from openapi_server.models.links import Links
-from openapi_server.models.neighbor_address import NeighborAddress
-from openapi_server.models.neighbor_addresses import NeighborAddresses
-from openapi_server.models.neighbor_entities import NeighborEntities
-from openapi_server.models.neighbor_entity import NeighborEntity
-from openapi_server.models.rates import Rates
-from openapi_server.models.related_address import (
-    RelatedAddress as CrossChainPubkeyRelatedAddress,
+from gsrest.models import (
+    Actor,
+    ActorContext,
+    Address,
+    AddressTag,
+    AddressTags,
+    AddressTxs,
+    AddressTxUtxo,
+    Block,
+    BlockAtDate,
+    Concept,
+    CurrencyStats,
+    Entity,
+    EntityAddresses,
+    ExternalConversion,
+    LabelSummary,
+    LinkUtxo,
+    Links,
+    NeighborAddress,
+    NeighborAddresses,
+    NeighborEntities,
+    NeighborEntity,
+    Rates,
+    RelatedAddress,
+    RelatedAddresses,
+    SearchResult,
+    SearchResultByCurrency,
+    Stats,
+    TagCloudEntry,
+    TagSummary,
+    Taxonomy,
+    TokenConfig,
+    TokenConfigs,
+    TxAccount,
+    Txs,
+    TxSummary,
+    TxUtxo,
+    TxValue,
+    Values,
 )
-from openapi_server.models.related_addresses import (
-    RelatedAddresses as CrossChainPubkeyRelatedAddresses,
-)
-from openapi_server.models.search_result import SearchResult
-from openapi_server.models.search_result_by_currency import SearchResultByCurrency
-from openapi_server.models.stats import Stats
-from openapi_server.models.tag_cloud_entry import TagCloudEntry
-from openapi_server.models.tag_summary import TagSummary
-from openapi_server.models.taxonomy import Taxonomy
-from openapi_server.models.token_config import TokenConfig
-from openapi_server.models.token_configs import TokenConfigs
-from openapi_server.models.tx import Tx
-from openapi_server.models.tx_account import TxAccount
-from openapi_server.models.tx_ref import TxRef
-from openapi_server.models.tx_summary import TxSummary
-from openapi_server.models.tx_utxo import TxUtxo
-from openapi_server.models.tx_value import TxValue
-from openapi_server.models.txs import Txs
-from openapi_server.models.values import Values
 
 
-def pydantic_txs_to_openapi(pydantic_txs: PydanticTxs) -> Txs:
-    """Convert Pydantic Txs to OpenAPI Txs"""
-    return Txs(
-        txs=[pydantic_tx_to_openapi(tx) for tx in pydantic_txs.txs],
-        next_page=str(pydantic_txs.next_page)
-        if pydantic_txs.next_page is not None
+def to_api_values(pydantic_values: PydanticValues) -> Values:
+    """Convert service Values to API Values."""
+    return Values.model_validate(pydantic_values.model_dump())
+
+
+def to_api_tx_summary(data: dict) -> TxSummary:
+    """Convert dict to API TxSummary."""
+    return TxSummary.model_validate(data)
+
+
+def to_api_values_dict(
+    values_dict: dict[str, PydanticValues] | None,
+) -> dict[str, Values] | None:
+    """Convert a dict of Values."""
+    if values_dict is None:
+        return None
+    return {k: to_api_values(v) for k, v in values_dict.items()}
+
+
+def to_api_address_tag(pydantic_tag: PydanticAddressTag) -> AddressTag:
+    """Convert service AddressTag to API AddressTag."""
+    return AddressTag.model_validate(pydantic_tag.model_dump())
+
+
+def to_api_address(pydantic_address: PydanticAddress) -> Address:
+    """Convert service Address to API Address."""
+    data = pydantic_address.model_dump()
+    return Address.model_validate(data)
+
+
+def to_api_entity(pydantic_entity: PydanticEntity) -> Entity:
+    """Convert service Entity to API Entity."""
+    data = pydantic_entity.model_dump()
+    # Convert empty lists to None for optional fields (backward compatibility)
+    if data.get("actors") == []:
+        data["actors"] = None
+    return Entity.model_validate(data)
+
+
+def to_api_neighbor_address(
+    pydantic_neighbor: PydanticNeighborAddress,
+) -> NeighborAddress:
+    """Convert service NeighborAddress to API NeighborAddress."""
+    return NeighborAddress(
+        labels=pydantic_neighbor.labels,
+        value=to_api_values(pydantic_neighbor.value),
+        token_values=to_api_values_dict(pydantic_neighbor.token_values),
+        no_txs=pydantic_neighbor.no_txs,
+        address=to_api_address(pydantic_neighbor.address),
+    )
+
+
+def to_api_neighbor_addresses(
+    pydantic_neighbors: PydanticNeighborAddresses,
+) -> NeighborAddresses:
+    """Convert service NeighborAddresses to API NeighborAddresses."""
+    return NeighborAddresses(
+        next_page=pydantic_neighbors.next_page,
+        neighbors=[to_api_neighbor_address(n) for n in pydantic_neighbors.neighbors],
+    )
+
+
+def to_api_neighbor_entity(pydantic_neighbor: PydanticNeighborEntity) -> NeighborEntity:
+    """Convert service NeighborEntity to API NeighborEntity."""
+    entity_val: Entity | int
+    if isinstance(pydantic_neighbor.entity, PydanticEntity):
+        entity_val = to_api_entity(pydantic_neighbor.entity)
+    else:
+        entity_val = pydantic_neighbor.entity
+
+    return NeighborEntity(
+        labels=pydantic_neighbor.labels,
+        value=to_api_values(pydantic_neighbor.value),
+        token_values=to_api_values_dict(pydantic_neighbor.token_values),
+        no_txs=pydantic_neighbor.no_txs,
+        entity=entity_val,
+    )
+
+
+def to_api_neighbor_entities(
+    pydantic_neighbors: PydanticNeighborEntities,
+) -> NeighborEntities:
+    """Convert service NeighborEntities to API NeighborEntities."""
+    return NeighborEntities(
+        next_page=pydantic_neighbors.next_page,
+        neighbors=[to_api_neighbor_entity(n) for n in pydantic_neighbors.neighbors],
+    )
+
+
+def to_api_entity_addresses(
+    pydantic_result: PydanticEntityAddresses,
+) -> EntityAddresses:
+    """Convert service EntityAddresses to API EntityAddresses."""
+    return EntityAddresses(
+        next_page=pydantic_result.next_page,
+        addresses=[to_api_address(addr) for addr in pydantic_result.addresses],
+    )
+
+
+def to_api_address_tag_result(
+    pydantic_result: PydanticAddressTagResult,
+) -> AddressTags:
+    """Convert service AddressTagResult to API AddressTags."""
+    return AddressTags(
+        next_page=pydantic_result.next_page,
+        address_tags=[to_api_address_tag(tag) for tag in pydantic_result.address_tags],
+    )
+
+
+def to_api_tx_value(pydantic_tx_value) -> TxValue:
+    """Convert service TxValue to API TxValue."""
+    return TxValue(
+        address=pydantic_tx_value.address,
+        value=to_api_values(pydantic_tx_value.value),
+        index=pydantic_tx_value.index,
+    )
+
+
+def to_api_tx_utxo(pydantic_tx: PydanticTxUtxo) -> TxUtxo:
+    """Convert service TxUtxo to API TxUtxo."""
+    return TxUtxo(
+        tx_type=pydantic_tx.tx_type,
+        currency=pydantic_tx.currency,
+        tx_hash=pydantic_tx.tx_hash,
+        coinbase=pydantic_tx.coinbase,
+        height=pydantic_tx.height,
+        no_inputs=pydantic_tx.no_inputs,
+        no_outputs=pydantic_tx.no_outputs,
+        timestamp=pydantic_tx.timestamp,
+        total_input=to_api_values(pydantic_tx.total_input),
+        total_output=to_api_values(pydantic_tx.total_output),
+        inputs=[to_api_tx_value(inp) for inp in pydantic_tx.inputs]
+        if pydantic_tx.inputs
+        else None,
+        outputs=[to_api_tx_value(out) for out in pydantic_tx.outputs]
+        if pydantic_tx.outputs
         else None,
     )
 
 
-def pydantic_token_configs_to_openapi(
-    pydantic_configs: PydanticTokenConfigs,
-) -> TokenConfigs:
-    """Convert Pydantic TokenConfigs to OpenAPI TokenConfigs"""
+def to_api_tx_account(pydantic_tx: PydanticTxAccount) -> TxAccount:
+    """Convert service TxAccount to API TxAccount."""
+    return TxAccount(
+        tx_type=pydantic_tx.tx_type,
+        identifier=pydantic_tx.identifier,
+        currency=pydantic_tx.currency,
+        network=pydantic_tx.network,
+        tx_hash=pydantic_tx.tx_hash,
+        height=pydantic_tx.height,
+        timestamp=pydantic_tx.timestamp,
+        value=to_api_values(pydantic_tx.value),
+        from_address=pydantic_tx.from_address,
+        to_address=pydantic_tx.to_address,
+        token_tx_id=pydantic_tx.token_tx_id,
+        fee=to_api_values(pydantic_tx.fee) if pydantic_tx.fee else None,
+        contract_creation=pydantic_tx.contract_creation,
+        is_external=pydantic_tx.is_external,
+    )
+
+
+def to_api_tx(pydantic_tx: Union[PydanticTxUtxo, PydanticTxAccount]):
+    """Convert service Tx to API Tx."""
+    if isinstance(pydantic_tx, PydanticTxUtxo):
+        return to_api_tx_utxo(pydantic_tx)
+    return to_api_tx_account(pydantic_tx)
+
+
+def to_api_txs(pydantic_txs: PydanticTxs) -> Txs:
+    """Convert service Txs to API Txs."""
+    return Txs(
+        txs=[to_api_tx(tx) for tx in pydantic_txs.txs],
+        next_page=str(pydantic_txs.next_page) if pydantic_txs.next_page else None,
+    )
+
+
+def to_api_address_tx_utxo(pydantic_tx: PydanticAddressTxUtxo) -> AddressTxUtxo:
+    """Convert service AddressTxUtxo to API AddressTxUtxo."""
+    return AddressTxUtxo(
+        tx_type=pydantic_tx.tx_type,
+        tx_hash=pydantic_tx.tx_hash,
+        currency=pydantic_tx.currency,
+        coinbase=pydantic_tx.coinbase,
+        height=pydantic_tx.height,
+        timestamp=pydantic_tx.timestamp,
+        value=to_api_values(pydantic_tx.value),
+    )
+
+
+def to_api_address_txs(pydantic_txs: PydanticAddressTxs) -> AddressTxs:
+    """Convert service AddressTxs to API AddressTxs."""
+    return AddressTxs.model_validate(pydantic_txs.model_dump())
+
+
+def to_api_link_utxo(pydantic_link: PydanticLinkUtxo) -> LinkUtxo:
+    """Convert service LinkUtxo to API LinkUtxo."""
+    return LinkUtxo(
+        tx_type=pydantic_link.tx_type,
+        tx_hash=pydantic_link.tx_hash,
+        currency=pydantic_link.currency,
+        height=pydantic_link.height,
+        timestamp=pydantic_link.timestamp,
+        input_value=to_api_values(pydantic_link.input_value),
+        output_value=to_api_values(pydantic_link.output_value),
+    )
+
+
+def to_api_links(pydantic_links: PydanticLinks) -> Links:
+    """Convert service Links to API Links."""
+    api_links = []
+    for link in pydantic_links.links:
+        if isinstance(link, PydanticLinkUtxo):
+            api_links.append(to_api_link_utxo(link))
+        elif isinstance(link, PydanticAddressTxUtxo):
+            api_links.append(to_api_address_tx_utxo(link))
+        elif isinstance(link, PydanticTxAccount):
+            api_links.append(to_api_tx_account(link))
+        else:
+            raise NotImplementedError(f"Unsupported link type: {type(link)}")
+    return Links(next_page=pydantic_links.next_page, links=api_links)
+
+
+def to_api_block(pydantic_block: PydanticBlock) -> Block:
+    """Convert service Block to API Block."""
+    return Block.model_validate(pydantic_block.model_dump())
+
+
+def to_api_block_at_date(pydantic_block_at_date: PydanticBlockAtDate) -> BlockAtDate:
+    """Convert service BlockAtDate to API BlockAtDate."""
+    return BlockAtDate.model_validate(pydantic_block_at_date.model_dump())
+
+
+def to_api_currency_stats(pydantic_stats: PydanticCurrencyStats) -> CurrencyStats:
+    """Convert service CurrencyStats to API CurrencyStats."""
+    return CurrencyStats.model_validate(pydantic_stats.model_dump())
+
+
+def to_api_stats(pydantic_stats: PydanticStats) -> Stats:
+    """Convert service Stats to API Stats."""
+    return Stats(
+        currencies=[to_api_currency_stats(cs) for cs in pydantic_stats.currencies],
+        version=pydantic_stats.version,
+        request_timestamp=pydantic_stats.request_timestamp,
+    )
+
+
+def to_api_rates(pydantic_rates: PydanticRates) -> Rates:
+    """Convert service Rates to API Rates."""
+    return Rates.model_validate(pydantic_rates.model_dump())
+
+
+def to_api_taxonomy(pydantic_taxonomy: PydanticTaxonomy) -> Taxonomy:
+    """Convert service Taxonomy to API Taxonomy."""
+    return Taxonomy.model_validate(pydantic_taxonomy.model_dump())
+
+
+def to_api_concept(pydantic_concept: PydanticConcept) -> Concept:
+    """Convert service Concept to API Concept."""
+    return Concept.model_validate(pydantic_concept.model_dump())
+
+
+def to_api_actor_context(pydantic_context: PydanticActorContext) -> ActorContext:
+    """Convert service ActorContext to API ActorContext."""
+    return ActorContext.model_validate(pydantic_context.model_dump())
+
+
+def to_api_actor(pydantic_actor: PydanticActor) -> Actor:
+    """Convert service Actor to API Actor."""
+    return Actor.model_validate(pydantic_actor.model_dump())
+
+
+def to_api_tag_cloud_entry(pydantic_entry: PydanticTagCloudEntry) -> TagCloudEntry:
+    """Convert service TagCloudEntry to API TagCloudEntry."""
+    return TagCloudEntry.model_validate(pydantic_entry.model_dump())
+
+
+def to_api_label_summary(pydantic_summary: PydanticLabelSummary) -> LabelSummary:
+    """Convert service LabelSummary to API LabelSummary."""
+    return LabelSummary.model_validate(pydantic_summary.model_dump())
+
+
+def to_api_tag_summary(pydantic_summary: PydanticTagSummary) -> TagSummary:
+    """Convert service TagSummary to API TagSummary."""
+    return TagSummary(
+        broad_category=pydantic_summary.broad_category,
+        tag_count=pydantic_summary.tag_count,
+        tag_count_indirect=pydantic_summary.tag_count_indirect,
+        best_actor=pydantic_summary.best_actor,
+        best_label=pydantic_summary.best_label,
+        concept_tag_cloud={
+            k: to_api_tag_cloud_entry(v)
+            for k, v in pydantic_summary.concept_tag_cloud.items()
+        },
+        label_summary={
+            k: to_api_label_summary(v)
+            for k, v in pydantic_summary.label_summary.items()
+        },
+    )
+
+
+def to_api_search_result_by_currency(pydantic_result) -> SearchResultByCurrency:
+    """Convert service SearchResultByCurrency to API SearchResultByCurrency."""
+    return SearchResultByCurrency.model_validate(pydantic_result.model_dump())
+
+
+def to_api_search_result(pydantic_result: PydanticSearchResult) -> SearchResult:
+    """Convert service SearchResult to API SearchResult."""
+    return SearchResult.model_validate(pydantic_result.model_dump())
+
+
+def to_api_token_configs(pydantic_configs: PydanticTokenConfigs) -> TokenConfigs:
+    """Convert service TokenConfigs to API TokenConfigs."""
     return TokenConfigs(
-        [
+        token_configs=[
             TokenConfig(
                 ticker=config.ticker,
                 decimals=config.decimals,
@@ -184,421 +448,10 @@ def pydantic_token_configs_to_openapi(
     )
 
 
-def pydantic_currency_stats_to_openapi(
-    pydantic_stats: PydanticCurrencyStats,
-) -> CurrencyStats:
-    """Convert Pydantic CurrencyStats to OpenAPI CurrencyStats"""
-    return CurrencyStats.from_dict(pydantic_stats.model_dump())
-
-
-def pydantic_tx_value_to_openapi(pydantic_tx_value: PydanticTxValue) -> TxValue:
-    """Convert Pydantic TxValue to OpenAPI TxValue"""
-    return TxValue(
-        address=pydantic_tx_value.address,
-        value=pydantic_values_to_openapi(pydantic_tx_value.value),
-        index=pydantic_tx_value.index,
-    )
-
-
-def pydantic_tx_ref_to_openapi(pydantic_tx_ref: PydanticTxRef) -> TxRef:
-    """Convert Pydantic TxRef to OpenAPI TxRef"""
-    return TxRef.from_dict(pydantic_tx_ref.model_dump())
-
-
-def pydantic_tx_account_to_openapi(pydantic_tx: PydanticTxAccount) -> TxAccount:
-    """Convert Pydantic TxAccount to OpenAPI TxAccount"""
-    return TxAccount(
-        currency=pydantic_tx.currency,
-        network=pydantic_tx.network,
-        tx_type=pydantic_tx.tx_type,
-        identifier=pydantic_tx.identifier,
-        tx_hash=pydantic_tx.tx_hash,
-        timestamp=pydantic_tx.timestamp,
-        height=pydantic_tx.height,
-        from_address=pydantic_tx.from_address,
-        to_address=pydantic_tx.to_address,
-        token_tx_id=pydantic_tx.token_tx_id,
-        contract_creation=pydantic_tx.contract_creation,
-        value=pydantic_values_to_openapi(pydantic_tx.value),
-        fee=pydantic_values_to_openapi(pydantic_tx.fee)
-        if pydantic_tx.fee is not None
-        else None,
-        is_external=pydantic_tx.is_external,
-    )
-
-
-def pydantic_tx_utxo_to_openapi(pydantic_tx: PydanticTxUtxo) -> TxUtxo:
-    """Convert Pydantic TxUtxo to OpenAPI TxUtxo"""
-    return TxUtxo(
-        currency=pydantic_tx.currency,
-        tx_hash=pydantic_tx.tx_hash,
-        coinbase=pydantic_tx.coinbase,
-        height=pydantic_tx.height,
-        no_inputs=pydantic_tx.no_inputs,
-        no_outputs=pydantic_tx.no_outputs,
-        inputs=[pydantic_tx_value_to_openapi(inp) for inp in (pydantic_tx.inputs or [])]
-        if pydantic_tx.inputs
-        else None,
-        outputs=[
-            pydantic_tx_value_to_openapi(out) for out in (pydantic_tx.outputs or [])
-        ]
-        if pydantic_tx.outputs
-        else None,
-        timestamp=pydantic_tx.timestamp,
-        total_input=pydantic_values_to_openapi(pydantic_tx.total_input),
-        total_output=pydantic_values_to_openapi(pydantic_tx.total_output),
-    )
-
-
-def pydantic_rates_to_openapi(pydantic_rates: PydanticRates) -> Rates:
-    """Convert Pydantic Rates to OpenAPI Rates"""
-    return Rates.from_dict(pydantic_rates.model_dump())
-
-
-def pydantic_values_to_openapi(pydantic_values: PydanticValues) -> Values:
-    """Convert Pydantic Values to OpenAPI Values"""
-    return Values.from_dict(pydantic_values.model_dump())
-
-
-def pydantic_tx_summary_to_openapi(pydantic_tx: PydanticTxSummary) -> TxSummary:
-    """Convert Pydantic TxSummary to OpenAPI TxSummary"""
-    return TxSummary.from_dict(pydantic_tx.model_dump())
-
-
-def pydantic_labeled_item_ref_to_openapi(
-    pydantic_ref: PydanticLabeledItemRef,
-) -> LabeledItemRef:
-    """Convert Pydantic LabeledItemRef to OpenAPI LabeledItemRef"""
-    return LabeledItemRef.from_dict(pydantic_ref.model_dump())
-
-
-def pydantic_address_tag_to_openapi(pydantic_tag: PydanticAddressTag) -> AddressTag:
-    """Convert Pydantic AddressTag to OpenAPI AddressTag"""
-    return AddressTag(
-        address=pydantic_tag.address,
-        entity=pydantic_tag.entity,
-        category=pydantic_tag.category,
-        concepts=pydantic_tag.concepts,
-        actor=pydantic_tag.actor,
-        tag_type=pydantic_tag.tag_type,
-        abuse=pydantic_tag.abuse,
-        label=pydantic_tag.label,
-        lastmod=pydantic_tag.lastmod,
-        source=pydantic_tag.source,
-        tagpack_is_public=pydantic_tag.tagpack_is_public,
-        tagpack_uri=pydantic_tag.tagpack_uri,
-        tagpack_creator=pydantic_tag.tagpack_creator,
-        tagpack_title=pydantic_tag.tagpack_title,
-        confidence=pydantic_tag.confidence,
-        confidence_level=pydantic_tag.confidence_level,
-        is_cluster_definer=pydantic_tag.is_cluster_definer,
-        inherited_from=pydantic_tag.inherited_from,
-        currency=pydantic_tag.currency,
-    )
-
-
-def pydantic_address_to_openapi(pydantic_address: PydanticAddress) -> Address:
-    """Convert Pydantic Address to OpenAPI Address"""
-    return Address(
-        address=pydantic_address.address,
-        currency=pydantic_address.currency,
-        entity=pydantic_address.entity,
-        first_tx=pydantic_tx_summary_to_openapi(pydantic_address.first_tx)
-        if pydantic_address.first_tx
-        else None,
-        last_tx=pydantic_tx_summary_to_openapi(pydantic_address.last_tx)
-        if pydantic_address.last_tx
-        else None,
-        no_incoming_txs=pydantic_address.no_incoming_txs,
-        no_outgoing_txs=pydantic_address.no_outgoing_txs,
-        total_received=pydantic_values_to_openapi(pydantic_address.total_received),
-        total_tokens_received={
-            k: pydantic_values_to_openapi(v)
-            for k, v in (pydantic_address.total_tokens_received or {}).items()
-        }
-        if pydantic_address.total_tokens_received
-        else None,
-        total_spent=pydantic_values_to_openapi(pydantic_address.total_spent),
-        total_tokens_spent={
-            k: pydantic_values_to_openapi(v)
-            for k, v in (pydantic_address.total_tokens_spent or {}).items()
-        }
-        if pydantic_address.total_tokens_spent
-        else None,
-        in_degree=pydantic_address.in_degree,
-        out_degree=pydantic_address.out_degree,
-        balance=pydantic_values_to_openapi(pydantic_address.balance),
-        token_balances={
-            k: pydantic_values_to_openapi(v)
-            for k, v in (pydantic_address.token_balances or {}).items()
-        }
-        if pydantic_address.token_balances
-        else None,
-        is_contract=pydantic_address.is_contract,
-        actors=[
-            pydantic_labeled_item_ref_to_openapi(actor)
-            for actor in (pydantic_address.actors or [])
-        ]
-        if pydantic_address.actors
-        else None,
-        status=pydantic_address.status,
-    )
-
-
-def pydantic_entity_to_openapi(pydantic_entity: PydanticEntity) -> Entity:
-    """Convert Pydantic Entity to OpenAPI Entity"""
-    return Entity(
-        currency=pydantic_entity.currency,
-        entity=pydantic_entity.entity,
-        root_address=pydantic_entity.root_address,
-        first_tx=pydantic_tx_summary_to_openapi(pydantic_entity.first_tx),
-        last_tx=pydantic_tx_summary_to_openapi(pydantic_entity.last_tx),
-        no_addresses=pydantic_entity.no_addresses,
-        no_incoming_txs=pydantic_entity.no_incoming_txs,
-        no_outgoing_txs=pydantic_entity.no_outgoing_txs,
-        total_received=pydantic_values_to_openapi(pydantic_entity.total_received),
-        total_tokens_received={
-            k: pydantic_values_to_openapi(v)
-            for k, v in (pydantic_entity.total_tokens_received or {}).items()
-        }
-        if pydantic_entity.total_tokens_received
-        else None,
-        total_spent=pydantic_values_to_openapi(pydantic_entity.total_spent),
-        total_tokens_spent={
-            k: pydantic_values_to_openapi(v)
-            for k, v in (pydantic_entity.total_tokens_spent or {}).items()
-        }
-        if pydantic_entity.total_tokens_spent
-        else None,
-        in_degree=pydantic_entity.in_degree,
-        out_degree=pydantic_entity.out_degree,
-        balance=pydantic_values_to_openapi(pydantic_entity.balance),
-        token_balances={
-            k: pydantic_values_to_openapi(v)
-            for k, v in (pydantic_entity.token_balances or {}).items()
-        }
-        if pydantic_entity.token_balances
-        else None,
-        best_address_tag=pydantic_address_tag_to_openapi(
-            pydantic_entity.best_address_tag
-        )
-        if pydantic_entity.best_address_tag
-        else None,
-        no_address_tags=pydantic_entity.no_address_tags,
-        actors=[
-            pydantic_labeled_item_ref_to_openapi(actor)
-            for actor in (pydantic_entity.actors or [])
-        ]
-        if pydantic_entity.actors
-        else None,
-    )
-
-
-def pydantic_entity_addresses_to_openapi(
-    pydantic_result: PydanticEntityAddresses,
-) -> EntityAddresses:
-    """Convert Pydantic EntityAddresses to OpenAPI EntityAddresses"""
-    return EntityAddresses(
-        next_page=pydantic_result.next_page,
-        addresses=[
-            pydantic_address_to_openapi(addr) for addr in pydantic_result.addresses
-        ],
-    )
-
-
-def pydantic_address_tag_result_to_openapi(
-    pydantic_result: PydanticAddressTagResult,
-) -> AddressTags:
-    """Convert Pydantic AddressTagResult to OpenAPI AddressTags"""
-    return AddressTags(
-        next_page=pydantic_result.next_page,
-        address_tags=[
-            pydantic_address_tag_to_openapi(tag) for tag in pydantic_result.address_tags
-        ],
-    )
-
-
-def pydantic_address_txs_to_openapi(pydantic_txs: PydanticAddressTxs) -> AddressTxs:
-    """Convert Pydantic AddressTxs to OpenAPI AddressTxs"""
-
-    # Use model_dump and from_dict to handle the inheritance complexity
-    txs_data = pydantic_txs.model_dump()
-
-    return AddressTxs.from_dict(txs_data)
-
-
-def pydantic_tx_to_openapi(
-    pydantic_txs: Union[PydanticTxAccount, PydanticTxUtxo],
-) -> AddressTxs:
-    """Convert Pydantic Tx to OpenAPI AddressTxs"""
-
-    # Use model_dump and from_dict to handle the inheritance complexity
-    txs_data = pydantic_txs.model_dump()
-
-    return Tx.from_dict(txs_data)
-
-
-def pydantic_link_utxo_to_openapi(pydantic_link: PydanticLinkUtxo) -> LinkUtxo:
-    """Convert Pydantic LinkUtxo to OpenAPI LinkUtxo"""
-    return LinkUtxo(
-        tx_hash=pydantic_link.tx_hash,
-        height=pydantic_link.height,
-        currency=pydantic_link.currency,
-        timestamp=pydantic_link.timestamp,
-        input_value=pydantic_values_to_openapi(pydantic_link.input_value),
-        output_value=pydantic_values_to_openapi(pydantic_link.output_value),
-    )
-
-
-def pydantic_address_tx_utxo_to_openapi(
-    pydantic_tx: PydanticAddressTxUtxo,
-) -> AddressTxUtxo:
-    """Convert Pydantic AddressTxUtxo to OpenAPI AddressTxUtxo"""
-    return AddressTxUtxo(
-        currency=pydantic_tx.currency,
-        height=pydantic_tx.height,
-        timestamp=pydantic_tx.timestamp,
-        coinbase=pydantic_tx.coinbase,
-        tx_hash=pydantic_tx.tx_hash,
-        value=pydantic_values_to_openapi(pydantic_tx.value),
-    )
-
-
-def pydantic_links_to_openapi(pydantic_links: PydanticLinks) -> Links:
-    """Convert Pydantic Links to OpenAPI Links"""
-    # Handle mixed link types
-    openapi_links = []
-    for link in pydantic_links.links:
-        if isinstance(link, PydanticLinkUtxo):
-            openapi_links.append(pydantic_link_utxo_to_openapi(link))
-        elif isinstance(link, PydanticAddressTxUtxo):
-            openapi_links.append(pydantic_address_tx_utxo_to_openapi(link))
-        elif isinstance(link, PydanticTxAccount):
-            openapi_links.append(pydantic_tx_account_to_openapi(link))
-        else:
-            raise NotImplementedError(f"Unsupported link type: {type(link)}")
-
-    return Links(next_page=pydantic_links.next_page, links=openapi_links)
-
-
-def pydantic_block_to_openapi(pydantic_block: PydanticBlock) -> Block:
-    """Convert Pydantic Block to OpenAPI Block"""
-    return Block(
-        currency=pydantic_block.currency,
-        height=pydantic_block.height,
-        block_hash=pydantic_block.block_hash,
-        no_txs=pydantic_block.no_txs,
-        timestamp=pydantic_block.timestamp,
-    )
-
-
-def pydantic_block_at_date_to_openapi(
-    pydantic_block_at_date: PydanticBlockAtDate,
-) -> BlockAtDate:
-    """Convert Pydantic BlockAtDate to OpenAPI BlockAtDate"""
-    return BlockAtDate(
-        before_block=pydantic_block_at_date.before_block,
-        before_timestamp=pydantic_block_at_date.before_timestamp,
-        after_block=pydantic_block_at_date.after_block,
-        after_timestamp=pydantic_block_at_date.after_timestamp,
-    )
-
-
-def pydantic_stats_to_openapi(pydantic_stats: PydanticStats) -> Stats:
-    """Convert Pydantic Stats to OpenAPI Stats"""
-    return Stats(
-        currencies=[
-            pydantic_currency_stats_to_openapi(cs) for cs in pydantic_stats.currencies
-        ],
-        version=pydantic_stats.version,
-        request_timestamp=pydantic_stats.request_timestamp,
-    )
-
-
-def pydantic_search_result_by_currency_to_openapi(
-    pydantic_result: PydanticSearchResultByCurrency,
-) -> SearchResultByCurrency:
-    """Convert Pydantic SearchResultByCurrency to OpenAPI SearchResultByCurrency"""
-    return SearchResultByCurrency(
-        currency=pydantic_result.currency,
-        addresses=pydantic_result.addresses,
-        txs=pydantic_result.txs,
-    )
-
-
-def pydantic_search_result_to_openapi(
-    pydantic_result: PydanticSearchResult,
-) -> SearchResult:
-    """Convert Pydantic SearchResult to OpenAPI SearchResult"""
-    return SearchResult(
-        currencies=[
-            pydantic_search_result_by_currency_to_openapi(c)
-            for c in pydantic_result.currencies
-        ],
-        labels=pydantic_result.labels,
-        actors=[
-            pydantic_labeled_item_ref_to_openapi(actor)
-            for actor in pydantic_result.actors
-        ],
-    )
-
-
-def pydantic_actor_context_to_openapi(
-    pydantic_context: PydanticActorContext,
-) -> ActorContext:
-    """Convert Pydantic ActorContext to OpenAPI ActorContext"""
-    return ActorContext(
-        uris=pydantic_context.uris,
-        images=pydantic_context.images,
-        refs=pydantic_context.refs,
-        coingecko_ids=pydantic_context.coingecko_ids,
-        defilama_ids=pydantic_context.defilama_ids,
-        twitter_handle=pydantic_context.twitter_handle,
-        github_organisation=pydantic_context.github_organisation,
-        legal_name=pydantic_context.legal_name,
-    )
-
-
-def pydantic_actor_to_openapi(pydantic_actor: PydanticActor) -> Actor:
-    """Convert Pydantic Actor to OpenAPI Actor"""
-    return Actor(
-        id=pydantic_actor.id,
-        uri=pydantic_actor.uri,
-        label=pydantic_actor.label,
-        jurisdictions=[
-            pydantic_labeled_item_ref_to_openapi(j)
-            for j in pydantic_actor.jurisdictions
-        ],
-        categories=[
-            pydantic_labeled_item_ref_to_openapi(c) for c in pydantic_actor.categories
-        ],
-        nr_tags=pydantic_actor.nr_tags,
-        context=pydantic_actor_context_to_openapi(pydantic_actor.context)
-        if pydantic_actor.context
-        else None,
-    )
-
-
-def pydantic_concept_to_openapi(pydantic_concept: PydanticConcept) -> Concept:
-    """Convert Pydantic Concept to OpenAPI Concept"""
-    return Concept(
-        id=pydantic_concept.id,
-        label=pydantic_concept.label,
-        description=pydantic_concept.description,
-        taxonomy=pydantic_concept.taxonomy,
-        uri=pydantic_concept.uri,
-    )
-
-
-def pydantic_taxonomy_to_openapi(pydantic_taxonomy: PydanticTaxonomy) -> Taxonomy:
-    """Convert Pydantic Taxonomy to OpenAPI Taxonomy"""
-    return Taxonomy(taxonomy=pydantic_taxonomy.taxonomy, uri=pydantic_taxonomy.uri)
-
-
-def pydantic_external_conversion_to_openapi(
+def to_api_external_conversion(
     pydantic_conversion: PydanticExternalConversion,
 ) -> ExternalConversion:
-    """Convert Pydantic ExternalConversions to OpenAPI ExternalConversions"""
+    """Convert service ExternalConversion to API ExternalConversion."""
     ctype = "dex_swap"
     if pydantic_conversion.conversion_type == "swap":
         ctype = "dex_swap"
@@ -622,174 +475,132 @@ def pydantic_external_conversion_to_openapi(
     )
 
 
-def pydantic_tag_cloud_entry_to_openapi(
-    pydantic_entry: PydanticTagCloudEntry,
-) -> TagCloudEntry:
-    """Convert Pydantic TagCloudEntry to OpenAPI TagCloudEntry"""
-    return TagCloudEntry(cnt=pydantic_entry.cnt, weighted=pydantic_entry.weighted)
-
-
-def pydantic_label_summary_to_openapi(
-    pydantic_summary: PydanticLabelSummary,
-) -> LabelSummary:
-    """Convert Pydantic LabelSummary to OpenAPI LabelSummary"""
-    return LabelSummary(
-        label=pydantic_summary.label,
-        count=pydantic_summary.count,
-        confidence=pydantic_summary.confidence,
-        relevance=pydantic_summary.relevance,
-        creators=pydantic_summary.creators,
-        sources=pydantic_summary.sources,
-        concepts=pydantic_summary.concepts,
-        lastmod=pydantic_summary.lastmod,
-        inherited_from=pydantic_summary.inherited_from,
-    )
-
-
-def pydantic_tag_summary_to_openapi(pydantic_summary: PydanticTagSummary) -> TagSummary:
-    """Convert Pydantic TagSummary to OpenAPI TagSummary"""
-    return TagSummary(
-        broad_category=pydantic_summary.broad_category,
-        tag_count=pydantic_summary.tag_count,
-        tag_count_indirect=pydantic_summary.tag_count_indirect,
-        best_actor=pydantic_summary.best_actor,
-        best_label=pydantic_summary.best_label,
-        concept_tag_cloud={
-            k: pydantic_tag_cloud_entry_to_openapi(v)
-            for k, v in pydantic_summary.concept_tag_cloud.items()
-        },
-        label_summary={
-            k: pydantic_label_summary_to_openapi(v)
-            for k, v in pydantic_summary.label_summary.items()
-        },
-    )
-
-
-def pydantic_neighbor_address_to_openapi(
-    pydantic_neighbor: PydanticNeighborAddress,
-) -> NeighborAddress:
-    """Convert Pydantic NeighborAddress to OpenAPI NeighborAddress"""
-    return NeighborAddress(
-        labels=pydantic_neighbor.labels,
-        value=pydantic_values_to_openapi(pydantic_neighbor.value),
-        no_txs=pydantic_neighbor.no_txs,
-        token_values={
-            k: pydantic_values_to_openapi(v)
-            for k, v in (pydantic_neighbor.token_values or {}).items()
-        }
-        if pydantic_neighbor.token_values
-        else None,
-        address=pydantic_address_to_openapi(pydantic_neighbor.address),
-    )
-
-
-def pydantic_neighbor_addresses_to_openapi(
-    pydantic_neighbors: PydanticNeighborAddresses,
-) -> NeighborAddresses:
-    """Convert Pydantic NeighborAddresses to OpenAPI NeighborAddresses"""
-    return NeighborAddresses(
-        next_page=pydantic_neighbors.next_page,
-        neighbors=[
-            pydantic_neighbor_address_to_openapi(neighbor)
-            for neighbor in pydantic_neighbors.neighbors
-        ],
-    )
-
-
-def pydantic_neighbor_entities_to_openapi(
-    pydantic_neighbors: PydanticNeighborEntities,
-) -> NeighborEntities:
-    """Convert Pydantic NeighborEntities to OpenAPI NeighborEntities"""
-    return NeighborEntities(
-        next_page=pydantic_neighbors.next_page,
-        neighbors=[
-            pydantic_neighbor_entity_to_openapi(neighbor)
-            for neighbor in pydantic_neighbors.neighbors
-        ],
-    )
-
-
-def pydantic_neighbor_entity_to_openapi(
-    pydantic_neighbor: PydanticNeighborEntity,
-) -> NeighborEntity:
-    """Convert Pydantic NeighborEntity to OpenAPI NeighborEntity"""
-    return NeighborEntity(
-        labels=pydantic_neighbor.labels,
-        value=pydantic_values_to_openapi(pydantic_neighbor.value),
-        token_values={
-            k: pydantic_values_to_openapi(v)
-            for k, v in (pydantic_neighbor.token_values or {}).items()
-        }
-        if pydantic_neighbor.token_values
-        else None,
-        no_txs=pydantic_neighbor.no_txs,
-        entity=pydantic_entity_to_openapi(pydantic_neighbor.entity)
-        if isinstance(pydantic_neighbor.entity, PydanticEntity)
-        else pydantic_neighbor.entity,
-    )
-
-
-def pydantic_cross_chain_pubkey_related_address_to_openapi(
+def to_api_cross_chain_pubkey_related_address(
     pydantic_address: PydanticCrossChainPubkeyRelatedAddress,
-) -> CrossChainPubkeyRelatedAddress:
-    """Convert Pydantic CrossChainPubkeyRelatedAddress to OpenAPI CrossChainPubkeyRelatedAddress"""
-    return CrossChainPubkeyRelatedAddress(
+) -> RelatedAddress:
+    """Convert service CrossChainPubkeyRelatedAddress to API RelatedAddress."""
+    return RelatedAddress(
         currency=pydantic_address.network,
         address=pydantic_address.address,
         relation_type="pubkey",
     )
 
 
-def pydantic_cross_chain_pubkey_related_addresses_to_openapi(
+def to_api_cross_chain_pubkey_related_addresses(
     pydantic_addresses: PydanticCrossChainPubkeyRelatedAddresses,
-) -> CrossChainPubkeyRelatedAddresses:
-    """Convert Pydantic CrossChainPubkeyRelatedAddresses to OpenAPI CrossChainPubkeyRelatedAddresses"""
-    return CrossChainPubkeyRelatedAddresses(
+) -> RelatedAddresses:
+    """Convert service CrossChainPubkeyRelatedAddresses to API RelatedAddresses."""
+    return RelatedAddresses(
         related_addresses=[
-            pydantic_cross_chain_pubkey_related_address_to_openapi(address)
-            for address in pydantic_addresses.addresses
+            to_api_cross_chain_pubkey_related_address(addr)
+            for addr in pydantic_addresses.addresses
         ],
         next_page=pydantic_addresses.next_page,
     )
 
 
-def pydantic_to_openapi(pydantic_obj):
-    """Generic function to convert Pydantic objects to OpenAPI objects based on type"""
+def pydantic_to_openapi(pydantic_obj: Any) -> Any:
+    """Generic function to convert Pydantic objects to API objects based on type.
 
-    # Handle lists
+    This is a compatibility layer for the old API. New code should use
+    the specific to_api_* functions directly.
+    """
     if isinstance(pydantic_obj, list):
         return [pydantic_to_openapi(item) for item in pydantic_obj]
 
-    # Handle primitive types (strings, numbers, booleans, None)
     if pydantic_obj is None or isinstance(pydantic_obj, (str, int, float, bool)):
         return pydantic_obj
 
     obj_type = type(pydantic_obj)
-
-    # Try to find function dynamically based on type name
     type_name = obj_type.__name__
 
-    # Convert PascalCase to snake_case and construct function name
+    # Map type names to converter functions
+    converters = {
+        "Values": to_api_values,
+        "Address": to_api_address,
+        "Entity": to_api_entity,
+        "AddressTag": to_api_address_tag,
+        "AddressTagResult": to_api_address_tag_result,
+        "NeighborAddress": to_api_neighbor_address,
+        "NeighborAddresses": to_api_neighbor_addresses,
+        "NeighborEntity": to_api_neighbor_entity,
+        "NeighborEntities": to_api_neighbor_entities,
+        "EntityAddresses": to_api_entity_addresses,
+        "TxUtxo": to_api_tx_utxo,
+        "TxAccount": to_api_tx_account,
+        "Txs": to_api_txs,
+        "AddressTxUtxo": to_api_address_tx_utxo,
+        "AddressTxs": to_api_address_txs,
+        "LinkUtxo": to_api_link_utxo,
+        "Links": to_api_links,
+        "Block": to_api_block,
+        "BlockAtDate": to_api_block_at_date,
+        "Stats": to_api_stats,
+        "CurrencyStats": to_api_currency_stats,
+        "RatesResponse": to_api_rates,
+        "Taxonomy": to_api_taxonomy,
+        "Concept": to_api_concept,
+        "Actor": to_api_actor,
+        "ActorContext": to_api_actor_context,
+        "TagCloudEntry": to_api_tag_cloud_entry,
+        "LabelSummary": to_api_label_summary,
+        "TagSummary": to_api_tag_summary,
+        "SearchResult": to_api_search_result,
+        "SearchResultByCurrency": to_api_search_result_by_currency,
+        "TokenConfigs": to_api_token_configs,
+        "ExternalConversion": to_api_external_conversion,
+        "CrossChainPubkeyRelatedAddress": to_api_cross_chain_pubkey_related_address,
+        "CrossChainPubkeyRelatedAddresses": to_api_cross_chain_pubkey_related_addresses,
+    }
 
-    snake_case_name = camel_to_snake_case(type_name)
-    function_name = f"pydantic_{snake_case_name}_to_openapi"
+    if type_name in converters:
+        return converters[type_name](pydantic_obj)
 
-    # Check if function exists in current module
-    current_module = sys.modules[__name__]
-    if hasattr(current_module, function_name):
-        converter_function = getattr(current_module, function_name)
-        return converter_function(pydantic_obj)
+    raise NotImplementedError(f"No converter found for type: {type_name}")
 
-    # Fallback to explicit type mapping
-    type_mapping = {}
 
-    if obj_type in type_mapping:
-        return type_mapping[obj_type](pydantic_obj)
-
-    # Handle union types for Tx (TxAccount or TxUtxo)
-    if isinstance(pydantic_obj, (PydanticTxAccount, PydanticTxUtxo)):
-        return pydantic_tx_to_openapi(pydantic_obj)
-
-    raise NotImplementedError(
-        f"No translator found for type: {obj_type} expected function: {function_name}"
-    )
+# Backward compatibility aliases (old function names)
+pydantic_values_to_openapi = to_api_values
+pydantic_address_to_openapi = to_api_address
+pydantic_entity_to_openapi = to_api_entity
+pydantic_address_tag_to_openapi = to_api_address_tag
+pydantic_address_tag_result_to_openapi = to_api_address_tag_result
+pydantic_neighbor_address_to_openapi = to_api_neighbor_address
+pydantic_neighbor_addresses_to_openapi = to_api_neighbor_addresses
+pydantic_neighbor_entity_to_openapi = to_api_neighbor_entity
+pydantic_neighbor_entities_to_openapi = to_api_neighbor_entities
+pydantic_entity_addresses_to_openapi = to_api_entity_addresses
+pydantic_tx_utxo_to_openapi = to_api_tx_utxo
+pydantic_tx_account_to_openapi = to_api_tx_account
+pydantic_tx_to_openapi = to_api_tx
+pydantic_txs_to_openapi = to_api_txs
+pydantic_address_tx_utxo_to_openapi = to_api_address_tx_utxo
+pydantic_address_txs_to_openapi = to_api_address_txs
+pydantic_link_utxo_to_openapi = to_api_link_utxo
+pydantic_links_to_openapi = to_api_links
+pydantic_block_to_openapi = to_api_block
+pydantic_block_at_date_to_openapi = to_api_block_at_date
+pydantic_stats_to_openapi = to_api_stats
+pydantic_currency_stats_to_openapi = to_api_currency_stats
+pydantic_rates_to_openapi = to_api_rates
+pydantic_taxonomy_to_openapi = to_api_taxonomy
+pydantic_concept_to_openapi = to_api_concept
+pydantic_actor_to_openapi = to_api_actor
+pydantic_actor_context_to_openapi = to_api_actor_context
+pydantic_tag_cloud_entry_to_openapi = to_api_tag_cloud_entry
+pydantic_label_summary_to_openapi = to_api_label_summary
+pydantic_tag_summary_to_openapi = to_api_tag_summary
+pydantic_search_result_to_openapi = to_api_search_result
+pydantic_search_result_by_currency_to_openapi = to_api_search_result_by_currency
+pydantic_token_configs_to_openapi = to_api_token_configs
+pydantic_external_conversion_to_openapi = to_api_external_conversion
+pydantic_cross_chain_pubkey_related_address_to_openapi = (
+    to_api_cross_chain_pubkey_related_address
+)
+pydantic_cross_chain_pubkey_related_addresses_to_openapi = (
+    to_api_cross_chain_pubkey_related_addresses
+)
+pydantic_tx_ref_to_openapi = lambda x: x.model_dump()  # noqa: E731
+pydantic_tx_summary_to_openapi = lambda x: x.model_dump()  # noqa: E731
+pydantic_labeled_item_ref_to_openapi = lambda x: x.model_dump()  # noqa: E731
+pydantic_tx_value_to_openapi = to_api_tx_value

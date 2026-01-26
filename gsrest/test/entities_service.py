@@ -16,21 +16,21 @@ from gsrest.test.addresses_service import (
     eth_entityWithTags,
     eth_entityWithTokens,
 )
+from gsrest.models import (
+    AddressTag,
+    AddressTxUtxo,
+    AddressTxs,
+    Entity,
+    EntityAddresses,
+    LabeledItemRef,
+    Links,
+    NeighborEntities,
+    NeighborEntity,
+    TxAccount,
+    TxSummary,
+)
 from gsrest.test.txs_service import tx1_eth, tx2_eth, tx4_eth, tx22_eth
 from gsrest.util.values_legacy import convert_value, make_values
-from openapi_server.models.address_tag import AddressTag
-from openapi_server.models.address_tx_utxo import AddressTxUtxo
-from openapi_server.models.address_txs import AddressTxs
-from openapi_server.models.entity import Entity
-from openapi_server.models.entity_addresses import EntityAddresses
-from openapi_server.models.labeled_item_ref import LabeledItemRef
-
-# from openapi_server.models.link_utxo import LinkUtxo
-from openapi_server.models.links import Links
-from openapi_server.models.neighbor_entities import NeighborEntities
-from openapi_server.models.neighbor_entity import NeighborEntity
-from openapi_server.models.tx_account import TxAccount
-from openapi_server.models.tx_summary import TxSummary
 
 tagstore_public_tp_uri = "tagpack_public.yaml"
 

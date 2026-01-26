@@ -1,9 +1,8 @@
-from openapi_server.models.token_config import TokenConfig
-from openapi_server.models.token_configs import TokenConfigs
+from gsrest.models import TokenConfig, TokenConfigs
 
-btc_tokens = TokenConfigs([])
+btc_tokens = TokenConfigs(token_configs=[])
 eth_tokens = TokenConfigs(
-    [
+    token_configs=[
         TokenConfig(
             ticker="usdc",
             decimals=6,

@@ -3,7 +3,7 @@ from csv import DictWriter
 from graphsenselib.errors import BadUserInputException
 from werkzeug.datastructures import Headers
 
-from openapi_server.models.values import Values
+from gsrest.models import Values
 
 
 def create_download_header(filename):

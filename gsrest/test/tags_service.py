@@ -1,5 +1,4 @@
-from openapi_server.models.address_tag import AddressTag
-from openapi_server.models.concept import Concept
+from gsrest.models import AddressTag, Concept
 
 base_tagpack_src = ""
 

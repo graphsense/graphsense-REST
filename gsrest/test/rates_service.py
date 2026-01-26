@@ -1,4 +1,4 @@
-from openapi_server.models.rates import Rates
+from gsrest.models import Rates
 
 rate = Rates(
     height=1, rates=[{"code": "eur", "value": 0.0}, {"code": "usd", "value": 0.0}]

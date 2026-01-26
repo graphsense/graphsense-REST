@@ -14,15 +14,17 @@ from gsrest.builtin.plugins.obfuscate_tags.obfuscate_tags import (
     obfuscate_private_tags,
     obfuscate_tagpack_uri_by_rule,
 )
-from openapi_server.models.address_tag import AddressTag
-from openapi_server.models.address_tags import AddressTags
-from openapi_server.models.entity import Entity
-from openapi_server.models.labeled_item_ref import LabeledItemRef
-from openapi_server.models.neighbor_entities import NeighborEntities
-from openapi_server.models.neighbor_entity import NeighborEntity
-from openapi_server.models.tx_summary import TxSummary
-from openapi_server.models.values import Values
-from openapi_server.models.rate import Rate
+from gsrest.models import (
+    AddressTag,
+    AddressTags,
+    Entity,
+    LabeledItemRef,
+    NeighborEntities,
+    NeighborEntity,
+    Rate,
+    TxSummary,
+    Values,
+)
 
 
 # --- Factories ---

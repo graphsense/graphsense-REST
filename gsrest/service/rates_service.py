@@ -1,6 +1,6 @@
 from gsrest.dependencies import get_service_container
+from gsrest.models import Rates
 from gsrest.translators import pydantic_rates_to_openapi
-from openapi_server.models.rates import Rates
 
 
 async def get_exchange_rates(request, currency, height) -> Rates:

@@ -1,6 +1,5 @@
+from gsrest.models import Block, TxAccount
 from gsrest.test.txs_service import token_tx1_eth, token_tx2_eth, tx1, tx1_eth, tx2_eth
-from openapi_server.models.block import Block
-from openapi_server.models.tx_account import TxAccount
 
 block = Block(
     height=1,

@@ -1,7 +1,5 @@
+from gsrest.models import TxAccount, TxUtxo, TxValue
 from gsrest.util.values_legacy import make_values
-from openapi_server.models.tx_account import TxAccount
-from openapi_server.models.tx_utxo import TxUtxo
-from openapi_server.models.tx_value import TxValue
 
 tx1 = TxUtxo(
     height=1,
@@ -162,19 +160,19 @@ tx1_eth_with_identifier = TxAccount(**tx1_eth.to_dict())
 tx1_eth_with_identifier.identifier = "af6e0000_I0"
 tx1_eth_with_identifier.contract_creation = False
 
-tx2_eth_with_identifier = TxAccount(tx2_eth.to_dict())
+tx2_eth_with_identifier = TxAccount(**tx2_eth.to_dict())
 tx2_eth_with_identifier.identifier = "af6e0003_I1"
 tx2_eth_with_identifier.contract_creation = False
 
-tx22_eth_with_identifier = TxAccount(tx22_eth.to_dict())
+tx22_eth_with_identifier = TxAccount(**tx22_eth.to_dict())
 tx22_eth_with_identifier.identifier = "af6e0004_I0"
 tx22_eth_with_identifier.contract_creation = False
 
-tx3_eth_with_identifier = TxAccount(tx3_eth.to_dict())
+tx3_eth_with_identifier = TxAccount(**tx3_eth.to_dict())
 tx3_eth_with_identifier.identifier = "ab188013_I1"
 tx3_eth_with_identifier.contract_creation = False
 
-tx4_eth_with_identifier = TxAccount(tx4_eth.to_dict())
+tx4_eth_with_identifier = TxAccount(**tx4_eth.to_dict())
 tx4_eth_with_identifier.identifier = "123456_I0"
 tx4_eth_with_identifier.contract_creation = False
 

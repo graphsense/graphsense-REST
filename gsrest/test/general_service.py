@@ -1,7 +1,10 @@
-from openapi_server.models.currency_stats import CurrencyStats
-from openapi_server.models.search_result import SearchResult
-from openapi_server.models.search_result_by_currency import SearchResultByCurrency
-from openapi_server.models.stats import Stats
+from gsrest.models import (
+    CurrencyStats,
+    LabeledItemRef,
+    SearchResult,
+    SearchResultByCurrency,
+    Stats,
+)
 
 stats = Stats(
     currencies=[
@@ -130,9 +133,9 @@ async def search(test_case):
 
     expected = base_search_results()
     expected.actors = [
-        {"id": "actorX", "label": "Actor X"},
-        {"id": "actorY", "label": "Actor Y"},
-        {"id": "anotherActor", "label": "Another Actor Y"},
+        LabeledItemRef(id="actorX", label="Actor X"),
+        LabeledItemRef(id="actorY", label="Actor Y"),
+        LabeledItemRef(id="anotherActor", label="Another Actor Y"),
     ]
 
     result = await test_case.request(path, q="actor")
@@ -141,9 +144,9 @@ async def search(test_case):
 
     result = await test_case.request(path, auth="y", q="actor")
     expected.actors = [
-        {"id": "actorX", "label": "Actor X"},
-        {"id": "actorY", "label": "Actor Y"},
-        {"id": "anotherActor", "label": "Another Actor Y"},
+        LabeledItemRef(id="actorX", label="Actor X"),
+        LabeledItemRef(id="actorY", label="Actor Y"),
+        LabeledItemRef(id="anotherActor", label="Another Actor Y"),
     ]
     assert expected.to_dict() == result
 

@@ -191,14 +191,28 @@ def with_plugin_response_hooks(func):
 
 
 def to_json_response(result: Any) -> dict:
-    """Convert OpenAPI model result to JSON-serializable dict"""
+    """Convert API model result to JSON-serializable dict.
+
+    Handles both old OpenAPI models (with to_dict()) and new Pydantic models
+    (with model_dump()).
+    """
     if result is None:
         return {}
     elif isinstance(result, list):
-        return [d.to_dict() if hasattr(d, "to_dict") else d for d in result]
-    elif hasattr(result, "to_dict"):
-        return result.to_dict()
-    return result
+        return [_model_to_dict(d) for d in result]
+    else:
+        return _model_to_dict(result)
+
+
+def _model_to_dict(obj: Any) -> Any:
+    """Convert a single model to dict."""
+    # Prefer to_dict() for compatibility with both old and new models
+    if hasattr(obj, "to_dict"):
+        return obj.to_dict()
+    # Fallback for other Pydantic models
+    elif hasattr(obj, "model_dump"):
+        return obj.model_dump(exclude_none=True)
+    return obj
 
 
 def parse_comma_separated_ints(value: Optional[str]) -> Optional[list[int]]:

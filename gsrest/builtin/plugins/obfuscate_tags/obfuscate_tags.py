@@ -8,22 +8,24 @@ from graphsenselib.tagstore.algorithms.obfuscate import (
     obfuscate_tag_if_not_public,
 )
 
+from gsrest.models import (
+    AddressTags,
+    Entity,
+    NeighborEntities,
+    SearchResultLeaf,
+    SearchResultLevel1,
+    SearchResultLevel2,
+    SearchResultLevel3,
+    SearchResultLevel4,
+    SearchResultLevel5,
+    SearchResultLevel6,
+)
 from gsrest.plugins import (
     Plugin,
     get_request_header,
     get_request_path,
     get_request_query_string,
 )
-from openapi_server.models.address_tags import AddressTags
-from openapi_server.models.entity import Entity
-from openapi_server.models.neighbor_entities import NeighborEntities
-from openapi_server.models.search_result_leaf import SearchResultLeaf
-from openapi_server.models.search_result_level1 import SearchResultLevel1
-from openapi_server.models.search_result_level2 import SearchResultLevel2
-from openapi_server.models.search_result_level3 import SearchResultLevel3
-from openapi_server.models.search_result_level4 import SearchResultLevel4
-from openapi_server.models.search_result_level5 import SearchResultLevel5
-from openapi_server.models.search_result_level6 import SearchResultLevel6
 
 GROUPS_HEADER_NAME = "X-Consumer-Groups"
 NO_OBFUSCATION_MARKER_PATTERN = re.compile(r"(private|tags-private)")

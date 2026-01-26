@@ -1,10 +1,18 @@
 import asyncio
-import importlib
 import time
 
 from graphsenselib.errors import BadUserInputException
 
 from gsrest.dependencies import get_service_container, get_tagstore_access_groups
+from gsrest.models import (
+    SearchResultLeaf,
+    SearchResultLevel1,
+    SearchResultLevel2,
+    SearchResultLevel3,
+    SearchResultLevel4,
+    SearchResultLevel5,
+    SearchResultLevel6,
+)
 from gsrest.service.tags_service import parse_page_int_optional
 from gsrest.translators import (
     pydantic_address_tag_result_to_openapi,
@@ -15,6 +23,16 @@ from gsrest.translators import (
     pydantic_links_to_openapi,
     pydantic_neighbor_entities_to_openapi,
 )
+
+# Mapping from level to SearchResult class
+SEARCH_RESULT_LEVEL_CLASSES = {
+    1: SearchResultLevel1,
+    2: SearchResultLevel2,
+    3: SearchResultLevel3,
+    4: SearchResultLevel4,
+    5: SearchResultLevel5,
+    6: SearchResultLevel6,
+}
 
 MAX_DEPTH = 7
 SEARCH_TIMEOUT = 300
@@ -312,10 +330,7 @@ async def search_entity_neighbors(
         for i, neighbor in neighbors:
             level = i + 1
             if level < MAX_DEPTH:
-                mod = importlib.import_module(
-                    f"openapi_server.models.search_result_level{level}"
-                )
-                levelClass = getattr(mod, f"SearchResultLevel{level}")
+                levelClass = SEARCH_RESULT_LEVEL_CLASSES[level]
                 paths = [
                     levelClass(
                         neighbor=neighbor,
@@ -324,11 +339,9 @@ async def search_entity_neighbors(
                     )
                 ]
             else:
-                mod = importlib.import_module(
-                    "openapi_server.models.search_result_leaf"
-                )
-                levelClass = getattr(mod, "SearchResultLeaf")
-                paths = [levelClass(neighbor=neighbor, matching_addresses=addresses)]
+                paths = [
+                    SearchResultLeaf(neighbor=neighbor, matching_addresses=addresses)
+                ]
         return paths[0]
 
     aws = [resolve_path(path) for path in result]
@@ -491,13 +504,9 @@ async def recursive_search(
     )
 
     if level < MAX_DEPTH:
-        mod = importlib.import_module(
-            f"openapi_server.models.search_result_level{level}"
-        )
-        levelClass = getattr(mod, f"SearchResultLevel{level}")
+        levelClass = SEARCH_RESULT_LEVEL_CLASSES[level]
     else:
-        mod = importlib.import_module("openapi_server.models.search_result_leaf")
-        levelClass = getattr(mod, "SearchResultLeaf")
+        levelClass = SearchResultLeaf
 
     async def handle_neighbor(neighbor):
         match = True

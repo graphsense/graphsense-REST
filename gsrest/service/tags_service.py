@@ -7,13 +7,13 @@ from gsrest.dependencies import (
     get_username,
 )
 from gsrest.service import parse_page_int_optional
+from gsrest.models import UserTagReportResponse
 from gsrest.translators import (
     pydantic_actor_to_openapi,
     pydantic_address_tag_result_to_openapi,
     pydantic_concept_to_openapi,
     pydantic_taxonomy_to_openapi,
 )
-from openapi_server.models.user_tag_report_response import UserTagReportResponse
 
 
 # Updated functions using new service layer

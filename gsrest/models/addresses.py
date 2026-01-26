@@ -1,0 +1,64 @@
+"""Address-related API models."""
+
+from typing import Any, Optional
+
+from pydantic import ConfigDict
+
+from gsrest.models.base import APIModel
+from gsrest.models.common import LabeledItemRef
+from gsrest.models.transactions import TxSummary
+from gsrest.models.values import Values
+
+
+class Address(APIModel):
+    """Address model."""
+
+    # Allow extra fields for test fixtures that set .tags
+    model_config = ConfigDict(
+        populate_by_name=True,
+        from_attributes=True,
+        extra="allow",
+    )
+
+    currency: str
+    address: str
+    entity: int
+    balance: Values
+    total_received: Values
+    total_spent: Values
+    first_tx: TxSummary
+    last_tx: TxSummary
+    in_degree: int
+    out_degree: int
+    no_incoming_txs: int
+    no_outgoing_txs: int
+    token_balances: Optional[dict[str, Values]] = None
+    total_tokens_received: Optional[dict[str, Values]] = None
+    total_tokens_spent: Optional[dict[str, Values]] = None
+    actors: Optional[list[LabeledItemRef]] = None
+    is_contract: Optional[bool] = None
+    status: Optional[str] = None
+
+    def to_dict(self, shallow: bool = False) -> dict[str, Any]:
+        """Override to exclude extra fields (like 'tags') from serialization."""
+        result = super().to_dict(shallow=shallow)
+        # Remove any extra fields that aren't part of the API response
+        result.pop("tags", None)
+        return result
+
+
+class NeighborAddress(APIModel):
+    """Neighbor address model."""
+
+    value: Values
+    no_txs: int
+    address: Address
+    labels: Optional[list[str]] = None
+    token_values: Optional[dict[str, Values]] = None
+
+
+class NeighborAddresses(APIModel):
+    """Paginated list of neighbor addresses."""
+
+    neighbors: list[NeighborAddress]
+    next_page: Optional[str] = None

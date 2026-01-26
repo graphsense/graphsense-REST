@@ -5,21 +5,23 @@ from graphsenselib.utils.rest_utils import omit
 from graphsenselib.utils.tron import evm_to_tron_address_string
 
 import gsrest.test.tags_service as ts
+from gsrest.models import (
+    Address,
+    AddressTag,
+    AddressTxUtxo,
+    AddressTxs,
+    Entity,
+    LabeledItemRef,
+    LinkUtxo,
+    Links,
+    NeighborAddress,
+    NeighborAddresses,
+    TxAccount,
+    TxSummary,
+)
 from gsrest.service.rates_service import list_rates
 from gsrest.test.txs_service import tx1_eth, tx2_eth, tx4_eth, tx22_eth
 from gsrest.util.values_legacy import convert_value, make_values
-from openapi_server.models.address import Address
-from openapi_server.models.address_tag import AddressTag
-from openapi_server.models.address_tx_utxo import AddressTxUtxo
-from openapi_server.models.address_txs import AddressTxs
-from openapi_server.models.entity import Entity
-from openapi_server.models.labeled_item_ref import LabeledItemRef
-from openapi_server.models.link_utxo import LinkUtxo
-from openapi_server.models.links import Links
-from openapi_server.models.neighbor_address import NeighborAddress
-from openapi_server.models.neighbor_addresses import NeighborAddresses
-from openapi_server.models.tx_account import TxAccount
-from openapi_server.models.tx_summary import TxSummary
 
 address = Address(
     currency="btc",

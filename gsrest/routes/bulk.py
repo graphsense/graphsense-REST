@@ -16,10 +16,8 @@ from fastapi.responses import StreamingResponse
 from graphsenselib.errors import BadUserInputException, NotFoundException
 
 from gsrest.dependencies import ServiceContainer
+from gsrest.models import AddressTag, Entity, Values
 from gsrest.routes.base import RequestAdapter, get_services, get_tagstore_access_groups
-from openapi_server.models.address_tag import AddressTag
-from openapi_server.models.entity import Entity
-from openapi_server.models.values import Values
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
