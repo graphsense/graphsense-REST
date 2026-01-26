@@ -18,7 +18,8 @@ class RequestAdapter:
     """Adapter to make FastAPI Request compatible with existing service layer.
 
     This adapter provides a unified interface that the service layer expects,
-    bridging FastAPI's Request object with the legacy aiohttp-style access patterns.
+    bridging FastAPI's Request object with the dict-style access patterns
+    used by the service layer.
     """
 
     def __init__(
