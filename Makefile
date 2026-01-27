@@ -18,6 +18,9 @@ WORKTREE_DIR ?= ../.graphsense-rest-old
 test: install-dev
 	uv run pytest -x -rx -vv
 
+test-reset-cassandra-image:
+	docker rmi graphsense/cassandra-test:4.1.4
+
 test-regression:
 	@export SKIP_REST_CONTAINER_SETUP=True && uv run pytest -m "regression" -s
 
@@ -97,4 +100,4 @@ tag-version: ensure-versions-alignment
 	-git diff --exit-code && git diff --staged --exit-code && git tag -a v$(GS_REST_SERVICE_VERSIONM) -m 'Release v$(GS_REST_SERVICE_VERSION)' || (echo "Repo is dirty please commit first" && exit 1)
 	git diff --exit-code && git diff --staged --exit-code && git tag -a v$(GS_REST_SERVICE_VERSION) -m 'Release v$(GS_REST_SERVICE_VERSION)' || (echo "Repo is dirty please commit first" && exit 1)
 
-.PHONY: format lint test ensure-versions-alignment run-codegen serve serve-docker pre-commit install-dev tag-version generate-python-client build-docker test-migration setup-migration-worktree clean-migration-worktree serve-old serve-new test-regression
+.PHONY: format lint test ensure-versions-alignment run-codegen serve serve-docker pre-commit install-dev tag-version generate-python-client build-docker build-test-cassandra test-reset-cassandra-image test-migration setup-migration-worktree clean-migration-worktree serve-old serve-new test-regression

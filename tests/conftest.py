@@ -1,5 +1,8 @@
+import subprocess
 from os import environ
+from pathlib import Path
 
+import docker
 import pytest
 from testcontainers.cassandra import CassandraContainer
 from testcontainers.postgres import PostgresContainer
@@ -9,7 +12,30 @@ from tests.cassandra.insert import load_test_data as cas_load_test_data
 from tests.tagstore.insert import load_test_data as tags_load_test_data
 
 postgres = PostgresContainer("postgres:16-alpine")
-cassandra = CassandraContainer("cassandra:4.1.4")
+
+# Pre-baked Cassandra image with schemas and fast startup settings already configured
+# Build with: make build-test-cassandra
+# Baked-in optimizations: NUM_TOKENS=1, ring_delay_ms=100, skip_wait_for_gossip=0
+CASSANDRA_TEST_IMAGE = environ.get(
+    "CASSANDRA_TEST_IMAGE", "graphsense/cassandra-test:4.1.4"
+)
+
+
+def ensure_cassandra_image_exists():
+    """Build Cassandra test image if it doesn't exist locally."""
+    client = docker.from_env()
+    try:
+        client.images.get(CASSANDRA_TEST_IMAGE)
+    except docker.errors.ImageNotFound:
+        dockerfile_path = Path(__file__).parent / "cassandra"
+        subprocess.run(
+            ["docker", "build", "-t", CASSANDRA_TEST_IMAGE, str(dockerfile_path)],
+            check=True,
+        )
+
+
+ensure_cassandra_image_exists()
+cassandra = CassandraContainer(CASSANDRA_TEST_IMAGE)
 
 
 @pytest.fixture(scope="session", autouse=True)

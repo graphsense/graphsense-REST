@@ -40,6 +40,7 @@ repos:
         exclude: |
             (?x)^(
                 tests/cassandra/insert.py|
+                tests/cassandra/init-schemas.py|
                 tests/tagstore/insert.py|
                 tests/txs_pagesize_tester.py|
                 tests/txs_pagesize_tests.py
