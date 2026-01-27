@@ -3,7 +3,7 @@ name = "gsrest"
 version = "1.16.0rc2"
 description = "GraphSense API REST API"
 readme = "README.md"
-keywords = ["OpenAPI", "GraphSense API"]
+keywords = ["GraphSense API"]
 requires-python = ">=3.10"
 license-files = ["LICENSE"]
 license = "MIT"
@@ -17,7 +17,6 @@ dependencies = [
     "fastapi>=0.115.0",
     "graphsense-lib[conversions,tagpacks]>=2.8.9",
     "httpx>=0.27.0",
-    "openapi-schema-validator>=0.2.3",
     "python-dateutil>=2.9.0",
     "redis>=7.1.0",
     "uvicorn[standard]>=0.32.0",
@@ -33,7 +32,7 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["gsrest*", "openapi_server.models*"]
+include = ["gsrest*"]
 exclude = ["clients*", "tests*", "scripts*", "gsrest.test", "gsrest.test.*"]
 
 [tool.setuptools]
@@ -45,6 +44,7 @@ asyncio_default_fixture_loop_scope = "function"
 markers = [
     "regression: mark test as regression test",
     "migration: mark test as FastAPI migration comparison test",
+    "loki_generated: mark test as generated from Loki API logs",
 ]
 addopts = "-m 'not regression and not migration'"
 testpaths = [

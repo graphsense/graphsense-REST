@@ -93,3 +93,6 @@ gsrest/plugins
 
 .ruff_cache/
 local
+tests/test_loki_generated.py
+tests/loki_generated_calls.json
+tests/migration_timing_report.json

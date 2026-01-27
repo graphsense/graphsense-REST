@@ -18,12 +18,15 @@ Usage:
 import json
 import logging
 import os
+import re
 import time
 from typing import Any
 from urllib.parse import urljoin
 
 import pytest
 import requests
+
+from tests.conftest import record_migration_timing
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -40,6 +43,34 @@ ETH_ADDRESS = "0xdac17f958d2ee523a2206206994597c13d831ec7"
 BTC_ENTITY = 109578
 BTC_TX = "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"
 BTC_HEIGHT = 100000
+
+
+def normalize_endpoint_to_pattern(uri: str) -> str:
+    """Normalize URI to a pattern for grouping timing data."""
+    # Remove query string for pattern
+    path = uri.split("?")[0]
+
+    # Replace specific values with placeholders
+    replacements = [
+        (r"/addresses/[13][a-km-zA-HJ-NP-Z1-9]{25,34}(?=/|$)", "/addresses/{btc_address}"),
+        (r"/addresses/bc1[a-z0-9]{39,59}(?=/|$)", "/addresses/{btc_bech32}"),
+        (r"/addresses/0x[a-fA-F0-9]{40}(?=/|$)", "/addresses/{eth_address}"),
+        (r"/addresses/T[a-zA-Z0-9]{33}(?=/|$)", "/addresses/{trx_address}"),
+        (r"/entities/\d+(?=/|$)", "/entities/{entity_id}"),
+        (r"/txs/0x[a-fA-F0-9]{64}(?=/|$)", "/txs/{eth_tx}"),
+        (r"/txs/[a-fA-F0-9]{64}(?=/|$)", "/txs/{tx_hash}"),
+        (r"/blocks/\d+(?=/|$)", "/blocks/{height}"),
+        (r"/rates/\d+(?=/|$)", "/rates/{height}"),
+        (r"/block_by_date/[^/]+(?=/|$)", "/block_by_date/{date}"),
+        (r"/actors/[^/]+(?=/|$)", "/actors/{actor}"),
+        (r"/taxonomies/[^/]+/concepts", "/taxonomies/{taxonomy}/concepts"),
+    ]
+
+    pattern = path
+    for regex, replacement in replacements:
+        pattern = re.sub(regex, replacement, pattern)
+
+    return pattern
 
 
 def get_response(base_url: str, endpoint: str, auth: str = "test") -> tuple[dict, int, float]:
@@ -94,7 +125,10 @@ def normalize_response(data: Any) -> Any:
 
 
 # Keys for which list order doesn't matter (unordered results from database)
-UNORDERED_LIST_KEYS = {"address_tags", "addresses", "tags"}
+UNORDERED_LIST_KEYS = {"address_tags", "addresses", "tags", "concepts", "sources", "creators"}
+
+# Keys to ignore in comparison (expected to differ between versions)
+IGNORED_KEYS = {"version"}
 
 
 def get_sort_key(item: Any) -> Any:
@@ -131,8 +165,8 @@ def compare_responses(old_data: Any, new_data: Any, path: str = "") -> list[str]
         return differences
 
     if isinstance(old_data, dict):
-        old_keys = set(old_data.keys())
-        new_keys = set(new_data.keys())
+        old_keys = set(old_data.keys()) - IGNORED_KEYS
+        new_keys = set(new_data.keys()) - IGNORED_KEYS
 
         missing_in_new = old_keys - new_keys
         missing_in_old = new_keys - old_keys
@@ -241,6 +275,15 @@ class MigrationTestBase:
     def assert_endpoint_equal(self, endpoint: str, auth: str = "test"):
         """Assert that an endpoint returns identical results from both servers."""
         result = self.compare_endpoint(endpoint, auth)
+
+        # Record timing for report
+        pattern = normalize_endpoint_to_pattern(endpoint)
+        record_migration_timing(
+            endpoint=endpoint,
+            old_time=result["old_time"],
+            new_time=result["new_time"],
+            pattern=pattern,
+        )
 
         logger.info(
             f"  {endpoint}: old={result['old_time']:.3f}s, new={result['new_time']:.3f}s, "

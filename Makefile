@@ -24,10 +24,19 @@ test-reset-cassandra-image:
 test-regression:
 	@export SKIP_REST_CONTAINER_SETUP=True && uv run pytest -m "regression" -s
 
-# Migration testing targets
-test-migration: setup-migration-worktree
-	@echo "Starting migration test pipeline..."
-	@./scripts/run_migration_tests.sh $(WORKTREE_DIR) $(OLD_SERVER_PORT) $(NEW_SERVER_PORT)
+# Loki-based migration test generation
+generate-migration-tests:
+	uv run scripts/generate_migration_tests_from_loki.py
+
+# Migration testing - compares old vs new server responses
+# Requires both servers running: make serve-old (terminal 1), make serve-new (terminal 2)
+# Generates timing report at tests/migration_timing_report.json
+# Runs both manual tests (test_fastapi_migration.py) and Loki-generated tests (test_loki_generated.py)
+test-migration:
+	@export SKIP_REST_CONTAINER_SETUP=True && \
+	export OLD_SERVER=http://localhost:$(OLD_SERVER_PORT) && \
+	export NEW_SERVER=http://localhost:$(NEW_SERVER_PORT) && \
+	uv run pytest tests/test_fastapi_migration.py tests/test_loki_generated.py -v -m "migration" --override-ini="addopts="
 
 setup-migration-worktree:
 	@if [ ! -d "$(WORKTREE_DIR)" ]; then \
@@ -100,4 +109,4 @@ tag-version: ensure-versions-alignment
 	-git diff --exit-code && git diff --staged --exit-code && git tag -a v$(GS_REST_SERVICE_VERSIONM) -m 'Release v$(GS_REST_SERVICE_VERSION)' || (echo "Repo is dirty please commit first" && exit 1)
 	git diff --exit-code && git diff --staged --exit-code && git tag -a v$(GS_REST_SERVICE_VERSION) -m 'Release v$(GS_REST_SERVICE_VERSION)' || (echo "Repo is dirty please commit first" && exit 1)
 
-.PHONY: format lint test ensure-versions-alignment run-codegen serve serve-docker pre-commit install-dev tag-version generate-python-client build-docker build-test-cassandra test-reset-cassandra-image test-migration setup-migration-worktree clean-migration-worktree serve-old serve-new test-regression
+.PHONY: format lint test ensure-versions-alignment run-codegen serve serve-docker pre-commit install-dev tag-version generate-python-client build-docker build-test-cassandra test-reset-cassandra-image test-migration setup-migration-worktree clean-migration-worktree serve-old serve-new test-regression generate-migration-tests
