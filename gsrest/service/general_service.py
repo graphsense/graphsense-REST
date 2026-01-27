@@ -11,7 +11,7 @@ from gsrest.translators import (
 async def get_statistics(request):
     """Returns summary statistics on all available currencies"""
     services = get_service_container(request)
-    version = request.app["openapi"]["info"]["version"]
+    version = request.app["version"]
 
     pydantic_result = await services.general_service.get_statistics(version)
 

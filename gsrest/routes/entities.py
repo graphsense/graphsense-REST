@@ -5,6 +5,15 @@ from typing import Literal, Optional
 from fastapi import APIRouter, Depends, Path, Query, Request
 
 from gsrest.dependencies import ServiceContainer
+from gsrest.models import (
+    AddressTags,
+    AddressTxs,
+    Entity,
+    EntityAddresses,
+    Links,
+    NeighborEntities,
+    SearchResultLevel1,
+)
 from gsrest.routes.base import (
     RequestAdapter,
     apply_plugin_hooks,
@@ -31,6 +40,8 @@ def _normalize_page(page: Optional[str]) -> Optional[str]:
     "/entities/{entity}",
     summary="Get an entity",
     operation_id="get_entity",
+    response_model=Entity,
+    response_model_exclude_none=True,
 )
 async def get_entity(
     request: Request,
@@ -65,6 +76,8 @@ async def get_entity(
     "/entities/{entity}/addresses",
     summary="Get an entity's addresses",
     operation_id="list_entity_addresses",
+    response_model=EntityAddresses,
+    response_model_exclude_none=True,
 )
 async def list_entity_addresses(
     request: Request,
@@ -100,6 +113,8 @@ async def list_entity_addresses(
     summary="Get an entity's neighbors in the entity graph",
     operation_id="list_entity_neighbors",
     deprecated=True,
+    response_model=NeighborEntities,
+    response_model_exclude_none=True,
 )
 async def list_entity_neighbors(
     request: Request,
@@ -159,6 +174,8 @@ async def list_entity_neighbors(
     summary="Get transactions between two entities",
     operation_id="list_entity_links",
     deprecated=True,
+    response_model=Links,
+    response_model_exclude_none=True,
 )
 async def list_entity_links(
     request: Request,
@@ -217,6 +234,8 @@ async def list_entity_links(
     summary="Get address tags for a given entity",
     operation_id="list_address_tags_by_entity",
     deprecated=True,
+    response_model=AddressTags,
+    response_model_exclude_none=True,
 )
 async def list_address_tags_by_entity(
     request: Request,
@@ -252,6 +271,8 @@ async def list_address_tags_by_entity(
     summary="Get all transactions an entity has been involved in",
     operation_id="list_entity_txs",
     deprecated=True,
+    response_model=AddressTxs,
+    response_model_exclude_none=True,
 )
 async def list_entity_txs(
     request: Request,
@@ -311,6 +332,8 @@ async def list_entity_txs(
     "/entities/{entity}/search",
     summary="Search neighbors of an entity",
     operation_id="search_entity_neighbors",
+    response_model=list[SearchResultLevel1],
+    response_model_exclude_none=True,
 )
 async def search_entity_neighbors(
     request: Request,

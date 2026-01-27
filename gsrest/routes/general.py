@@ -4,6 +4,8 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, Query, Request
 
+from gsrest.dependencies import ServiceContainer
+from gsrest.models import SearchResult, Stats
 from gsrest.routes.base import (
     RequestAdapter,
     apply_plugin_hooks,
@@ -12,7 +14,6 @@ from gsrest.routes.base import (
     get_tagstore_access_groups,
     to_json_response,
 )
-from gsrest.dependencies import ServiceContainer
 import gsrest.service.general_service as service
 
 router = APIRouter()
@@ -22,6 +23,8 @@ router = APIRouter()
     "/stats",
     summary="Get statistics of supported currencies",
     operation_id="get_statistics",
+    response_model=Stats,
+    response_model_exclude_none=True,
 )
 async def get_statistics(
     request: Request,
@@ -44,6 +47,8 @@ async def get_statistics(
     "/search",
     summary="Returns matching addresses, transactions and labels",
     operation_id="search",
+    response_model=SearchResult,
+    response_model_exclude_none=True,
 )
 async def search(
     request: Request,

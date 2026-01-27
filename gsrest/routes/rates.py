@@ -3,6 +3,7 @@
 from fastapi import APIRouter, Depends, Path, Request
 
 from gsrest.dependencies import ServiceContainer
+from gsrest.models import Rates
 from gsrest.routes.base import (
     RequestAdapter,
     apply_plugin_hooks,
@@ -19,6 +20,8 @@ router = APIRouter()
     "/rates/{height}",
     summary="Get exchange rates for a given block height",
     operation_id="get_exchange_rates",
+    response_model=Rates,
+    response_model_exclude_none=True,
 )
 async def get_exchange_rates(
     request: Request,

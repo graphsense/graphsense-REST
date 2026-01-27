@@ -54,14 +54,8 @@ class RequestAdapter:
             return self._fastapi_request.app.state.config
         elif key == "request_config":
             return {"show_private_tags": self._show_private_tags}
-        elif key == "openapi":
-            # Used by general_service for version info
-            # Try to get from generated OpenAPI schema, fall back to app version
-            schema = getattr(self._fastapi_request.app.state, "openapi_schema", None)
-            if schema:
-                return schema
-            # Fallback: construct minimal openapi info from app
-            return {"info": {"version": self._fastapi_request.app.version}}
+        elif key == "version":
+            return self._fastapi_request.app.version
         raise KeyError(key)
 
     @property

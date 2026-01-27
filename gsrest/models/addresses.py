@@ -2,7 +2,7 @@
 
 from typing import Any, Optional
 
-from pydantic import ConfigDict
+from pydantic import Field
 
 from gsrest.models.base import APIModel
 from gsrest.models.common import LabeledItemRef
@@ -12,13 +12,6 @@ from gsrest.models.values import Values
 
 class Address(APIModel):
     """Address model."""
-
-    # Allow extra fields for test fixtures that set .tags
-    model_config = ConfigDict(
-        populate_by_name=True,
-        from_attributes=True,
-        extra="allow",
-    )
 
     currency: str
     address: str
@@ -38,11 +31,12 @@ class Address(APIModel):
     actors: Optional[list[LabeledItemRef]] = None
     is_contract: Optional[bool] = None
     status: Optional[str] = None
+    # tags field used by test fixtures only, excluded from serialization and schema
+    tags: Optional[list[Any]] = Field(default=None, exclude=True)
 
     def to_dict(self, shallow: bool = False) -> dict[str, Any]:
-        """Override to exclude extra fields (like 'tags') from serialization."""
+        """Override to exclude test-only fields from serialization."""
         result = super().to_dict(shallow=shallow)
-        # Remove any extra fields that aren't part of the API response
         result.pop("tags", None)
         return result
 

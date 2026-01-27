@@ -1,10 +1,17 @@
 """Transaction API routes"""
 
-from typing import Optional
+from typing import Optional, Union
 
 from fastapi import APIRouter, Depends, Path, Query, Request
 
 from gsrest.dependencies import ServiceContainer
+from gsrest.models import (
+    ExternalConversion,
+    TxAccount,
+    TxRef,
+    TxUtxo,
+    TxValue,
+)
 from gsrest.routes.base import (
     RequestAdapter,
     apply_plugin_hooks,
@@ -29,6 +36,8 @@ def _normalize_page(page: Optional[str]) -> Optional[str]:
     summary="Returns all token transactions in a given transaction",
     operation_id="list_token_txs",
     deprecated=True,
+    response_model=list[TxAccount],
+    response_model_exclude_none=True,
 )
 async def list_token_txs(
     request: Request,
@@ -55,6 +64,8 @@ async def list_token_txs(
     "/txs/{tx_hash}",
     summary="Get a transaction by its hash",
     operation_id="get_tx",
+    response_model=Union[TxUtxo, TxAccount],
+    response_model_exclude_none=True,
 )
 async def get_tx(
     request: Request,
@@ -97,6 +108,8 @@ async def get_tx(
     "/txs/{tx_hash}/spent_in",
     summary="Get transactions that spent outputs from this transaction",
     operation_id="get_spent_in_txs",
+    response_model=list[TxRef],
+    response_model_exclude_none=True,
 )
 async def get_spent_in(
     request: Request,
@@ -125,6 +138,8 @@ async def get_spent_in(
     "/txs/{tx_hash}/spending",
     summary="Get transactions that this transaction is spending from",
     operation_id="get_spending_txs",
+    response_model=list[TxRef],
+    response_model_exclude_none=True,
 )
 async def get_spending(
     request: Request,
@@ -153,6 +168,8 @@ async def get_spending(
     "/txs/{tx_hash}/conversions",
     summary="Get DeFi conversions for a transaction",
     operation_id="get_tx_conversions",
+    response_model=list[ExternalConversion],
+    response_model_exclude_none=True,
 )
 async def get_tx_conversions(
     request: Request,
@@ -225,6 +242,8 @@ async def list_tx_flows(
     "/txs/{tx_hash}/{io}",
     summary="Get transaction inputs or outputs",
     operation_id="get_tx_io",
+    response_model=list[TxValue],
+    response_model_exclude_none=True,
 )
 async def get_tx_io(
     request: Request,

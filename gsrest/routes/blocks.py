@@ -1,8 +1,11 @@
 """Block API routes"""
 
+from typing import Union
+
 from fastapi import APIRouter, Depends, Path, Request
 
 from gsrest.dependencies import ServiceContainer
+from gsrest.models import Block, BlockAtDate, TxAccount, TxUtxo
 from gsrest.routes.base import (
     RequestAdapter,
     apply_plugin_hooks,
@@ -19,6 +22,8 @@ router = APIRouter()
     "/blocks/{height}",
     summary="Get a block by its height",
     operation_id="get_block",
+    response_model=Block,
+    response_model_exclude_none=True,
 )
 async def get_block(
     request: Request,
@@ -45,6 +50,8 @@ async def get_block(
     "/blocks/{height}/txs",
     summary="Get block transactions",
     operation_id="list_block_txs",
+    response_model=list[Union[TxUtxo, TxAccount]],
+    response_model_exclude_none=True,
 )
 async def list_block_txs(
     request: Request,
@@ -71,6 +78,8 @@ async def list_block_txs(
     "/block_by_date/{date}",
     summary="Get block by date",
     operation_id="get_block_by_date",
+    response_model=BlockAtDate,
+    response_model_exclude_none=True,
 )
 async def get_block_by_date(
     request: Request,

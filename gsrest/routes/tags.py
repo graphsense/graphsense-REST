@@ -6,6 +6,13 @@ from fastapi import APIRouter, Depends, Path, Query, Request
 from pydantic import BaseModel
 
 from gsrest.dependencies import ServiceContainer
+from gsrest.models import (
+    Actor,
+    AddressTags,
+    Concept,
+    Taxonomy,
+    UserTagReportResponse,
+)
 from gsrest.routes.base import (
     RequestAdapter,
     apply_plugin_hooks,
@@ -41,6 +48,8 @@ class UserReportedTag(BaseModel):
     "/tags",
     summary="Get address tags by label",
     operation_id="list_address_tags",
+    response_model=AddressTags,
+    response_model_exclude_none=True,
 )
 async def list_address_tags(
     request: Request,
@@ -75,6 +84,8 @@ async def list_address_tags(
     "/tags/actors/{actor}",
     summary="Get an actor by ID",
     operation_id="get_actor",
+    response_model=Actor,
+    response_model_exclude_none=True,
 )
 async def get_actor(
     request: Request,
@@ -101,6 +112,8 @@ async def get_actor(
     "/tags/actors/{actor}/tags",
     summary="Get tags associated with an actor",
     operation_id="get_actor_tags",
+    response_model=AddressTags,
+    response_model_exclude_none=True,
 )
 async def get_actor_tags(
     request: Request,
@@ -135,6 +148,8 @@ async def get_actor_tags(
     "/tags/taxonomies",
     summary="List all taxonomies",
     operation_id="list_taxonomies",
+    response_model=list[Taxonomy],
+    response_model_exclude_none=True,
 )
 async def list_taxonomies(
     request: Request,
@@ -157,6 +172,8 @@ async def list_taxonomies(
     "/tags/taxonomies/{taxonomy}/concepts",
     summary="List concepts for a taxonomy",
     operation_id="list_concepts",
+    response_model=list[Concept],
+    response_model_exclude_none=True,
 )
 async def list_concepts(
     request: Request,
@@ -183,6 +200,8 @@ async def list_concepts(
     "/tags/report-tag",
     summary="Report a new tag",
     operation_id="report_tag",
+    response_model=UserTagReportResponse,
+    response_model_exclude_none=True,
 )
 async def report_tag(
     request: Request,
