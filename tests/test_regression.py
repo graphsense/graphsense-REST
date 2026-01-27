@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-new_endpoint = "http://localhost:9000"
+new_endpoint = os.environ.get("NEW_SERVER", "http://localhost:9000")
 current_endpoint = "https://api.test.ikna.io"
 current_key = os.environ.get("GS_API_KEY_TEST")
 
@@ -143,12 +143,16 @@ def test_conversions():
 
     # thor 2nd endpoint
     call_5 = "eth/txs/ce09a43f14088aa5ab1e2366609678c03f4b1023b5e372c6a208201601a9270f/conversions"
-
     call_6 = "eth/txs/250bb9fd01c35f36b96eeac039de3841013c9ac63a74788976900a713ccd2695/conversions" # swap that has trace0 trace_address == None
+
+
+    # thor BTC OP RETURN
+    call_7 = "eth/txs/0xC0915244DC52B5EFC4F602A7C68874D689AB6F8B71D151D39244617030DB89E0/conversions"
+    #call_7_2 = "btc/txs/0B7B76EF969D20D3015CA92726F4BA0E2070D6920DDCAC2E61ABB07C72FD1878/conversions"
 
     calls = [
         call_1, call_2, call_3_send, call_3_receive, call_3_refund, call_4_eth_to_token,
-        call_4_eth_to_btc_thorchain, call_5, call_6
+        call_4_eth_to_btc_thorchain, call_5, call_6, call_7#, call_7_2
     ]
     for call in calls:
         logger.info(f"Testing call: {call}")

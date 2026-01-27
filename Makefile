@@ -22,7 +22,9 @@ test-reset-cassandra-image:
 	docker rmi graphsense/cassandra-test:4.1.4
 
 test-regression:
-	@export SKIP_REST_CONTAINER_SETUP=True && uv run pytest -m "regression" -s
+	@export SKIP_REST_CONTAINER_SETUP=True && \
+	export NEW_SERVER=http://localhost:$(NEW_SERVER_PORT) && \
+	uv run pytest -m "regression" -s
 
 # Loki-based migration test generation
 generate-migration-tests:
