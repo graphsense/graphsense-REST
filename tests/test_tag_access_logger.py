@@ -41,9 +41,8 @@ class TestShouldLogResult:
 
     def setup_method(self):
         self.mock_tagstore_db = MagicMock()
-        self.mock_redis = AsyncMock()
         self.proxy = TagAccessLoggerTagstoreProxy(
-            self.mock_tagstore_db, self.mock_redis, "test_prefix"
+            self.mock_tagstore_db, None, "test_prefix"
         )
 
     def test_returns_false_for_none(self):
@@ -95,36 +94,33 @@ class TestShouldLogResult:
 
 
 class TestLogTagAccess:
-    """Tests for _log_tag_access method."""
-
-    def setup_method(self):
-        self.mock_tagstore_db = MagicMock()
-        self.mock_redis = AsyncMock()
-        self.proxy = TagAccessLoggerTagstoreProxy(
-            self.mock_tagstore_db, self.mock_redis, "tag_access"
-        )
+    """Tests for _log_tag_access method with real Redis."""
 
     @pytest.mark.asyncio
-    async def test_increments_redis_key_with_correct_format(self):
-        """Should call redis.incr with correctly formatted key."""
-        tag = create_mock_tag(
-            identifier="1ABC123", creator="iknaio", network="btc"
+    async def test_increments_redis_key_with_correct_format(self, redis_client):
+        """Should increment Redis key with correctly formatted key."""
+        mock_tagstore_db = MagicMock()
+        proxy = TagAccessLoggerTagstoreProxy(
+            mock_tagstore_db, redis_client, "tag_access"
         )
+        tag = create_mock_tag(identifier="1ABC123", creator="iknaio", network="btc")
 
         with patch("gsrest.dependencies.time") as mock_time:
             mock_time.localtime.return_value = None
             mock_time.strftime.return_value = "2025-01-27"
 
-            await self.proxy._log_tag_access("get_tags", tag)
+            await proxy._log_tag_access("get_tags", tag)
 
         expected_key = "tag_access|2025-01-27|iknaio|btc|1ABC123"
-        self.mock_redis.incr.assert_called_once_with(expected_key)
+        value = await redis_client.get(expected_key)
+        assert value == b"1"
 
     @pytest.mark.asyncio
-    async def test_uses_configured_prefix(self):
+    async def test_uses_configured_prefix(self, redis_client):
         """Should use the configured prefix in the Redis key."""
+        mock_tagstore_db = MagicMock()
         proxy = TagAccessLoggerTagstoreProxy(
-            self.mock_tagstore_db, self.mock_redis, "custom_prefix"
+            mock_tagstore_db, redis_client, "custom_prefix"
         )
         tag = create_mock_tag(identifier="addr1", creator="creator1", network="eth")
 
@@ -135,102 +131,144 @@ class TestLogTagAccess:
             await proxy._log_tag_access("some_method", tag)
 
         expected_key = "custom_prefix|2025-12-31|creator1|eth|addr1"
-        self.mock_redis.incr.assert_called_once_with(expected_key)
+        value = await redis_client.get(expected_key)
+        assert value == b"1"
+
+    @pytest.mark.asyncio
+    async def test_increments_counter_on_multiple_accesses(self, redis_client):
+        """Should increment counter each time the same tag is accessed."""
+        mock_tagstore_db = MagicMock()
+        proxy = TagAccessLoggerTagstoreProxy(
+            mock_tagstore_db, redis_client, "tag_access"
+        )
+        tag = create_mock_tag(identifier="addr1", creator="creator1", network="btc")
+
+        with patch("gsrest.dependencies.time") as mock_time:
+            mock_time.localtime.return_value = None
+            mock_time.strftime.return_value = "2025-01-27"
+
+            await proxy._log_tag_access("get_tags", tag)
+            await proxy._log_tag_access("get_tags", tag)
+            await proxy._log_tag_access("get_tags", tag)
+
+        expected_key = "tag_access|2025-01-27|creator1|btc|addr1"
+        value = await redis_client.get(expected_key)
+        assert value == b"3"
 
 
 class TestProxyMethodCalls:
-    """Tests for __getattr__ proxy behavior."""
-
-    def setup_method(self):
-        self.mock_tagstore_db = MagicMock()
-        self.mock_redis = AsyncMock()
-        self.proxy = TagAccessLoggerTagstoreProxy(
-            self.mock_tagstore_db, self.mock_redis, "test_prefix"
-        )
+    """Tests for __getattr__ proxy behavior with real Redis."""
 
     @pytest.mark.asyncio
-    async def test_proxies_method_call_to_underlying_db(self):
+    async def test_proxies_method_call_to_underlying_db(self, redis_client):
         """Should proxy method calls to the underlying tagstore_db."""
+        mock_tagstore_db = MagicMock()
         mock_method = AsyncMock(return_value=None)
-        self.mock_tagstore_db.get_tags = mock_method
+        mock_tagstore_db.get_tags = mock_method
+        proxy = TagAccessLoggerTagstoreProxy(
+            mock_tagstore_db, redis_client, "test_prefix"
+        )
 
-        await self.proxy.get_tags("btc", "some_address")
+        await proxy.get_tags("btc", "some_address")
 
         mock_method.assert_called_once_with("btc", "some_address")
 
     @pytest.mark.asyncio
-    async def test_returns_result_from_underlying_method(self):
+    async def test_returns_result_from_underlying_method(self, redis_client):
         """Should return the result from the underlying method."""
+        mock_tagstore_db = MagicMock()
         expected_result = {"data": "test"}
-        self.mock_tagstore_db.some_method = AsyncMock(return_value=expected_result)
+        mock_tagstore_db.some_method = AsyncMock(return_value=expected_result)
+        proxy = TagAccessLoggerTagstoreProxy(
+            mock_tagstore_db, redis_client, "test_prefix"
+        )
 
-        result = await self.proxy.some_method()
+        result = await proxy.some_method()
 
         assert result == expected_result
 
     @pytest.mark.asyncio
-    async def test_logs_single_tag_result(self):
+    async def test_logs_single_tag_result(self, redis_client):
         """Should log access when method returns a single TagPublic."""
+        mock_tagstore_db = MagicMock()
         tag = create_mock_tag(identifier="addr1", creator="creator1", network="btc")
-        self.mock_tagstore_db.get_tag = AsyncMock(return_value=tag)
+        mock_tagstore_db.get_tag = AsyncMock(return_value=tag)
+        proxy = TagAccessLoggerTagstoreProxy(
+            mock_tagstore_db, redis_client, "test_prefix"
+        )
 
         with patch("gsrest.dependencies.time") as mock_time:
             mock_time.localtime.return_value = None
             mock_time.strftime.return_value = "2025-01-27"
 
-            result = await self.proxy.get_tag("btc", "addr1")
+            result = await proxy.get_tag("btc", "addr1")
 
         assert result == tag
-        self.mock_redis.incr.assert_called_once()
-        call_args = self.mock_redis.incr.call_args[0][0]
-        assert "test_prefix|2025-01-27|creator1|btc|addr1" == call_args
+        expected_key = "test_prefix|2025-01-27|creator1|btc|addr1"
+        value = await redis_client.get(expected_key)
+        assert value == b"1"
 
     @pytest.mark.asyncio
-    async def test_logs_each_tag_in_list_result(self):
+    async def test_logs_each_tag_in_list_result(self, redis_client):
         """Should log access for each tag when method returns a list."""
+        mock_tagstore_db = MagicMock()
         tags = [
             create_mock_tag(identifier="addr1", creator="creator1", network="btc"),
             create_mock_tag(identifier="addr2", creator="creator2", network="btc"),
         ]
-        self.mock_tagstore_db.get_tags = AsyncMock(return_value=tags)
+        mock_tagstore_db.get_tags = AsyncMock(return_value=tags)
+        proxy = TagAccessLoggerTagstoreProxy(
+            mock_tagstore_db, redis_client, "test_prefix"
+        )
 
         with patch("gsrest.dependencies.time") as mock_time:
             mock_time.localtime.return_value = None
             mock_time.strftime.return_value = "2025-01-27"
 
-            result = await self.proxy.get_tags("btc", ["addr1", "addr2"])
+            result = await proxy.get_tags("btc", ["addr1", "addr2"])
 
         assert result == tags
-        assert self.mock_redis.incr.call_count == 2
+        value1 = await redis_client.get("test_prefix|2025-01-27|creator1|btc|addr1")
+        value2 = await redis_client.get("test_prefix|2025-01-27|creator2|btc|addr2")
+        assert value1 == b"1"
+        assert value2 == b"1"
 
     @pytest.mark.asyncio
-    async def test_does_not_log_non_tag_results(self):
+    async def test_does_not_log_non_tag_results(self, redis_client):
         """Should not log when method returns non-TagPublic results."""
-        self.mock_tagstore_db.get_count = AsyncMock(return_value=42)
+        mock_tagstore_db = MagicMock()
+        mock_tagstore_db.get_count = AsyncMock(return_value=42)
+        proxy = TagAccessLoggerTagstoreProxy(
+            mock_tagstore_db, redis_client, "test_prefix"
+        )
 
-        result = await self.proxy.get_count()
+        result = await proxy.get_count()
 
         assert result == 42
-        self.mock_redis.incr.assert_not_called()
+        keys = await redis_client.keys("test_prefix|*")
+        assert keys == []
 
     @pytest.mark.asyncio
     async def test_does_not_log_when_redis_client_is_none(self):
         """Should not attempt to log when redis_client is None."""
-        proxy = TagAccessLoggerTagstoreProxy(
-            self.mock_tagstore_db, None, "test_prefix"
-        )
+        mock_tagstore_db = MagicMock()
+        proxy = TagAccessLoggerTagstoreProxy(mock_tagstore_db, None, "test_prefix")
         tag = create_mock_tag()
-        self.mock_tagstore_db.get_tag = AsyncMock(return_value=tag)
+        mock_tagstore_db.get_tag = AsyncMock(return_value=tag)
 
         result = await proxy.get_tag("btc", "addr1")
 
         assert result == tag
         # No exception should be raised
 
-    def test_proxies_non_callable_attributes(self):
+    def test_proxies_non_callable_attributes(self, redis_client):
         """Should proxy non-callable attributes directly."""
-        self.mock_tagstore_db.some_attribute = "test_value"
+        mock_tagstore_db = MagicMock()
+        mock_tagstore_db.some_attribute = "test_value"
+        proxy = TagAccessLoggerTagstoreProxy(
+            mock_tagstore_db, redis_client, "test_prefix"
+        )
 
-        result = self.proxy.some_attribute
+        result = proxy.some_attribute
 
         assert result == "test_value"

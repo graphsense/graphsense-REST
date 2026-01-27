@@ -9,6 +9,7 @@ import docker
 import pytest
 from testcontainers.cassandra import CassandraContainer
 from testcontainers.postgres import PostgresContainer
+from testcontainers.redis import RedisContainer
 
 from tests import BaseTestCase
 from tests.cassandra.insert import load_test_data as cas_load_test_data
@@ -18,6 +19,7 @@ from tests.tagstore.insert import load_test_data as tags_load_test_data
 _migration_timing_data = []
 
 postgres = PostgresContainer("postgres:16-alpine")
+redis = RedisContainer("redis:7-alpine")
 
 # Pre-baked Cassandra image with schemas and fast startup settings already configured
 # Build with: make build-test-cassandra
@@ -52,10 +54,12 @@ def gs_rest_db_setup(request):
 
     postgres.start()
     cassandra.start()
+    redis.start()
 
     def remove_container():
         postgres.stop()
         cassandra.stop()
+        redis.stop()
 
     request.addfinalizer(remove_container)
 
@@ -64,6 +68,10 @@ def gs_rest_db_setup(request):
 
     postgres_sync_url = postgres.get_connection_url()
     portgres_async_url = postgres_sync_url.replace("psycopg2", "asyncpg")
+
+    redis_host = redis.get_container_host_ip()
+    redis_port = redis.get_exposed_port(6379)
+    redis_url = f"redis://{redis_host}:{redis_port}"
 
     config = {
         "logging": {"level": "DEBUG"},
@@ -93,6 +101,7 @@ def gs_rest_db_setup(request):
         },
         "gs-tagstore": {"url": portgres_async_url},
         "show_private_tags": {"on_header": {"Authorization": "x"}},
+        "tag_access_logger": {"redis_url": redis_url},
     }
 
     # Ugly hack to pass parameters
@@ -218,3 +227,18 @@ def migration_timing_report(request):
     }
     report_path.write_text(json.dumps(report, indent=2))
     write(f"Detailed report saved to: {report_path}")
+
+
+@pytest.fixture
+async def redis_client(gs_rest_db_setup):
+    """Provide an async Redis client for tests."""
+    from redis import asyncio as aioredis
+
+    redis_host = redis.get_container_host_ip()
+    redis_port = redis.get_exposed_port(6379)
+    redis_url = f"redis://{redis_host}:{redis_port}"
+
+    client = await aioredis.from_url(redis_url)
+    yield client
+    await client.flushdb()
+    await client.aclose()
