@@ -94,9 +94,6 @@ exclude = [
 extend-select = ["T201"]
 
 
-[tool.uv.sources]
-graphsense-lib = { path="../graphsense-lib"}
-
 [dependency-groups]
 dev = [
     "gunicorn>=23.0.0",
