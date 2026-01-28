@@ -87,7 +87,7 @@ class ApiClient:
         self.configuration = configuration
         self.pool_threads = pool_threads
         # Create thread pool for async_req support (v5 compatibility)
-        self._thread_pool = ThreadPoolExecutor(max_workers=pool_threads) if pool_threads > 1 else None
+        self._thread_pool = ThreadPoolExecutor(max_workers=pool_threads) if pool_threads >= 1 else None
 
         self.rest_client = rest.RESTClientObject(configuration)
         self.default_headers = {}

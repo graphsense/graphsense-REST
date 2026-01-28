@@ -34,6 +34,29 @@ class CompatInt(int):
         """Return string representation for backward compatibility."""
         return str(self)
 
+    # Arithmetic operations that preserve CompatInt type
+    def __add__(self, other): return CompatInt(int(self) + other)
+    def __radd__(self, other): return CompatInt(other + int(self))
+    def __sub__(self, other): return CompatInt(int(self) - other)
+    def __rsub__(self, other): return CompatInt(other - int(self))
+    def __mul__(self, other): return CompatInt(int(self) * other)
+    def __rmul__(self, other): return CompatInt(other * int(self))
+    def __floordiv__(self, other): return CompatInt(int(self) // other)
+    def __mod__(self, other): return CompatInt(int(self) % other)
+    def __neg__(self): return CompatInt(-int(self))
+    def __pos__(self): return CompatInt(+int(self))
+    def __abs__(self): return CompatInt(abs(int(self)))
+
+    # Serialization support (pickle/copy)
+    def __reduce__(self):
+        return (CompatInt, (int(self),))
+
+    def __copy__(self):
+        return CompatInt(int(self))
+
+    def __deepcopy__(self, memo):
+        return CompatInt(int(self))
+
 
 T = TypeVar('T')
 
@@ -65,6 +88,17 @@ class CompatList(list, Generic[T]):
         """Return self for backward compatibility with ModelSimple pattern."""
         return list(self)
 
+    # Serialization support (pickle/copy)
+    def __reduce__(self):
+        return (CompatList, (list(self),))
+
+    def __copy__(self):
+        return CompatList(list(self))
+
+    def __deepcopy__(self, memo):
+        import copy
+        return CompatList(copy.deepcopy(list(self), memo))
+
 
 # Type aliases for backward compatibility with v5 client
 # These were previously ModelSimple wrapper types
@@ -89,18 +123,27 @@ class DictModel:
 
     def __init__(self, data: dict):
         object.__setattr__(self, '_data', data)
+        object.__setattr__(self, '_cache', {})
 
     def __getattr__(self, name: str) -> Any:
         if name.startswith('_'):
             raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
         data = object.__getattribute__(self, '_data')
+        cache = object.__getattribute__(self, '_cache')
+        # Return cached wrapped value if available
+        if name in cache:
+            return cache[name]
         if name in data:
             value = data[name]
-            # Recursively wrap nested dicts
+            # Recursively wrap nested dicts and cache them
             if isinstance(value, dict):
-                return DictModel(value)
+                wrapped = DictModel(value)
+                cache[name] = wrapped
+                return wrapped
             elif isinstance(value, list):
-                return [DictModel(item) if isinstance(item, dict) else item for item in value]
+                wrapped = [DictModel(item) if isinstance(item, dict) else item for item in value]
+                cache[name] = wrapped
+                return wrapped
             return value
         raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
 
@@ -138,6 +181,33 @@ class DictModel:
     def to_dict(self) -> dict:
         """Return the underlying dict."""
         return object.__getattribute__(self, '_data')
+
+    # Dict protocol methods
+    def __contains__(self, key: str) -> bool:
+        return key in object.__getattribute__(self, '_data')
+
+    def __iter__(self):
+        return iter(object.__getattribute__(self, '_data'))
+
+    def __len__(self) -> int:
+        return len(object.__getattribute__(self, '_data'))
+
+    def keys(self):
+        return object.__getattribute__(self, '_data').keys()
+
+    def values(self):
+        return object.__getattribute__(self, '_data').values()
+
+    def items(self):
+        return object.__getattribute__(self, '_data').items()
+
+    # Copy support
+    def __copy__(self):
+        return DictModel(object.__getattribute__(self, '_data').copy())
+
+    def __deepcopy__(self, memo):
+        import copy
+        return DictModel(copy.deepcopy(object.__getattribute__(self, '_data'), memo))
 
 
 # Monkey-patch Pydantic BaseModel to support dict-style access for backward compatibility

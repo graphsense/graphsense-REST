@@ -3,6 +3,7 @@
 OPENAPI_URL ?= http://localhost:9000/openapi.json
 GENERATOR_VERSION ?= v7.19.0
 TEMPLATES_DIR ?= ../python-templates
+COMPAT_DIR ?= ../python-compat
 
 # Legacy v5.2.1 generator (for comparison/rollback)
 generate-openapi-client-v5:
@@ -47,15 +48,15 @@ generate-openapi-client:
 		--additional-properties=packageVersion=$$API_VERSION \
 		--additional-properties=library=urllib3
 	@echo "Applying backward compatibility patches..."
-	python scripts/patch_compat.py .
+	python $(COMPAT_DIR)/patch_compat.py .
 	@echo "Verifying backward compatibility..."
-	python scripts/test_compat.py
+	python $(COMPAT_DIR)/test_compat.py .
 	@echo "Cleaning up temporary files..."
 	rm -f openapi.json.tmp openapi.json.modified
 
 # Just run the compatibility tests (useful during development)
 test-compat:
-	python scripts/test_compat.py
+	python $(COMPAT_DIR)/test_compat.py .
 
 run-examples:
 	API_KEY=$(API_KEY) python test_examples.py
