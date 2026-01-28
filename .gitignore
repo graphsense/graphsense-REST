@@ -96,7 +96,3 @@ local
 tests/test_loki_generated.py
 tests/loki_generated_calls.json
 tests/migration_timing_report.json
-clients/python/MIGRATION_ISSUES.md
-CRITICAL_ISSUES_SUMMARY.md
-COMPATIBILITY_ANALYSIS.md
-clients/python/COMPATIBILITY_QUICK_REFERENCE.md

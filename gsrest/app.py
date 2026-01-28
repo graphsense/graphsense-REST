@@ -4,6 +4,7 @@ import logging
 import logging.handlers
 import os
 import re
+import traceback
 from contextlib import asynccontextmanager
 from typing import Any, Optional
 
@@ -363,6 +364,11 @@ async def teardown_database(app: FastAPI):
     logger.info(app.state.tagstore_engine.pool.status())
     logger.info("Closed Tagstore connection.")
 
+    # Close Redis client if it exists
+    if getattr(app.state, "redis_client", None):
+        await app.state.redis_client.aclose()
+        logger.info("Closed Redis connection.")
+
 
 class ConceptsCacheServiceFastAPI(ConceptProtocol):
     """FastAPI-compatible concepts cache service"""
@@ -406,6 +412,9 @@ async def setup_services(app: FastAPI):
     else:
         redis_client = None
         log_tag_access_prefix = None
+
+    # Store redis_client on app.state for cleanup during shutdown
+    app.state.redis_client = redis_client
 
     app.state.services = ServiceContainer(
         config=config,
@@ -465,6 +474,7 @@ async def setup_plugins(app: FastAPI):
             setup_gen = subcl.setup(setup_args)
             if hasattr(setup_gen, "__anext__"):
                 await setup_gen.__anext__()
+                app.state.plugin_cleanup_generators.append(setup_gen)
 
 
 @asynccontextmanager
@@ -478,7 +488,20 @@ async def lifespan(app: FastAPI):
     yield
 
     # Shutdown
+    # Close plugin cleanup generators
+    for gen in getattr(app.state, "plugin_cleanup_generators", []):
+        try:
+            await gen.aclose()
+        except Exception as e:
+            logger.warning(f"Error closing plugin generator: {e}")
+
     await teardown_database(app)
+
+
+def _get_request_context(request: Request) -> str:
+    """Get user and URL context for error logging."""
+    username = request.headers.get("X-Consumer-Username", "unknown")
+    return f"URL: {request.url} | User: {username}"
 
 
 def _register_exception_handlers(app: FastAPI):
@@ -486,6 +509,9 @@ def _register_exception_handlers(app: FastAPI):
 
     @app.exception_handler(NotFoundException)
     async def not_found_handler(request: Request, exc: NotFoundException):
+        logger.warning(
+            f"NotFoundException: {exc.get_user_msg()} | {_get_request_context(request)}"
+        )
         return JSONResponse(
             status_code=404,
             content={"detail": exc.get_user_msg()},
@@ -493,6 +519,9 @@ def _register_exception_handlers(app: FastAPI):
 
     @app.exception_handler(BadUserInputException)
     async def bad_input_handler(request: Request, exc: BadUserInputException):
+        logger.warning(
+            f"BadUserInputException: {exc.get_user_msg()} | {_get_request_context(request)}"
+        )
         return JSONResponse(
             status_code=400,
             content={"detail": exc.get_user_msg()},
@@ -502,6 +531,9 @@ def _register_exception_handlers(app: FastAPI):
     async def feature_not_available_handler(
         request: Request, exc: FeatureNotAvailableException
     ):
+        logger.warning(
+            f"FeatureNotAvailableException: {exc.get_user_msg()} | {_get_request_context(request)}"
+        )
         return JSONResponse(
             status_code=400,
             content={"detail": exc.get_user_msg()},
@@ -509,9 +541,19 @@ def _register_exception_handlers(app: FastAPI):
 
     @app.exception_handler(GsTimeoutException)
     async def timeout_handler(request: Request, exc: GsTimeoutException):
+        logger.warning(f"GsTimeoutException | {_get_request_context(request)}")
         return JSONResponse(
             status_code=408,
             content={"detail": "Request timeout"},
+        )
+
+    @app.exception_handler(Exception)
+    async def unhandled_exception_handler(request: Request, exc: Exception):
+        tb = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+        logger.error(f"Unhandled exception | {_get_request_context(request)}\n{tb}")
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "Internal server error"},
         )
 
 
