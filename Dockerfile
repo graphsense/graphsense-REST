@@ -16,7 +16,6 @@ ENV CONFIG_FILE=./instance/config.yaml
 # copy code
 RUN mkdir -p /srv/graphsense-rest/
 COPY gsrest /srv/graphsense-rest/gsrest
-COPY openapi_server /srv/graphsense-rest/openapi_server
 COPY pyproject.toml /srv/graphsense-rest/
 COPY uv.lock /srv/graphsense-rest/
 COPY README.md /srv/graphsense-rest/
@@ -64,7 +63,4 @@ RUN mkdir -p gsrest/plugins
 
 # RUN find gsrest/plugins -name requirements.txt -exec uv pip install -r {} \;
 
-CMD find gsrest/plugins -name requirements.txt -exec /srv/graphsense-rest/.venv/bin/python -m pip install -r {} \; && gunicorn \
-    -c /srv/graphsense-rest/gunicorn-conf.py \
-    "gsrest:main('${CONFIG_FILE}')" \
-     --worker-class aiohttp.GunicornWebWorker
+CMD ["sh", "-c", "find gsrest/plugins -name requirements.txt -exec /srv/graphsense-rest/.venv/bin/python -m pip install -r {} \\; && gunicorn -c /srv/graphsense-rest/gunicorn-conf.py \"gsrest.app:create_app('$CONFIG_FILE')\" --worker-class uvicorn.workers.UvicornWorker"]
