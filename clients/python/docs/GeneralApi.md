@@ -13,15 +13,17 @@ Method | HTTP request | Description
 
 Get statistics of supported currencies
 
+Get statistics of supported currencies
+
 ### Example
 
+
 ```python
-import time
-from dateutil.parser import parse as dateutil_parser
 import graphsense
-from graphsense.api import general_api
-from graphsense.model.stats import Stats
+from graphsense.models.stats import Stats
+from graphsense.rest import ApiException
 from pprint import pprint
+
 # Defining the host is optional and defaults to https://api.ikna.io
 # See configuration.py for a list of all supported configuration parameters.
 configuration = graphsense.Configuration(
@@ -30,34 +32,28 @@ configuration = graphsense.Configuration(
 
 
 # Enter a context with an instance of the API client
-with graphsense.ApiClient() as api_client:
+with graphsense.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = general_api.GeneralApi(api_client)
+    api_instance = graphsense.GeneralApi(api_client)
 
-    # example, this endpoint has no required or optional parameters
     try:
         # Get statistics of supported currencies
         api_response = api_instance.get_statistics()
+        print("The response of GeneralApi->get_statistics:\n")
         pprint(api_response)
-    except graphsense.ApiException as e:
+    except Exception as e:
         print("Exception when calling GeneralApi->get_statistics: %s\n" % e)
 ```
 
 
+
 ### Parameters
+
 This endpoint does not need any parameter.
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
-**async_req** | **bool** | Execute request asynchronously | [optional] default is False.
 
 ### Return type
 
 [**Stats**](Stats.md)
-
-**Notes:**
-
-* If `async_req` parameter is True, the request will be called asynchronously.  The method will return the request thread.  If parameter `async_req` is False or missing, then the method will return the response directly.
-
-* If the HTTP response code is `429 Too Many Requests` due to rate limit policies, the underlying `urllib3` HTTP client will automatically stall the request as long as advised by the `Retry-After` header.
 
 ### Authorization
 
@@ -68,29 +64,31 @@ No authorization required
  - **Content-Type**: Not defined
  - **Accept**: application/json
 
-
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | OK |  -  |
+**200** | Successful Response |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **search**
-> SearchResult search(q)
+> SearchResult search(q, currency=currency, limit=limit, include_sub_tx_identifiers=include_sub_tx_identifiers, include_labels=include_labels, include_actors=include_actors, include_txs=include_txs, include_addresses=include_addresses)
+
+Returns matching addresses, transactions and labels
 
 Returns matching addresses, transactions and labels
 
 ### Example
 
 * Api Key Authentication (api_key):
+
 ```python
-import time
-from dateutil.parser import parse as dateutil_parser
 import graphsense
-from graphsense.api import general_api
-from graphsense.model.search_result import SearchResult
+from graphsense.models.search_result import SearchResult
+from graphsense.rest import ApiException
 from pprint import pprint
+
 # Defining the host is optional and defaults to https://api.ikna.io
 # See configuration.py for a list of all supported configuration parameters.
 configuration = graphsense.Configuration(
@@ -103,7 +101,7 @@ configuration = graphsense.Configuration(
 # satisfies your auth use case.
 
 # Configure API key authorization: api_key
-configuration.api_key['api_key'] = 'YOUR_API_KEY'
+configuration.api_key['api_key'] = os.environ["API_KEY"]
 
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['api_key'] = 'Bearer'
@@ -111,59 +109,44 @@ configuration.api_key['api_key'] = 'YOUR_API_KEY'
 # Enter a context with an instance of the API client
 with graphsense.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = general_api.GeneralApi(api_client)
-    q = "foo" # str | It can be (the beginning of) an address, a transaction or a label
-    currency = "btc" # str | The cryptocurrency (e.g., btc) (optional)
-    limit = 10 # int | Maximum number of search results (optional) if omitted the server will use the default value of 10
-    include_sub_tx_identifiers = False # bool | Whether to include sub-transaction identifiers (optional) if omitted the server will use the default value of False
-    include_labels = True # bool | Whether to include labels (optional) if omitted the server will use the default value of True
-    include_actors = True # bool | Whether to include actors (optional) if omitted the server will use the default value of True
-    include_txs = True # bool | Whether to include transactions (optional) if omitted the server will use the default value of True
-    include_addresses = True # bool | Whether to include addresses (optional) if omitted the server will use the default value of True
+    api_instance = graphsense.GeneralApi(api_client)
+    q = 'q_example' # str | Search query (address, transaction, or label)
+    currency = 'currency_example' # str | The cryptocurrency (e.g., btc) (optional)
+    limit = 10 # int | Maximum number of search results (optional) (default to 10)
+    include_sub_tx_identifiers = False # bool | Whether to include sub-transaction identifiers (optional) (default to False)
+    include_labels = True # bool | Whether to include labels (optional) (default to True)
+    include_actors = True # bool | Whether to include actors (optional) (default to True)
+    include_txs = True # bool | Whether to include transactions (optional) (default to True)
+    include_addresses = True # bool | Whether to include addresses (optional) (default to True)
 
-    # example passing only required values which don't have defaults set
-    try:
-        # Returns matching addresses, transactions and labels
-        api_response = api_instance.search(q)
-        pprint(api_response)
-    except graphsense.ApiException as e:
-        print("Exception when calling GeneralApi->search: %s\n" % e)
-
-    # example passing only required values which don't have defaults set
-    # and optional values
     try:
         # Returns matching addresses, transactions and labels
         api_response = api_instance.search(q, currency=currency, limit=limit, include_sub_tx_identifiers=include_sub_tx_identifiers, include_labels=include_labels, include_actors=include_actors, include_txs=include_txs, include_addresses=include_addresses)
+        print("The response of GeneralApi->search:\n")
         pprint(api_response)
-    except graphsense.ApiException as e:
+    except Exception as e:
         print("Exception when calling GeneralApi->search: %s\n" % e)
 ```
 
 
+
 ### Parameters
+
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **q** | **str**| It can be (the beginning of) an address, a transaction or a label |
- **currency** | **str**| The cryptocurrency (e.g., btc) | [optional]
- **limit** | **int**| Maximum number of search results | [optional] if omitted the server will use the default value of 10
- **include_sub_tx_identifiers** | **bool**| Whether to include sub-transaction identifiers | [optional] if omitted the server will use the default value of False
- **include_labels** | **bool**| Whether to include labels | [optional] if omitted the server will use the default value of True
- **include_actors** | **bool**| Whether to include actors | [optional] if omitted the server will use the default value of True
- **include_txs** | **bool**| Whether to include transactions | [optional] if omitted the server will use the default value of True
- **include_addresses** | **bool**| Whether to include addresses | [optional] if omitted the server will use the default value of True
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
-**async_req** | **bool** | Execute request asynchronously | [optional] default is False.
+ **q** | **str**| Search query (address, transaction, or label) | 
+ **currency** | **str**| The cryptocurrency (e.g., btc) | [optional] 
+ **limit** | **int**| Maximum number of search results | [optional] [default to 10]
+ **include_sub_tx_identifiers** | **bool**| Whether to include sub-transaction identifiers | [optional] [default to False]
+ **include_labels** | **bool**| Whether to include labels | [optional] [default to True]
+ **include_actors** | **bool**| Whether to include actors | [optional] [default to True]
+ **include_txs** | **bool**| Whether to include transactions | [optional] [default to True]
+ **include_addresses** | **bool**| Whether to include addresses | [optional] [default to True]
 
 ### Return type
 
 [**SearchResult**](SearchResult.md)
-
-**Notes:**
-
-* If `async_req` parameter is True, the request will be called asynchronously.  The method will return the request thread.  If parameter `async_req` is False or missing, then the method will return the response directly.
-
-* If the HTTP response code is `429 Too Many Requests` due to rate limit policies, the underlying `urllib3` HTTP client will automatically stall the request as long as advised by the `Retry-After` header.
 
 ### Authorization
 
@@ -174,11 +157,12 @@ Name | Type | Description  | Notes
  - **Content-Type**: Not defined
  - **Accept**: application/json
 
-
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | OK |  -  |
+**200** | Successful Response |  -  |
+**422** | Validation Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

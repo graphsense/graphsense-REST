@@ -1,25 +1,43 @@
 # TxAccount
 
+Account-based transaction model.
 
 ## Properties
+
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**identifier** | **str** | uniquely identifies a transaction or a sub transaction like a token transaction or trace. | 
-**currency** | **str** | crypto currency code | 
-**network** | **str** | crypto currency code | 
-**tx_hash** | **str** | Transaction hash | 
-**height** | [**Height**](Height.md) |  | 
-**timestamp** | **int** | Timestamp in posix seconds format | 
+**tx_type** | **str** |  | [optional] [default to 'account']
+**identifier** | **str** |  | 
+**currency** | **str** |  | 
+**network** | **str** |  | 
+**tx_hash** | **str** |  | 
+**height** | **int** |  | 
+**timestamp** | **int** |  | 
 **value** | [**Values**](Values.md) |  | 
-**from_address** | **str** | Address | 
-**to_address** | **str** | Address | 
-**tx_type** | **str** |  | defaults to "account"
-**token_tx_id** | **int** | identifies a specific token transaction within a tx_hash, (deprecated) use identifier instead in encapsulates all information that uniquely identifies the transaction | [optional] 
+**from_address** | **str** |  | 
+**to_address** | **str** |  | 
+**token_tx_id** | **int** |  | [optional] 
 **fee** | [**Values**](Values.md) |  | [optional] 
-**contract_creation** | **bool** | Indicates if this transaction created a new contract. Recipient address is the address of the new contract. | [optional] 
-**is_external** | **bool** | Indicates if this transaction is an external transaction for an eth like currency. | [optional] 
-**any string name** | **bool, date, datetime, dict, float, int, list, str, none_type** | any string name can be used but the value must be the correct type | [optional]
+**contract_creation** | **bool** |  | [optional] 
+**is_external** | **bool** |  | [optional] 
 
+## Example
+
+```python
+from graphsense.models.tx_account import TxAccount
+
+# TODO update the JSON string below
+json = "{}"
+# create an instance of TxAccount from a JSON string
+tx_account_instance = TxAccount.from_json(json)
+# print the JSON string representation of the object
+print(TxAccount.to_json())
+
+# convert the object into a dict
+tx_account_dict = tx_account_instance.to_dict()
+# create an instance of TxAccount from a dict
+tx_account_from_dict = TxAccount.from_dict(tx_account_dict)
+```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
 

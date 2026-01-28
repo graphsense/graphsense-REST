@@ -1,7 +1,9 @@
 # CurrencyStats
 
+Currency statistics model.
 
 ## Properties
+
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **name** | **str** |  | 
@@ -9,12 +11,28 @@ Name | Type | Description | Notes
 **no_address_relations** | **int** |  | 
 **no_addresses** | **int** |  | 
 **no_entities** | **int** |  | 
-**no_txs** | **int** | number of transactions | 
+**no_txs** | **int** |  | 
 **no_labels** | **int** |  | 
 **no_tagged_addresses** | **int** |  | 
-**timestamp** | **int** | Timestamp in posix seconds format | 
-**any string name** | **bool, date, datetime, dict, float, int, list, str, none_type** | any string name can be used but the value must be the correct type | [optional]
+**timestamp** | **int** |  | 
 
+## Example
+
+```python
+from graphsense.models.currency_stats import CurrencyStats
+
+# TODO update the JSON string below
+json = "{}"
+# create an instance of CurrencyStats from a JSON string
+currency_stats_instance = CurrencyStats.from_json(json)
+# print the JSON string representation of the object
+print(CurrencyStats.to_json())
+
+# convert the object into a dict
+currency_stats_dict = currency_stats_instance.to_dict()
+# create an instance of CurrencyStats from a dict
+currency_stats_from_dict = CurrencyStats.from_dict(currency_stats_dict)
+```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
 

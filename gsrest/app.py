@@ -1,13 +1,16 @@
 import importlib
+import json
 import logging
 import logging.handlers
 import os
+import re
 from contextlib import asynccontextmanager
-from typing import Optional
+from typing import Any, Optional
 
 import yaml
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse
 from graphsenselib.config import AppConfig
 from graphsenselib.db.asynchronous.services.tags_service import ConceptProtocol
@@ -41,6 +44,207 @@ from gsrest.routes import (
 
 CONFIG_FILE = "./instance/config.yaml"
 logger = logging.getLogger(__name__)
+
+
+def _to_snake_case(name: str) -> str:
+    """Convert PascalCase or camelCase to snake_case.
+
+    This is used to generate backward-compatible OpenAPI schema names
+    that match the original Connexion-based API.
+    """
+    # Insert underscore before uppercase letters (except at start)
+    s1 = re.sub(r"(.)([A-Z][a-z]+)", r"\1_\2", name)
+    # Insert underscore before uppercase letters that follow lowercase
+    return re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
+
+
+def _add_missing_union_schemas(schema: dict[str, Any]) -> dict[str, Any]:
+    """Add missing union schemas for backward compatibility with client generator.
+
+    The original Connexion-based API had explicit union schemas like 'tx', 'link',
+    'address_tx' that the Python client generator uses. FastAPI inlines these as
+    anyOf in responses, but we need the named schemas for client compatibility.
+    """
+    schemas = schema.get("components", {}).get("schemas", {})
+    if not schemas:
+        return schema
+
+    # Define the union schemas that need to be added
+    # These match the original OpenAPI spec structure
+    union_schemas = {
+        "tx": {
+            "title": "tx",
+            "discriminator": {
+                "propertyName": "tx_type",
+                "mapping": {
+                    "utxo": "#/components/schemas/tx_utxo",
+                    "account": "#/components/schemas/tx_account",
+                },
+            },
+            "oneOf": [
+                {"$ref": "#/components/schemas/tx_utxo"},
+                {"$ref": "#/components/schemas/tx_account"},
+            ],
+        },
+        "link": {
+            "title": "link",
+            "discriminator": {
+                "propertyName": "tx_type",
+                "mapping": {
+                    "utxo": "#/components/schemas/link_utxo",
+                    "account": "#/components/schemas/tx_account",
+                },
+            },
+            "oneOf": [
+                {"$ref": "#/components/schemas/link_utxo"},
+                {"$ref": "#/components/schemas/tx_account"},
+            ],
+        },
+        "address_tx": {
+            "title": "address_tx",
+            "discriminator": {
+                "propertyName": "tx_type",
+                "mapping": {
+                    "utxo": "#/components/schemas/address_tx_utxo",
+                    "account": "#/components/schemas/tx_account",
+                },
+            },
+            "oneOf": [
+                {"$ref": "#/components/schemas/address_tx_utxo"},
+                {"$ref": "#/components/schemas/tx_account"},
+            ],
+        },
+        "tag": {
+            "title": "tag",
+            "type": "object",
+            "properties": {
+                "label": {"type": "string"},
+                "category": {"type": "string"},
+                "abuse": {"type": "string"},
+                "actor": {"type": "string"},
+                "concepts": {
+                    "type": "array",
+                    "items": {"$ref": "#/components/schemas/concept"},
+                },
+            },
+        },
+    }
+
+    # Add missing schemas
+    for name, definition in union_schemas.items():
+        if name not in schemas:
+            schemas[name] = definition
+
+    return schema
+
+
+def _fix_response_schemas(schema: dict[str, Any]) -> dict[str, Any]:
+    """Fix response schemas by replacing inline anyOf with refs to named union schemas.
+
+    This function replaces inline anyOf union types with $ref to named union schemas
+    that the Python client generator expects.
+    """
+    # Define the mapping from anyOf patterns to union schema refs
+    anyof_to_ref = {
+        # tx union: tx_utxo | tx_account
+        frozenset(
+            ["#/components/schemas/tx_utxo", "#/components/schemas/tx_account"]
+        ): "#/components/schemas/tx",
+        frozenset(
+            ["#/components/schemas/TxUtxo", "#/components/schemas/TxAccount"]
+        ): "#/components/schemas/tx",
+        # link union: link_utxo | tx_account
+        frozenset(
+            ["#/components/schemas/link_utxo", "#/components/schemas/tx_account"]
+        ): "#/components/schemas/link",
+        frozenset(
+            ["#/components/schemas/LinkUtxo", "#/components/schemas/TxAccount"]
+        ): "#/components/schemas/link",
+        # address_tx union: address_tx_utxo | tx_account
+        frozenset(
+            ["#/components/schemas/address_tx_utxo", "#/components/schemas/tx_account"]
+        ): "#/components/schemas/address_tx",
+        frozenset(
+            ["#/components/schemas/AddressTxUtxo", "#/components/schemas/TxAccount"]
+        ): "#/components/schemas/address_tx",
+    }
+
+    def fix_schema(obj: Any) -> Any:
+        if isinstance(obj, dict):
+            # Check if this is an anyOf that should be replaced with a union ref
+            if "anyOf" in obj and isinstance(obj["anyOf"], list):
+                anyof_items = obj["anyOf"]
+
+                # Check for union type refs
+                refs = set()
+                for item in anyof_items:
+                    if isinstance(item, dict) and "$ref" in item:
+                        refs.add(item["$ref"])
+                frozen_refs = frozenset(refs)
+                if frozen_refs in anyof_to_ref:
+                    # Replace with $ref to union schema
+                    return {"$ref": anyof_to_ref[frozen_refs]}
+
+            # Recursively process nested structures
+            return {k: fix_schema(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [fix_schema(item) for item in obj]
+        return obj
+
+    return fix_schema(schema)
+
+
+def _convert_schema_names_to_snake_case(schema: dict[str, Any]) -> dict[str, Any]:
+    """Post-process OpenAPI schema to use snake_case schema names.
+
+    This ensures backward compatibility with the original Connexion-based API
+    which used snake_case schema names (e.g., 'address_tag' instead of 'AddressTag').
+    The Python client generator depends on these schema names.
+    """
+    # First add missing union schemas
+    schema = _add_missing_union_schemas(schema)
+
+    # Fix response schemas to use refs instead of inline anyOf
+    schema = _fix_response_schemas(schema)
+
+    # Serialize to JSON and replace all $ref occurrences
+    schema_json = json.dumps(schema)
+
+    # Get all schema names from components
+    schemas = schema.get("components", {}).get("schemas", {})
+    if not schemas:
+        return schema
+
+    # Build mapping from PascalCase to snake_case
+    # Only convert our custom models, not FastAPI built-in schemas like HTTPValidationError
+    builtin_schemas = {"HTTPValidationError", "ValidationError"}
+    name_mapping = {}
+    for name in schemas.keys():
+        if name not in builtin_schemas:
+            snake_name = _to_snake_case(name)
+            if snake_name != name:
+                name_mapping[name] = snake_name
+
+    # Replace all occurrences in the JSON
+    for old_name, new_name in name_mapping.items():
+        # Replace in $ref paths: "#/components/schemas/OldName" -> "#/components/schemas/new_name"
+        schema_json = schema_json.replace(
+            f'"#/components/schemas/{old_name}"', f'"#/components/schemas/{new_name}"'
+        )
+
+    # Parse back to dict
+    schema = json.loads(schema_json)
+
+    # Rename the schema keys themselves
+    if "components" in schema and "schemas" in schema["components"]:
+        old_schemas = schema["components"]["schemas"]
+        new_schemas = {}
+        for name, definition in old_schemas.items():
+            new_name = name_mapping.get(name, name)
+            new_schemas[new_name] = definition
+        schema["components"]["schemas"] = new_schemas
+
+    return schema
 
 
 def load_config(config_file: str) -> dict:
@@ -397,8 +601,54 @@ def create_app(
 
     _register_exception_handlers(app)
     _register_routers(app)
+    _setup_custom_openapi(app)
 
     return app
+
+
+def _setup_custom_openapi(app: FastAPI) -> None:
+    """Set up custom OpenAPI schema generation with snake_case schema names.
+
+    This ensures backward compatibility with the original Connexion-based API:
+    - Uses snake_case schema names (e.g., 'address_tag' instead of 'AddressTag')
+    - Adds named union schemas for tx, link, address_tx, tag types
+    - Replaces inline anyOf with $ref to named union schemas
+
+    The Python client generator depends on these schema names and union types.
+    """
+
+    def custom_openapi():
+        if app.openapi_schema:
+            return app.openapi_schema
+
+        openapi_schema = get_openapi(
+            title=app.title,
+            version=app.version,
+            description=app.description,
+            routes=app.routes,
+        )
+
+        # Add servers for client generator compatibility
+        openapi_schema["servers"] = [{"url": ""}]
+
+        # Add contact info for backward compatibility
+        openapi_schema["info"]["contact"] = {
+            "email": "contact@ikna.io",
+            "name": "Iknaio Cryptoasset Analytics GmbH",
+        }
+        openapi_schema["info"]["description"] = (
+            "GraphSense API provides programmatic access to various ledgers' "
+            "addresses, entities, blocks, transactions and tags for automated "
+            "and highly efficient forensics tasks."
+        )
+
+        # Convert schema names to snake_case for backward compatibility
+        openapi_schema = _convert_schema_names_to_snake_case(openapi_schema)
+
+        app.openapi_schema = openapi_schema
+        return app.openapi_schema
+
+    app.openapi = custom_openapi
 
 
 def create_app_from_dict(config_dict: dict) -> FastAPI:
@@ -418,5 +668,6 @@ def create_app_from_dict(config_dict: dict) -> FastAPI:
 
     _register_exception_handlers(app)
     _register_routers(app)
+    _setup_custom_openapi(app)
 
     return app

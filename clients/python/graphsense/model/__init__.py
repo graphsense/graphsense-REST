@@ -1,5 +1,20 @@
-# we can not import model classes here because that would create a circular
-# reference which would not work in python2
-# do not import all models into this module because that uses a lot of memory and stack frames
-# if you need the ability to import all models from one package, import them with
-# from {{packageName}.models import ModelA, ModelB
+"""
+Backward compatibility alias for graphsense.models.
+
+v5 used graphsense.model, v7 uses graphsense.models.
+This module provides backward compatibility by re-exporting from models.
+"""
+
+# Re-export all models for backward compatibility
+from graphsense.models import *  # noqa: F401, F403
+from graphsense.models import (
+    Rate,
+    Rates,
+    Values,
+    Address,
+    AddressTag,
+    AddressTags,
+    Block,
+    Entity,
+    # Add more as needed
+)

@@ -15,20 +15,22 @@ Method | HTTP request | Description
 
 
 # **get_address**
-> Address get_address(currency, address)
+> Address get_address(currency, address, include_actors=include_actors)
+
+Get an address
 
 Get an address
 
 ### Example
 
 * Api Key Authentication (api_key):
+
 ```python
-import time
-from dateutil.parser import parse as dateutil_parser
 import graphsense
-from graphsense.api import addresses_api
-from graphsense.model.address import Address
+from graphsense.models.address import Address
+from graphsense.rest import ApiException
 from pprint import pprint
+
 # Defining the host is optional and defaults to https://api.ikna.io
 # See configuration.py for a list of all supported configuration parameters.
 configuration = graphsense.Configuration(
@@ -41,7 +43,7 @@ configuration = graphsense.Configuration(
 # satisfies your auth use case.
 
 # Configure API key authorization: api_key
-configuration.api_key['api_key'] = 'YOUR_API_KEY'
+configuration.api_key['api_key'] = os.environ["API_KEY"]
 
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['api_key'] = 'Bearer'
@@ -49,49 +51,34 @@ configuration.api_key['api_key'] = 'YOUR_API_KEY'
 # Enter a context with an instance of the API client
 with graphsense.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = addresses_api.AddressesApi(api_client)
-    currency = "btc" # str | The cryptocurrency code (e.g., btc)
-    address = "1Archive1n2C579dMsAu3iC6tWzuQJz8dN" # str | The cryptocurrency address
-    include_actors = True # bool | Whether to include information about the actor behind the address (optional) if omitted the server will use the default value of True
+    api_instance = graphsense.AddressesApi(api_client)
+    currency = 'currency_example' # str | The cryptocurrency code (e.g., btc)
+    address = 'address_example' # str | The cryptocurrency address
+    include_actors = True # bool | Whether to include actor information (optional) (default to True)
 
-    # example passing only required values which don't have defaults set
-    try:
-        # Get an address
-        api_response = api_instance.get_address(currency, address)
-        pprint(api_response)
-    except graphsense.ApiException as e:
-        print("Exception when calling AddressesApi->get_address: %s\n" % e)
-
-    # example passing only required values which don't have defaults set
-    # and optional values
     try:
         # Get an address
         api_response = api_instance.get_address(currency, address, include_actors=include_actors)
+        print("The response of AddressesApi->get_address:\n")
         pprint(api_response)
-    except graphsense.ApiException as e:
+    except Exception as e:
         print("Exception when calling AddressesApi->get_address: %s\n" % e)
 ```
 
 
+
 ### Parameters
+
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **currency** | **str**| The cryptocurrency code (e.g., btc) |
- **address** | **str**| The cryptocurrency address |
- **include_actors** | **bool**| Whether to include information about the actor behind the address | [optional] if omitted the server will use the default value of True
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
-**async_req** | **bool** | Execute request asynchronously | [optional] default is False.
+ **currency** | **str**| The cryptocurrency code (e.g., btc) | 
+ **address** | **str**| The cryptocurrency address | 
+ **include_actors** | **bool**| Whether to include actor information | [optional] [default to True]
 
 ### Return type
 
 [**Address**](Address.md)
-
-**Notes:**
-
-* If `async_req` parameter is True, the request will be called asynchronously.  The method will return the request thread.  If parameter `async_req` is False or missing, then the method will return the response directly.
-
-* If the HTTP response code is `429 Too Many Requests` due to rate limit policies, the underlying `urllib3` HTTP client will automatically stall the request as long as advised by the `Retry-After` header.
 
 ### Authorization
 
@@ -102,29 +89,32 @@ Name | Type | Description  | Notes
  - **Content-Type**: Not defined
  - **Accept**: application/json
 
-
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | OK |  -  |
+**200** | Successful Response |  -  |
+**422** | Validation Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_address_entity**
-> Entity get_address_entity(currency, address)
+> Entity get_address_entity(currency, address, include_actors=include_actors)
+
+Get the entity of an address
 
 Get the entity of an address
 
 ### Example
 
 * Api Key Authentication (api_key):
+
 ```python
-import time
-from dateutil.parser import parse as dateutil_parser
 import graphsense
-from graphsense.api import addresses_api
-from graphsense.model.entity import Entity
+from graphsense.models.entity import Entity
+from graphsense.rest import ApiException
 from pprint import pprint
+
 # Defining the host is optional and defaults to https://api.ikna.io
 # See configuration.py for a list of all supported configuration parameters.
 configuration = graphsense.Configuration(
@@ -137,7 +127,7 @@ configuration = graphsense.Configuration(
 # satisfies your auth use case.
 
 # Configure API key authorization: api_key
-configuration.api_key['api_key'] = 'YOUR_API_KEY'
+configuration.api_key['api_key'] = os.environ["API_KEY"]
 
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['api_key'] = 'Bearer'
@@ -145,49 +135,34 @@ configuration.api_key['api_key'] = 'YOUR_API_KEY'
 # Enter a context with an instance of the API client
 with graphsense.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = addresses_api.AddressesApi(api_client)
-    currency = "btc" # str | The cryptocurrency code (e.g., btc)
-    address = "1Archive1n2C579dMsAu3iC6tWzuQJz8dN" # str | The cryptocurrency address
-    include_actors = True # bool | Whether to include information about the actor behind the address (optional) if omitted the server will use the default value of True
+    api_instance = graphsense.AddressesApi(api_client)
+    currency = 'currency_example' # str | The cryptocurrency code (e.g., btc)
+    address = 'address_example' # str | The cryptocurrency address
+    include_actors = True # bool | Whether to include actor information (optional) (default to True)
 
-    # example passing only required values which don't have defaults set
-    try:
-        # Get the entity of an address
-        api_response = api_instance.get_address_entity(currency, address)
-        pprint(api_response)
-    except graphsense.ApiException as e:
-        print("Exception when calling AddressesApi->get_address_entity: %s\n" % e)
-
-    # example passing only required values which don't have defaults set
-    # and optional values
     try:
         # Get the entity of an address
         api_response = api_instance.get_address_entity(currency, address, include_actors=include_actors)
+        print("The response of AddressesApi->get_address_entity:\n")
         pprint(api_response)
-    except graphsense.ApiException as e:
+    except Exception as e:
         print("Exception when calling AddressesApi->get_address_entity: %s\n" % e)
 ```
 
 
+
 ### Parameters
+
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **currency** | **str**| The cryptocurrency code (e.g., btc) |
- **address** | **str**| The cryptocurrency address |
- **include_actors** | **bool**| Whether to include information about the actor behind the address | [optional] if omitted the server will use the default value of True
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
-**async_req** | **bool** | Execute request asynchronously | [optional] default is False.
+ **currency** | **str**| The cryptocurrency code (e.g., btc) | 
+ **address** | **str**| The cryptocurrency address | 
+ **include_actors** | **bool**| Whether to include actor information | [optional] [default to True]
 
 ### Return type
 
 [**Entity**](Entity.md)
-
-**Notes:**
-
-* If `async_req` parameter is True, the request will be called asynchronously.  The method will return the request thread.  If parameter `async_req` is False or missing, then the method will return the response directly.
-
-* If the HTTP response code is `429 Too Many Requests` due to rate limit policies, the underlying `urllib3` HTTP client will automatically stall the request as long as advised by the `Retry-After` header.
 
 ### Authorization
 
@@ -198,29 +173,32 @@ Name | Type | Description  | Notes
  - **Content-Type**: Not defined
  - **Accept**: application/json
 
-
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | OK |  -  |
+**200** | Successful Response |  -  |
+**422** | Validation Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_tag_summary_by_address**
-> TagSummary get_tag_summary_by_address(currency, address)
+> TagSummary get_tag_summary_by_address(currency, address, include_best_cluster_tag=include_best_cluster_tag)
+
+Get attribution tag summary for a given address
 
 Get attribution tag summary for a given address
 
 ### Example
 
 * Api Key Authentication (api_key):
+
 ```python
-import time
-from dateutil.parser import parse as dateutil_parser
 import graphsense
-from graphsense.api import addresses_api
-from graphsense.model.tag_summary import TagSummary
+from graphsense.models.tag_summary import TagSummary
+from graphsense.rest import ApiException
 from pprint import pprint
+
 # Defining the host is optional and defaults to https://api.ikna.io
 # See configuration.py for a list of all supported configuration parameters.
 configuration = graphsense.Configuration(
@@ -233,7 +211,7 @@ configuration = graphsense.Configuration(
 # satisfies your auth use case.
 
 # Configure API key authorization: api_key
-configuration.api_key['api_key'] = 'YOUR_API_KEY'
+configuration.api_key['api_key'] = os.environ["API_KEY"]
 
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['api_key'] = 'Bearer'
@@ -241,49 +219,34 @@ configuration.api_key['api_key'] = 'YOUR_API_KEY'
 # Enter a context with an instance of the API client
 with graphsense.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = addresses_api.AddressesApi(api_client)
-    currency = "btc" # str | The cryptocurrency code (e.g., btc)
-    address = "1Archive1n2C579dMsAu3iC6tWzuQJz8dN" # str | The cryptocurrency address
-    include_best_cluster_tag = False # bool | If the best cluster tag should be inherited to the address level, often helpful for exchanges where not every address is tagged. (optional) if omitted the server will use the default value of False
+    api_instance = graphsense.AddressesApi(api_client)
+    currency = 'currency_example' # str | The cryptocurrency code (e.g., btc)
+    address = 'address_example' # str | The cryptocurrency address
+    include_best_cluster_tag = True # bool | If the best cluster tag should be inherited to the address level (optional)
 
-    # example passing only required values which don't have defaults set
-    try:
-        # Get attribution tag summary for a given address
-        api_response = api_instance.get_tag_summary_by_address(currency, address)
-        pprint(api_response)
-    except graphsense.ApiException as e:
-        print("Exception when calling AddressesApi->get_tag_summary_by_address: %s\n" % e)
-
-    # example passing only required values which don't have defaults set
-    # and optional values
     try:
         # Get attribution tag summary for a given address
         api_response = api_instance.get_tag_summary_by_address(currency, address, include_best_cluster_tag=include_best_cluster_tag)
+        print("The response of AddressesApi->get_tag_summary_by_address:\n")
         pprint(api_response)
-    except graphsense.ApiException as e:
+    except Exception as e:
         print("Exception when calling AddressesApi->get_tag_summary_by_address: %s\n" % e)
 ```
 
 
+
 ### Parameters
+
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **currency** | **str**| The cryptocurrency code (e.g., btc) |
- **address** | **str**| The cryptocurrency address |
- **include_best_cluster_tag** | **bool**| If the best cluster tag should be inherited to the address level, often helpful for exchanges where not every address is tagged. | [optional] if omitted the server will use the default value of False
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
-**async_req** | **bool** | Execute request asynchronously | [optional] default is False.
+ **currency** | **str**| The cryptocurrency code (e.g., btc) | 
+ **address** | **str**| The cryptocurrency address | 
+ **include_best_cluster_tag** | **bool**| If the best cluster tag should be inherited to the address level | [optional] 
 
 ### Return type
 
 [**TagSummary**](TagSummary.md)
-
-**Notes:**
-
-* If `async_req` parameter is True, the request will be called asynchronously.  The method will return the request thread.  If parameter `async_req` is False or missing, then the method will return the response directly.
-
-* If the HTTP response code is `429 Too Many Requests` due to rate limit policies, the underlying `urllib3` HTTP client will automatically stall the request as long as advised by the `Retry-After` header.
 
 ### Authorization
 
@@ -294,30 +257,32 @@ Name | Type | Description  | Notes
  - **Content-Type**: Not defined
  - **Accept**: application/json
 
-
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | OK |  -  |
+**200** | Successful Response |  -  |
+**422** | Validation Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_address_links**
-> Links list_address_links(currency, address, neighbor)
+> Links list_address_links(currency, address, neighbor, min_height=min_height, max_height=max_height, min_date=min_date, max_date=max_date, order=order, token_currency=token_currency, page=page, pagesize=pagesize)
+
+Get outgoing transactions between two addresses
 
 Get outgoing transactions between two addresses
 
 ### Example
 
 * Api Key Authentication (api_key):
+
 ```python
-import time
-from dateutil.parser import parse as dateutil_parser
 import graphsense
-from graphsense.api import addresses_api
-from graphsense.model.height import Height
-from graphsense.model.links import Links
+from graphsense.models.links import Links
+from graphsense.rest import ApiException
 from pprint import pprint
+
 # Defining the host is optional and defaults to https://api.ikna.io
 # See configuration.py for a list of all supported configuration parameters.
 configuration = graphsense.Configuration(
@@ -330,7 +295,7 @@ configuration = graphsense.Configuration(
 # satisfies your auth use case.
 
 # Configure API key authorization: api_key
-configuration.api_key['api_key'] = 'YOUR_API_KEY'
+configuration.api_key['api_key'] = os.environ["API_KEY"]
 
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['api_key'] = 'Bearer'
@@ -338,65 +303,50 @@ configuration.api_key['api_key'] = 'YOUR_API_KEY'
 # Enter a context with an instance of the API client
 with graphsense.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = addresses_api.AddressesApi(api_client)
-    currency = "btc" # str | The cryptocurrency code (e.g., btc)
-    address = "1Archive1n2C579dMsAu3iC6tWzuQJz8dN" # str | The cryptocurrency address
-    neighbor = "1FKCzy3BEtiZDhRDtivp7Y7RVb9edg5BH7" # str | Neighbor address
-    min_height = Height(1) # Height | Return transactions starting from given height (optional)
-    max_height = Height(2) # Height | Return transactions up to (including) given height (optional)
-    min_date = dateutil_parser('2017-07-21T17:32:28Z') # datetime | min date of txs (optional)
-    max_date = dateutil_parser('2017-07-21T17:32:28Z') # datetime | max date of txs (optional)
-    order = "desc" # str | Sorting order (optional) if omitted the server will use the default value of "desc"
-    token_currency = "WETH" # str | Return transactions of given token or base currency (optional)
-    page = "" # str | Resumption token for retrieving the next page (optional)
-    pagesize = 10 # int | Number of items returned in a single page (optional)
+    api_instance = graphsense.AddressesApi(api_client)
+    currency = 'currency_example' # str | The cryptocurrency code (e.g., btc)
+    address = 'address_example' # str | The cryptocurrency address
+    neighbor = 'neighbor_example' # str | Neighbor address
+    min_height = 56 # int | Return transactions starting from given height (optional)
+    max_height = 56 # int | Return transactions up to (including) given height (optional)
+    min_date = 'min_date_example' # str | Min date of txs (optional)
+    max_date = 'max_date_example' # str | Max date of txs (optional)
+    order = 'order_example' # str | Sorting order (optional)
+    token_currency = 'token_currency_example' # str | Return transactions of given token or base currency (optional)
+    page = 'page_example' # str | Resumption token for retrieving the next page (optional)
+    pagesize = 56 # int | Number of items returned in a single page (optional)
 
-    # example passing only required values which don't have defaults set
-    try:
-        # Get outgoing transactions between two addresses
-        api_response = api_instance.list_address_links(currency, address, neighbor)
-        pprint(api_response)
-    except graphsense.ApiException as e:
-        print("Exception when calling AddressesApi->list_address_links: %s\n" % e)
-
-    # example passing only required values which don't have defaults set
-    # and optional values
     try:
         # Get outgoing transactions between two addresses
         api_response = api_instance.list_address_links(currency, address, neighbor, min_height=min_height, max_height=max_height, min_date=min_date, max_date=max_date, order=order, token_currency=token_currency, page=page, pagesize=pagesize)
+        print("The response of AddressesApi->list_address_links:\n")
         pprint(api_response)
-    except graphsense.ApiException as e:
+    except Exception as e:
         print("Exception when calling AddressesApi->list_address_links: %s\n" % e)
 ```
 
 
+
 ### Parameters
+
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **currency** | **str**| The cryptocurrency code (e.g., btc) |
- **address** | **str**| The cryptocurrency address |
- **neighbor** | **str**| Neighbor address |
- **min_height** | **Height**| Return transactions starting from given height | [optional]
- **max_height** | **Height**| Return transactions up to (including) given height | [optional]
- **min_date** | **datetime**| min date of txs | [optional]
- **max_date** | **datetime**| max date of txs | [optional]
- **order** | **str**| Sorting order | [optional] if omitted the server will use the default value of "desc"
- **token_currency** | **str**| Return transactions of given token or base currency | [optional]
- **page** | **str**| Resumption token for retrieving the next page | [optional]
- **pagesize** | **int**| Number of items returned in a single page | [optional]
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
-**async_req** | **bool** | Execute request asynchronously | [optional] default is False.
+ **currency** | **str**| The cryptocurrency code (e.g., btc) | 
+ **address** | **str**| The cryptocurrency address | 
+ **neighbor** | **str**| Neighbor address | 
+ **min_height** | **int**| Return transactions starting from given height | [optional] 
+ **max_height** | **int**| Return transactions up to (including) given height | [optional] 
+ **min_date** | **str**| Min date of txs | [optional] 
+ **max_date** | **str**| Max date of txs | [optional] 
+ **order** | **str**| Sorting order | [optional] 
+ **token_currency** | **str**| Return transactions of given token or base currency | [optional] 
+ **page** | **str**| Resumption token for retrieving the next page | [optional] 
+ **pagesize** | **int**| Number of items returned in a single page | [optional] 
 
 ### Return type
 
 [**Links**](Links.md)
-
-**Notes:**
-
-* If `async_req` parameter is True, the request will be called asynchronously.  The method will return the request thread.  If parameter `async_req` is False or missing, then the method will return the response directly.
-
-* If the HTTP response code is `429 Too Many Requests` due to rate limit policies, the underlying `urllib3` HTTP client will automatically stall the request as long as advised by the `Retry-After` header.
 
 ### Authorization
 
@@ -407,29 +357,32 @@ Name | Type | Description  | Notes
  - **Content-Type**: Not defined
  - **Accept**: application/json
 
-
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | OK |  -  |
+**200** | Successful Response |  -  |
+**422** | Validation Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_address_neighbors**
-> NeighborAddresses list_address_neighbors(currency, address, direction)
+> NeighborAddresses list_address_neighbors(currency, address, direction, only_ids=only_ids, include_labels=include_labels, include_actors=include_actors, page=page, pagesize=pagesize)
+
+Get an address's neighbors in the address graph
 
 Get an address's neighbors in the address graph
 
 ### Example
 
 * Api Key Authentication (api_key):
+
 ```python
-import time
-from dateutil.parser import parse as dateutil_parser
 import graphsense
-from graphsense.api import addresses_api
-from graphsense.model.neighbor_addresses import NeighborAddresses
+from graphsense.models.neighbor_addresses import NeighborAddresses
+from graphsense.rest import ApiException
 from pprint import pprint
+
 # Defining the host is optional and defaults to https://api.ikna.io
 # See configuration.py for a list of all supported configuration parameters.
 configuration = graphsense.Configuration(
@@ -442,7 +395,7 @@ configuration = graphsense.Configuration(
 # satisfies your auth use case.
 
 # Configure API key authorization: api_key
-configuration.api_key['api_key'] = 'YOUR_API_KEY'
+configuration.api_key['api_key'] = os.environ["API_KEY"]
 
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['api_key'] = 'Bearer'
@@ -450,61 +403,44 @@ configuration.api_key['api_key'] = 'YOUR_API_KEY'
 # Enter a context with an instance of the API client
 with graphsense.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = addresses_api.AddressesApi(api_client)
-    currency = "btc" # str | The cryptocurrency code (e.g., btc)
-    address = "1Archive1n2C579dMsAu3iC6tWzuQJz8dN" # str | The cryptocurrency address
-    direction = "out" # str | Incoming or outgoing neighbors
-    only_ids = [
-        "only_ids_example",
-    ] # [str] | Restrict result to given set of comma separated addresses (optional)
-    include_labels = False # bool | Whether to include labels of first page of address tags (optional) if omitted the server will use the default value of False
-    include_actors = True # bool | Whether to include information about the actor behind the address (optional) if omitted the server will use the default value of True
-    page = "" # str | Resumption token for retrieving the next page (optional)
-    pagesize = 10 # int | Number of items returned in a single page (optional)
+    api_instance = graphsense.AddressesApi(api_client)
+    currency = 'currency_example' # str | The cryptocurrency code (e.g., btc)
+    address = 'address_example' # str | The cryptocurrency address
+    direction = 'direction_example' # str | Incoming or outgoing neighbors
+    only_ids = 'only_ids_example' # str | Restrict result to given set of comma separated addresses (optional)
+    include_labels = True # bool | Whether to include labels of first page of address tags (optional)
+    include_actors = True # bool | Whether to include actor information (optional) (default to True)
+    page = 'page_example' # str | Resumption token for retrieving the next page (optional)
+    pagesize = 56 # int | Number of items returned in a single page (optional)
 
-    # example passing only required values which don't have defaults set
-    try:
-        # Get an address's neighbors in the address graph
-        api_response = api_instance.list_address_neighbors(currency, address, direction)
-        pprint(api_response)
-    except graphsense.ApiException as e:
-        print("Exception when calling AddressesApi->list_address_neighbors: %s\n" % e)
-
-    # example passing only required values which don't have defaults set
-    # and optional values
     try:
         # Get an address's neighbors in the address graph
         api_response = api_instance.list_address_neighbors(currency, address, direction, only_ids=only_ids, include_labels=include_labels, include_actors=include_actors, page=page, pagesize=pagesize)
+        print("The response of AddressesApi->list_address_neighbors:\n")
         pprint(api_response)
-    except graphsense.ApiException as e:
+    except Exception as e:
         print("Exception when calling AddressesApi->list_address_neighbors: %s\n" % e)
 ```
 
 
+
 ### Parameters
+
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **currency** | **str**| The cryptocurrency code (e.g., btc) |
- **address** | **str**| The cryptocurrency address |
- **direction** | **str**| Incoming or outgoing neighbors |
- **only_ids** | **[str]**| Restrict result to given set of comma separated addresses | [optional]
- **include_labels** | **bool**| Whether to include labels of first page of address tags | [optional] if omitted the server will use the default value of False
- **include_actors** | **bool**| Whether to include information about the actor behind the address | [optional] if omitted the server will use the default value of True
- **page** | **str**| Resumption token for retrieving the next page | [optional]
- **pagesize** | **int**| Number of items returned in a single page | [optional]
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
-**async_req** | **bool** | Execute request asynchronously | [optional] default is False.
+ **currency** | **str**| The cryptocurrency code (e.g., btc) | 
+ **address** | **str**| The cryptocurrency address | 
+ **direction** | **str**| Incoming or outgoing neighbors | 
+ **only_ids** | **str**| Restrict result to given set of comma separated addresses | [optional] 
+ **include_labels** | **bool**| Whether to include labels of first page of address tags | [optional] 
+ **include_actors** | **bool**| Whether to include actor information | [optional] [default to True]
+ **page** | **str**| Resumption token for retrieving the next page | [optional] 
+ **pagesize** | **int**| Number of items returned in a single page | [optional] 
 
 ### Return type
 
 [**NeighborAddresses**](NeighborAddresses.md)
-
-**Notes:**
-
-* If `async_req` parameter is True, the request will be called asynchronously.  The method will return the request thread.  If parameter `async_req` is False or missing, then the method will return the response directly.
-
-* If the HTTP response code is `429 Too Many Requests` due to rate limit policies, the underlying `urllib3` HTTP client will automatically stall the request as long as advised by the `Retry-After` header.
 
 ### Authorization
 
@@ -515,30 +451,32 @@ Name | Type | Description  | Notes
  - **Content-Type**: Not defined
  - **Accept**: application/json
 
-
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | OK |  -  |
+**200** | Successful Response |  -  |
+**422** | Validation Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_address_txs**
-> AddressTxs list_address_txs(currency, address)
+> AddressTxs list_address_txs(currency, address, direction=direction, min_height=min_height, max_height=max_height, min_date=min_date, max_date=max_date, order=order, token_currency=token_currency, page=page, pagesize=pagesize)
+
+Get all transactions an address has been involved in
 
 Get all transactions an address has been involved in
 
 ### Example
 
 * Api Key Authentication (api_key):
+
 ```python
-import time
-from dateutil.parser import parse as dateutil_parser
 import graphsense
-from graphsense.api import addresses_api
-from graphsense.model.height import Height
-from graphsense.model.address_txs import AddressTxs
+from graphsense.models.address_txs import AddressTxs
+from graphsense.rest import ApiException
 from pprint import pprint
+
 # Defining the host is optional and defaults to https://api.ikna.io
 # See configuration.py for a list of all supported configuration parameters.
 configuration = graphsense.Configuration(
@@ -551,7 +489,7 @@ configuration = graphsense.Configuration(
 # satisfies your auth use case.
 
 # Configure API key authorization: api_key
-configuration.api_key['api_key'] = 'YOUR_API_KEY'
+configuration.api_key['api_key'] = os.environ["API_KEY"]
 
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['api_key'] = 'Bearer'
@@ -559,65 +497,50 @@ configuration.api_key['api_key'] = 'YOUR_API_KEY'
 # Enter a context with an instance of the API client
 with graphsense.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = addresses_api.AddressesApi(api_client)
-    currency = "btc" # str | The cryptocurrency code (e.g., btc)
-    address = "1Archive1n2C579dMsAu3iC6tWzuQJz8dN" # str | The cryptocurrency address
-    direction = "out" # str | Incoming or outgoing transactions (optional)
-    min_height = Height(1) # Height | Return transactions starting from given height (optional)
-    max_height = Height(2) # Height | Return transactions up to (including) given height (optional)
-    min_date = dateutil_parser('2017-07-21T17:32:28Z') # datetime | min date of txs (optional)
-    max_date = dateutil_parser('2017-07-21T17:32:28Z') # datetime | max date of txs (optional)
-    order = "desc" # str | Sorting order (optional) if omitted the server will use the default value of "desc"
-    token_currency = "WETH" # str | Return transactions of given token or base currency (optional)
-    page = "" # str | Resumption token for retrieving the next page (optional)
-    pagesize = 10 # int | Number of items returned in a single page (optional)
+    api_instance = graphsense.AddressesApi(api_client)
+    currency = 'currency_example' # str | The cryptocurrency code (e.g., btc)
+    address = 'address_example' # str | The cryptocurrency address
+    direction = 'direction_example' # str | Incoming or outgoing transactions (optional)
+    min_height = 56 # int | Return transactions starting from given height (optional)
+    max_height = 56 # int | Return transactions up to (including) given height (optional)
+    min_date = 'min_date_example' # str | Min date of txs (optional)
+    max_date = 'max_date_example' # str | Max date of txs (optional)
+    order = 'order_example' # str | Sorting order (optional)
+    token_currency = 'token_currency_example' # str | Return transactions of given token or base currency (optional)
+    page = 'page_example' # str | Resumption token for retrieving the next page (optional)
+    pagesize = 56 # int | Number of items returned in a single page (optional)
 
-    # example passing only required values which don't have defaults set
-    try:
-        # Get all transactions an address has been involved in
-        api_response = api_instance.list_address_txs(currency, address)
-        pprint(api_response)
-    except graphsense.ApiException as e:
-        print("Exception when calling AddressesApi->list_address_txs: %s\n" % e)
-
-    # example passing only required values which don't have defaults set
-    # and optional values
     try:
         # Get all transactions an address has been involved in
         api_response = api_instance.list_address_txs(currency, address, direction=direction, min_height=min_height, max_height=max_height, min_date=min_date, max_date=max_date, order=order, token_currency=token_currency, page=page, pagesize=pagesize)
+        print("The response of AddressesApi->list_address_txs:\n")
         pprint(api_response)
-    except graphsense.ApiException as e:
+    except Exception as e:
         print("Exception when calling AddressesApi->list_address_txs: %s\n" % e)
 ```
 
 
+
 ### Parameters
+
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **currency** | **str**| The cryptocurrency code (e.g., btc) |
- **address** | **str**| The cryptocurrency address |
- **direction** | **str**| Incoming or outgoing transactions | [optional]
- **min_height** | **Height**| Return transactions starting from given height | [optional]
- **max_height** | **Height**| Return transactions up to (including) given height | [optional]
- **min_date** | **datetime**| min date of txs | [optional]
- **max_date** | **datetime**| max date of txs | [optional]
- **order** | **str**| Sorting order | [optional] if omitted the server will use the default value of "desc"
- **token_currency** | **str**| Return transactions of given token or base currency | [optional]
- **page** | **str**| Resumption token for retrieving the next page | [optional]
- **pagesize** | **int**| Number of items returned in a single page | [optional]
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
-**async_req** | **bool** | Execute request asynchronously | [optional] default is False.
+ **currency** | **str**| The cryptocurrency code (e.g., btc) | 
+ **address** | **str**| The cryptocurrency address | 
+ **direction** | **str**| Incoming or outgoing transactions | [optional] 
+ **min_height** | **int**| Return transactions starting from given height | [optional] 
+ **max_height** | **int**| Return transactions up to (including) given height | [optional] 
+ **min_date** | **str**| Min date of txs | [optional] 
+ **max_date** | **str**| Max date of txs | [optional] 
+ **order** | **str**| Sorting order | [optional] 
+ **token_currency** | **str**| Return transactions of given token or base currency | [optional] 
+ **page** | **str**| Resumption token for retrieving the next page | [optional] 
+ **pagesize** | **int**| Number of items returned in a single page | [optional] 
 
 ### Return type
 
 [**AddressTxs**](AddressTxs.md)
-
-**Notes:**
-
-* If `async_req` parameter is True, the request will be called asynchronously.  The method will return the request thread.  If parameter `async_req` is False or missing, then the method will return the response directly.
-
-* If the HTTP response code is `429 Too Many Requests` due to rate limit policies, the underlying `urllib3` HTTP client will automatically stall the request as long as advised by the `Retry-After` header.
 
 ### Authorization
 
@@ -628,29 +551,32 @@ Name | Type | Description  | Notes
  - **Content-Type**: Not defined
  - **Accept**: application/json
 
-
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | OK |  -  |
+**200** | Successful Response |  -  |
+**422** | Validation Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_related_addresses**
-> RelatedAddresses list_related_addresses(currency, address)
+> RelatedAddresses list_related_addresses(currency, address, address_relation_type=address_relation_type, page=page, pagesize=pagesize)
+
+Get related addresses to the input address
 
 Get related addresses to the input address
 
 ### Example
 
 * Api Key Authentication (api_key):
+
 ```python
-import time
-from dateutil.parser import parse as dateutil_parser
 import graphsense
-from graphsense.api import addresses_api
-from graphsense.model.related_addresses import RelatedAddresses
+from graphsense.models.related_addresses import RelatedAddresses
+from graphsense.rest import ApiException
 from pprint import pprint
+
 # Defining the host is optional and defaults to https://api.ikna.io
 # See configuration.py for a list of all supported configuration parameters.
 configuration = graphsense.Configuration(
@@ -663,7 +589,7 @@ configuration = graphsense.Configuration(
 # satisfies your auth use case.
 
 # Configure API key authorization: api_key
-configuration.api_key['api_key'] = 'YOUR_API_KEY'
+configuration.api_key['api_key'] = os.environ["API_KEY"]
 
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['api_key'] = 'Bearer'
@@ -671,53 +597,38 @@ configuration.api_key['api_key'] = 'YOUR_API_KEY'
 # Enter a context with an instance of the API client
 with graphsense.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = addresses_api.AddressesApi(api_client)
-    currency = "btc" # str | The cryptocurrency code (e.g., btc)
-    address = "1Archive1n2C579dMsAu3iC6tWzuQJz8dN" # str | The cryptocurrency address
-    address_relation_type = "pubkey" # str | what type of related addresses to return (optional) if omitted the server will use the default value of "pubkey"
-    page = "" # str | Resumption token for retrieving the next page (optional)
-    pagesize = 10 # int | Number of items returned in a single page (optional)
+    api_instance = graphsense.AddressesApi(api_client)
+    currency = 'currency_example' # str | The cryptocurrency code (e.g., btc)
+    address = 'address_example' # str | The cryptocurrency address
+    address_relation_type = pubkey # str | What type of related addresses to return (optional) (default to pubkey)
+    page = 'page_example' # str | Resumption token for retrieving the next page (optional)
+    pagesize = 56 # int | Number of items returned in a single page (optional)
 
-    # example passing only required values which don't have defaults set
-    try:
-        # Get related addresses to the input address
-        api_response = api_instance.list_related_addresses(currency, address)
-        pprint(api_response)
-    except graphsense.ApiException as e:
-        print("Exception when calling AddressesApi->list_related_addresses: %s\n" % e)
-
-    # example passing only required values which don't have defaults set
-    # and optional values
     try:
         # Get related addresses to the input address
         api_response = api_instance.list_related_addresses(currency, address, address_relation_type=address_relation_type, page=page, pagesize=pagesize)
+        print("The response of AddressesApi->list_related_addresses:\n")
         pprint(api_response)
-    except graphsense.ApiException as e:
+    except Exception as e:
         print("Exception when calling AddressesApi->list_related_addresses: %s\n" % e)
 ```
 
 
+
 ### Parameters
+
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **currency** | **str**| The cryptocurrency code (e.g., btc) |
- **address** | **str**| The cryptocurrency address |
- **address_relation_type** | **str**| what type of related addresses to return | [optional] if omitted the server will use the default value of "pubkey"
- **page** | **str**| Resumption token for retrieving the next page | [optional]
- **pagesize** | **int**| Number of items returned in a single page | [optional]
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
-**async_req** | **bool** | Execute request asynchronously | [optional] default is False.
+ **currency** | **str**| The cryptocurrency code (e.g., btc) | 
+ **address** | **str**| The cryptocurrency address | 
+ **address_relation_type** | **str**| What type of related addresses to return | [optional] [default to pubkey]
+ **page** | **str**| Resumption token for retrieving the next page | [optional] 
+ **pagesize** | **int**| Number of items returned in a single page | [optional] 
 
 ### Return type
 
 [**RelatedAddresses**](RelatedAddresses.md)
-
-**Notes:**
-
-* If `async_req` parameter is True, the request will be called asynchronously.  The method will return the request thread.  If parameter `async_req` is False or missing, then the method will return the response directly.
-
-* If the HTTP response code is `429 Too Many Requests` due to rate limit policies, the underlying `urllib3` HTTP client will automatically stall the request as long as advised by the `Retry-After` header.
 
 ### Authorization
 
@@ -728,29 +639,32 @@ Name | Type | Description  | Notes
  - **Content-Type**: Not defined
  - **Accept**: application/json
 
-
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | OK |  -  |
+**200** | Successful Response |  -  |
+**422** | Validation Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_tags_by_address**
-> AddressTags list_tags_by_address(currency, address)
+> AddressTags list_tags_by_address(currency, address, page=page, pagesize=pagesize, include_best_cluster_tag=include_best_cluster_tag)
+
+Get attribution tags for a given address
 
 Get attribution tags for a given address
 
 ### Example
 
 * Api Key Authentication (api_key):
+
 ```python
-import time
-from dateutil.parser import parse as dateutil_parser
 import graphsense
-from graphsense.api import addresses_api
-from graphsense.model.address_tags import AddressTags
+from graphsense.models.address_tags import AddressTags
+from graphsense.rest import ApiException
 from pprint import pprint
+
 # Defining the host is optional and defaults to https://api.ikna.io
 # See configuration.py for a list of all supported configuration parameters.
 configuration = graphsense.Configuration(
@@ -763,7 +677,7 @@ configuration = graphsense.Configuration(
 # satisfies your auth use case.
 
 # Configure API key authorization: api_key
-configuration.api_key['api_key'] = 'YOUR_API_KEY'
+configuration.api_key['api_key'] = os.environ["API_KEY"]
 
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['api_key'] = 'Bearer'
@@ -771,53 +685,38 @@ configuration.api_key['api_key'] = 'YOUR_API_KEY'
 # Enter a context with an instance of the API client
 with graphsense.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = addresses_api.AddressesApi(api_client)
-    currency = "btc" # str | The cryptocurrency code (e.g., btc)
-    address = "1Archive1n2C579dMsAu3iC6tWzuQJz8dN" # str | The cryptocurrency address
-    page = "" # str | Resumption token for retrieving the next page (optional)
-    pagesize = 10 # int | Number of items returned in a single page (optional)
-    include_best_cluster_tag = False # bool | If the best cluster tag should be inherited to the address level, often helpful for exchanges where not every address is tagged. (optional) if omitted the server will use the default value of False
+    api_instance = graphsense.AddressesApi(api_client)
+    currency = 'currency_example' # str | The cryptocurrency code (e.g., btc)
+    address = 'address_example' # str | The cryptocurrency address
+    page = 'page_example' # str | Resumption token for retrieving the next page (optional)
+    pagesize = 56 # int | Number of items returned in a single page (optional)
+    include_best_cluster_tag = True # bool | If the best cluster tag should be inherited to the address level (optional)
 
-    # example passing only required values which don't have defaults set
-    try:
-        # Get attribution tags for a given address
-        api_response = api_instance.list_tags_by_address(currency, address)
-        pprint(api_response)
-    except graphsense.ApiException as e:
-        print("Exception when calling AddressesApi->list_tags_by_address: %s\n" % e)
-
-    # example passing only required values which don't have defaults set
-    # and optional values
     try:
         # Get attribution tags for a given address
         api_response = api_instance.list_tags_by_address(currency, address, page=page, pagesize=pagesize, include_best_cluster_tag=include_best_cluster_tag)
+        print("The response of AddressesApi->list_tags_by_address:\n")
         pprint(api_response)
-    except graphsense.ApiException as e:
+    except Exception as e:
         print("Exception when calling AddressesApi->list_tags_by_address: %s\n" % e)
 ```
 
 
+
 ### Parameters
+
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **currency** | **str**| The cryptocurrency code (e.g., btc) |
- **address** | **str**| The cryptocurrency address |
- **page** | **str**| Resumption token for retrieving the next page | [optional]
- **pagesize** | **int**| Number of items returned in a single page | [optional]
- **include_best_cluster_tag** | **bool**| If the best cluster tag should be inherited to the address level, often helpful for exchanges where not every address is tagged. | [optional] if omitted the server will use the default value of False
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
-**async_req** | **bool** | Execute request asynchronously | [optional] default is False.
+ **currency** | **str**| The cryptocurrency code (e.g., btc) | 
+ **address** | **str**| The cryptocurrency address | 
+ **page** | **str**| Resumption token for retrieving the next page | [optional] 
+ **pagesize** | **int**| Number of items returned in a single page | [optional] 
+ **include_best_cluster_tag** | **bool**| If the best cluster tag should be inherited to the address level | [optional] 
 
 ### Return type
 
 [**AddressTags**](AddressTags.md)
-
-**Notes:**
-
-* If `async_req` parameter is True, the request will be called asynchronously.  The method will return the request thread.  If parameter `async_req` is False or missing, then the method will return the response directly.
-
-* If the HTTP response code is `429 Too Many Requests` due to rate limit policies, the underlying `urllib3` HTTP client will automatically stall the request as long as advised by the `Retry-After` header.
 
 ### Authorization
 
@@ -828,11 +727,12 @@ Name | Type | Description  | Notes
  - **Content-Type**: Not defined
  - **Accept**: application/json
 
-
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | OK |  -  |
+**200** | Successful Response |  -  |
+**422** | Validation Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

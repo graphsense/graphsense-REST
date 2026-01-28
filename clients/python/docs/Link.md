@@ -2,26 +2,43 @@
 
 
 ## Properties
+
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**tx_type** | **str** |  | defaults to "account"
-**token_tx_id** | **int** | identifies a specific token transaction within a tx_hash, (deprecated) use identifier instead in encapsulates all information that uniquely identifies the transaction | [optional] 
+**tx_type** | **str** |  | [optional] [default to 'account']
+**tx_hash** | **str** |  | 
+**currency** | **str** |  | 
+**height** | **int** |  | 
+**timestamp** | **int** |  | 
+**input_value** | [**Values**](Values.md) |  | 
+**output_value** | [**Values**](Values.md) |  | 
+**identifier** | **str** |  | 
+**network** | **str** |  | 
+**value** | [**Values**](Values.md) |  | 
+**from_address** | **str** |  | 
+**to_address** | **str** |  | 
+**token_tx_id** | **int** |  | [optional] 
 **fee** | [**Values**](Values.md) |  | [optional] 
-**contract_creation** | **bool** | Indicates if this transaction created a new contract. Recipient address is the address of the new contract. | [optional] 
-**is_external** | **bool** | Indicates if this transaction is an external transaction for an eth like currency. | [optional] 
-**tx_hash** | **str** | Transaction hash | [optional] 
-**currency** | **str** | crypto currency code | [optional] 
-**height** | [**Height**](Height.md) |  | [optional] 
-**timestamp** | **int** | Timestamp in posix seconds format | [optional] 
-**input_value** | [**Values**](Values.md) |  | [optional] 
-**output_value** | [**Values**](Values.md) |  | [optional] 
-**identifier** | **str** | uniquely identifies a transaction or a sub transaction like a token transaction or trace. | [optional] 
-**network** | **str** | crypto currency code | [optional] 
-**value** | [**Values**](Values.md) |  | [optional] 
-**from_address** | **str** | Address | [optional] 
-**to_address** | **str** | Address | [optional] 
-**any string name** | **bool, date, datetime, dict, float, int, list, str, none_type** | any string name can be used but the value must be the correct type | [optional]
+**contract_creation** | **bool** |  | [optional] 
+**is_external** | **bool** |  | [optional] 
 
+## Example
+
+```python
+from graphsense.models.link import Link
+
+# TODO update the JSON string below
+json = "{}"
+# create an instance of Link from a JSON string
+link_instance = Link.from_json(json)
+# print the JSON string representation of the object
+print(Link.to_json())
+
+# convert the object into a dict
+link_dict = link_instance.to_dict()
+# create an instance of Link from a dict
+link_from_dict = Link.from_dict(link_dict)
+```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
 

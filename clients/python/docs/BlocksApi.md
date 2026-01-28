@@ -5,7 +5,7 @@ All URIs are relative to *https://api.ikna.io*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**get_block**](BlocksApi.md#get_block) | **GET** /{currency}/blocks/{height} | Get a block by its height
-[**get_block_by_date**](BlocksApi.md#get_block_by_date) | **GET** /{currency}/block_by_date/{date} | Get the closest blocks given a timestamp
+[**get_block_by_date**](BlocksApi.md#get_block_by_date) | **GET** /{currency}/block_by_date/{date} | Get block by date
 [**list_block_txs**](BlocksApi.md#list_block_txs) | **GET** /{currency}/blocks/{height}/txs | Get block transactions
 
 
@@ -14,17 +14,18 @@ Method | HTTP request | Description
 
 Get a block by its height
 
+Get a block by its height
+
 ### Example
 
 * Api Key Authentication (api_key):
+
 ```python
-import time
-from dateutil.parser import parse as dateutil_parser
 import graphsense
-from graphsense.api import blocks_api
-from graphsense.model.block import Block
-from graphsense.model.height import Height
+from graphsense.models.block import Block
+from graphsense.rest import ApiException
 from pprint import pprint
+
 # Defining the host is optional and defaults to https://api.ikna.io
 # See configuration.py for a list of all supported configuration parameters.
 configuration = graphsense.Configuration(
@@ -37,7 +38,7 @@ configuration = graphsense.Configuration(
 # satisfies your auth use case.
 
 # Configure API key authorization: api_key
-configuration.api_key['api_key'] = 'YOUR_API_KEY'
+configuration.api_key['api_key'] = os.environ["API_KEY"]
 
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['api_key'] = 'Bearer'
@@ -45,39 +46,33 @@ configuration.api_key['api_key'] = 'YOUR_API_KEY'
 # Enter a context with an instance of the API client
 with graphsense.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = blocks_api.BlocksApi(api_client)
-    currency = "btc" # str | The cryptocurrency code (e.g., btc)
-    height = Height(1) # Height | The block height
+    api_instance = graphsense.BlocksApi(api_client)
+    currency = 'currency_example' # str | The cryptocurrency code (e.g., btc)
+    height = 56 # int | The block height
 
-    # example passing only required values which don't have defaults set
     try:
         # Get a block by its height
         api_response = api_instance.get_block(currency, height)
+        print("The response of BlocksApi->get_block:\n")
         pprint(api_response)
-    except graphsense.ApiException as e:
+    except Exception as e:
         print("Exception when calling BlocksApi->get_block: %s\n" % e)
 ```
 
 
+
 ### Parameters
+
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **currency** | **str**| The cryptocurrency code (e.g., btc) |
- **height** | **Height**| The block height |
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
-**async_req** | **bool** | Execute request asynchronously | [optional] default is False.
+ **currency** | **str**| The cryptocurrency code (e.g., btc) | 
+ **height** | **int**| The block height | 
 
 ### Return type
 
 [**Block**](Block.md)
 
-**Notes:**
-
-* If `async_req` parameter is True, the request will be called asynchronously.  The method will return the request thread.  If parameter `async_req` is False or missing, then the method will return the response directly.
-
-* If the HTTP response code is `429 Too Many Requests` due to rate limit policies, the underlying `urllib3` HTTP client will automatically stall the request as long as advised by the `Retry-After` header.
-
 ### Authorization
 
 [api_key](../README.md#api_key)
@@ -87,29 +82,32 @@ Name | Type | Description  | Notes
  - **Content-Type**: Not defined
  - **Accept**: application/json
 
-
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | OK |  -  |
+**200** | Successful Response |  -  |
+**422** | Validation Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_block_by_date**
-> BlockAtDate get_block_by_date(currency, date)
+> BlockAtDate get_block_by_date(currency, var_date)
 
-Get the closest blocks given a timestamp
+Get block by date
+
+Get block by date
 
 ### Example
 
 * Api Key Authentication (api_key):
+
 ```python
-import time
-from dateutil.parser import parse as dateutil_parser
 import graphsense
-from graphsense.api import blocks_api
-from graphsense.model.block_at_date import BlockAtDate
+from graphsense.models.block_at_date import BlockAtDate
+from graphsense.rest import ApiException
 from pprint import pprint
+
 # Defining the host is optional and defaults to https://api.ikna.io
 # See configuration.py for a list of all supported configuration parameters.
 configuration = graphsense.Configuration(
@@ -122,7 +120,7 @@ configuration = graphsense.Configuration(
 # satisfies your auth use case.
 
 # Configure API key authorization: api_key
-configuration.api_key['api_key'] = 'YOUR_API_KEY'
+configuration.api_key['api_key'] = os.environ["API_KEY"]
 
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['api_key'] = 'Bearer'
@@ -130,38 +128,32 @@ configuration.api_key['api_key'] = 'YOUR_API_KEY'
 # Enter a context with an instance of the API client
 with graphsense.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = blocks_api.BlocksApi(api_client)
-    currency = "btc" # str | The cryptocurrency code (e.g., btc)
-    date = dateutil_parser('2017-07-21T17:32:28Z') # datetime | The time of the block
+    api_instance = graphsense.BlocksApi(api_client)
+    currency = 'currency_example' # str | The cryptocurrency code (e.g., btc)
+    var_date = 'var_date_example' # str | The date (YYYY-MM-DD)
 
-    # example passing only required values which don't have defaults set
     try:
-        # Get the closest blocks given a timestamp
-        api_response = api_instance.get_block_by_date(currency, date)
+        # Get block by date
+        api_response = api_instance.get_block_by_date(currency, var_date)
+        print("The response of BlocksApi->get_block_by_date:\n")
         pprint(api_response)
-    except graphsense.ApiException as e:
+    except Exception as e:
         print("Exception when calling BlocksApi->get_block_by_date: %s\n" % e)
 ```
 
 
+
 ### Parameters
+
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **currency** | **str**| The cryptocurrency code (e.g., btc) |
- **date** | **datetime**| The time of the block |
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
-**async_req** | **bool** | Execute request asynchronously | [optional] default is False.
+ **currency** | **str**| The cryptocurrency code (e.g., btc) | 
+ **var_date** | **str**| The date (YYYY-MM-DD) | 
 
 ### Return type
 
 [**BlockAtDate**](BlockAtDate.md)
-
-**Notes:**
-
-* If `async_req` parameter is True, the request will be called asynchronously.  The method will return the request thread.  If parameter `async_req` is False or missing, then the method will return the response directly.
-
-* If the HTTP response code is `429 Too Many Requests` due to rate limit policies, the underlying `urllib3` HTTP client will automatically stall the request as long as advised by the `Retry-After` header.
 
 ### Authorization
 
@@ -172,30 +164,32 @@ Name | Type | Description  | Notes
  - **Content-Type**: Not defined
  - **Accept**: application/json
 
-
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | OK |  -  |
+**200** | Successful Response |  -  |
+**422** | Validation Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_block_txs**
-> [Tx] list_block_txs(currency, height)
+> List[Tx] list_block_txs(currency, height)
+
+Get block transactions
 
 Get block transactions
 
 ### Example
 
 * Api Key Authentication (api_key):
+
 ```python
-import time
-from dateutil.parser import parse as dateutil_parser
 import graphsense
-from graphsense.api import blocks_api
-from graphsense.model.tx import Tx
-from graphsense.model.height import Height
+from graphsense.models.tx import Tx
+from graphsense.rest import ApiException
 from pprint import pprint
+
 # Defining the host is optional and defaults to https://api.ikna.io
 # See configuration.py for a list of all supported configuration parameters.
 configuration = graphsense.Configuration(
@@ -208,7 +202,7 @@ configuration = graphsense.Configuration(
 # satisfies your auth use case.
 
 # Configure API key authorization: api_key
-configuration.api_key['api_key'] = 'YOUR_API_KEY'
+configuration.api_key['api_key'] = os.environ["API_KEY"]
 
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['api_key'] = 'Bearer'
@@ -216,38 +210,32 @@ configuration.api_key['api_key'] = 'YOUR_API_KEY'
 # Enter a context with an instance of the API client
 with graphsense.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = blocks_api.BlocksApi(api_client)
-    currency = "btc" # str | The cryptocurrency code (e.g., btc)
-    height = Height(1) # Height | The block height
+    api_instance = graphsense.BlocksApi(api_client)
+    currency = 'currency_example' # str | The cryptocurrency code (e.g., btc)
+    height = 56 # int | The block height
 
-    # example passing only required values which don't have defaults set
     try:
         # Get block transactions
         api_response = api_instance.list_block_txs(currency, height)
+        print("The response of BlocksApi->list_block_txs:\n")
         pprint(api_response)
-    except graphsense.ApiException as e:
+    except Exception as e:
         print("Exception when calling BlocksApi->list_block_txs: %s\n" % e)
 ```
 
 
+
 ### Parameters
+
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **currency** | **str**| The cryptocurrency code (e.g., btc) |
- **height** | **Height**| The block height |
-**_preload_content** | **bool** | If False, the urllib3.HTTPResponse object will be returned without reading/decoding response data. | [optional] default is True.
-**async_req** | **bool** | Execute request asynchronously | [optional] default is False.
+ **currency** | **str**| The cryptocurrency code (e.g., btc) | 
+ **height** | **int**| The block height | 
 
 ### Return type
 
-[**[Tx]**](Tx.md)
-
-**Notes:**
-
-* If `async_req` parameter is True, the request will be called asynchronously.  The method will return the request thread.  If parameter `async_req` is False or missing, then the method will return the response directly.
-
-* If the HTTP response code is `429 Too Many Requests` due to rate limit policies, the underlying `urllib3` HTTP client will automatically stall the request as long as advised by the `Retry-After` header.
+[**List[Tx]**](Tx.md)
 
 ### Authorization
 
@@ -258,11 +246,12 @@ Name | Type | Description  | Notes
  - **Content-Type**: Not defined
  - **Accept**: application/json
 
-
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | OK |  -  |
+**200** | Successful Response |  -  |
+**422** | Validation Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

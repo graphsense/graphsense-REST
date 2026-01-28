@@ -1,15 +1,33 @@
 # TokenConfig
 
+Token configuration model.
 
 ## Properties
+
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**ticker** | **str** | ticker symbol of the currency e.g. USDT | 
-**decimals** | **int** | the number of digits after the comma. Values are always delivered as integers. This value can be used to set the decimal point at the right place. | 
-**peg_currency** | **str** | is set if token is a stablecoin. It holds the thicker symbol of the currency the tokens is pegged to. | [optional] 
-**contract_address** | **str** | the contract address of the token on the blockchain. This is only set for tokens that are not native to the blockchain. | [optional] 
-**any string name** | **bool, date, datetime, dict, float, int, list, str, none_type** | any string name can be used but the value must be the correct type | [optional]
+**ticker** | **str** |  | 
+**decimals** | **int** |  | 
+**peg_currency** | **str** |  | [optional] 
+**contract_address** | **str** |  | [optional] 
 
+## Example
+
+```python
+from graphsense.models.token_config import TokenConfig
+
+# TODO update the JSON string below
+json = "{}"
+# create an instance of TokenConfig from a JSON string
+token_config_instance = TokenConfig.from_json(json)
+# print the JSON string representation of the object
+print(TokenConfig.to_json())
+
+# convert the object into a dict
+token_config_dict = token_config_instance.to_dict()
+# create an instance of TokenConfig from a dict
+token_config_from_dict = TokenConfig.from_dict(token_config_dict)
+```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
 

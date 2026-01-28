@@ -1,19 +1,37 @@
 # ActorContext
 
+Actor context model.
 
 ## Properties
+
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**uris** | **[str]** | list of additonal uris identifying the actor | 
-**images** | **[str]** | list of uris to logos of the actor | 
-**refs** | **[str]** | list of uris to further information of the actors | 
-**coingecko_ids** | **[str]** | list of references to coingecko exchanges or coins | 
-**defilama_ids** | **[str]** | list of references to defilama | 
-**twitter_handle** | **str** | semi-colon separated list of twitter handles used by the actor | [optional] 
-**github_organisation** | **str** | semi-colon separated list of github organisations used by the actor | [optional] 
-**legal_name** | **str** | Name of the legal entity registerd by the actor. | [optional] 
-**any string name** | **bool, date, datetime, dict, float, int, list, str, none_type** | any string name can be used but the value must be the correct type | [optional]
+**uris** | **List[str]** |  | 
+**images** | **List[str]** |  | 
+**refs** | **List[str]** |  | 
+**coingecko_ids** | **List[str]** |  | 
+**defilama_ids** | **List[str]** |  | 
+**twitter_handle** | **str** |  | [optional] 
+**github_organisation** | **str** |  | [optional] 
+**legal_name** | **str** |  | [optional] 
 
+## Example
+
+```python
+from graphsense.models.actor_context import ActorContext
+
+# TODO update the JSON string below
+json = "{}"
+# create an instance of ActorContext from a JSON string
+actor_context_instance = ActorContext.from_json(json)
+# print the JSON string representation of the object
+print(ActorContext.to_json())
+
+# convert the object into a dict
+actor_context_dict = actor_context_instance.to_dict()
+# create an instance of ActorContext from a dict
+actor_context_from_dict = ActorContext.from_dict(actor_context_dict)
+```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
 

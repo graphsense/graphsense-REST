@@ -1,24 +1,42 @@
 # ExternalConversion
 
+External conversion (DEX swap or bridge) model.
 
 ## Properties
+
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **conversion_type** | **str** |  | 
-**from_address** | **str** | Provider of the input assets of the external conversion | 
-**to_address** | **str** | Receiver of the output assets of the external conversion | 
-**from_asset** | **str** | Asset converted from | 
-**to_asset** | **str** | Asset converted to | 
-**from_amount** | **str** | Amount of asset converted from | 
-**to_amount** | **str** | Amount of asset converted to | 
-**from_asset_transfer** | **str** | Initial asset transfer starting the conversion process | 
-**to_asset_transfer** | **str** | Output asset transfer ending the conversion process | 
-**from_network** | **str** | Network where the initial payment took place | 
-**to_network** | **str** | Network where the concluding payment took place | 
-**from_is_supported_asset** | **bool** | Whether the from asset is a supported asset | 
-**to_is_supported_asset** | **bool** | Whether the to asset is a supported asset | 
-**any string name** | **bool, date, datetime, dict, float, int, list, str, none_type** | any string name can be used but the value must be the correct type | [optional]
+**from_address** | **str** |  | 
+**to_address** | **str** |  | 
+**from_asset** | **str** |  | 
+**to_asset** | **str** |  | 
+**from_amount** | **str** |  | 
+**to_amount** | **str** |  | 
+**from_asset_transfer** | **str** |  | 
+**to_asset_transfer** | **str** |  | 
+**from_network** | **str** |  | 
+**to_network** | **str** |  | 
+**from_is_supported_asset** | **bool** |  | 
+**to_is_supported_asset** | **bool** |  | 
 
+## Example
+
+```python
+from graphsense.models.external_conversion import ExternalConversion
+
+# TODO update the JSON string below
+json = "{}"
+# create an instance of ExternalConversion from a JSON string
+external_conversion_instance = ExternalConversion.from_json(json)
+# print the JSON string representation of the object
+print(ExternalConversion.to_json())
+
+# convert the object into a dict
+external_conversion_dict = external_conversion_instance.to_dict()
+# create an instance of ExternalConversion from a dict
+external_conversion_from_dict = ExternalConversion.from_dict(external_conversion_dict)
+```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
 

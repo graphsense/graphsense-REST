@@ -2,37 +2,99 @@
 name = "graphsense-python"
 version = "1.16.0rc2"
 description = "GraphSense API"
-readme = { file = "README.md", content-type = "text/markdown; charset=UTF-8; variant=GFM" }
-requires-python = ">=3.6"
-dependencies = [
-    "urllib3 >= 1.25.3",
-    "python-dateutil>= 2.5.3",
-]
-keywords = ["OpenAPI", "OpenAPI-Generator", "GraphSense API"]
 authors = [
-    { name = "Iknaio Cryptoasset Analytics GmbH", email = "contact@ikna.io" }
+  {name = "Iknaio Cryptoasset Analytics GmbH",email = "contact@ikna.io"},
 ]
-maintainers = [
-    { name = "Iknaio Cryptoasset Analytics GmbH", email = "contact@ikna.io" }
+readme = "README.md"
+keywords = ["OpenAPI", "OpenAPI-Generator", "GraphSense API"]
+requires-python = ">=3.9"
+
+dependencies = [
+  "urllib3 (>=2.1.0,<3.0.0)",
+  "python-dateutil (>=2.8.2)",
+  "pydantic (>=2)",
+  "typing-extensions (>=4.7.1)",
 ]
 
 [project.urls]
-Homepage = "https://graphsense.github.io/"
-Source = "https://github.com/graphsense/graphsense-REST/tree/master/clients/python"
-Changelog = "https://github.com/graphsense/graphsense-REST/tree/master/CHANGELOG.md"
-"Bug Tracker" = "https://github.com/graphsense/graphsense-rest/issues"
+Repository = "https://github.com/GIT_USER_ID/GIT_REPO_ID"
+
+[tool.poetry]
+requires-poetry = ">=2.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">= 7.2.1"
+pytest-cov = ">= 2.8.1"
+tox = ">= 3.9.0"
+flake8 = ">= 4.0.0"
+types-python-dateutil = ">= 2.8.19.14"
+mypy = ">= 1.5"
+
 
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
-
-[tool.setuptools.packages.find]
-exclude = ["test", "tests", "clients"]
 
 [dependency-groups]
 dev = [
-    "pypandoc>=1.14",
+    "pytest>=8.4.2",
+    "pytest-vcr>=1.0.2",
 ]
 
-[tool.setuptools]
-include-package-data = true
+[tool.pylint.'MESSAGES CONTROL']
+extension-pkg-whitelist = "pydantic"
+
+[tool.mypy]
+files = [
+  "graphsense",
+  #"test",  # auto-generated tests
+  "tests", # hand-written tests
+]
+# TODO: enable "strict" once all these individual checks are passing
+# strict = true
+
+# List from: https://mypy.readthedocs.io/en/stable/existing_code.html#introduce-stricter-options
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+
+## Getting these passing should be easy
+strict_equality = true
+extra_checks = true
+
+## Strongly recommend enabling this one as soon as you can
+check_untyped_defs = true
+
+## These shouldn't be too much additional work, but may be tricky to
+## get passing if you use a lot of untyped libraries
+disallow_subclassing_any = true
+disallow_untyped_decorators = true
+disallow_any_generics = true
+
+### These next few are various gradations of forcing use of type annotations
+#disallow_untyped_calls = true
+#disallow_incomplete_defs = true
+#disallow_untyped_defs = true
+#
+### This one isn't too hard to get passing, but return on investment is lower
+#no_implicit_reexport = true
+#
+### This one can be tricky to get passing if you use a lot of untyped libraries
+#warn_return_any = true
+
+[[tool.mypy.overrides]]
+module = [
+  "graphsense.configuration",
+]
+warn_unused_ignores = true
+strict_equality = true
+extra_checks = true
+check_untyped_defs = true
+disallow_subclassing_any = true
+disallow_untyped_decorators = true
+disallow_any_generics = true
+disallow_untyped_calls = true
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
+no_implicit_reexport = true
+warn_return_any = true

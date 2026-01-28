@@ -147,12 +147,13 @@ def test_conversions():
 
 
     # thor BTC OP RETURN
-    call_7 = "eth/txs/0xC0915244DC52B5EFC4F602A7C68874D689AB6F8B71D151D39244617030DB89E0/conversions"
-    #call_7_2 = "btc/txs/0B7B76EF969D20D3015CA92726F4BA0E2070D6920DDCAC2E61ABB07C72FD1878/conversions"
+    call_7_2 = "eth/txs/9ADD0876DC5478BC9658C10033AC59B8C504A5122266DBBBDE289BEEF2DF3D97/conversions" # bridge eth -> btc with log, now supported via OP RETURN
+    call_7 = "eth/txs/0xC0915244DC52B5EFC4F602A7C68874D689AB6F8B71D151D39244617030DB89E0/conversions" # bridge eth -> btc without log, direct memo, now supported
+    #call_7_3 = "btc/txs/0B7B76EF969D20D3015CA92726F4BA0E2070D6920DDCAC2E61ABB07C72FD1878/conversions"
 
     calls = [
         call_1, call_2, call_3_send, call_3_receive, call_3_refund, call_4_eth_to_token,
-        call_4_eth_to_btc_thorchain, call_5, call_6, call_7#, call_7_2
+        call_4_eth_to_btc_thorchain, call_5, call_6, call_7_2, call_7, #, call_7_2
     ]
     for call in calls:
         logger.info(f"Testing call: {call}")

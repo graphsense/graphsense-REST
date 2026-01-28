@@ -1,14 +1,32 @@
 # SearchResult
 
+Search result model.
 
 ## Properties
+
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**currencies** | [**[SearchResultByCurrency]**](SearchResultByCurrency.md) |  | 
-**labels** | [**SearchResultLabels**](SearchResultLabels.md) |  | 
-**actors** | [**LabeledItemRefs**](LabeledItemRefs.md) |  | [optional] 
-**any string name** | **bool, date, datetime, dict, float, int, list, str, none_type** | any string name can be used but the value must be the correct type | [optional]
+**currencies** | [**List[SearchResultByCurrency]**](SearchResultByCurrency.md) |  | 
+**labels** | **List[str]** |  | 
+**actors** | [**List[LabeledItemRef]**](LabeledItemRef.md) |  | [optional] 
 
+## Example
+
+```python
+from graphsense.models.search_result import SearchResult
+
+# TODO update the JSON string below
+json = "{}"
+# create an instance of SearchResult from a JSON string
+search_result_instance = SearchResult.from_json(json)
+# print the JSON string representation of the object
+print(SearchResult.to_json())
+
+# convert the object into a dict
+search_result_dict = search_result_instance.to_dict()
+# create an instance of SearchResult from a dict
+search_result_from_dict = SearchResult.from_dict(search_result_dict)
+```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
 

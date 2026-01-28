@@ -11,7 +11,7 @@ NUM_THREADS ?= 1
 
 # Migration test settings
 OLD_SERVER_PORT ?= 9001
-NEW_SERVER_PORT ?= 9003  # Note: adev uses OLD_SERVER_PORT+1 for aux/livereload server
+NEW_SERVER_PORT ?= 9000  # Note: adev uses OLD_SERVER_PORT+1 for aux/livereload server
 MIGRATION_BASE_REF ?= master
 WORKTREE_DIR ?= ../.graphsense-rest-old
 
