@@ -44,7 +44,6 @@ class AddressTxUtxo(BaseModel):
         return validated
 
 
-
     model_config = ConfigDict(
         populate_by_name=True,
         validate_assignment=True,

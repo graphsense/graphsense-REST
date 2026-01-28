@@ -60,29 +60,75 @@ class Entity(BaseModel):
 
         instance = Entity.model_construct()
         error_messages = []
-        # validate data type: Entity (or dict that can become Entity)
-        if isinstance(v, Entity):
-            return v
-
-        # Check if it's a dict (Entity-like object)
-        if isinstance(v, dict):
+        # validate data type: Entity
+        if not isinstance(v, Entity):
+            error_messages.append(f"Error! Input type `{type(v)}` is not `Entity`")
+        else:
             return v
 
         # validate data type: int
-        if isinstance(v, int):
-            try:
-                instance.anyof_schema_2_validator = v
-                return v
-            except (ValidationError, ValueError) as e:
-                error_messages.append(str(e))
-        else:
-            error_messages.append(f"Error! Input type `{type(v)}` is not `Entity`, `dict`, or `int`")
-
+        try:
+            instance.anyof_schema_2_validator = v
+            return v
+        except (ValidationError, ValueError) as e:
+            error_messages.append(str(e))
         if error_messages:
             # no match
             raise ValueError("No match found when setting the actual_instance in Entity with anyOf schemas: Entity, int. Details: " + ", ".join(error_messages))
         else:
             return v
+    def __getattr__(self, name: str):
+        """Delegate attribute access to actual_instance for backward compatibility.
+
+        This allows code like `tx.height` instead of `tx.actual_instance.height`.
+        """
+        if name.startswith('_') or name in (
+            'actual_instance', 'one_of_schemas', 'model_config',
+            'discriminator_value_class_map', 'model_fields', 'model_computed_fields',
+            'model_extra', 'model_fields_set', 'oneof_schema_1_validator',
+            'oneof_schema_2_validator', 'oneof_schema_3_validator'
+        ):
+            raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
+
+        actual = object.__getattribute__(self, 'actual_instance')
+        if actual is None:
+            raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
+        return getattr(actual, name)
+
+    def __setattr__(self, name: str, value):
+        """Delegate attribute setting to actual_instance for backward compatibility."""
+        if name.startswith('_') or name in (
+            'actual_instance', 'one_of_schemas', 'model_config',
+            'discriminator_value_class_map', 'model_fields', 'model_computed_fields',
+            'model_extra', 'model_fields_set'
+        ):
+            super().__setattr__(name, value)
+            return
+
+        try:
+            actual = object.__getattribute__(self, 'actual_instance')
+            if actual is not None:
+                setattr(actual, name, value)
+                return
+        except AttributeError:
+            pass
+
+        super().__setattr__(name, value)
+
+    def __getitem__(self, key):
+        """Delegate subscript access to actual_instance for backward compatibility.
+
+        This allows code like `tx['height']` instead of `tx.actual_instance['height']`.
+        """
+        actual = object.__getattribute__(self, 'actual_instance')
+        if actual is None:
+            raise KeyError(key)
+        # Try dict-style access first, then attribute access
+        if hasattr(actual, '__getitem__'):
+            return actual[key]
+        return getattr(actual, key)
+
+
 
     @classmethod
     def from_dict(cls, obj: Dict[str, Any]) -> Self:
@@ -96,28 +142,21 @@ class Entity(BaseModel):
             return instance
 
         error_messages = []
-        # Try to deserialize as int first (simpler case)
+        # anyof_schema_1_validator: Optional[Entity] = None
         try:
-            # validation
-            parsed_data = json.loads(json_str)
-            if isinstance(parsed_data, int):
-                instance.anyof_schema_2_validator = parsed_data
-                # assign value to actual_instance
-                instance.actual_instance = instance.anyof_schema_2_validator
-                return instance
-        except (ValidationError, ValueError) as e:
-            error_messages.append(str(e))
-
-        # If not an int, try to deserialize as Entity object (dict)
-        try:
-            parsed_data = json.loads(json_str)
-            if isinstance(parsed_data, dict):
-                # For Entity objects, just use the dict directly as actual_instance
-                # This avoids the infinite recursion
-                instance.actual_instance = parsed_data
-                return instance
+            instance.actual_instance = Entity.from_json(json_str)
+            return instance
         except (ValidationError, ValueError) as e:
              error_messages.append(str(e))
+        # deserialize data into int
+        try:
+            # validation
+            instance.anyof_schema_2_validator = json.loads(json_str)
+            # assign value to actual_instance
+            instance.actual_instance = instance.anyof_schema_2_validator
+            return instance
+        except (ValidationError, ValueError) as e:
+            error_messages.append(str(e))
 
         if error_messages:
             # no match
@@ -148,46 +187,6 @@ class Entity(BaseModel):
     def to_str(self) -> str:
         """Returns the string representation of the actual instance"""
         return pprint.pformat(self.model_dump())
-
-    def __getitem__(self, key):
-        """Allow dict-style access to entity fields for backward compatibility."""
-        if self.actual_instance is None:
-            raise KeyError(key)
-
-        if isinstance(self.actual_instance, dict):
-            return self.actual_instance[key]
-        elif isinstance(self.actual_instance, int):
-            raise KeyError(f"Cannot access key '{key}' on int entity")
-        else:
-            # For Entity instances
-            return getattr(self.actual_instance, key)
-
-    def __getattr__(self, name):
-        """Allow attribute access to entity fields for backward compatibility."""
-        # Avoid infinite recursion for private attributes and Pydantic internals
-        if name.startswith('_') or name in ('actual_instance', 'anyof_schema_1_validator', 'anyof_schema_2_validator'):
-            raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
-
-        actual = object.__getattribute__(self, 'actual_instance')
-        if actual is None:
-            raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
-
-        if isinstance(actual, dict):
-            if name in actual:
-                from graphsense.compat import DictModel
-                value = actual[name]
-                # Wrap nested dicts in DictModel for attribute access
-                if isinstance(value, dict):
-                    return DictModel(value)
-                elif isinstance(value, list):
-                    return [DictModel(item) if isinstance(item, dict) else item for item in value]
-                return value
-            raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
-        elif isinstance(actual, int):
-            raise AttributeError(f"Cannot access attribute '{name}' on int entity")
-        else:
-            # For Entity instances
-            return getattr(actual, name)
 
 # TODO: Rewrite to not use raise_errors
 Entity.model_rebuild(raise_errors=False)

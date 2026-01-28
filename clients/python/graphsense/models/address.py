@@ -47,15 +47,13 @@ class Address(BaseModel):
     is_contract: Optional[StrictBool] = None
     status: Optional[StrictStr] = None
     __properties: ClassVar[List[str]] = ["currency", "address", "entity", "balance", "total_received", "total_spent", "first_tx", "last_tx", "in_degree", "out_degree", "no_incoming_txs", "no_outgoing_txs", "token_balances", "total_tokens_received", "total_tokens_spent", "actors", "is_contract", "status"]
-    @field_validator('actors', mode='wrap')
+    @field_validator('actors', mode='before')
     @classmethod
-    def wrap_actors_compat(cls, v, handler):
+    def wrap_actors_compat(cls, v):
         """Wrap actors in CompatList for backward compatibility."""
-        validated = handler(v)
-        if validated is not None and not isinstance(validated, CompatList):
-            return CompatList(validated) if isinstance(validated, list) else validated
-        return validated
-
+        if v is not None and not isinstance(v, CompatList):
+            return CompatList(v) if isinstance(v, list) else v
+        return v
 
 
     model_config = ConfigDict(

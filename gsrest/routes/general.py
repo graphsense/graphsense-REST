@@ -14,6 +14,7 @@ from gsrest.routes.base import (
     get_tagstore_access_groups,
     to_json_response,
 )
+from gsrest.security import get_api_key
 import gsrest.service.general_service as service
 
 router = APIRouter()
@@ -49,6 +50,7 @@ async def get_statistics(
     operation_id="search",
     response_model=SearchResult,
     response_model_exclude_none=True,
+    dependencies=[Depends(get_api_key)],
 )
 async def search(
     request: Request,

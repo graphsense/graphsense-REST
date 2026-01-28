@@ -48,25 +48,20 @@ class TxUtxo(BaseModel):
         if validated is not None and not isinstance(validated, CompatInt):
             return CompatInt(validated)
         return validated
-    @field_validator('inputs', mode='wrap')
+    @field_validator('inputs', mode='before')
     @classmethod
-    def wrap_inputs_compat(cls, v, handler):
+    def wrap_inputs_compat(cls, v):
         """Wrap inputs in CompatList for backward compatibility."""
-        validated = handler(v)
-        if validated is not None and not isinstance(validated, CompatList):
-            return CompatList(validated) if isinstance(validated, list) else validated
-        return validated
-    @field_validator('outputs', mode='wrap')
+        if v is not None and not isinstance(v, CompatList):
+            return CompatList(v) if isinstance(v, list) else v
+        return v
+    @field_validator('outputs', mode='before')
     @classmethod
-    def wrap_outputs_compat(cls, v, handler):
+    def wrap_outputs_compat(cls, v):
         """Wrap outputs in CompatList for backward compatibility."""
-        validated = handler(v)
-        if validated is not None and not isinstance(validated, CompatList):
-            return CompatList(validated) if isinstance(validated, list) else validated
-        return validated
-
-
-
+        if v is not None and not isinstance(v, CompatList):
+            return CompatList(v) if isinstance(v, list) else v
+        return v
 
 
 

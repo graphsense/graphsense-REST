@@ -27,7 +27,7 @@ class Rates(BaseModel):
     Exchange rates model.
     """ # noqa: E501
     rates: Optional[List[Rate]] = None
-    height: Optional[StrictInt] = None
+    height: Optional[int] = None
     __properties: ClassVar[List[str]] = ["rates", "height"]
     @field_validator('height', mode='wrap')
     @classmethod
@@ -37,7 +37,6 @@ class Rates(BaseModel):
         if validated is not None and not isinstance(validated, CompatInt):
             return CompatInt(validated)
         return validated
-
 
 
     model_config = ConfigDict(

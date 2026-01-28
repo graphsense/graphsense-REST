@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 from typing import Any, Optional
 
 import yaml
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse
@@ -41,6 +41,7 @@ from gsrest.routes import (
     tokens,
     txs,
 )
+from gsrest.security import get_api_key
 
 CONFIG_FILE = "./instance/config.yaml"
 logger = logging.getLogger(__name__)
@@ -515,16 +516,44 @@ def _register_exception_handlers(app: FastAPI):
 
 
 def _register_routers(app: FastAPI):
-    """Register all API routers on the app"""
+    """Register all API routers on the app.
+
+    Security is applied at the router level for all endpoints except /stats.
+    The general router has mixed security: /stats is public, /search requires api_key.
+    """
+    # General router has special handling - /stats is public, /search requires auth
     app.include_router(general.router, tags=["general"])
-    app.include_router(tags.router, tags=["tags"])
-    app.include_router(addresses.router, prefix="/{currency}", tags=["addresses"])
-    app.include_router(blocks.router, prefix="/{currency}", tags=["blocks"])
-    app.include_router(entities.router, prefix="/{currency}", tags=["entities"])
-    app.include_router(txs.router, prefix="/{currency}", tags=["txs"])
-    app.include_router(rates.router, prefix="/{currency}", tags=["rates"])
-    app.include_router(tokens.router, prefix="/{currency}", tags=["tokens"])
-    app.include_router(bulk.router, prefix="/{currency}", tags=["bulk"])
+
+    # All other routers require api_key authentication
+    api_key_dep = [Depends(get_api_key)]
+    app.include_router(tags.router, tags=["tags"], dependencies=api_key_dep)
+    app.include_router(
+        addresses.router,
+        prefix="/{currency}",
+        tags=["addresses"],
+        dependencies=api_key_dep,
+    )
+    app.include_router(
+        blocks.router, prefix="/{currency}", tags=["blocks"], dependencies=api_key_dep
+    )
+    app.include_router(
+        entities.router,
+        prefix="/{currency}",
+        tags=["entities"],
+        dependencies=api_key_dep,
+    )
+    app.include_router(
+        txs.router, prefix="/{currency}", tags=["txs"], dependencies=api_key_dep
+    )
+    app.include_router(
+        rates.router, prefix="/{currency}", tags=["rates"], dependencies=api_key_dep
+    )
+    app.include_router(
+        tokens.router, prefix="/{currency}", tags=["tokens"], dependencies=api_key_dep
+    )
+    app.include_router(
+        bulk.router, prefix="/{currency}", tags=["bulk"], dependencies=api_key_dep
+    )
 
 
 def _setup_cors_middleware(app: FastAPI, config: GSRestConfig):
