@@ -79,7 +79,7 @@ class ApiClient:
         header_name=None,
         header_value=None,
         cookie=None,
-        pool_threads=1  # Kept for backward compatibility (not used in v7)
+        pool_threads=1  # Thread pool size for async_req support
     ) -> None:
         # use default configuration if none is provided
         if configuration is None:

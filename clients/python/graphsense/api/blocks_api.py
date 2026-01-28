@@ -11,7 +11,6 @@
 
 import warnings
 from pydantic import Field, StrictFloat, StrictStr, StrictInt
-from datetime import datetime as _datetime
 from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
@@ -60,7 +59,7 @@ def validate_call_compat(func):
     validated_func = _validate_call(config=_validate_call_config)(func)
     @wraps(func)
     def wrapper(*args, **kwargs):
-        # Remove legacy v5 kwargs that v7 doesn't support
+        # Capture async_req before removing it
         async_req = kwargs.pop('async_req', False)
         kwargs.pop('_preload_content', None)
         kwargs.pop('_return_http_data_only', None)
@@ -93,6 +92,13 @@ def validate_call_compat(func):
                 if thread_pool is not None:
                     future = thread_pool.submit(validated_func, *args, **kwargs)
                     return _AsyncResult(future)
+                else:
+                    import warnings
+                    warnings.warn(
+                        "async_req=True but no thread pool available (pool_threads=0). "
+                        "Running synchronously. Set pool_threads >= 1 for async execution.",
+                        UserWarning
+                    )
             # No thread pool available, fall through to sync call
 
         return validated_func(*args, **kwargs)
@@ -395,7 +401,7 @@ class BlocksApi:
     def get_block_by_date(
         self,
         currency: Annotated[StrictStr, Field(description="The cryptocurrency code (e.g., btc)")],
-        var_date: Annotated[Union[StrictStr, _datetime], Field(description="The date (YYYY-MM-DD)")],
+        var_date: Annotated[StrictStr, Field(description="The date (YYYY-MM-DD)")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -467,7 +473,7 @@ class BlocksApi:
     def get_block_by_date_with_http_info(
         self,
         currency: Annotated[StrictStr, Field(description="The cryptocurrency code (e.g., btc)")],
-        var_date: Annotated[Union[StrictStr, _datetime], Field(description="The date (YYYY-MM-DD)")],
+        var_date: Annotated[StrictStr, Field(description="The date (YYYY-MM-DD)")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -539,7 +545,7 @@ class BlocksApi:
     def get_block_by_date_without_preload_content(
         self,
         currency: Annotated[StrictStr, Field(description="The cryptocurrency code (e.g., btc)")],
-        var_date: Annotated[Union[StrictStr, _datetime], Field(description="The date (YYYY-MM-DD)")],
+        var_date: Annotated[StrictStr, Field(description="The date (YYYY-MM-DD)")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -613,10 +619,6 @@ class BlocksApi:
         _host_index,
     ) -> RequestSerialized:
 
-
-        # Convert datetime to string for backward compatibility
-        if isinstance(var_date, _datetime):
-            var_date = var_date.strftime('%Y-%m-%d')
         _host = None
 
         _collection_formats: Dict[str, str] = {

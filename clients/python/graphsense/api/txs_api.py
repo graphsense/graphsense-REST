@@ -29,6 +29,7 @@ from graphsense.rest import RESTResponseType
 
 # Backward compatibility wrapper for @validate_call to accept async_req
 from functools import wraps
+from datetime import datetime as _dt_compat
 from pydantic import ConfigDict
 _validate_call_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -60,10 +61,29 @@ def validate_call_compat(func):
     validated_func = _validate_call(config=_validate_call_config)(func)
     @wraps(func)
     def wrapper(*args, **kwargs):
-        # Remove legacy v5 kwargs that v7 doesn't support
+        # Capture async_req before removing it
         async_req = kwargs.pop('async_req', False)
         kwargs.pop('_preload_content', None)
         kwargs.pop('_return_http_data_only', None)
+        # Convert datetime to date string for date parameters (backward compatibility)
+        # Preserve full ISO 8601 format when datetime has time/timezone info
+        for key in list(kwargs.keys()):
+            if 'date' in key.lower() and isinstance(kwargs[key], _dt_compat):
+                dt = kwargs[key]
+                if dt.hour or dt.minute or dt.second or dt.tzinfo:
+                    # Preserve full datetime with timezone (ISO 8601)
+                    kwargs[key] = dt.isoformat()
+                else:
+                    # Date-only (midnight, no timezone) - use simple format
+                    kwargs[key] = dt.strftime('%Y-%m-%d')
+        # Also check positional args - var_date is typically arg[1]
+        args = list(args)
+        for i, arg in enumerate(args):
+            if isinstance(arg, _dt_compat):
+                if arg.hour or arg.minute or arg.second or arg.tzinfo:
+                    args[i] = arg.isoformat()
+                else:
+                    args[i] = arg.strftime('%Y-%m-%d')
 
         # Handle async_req: submit to thread pool if available
         if async_req:
@@ -74,6 +94,13 @@ def validate_call_compat(func):
                 if thread_pool is not None:
                     future = thread_pool.submit(validated_func, *args, **kwargs)
                     return _AsyncResult(future)
+                else:
+                    import warnings
+                    warnings.warn(
+                        "async_req=True but no thread pool available (pool_threads=0). "
+                        "Running synchronously. Set pool_threads >= 1 for async execution.",
+                        UserWarning
+                    )
             # No thread pool available, fall through to sync call
 
         return validated_func(*args, **kwargs)
