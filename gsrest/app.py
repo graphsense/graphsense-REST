@@ -599,19 +599,38 @@ def _register_routers(app: FastAPI):
 
 
 def _setup_cors_middleware(app: FastAPI, config: GSRestConfig):
-    """Setup CORS middleware on the app"""
+    """Setup CORS middleware on the app.
+
+    When ALLOWED_ORIGINS contains "*", we use allow_origin_regex instead of
+    allow_origins=["*"]. This makes the middleware echo back the requesting
+    Origin header instead of sending literal "*", which allows credentials
+    to work (browsers reject Access-Control-Allow-Origin: * with credentials).
+    """
     origins = config.ALLOWED_ORIGINS
     if isinstance(origins, str):
-        origins = [origins] if origins != "*" else ["*"]
+        origins = [origins]
 
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=origins,
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-        expose_headers=["*"],
-    )
+    # allow_origins=["*"] sends literal "*" which is incompatible with credentials.
+    # Using allow_origin_regex=".*" echoes the Origin header, allowing credentials.
+    # Check if "*" is anywhere in the list (not just exactly ["*"])
+    if "*" in origins:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origin_regex=".*",
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+            expose_headers=["*"],
+        )
+    else:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=origins,
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+            expose_headers=["*"],
+        )
 
 
 def create_app(
