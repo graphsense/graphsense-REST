@@ -678,7 +678,7 @@ class TestFastAPIMigrationBasic(MigrationTestBase):
     @pytest.mark.migration
     def test_supported_tokens(self):
         """Test supported tokens endpoint."""
-        self.assert_endpoint_equal("eth/supported_tokens/")
+        self.assert_endpoint_equal("eth/supported_tokens")
 
 
 class TestSearchParameters(MigrationTestBase):
@@ -1064,7 +1064,7 @@ class TestMultiCurrency(MigrationTestBase):
     @pytest.mark.parametrize("currency", ["btc", "eth"])
     def test_supported_tokens_multi_currency(self, currency):
         """Test supported_tokens across different currencies."""
-        self.assert_endpoint_equal(f"{currency}/supported_tokens/")
+        self.assert_endpoint_equal(f"{currency}/supported_tokens")
 
 
 class TestPagination(MigrationTestBase):
@@ -1222,7 +1222,7 @@ class TestETHSpecificEndpoints(MigrationTestBase):
     @pytest.mark.migration
     def test_eth_supported_tokens(self):
         """Test ETH supported tokens with pagination."""
-        self.assert_endpoint_equal("eth/supported_tokens/?pagesize=10")
+        self.assert_endpoint_equal("eth/supported_tokens?pagesize=10")
 
 
 class TestLinksEndpoints(MigrationTestBase):
@@ -1468,12 +1468,12 @@ class TestMultipleCurrencies(MigrationTestBase):
     @pytest.mark.parametrize("currency", ["btc", "bch", "ltc", "zec"])
     def test_supported_tokens_utxo(self, currency):
         """Test supported tokens for UTXO chains."""
-        self.assert_endpoint_equal(f"{currency}/supported_tokens/")
+        self.assert_endpoint_equal(f"{currency}/supported_tokens")
 
     @pytest.mark.migration
     def test_trx_supported_tokens(self):
         """Test TRX supported tokens."""
-        self.assert_endpoint_equal("trx/supported_tokens/")
+        self.assert_endpoint_equal("trx/supported_tokens")
 
 
 class TestOnlyIdsFilter(MigrationTestBase):
@@ -1632,6 +1632,49 @@ class TestTxsListExtended(MigrationTestBase):
         self.assert_endpoint_equal(
             f"eth/addresses/{ETH_ADDRESS}/txs?min_height=20698064&max_height=22567324&order=asc&pagesize=5"
         )
+
+
+class TestRouteConventions:
+    """Tests for route definition conventions (no running servers needed)."""
+
+    def test_no_trailing_slashes_in_routes(self):
+        """Ensure no routes have trailing slashes (causes 307 redirects)."""
+        from gsrest.routes import (
+            addresses,
+            blocks,
+            bulk,
+            entities,
+            general,
+            rates,
+            tags,
+            tokens,
+            txs,
+        )
+
+        routers = [
+            ("addresses", addresses.router),
+            ("blocks", blocks.router),
+            ("bulk", bulk.router),
+            ("entities", entities.router),
+            ("general", general.router),
+            ("rates", rates.router),
+            ("tags", tags.router),
+            ("tokens", tokens.router),
+            ("txs", txs.router),
+        ]
+
+        violations = []
+        for module_name, router in routers:
+            for route in router.routes:
+                path = getattr(route, "path", "")
+                # Check for trailing slash (but "/" alone is fine)
+                if path != "/" and path.endswith("/"):
+                    violations.append(f"{module_name}: {path}")
+
+        if violations:
+            msg = "Routes with trailing slashes found (causes 307 redirects):\n"
+            msg += "\n".join(f"  - {v}" for v in violations)
+            assert False, msg
 
 
 if __name__ == "__main__":

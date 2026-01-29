@@ -17,7 +17,7 @@ router = APIRouter()
 
 
 @router.get(
-    "/supported_tokens/",
+    "/supported_tokens",
     summary="Get supported tokens for a currency",
     operation_id="list_supported_tokens",
     response_model=TokenConfigs,
