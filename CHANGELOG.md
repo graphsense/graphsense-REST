@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [26.01.0/1.16.0] - 2026-01-30
+### added
+-  tag access counter extension
+
 ## [25.11.5/1.15.5] - 2026-01-07
 ### removed
 -  removed "Content-Disposition" header from bulk endpoints
