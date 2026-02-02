@@ -256,4 +256,11 @@ def get_username(request) -> Optional[str]:
 
 
 def should_obfuscate_private_tags(request) -> bool:
+    # Check header modifications from plugin middleware first
+    header_mods = getattr(request, "state", None)
+    if header_mods is not None:
+        header_mods = getattr(header_mods, "header_modifications", {})
+        if header_mods.get(GROUPS_HEADER_NAME) == OBFUSCATION_MARKER_GROUP:
+            return True
+    # Fall back to checking actual headers
     return request.headers.get(GROUPS_HEADER_NAME, "") == OBFUSCATION_MARKER_GROUP

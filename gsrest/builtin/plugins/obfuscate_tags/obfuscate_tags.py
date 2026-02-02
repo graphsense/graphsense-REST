@@ -104,7 +104,7 @@ class ObfuscateTags(Plugin):
                 for x in get_request_header(request, GROUPS_HEADER_NAME, "").split(",")
             ]
 
-        obfuscate_tagpack_uri_rule = context.get("config", {}).get(
+        obfuscate_tagpack_uri_rule = (context.get("config") or {}).get(
             "obfuscate_tagpack_uri_rule", None
         )
 

@@ -8,8 +8,8 @@ Usage:
     # Start old server on port 9001
     GS_REST_DEV_PORT=9001 make serve-old
 
-    # Start new FastAPI server on port 9002
-    uv run uvicorn gsrest.app:create_app --factory --port 9002
+    # Start new FastAPI server on port 9000
+    uv run uvicorn gsrest.app:create_app --factory --port 9000
 
     # Run comparison tests
     uv run pytest tests/test_fastapi_migration.py -v -s
@@ -33,12 +33,13 @@ logger = logging.getLogger(__name__)
 
 # Server endpoints - can be overridden via environment variables
 OLD_SERVER = os.environ.get("OLD_SERVER", "http://localhost:9001")
-NEW_SERVER = os.environ.get("NEW_SERVER", "http://localhost:9002")
+NEW_SERVER = os.environ.get("NEW_SERVER", "http://localhost:9000")
 
 HEADERS = {"Content-Type": "application/json", "Accept": "application/json"}
 
 # Test data constants
 BTC_ADDRESS = "1Archive1n2C579dMsAu3iC6tWzuQJz8dN"
+BTC_ADDRESS_PRIVATE_TAGS = "3D4gm7eGSXiEkWS5V3hN9kDVo2eDGBK4eA"  # Address with potentially private tags
 ETH_ADDRESS = "0xdac17f958d2ee523a2206206994597c13d831ec7"
 BTC_ENTITY = 109578
 BTC_TX = "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"
@@ -679,6 +680,55 @@ class TestFastAPIMigrationBasic(MigrationTestBase):
     def test_supported_tokens(self):
         """Test supported tokens endpoint."""
         self.assert_endpoint_equal("eth/supported_tokens")
+
+
+class TestAddressObfuscation(MigrationTestBase):
+    """Test address/entity endpoints to verify tag obfuscation behavior is consistent.
+
+    These tests verify that tag/actor obfuscation works identically between
+    the old aiohttp and new FastAPI implementations for addresses with:
+    - Public tags (1Archive1n2C579dMsAu3iC6tWzuQJz8dN - Internet Archive)
+    - Potentially private tags (3D4gm7eGSXiEkWS5V3hN9kDVo2eDGBK4eA)
+
+    Tests use endpoints where obfuscation is actually applied:
+    - /addresses/{addr}/entity - obfuscates best_address_tag and actors
+    - /addresses/{addr}/tag_summary - obfuscates via tag_transformer in service
+    - /entities/{entity}/tags - obfuscates private tag labels
+    """
+
+    @pytest.mark.migration
+    @pytest.mark.parametrize("address", [BTC_ADDRESS, BTC_ADDRESS_PRIVATE_TAGS])
+    def test_address_entity_obfuscation(self, address):
+        """Test address entity endpoint (obfuscation applies to best_address_tag and actors)."""
+        self.assert_endpoint_equal(f"btc/addresses/{address}/entity")
+
+    @pytest.mark.migration
+    @pytest.mark.parametrize("address", [BTC_ADDRESS, BTC_ADDRESS_PRIVATE_TAGS])
+    def test_tag_summary_obfuscation(self, address):
+        """Test tag_summary endpoint with obfuscation.
+
+        This endpoint uses a tag_transformer in the service layer which checks
+        should_obfuscate_private_tags(). Without private group headers,
+        private tags should be obfuscated.
+        """
+        self.assert_endpoint_equal(
+            f"btc/addresses/{address}/tag_summary?include_best_cluster_tag=true"
+        )
+
+    @pytest.mark.migration
+    @pytest.mark.parametrize("address", [BTC_ADDRESS, BTC_ADDRESS_PRIVATE_TAGS])
+    def test_entity_tags_obfuscation(self, address):
+        """Test entity tags endpoint (obfuscation applies to private tags).
+
+        Looks up the entity ID from the address first, then compares entity tags.
+        """
+        # Get entity ID from address
+        data, status, _ = get_response(NEW_SERVER, f"btc/addresses/{address}/entity")
+        assert status == 200, f"Failed to get entity for {address}"
+        entity_id = data["entity"]
+
+        # Compare entity tags between old and new
+        self.assert_endpoint_equal(f"btc/entities/{entity_id}/tags")
 
 
 class TestSearchParameters(MigrationTestBase):

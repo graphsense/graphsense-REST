@@ -126,6 +126,7 @@ def compare_instances(call) -> Dict[str, Any]:
         logger.error(f"Error during testing: {e}")
         raise
 
+
 @pytest.mark.regression
 def test_conversions():
     """Run the regression test and return the comparison result."""

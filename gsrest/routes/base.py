@@ -62,6 +62,10 @@ class RequestAdapter:
     def headers(self):
         return self._fastapi_request.headers
 
+    @property
+    def state(self):
+        return self._fastapi_request.state
+
 
 def apply_plugin_hooks(request: Request, result):
     """Apply plugin response hooks to a result.

@@ -444,10 +444,11 @@ async def setup_plugins(app: FastAPI):
         )
         builtin_plugin = ObfuscateTags
         name = f"{builtin_plugin.__module__}"
+        short_name = name.split(".")[-1]
         app.state.plugins.append(builtin_plugin)
-        app.state.plugin_contexts[name] = {"config": config.get_plugin_config(name)}
+        plugin_config = config.get_plugin_config(short_name)
+        app.state.plugin_contexts[name] = {"config": plugin_config}
         if hasattr(builtin_plugin, "setup"):
-            plugin_config = config.get_plugin_config(name)
             setup_args = {
                 "config": plugin_config,
                 "context": app.state.plugin_contexts[name],
