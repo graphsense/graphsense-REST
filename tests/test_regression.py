@@ -208,6 +208,33 @@ def test_txs_list():
 
 
 @pytest.mark.regression
+def test_obfuscation():
+    """Test that anonymous users get obfuscated tags (not zero tags).
+
+    This catches the bug where get_show_private_tags() didn't check
+    header_modifications from the plugin middleware.
+    """
+    # Address known to have private tags
+    call = "btc/addresses/3D4gm7eGSXiEkWS5V3hN9kDVo2eDGBK4eA/tag_summary"
+
+    # Get data without auth header (anonymous user)
+    data, _ = get_data_from_new_endpoint(call)
+
+    # Anonymous users should still get tags (not zero)
+    assert data.get("tag_count", 0) > 0, \
+        "Anonymous users should see obfuscated tags, not zero tags"
+
+    # But labels should be obfuscated (empty string)
+    assert data.get("best_label") == "", \
+        f"Labels should be obfuscated for anonymous users, got: {data.get('best_label')}"
+
+    # All label keys in summary should be empty
+    for label_key in data.get("label_summary", {}).keys():
+        assert label_key == "", \
+            f"Label keys should be obfuscated, got: {label_key}"
+
+
+@pytest.mark.regression
 def test_search():
     """Run the regression test and return the comparison result."""
 

@@ -28,7 +28,7 @@ from gsrest.plugins import (
 )
 
 GROUPS_HEADER_NAME = "X-Consumer-Groups"
-NO_OBFUSCATION_MARKER_PATTERN = re.compile(r"(private|tags-private)")
+NO_OBFUSCATION_MARKER_PATTERN = re.compile(r"tags-private")
 OBFUSCATION_MARKER_GROUP = "obfuscate"
 
 

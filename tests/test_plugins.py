@@ -63,9 +63,9 @@ def make_request(path, headers=None, query=""):
 # --- Helper Function Tests ---
 
 @pytest.mark.parametrize("groups,expected", [
-    (["private"], True),
+    (["private"], False),  # Only 'tags-private' is recognized, not bare 'private'
     (["tags-private"], True),
-    (["public", "private"], True),
+    (["public", "tags-private"], True),
     (["public"], False),
     (["obfuscate"], False),
     ([], False),
@@ -110,7 +110,7 @@ class TestObfuscateTagpackUriByRule:
 # --- before_request Tests ---
 
 @pytest.mark.parametrize("path,headers,query", [
-    ("/btc/entities/123", {GROUPS_HEADER_NAME: "private"}, ""),
+    # Only 'tags-private' is recognized, not bare 'private'
     ("/btc/entities/123", {GROUPS_HEADER_NAME: "tags-private"}, ""),
     ("/btc/entities/123/neighbors", {}, "include_labels=true"),
     ("/btc/entities/123/neighbors", {}, "INCLUDE_LABELS=TRUE"),
@@ -190,7 +190,7 @@ class TestBeforeResponseNeighborEntities:
         assert neighbors.neighbors[1].entity.best_address_tag.label == "Kept"
 
 
-@pytest.mark.parametrize("group", ["private", "tags-private"])
+@pytest.mark.parametrize("group", ["tags-private"])  # Only 'tags-private' skips obfuscation
 def test_before_response_skips_with_no_obfuscation_group(group):
     entity = make_entity(tag=make_tag(is_public=False, label="Private"))
     req = make_request("/btc/entities/123", {GROUPS_HEADER_NAME: group})

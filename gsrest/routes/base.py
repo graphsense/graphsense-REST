@@ -115,9 +115,13 @@ def get_show_private_tags(
     if not show_private_tags_conf:
         return False
 
+    # Get header modifications from plugin middleware (if any)
+    header_mods = getattr(request.state, "header_modifications", {})
+
     show_private_tags = True
     for k, v in show_private_tags_conf.get("on_header", {}).items():
-        hval = request.headers.get(k, None)
+        # Check both actual headers and plugin-set header modifications
+        hval = header_mods.get(k) or request.headers.get(k, None)
         if not hval:
             return False
         show_private_tags = show_private_tags and bool(re.match(re.compile(v), hval))
