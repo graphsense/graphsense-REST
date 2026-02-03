@@ -20,6 +20,7 @@ dependencies = [
     "python-dateutil>=2.9.0",
     "redis>=7.1.0",
     "uvicorn[standard]>=0.32.0",
+    "aiohttp>=3.8.0"
 ]
 
 [project.urls]
@@ -92,6 +93,10 @@ exclude = [
 
 [tool.ruff.lint]
 extend-select = ["T201"]
+
+
+[tool.uv.sources]
+graphsense-lib = { path="../graphsense-lib"}
 
 
 [dependency-groups]

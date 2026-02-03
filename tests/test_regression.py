@@ -20,6 +20,13 @@ headers = {
     "Accept": "application/json"
 }
 
+# Headers to simulate authenticated access (what API gateway provides)
+authenticated_headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+    "X-Consumer-Groups": "tags-private"  # Simulate gateway adding this on auth
+}
+
 
 def get_data_from_current_endpoint(endpoint: str, key: str) -> tuple[Dict[str, Any], float]:
     """Get data from the current endpoint with API key authentication."""
@@ -39,12 +46,20 @@ def get_data_from_current_endpoint(endpoint: str, key: str) -> tuple[Dict[str, A
         raise
 
 
-def get_data_from_new_endpoint(endpoint: str) -> tuple[Dict[str, Any], float]:
-    """Get data from the new endpoint without authentication."""
+def get_data_from_new_endpoint(endpoint: str, authenticated: bool = True) -> tuple[Dict[str, Any], float]:
+    """Get data from the new endpoint.
+
+    Args:
+        endpoint: The API endpoint to call
+        authenticated: If True, include headers that simulate API gateway auth.
+                      If False, call without auth headers (for anonymous user tests).
+    """
     now = time.time()
     url = urljoin(new_endpoint, endpoint)
     try:
-        response = requests.get(url, headers=headers)
+        # Use authenticated_headers to simulate what the API gateway provides
+        request_headers = authenticated_headers if authenticated else headers
+        response = requests.get(url, headers=request_headers)
         response.raise_for_status()
         elapsed = time.time() - now
         return response.json(), elapsed
@@ -150,11 +165,14 @@ def test_conversions():
     # thor BTC OP RETURN
     call_7_2 = "eth/txs/9ADD0876DC5478BC9658C10033AC59B8C504A5122266DBBBDE289BEEF2DF3D97/conversions" # bridge eth -> btc with log, now supported via OP RETURN
     call_7 = "eth/txs/0xC0915244DC52B5EFC4F602A7C68874D689AB6F8B71D151D39244617030DB89E0/conversions" # bridge eth -> btc without log, direct memo, now supported
+    call_8 = "eth/txs/e2948634dce13d0998dbd65a0f56ffa8d4f070088cce57cc09cc366981073f9f_I321/conversions" # bridge BTC -> ETH , ETH receiving to_asset_transfer subtx
+    call_8_1 = "eth/txs/e2948634dce13d0998dbd65a0f56ffa8d4f070088cce57cc09cc366981073f9f/conversions" # bridge BTC -> ETH , ETH receiving tx (general, not subtx)
     #call_7_3 = "btc/txs/0B7B76EF969D20D3015CA92726F4BA0E2070D6920DDCAC2E61ABB07C72FD1878/conversions"
 
     calls = [
         call_1, call_2, call_3_send, call_3_receive, call_3_refund, call_4_eth_to_token,
         call_4_eth_to_btc_thorchain, call_5, call_6, call_7_2, call_7, #, call_7_2
+        call_8, call_8_1,
     ]
     for call in calls:
         logger.info(f"Testing call: {call}")
@@ -218,7 +236,7 @@ def test_obfuscation():
     call = "btc/addresses/3D4gm7eGSXiEkWS5V3hN9kDVo2eDGBK4eA/tag_summary"
 
     # Get data without auth header (anonymous user)
-    data, _ = get_data_from_new_endpoint(call)
+    data, _ = get_data_from_new_endpoint(call, authenticated=False)
 
     # Anonymous users should still get tags (not zero)
     assert data.get("tag_count", 0) > 0, \

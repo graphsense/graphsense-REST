@@ -37,6 +37,14 @@ NEW_SERVER = os.environ.get("NEW_SERVER", "http://localhost:9000")
 
 HEADERS = {"Content-Type": "application/json", "Accept": "application/json"}
 
+# Headers that simulate authenticated access with private tags permission
+# The X-Consumer-Groups header is typically set by an API gateway
+AUTHENTICATED_HEADERS = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+    "X-Consumer-Groups": "tags-private",  # Grants access to private tags
+}
+
 # Test data constants
 BTC_ADDRESS = "1Archive1n2C579dMsAu3iC6tWzuQJz8dN"
 BTC_ADDRESS_PRIVATE_TAGS = "3D4gm7eGSXiEkWS5V3hN9kDVo2eDGBK4eA"  # Address with potentially private tags
@@ -74,10 +82,18 @@ def normalize_endpoint_to_pattern(uri: str) -> str:
     return pattern
 
 
-def get_response(base_url: str, endpoint: str, auth: str = "test") -> tuple[dict, int, float]:
-    """Get response from an endpoint, returning (data, status_code, elapsed_time)."""
+def get_response(base_url: str, endpoint: str, auth: str = "test", authenticated: bool = True) -> tuple[dict, int, float]:
+    """Get response from an endpoint, returning (data, status_code, elapsed_time).
+
+    Args:
+        base_url: The server base URL
+        endpoint: The API endpoint to call
+        auth: Authorization header value
+        authenticated: If True, include X-Consumer-Groups for private tags access
+    """
     url = urljoin(base_url + "/", endpoint.lstrip("/"))
-    headers = {**HEADERS, "Authorization": auth}
+    base_headers = AUTHENTICATED_HEADERS if authenticated else HEADERS
+    headers = {**base_headers, "Authorization": auth}
 
     start = time.time()
     response = requests.get(url, headers=headers, timeout=30)
@@ -91,10 +107,19 @@ def get_response(base_url: str, endpoint: str, auth: str = "test") -> tuple[dict
     return data, response.status_code, elapsed
 
 
-def post_response(base_url: str, endpoint: str, body: dict, auth: str = "test") -> tuple[dict, int, float]:
-    """POST request to an endpoint, returning (data, status_code, elapsed_time)."""
+def post_response(base_url: str, endpoint: str, body: dict, auth: str = "test", authenticated: bool = True) -> tuple[dict, int, float]:
+    """POST request to an endpoint, returning (data, status_code, elapsed_time).
+
+    Args:
+        base_url: The server base URL
+        endpoint: The API endpoint to call
+        body: The JSON body to send
+        auth: Authorization header value
+        authenticated: If True, include X-Consumer-Groups for private tags access
+    """
     url = urljoin(base_url + "/", endpoint.lstrip("/"))
-    headers = {**HEADERS, "Authorization": auth}
+    base_headers = AUTHENTICATED_HEADERS if authenticated else HEADERS
+    headers = {**base_headers, "Authorization": auth}
 
     start = time.time()
     response = requests.post(url, headers=headers, json=body, timeout=60)
