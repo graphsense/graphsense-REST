@@ -15,14 +15,12 @@ repos:
     -   id: trailing-whitespace
         exclude: |
             (?x)^(
-                openapi_server/.*|
                 tests/test_*.py|
                 clients/.*
             )$
     -   id: end-of-file-fixer
         exclude: |
             (?x)^(
-                openapi_server/.*|
                 tests/test_.*.py|
                 clients/.*
             )$
