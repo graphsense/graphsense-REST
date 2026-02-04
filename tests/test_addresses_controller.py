@@ -1,10 +1,5 @@
 # coding: utf-8
 
-import pytest
-import json
-from aiohttp import web
-from aiohttp.test_utils import unittest_run_loop
-
 from tests import BaseTestCase
 import gsrest.test.addresses_service as test_service
 

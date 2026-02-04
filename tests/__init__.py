@@ -15,10 +15,10 @@ pytest.register_assert_rewrite("gsrest")
 from gsrest.app import create_app  # noqa: E402
 
 
-class AioHTTPClientShim:
-    """Shim to make httpx.AsyncClient look like aiohttp.ClientSession for tests.
+class HTTPClientShim:
+    """Shim providing async-style API for httpx.AsyncClient.
 
-    This allows existing tests that use aiohttp-style API to work with httpx.
+    Provides await-based response methods for backward compatibility with existing tests.
     """
 
     def __init__(self, httpx_client: AsyncClient):
@@ -27,16 +27,11 @@ class AioHTTPClientShim:
     async def request(
         self, path: str = None, method: str = "GET", json=None, headers=None, **kwargs
     ):
-        """Mimic aiohttp's client.request() API.
-
-        aiohttp uses: client.request(path="/foo", method="GET")
-        httpx uses: client.request(method="GET", url="/foo")
-        """
         url = path or kwargs.get("url", "/")
         response = await self._client.request(
             method=method, url=url, json=json, headers=headers
         )
-        return AioHTTPResponseShim(response)
+        return HTTPResponseShim(response)
 
     async def get(self, path: str, headers=None, **kwargs):
         return await self.request(path=path, method="GET", headers=headers, **kwargs)
@@ -47,27 +42,23 @@ class AioHTTPClientShim:
         )
 
 
-class AioHTTPResponseShim:
-    """Shim to make httpx.Response look like aiohttp.ClientResponse for tests."""
+class HTTPResponseShim:
+    """Shim providing async-style API for httpx.Response."""
 
     def __init__(self, httpx_response):
         self._response = httpx_response
 
     @property
     def status(self) -> int:
-        """aiohttp uses .status, httpx uses .status_code"""
         return self._response.status_code
 
     async def read(self) -> bytes:
-        """aiohttp uses await response.read(), httpx has response.content"""
         return self._response.content
 
     async def text(self) -> str:
-        """aiohttp uses await response.text(), httpx has response.text"""
         return self._response.text
 
     async def json(self):
-        """aiohttp uses await response.json(), httpx has response.json()"""
         return self._response.json()
 
     @property
@@ -100,10 +91,7 @@ class AppStateShim:
 
 
 class BaseTestCase:
-    """Base test case for FastAPI tests using httpx.
-
-    Maintains backward compatibility with existing aiohttp-style tests.
-    """
+    """Base test case for FastAPI tests using httpx."""
 
     config: dict = None  # Set by conftest.py
     app = None  # Will be set during setup
@@ -131,8 +119,7 @@ class BaseTestCase:
             async with AsyncClient(
                 transport=transport, base_url="http://test"
             ) as httpx_client:
-                # Wrap httpx client in aiohttp-compatible shim
-                self.client = AioHTTPClientShim(httpx_client)
+                self.client = HTTPClientShim(httpx_client)
                 self._httpx_client = (
                     httpx_client  # Keep reference for direct access if needed
                 )
