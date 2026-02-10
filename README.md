@@ -16,10 +16,10 @@ For integrating the GraphSense API into your Python applications, we provide an 
 
 ### Installation
 
-Install the GraphSense Python client via pip:
+Install the GraphSense Python client via uv pip:
 
 ```bash
-pip install graphsense-python
+uv pip install graphsense-python
 ```
 
 ### Usage
