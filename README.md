@@ -3,6 +3,9 @@
 
 # GraphSense REST Interface
 
+> [!WARNING]
+> **Retirement notice:** This REST interface is retired and is **not** part of [graphsense-lib](https://github.com/graphsense/graphsense-lib).
+
 The GraphSense REST Interface provides access to denormalized views computed
 by the [graphsense-transformation][graphsense-transformation] pipeline.
 It is used by the [graphsense-dashboard][graphsense-dashboard] component.
